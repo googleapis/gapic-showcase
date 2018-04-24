@@ -1,0 +1,9 @@
+type: google.api.Service
+config_version: 3
+name: localhost
+title: Google Example Library API
+
+apis:
+- name: google.example.feature_testing.v1.FeatureTestingService
+- name: google.example.feature_testing.v1.EchoService
+- name: google.longrunning.Operations
