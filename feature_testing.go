@@ -11,6 +11,7 @@ import (
 	statuspb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -19,6 +20,7 @@ type FeatureTestingServer struct {
 	operationStore *OperationStore
 	nowF           func() time.Time
 	sleepF         func(time.Duration)
+	mu             sync.Mutex
 }
 
 func NewFeatureTestingServer(opStore *OperationStore) *FeatureTestingServer {
@@ -57,7 +59,9 @@ func (s *FeatureTestingServer) SetupRetryTest(ctx context.Context, in *pb.SetupR
 		return nil, status.Error(codes.InvalidArgument, "A list of responses must be specified.")
 	}
 	id := fmt.Sprintf("retry-test-%d", s.now().UTC().Unix())
+	s.mu.Lock()
 	s.retryStore[id] = in.GetResponses()
+	s.mu.Unlock()
 	return &pb.RetryTestId{Id: id}, nil
 }
 
@@ -65,6 +69,8 @@ func (s *FeatureTestingServer) RetryTest(ctx context.Context, in *pb.RetryTestId
 	if in.GetId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "An Id must be specified.")
 	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	resps, ok := s.retryStore[in.GetId()]
 	if !ok {
 		return nil, status.Errorf(codes.NotFound, "RetryTest with Id: %s was not found.", in.GetId())

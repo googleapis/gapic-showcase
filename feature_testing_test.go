@@ -10,6 +10,15 @@ import (
 	"time"
 )
 
+func mockSleeper(seconds int64, nanos int32, t *testing.T) func(d time.Duration) {
+	return func(d time.Duration) {
+		expected := time.Duration(seconds)*time.Second + time.Duration(nanos)*time.Nanosecond
+		if d != expected {
+			t.Errorf("Expected to sleep %d but was sleep was calledwith %d", expected, d)
+		}
+	}
+}
+
 func TestTimeoutTestSuccess(t *testing.T) {
 	tests := []struct {
 		seconds int64
@@ -20,12 +29,7 @@ func TestTimeoutTestSuccess(t *testing.T) {
 		{10, int32(10), "world"},
 	}
 	for _, test := range tests {
-		server := NewFeatureTestingServer(nil).WithSleepFunc(func(d time.Duration) {
-			expected := time.Duration(test.seconds)*time.Second + time.Duration(test.nanos)*time.Nanosecond
-			if d != expected {
-				t.Errorf("Expected to sleep %d but was sleep was calledwith %d", expected, d)
-			}
-		})
+		server := NewFeatureTestingServer(nil).WithSleepFunc(mockSleeper(test.seconds, test.nanos, t))
 		in := &pb.TimeoutTestRequest{
 			ResponseDelay: &durpb.Duration{
 				Seconds: test.seconds,
@@ -35,7 +39,7 @@ func TestTimeoutTestSuccess(t *testing.T) {
 				Success: &pb.TimeoutTestResponse{Content: test.resp},
 			},
 		}
-		out, err := server.TimeoutTest(context.TODO(), in)
+		out, err := server.TimeoutTest(context.Background(), in)
 		if err != nil {
 			t.Error(err)
 		}
@@ -56,12 +60,7 @@ func TestTimeoutTestError(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		server := NewFeatureTestingServer(nil).WithSleepFunc(func(d time.Duration) {
-			expected := time.Duration(test.seconds)*time.Second + time.Duration(test.nanos)*time.Nanosecond
-			if d != expected {
-				t.Errorf("Expected to sleep %d but was sleep was called with %d", expected, d)
-			}
-		})
+		server := NewFeatureTestingServer(nil).WithSleepFunc(mockSleeper(test.seconds, test.nanos, t))
 		in := &pb.TimeoutTestRequest{
 			ResponseDelay: &durpb.Duration{
 				Seconds: test.seconds,
@@ -71,7 +70,7 @@ func TestTimeoutTestError(t *testing.T) {
 				Error: status.New(test.code, "").Proto(),
 			},
 		}
-		out, err := server.TimeoutTest(context.TODO(), in)
+		out, err := server.TimeoutTest(context.Background(), in)
 		if out != nil {
 			t.Errorf("TimeoutTest: Expected to error with code %d but returned success", test.code)
 		}

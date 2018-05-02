@@ -2,6 +2,7 @@ package feature_testing
 
 import (
 	pb "github.com/googleapis/feature-testing-server/genproto/google/example/feature_testing/v1"
+	"github.com/grpc/grpc-go/status"
 	"golang.org/x/net/context"
 	"io"
 	"strings"
@@ -9,16 +10,23 @@ import (
 
 type EchoServer struct{}
 
-func (s *EchoServer) Echo(ctx context.Context, in *pb.EchoMessage) (*pb.EchoMessage, error) {
-	return in, nil
+func (s *EchoServer) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.EchoResponse, error) {
+	err := status.ErrorProto(in.GetError())
+	if err != nil {
+		return nil, err
+	}
+	return &pb.EchoResponse{Content: in.GetContent()}, nil
 }
 
-func (s *EchoServer) Expand(in *pb.EchoMessage, stream pb.EchoService_ExpandServer) error {
-	for _, word := range strings.Fields(in.Content) {
-		err := stream.Send(&pb.EchoMessage{Content: word})
+func (s *EchoServer) Expand(in *pb.ExpandRequest, stream pb.EchoService_ExpandServer) error {
+	for _, word := range strings.Fields(in.GetContent()) {
+		err := stream.Send(&pb.EchoResponse{Content: word})
 		if err != nil {
 			return err
 		}
+	}
+	if in.GetError() != nil {
+		return status.ErrorProto(in.GetError())
 	}
 	return nil
 }
@@ -29,12 +37,18 @@ func (s *EchoServer) Collect(stream pb.EchoService_CollectServer) error {
 	for {
 		req, err := stream.Recv()
 		if err == io.EOF {
-			stream.SendAndClose(&pb.EchoMessage{Content: strings.Join(resp, " ")})
+			return stream.SendAndClose(&pb.EchoResponse{Content: strings.Join(resp, " ")})
 		}
 		if err != nil {
 			return err
 		}
-		resp = append(resp, req.Content)
+		s := status.ErrorProto(req.GetError())
+		if s != nil {
+			return s
+		}
+		if req.GetContent() != "" {
+			resp = append(resp, req.GetContent())
+		}
 	}
 }
 
@@ -47,6 +61,11 @@ func (s *EchoServer) Chat(stream pb.EchoService_ChatServer) error {
 		if err != nil {
 			return err
 		}
-		stream.Send(req)
+
+		s := status.ErrorProto(req.GetError())
+		if s != nil {
+			return s
+		}
+		stream.Send(&pb.EchoResponse{Content: req.GetContent()})
 	}
 }
