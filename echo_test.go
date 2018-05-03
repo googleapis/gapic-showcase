@@ -134,7 +134,7 @@ func TestCollect(t *testing.T) {
 		{[]string{"Hello", "", "World"}, strPtr("Hello World"), nil},
 		{[]string{"Hello", "World"}, strPtr("Hello World"), &spb.Status{Code: int32(codes.OK)}},
 		{[]string{"Hello", "World"}, nil, &spb.Status{Code: int32(codes.InvalidArgument)}},
-		{[]string{"hola"}, strPtr("hola"), nil},
+		{[]string{}, nil, &spb.Status{Code: int32(codes.InvalidArgument)}},
 		{[]string{}, strPtr(""), nil},
 	}
 
@@ -184,7 +184,7 @@ func (m *mockChatStream) Send(r *pb.EchoResponse) error {
 	return nil
 }
 
-func TestChatSuccess(t *testing.T) {
+func TestChat(t *testing.T) {
 	tests := []struct {
 		reqs []string
 		err  *spb.Status

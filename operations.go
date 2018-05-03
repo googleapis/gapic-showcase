@@ -9,10 +9,10 @@ import (
 )
 
 type OperationsServer struct {
-	store *OperationStore
+	store OperationStore
 }
 
-func NewOperationsServer(opStore *OperationStore) *OperationsServer {
+func NewOperationsServer(opStore OperationStore) *OperationsServer {
 	return &OperationsServer{store: opStore}
 }
 

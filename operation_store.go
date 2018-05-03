@@ -20,19 +20,25 @@ type operationInfo struct {
 	err      *statuspb.Status
 }
 
-type OperationStore struct {
+type OperationStore interface {
+	RegisterOp(*featurepb.LongrunningTestRequest) (*lropb.Operation, error)
+	Get(string) (*lropb.Operation, error)
+	Cancel(string) error
+}
+
+type OperationStoreImpl struct {
 	nowF  func() time.Time
 	store map[string]*operationInfo
 }
 
-func (s *OperationStore) WithNowF(nowFunc func() time.Time) *OperationStore {
-	return &OperationStore{
+func (s *OperationStoreImpl) WithNowF(nowFunc func() time.Time) *OperationStoreImpl {
+	return &OperationStoreImpl{
 		nowF:  nowFunc,
 		store: s.store,
 	}
 }
 
-func (s *OperationStore) RegisterOp(op *featurepb.LongrunningTestRequest) (*lropb.Operation, error) {
+func (s *OperationStoreImpl) RegisterOp(op *featurepb.LongrunningTestRequest) (*lropb.Operation, error) {
 	end, err := ptypes.Timestamp(op.CompletionTime)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "Given operation completion time is invalid.")
@@ -50,7 +56,7 @@ func (s *OperationStore) RegisterOp(op *featurepb.LongrunningTestRequest) (*lrop
 	return s.Get(name)
 }
 
-func (s *OperationStore) Get(name string) (*lropb.Operation, error) {
+func (s *OperationStoreImpl) Get(name string) (*lropb.Operation, error) {
 	op, ok := s.store[name]
 	if !ok {
 		return nil, status.Errorf(codes.NotFound, "Operation '%s' not found.", name)
@@ -95,7 +101,7 @@ func (s *OperationStore) Get(name string) (*lropb.Operation, error) {
 	return ret, nil
 }
 
-func (s *OperationStore) Cancel(name string) error {
+func (s *OperationStoreImpl) Cancel(name string) error {
 	op, ok := s.store[name]
 	if !ok {
 		return status.Errorf(codes.NotFound, "Operation '%s' not found.", name)
@@ -105,7 +111,7 @@ func (s *OperationStore) Cancel(name string) error {
 	return nil
 }
 
-func (s *OperationStore) now() time.Time {
+func (s *OperationStoreImpl) now() time.Time {
 	if s.nowF != nil {
 		return s.nowF()
 	}

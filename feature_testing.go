@@ -17,13 +17,13 @@ import (
 
 type FeatureTestingServer struct {
 	retryStore     map[string][]*statuspb.Status
-	operationStore *OperationStore
+	operationStore OperationStore
 	nowF           func() time.Time
 	sleepF         func(time.Duration)
 	mu             sync.Mutex
 }
 
-func NewFeatureTestingServer(opStore *OperationStore) *FeatureTestingServer {
+func NewFeatureTestingServer(opStore OperationStore) *FeatureTestingServer {
 	return &FeatureTestingServer{operationStore: opStore}
 }
 
@@ -55,11 +55,14 @@ func (s *FeatureTestingServer) TimeoutTest(ctx context.Context, in *pb.TimeoutTe
 }
 
 func (s *FeatureTestingServer) SetupRetryTest(ctx context.Context, in *pb.SetupRetryTestRequest) (*pb.RetryTestId, error) {
-	if in.GetResponses() == nil {
+	if in.GetResponses() == nil || len(in.GetResponses()) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "A list of responses must be specified.")
 	}
-	id := fmt.Sprintf("retry-test-%d", s.now().UTC().Unix())
 	s.mu.Lock()
+	id := fmt.Sprintf("retry-test-%d", s.now().UTC().Unix())
+	if s.retryStore == nil {
+		s.retryStore = map[string][]*statuspb.Status{}
+	}
 	s.retryStore[id] = in.GetResponses()
 	s.mu.Unlock()
 	return &pb.RetryTestId{Id: id}, nil
@@ -76,14 +79,14 @@ func (s *FeatureTestingServer) RetryTest(ctx context.Context, in *pb.RetryTestId
 		return nil, status.Errorf(codes.NotFound, "RetryTest with Id: %s was not found.", in.GetId())
 	}
 	resp, resps := resps[0], resps[1:]
+	if status.FromProto(resp).Code() == codes.OK {
+		delete(s.retryStore, in.GetId())
+		return &empty.Empty{}, nil
+	}
 	if len(resps) == 0 {
 		delete(s.retryStore, in.GetId())
 	} else {
 		s.retryStore[in.GetId()] = resps
-	}
-
-	if status.FromProto(resp).Code() == codes.OK {
-		return &empty.Empty{}, nil
 	}
 	return nil, status.ErrorProto(resp)
 }
@@ -97,8 +100,8 @@ func (s *FeatureTestingServer) PaginationTest(ctx context.Context, in *pb.Pagina
 		return nil, status.Error(codes.InvalidArgument, "The page size provided must not be negative.")
 	}
 
-	if in.GetMaxResponse() < 0 {
-		return nil, status.Error(codes.InvalidArgument, "The maximum response provided must not be negative.")
+	if in.GetMaxResponse() <= 0 {
+		return nil, status.Error(codes.InvalidArgument, "The maximum response provided must be positive.")
 	}
 
 	start := int32(0)
@@ -130,7 +133,7 @@ func (s *FeatureTestingServer) PaginationTest(ctx context.Context, in *pb.Pagina
 	}
 
 	page := []int32{}
-	for i := start; i <= end; i++ {
+	for i := start; i < end; i++ {
 		page = append(page, i)
 	}
 

@@ -21,7 +21,7 @@ func main() {
 	}
 	s := grpc.NewServer()
 	featurepb.RegisterEchoServiceServer(s, &EchoServer{})
-	opStore := &OperationStore{}
+	opStore := &OperationStoreImpl{}
 	featurepb.RegisterFeatureTestingServiceServer(s, NewFeatureTestingServer(opStore))
 	lropb.RegisterOperationsServer(s, NewOperationsServer(opStore))
 	// Register reflection service on gRPC server.
