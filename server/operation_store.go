@@ -12,17 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package feature_testing
+package showcase
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/golang/protobuf/ptypes"
-	featurepb "github.com/googleapis/feature-testing-server/genproto/google/example/feature_testing/v1"
+	featurepb "github.com/googleapis/feature-testing-server/server/genproto"
 	"github.com/grpc/grpc-go/status"
+
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 	statuspb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
-	"time"
 )
 
 type operationInfo struct {
@@ -30,12 +32,12 @@ type operationInfo struct {
 	start    time.Time
 	end      time.Time
 	canceled bool
-	resp     *featurepb.LongrunningTestResponse
+	resp     *featurepb.LongrunningResponse
 	err      *statuspb.Status
 }
 
 type OperationStore interface {
-	RegisterOp(*featurepb.LongrunningTestRequest) (*lropb.Operation, error)
+	RegisterOp(*featurepb.LongrunningRequest) (*lropb.Operation, error)
 	Get(string) (*lropb.Operation, error)
 	Cancel(string) error
 }
@@ -52,7 +54,7 @@ func (s *OperationStoreImpl) WithNowF(nowFunc func() time.Time) *OperationStoreI
 	}
 }
 
-func (s *OperationStoreImpl) RegisterOp(op *featurepb.LongrunningTestRequest) (*lropb.Operation, error) {
+func (s *OperationStoreImpl) RegisterOp(op *featurepb.LongrunningRequest) (*lropb.Operation, error) {
 	end, err := ptypes.Timestamp(op.CompletionTime)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "Given operation completion time is invalid.")
@@ -97,7 +99,7 @@ func (s *OperationStoreImpl) Get(name string) (*lropb.Operation, error) {
 			}
 			ret.Result = &lropb.Operation_Response{Response: resp}
 			ret.Done = true
-			meta, err := ptypes.MarshalAny(&featurepb.LongrunningTestMetadata{TimeRemaining: ptypes.DurationProto(0)})
+			meta, err := ptypes.MarshalAny(&featurepb.LongrunningMetadata{TimeRemaining: ptypes.DurationProto(0)})
 			if err != nil {
 				return nil, err
 			}
@@ -105,7 +107,7 @@ func (s *OperationStoreImpl) Get(name string) (*lropb.Operation, error) {
 		}
 	} else {
 		meta, err := ptypes.MarshalAny(
-			&featurepb.LongrunningTestMetadata{
+			&featurepb.LongrunningMetadata{
 				TimeRemaining: ptypes.DurationProto(now.Sub(op.end))})
 		if err != nil {
 			return nil, err

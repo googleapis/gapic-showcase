@@ -12,24 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package feature_testing
+package showcase
 
 import (
 	"fmt"
+	"io"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
-	pb "github.com/googleapis/feature-testing-server/genproto/google/example/feature_testing/v1"
+	pb "github.com/googleapis/feature-testing-server/server/genproto"
 	"github.com/grpc/grpc-go/status"
+
 	"golang.org/x/net/context"
+
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 	statuspb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
-	"strconv"
-	"sync"
-	"time"
 )
 
-type FeatureTestingServer struct {
+type ShowcaseServer struct {
 	retryStore     map[string][]*statuspb.Status
 	operationStore OperationStore
 	nowF           func() time.Time
@@ -37,12 +42,72 @@ type FeatureTestingServer struct {
 	mu             sync.Mutex
 }
 
-func NewFeatureTestingServer(opStore OperationStore) *FeatureTestingServer {
-	return &FeatureTestingServer{operationStore: opStore}
+func NewShowcaseServer(opStore OperationStore) *ShowcaseServer {
+	return &ShowcaseServer{operationStore: opStore}
 }
 
-func (s *FeatureTestingServer) WithNowFunc(nowFunc func() time.Time) *FeatureTestingServer {
-	return &FeatureTestingServer{
+func (s *ShowcaseServer) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.EchoResponse, error) {
+	err := status.ErrorProto(in.GetError())
+	if err != nil {
+		return nil, err
+	}
+	return &pb.EchoResponse{Content: in.GetContent()}, nil
+}
+
+func (s *ShowcaseServer) Expand(in *pb.ExpandRequest, stream pb.Showcase_ExpandServer) error {
+	for _, word := range strings.Fields(in.GetContent()) {
+		err := stream.Send(&pb.EchoResponse{Content: word})
+		if err != nil {
+			return err
+		}
+	}
+	if in.GetError() != nil {
+		return status.ErrorProto(in.GetError())
+	}
+	return nil
+}
+
+func (s *ShowcaseServer) Collect(stream pb.Showcase_CollectServer) error {
+	var resp []string
+
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			return stream.SendAndClose(&pb.EchoResponse{Content: strings.Join(resp, " ")})
+		}
+		if err != nil {
+			return err
+		}
+		s := status.ErrorProto(req.GetError())
+		if s != nil {
+			return s
+		}
+		if req.GetContent() != "" {
+			resp = append(resp, req.GetContent())
+		}
+	}
+}
+
+func (s *ShowcaseServer) Chat(stream pb.Showcase_ChatServer) error {
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+
+		s := status.ErrorProto(req.GetError())
+		if s != nil {
+			return s
+		}
+		stream.Send(&pb.EchoResponse{Content: req.GetContent()})
+	}
+}
+
+func (s *ShowcaseServer) WithNowFunc(nowFunc func() time.Time) *ShowcaseServer {
+	return &ShowcaseServer{
 		retryStore:     s.retryStore,
 		operationStore: s.operationStore,
 		nowF:           nowFunc,
@@ -50,8 +115,8 @@ func (s *FeatureTestingServer) WithNowFunc(nowFunc func() time.Time) *FeatureTes
 	}
 }
 
-func (s *FeatureTestingServer) WithSleepFunc(sleepFunc func(time.Duration)) *FeatureTestingServer {
-	return &FeatureTestingServer{
+func (s *ShowcaseServer) WithSleepFunc(sleepFunc func(time.Duration)) *ShowcaseServer {
+	return &ShowcaseServer{
 		retryStore:     s.retryStore,
 		operationStore: s.operationStore,
 		nowF:           s.nowF,
@@ -59,7 +124,7 @@ func (s *FeatureTestingServer) WithSleepFunc(sleepFunc func(time.Duration)) *Fea
 	}
 }
 
-func (s *FeatureTestingServer) TimeoutTest(ctx context.Context, in *pb.TimeoutTestRequest) (*pb.TimeoutTestResponse, error) {
+func (s *ShowcaseServer) Timeout(ctx context.Context, in *pb.TimeoutRequest) (*pb.TimeoutResponse, error) {
 	d, _ := ptypes.Duration(in.GetResponseDelay())
 	s.sleep(d)
 	if in.GetError() != nil {
@@ -68,7 +133,7 @@ func (s *FeatureTestingServer) TimeoutTest(ctx context.Context, in *pb.TimeoutTe
 	return in.GetSuccess(), nil
 }
 
-func (s *FeatureTestingServer) SetupRetryTest(ctx context.Context, in *pb.SetupRetryTestRequest) (*pb.RetryTestId, error) {
+func (s *ShowcaseServer) SetupRetry(ctx context.Context, in *pb.SetupRetryRequest) (*pb.RetryId, error) {
 	if in.GetResponses() == nil || len(in.GetResponses()) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "A list of responses must be specified.")
 	}
@@ -79,10 +144,10 @@ func (s *FeatureTestingServer) SetupRetryTest(ctx context.Context, in *pb.SetupR
 	}
 	s.retryStore[id] = in.GetResponses()
 	s.mu.Unlock()
-	return &pb.RetryTestId{Id: id}, nil
+	return &pb.RetryId{Id: id}, nil
 }
 
-func (s *FeatureTestingServer) RetryTest(ctx context.Context, in *pb.RetryTestId) (*empty.Empty, error) {
+func (s *ShowcaseServer) Retry(ctx context.Context, in *pb.RetryId) (*empty.Empty, error) {
 	if in.GetId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "An Id must be specified.")
 	}
@@ -90,7 +155,7 @@ func (s *FeatureTestingServer) RetryTest(ctx context.Context, in *pb.RetryTestId
 	defer s.mu.Unlock()
 	resps, ok := s.retryStore[in.GetId()]
 	if !ok {
-		return nil, status.Errorf(codes.NotFound, "RetryTest with Id: %s was not found.", in.GetId())
+		return nil, status.Errorf(codes.NotFound, "Retry with Id: %s was not found.", in.GetId())
 	}
 	resp, resps := resps[0], resps[1:]
 	if status.FromProto(resp).Code() == codes.OK {
@@ -105,11 +170,11 @@ func (s *FeatureTestingServer) RetryTest(ctx context.Context, in *pb.RetryTestId
 	return nil, status.ErrorProto(resp)
 }
 
-func (s *FeatureTestingServer) LongrunningTest(ctx context.Context, in *pb.LongrunningTestRequest) (*lropb.Operation, error) {
+func (s *ShowcaseServer) Longrunning(ctx context.Context, in *pb.LongrunningRequest) (*lropb.Operation, error) {
 	return s.operationStore.RegisterOp(in)
 }
 
-func (s *FeatureTestingServer) PaginationTest(ctx context.Context, in *pb.PaginationTestRequest) (*pb.PaginationTestResponse, error) {
+func (s *ShowcaseServer) Pagination(ctx context.Context, in *pb.PaginationRequest) (*pb.PaginationResponse, error) {
 	if in.GetPageSize() < 0 || in.GetPageSizeOverride() < 0 {
 		return nil, status.Error(codes.InvalidArgument, "The page size provided must not be negative.")
 	}
@@ -151,21 +216,21 @@ func (s *FeatureTestingServer) PaginationTest(ctx context.Context, in *pb.Pagina
 		page = append(page, i)
 	}
 
-	return &pb.PaginationTestResponse{
+	return &pb.PaginationResponse{
 		Responses:     page,
 		NextPageToken: nextToken,
 	}, nil
 }
 
-func (s *FeatureTestingServer) ParameterFlatteningTest(ctx context.Context, in *pb.ParameterFlatteningTestMessage) (*pb.ParameterFlatteningTestMessage, error) {
+func (s *ShowcaseServer) ParameterFlattening(ctx context.Context, in *pb.ParameterFlatteningMessage) (*pb.ParameterFlatteningMessage, error) {
 	return in, nil
 }
 
-func (s *FeatureTestingServer) ResourceNameTest(ctx context.Context, in *pb.ResourceNameTestMessage) (*pb.ResourceNameTestMessage, error) {
+func (s *ShowcaseServer) ResourceName(ctx context.Context, in *pb.ResourceNameMessage) (*pb.ResourceNameMessage, error) {
 	return in, nil
 }
 
-func (s *FeatureTestingServer) sleep(d time.Duration) {
+func (s *ShowcaseServer) sleep(d time.Duration) {
 	if s.sleepF != nil {
 		s.sleepF(d)
 	} else {
@@ -173,7 +238,7 @@ func (s *FeatureTestingServer) sleep(d time.Duration) {
 	}
 }
 
-func (s FeatureTestingServer) now() time.Time {
+func (s ShowcaseServer) now() time.Time {
 	if s.nowF != nil {
 		return s.nowF()
 	}

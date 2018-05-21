@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package feature_testing
+package showcase
 
 import (
 	"log"
 	"net"
 
-	featurepb "github.com/googleapis/feature-testing-server/genproto/google/example/feature_testing/v1"
+	showcasepb "github.com/googleapis/feature-testing-server/server/genproto"
 	lropb "google.golang.org/genproto/googleapis/longrunning"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -33,11 +34,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
 	s := grpc.NewServer()
-	featurepb.RegisterEchoServiceServer(s, &EchoServer{})
+	defer s.GracefulStop()
+
 	opStore := &OperationStoreImpl{}
-	featurepb.RegisterFeatureTestingServiceServer(s, NewFeatureTestingServer(opStore))
+	showcasepb.RegisterShowcaseServer(s, NewShowcaseServer(opStore))
 	lropb.RegisterOperationsServer(s, NewOperationsServer(opStore))
+
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
 	if err := s.Serve(lis); err != nil {

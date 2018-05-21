@@ -20,56 +20,103 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 import "google/rpc/status.proto";
 
-package google.example.feature_testing.v1;
+package google.showcase.v1;
 
-// This is a service to test the feature set of the googleapis gapic-generator.
-service FeatureTestingService {
-  // This method is to test how a client handles a request timing out. The
+// This is a service to show the feature set of an API Client Generator.
+service Showcase {
+  // A method used to show unary methods. This method will return the message
+  // that was given.
+  rpc Echo(EchoRequest) returns (EchoResponse) {}
+
+  // A method used to show server-side streaming methods. This method will
+  // split the given content into words and will pass each word back through
+  // the stream.
+  rpc Expand(ExpandRequest) returns (stream EchoResponse) {}
+
+  // A method used to show client-side streaming methods. This method will
+  // collect the contents given to it. When the stream is closed by the client,
+  // this method will return the a concatenation of the strings passed to it.
+  rpc Collect(stream EchoRequest) returns (EchoResponse) {}
+
+  // A method that will be used to show bidirectional streaming methods. Upon
+  // receiving a request on the stream, the same content will be passed back
+  // on the stream.
+
+  rpc Chat(stream EchoRequest) returns (stream EchoResponse) {}
+  // This method is to show how a client handles a request timing out. The
   // server will wait the requested amount of response_delay and then return
   // the response specified in the request.
-  rpc TimeoutTest(TimeoutTestRequest) returns (TimeoutTestResponse) {}
 
-  // This method is used to setup a RetryTest. The given list of retry behavior
-  // will be bound to an ID defined by the server. Subsequent RetryTest requests
+  rpc Timeout(TimeoutRequest) returns (TimeoutResponse) {}
+
+  // This method is used to setup the Retry method. The given list of retry behavior
+  // will be bound to an ID defined by the server. Subsequent Retry requests
   // of the given ID will respond with the behavior specified in this request.
-  rpc SetupRetryTest(SetupRetryTestRequest) returns (RetryTestId) {}
+  rpc SetupRetry(SetupRetryRequest) returns (RetryId) {}
 
-  // This method is used to test how a client handles errors that can be 
-  // retried. Requests to a given RetryTestId will respond in the way specified
-  // in SetupRetryTest method.
-  rpc RetryTest(RetryTestId) returns (google.protobuf.Empty) {}
+  // This method is used to show how a client handles errors that can be
+  // retried. Requests to a given RetryId will respond in the way specified
+  // in SetupRetry method.
+  rpc Retry(RetryId) returns (google.protobuf.Empty) {}
 
-  // This method is used to test how a client handles a long running operation.
+  // This method is used to show how a client handles a long running operation.
   // Upon receiving a request, the server will create a new ID and mark that
   // the ID created will complete at the time denoted in the request. If the
   // completion time has already passed, the server will return a longrunning
   // operation that signifies a completed operation. Upon subsequent requests
-  // to the Longrunning mixin service, if the operation is incomplete, the
+  // to the operations mixin service, if the operation is incomplete, the
   // the server will return metadata denoting the percent that the operation
   // is complete, else the server will return a completed operation that will
   // either denote that the operation has succeeded or failed.
-  rpc LongrunningTest(LongrunningTestRequest) returns (google.longrunning.Operation) {}
+  rpc Longrunning(LongrunningRequest) returns (google.longrunning.Operation) {}
 
-  // This method is used to test how a client will handle a method that lists
+  // This method is used to show how a client will handle a method that lists
   // responses in a paginated method. The request will specify an ID and the
   // maximum number of responses to return. If the ID has not been seen before
   // the server will mark the ID specified and the maximum number to be
   // returned. The page token will be a stringified integer denoting the
   // the number to start the page at.
-  rpc PaginationTest(PaginationTestRequest) returns (PaginationTestResponse) {}
+  rpc Pagination(PaginationRequest) returns (PaginationResponse) {}
 
-  // This method is used to test how a client will handle configuration to
-  // flatten a request. The server will simply echo the request and 
-  rpc ParameterFlatteningTest(ParameterFlatteningTestMessage) returns (ParameterFlatteningTestMessage) {}
+  // This method is used to show how a client will handle configuration to
+  // flatten a request. The server will simply echo the request and
+  rpc ParameterFlattening(ParameterFlatteningMessage) returns (ParameterFlatteningMessage) {}
 
-  // This method is used to test how a client will handle request strings that
+  // This method is used to show how a client will handle request strings that
   // are configured to follow a certain pattern or set of patterns. The server
   // will simply echo the request.
-  rpc ResourceNameTest(ResourceNameTestMessage) returns (ResourceNameTestMessage) {}
+  rpc ResourceName(ResourceNameMessage) returns (ResourceNameMessage) {}
 }
 
-// The request for FeatureTestingService TimeoutTest method.
-message TimeoutTestRequest {
+// The request message used for the Echo, Collect and Chat methods. If content
+// is set in this message then the request will succeed. If a status is
+message EchoRequest {
+  oneof response {
+    // The content to be echoed by the server.
+    string content = 1;
+
+    // The error to be thrown by the server.
+    google.rpc.Status error = 2;
+  }
+}
+
+// The response message for the EchoService methods.
+message EchoResponse {
+  // The content specified in the request.
+  string content = 1;
+}
+
+// The request message for the Expand method.
+message ExpandRequest {
+  // The content that will be split into words and returned on the stream.
+  string content = 1;
+
+  // The error that is thrown after all words are sent on the stream.
+  google.rpc.Status error = 2;
+}
+
+// The request for Showcase Timeout method.
+message TimeoutRequest {
   // The amount of time to wait before returning a response.
   google.protobuf.Duration response_delay = 1;
 
@@ -79,32 +126,32 @@ message TimeoutTestRequest {
     google.rpc.Status error = 2;
 
     // The response to be returned that will signify successful method call.
-    TimeoutTestResponse success = 3;
+    TimeoutResponse success = 3;
   }
 }
 
-// The response for FeatureTestingService TimeoutTest method.
-message TimeoutTestResponse {
+// The response for Showcase Timeout method.
+message TimeoutResponse {
   // This content can contain anything, the server will not depend on a value
   // here.
   string content = 1;
 }
 
-// The request for the FeatureTestingService SetupRetryTest method.
-message SetupRetryTestRequest {
+// The request for the Showcase SetupRetry method.
+message SetupRetryRequest {
   // The server will respond in the order that is given in this field.
   repeated google.rpc.Status responses = 1;
 }
 
 // The ID which a given list of responses will be bound to.
-message RetryTestId {
+message RetryId {
   // An ID which will the given list of responses will be bound to on the
   // server.
   string id = 1;
 }
 
-// The request for the FeatureTestingService LongrunningTest method.
-message LongrunningTestRequest {
+// The request for the Showcase Longrunning method.
+message LongrunningRequest {
   // The time after which this operation will succeed. If, upon the first,
   // the time has passed, the initial response will return a completed
   // operation.
@@ -117,26 +164,26 @@ message LongrunningTestRequest {
     google.rpc.Status error = 2;
 
     // The response that will be returned upon operation success.
-    LongrunningTestResponse success = 3;
+    LongrunningResponse success = 3;
   }
 }
 
-// The metadata for the FeatureTestingService LongrunningTest method.
-message LongrunningTestMetadata {
+// The metadata for the Showcase Longrunning method.
+message LongrunningMetadata {
   // The amount of time remaining on this operation.
   google.protobuf.Duration time_remaining = 1;
 }
 
 
-// The final operation response for the FeatureTestingService LongrunningTest
+// The final operation response for the Showcase Longrunning
 // method.
-message LongrunningTestResponse {
+message LongrunningResponse {
   // The response that will be returned for a successful operation.
   string content = 1;
 }
 
-// The request for the FeatureTestingService PaginationTest.
-message PaginationTestRequest {
+// The request for the Showcase Pagination.
+message PaginationRequest {
   // The maximum number that will be returned in the response.
   int32 max_response = 1;
 
@@ -150,13 +197,13 @@ message PaginationTestRequest {
   // to follow general google api practices.
   string page_token = 3;
 
-  // This field is used to test the client's ability to handle servers that
+  // This field is used to show the client's ability to handle servers that
   // return a page that is larger the specified page size.
   int32 page_size_override = 4;
 }
 
-// The response for the FeatureTestingService PaginationTest method.
-message PaginationTestResponse {
+// The response for the Showcase Pagination method.
+message PaginationResponse {
   // An increasing list of responses starting at the value specified by the
   // page token. If the page token is empty, then this list will start at 0.
   repeated int32 responses = 1;
@@ -165,26 +212,23 @@ message PaginationTestResponse {
   string next_page_token = 2;
 }
 
-// The request and response message for the FeatureTestingService
-// ParameterFlatteningTest.
-message ParameterFlatteningTestMessage {
+// The request and response message for the Showcase ParameterFlattening.
+message ParameterFlatteningMessage {
   // Simply a string for content.
   string content = 1;
 
-  // A list of strings to test repeated fields.
+  // A list of strings to show how flattening affects repeated fields.
   repeated string repeated_content = 2;
 
-  // A message to test flattenings that cause a message type to become a param.
-  ParameterFlatteningTestMessage nested = 3;
+  // A message to show flattenings that cause a message type to become a param.
+  ParameterFlatteningMessage nested = 3;
 }
 
-// The request and response message for the FeatureTestingService
-// ResourceNameTest.
-message ResourceNameTestMessage {
+// The request and response message for the Showcase ResourceName method.
+message ResourceNameMessage {
   // This field will have a single template bound to it.
   string single_template = 1;
 
   // This field will be a oneof resource name with many templates bound to it.
   string multiple_templates = 2;
 }
-
