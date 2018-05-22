@@ -10,7 +10,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	durpb "github.com/golang/protobuf/ptypes/duration"
-	pb "github.com/googleapis/feature-testing-server/server/genproto"
+	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/grpc/grpc-go/status"
 
 	"golang.org/x/net/context"

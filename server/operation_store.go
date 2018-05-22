@@ -19,7 +19,7 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
-	featurepb "github.com/googleapis/feature-testing-server/server/genproto"
+	featurepb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/grpc/grpc-go/status"
 
 	lropb "google.golang.org/genproto/googleapis/longrunning"

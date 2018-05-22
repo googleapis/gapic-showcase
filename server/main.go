@@ -18,7 +18,7 @@ import (
 	"log"
 	"net"
 
-	showcasepb "github.com/googleapis/feature-testing-server/server/genproto"
+	showcasepb "github.com/googleapis/gapic-showcase/server/genproto"
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 
 	"google.golang.org/grpc"
