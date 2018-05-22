@@ -22,7 +22,8 @@ import "google/rpc/status.proto";
 
 package google.showcase.v1;
 
-// This is a service to show the feature set of an API Client Generator.
+// A service to showcase Generated API Client features and common API patterns
+// used by Google.
 service Showcase {
   // A method used to show unary methods. This method will return the message
   // that was given.
@@ -43,10 +44,10 @@ service Showcase {
   // on the stream.
 
   rpc Chat(stream EchoRequest) returns (stream EchoResponse) {}
+
   // This method is to show how a client handles a request timing out. The
   // server will wait the requested amount of response_delay and then return
   // the response specified in the request.
-
   rpc Timeout(TimeoutRequest) returns (TimeoutResponse) {}
 
   // This method is used to setup the Retry method. The given list of retry behavior

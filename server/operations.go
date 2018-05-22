@@ -15,11 +15,19 @@
 package showcase
 
 import (
+	"fmt"
+	"time"
+
+	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
+	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/grpc/grpc-go/status"
-	"golang.org/x/net/context"
+
 	"google.golang.org/genproto/googleapis/longrunning"
+	statuspb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
+
+	"golang.org/x/net/context"
 )
 
 type OperationsServer struct {
@@ -48,4 +56,111 @@ func (s *OperationsServer) ListOperations(ctx context.Context, in *longrunning.L
 
 func (s *OperationsServer) DeleteOperation(ctx context.Context, in *longrunning.DeleteOperationRequest) (*empty.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "google.longrunning.DeleteOperation is unimplemented.")
+}
+
+type operationInfo struct {
+	name     string
+	start    time.Time
+	end      time.Time
+	canceled bool
+	resp     *pb.LongrunningResponse
+	err      *statuspb.Status
+}
+
+type OperationStore interface {
+	RegisterOp(*pb.LongrunningRequest) (*longrunning.Operation, error)
+	Get(string) (*longrunning.Operation, error)
+	Cancel(string) error
+}
+
+type OperationStoreImpl struct {
+	nowF  func() time.Time
+	store map[string]*operationInfo
+}
+
+func (s *OperationStoreImpl) WithNowF(nowFunc func() time.Time) *OperationStoreImpl {
+	return &OperationStoreImpl{
+		nowF:  nowFunc,
+		store: s.store,
+	}
+}
+
+func (s *OperationStoreImpl) RegisterOp(op *pb.LongrunningRequest) (*longrunning.Operation, error) {
+	end, err := ptypes.Timestamp(op.CompletionTime)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "Given operation completion time is invalid.")
+	}
+	now := s.nowF()
+	name := fmt.Sprintf("lro-test-op-%d", now.UTC().Unix())
+	s.store[name] = &operationInfo{
+		name:     name,
+		start:    now,
+		end:      end,
+		canceled: false,
+		resp:     op.GetSuccess(),
+		err:      op.GetError(),
+	}
+	return s.Get(name)
+}
+
+func (s *OperationStoreImpl) Get(name string) (*longrunning.Operation, error) {
+	op, ok := s.store[name]
+	if !ok {
+		return nil, status.Errorf(codes.NotFound, "Operation '%s' not found.", name)
+	}
+	ret := &longrunning.Operation{
+		Name: op.name,
+	}
+
+	now := s.now()
+
+	if op.canceled {
+		ret.Result = &longrunning.Operation_Error{
+			Error: status.Newf(
+				codes.Canceled,
+				"Operation '%s' has been canceled.", name).Proto(),
+		}
+	} else if now.After(op.end) {
+		if op.err != nil {
+			ret.Result = &longrunning.Operation_Error{Error: op.err}
+		} else {
+			resp, err := ptypes.MarshalAny(op.resp)
+			if err != nil {
+				return nil, err
+			}
+			ret.Result = &longrunning.Operation_Response{Response: resp}
+			ret.Done = true
+			meta, err := ptypes.MarshalAny(&pb.LongrunningMetadata{TimeRemaining: ptypes.DurationProto(0)})
+			if err != nil {
+				return nil, err
+			}
+			ret.Metadata = meta
+		}
+	} else {
+		meta, err := ptypes.MarshalAny(
+			&pb.LongrunningMetadata{
+				TimeRemaining: ptypes.DurationProto(now.Sub(op.end))})
+		if err != nil {
+			return nil, err
+		}
+		ret.Metadata = meta
+	}
+	return ret, nil
+}
+
+func (s *OperationStoreImpl) Cancel(name string) error {
+	op, ok := s.store[name]
+	if !ok {
+		return status.Errorf(codes.NotFound, "Operation '%s' not found.", name)
+	}
+	op.canceled = true
+	s.store[name] = op
+	return nil
+}
+
+func (s *OperationStoreImpl) now() time.Time {
+	if s.nowF != nil {
+		return s.nowF()
+	}
+	return time.Now()
 }
