@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package showcase
+package main
 
 import (
 	"log"
 	"net"
 
+  "github.com/googleapis/gapic-showcase/server"
 	showcasepb "github.com/googleapis/gapic-showcase/server/genproto"
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 
@@ -38,9 +39,9 @@ func main() {
 	s := grpc.NewServer()
 	defer s.GracefulStop()
 
-	opStore := &OperationStoreImpl{}
-	showcasepb.RegisterShowcaseServer(s, NewShowcaseServer(opStore))
-	lropb.RegisterOperationsServer(s, NewOperationsServer(opStore))
+	opStore := server.NewOpertionStore()
+	showcasepb.RegisterShowcaseServer(s, server.NewShowcaseServer(opStore))
+	lropb.RegisterOperationsServer(s, server.NewOperationsServer(opStore))
 
 	// Register reflection service on gRPC server.
 	reflection.Register(s)

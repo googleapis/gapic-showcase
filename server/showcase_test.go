@@ -1,6 +1,7 @@
-package showcase
+package server
 
 import (
+  "errors"
 	"io"
 	"reflect"
 	"strings"
@@ -107,6 +108,25 @@ func TestExpand(t *testing.T) {
 	}
 }
 
+type errorExpandStream struct {
+  err error
+  pb.Showcase_ExpandServer
+}
+
+func (s *errorExpandStream) Send(resp *pb.EchoResponse) error {
+  return s.err
+}
+
+func TestExpand_streamErr (t *testing.T) {
+  e := errors.New("Test Error")
+  stream := &errorExpandStream{err: e}
+  server := ShowcaseServer{}
+  err := server.Expand(&pb.ExpandRequest{Content: "Hello World"}, stream)
+  if (e != err) {
+    t.Error("Expand expected to pass through stream errors.")
+  }
+}
+
 type mockCollectStream struct {
 	reqs []*pb.EchoRequest
 	exp  *string
@@ -166,6 +186,25 @@ func TestCollect(t *testing.T) {
 	}
 }
 
+type errorCollectStream struct {
+  err error
+  pb.Showcase_CollectServer
+}
+
+func (s *errorCollectStream) Recv() (*pb.EchoRequest, error) {
+  return nil, s.err
+}
+
+func TestCollect_streamErr (t *testing.T) {
+  e := errors.New("Test Error")
+  stream := &errorCollectStream{err: e}
+  server := ShowcaseServer{}
+  err := server.Collect(stream)
+  if (e != err) {
+    t.Error("Expand expected to pass through stream errors.")
+  }
+}
+
 type mockChatStream struct {
 	reqs []*pb.EchoRequest
 	curr *pb.EchoRequest
@@ -223,6 +262,25 @@ func TestChat(t *testing.T) {
 	}
 }
 
+type errorChatStream struct {
+  err error
+  pb.Showcase_ChatServer
+}
+
+func (s *errorChatStream) Recv() (*pb.EchoRequest, error) {
+  return nil, s.err
+}
+
+func TestChat_streamErr (t *testing.T) {
+  e := errors.New("Test Error")
+  stream := &errorChatStream{err: e}
+  server := ShowcaseServer{}
+  err := server.Chat(stream)
+  if (e != err) {
+    t.Error("Expand expected to pass through stream errors.")
+  }
+}
+
 func TestTimeoutSuccess(t *testing.T) {
 	tests := []struct {
 		seconds int64
@@ -233,7 +291,7 @@ func TestTimeoutSuccess(t *testing.T) {
 		{10, int32(10), "world"},
 	}
 	for _, test := range tests {
-		server := NewShowcaseServer(nil).WithSleepFunc(mockSleeper(test.seconds, test.nanos, t))
+		server := &ShowcaseServer{sleepF: mockSleeper(test.seconds, test.nanos, t)}
 		in := &pb.TimeoutRequest{
 			ResponseDelay: &durpb.Duration{
 				Seconds: test.seconds,
@@ -264,7 +322,7 @@ func TestTimeoutError(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		server := NewShowcaseServer(nil).WithSleepFunc(mockSleeper(test.seconds, test.nanos, t))
+		server := &ShowcaseServer{sleepF: mockSleeper(test.seconds, test.nanos, t)}
 		in := &pb.TimeoutRequest{
 			ResponseDelay: &durpb.Duration{
 				Seconds: test.seconds,
@@ -309,7 +367,7 @@ func TestSetupRetry(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		server := (&ShowcaseServer{}).WithNowFunc(zeroNow)
+		server := (&ShowcaseServer{nowF: zeroNow})
 		var resps []*spb.Status
 		if test.in != nil {
 			resps = []*spb.Status{}
@@ -343,13 +401,17 @@ func TestRetry(t *testing.T) {
 			[]codes.Code{codes.OK, codes.NotFound},
 		},
 		{
+			[]codes.Code{codes.Unavailable, codes.Unavailable},
+			[]codes.Code{codes.Unavailable, codes.Unavailable},
+		},
+		{
 			[]codes.Code{codes.Unavailable, codes.OK},
 			[]codes.Code{codes.Unavailable, codes.OK},
 		},
 	}
 
 	for _, test := range tests {
-		server := (&ShowcaseServer{}).WithNowFunc(zeroNow)
+		server := &ShowcaseServer{nowF: zeroNow}
 		resps := []*spb.Status{}
 		for _, code := range test.in {
 			resps = append(resps, &spb.Status{Code: int32(code)})
@@ -367,6 +429,15 @@ func TestRetry(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestRetry_noId(t *testing.T) {
+  server := &ShowcaseServer{}
+  _, err := server.Retry(context.Background(), &pb.RetryId{})
+  s, _ := status.FromError(err)
+  if codes.InvalidArgument != s.Code() {
+    t.Error("Retry expected to return InvalidArgument if no id was specified.")
+  }
 }
 
 func TestPagination_invalidArgs(t *testing.T) {

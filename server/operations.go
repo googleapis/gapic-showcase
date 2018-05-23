@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package showcase
+package server
 
 import (
 	"fmt"
@@ -73,19 +73,19 @@ type OperationStore interface {
 	Cancel(string) error
 }
 
-type OperationStoreImpl struct {
+type operationStoreImpl struct {
 	nowF  func() time.Time
 	store map[string]*operationInfo
 }
 
-func (s *OperationStoreImpl) WithNowF(nowFunc func() time.Time) *OperationStoreImpl {
-	return &OperationStoreImpl{
-		nowF:  nowFunc,
-		store: s.store,
+func NewOpertionStore() OperationStore {
+	return &operationStoreImpl{
+		nowF: time.Now,
+    store: map[string]*operationInfo{},
 	}
 }
 
-func (s *OperationStoreImpl) RegisterOp(op *pb.LongrunningRequest) (*longrunning.Operation, error) {
+func (s *operationStoreImpl) RegisterOp(op *pb.LongrunningRequest) (*longrunning.Operation, error) {
 	end, err := ptypes.Timestamp(op.CompletionTime)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "Given operation completion time is invalid.")
@@ -103,7 +103,7 @@ func (s *OperationStoreImpl) RegisterOp(op *pb.LongrunningRequest) (*longrunning
 	return s.Get(name)
 }
 
-func (s *OperationStoreImpl) Get(name string) (*longrunning.Operation, error) {
+func (s *operationStoreImpl) Get(name string) (*longrunning.Operation, error) {
 	op, ok := s.store[name]
 	if !ok {
 		return nil, status.Errorf(codes.NotFound, "Operation '%s' not found.", name)
@@ -112,7 +112,7 @@ func (s *OperationStoreImpl) Get(name string) (*longrunning.Operation, error) {
 		Name: op.name,
 	}
 
-	now := s.now()
+	now := s.nowF()
 
 	if op.canceled {
 		ret.Result = &longrunning.Operation_Error{
@@ -124,31 +124,20 @@ func (s *OperationStoreImpl) Get(name string) (*longrunning.Operation, error) {
 		if op.err != nil {
 			ret.Result = &longrunning.Operation_Error{Error: op.err}
 		} else {
-			resp, err := ptypes.MarshalAny(op.resp)
-			if err != nil {
-				return nil, err
-			}
+			resp, _ := ptypes.MarshalAny(op.resp)
 			ret.Result = &longrunning.Operation_Response{Response: resp}
 			ret.Done = true
-			meta, err := ptypes.MarshalAny(&pb.LongrunningMetadata{TimeRemaining: ptypes.DurationProto(0)})
-			if err != nil {
-				return nil, err
-			}
-			ret.Metadata = meta
 		}
 	} else {
-		meta, err := ptypes.MarshalAny(
+		meta, _ := ptypes.MarshalAny(
 			&pb.LongrunningMetadata{
 				TimeRemaining: ptypes.DurationProto(now.Sub(op.end))})
-		if err != nil {
-			return nil, err
-		}
 		ret.Metadata = meta
 	}
 	return ret, nil
 }
 
-func (s *OperationStoreImpl) Cancel(name string) error {
+func (s *operationStoreImpl) Cancel(name string) error {
 	op, ok := s.store[name]
 	if !ok {
 		return status.Errorf(codes.NotFound, "Operation '%s' not found.", name)
@@ -156,11 +145,4 @@ func (s *OperationStoreImpl) Cancel(name string) error {
 	op.canceled = true
 	s.store[name] = op
 	return nil
-}
-
-func (s *OperationStoreImpl) now() time.Time {
-	if s.nowF != nil {
-		return s.nowF()
-	}
-	return time.Now()
 }

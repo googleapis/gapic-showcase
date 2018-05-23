@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package showcase
+package server
 
 import (
 	"fmt"
@@ -43,7 +43,11 @@ type ShowcaseServer struct {
 }
 
 func NewShowcaseServer(opStore OperationStore) *ShowcaseServer {
-	return &ShowcaseServer{operationStore: opStore}
+	return &ShowcaseServer{
+		operationStore: opStore,
+		nowF:           time.Now,
+		sleepF:         time.Sleep,
+	}
 }
 
 func (s *ShowcaseServer) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.EchoResponse, error) {
@@ -106,27 +110,9 @@ func (s *ShowcaseServer) Chat(stream pb.Showcase_ChatServer) error {
 	}
 }
 
-func (s *ShowcaseServer) WithNowFunc(nowFunc func() time.Time) *ShowcaseServer {
-	return &ShowcaseServer{
-		retryStore:     s.retryStore,
-		operationStore: s.operationStore,
-		nowF:           nowFunc,
-		sleepF:         s.sleepF,
-	}
-}
-
-func (s *ShowcaseServer) WithSleepFunc(sleepFunc func(time.Duration)) *ShowcaseServer {
-	return &ShowcaseServer{
-		retryStore:     s.retryStore,
-		operationStore: s.operationStore,
-		nowF:           s.nowF,
-		sleepF:         sleepFunc,
-	}
-}
-
 func (s *ShowcaseServer) Timeout(ctx context.Context, in *pb.TimeoutRequest) (*pb.TimeoutResponse, error) {
 	d, _ := ptypes.Duration(in.GetResponseDelay())
-	s.sleep(d)
+	s.sleepF(d)
 	if in.GetError() != nil {
 		return nil, status.ErrorProto(in.GetError())
 	}
@@ -138,7 +124,7 @@ func (s *ShowcaseServer) SetupRetry(ctx context.Context, in *pb.SetupRetryReques
 		return nil, status.Error(codes.InvalidArgument, "A list of responses must be specified.")
 	}
 	s.mu.Lock()
-	id := fmt.Sprintf("retry-test-%d", s.now().UTC().Unix())
+	id := fmt.Sprintf("retry-test-%d", s.nowF().UTC().Unix())
 	if s.retryStore == nil {
 		s.retryStore = map[string][]*statuspb.Status{}
 	}
@@ -228,19 +214,4 @@ func (s *ShowcaseServer) ParameterFlattening(ctx context.Context, in *pb.Paramet
 
 func (s *ShowcaseServer) ResourceName(ctx context.Context, in *pb.ResourceNameMessage) (*pb.ResourceNameMessage, error) {
 	return in, nil
-}
-
-func (s *ShowcaseServer) sleep(d time.Duration) {
-	if s.sleepF != nil {
-		s.sleepF(d)
-	} else {
-		time.Sleep(d)
-	}
-}
-
-func (s ShowcaseServer) now() time.Time {
-	if s.nowF != nil {
-		return s.nowF()
-	}
-	return time.Now()
 }
