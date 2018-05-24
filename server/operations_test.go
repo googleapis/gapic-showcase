@@ -24,6 +24,7 @@ import (
 	"github.com/grpc/grpc-go/status"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/genproto/googleapis/longrunning"
+  statuspb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
 	"golang.org/x/net/context"
 )
@@ -147,5 +148,51 @@ func TestStoreGet_Done(t *testing.T) {
   ptypes.UnmarshalAny(op.GetResponse(), resp)
   if !proto.Equal(expected, resp) {
     t.Errorf("Expected result to be %s, but was %s", expected.String(), resp.String())
+  }
+}
+
+func TestStoreGet_Err(t *testing.T) {
+  end := time.Unix(100, 0)
+  store := &operationStoreImpl{
+    nowF: mockNow(time.Unix(200, 0)),
+    store: map[string]*operationInfo{},
+  }
+  expected := &statuspb.Status{Code: int32(codes.Aborted)}
+  store.store["name"] = &operationInfo{
+    name: "name",
+    err: expected,
+    end: end,
+  }
+  op, _ := store.Get("name")
+  if !proto.Equal(expected, op.GetError()) {
+    t.Errorf("Expected result to be %s, but was %s", expected.String(), op.GetError().String())
+  }
+}
+
+func TestStoreGet_Pending(t *testing.T) {
+  start := time.Unix(0, 0)
+  end := time.Unix(100, 0)
+  store := &operationStoreImpl{
+    nowF: mockNow(time.Unix(90, 0)),
+    store: map[string]*operationInfo{},
+  }
+  store.store["name"] = &operationInfo{
+    name: "name",
+    start: start,
+    end: end,
+  }
+  op, err := store.Get("name")
+  if err != nil {
+    t.Error(err)
+  }
+  meta := &pb.LongrunningMetadata{}
+  ptypes.UnmarshalAny(op.GetMetadata(), meta)
+  dur, err := ptypes.Duration(meta.GetTimeRemaining())
+  if err != nil {
+    t.Error(err)
+  }
+  expected := time.Duration(10)*time.Second
+  if dur != expected {
+    t.Errorf("Expected the duration to be %s, but was, %s", expected, dur)
   }
 }

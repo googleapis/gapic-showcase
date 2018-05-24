@@ -131,7 +131,7 @@ func (s *operationStoreImpl) Get(name string) (*longrunning.Operation, error) {
 	} else {
 		meta, _ := ptypes.MarshalAny(
 			&pb.LongrunningMetadata{
-				TimeRemaining: ptypes.DurationProto(now.Sub(op.end))})
+				TimeRemaining: ptypes.DurationProto(op.end.Sub(now))})
 		ret.Metadata = meta
 	}
 	return ret, nil
