@@ -10,6 +10,15 @@ the pattern or feature in question.
 
 [googleapis](https://github.com/googleapis)
 
+## Usage
+```sh
+# Install the server
+go get github.com/googlapis/gapic-showcase
+
+# Spin up the server. Opens port 8080 to accept requests.
+go run $GOPATH/src/github.com/googleapis/gapic-showcase/cmd/server/main.go
+```
+
 ## Pattern and Feature Test Cases
 
 ### Unary

@@ -16,11 +16,13 @@ package server
 
 import (
   "errors"
+  "fmt"
   "testing"
   "time"
 
   "github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
+  "github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/grpc/grpc-go/status"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/genproto/googleapis/longrunning"
@@ -97,6 +99,75 @@ func TestServerDeleteOperation(t *testing.T) {
   s, _ := status.FromError(err)
   if codes.Unimplemented != s.Code() {
     t.Error("DeleteOperations should return an error indicating it is Unimplemented.")
+  }
+}
+
+func TestStoreRegisterOp(t *testing.T) {
+  completion, _ := ptypes.TimestampProto(time.Unix(200,0))
+  req := &pb.LongrunningRequest{
+    CompletionTime: completion,
+    Response: &pb.LongrunningRequest_Success{
+      Success: &pb.LongrunningResponse{Content: "content"},
+    },
+  }
+  store := &operationStoreImpl{
+    nowF: mockNow(time.Unix(100, 0)),
+    store: map[string]*operationInfo{},
+  }
+
+  op, err := store.RegisterOp(req)
+  if err != nil {
+    t.Error(err)
+  }
+  if op == nil {
+    t.Error("Expected RegisterOp to return an Operation.")
+  }
+
+  expectedName := fmt.Sprintf("lro-test-op-%d", time.Unix(100,0).Unix())
+  if val, ok := store.store[expectedName]; ok {
+    if val.name != expectedName {
+      t.Errorf("Expected registered op name to be %s, but was %s",
+        expectedName, val.name)
+    }
+    if !time.Unix(100, 0).Equal(val.start) {
+      t.Errorf("Expected start time to be %d, but was %d", time.Unix(100, 0).Unix(),
+        val.start.Unix())
+    }
+    if !time.Unix(200, 0).Equal(val.end) {
+      t.Errorf("Expected end time to be %d, but was %d", time.Unix(200, 0).Unix(),
+        val.end.Unix())
+    }
+    if val.canceled {
+      t.Errorf("A newly registered op should not be canceled.")
+    }
+    if req.GetSuccess() != val.resp {
+      t.Errorf("Expected the op response to be %s, but was %s",
+        req.GetSuccess().String(), val.resp)
+    }
+    if req.GetError() != val.err {
+      t.Errorf("Expected the op err to be %s, but was %s",
+        req.GetError().String(), val.resp)
+    }
+  } else {
+    t.Errorf("Expected store to contain value with key %s", expectedName)
+  }
+}
+
+func TestStoreRegisterOp_InvalidArgs(t *testing.T) {
+  tests := []*timestamp.Timestamp{
+    nil,
+    &timestamp.Timestamp{Nanos: -1},
+  }
+  for _, test := range(tests) {
+    store := NewOpertionStore()
+    req := &pb.LongrunningRequest{
+      CompletionTime: test,
+    }
+    _, err := store.RegisterOp(req)
+    s, _ := status.FromError(err)
+    if codes.InvalidArgument != s.Code() {
+      t.Error("Expected to return InvalidArgument for invalid completion times.")
+    }
   }
 }
 
@@ -194,5 +265,22 @@ func TestStoreGet_Pending(t *testing.T) {
   expected := time.Duration(10)*time.Second
   if dur != expected {
     t.Errorf("Expected the duration to be %s, but was, %s", expected, dur)
+  }
+}
+
+func TestStoreCancel(t *testing.T) {
+  store := &operationStoreImpl{
+    store: map[string]*operationInfo{},
+	}
+  store.store["name"] = &operationInfo{name: "name"}
+  store.Cancel("name")
+  if !store.store["name"].canceled {
+    t.Error("Expected Cancel to mark an operation as canceled.")
+  }
+
+  err := store.Cancel("non-existant")
+  s, _ := status.FromError(err)
+  if codes.NotFound != s.Code() {
+    t.Error("Expect to return code NotFound if operation name is not found.")
   }
 }
