@@ -1,0 +1,31 @@
+version: 2
+workflows:
+  version: 2
+  tests:
+    jobs:
+      - unit
+jobs:
+  unit:
+    docker:
+      - image: golang:1.10
+    environment:
+      GOPATH: /go
+    working_directory: /go/src/github.com/googleapis/gapic-showcase
+    steps:
+      - checkout
+      - run:
+          name: Check formatting
+          command: gofmt -l server
+      - run:
+          name: Examine and report suspicious constructs
+          command: go tool vet server
+      - run:
+          name: Install dependencies
+          command: go get -v -t -d ./server/...
+      - run:
+          name: Run tests
+          command: go test ./server -coverprofile=coverage.txt -covermode=atomic
+      - run:
+          name: Submit coverage data to codecov.
+          command: bash <(curl -s https://codecov.io/bash)
+          when: always
