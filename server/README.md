@@ -1,4 +1,8 @@
 # GAPIC Showcase Server
+[![Release Level][releaselevelimg]][releaselevel]
+[![CircleCI][circleimg]][circle]
+[![Code Coverage][codecovimg]][codecov]
+[![GoDoc][godocimg]][godoc]
 
 > A server to test generated clients.
 
@@ -81,3 +85,12 @@ go run $GOPATH/src/github.com/googleapis/gapic-showcase/cmd/server/main.go
 
 - Field which has a single pattern
 - Field which can have multiple patterns
+
+[circle]: https://circleci.com/gh/googleapis/gapic-showcase
+[circleimg]: https://circleci.com/gh/googleapis/gapic-showcase.svg?style=shield
+[codecovimg]: https://codecov.io/github/googleapis/gapic-showcase/coverage.svg?branch=master
+[codecov]: https://codecov.io/github/googleapis/gapic-showcase?branch=master
+[godoc]: https://godoc.org/github.com/googleapis/gapic-showcase/server
+[godocimg]: https://godoc.org/github.com/googleapis/gapic-showcase/server?status.svg
+[releaselevel]: https://cloud.google.com/terms/launch-stages
+[releaselevelimg]: https://img.shields.io/badge/release%20level-pre%20alpha-red.svg?style&#x3D;flat

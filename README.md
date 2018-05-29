@@ -8,7 +8,13 @@ common patterns used by Google APIS as well as features used by GAPICs to make
 calling Google APIs an enjoyable experience. Each method declared by
 the Showcase API serves to show a specific pattern or feature.
 
-This repository also includes a server implementation of the Showcase API that
+## GAPIC Showcase Server
+[![Release Level][releaselevelimg]][releaselevel]
+[![CircleCI][circleimg]][circle]
+[![Code Coverage][codecovimg]][codecov]
+[![GoDoc][godocimg]][godoc]
+
+This repository also includes a [server](server/) implementation of the Showcase API that
 can be used to verify GAPIC generators.
 
 ## Method Types, Patterns and Features
@@ -124,3 +130,12 @@ included in this repository.
 ## Disclaimer
 
 This is not an official Google product.
+
+[circle]: https://circleci.com/gh/googleapis/gapic-showcase
+[circleimg]: https://circleci.com/gh/googleapis/gapic-showcase.svg?style=shield
+[codecovimg]: https://codecov.io/github/googleapis/gapic-showcase/coverage.svg?branch=master
+[codecov]: https://codecov.io/github/googleapis/gapic-showcase?branch=master
+[godoc]: https://godoc.org/github.com/googleapis/gapic-showcase/server
+[godocimg]: https://godoc.org/github.com/googleapis/gapic-showcase/server?status.svg
+[releaselevel]: https://cloud.google.com/terms/launch-stages
+[releaselevelimg]: https://img.shields.io/badge/release%20level-pre%20alpha-red.svg?style&#x3D;flat
