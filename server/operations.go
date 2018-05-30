@@ -120,7 +120,7 @@ func (s *operationStoreImpl) Get(name string) (*longrunning.Operation, error) {
 func (s *operationStoreImpl) get(name string) (*longrunning.Operation, error) {
 	op, ok := s.store[name]
 	if !ok {
-		return nil, status.Errorf(codes.NotFound, "Operation '%s' not found.", name)
+		return nil, status.Errorf(codes.NotFound, "Operation %q not found.", name)
 	}
 	ret := &longrunning.Operation{
 		Name: op.name,
@@ -132,7 +132,7 @@ func (s *operationStoreImpl) get(name string) (*longrunning.Operation, error) {
 		ret.Result = &longrunning.Operation_Error{
 			Error: status.Newf(
 				codes.Canceled,
-				"Operation '%s' has been canceled.", name).Proto(),
+				"Operation %q has been canceled.", name).Proto(),
 		}
 	} else if now.After(op.end) {
 		if op.err != nil {
@@ -157,7 +157,7 @@ func (s *operationStoreImpl) Cancel(name string) error {
 
 	op, ok := s.store[name]
 	if !ok {
-		return status.Errorf(codes.NotFound, "Operation '%s' not found.", name)
+		return status.Errorf(codes.NotFound, "Operation %q not found.", name)
 	}
 	op.canceled = true
 	s.store[name] = op
