@@ -30,19 +30,37 @@ import (
 	"golang.org/x/net/context"
 )
 
-type OperationsServer struct {
+// NewOperationsServer returns a longrunning.OperationsServer which uses the
+// given OperationStore.
+func NewOperationsServer(opStore OperationStore) longrunning.OperationsServer {
+	return &operationsServerImpl{store: opStore}
+}
+
+// OperationStore is an interface for storing longrunning requests for the
+// Showcase API.
+type OperationStore interface {
+	RegisterOp(*pb.LongrunningRequest) (*longrunning.Operation, error)
+	Get(string) (*longrunning.Operation, error)
+	Cancel(string) error
+}
+
+// NewOperationStore returns an implemented OperationStore.
+func NewOperationStore() OperationStore {
+	return &operationStoreImpl{
+		nowF:  time.Now,
+		store: map[string]*operationInfo{},
+	}
+}
+
+type operationsServerImpl struct {
 	store OperationStore
 }
 
-func NewOperationsServer(opStore OperationStore) *OperationsServer {
-	return &OperationsServer{store: opStore}
-}
-
-func (s *OperationsServer) GetOperation(ctx context.Context, in *longrunning.GetOperationRequest) (*longrunning.Operation, error) {
+func (s operationsServerImpl) GetOperation(ctx context.Context, in *longrunning.GetOperationRequest) (*longrunning.Operation, error) {
 	return s.store.Get(in.GetName())
 }
 
-func (s *OperationsServer) CancelOperation(ctx context.Context, in *longrunning.CancelOperationRequest) (*empty.Empty, error) {
+func (s operationsServerImpl) CancelOperation(ctx context.Context, in *longrunning.CancelOperationRequest) (*empty.Empty, error) {
 	err := s.store.Cancel(in.GetName())
 	if err != nil {
 		return nil, err
@@ -50,11 +68,11 @@ func (s *OperationsServer) CancelOperation(ctx context.Context, in *longrunning.
 	return &empty.Empty{}, nil
 }
 
-func (s *OperationsServer) ListOperations(ctx context.Context, in *longrunning.ListOperationsRequest) (*longrunning.ListOperationsResponse, error) {
+func (s operationsServerImpl) ListOperations(ctx context.Context, in *longrunning.ListOperationsRequest) (*longrunning.ListOperationsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "google.longrunning.ListOperations is unimplemented.")
 }
 
-func (s *OperationsServer) DeleteOperation(ctx context.Context, in *longrunning.DeleteOperationRequest) (*empty.Empty, error) {
+func (s operationsServerImpl) DeleteOperation(ctx context.Context, in *longrunning.DeleteOperationRequest) (*empty.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "google.longrunning.DeleteOperation is unimplemented.")
 }
 
@@ -67,22 +85,9 @@ type operationInfo struct {
 	err      *statuspb.Status
 }
 
-type OperationStore interface {
-	RegisterOp(*pb.LongrunningRequest) (*longrunning.Operation, error)
-	Get(string) (*longrunning.Operation, error)
-	Cancel(string) error
-}
-
 type operationStoreImpl struct {
 	nowF  func() time.Time
 	store map[string]*operationInfo
-}
-
-func NewOpertionStore() OperationStore {
-	return &operationStoreImpl{
-		nowF: time.Now,
-    store: map[string]*operationInfo{},
-	}
 }
 
 func (s *operationStoreImpl) RegisterOp(op *pb.LongrunningRequest) (*longrunning.Operation, error) {

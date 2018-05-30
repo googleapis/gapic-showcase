@@ -18,7 +18,7 @@ import (
 	"log"
 	"net"
 
-  "github.com/googleapis/gapic-showcase/server"
+	"github.com/googleapis/gapic-showcase/server"
 	showcasepb "github.com/googleapis/gapic-showcase/server/genproto"
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 
@@ -39,7 +39,7 @@ func main() {
 	s := grpc.NewServer()
 	defer s.GracefulStop()
 
-	opStore := server.NewOpertionStore()
+	opStore := server.NewOperationStore()
 	showcasepb.RegisterShowcaseServer(s, server.NewShowcaseServer(opStore))
 	lropb.RegisterOperationsServer(s, server.NewOperationsServer(opStore))
 

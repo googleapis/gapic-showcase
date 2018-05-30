@@ -1,7 +1,7 @@
 package server
 
 import (
-  "errors"
+	"errors"
 	"io"
 	"reflect"
 	"strings"
@@ -24,7 +24,7 @@ import (
 func TestEcho_success(t *testing.T) {
 	table := []string{"hello world", ""}
 
-	server := ShowcaseServer{}
+	server := NewShowcaseServer(nil)
 	for _, val := range table {
 		in := &pb.EchoRequest{Response: &pb.EchoRequest_Content{Content: val}}
 		out, err := server.Echo(context.Background(), in)
@@ -47,7 +47,7 @@ func TestEcho_success(t *testing.T) {
 func TestEcho_error(t *testing.T) {
 	table := []codes.Code{codes.Canceled, codes.InvalidArgument}
 
-	server := ShowcaseServer{}
+	server := NewShowcaseServer(nil)
 	for _, val := range table {
 		in := &pb.EchoRequest{
 			Response: &pb.EchoRequest_Error{
@@ -89,12 +89,12 @@ func (m *mockExpandStream) verify() {
 func TestExpand(t *testing.T) {
 	contentTable := []string{"Hello World", "Hola", ""}
 	errTable := []*spb.Status{
-		&spb.Status{Code: int32(codes.OK)},
-		&spb.Status{Code: int32(codes.InvalidArgument)},
+		{Code: int32(codes.OK)},
+		{Code: int32(codes.InvalidArgument)},
 		nil,
 	}
 
-	server := ShowcaseServer{}
+	server := NewShowcaseServer(nil)
 	for _, c := range contentTable {
 		for _, e := range errTable {
 			stream := &mockExpandStream{exp: strings.Fields(c), t: t}
@@ -109,22 +109,22 @@ func TestExpand(t *testing.T) {
 }
 
 type errorExpandStream struct {
-  err error
-  pb.Showcase_ExpandServer
+	err error
+	pb.Showcase_ExpandServer
 }
 
 func (s *errorExpandStream) Send(resp *pb.EchoResponse) error {
-  return s.err
+	return s.err
 }
 
-func TestExpand_streamErr (t *testing.T) {
-  e := errors.New("Test Error")
-  stream := &errorExpandStream{err: e}
-  server := ShowcaseServer{}
-  err := server.Expand(&pb.ExpandRequest{Content: "Hello World"}, stream)
-  if (e != err) {
-    t.Error("Expand expected to pass through stream errors.")
-  }
+func TestExpand_streamErr(t *testing.T) {
+	e := errors.New("Test Error")
+	stream := &errorExpandStream{err: e}
+	server := NewShowcaseServer(nil)
+	err := server.Expand(&pb.ExpandRequest{Content: "Hello World"}, stream)
+	if e != err {
+		t.Error("Expand expected to pass through stream errors.")
+	}
 }
 
 type mockCollectStream struct {
@@ -167,7 +167,7 @@ func TestCollect(t *testing.T) {
 		{[]string{}, strPtr(""), nil},
 	}
 
-	server := &ShowcaseServer{}
+	server := NewShowcaseServer(nil)
 	for _, test := range tests {
 		reqs := []*pb.EchoRequest{}
 		for _, req := range test.reqs {
@@ -187,22 +187,22 @@ func TestCollect(t *testing.T) {
 }
 
 type errorCollectStream struct {
-  err error
-  pb.Showcase_CollectServer
+	err error
+	pb.Showcase_CollectServer
 }
 
 func (s *errorCollectStream) Recv() (*pb.EchoRequest, error) {
-  return nil, s.err
+	return nil, s.err
 }
 
-func TestCollect_streamErr (t *testing.T) {
-  e := errors.New("Test Error")
-  stream := &errorCollectStream{err: e}
-  server := ShowcaseServer{}
-  err := server.Collect(stream)
-  if (e != err) {
-    t.Error("Expand expected to pass through stream errors.")
-  }
+func TestCollect_streamErr(t *testing.T) {
+	e := errors.New("Test Error")
+	stream := &errorCollectStream{err: e}
+	server := NewShowcaseServer(nil)
+	err := server.Collect(stream)
+	if e != err {
+		t.Error("Expand expected to pass through stream errors.")
+	}
 }
 
 type mockChatStream struct {
@@ -242,7 +242,7 @@ func TestChat(t *testing.T) {
 		{[]string{}, &spb.Status{Code: int32(codes.InvalidArgument)}},
 	}
 
-	server := &ShowcaseServer{}
+	server := NewShowcaseServer(nil)
 	for _, test := range tests {
 		reqs := []*pb.EchoRequest{}
 		for _, req := range test.reqs {
@@ -263,22 +263,22 @@ func TestChat(t *testing.T) {
 }
 
 type errorChatStream struct {
-  err error
-  pb.Showcase_ChatServer
+	err error
+	pb.Showcase_ChatServer
 }
 
 func (s *errorChatStream) Recv() (*pb.EchoRequest, error) {
-  return nil, s.err
+	return nil, s.err
 }
 
-func TestChat_streamErr (t *testing.T) {
-  e := errors.New("Test Error")
-  stream := &errorChatStream{err: e}
-  server := ShowcaseServer{}
-  err := server.Chat(stream)
-  if (e != err) {
-    t.Error("Expand expected to pass through stream errors.")
-  }
+func TestChat_streamErr(t *testing.T) {
+	e := errors.New("Test Error")
+	stream := &errorChatStream{err: e}
+	server := NewShowcaseServer(nil)
+	err := server.Chat(stream)
+	if e != err {
+		t.Error("Expand expected to pass through stream errors.")
+	}
 }
 
 func TestTimeoutSuccess(t *testing.T) {
@@ -291,7 +291,7 @@ func TestTimeoutSuccess(t *testing.T) {
 		{10, int32(10), "world"},
 	}
 	for _, test := range tests {
-		server := &ShowcaseServer{sleepF: mockSleeper(test.seconds, test.nanos, t)}
+		server := &showcaseServerImpl{sleepF: mockSleeper(test.seconds, test.nanos, t)}
 		in := &pb.TimeoutRequest{
 			ResponseDelay: &durpb.Duration{
 				Seconds: test.seconds,
@@ -322,7 +322,7 @@ func TestTimeoutError(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		server := &ShowcaseServer{sleepF: mockSleeper(test.seconds, test.nanos, t)}
+		server := &showcaseServerImpl{sleepF: mockSleeper(test.seconds, test.nanos, t)}
 		in := &pb.TimeoutRequest{
 			ResponseDelay: &durpb.Duration{
 				Seconds: test.seconds,
@@ -367,7 +367,7 @@ func TestSetupRetry(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		server := (&ShowcaseServer{nowF: zeroNow})
+		server := (&showcaseServerImpl{nowF: zeroNow})
 		var resps []*spb.Status
 		if test.in != nil {
 			resps = []*spb.Status{}
@@ -411,7 +411,7 @@ func TestRetry(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		server := &ShowcaseServer{nowF: zeroNow}
+		server := &showcaseServerImpl{nowF: zeroNow}
 		resps := []*spb.Status{}
 		for _, code := range test.in {
 			resps = append(resps, &spb.Status{Code: int32(code)})
@@ -432,24 +432,24 @@ func TestRetry(t *testing.T) {
 }
 
 func TestRetry_noId(t *testing.T) {
-  server := &ShowcaseServer{}
-  _, err := server.Retry(context.Background(), &pb.RetryId{})
-  s, _ := status.FromError(err)
-  if codes.InvalidArgument != s.Code() {
-    t.Error("Retry expected to return InvalidArgument if no id was specified.")
-  }
+	server := NewShowcaseServer(nil)
+	_, err := server.Retry(context.Background(), &pb.RetryId{})
+	s, _ := status.FromError(err)
+	if codes.InvalidArgument != s.Code() {
+		t.Error("Retry expected to return InvalidArgument if no id was specified.")
+	}
 }
 
 func TestPagination_invalidArgs(t *testing.T) {
 	tests := []*pb.PaginationRequest{
-		&pb.PaginationRequest{PageSize: 0},
-		&pb.PaginationRequest{PageSizeOverride: -1},
-		&pb.PaginationRequest{MaxResponse: -1},
-		&pb.PaginationRequest{PageToken: "-1"},
-		&pb.PaginationRequest{PageToken: "BOGUS"},
-		&pb.PaginationRequest{MaxResponse: 1, PageToken: "2"},
+		{PageSize: 0},
+		{PageSizeOverride: -1},
+		{MaxResponse: -1},
+		{PageToken: "-1"},
+		{PageToken: "BOGUS"},
+		{MaxResponse: 1, PageToken: "2"},
 	}
-	server := &ShowcaseServer{}
+	server := NewShowcaseServer(nil)
 	for _, in := range tests {
 		_, err := server.Pagination(context.Background(), in)
 		s, _ := status.FromError(err)
@@ -487,7 +487,7 @@ func TestPagination(t *testing.T) {
 		},
 	}
 
-	server := &ShowcaseServer{}
+	server := NewShowcaseServer(nil)
 	for _, test := range tests {
 		out, err := server.Pagination(context.Background(), test.in)
 		if err != nil {
@@ -541,7 +541,7 @@ func TestParameterFlattening(t *testing.T) {
 		RepeatedContent: []string{"hello", "world"},
 		Nested:          &pb.ParameterFlatteningMessage{Content: "hola"},
 	}
-	server := &ShowcaseServer{}
+	server := NewShowcaseServer(nil)
 	out, err := server.ParameterFlattening(context.Background(), in)
 	if err != nil {
 		t.Error(err)
@@ -559,7 +559,7 @@ func TestResourceName(t *testing.T) {
 		SingleTemplate:    "/hello/world",
 		MultipleTemplates: "/hola/world",
 	}
-	server := &ShowcaseServer{}
+	server := NewShowcaseServer(nil)
 	out, err := server.ResourceName(context.Background(), in)
 	if err != nil {
 		t.Error(err)

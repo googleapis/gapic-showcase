@@ -15,16 +15,19 @@ jobs:
       - checkout
       - run:
           name: Check formatting
-          command: gofmt -l server
+          command: "! gofmt -l ./ 2>&1 | read"
+      - run:
+          name: Lint code
+          command: "! go lint ./... 2>&1 | read"
       - run:
           name: Examine and report suspicious constructs
-          command: go tool vet server
+          command: "! go tool vet ./ 2>&1 | read"
       - run:
           name: Install dependencies
           command: go get -v -t -d ./server/...
       - run:
           name: Run tests
-          command: go test ./server -coverprofile=coverage.txt -covermode=atomic
+          command: go test ./... -coverprofile=coverage.txt -covermode=atomic
       - run:
           name: Submit coverage data to codecov.
           command: bash <(curl -s https://codecov.io/bash)

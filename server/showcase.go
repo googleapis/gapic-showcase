@@ -34,7 +34,16 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
-type ShowcaseServer struct {
+// NewShowcaseServer returns a new ShowcaseServer for the Showcase API.
+func NewShowcaseServer(opStore OperationStore) pb.ShowcaseServer {
+	return &showcaseServerImpl{
+		operationStore: opStore,
+		nowF:           time.Now,
+		sleepF:         time.Sleep,
+	}
+}
+
+type showcaseServerImpl struct {
 	retryStore     map[string][]*statuspb.Status
 	operationStore OperationStore
 	nowF           func() time.Time
@@ -42,15 +51,7 @@ type ShowcaseServer struct {
 	mu             sync.Mutex
 }
 
-func NewShowcaseServer(opStore OperationStore) *ShowcaseServer {
-	return &ShowcaseServer{
-		operationStore: opStore,
-		nowF:           time.Now,
-		sleepF:         time.Sleep,
-	}
-}
-
-func (s *ShowcaseServer) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.EchoResponse, error) {
+func (s *showcaseServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.EchoResponse, error) {
 	err := status.ErrorProto(in.GetError())
 	if err != nil {
 		return nil, err
@@ -58,7 +59,7 @@ func (s *ShowcaseServer) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.Echo
 	return &pb.EchoResponse{Content: in.GetContent()}, nil
 }
 
-func (s *ShowcaseServer) Expand(in *pb.ExpandRequest, stream pb.Showcase_ExpandServer) error {
+func (s *showcaseServerImpl) Expand(in *pb.ExpandRequest, stream pb.Showcase_ExpandServer) error {
 	for _, word := range strings.Fields(in.GetContent()) {
 		err := stream.Send(&pb.EchoResponse{Content: word})
 		if err != nil {
@@ -71,7 +72,7 @@ func (s *ShowcaseServer) Expand(in *pb.ExpandRequest, stream pb.Showcase_ExpandS
 	return nil
 }
 
-func (s *ShowcaseServer) Collect(stream pb.Showcase_CollectServer) error {
+func (s *showcaseServerImpl) Collect(stream pb.Showcase_CollectServer) error {
 	var resp []string
 
 	for {
@@ -92,7 +93,7 @@ func (s *ShowcaseServer) Collect(stream pb.Showcase_CollectServer) error {
 	}
 }
 
-func (s *ShowcaseServer) Chat(stream pb.Showcase_ChatServer) error {
+func (s *showcaseServerImpl) Chat(stream pb.Showcase_ChatServer) error {
 	for {
 		req, err := stream.Recv()
 		if err == io.EOF {
@@ -110,7 +111,7 @@ func (s *ShowcaseServer) Chat(stream pb.Showcase_ChatServer) error {
 	}
 }
 
-func (s *ShowcaseServer) Timeout(ctx context.Context, in *pb.TimeoutRequest) (*pb.TimeoutResponse, error) {
+func (s *showcaseServerImpl) Timeout(ctx context.Context, in *pb.TimeoutRequest) (*pb.TimeoutResponse, error) {
 	d, _ := ptypes.Duration(in.GetResponseDelay())
 	s.sleepF(d)
 	if in.GetError() != nil {
@@ -119,7 +120,7 @@ func (s *ShowcaseServer) Timeout(ctx context.Context, in *pb.TimeoutRequest) (*p
 	return in.GetSuccess(), nil
 }
 
-func (s *ShowcaseServer) SetupRetry(ctx context.Context, in *pb.SetupRetryRequest) (*pb.RetryId, error) {
+func (s *showcaseServerImpl) SetupRetry(ctx context.Context, in *pb.SetupRetryRequest) (*pb.RetryId, error) {
 	if in.GetResponses() == nil || len(in.GetResponses()) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "A list of responses must be specified.")
 	}
@@ -133,7 +134,7 @@ func (s *ShowcaseServer) SetupRetry(ctx context.Context, in *pb.SetupRetryReques
 	return &pb.RetryId{Id: id}, nil
 }
 
-func (s *ShowcaseServer) Retry(ctx context.Context, in *pb.RetryId) (*empty.Empty, error) {
+func (s *showcaseServerImpl) Retry(ctx context.Context, in *pb.RetryId) (*empty.Empty, error) {
 	if in.GetId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "An Id must be specified.")
 	}
@@ -156,11 +157,11 @@ func (s *ShowcaseServer) Retry(ctx context.Context, in *pb.RetryId) (*empty.Empt
 	return nil, status.ErrorProto(resp)
 }
 
-func (s *ShowcaseServer) Longrunning(ctx context.Context, in *pb.LongrunningRequest) (*lropb.Operation, error) {
+func (s *showcaseServerImpl) Longrunning(ctx context.Context, in *pb.LongrunningRequest) (*lropb.Operation, error) {
 	return s.operationStore.RegisterOp(in)
 }
 
-func (s *ShowcaseServer) Pagination(ctx context.Context, in *pb.PaginationRequest) (*pb.PaginationResponse, error) {
+func (s *showcaseServerImpl) Pagination(ctx context.Context, in *pb.PaginationRequest) (*pb.PaginationResponse, error) {
 	if in.GetPageSize() < 0 || in.GetPageSizeOverride() < 0 {
 		return nil, status.Error(codes.InvalidArgument, "The page size provided must not be negative.")
 	}
@@ -208,10 +209,10 @@ func (s *ShowcaseServer) Pagination(ctx context.Context, in *pb.PaginationReques
 	}, nil
 }
 
-func (s *ShowcaseServer) ParameterFlattening(ctx context.Context, in *pb.ParameterFlatteningMessage) (*pb.ParameterFlatteningMessage, error) {
+func (s *showcaseServerImpl) ParameterFlattening(ctx context.Context, in *pb.ParameterFlatteningMessage) (*pb.ParameterFlatteningMessage, error) {
 	return in, nil
 }
 
-func (s *ShowcaseServer) ResourceName(ctx context.Context, in *pb.ResourceNameMessage) (*pb.ResourceNameMessage, error) {
+func (s *showcaseServerImpl) ResourceName(ctx context.Context, in *pb.ResourceNameMessage) (*pb.ResourceNameMessage, error) {
 	return in, nil
 }
