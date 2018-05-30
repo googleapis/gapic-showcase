@@ -15,19 +15,18 @@
 package server
 
 import (
+	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
-	"github.com/grpc/grpc-go/status"
-
 	"google.golang.org/genproto/googleapis/longrunning"
 	statuspb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
-
-	"golang.org/x/net/context"
+	"google.golang.org/grpc/status"
 )
 
 // NewOperationsServer returns a longrunning.OperationsServer which uses the
@@ -47,7 +46,6 @@ type OperationStore interface {
 // NewOperationStore returns an implemented OperationStore.
 func NewOperationStore() OperationStore {
 	return &operationStoreImpl{
-		nowF:  time.Now,
 		store: map[string]*operationInfo{},
 	}
 }
@@ -86,7 +84,10 @@ type operationInfo struct {
 }
 
 type operationStoreImpl struct {
-	nowF  func() time.Time
+	uid  uniqID
+	nowF func() time.Time
+
+	mu    sync.Mutex
 	store map[string]*operationInfo
 }
 
@@ -95,20 +96,28 @@ func (s *operationStoreImpl) RegisterOp(op *pb.LongrunningRequest) (*longrunning
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "Given operation completion time is invalid.")
 	}
-	now := s.nowF()
-	name := fmt.Sprintf("lro-test-op-%d", now.UTC().Unix())
+	name := fmt.Sprintf("lro-test-op-%d", s.uid.id())
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.store[name] = &operationInfo{
 		name:     name,
-		start:    now,
+		start:    s.nowF(),
 		end:      end,
 		canceled: false,
 		resp:     op.GetSuccess(),
 		err:      op.GetError(),
 	}
-	return s.Get(name)
+	return s.get(name)
 }
 
 func (s *operationStoreImpl) Get(name string) (*longrunning.Operation, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.get(name)
+}
+
+func (s *operationStoreImpl) get(name string) (*longrunning.Operation, error) {
 	op, ok := s.store[name]
 	if !ok {
 		return nil, status.Errorf(codes.NotFound, "Operation '%s' not found.", name)
@@ -143,6 +152,9 @@ func (s *operationStoreImpl) Get(name string) (*longrunning.Operation, error) {
 }
 
 func (s *operationStoreImpl) Cancel(name string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	op, ok := s.store[name]
 	if !ok {
 		return status.Errorf(codes.NotFound, "Operation '%s' not found.", name)

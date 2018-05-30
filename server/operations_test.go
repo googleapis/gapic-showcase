@@ -15,8 +15,8 @@
 package server
 
 import (
+	"context"
 	"errors"
-	"fmt"
 	"testing"
 	"time"
 
@@ -24,11 +24,10 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
-	"github.com/grpc/grpc-go/status"
-	"golang.org/x/net/context"
 	"google.golang.org/genproto/googleapis/longrunning"
 	statuspb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type getOpStore struct {
@@ -122,7 +121,7 @@ func TestStoreRegisterOp(t *testing.T) {
 		t.Error("Expected RegisterOp to return an Operation.")
 	}
 
-	expectedName := fmt.Sprintf("lro-test-op-%d", time.Unix(100, 0).Unix())
+	expectedName := "lro-test-op-0"
 	if val, ok := store.store[expectedName]; ok {
 		if val.name != expectedName {
 			t.Errorf("Expected registered op name to be %s, but was %s",

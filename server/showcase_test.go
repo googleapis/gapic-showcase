@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"io"
 	"reflect"
@@ -12,13 +13,10 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	durpb "github.com/golang/protobuf/ptypes/duration"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
-	"github.com/grpc/grpc-go/status"
-
-	"golang.org/x/net/context"
-
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestEcho_success(t *testing.T) {
@@ -367,7 +365,7 @@ func TestSetupRetry(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		server := (&showcaseServerImpl{nowF: zeroNow})
+		server := (&showcaseServerImpl{})
 		var resps []*spb.Status
 		if test.in != nil {
 			resps = []*spb.Status{}
@@ -411,7 +409,7 @@ func TestRetry(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		server := &showcaseServerImpl{nowF: zeroNow}
+		server := &showcaseServerImpl{}
 		resps := []*spb.Status{}
 		for _, code := range test.in {
 			resps = append(resps, &spb.Status{Code: int32(code)})
