@@ -15,40 +15,47 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
-	"github.com/grpc/grpc-go/status"
-
-	"golang.org/x/net/context"
-
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 	statuspb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
+
+type uniqID struct {
+	i int64
+}
+
+func (u *uniqID) id() int64 {
+	return atomic.AddInt64(&u.i, 1) - 1
+}
 
 // NewShowcaseServer returns a new ShowcaseServer for the Showcase API.
 func NewShowcaseServer(opStore OperationStore) pb.ShowcaseServer {
 	return &showcaseServerImpl{
 		operationStore: opStore,
-		nowF:           time.Now,
 		sleepF:         time.Sleep,
 	}
 }
 
 type showcaseServerImpl struct {
+	uid uniqID
+
+	mu             sync.Mutex
 	retryStore     map[string][]*statuspb.Status
 	operationStore OperationStore
-	nowF           func() time.Time
 	sleepF         func(time.Duration)
-	mu             sync.Mutex
 }
 
 func (s *showcaseServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.EchoResponse, error) {
@@ -124,13 +131,14 @@ func (s *showcaseServerImpl) SetupRetry(ctx context.Context, in *pb.SetupRetryRe
 	if in.GetResponses() == nil || len(in.GetResponses()) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "A list of responses must be specified.")
 	}
+	id := fmt.Sprintf("retry-test-%d", s.uid.id())
+
 	s.mu.Lock()
-	id := fmt.Sprintf("retry-test-%d", s.nowF().UTC().Unix())
+	defer s.mu.Unlock()
 	if s.retryStore == nil {
 		s.retryStore = map[string][]*statuspb.Status{}
 	}
 	s.retryStore[id] = in.GetResponses()
-	s.mu.Unlock()
 	return &pb.RetryId{Id: id}, nil
 }
 

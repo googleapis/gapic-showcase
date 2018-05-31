@@ -35,7 +35,7 @@ import google_protobuf4 "github.com/golang/protobuf/ptypes/timestamp"
 import google_rpc "google.golang.org/genproto/googleapis/rpc/status"
 
 import (
-	context "golang.org/x/net/context"
+	context "context"
 	grpc "google.golang.org/grpc"
 )
 
