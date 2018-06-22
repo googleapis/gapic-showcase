@@ -15,6 +15,8 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"net"
 
@@ -36,7 +38,10 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	s := grpc.NewServer()
+	opts := []grpc.ServerOption{
+		grpc.UnaryInterceptor(logRequests),
+	}
+	s := grpc.NewServer(opts...)
 	defer s.GracefulStop()
 
 	opStore := server.NewOperationStore()
@@ -48,4 +53,15 @@ func main() {
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+}
+
+func logRequests(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	fmt.Printf("Method: %s\n", info.FullMethod)
+	fmt.Printf("    Request:  %+v\n", req)
+	resp, err := handler(ctx, req)
+	if err == nil {
+		fmt.Printf("    Response: %+v\n", resp)
+	}
+	fmt.Printf("\n")
+	return resp, err
 }
