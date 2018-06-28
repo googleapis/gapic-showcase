@@ -22,6 +22,7 @@ import "google/rpc/status.proto";
 
 package google.showcase.v1;
 
+
 // A service to showcase Generated API Client features and common API patterns
 // used by Google.
 service Showcase {
