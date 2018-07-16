@@ -224,3 +224,7 @@ func (s *showcaseServerImpl) ParameterFlattening(ctx context.Context, in *pb.Par
 func (s *showcaseServerImpl) ResourceName(ctx context.Context, in *pb.ResourceNameMessage) (*pb.ResourceNameMessage, error) {
 	return in, nil
 }
+
+func (s *showcaseServerImpl) ResourceSet(ctx context.Context, in *pb.ResourceSetMessage) (*pb.ResourceSetMessage, error) {
+	return in, nil
+}

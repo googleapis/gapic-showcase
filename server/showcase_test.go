@@ -554,8 +554,7 @@ func TestParameterFlattening(t *testing.T) {
 
 func TestResourceName(t *testing.T) {
 	in := &pb.ResourceNameMessage{
-		SingleTemplate:    "/hello/world",
-		MultipleTemplates: "/hola/world",
+		Name: "/hello/world",
 	}
 	server := NewShowcaseServer(nil)
 	out, err := server.ResourceName(context.Background(), in)
@@ -567,5 +566,22 @@ func TestResourceName(t *testing.T) {
 	}
 	if !proto.Equal(in, out) {
 		t.Errorf("ResourceName unexpectedly altered the input proto.")
+	}
+}
+
+func TestResourceSet(t *testing.T) {
+	in := &pb.ResourceSetMessage{
+		Name: "/hello/world",
+	}
+	server := NewShowcaseServer(nil)
+	out, err := server.ResourceSet(context.Background(), in)
+	if err != nil {
+		t.Error(err)
+	}
+	if in != out {
+		t.Errorf("ResourceSet expected to pass back the input.")
+	}
+	if !proto.Equal(in, out) {
+		t.Errorf("ResourceSet unexpectedly altered the input proto.")
 	}
 }

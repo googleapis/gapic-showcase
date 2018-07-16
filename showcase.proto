@@ -14,6 +14,7 @@
 
 syntax = "proto3";
 
+import "google/api/annotations.proto";
 import "google/longrunning/operations.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/empty.proto";
@@ -22,9 +23,17 @@ import "google/rpc/status.proto";
 
 package google.showcase.v1;
 
+option (google.api.metadata) = {
+  product_name: "GAPIC Showcase"
+  product_url: "https://github.com/googleapis/gapic-showcase"
+};
+
 // A service to showcase Generated API Client features and common API patterns
 // used by Google.
 service Showcase {
+  // This service is meant to only run locally.
+  option (google.api.default_host) = "localhost";
+
   // A method used to show unary methods. This method will return the message
   // that was given.
   rpc Echo(EchoRequest) returns (EchoResponse) {}
@@ -32,7 +41,11 @@ service Showcase {
   // A method used to show server-side streaming methods. This method will
   // split the given content into words and will pass each word back through
   // the stream.
-  rpc Expand(ExpandRequest) returns (stream EchoResponse) {}
+  rpc Expand(ExpandRequest) returns (stream EchoResponse) {
+    option (google.api.method_signature) = {
+      fields: ["content", "error"]
+    };
+  }
 
   // A method used to show client-side streaming methods. This method will
   // collect the contents given to it. When the stream is closed by the client,
@@ -43,7 +56,11 @@ service Showcase {
   // receiving a request on the stream, the same content will be passed back
   // on the stream.
 
-  rpc Chat(stream EchoRequest) returns (stream EchoResponse) {}
+  rpc Chat(stream EchoRequest) returns (stream EchoResponse) {
+    option (google.api.method_signature) = {
+      fields: ["response_delay"]
+    };
+  }
 
   // This method is to show how a client handles a request timing out. The
   // server will wait the requested amount of response_delay and then return
@@ -53,12 +70,20 @@ service Showcase {
   // This method is used to setup the Retry method. The given list of retry behavior
   // will be bound to an ID defined by the server. Subsequent Retry requests
   // of the given ID will respond with the behavior specified in this request.
-  rpc SetupRetry(SetupRetryRequest) returns (RetryId) {}
+  rpc SetupRetry(SetupRetryRequest) returns (RetryId) {
+    option (google.api.method_signature) = {
+      fields: ["responses"]
+    };
+  }
 
   // This method is used to show how a client handles errors that can be
   // retried. Requests to a given RetryId will respond in the way specified
   // in SetupRetry method.
-  rpc Retry(RetryId) returns (google.protobuf.Empty) {}
+  rpc Retry(RetryId) returns (google.protobuf.Empty) {
+    option (google.api.method_signature) = {
+      fields: ["id"]
+    };
+  }
 
   // This method is used to show how a client handles a long running operation.
   // Upon receiving a request, the server will create a new ID and mark that
@@ -69,7 +94,12 @@ service Showcase {
   // the server will return metadata denoting the percent that the operation
   // is complete, else the server will return a completed operation that will
   // either denote that the operation has succeeded or failed.
-  rpc Longrunning(LongrunningRequest) returns (google.longrunning.Operation) {}
+  rpc Longrunning(LongrunningRequest) returns (google.longrunning.Operation) {
+    option (google.longrunning.operation_types) = {
+      response: "google.showcase.v1.LongrunningResponse"
+      metadata: "google.showcase.v1.LongrunningMetadata"
+    };
+  }
 
   // This method is used to show how a client will handle a method that lists
   // responses in a paginated method. The request will specify an ID and the
@@ -77,16 +107,38 @@ service Showcase {
   // the server will mark the ID specified and the maximum number to be
   // returned. The page token will be a stringified integer denoting the
   // the number to start the page at.
-  rpc Pagination(PaginationRequest) returns (PaginationResponse) {}
+  rpc Pagination(PaginationRequest) returns (PaginationResponse) {
+    option (google.api.method_signature) = {
+      fields: ["max_response", "page_size_override"]
+    };
+  }
 
   // This method is used to show how a client will handle configuration to
   // flatten a request. The server will simply echo the request and
-  rpc ParameterFlattening(ParameterFlatteningMessage) returns (ParameterFlatteningMessage) {}
+  rpc ParameterFlattening(ParameterFlatteningMessage) returns (ParameterFlatteningMessage) {
+    option (google.api.method_signature) = {
+      fields: ["content", "repeated_content", "nested"]
+    };
+  }
 
   // This method is used to show how a client will handle request strings that
-  // are configured to follow a certain pattern or set of patterns. The server
+  // are configured to follow a certain pattern. The server
   // will simply echo the request.
-  rpc ResourceName(ResourceNameMessage) returns (ResourceNameMessage) {}
+  rpc ResourceName(ResourceNameMessage) returns (ResourceNameMessage) {
+    option (google.api.method_signature) = {
+      fields: ["name"]
+    };
+  }
+
+
+  // This method is used to show how a client will handle request strings that
+  // are configured to follow a certain set of patterns. The server
+  // will simply echo the request.
+  rpc ResourceSet(ResourceSetMessage) returns (ResourceSetMessage) {
+    option (google.api.method_signature) = {
+      fields: ["name"]
+    };
+  }
 }
 
 // The request message used for the Echo, Collect and Chat methods. If content
@@ -119,7 +171,7 @@ message ExpandRequest {
 // The request for Showcase Timeout method.
 message TimeoutRequest {
   // The amount of time to wait before returning a response.
-  google.protobuf.Duration response_delay = 1;
+  google.protobuf.Duration response_delay = 1 [(google.api.required) = true];
 
   oneof response {
     // The error that will be returned by the server. If this code is specified
@@ -141,14 +193,14 @@ message TimeoutResponse {
 // The request for the Showcase SetupRetry method.
 message SetupRetryRequest {
   // The server will respond in the order that is given in this field.
-  repeated google.rpc.Status responses = 1;
+  repeated google.rpc.Status responses = 1 [(google.api.required) = true];
 }
 
 // The ID which a given list of responses will be bound to.
 message RetryId {
   // An ID which will the given list of responses will be bound to on the
   // server.
-  string id = 1;
+  string id = 1 [(google.api.required) = true];
 }
 
 // The request for the Showcase Longrunning method.
@@ -156,7 +208,7 @@ message LongrunningRequest {
   // The time after which this operation will succeed. If, upon the first,
   // the time has passed, the initial response will return a completed
   // operation.
-  google.protobuf.Timestamp completion_time = 1;
+  google.protobuf.Timestamp completion_time = 1 [(google.api.required) = true];
 
   oneof response {
     // The error that will be returned in the operation signifying a failed
@@ -186,7 +238,7 @@ message LongrunningResponse {
 // The request for the Showcase Pagination.
 message PaginationRequest {
   // The maximum number that will be returned in the response.
-  int32 max_response = 1;
+  int32 max_response = 1 [(google.api.required) = true];
 
   // The amount of numbers to returned in the response.
   int32 page_size = 2;
@@ -228,8 +280,22 @@ message ParameterFlatteningMessage {
 // The request and response message for the Showcase ResourceName method.
 message ResourceNameMessage {
   // This field will have a single template bound to it.
-  string single_template = 1;
+  string name = 1 [
+    (google.api.resource).path = "projects/*/resources/*",
+    (google.api.required) = true
+  ];
+}
 
+// The request and response message for the Shwocase ResourceSet method.
+message ResourceSetMessage {
   // This field will be a oneof resource name with many templates bound to it.
-  string multiple_templates = 2;
+  string name = 1 [
+    (google.api.resource_set) = {
+      base_name: "Resource"
+      resources: [
+        {base_name: "GlobalResource", path: "global/projects/*/resources/*"},
+        {base_name: "RegionalResource", path: "regional/projects/*/resources/*"}]
+    },
+    (google.api.required) = true
+  ];
 }
