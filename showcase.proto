@@ -21,7 +21,7 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 import "google/rpc/status.proto";
 
-package google.showcase.v1;
+package google.showcase.v1alpha1;
 
 option (google.api.metadata) = {
   product_name: "GAPIC Showcase"
@@ -31,8 +31,9 @@ option (google.api.metadata) = {
 // A service to showcase Generated API Client features and common API patterns
 // used by Google.
 service Showcase {
-  // This service is meant to only run locally.
-  option (google.api.default_host) = "localhost";
+  // This service is meant to only run locally on the port 7469 (keypad digits
+  // for "show").
+  option (google.api.default_host) = "localhost:7469";
 
   // A method used to show unary methods. This method will return the message
   // that was given.
@@ -96,8 +97,8 @@ service Showcase {
   // either denote that the operation has succeeded or failed.
   rpc Longrunning(LongrunningRequest) returns (google.longrunning.Operation) {
     option (google.longrunning.operation_types) = {
-      response: "google.showcase.v1.LongrunningResponse"
-      metadata: "google.showcase.v1.LongrunningMetadata"
+      response: "google.showcase.v1alpha1.LongrunningResponse"
+      metadata: "google.showcase.v1alpha1.LongrunningMetadata"
     };
   }
 

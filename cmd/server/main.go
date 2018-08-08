@@ -29,7 +29,8 @@ import (
 )
 
 const (
-	port = ":8080"
+	// Keypad digits for "show".
+	port = ":7469"
 )
 
 func main() {
