@@ -25,7 +25,7 @@ package google.showcase.v1alpha1;
 
 option (google.api.metadata) = {
   product_name: "GAPIC Showcase"
-  product_url: "https://github.com/googleapis/gapic-showcase"
+  product_uri: "https://github.com/googleapis/gapic-showcase"
 };
 
 // A service to showcase Generated API Client features and common API patterns
