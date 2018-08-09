@@ -57,11 +57,7 @@ service Showcase {
   // receiving a request on the stream, the same content will be passed back
   // on the stream.
 
-  rpc Chat(stream EchoRequest) returns (stream EchoResponse) {
-    option (google.api.method_signature) = {
-      fields: ["response_delay"]
-    };
-  }
+  rpc Chat(stream EchoRequest) returns (stream EchoResponse);
 
   // This method is to show how a client handles a request timing out. The
   // server will wait the requested amount of response_delay and then return
