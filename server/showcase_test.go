@@ -385,7 +385,7 @@ func TestSetupRetry(t *testing.T) {
 	}
 }
 
-func TestRetry(t *testing.T) {
+func TestAttempt(t *testing.T) {
 	tests := []struct {
 		in  []codes.Code
 		out []codes.Code
@@ -420,21 +420,21 @@ func TestRetry(t *testing.T) {
 			t.Errorf("SetupRetry failed to setup.")
 		}
 		for _, expected := range test.out {
-			_, err := server.Retry(context.Background(), out)
+			_, err := server.Attempt(context.Background(), out)
 			s, _ := status.FromError(err)
 			if expected != s.Code() {
-				t.Errorf("Retry expected to return code '%d', but returned '%d'", expected, s.Code())
+				t.Errorf("Attempt expected to return code '%d', but returned '%d'", expected, s.Code())
 			}
 		}
 	}
 }
 
-func TestRetry_noId(t *testing.T) {
+func TestAttempt_noId(t *testing.T) {
 	server := NewShowcaseServer(nil)
-	_, err := server.Retry(context.Background(), &pb.RetryId{})
+	_, err := server.Attempt(context.Background(), &pb.RetryId{})
 	s, _ := status.FromError(err)
 	if codes.InvalidArgument != s.Code() {
-		t.Error("Retry expected to return InvalidArgument if no id was specified.")
+		t.Error("Attempt expected to return InvalidArgument if no id was specified.")
 	}
 }
 

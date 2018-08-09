@@ -80,7 +80,7 @@ service Showcase {
   // This method is used to show how a client handles errors that can be
   // retried. Requests to a given RetryId will respond in the way specified
   // in SetupRetry method.
-  rpc Retry(RetryId) returns (google.protobuf.Empty) {
+  rpc Attempt(RetryId) returns (google.protobuf.Empty) {
     option (google.api.method_signature) = {
       fields: ["id"]
     };

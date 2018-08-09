@@ -38,6 +38,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+	// TODO Add a logger.
+	fmt.Printf("Gapic Showcase V1Alpha1 listening on port: %s", port)
 
 	opts := []grpc.ServerOption{
 		grpc.UnaryInterceptor(logRequests),
@@ -57,7 +59,7 @@ func main() {
 }
 
 func logRequests(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	fmt.Printf("Method: %s\n", info.FullMethod)
+	fmt.Printf("Received Request for Method: %s\n", info.FullMethod)
 	fmt.Printf("    Request:  %+v\n", req)
 	resp, err := handler(ctx, req)
 	if err == nil {

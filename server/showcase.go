@@ -142,7 +142,7 @@ func (s *showcaseServerImpl) SetupRetry(ctx context.Context, in *pb.SetupRetryRe
 	return &pb.RetryId{Id: id}, nil
 }
 
-func (s *showcaseServerImpl) Retry(ctx context.Context, in *pb.RetryId) (*empty.Empty, error) {
+func (s *showcaseServerImpl) Attempt(ctx context.Context, in *pb.RetryId) (*empty.Empty, error) {
 	if in.GetId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "An Id must be specified.")
 	}
