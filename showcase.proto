@@ -24,7 +24,6 @@ import "google/rpc/status.proto";
 package google.showcase.v1alpha1;
 
 option (google.api.metadata) = {
-  product_name: "GAPIC Showcase"
   product_uri: "https://github.com/googleapis/gapic-showcase"
 };
 
