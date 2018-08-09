@@ -24,7 +24,7 @@ jobs:
           command: "! go tool vet ./ 2>&1 | read"
       - run:
           name: Install dependencies
-          command: go get -v -t -d ./server/...
+          command: go get -v -t -d ./server/... && go get -v -t -d ./cmd/...
       - run:
           name: Run tests
           command: go test ./... -coverprofile=coverage.txt -covermode=atomic
