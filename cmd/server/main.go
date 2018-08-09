@@ -19,9 +19,13 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/googleapis/gapic-showcase/server"
 	showcasepb "github.com/googleapis/gapic-showcase/server/genproto"
+	"github.com/takama/daemon"
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 
 	"google.golang.org/grpc"
@@ -29,18 +33,59 @@ import (
 )
 
 const (
+	name        = "gapic-showcase"
+	description = "Gapic Showcase V1Alpha1 Service"
 	// Keypad digits for "show".
 	port = ":7469"
 )
 
-func main() {
+var stdlog, errlog *log.Logger
+var dependencies = []string{}
+
+// Service has embedded daemon
+type process struct {
+	daemon.Daemon
+}
+
+// Manage by daemon commands or run the daemon
+func (p *process) manage() (string, error) {
+
+	usage := fmt.Sprintf(
+		"Usage: %s install | remove | start | stop | status", os.Args[0])
+
+	// if received any kind of command, do it
+	if len(os.Args) > 1 {
+		command := os.Args[1]
+		switch command {
+		case "install":
+			return p.Install()
+		case "remove":
+			return p.Remove()
+		case "start":
+			return p.Start()
+		case "stop":
+			return p.Stop()
+		case "status":
+			return p.Status()
+		default:
+			return usage, nil
+		}
+	}
+
+	// Set up channel on which to send signal notifications.
+	// We must use a buffered channel or risk missing the signal
+	// if we're not ready to receive when the signal is sent.
+	interrupt := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt, os.Kill, syscall.SIGTERM)
+
+	// Set start listening.
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatalf("Failed to listen: %v", err)
 	}
-	// TODO Add a logger.
-	fmt.Printf("Gapic Showcase V1Alpha1 listening on port: %s", port)
+	stdlog.Printf("Gapic Showcase V1Alpha1 listening on port: %s", port)
 
+	// Setup Server.
 	opts := []grpc.ServerOption{
 		grpc.UnaryInterceptor(logRequests),
 	}
@@ -53,18 +98,48 @@ func main() {
 
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	go s.Serve(lis)
+
+	for {
+		select {
+		case killSignal := <-interrupt:
+			stdlog.Println("Got signal:", killSignal)
+			if killSignal == os.Interrupt {
+				return "Daemon was interruped by system signal", nil
+			}
+			return "Daemon was killed", nil
+		}
 	}
+	return usage, nil
 }
 
 func logRequests(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	fmt.Printf("Received Request for Method: %s\n", info.FullMethod)
-	fmt.Printf("    Request:  %+v\n", req)
+	stdlog.Printf("Received Request for Method: %s\n", info.FullMethod)
+	stdlog.Printf("    Request:  %+v\n", req)
 	resp, err := handler(ctx, req)
 	if err == nil {
-		fmt.Printf("    Response: %+v\n", resp)
+		stdlog.Printf("    Response: %+v\n", resp)
 	}
-	fmt.Printf("\n")
+	stdlog.Println("")
 	return resp, err
+}
+
+func init() {
+	stdlog = log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	errlog = log.New(os.Stderr, "", log.Ldate|log.Ltime)
+}
+
+func main() {
+	srv, err := daemon.New(name, description, dependencies...)
+	if err != nil {
+		errlog.Println("Error: ", err)
+		os.Exit(1)
+	}
+	p := &process{srv}
+	status, err := p.manage()
+	if err != nil {
+		errlog.Println(status, "\nError: ", err)
+		os.Exit(1)
+	}
+	fmt.Println(status)
 }
