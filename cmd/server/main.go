@@ -35,8 +35,8 @@ import (
 const (
 	name        = "gapic-showcase"
 	description = "Gapic Showcase V1Alpha1 Service"
-	version			= "0.0.4"
-	port 				= ":7469"
+	version     = "0.0.4"
+	port        = ":7469"
 )
 
 var stdlog, errlog *log.Logger
