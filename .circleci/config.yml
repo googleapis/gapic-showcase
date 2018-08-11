@@ -1,17 +1,19 @@
 version: 2
 workflows:
   version: 2
-  build:
+  main:
     jobs:
-      - unit
+      - build
       - release:
           requires:
-            - unit
+            - build
           filters:
+            branches:
+              ignore: /.*/
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
 jobs:
-  unit:
+  build:
     docker:
       - image: golang:1.10
     environment:
@@ -108,4 +110,4 @@ jobs:
             ghr -t ${GITHUB_TOKEN} \
                 -u ${CIRCLE_PROJECT_USERNAME} \
                 -r ${CIRCLE_PROJECT_REPONAME} \
-                -c ${CIRCLE_SHA1} "v${VERSION}" ./dist/
+                -c ${CIRCLE_SHA1} v${VERSION} ./dist/
