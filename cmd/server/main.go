@@ -35,8 +35,8 @@ import (
 const (
 	name        = "gapic-showcase"
 	description = "Gapic Showcase V1Alpha1 Service"
-	// Keypad digits for "show".
-	port = ":7469"
+	version			= "0.0.4"
+	port 				= ":7469"
 )
 
 var stdlog, errlog *log.Logger
@@ -51,12 +51,14 @@ type process struct {
 func (p *process) manage() (string, error) {
 
 	usage := fmt.Sprintf(
-		"Usage: %s install | remove | start | stop | status", os.Args[0])
+		"Usage: %s version | install | remove | start | stop | status", os.Args[0])
 
 	// if received any kind of command, do it
 	if len(os.Args) > 1 {
 		command := os.Args[1]
 		switch command {
+		case "version":
+			return version, nil
 		case "install":
 			return p.Install()
 		case "remove":
@@ -118,7 +120,9 @@ func logRequests(ctx context.Context, req interface{}, info *grpc.UnaryServerInf
 	stdlog.Printf("    Request:  %+v\n", req)
 	resp, err := handler(ctx, req)
 	if err == nil {
-		stdlog.Printf("    Response: %+v\n", resp)
+		stdlog.Printf("    Returning Response: %+v\n", resp)
+	} else {
+		stdlog.Printf("    Returning Error: %+v\n", err)
 	}
 	stdlog.Println("")
 	return resp, err
