@@ -102,7 +102,7 @@ jobs:
             VERSION=$(go run cmd/server/main.go version)
             mkdir tmp/gapic-showcase-v1alpha1-${VERSION}-protos
             cp -rv tmp/api-common-protos/google tmp/gapic-showcase-v1alpha1-${VERSION}-protos
-            tar -zcvf dist/gapic-showcase-v1alpha1-${VERSION}-protos.tar.gz tmp/gapic-showcase-v1alpha1-${VERSION}-protos
+            cd tmp/ && tar -zcvf ../dist/gapic-showcase-v1alpha1-${VERSION}-protos.tar.gz gapic-showcase-v1alpha1-${VERSION}-protos
       - run:
           name: Attach compiled stuff to the tag.
           command: |
