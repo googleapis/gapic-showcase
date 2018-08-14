@@ -9,11 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes"
 	durpb "github.com/golang/protobuf/ptypes/duration"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
-	lropb "google.golang.org/genproto/googleapis/longrunning"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -22,7 +19,7 @@ import (
 func TestEcho_success(t *testing.T) {
 	table := []string{"hello world", ""}
 
-	server := NewShowcaseServer(nil)
+	server := NewEchoServer()
 	for _, val := range table {
 		in := &pb.EchoRequest{Response: &pb.EchoRequest_Content{Content: val}}
 		out, err := server.Echo(context.Background(), in)
@@ -45,7 +42,7 @@ func TestEcho_success(t *testing.T) {
 func TestEcho_error(t *testing.T) {
 	table := []codes.Code{codes.Canceled, codes.InvalidArgument}
 
-	server := NewShowcaseServer(nil)
+	server := NewEchoServer()
 	for _, val := range table {
 		in := &pb.EchoRequest{
 			Response: &pb.EchoRequest_Error{
@@ -67,7 +64,7 @@ func TestEcho_error(t *testing.T) {
 type mockExpandStream struct {
 	exp []string
 	t   *testing.T
-	pb.Showcase_ExpandServer
+	pb.Echo_ExpandServer
 }
 
 func (m *mockExpandStream) Send(resp *pb.EchoResponse) error {
@@ -92,7 +89,7 @@ func TestExpand(t *testing.T) {
 		nil,
 	}
 
-	server := NewShowcaseServer(nil)
+	server := NewEchoServer()
 	for _, c := range contentTable {
 		for _, e := range errTable {
 			stream := &mockExpandStream{exp: strings.Fields(c), t: t}
@@ -108,7 +105,7 @@ func TestExpand(t *testing.T) {
 
 type errorExpandStream struct {
 	err error
-	pb.Showcase_ExpandServer
+	pb.Echo_ExpandServer
 }
 
 func (s *errorExpandStream) Send(resp *pb.EchoResponse) error {
@@ -118,7 +115,7 @@ func (s *errorExpandStream) Send(resp *pb.EchoResponse) error {
 func TestExpand_streamErr(t *testing.T) {
 	e := errors.New("Test Error")
 	stream := &errorExpandStream{err: e}
-	server := NewShowcaseServer(nil)
+	server := NewEchoServer()
 	err := server.Expand(&pb.ExpandRequest{Content: "Hello World"}, stream)
 	if e != err {
 		t.Error("Expand expected to pass through stream errors.")
@@ -129,7 +126,7 @@ type mockCollectStream struct {
 	reqs []*pb.EchoRequest
 	exp  *string
 	t    *testing.T
-	pb.Showcase_CollectServer
+	pb.Echo_CollectServer
 }
 
 func (m *mockCollectStream) SendAndClose(r *pb.EchoResponse) error {
@@ -165,7 +162,7 @@ func TestCollect(t *testing.T) {
 		{[]string{}, strPtr(""), nil},
 	}
 
-	server := NewShowcaseServer(nil)
+	server := NewEchoServer()
 	for _, test := range tests {
 		reqs := []*pb.EchoRequest{}
 		for _, req := range test.reqs {
@@ -186,7 +183,7 @@ func TestCollect(t *testing.T) {
 
 type errorCollectStream struct {
 	err error
-	pb.Showcase_CollectServer
+	pb.Echo_CollectServer
 }
 
 func (s *errorCollectStream) Recv() (*pb.EchoRequest, error) {
@@ -196,7 +193,7 @@ func (s *errorCollectStream) Recv() (*pb.EchoRequest, error) {
 func TestCollect_streamErr(t *testing.T) {
 	e := errors.New("Test Error")
 	stream := &errorCollectStream{err: e}
-	server := NewShowcaseServer(nil)
+	server := NewEchoServer()
 	err := server.Collect(stream)
 	if e != err {
 		t.Error("Expand expected to pass through stream errors.")
@@ -207,7 +204,7 @@ type mockChatStream struct {
 	reqs []*pb.EchoRequest
 	curr *pb.EchoRequest
 	t    *testing.T
-	pb.Showcase_ChatServer
+	pb.Echo_ChatServer
 }
 
 func (m *mockChatStream) Recv() (*pb.EchoRequest, error) {
@@ -240,7 +237,7 @@ func TestChat(t *testing.T) {
 		{[]string{}, &spb.Status{Code: int32(codes.InvalidArgument)}},
 	}
 
-	server := NewShowcaseServer(nil)
+	server := NewEchoServer()
 	for _, test := range tests {
 		reqs := []*pb.EchoRequest{}
 		for _, req := range test.reqs {
@@ -262,7 +259,7 @@ func TestChat(t *testing.T) {
 
 type errorChatStream struct {
 	err error
-	pb.Showcase_ChatServer
+	pb.Echo_ChatServer
 }
 
 func (s *errorChatStream) Recv() (*pb.EchoRequest, error) {
@@ -272,14 +269,14 @@ func (s *errorChatStream) Recv() (*pb.EchoRequest, error) {
 func TestChat_streamErr(t *testing.T) {
 	e := errors.New("Test Error")
 	stream := &errorChatStream{err: e}
-	server := NewShowcaseServer(nil)
+	server := NewEchoServer()
 	err := server.Chat(stream)
 	if e != err {
 		t.Error("Expand expected to pass through stream errors.")
 	}
 }
 
-func TestTimeoutSuccess(t *testing.T) {
+func TestWaitSuccess(t *testing.T) {
 	tests := []struct {
 		seconds int64
 		nanos   int32
@@ -289,27 +286,27 @@ func TestTimeoutSuccess(t *testing.T) {
 		{10, int32(10), "world"},
 	}
 	for _, test := range tests {
-		server := &showcaseServerImpl{sleepF: mockSleeper(test.seconds, test.nanos, t)}
-		in := &pb.TimeoutRequest{
+		server := &echoServerImpl{sleepF: mockSleeper(test.seconds, test.nanos, t)}
+		in := &pb.WaitRequest{
 			ResponseDelay: &durpb.Duration{
 				Seconds: test.seconds,
 				Nanos:   test.nanos,
 			},
-			Response: &pb.TimeoutRequest_Success{
-				Success: &pb.TimeoutResponse{Content: test.resp},
+			Response: &pb.WaitRequest_Success{
+				Success: &pb.WaitResponse{Content: test.resp},
 			},
 		}
-		out, err := server.Timeout(context.Background(), in)
+		out, err := server.Wait(context.Background(), in)
 		if err != nil {
 			t.Error(err)
 		}
 		if out.GetContent() != test.resp {
-			t.Errorf("Expected Timeout test to return %s, but returned %s", out.GetContent(), test.resp)
+			t.Errorf("Expected Wait test to return %s, but returned %s", out.GetContent(), test.resp)
 		}
 	}
 }
 
-func TestTimeoutError(t *testing.T) {
+func TestWaitError(t *testing.T) {
 	tests := []struct {
 		seconds int64
 		nanos   int32
@@ -320,23 +317,23 @@ func TestTimeoutError(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		server := &showcaseServerImpl{sleepF: mockSleeper(test.seconds, test.nanos, t)}
-		in := &pb.TimeoutRequest{
+		server := &echoServerImpl{sleepF: mockSleeper(test.seconds, test.nanos, t)}
+		in := &pb.WaitRequest{
 			ResponseDelay: &durpb.Duration{
 				Seconds: test.seconds,
 				Nanos:   test.nanos,
 			},
-			Response: &pb.TimeoutRequest_Error{
+			Response: &pb.WaitRequest_Error{
 				Error: status.New(test.code, "").Proto(),
 			},
 		}
-		out, err := server.Timeout(context.Background(), in)
+		out, err := server.Wait(context.Background(), in)
 		if out != nil {
-			t.Errorf("Timeout: Expected to error with code %d but returned success", test.code)
+			t.Errorf("Wait: Expected to error with code %d but returned success", test.code)
 		}
 		s, _ := status.FromError(err)
 		if s.Code() != test.code {
-			t.Errorf("Timeout: Expected to error with code %d but errored with code %d", test.code, s.Code())
+			t.Errorf("Wait: Expected to error with code %d but errored with code %d", test.code, s.Code())
 		}
 	}
 }
@@ -354,90 +351,6 @@ func zeroNow() time.Time {
 	return time.Unix(0, 0)
 }
 
-func TestSetupRetry(t *testing.T) {
-	tests := []struct {
-		in  []codes.Code
-		out codes.Code
-	}{
-		{[]codes.Code{codes.OK}, codes.OK},
-		{nil, codes.InvalidArgument},
-		{[]codes.Code{}, codes.InvalidArgument},
-	}
-
-	for _, test := range tests {
-		server := (&showcaseServerImpl{})
-		var resps []*spb.Status
-		if test.in != nil {
-			resps = []*spb.Status{}
-			for _, code := range test.in {
-				resps = append(resps, &spb.Status{Code: int32(code)})
-			}
-		}
-		in := &pb.SetupRetryRequest{Responses: resps}
-		out, err := server.SetupRetry(context.Background(), in)
-		if out != nil && out.GetId() != "retry-test-0" {
-			t.Errorf("Expected SetupRetry to return the ID 'retry-test-0', but returned '%s'", out.GetId())
-		}
-		s, _ := status.FromError(err)
-		if s.Code() != test.out {
-			t.Errorf("Expected SetupRetry to return with code '%d', but returned code '%d'", test.out, s.Code())
-		}
-	}
-}
-
-func TestAttempt(t *testing.T) {
-	tests := []struct {
-		in  []codes.Code
-		out []codes.Code
-	}{
-		{
-			[]codes.Code{codes.OK},
-			[]codes.Code{codes.OK},
-		},
-		{
-			[]codes.Code{codes.OK, codes.Unavailable},
-			[]codes.Code{codes.OK, codes.NotFound},
-		},
-		{
-			[]codes.Code{codes.Unavailable, codes.Unavailable},
-			[]codes.Code{codes.Unavailable, codes.Unavailable},
-		},
-		{
-			[]codes.Code{codes.Unavailable, codes.OK},
-			[]codes.Code{codes.Unavailable, codes.OK},
-		},
-	}
-
-	for _, test := range tests {
-		server := &showcaseServerImpl{}
-		resps := []*spb.Status{}
-		for _, code := range test.in {
-			resps = append(resps, &spb.Status{Code: int32(code)})
-		}
-		in := &pb.SetupRetryRequest{Responses: resps}
-		out, err := server.SetupRetry(context.Background(), in)
-		if err != nil {
-			t.Errorf("SetupRetry failed to setup.")
-		}
-		for _, expected := range test.out {
-			_, err := server.Attempt(context.Background(), out)
-			s, _ := status.FromError(err)
-			if expected != s.Code() {
-				t.Errorf("Attempt expected to return code '%d', but returned '%d'", expected, s.Code())
-			}
-		}
-	}
-}
-
-func TestAttempt_noId(t *testing.T) {
-	server := NewShowcaseServer(nil)
-	_, err := server.Attempt(context.Background(), &pb.RetryId{})
-	s, _ := status.FromError(err)
-	if codes.InvalidArgument != s.Code() {
-		t.Error("Attempt expected to return InvalidArgument if no id was specified.")
-	}
-}
-
 func TestPagination_invalidArgs(t *testing.T) {
 	tests := []*pb.PaginationRequest{
 		{PageSize: 0},
@@ -447,7 +360,7 @@ func TestPagination_invalidArgs(t *testing.T) {
 		{PageToken: "BOGUS"},
 		{MaxResponse: 1, PageToken: "2"},
 	}
-	server := NewShowcaseServer(nil)
+	server := NewEchoServer()
 	for _, in := range tests {
 		_, err := server.Pagination(context.Background(), in)
 		s, _ := status.FromError(err)
@@ -485,7 +398,7 @@ func TestPagination(t *testing.T) {
 		},
 	}
 
-	server := NewShowcaseServer(nil)
+	server := NewEchoServer()
 	for _, test := range tests {
 		out, err := server.Pagination(context.Background(), test.in)
 		if err != nil {
@@ -496,92 +409,5 @@ func TestPagination(t *testing.T) {
 			t.Errorf("Pagination with input '%s', expected '%s', but returned %s",
 				test.in.String(), test.out.String(), out.String())
 		}
-	}
-}
-
-type mockOperationStore struct {
-	t   *testing.T
-	req *pb.LongrunningRequest
-	OperationStore
-}
-
-func (m *mockOperationStore) RegisterOp(in *pb.LongrunningRequest) (*lropb.Operation, error) {
-	m.req = in
-	return &lropb.Operation{}, nil
-}
-
-func TestLongrunning(t *testing.T) {
-	mockStore := &mockOperationStore{t: t}
-	server := NewShowcaseServer(mockStore)
-	stamp, _ := ptypes.TimestampProto(time.Unix(0, 0))
-	in := &pb.LongrunningRequest{
-		CompletionTime: stamp,
-		Response: &pb.LongrunningRequest_Success{
-			Success: &pb.LongrunningResponse{Content: "Hello World"},
-		},
-	}
-	_, err := server.Longrunning(context.Background(), in)
-	if err != nil {
-		t.Error(err)
-	}
-	if mockStore.req != in {
-		t.Error("Longrunning expected to register the an operation with the store.")
-	}
-	if !proto.Equal(mockStore.req, in) {
-		t.Error("Longrunning unexpectedly altered the input registering with the operation store.")
-	}
-
-}
-
-func TestParameterFlattening(t *testing.T) {
-	in := &pb.ParameterFlatteningMessage{
-		Content:         "hello world",
-		RepeatedContent: []string{"hello", "world"},
-		Nested:          &pb.ParameterFlatteningMessage{Content: "hola"},
-	}
-	server := NewShowcaseServer(nil)
-	out, err := server.ParameterFlattening(context.Background(), in)
-	if err != nil {
-		t.Error(err)
-	}
-	if in != out {
-		t.Errorf("ParameterFlattening expected to pass back the input.")
-	}
-	if !proto.Equal(in, out) {
-		t.Errorf("ParameterFlattening unexpectedly altered the input proto.")
-	}
-}
-
-func TestResourceName(t *testing.T) {
-	in := &pb.ResourceNameMessage{
-		Name: "/hello/world",
-	}
-	server := NewShowcaseServer(nil)
-	out, err := server.ResourceName(context.Background(), in)
-	if err != nil {
-		t.Error(err)
-	}
-	if in != out {
-		t.Errorf("ResourceName expected to pass back the input.")
-	}
-	if !proto.Equal(in, out) {
-		t.Errorf("ResourceName unexpectedly altered the input proto.")
-	}
-}
-
-func TestResourceSet(t *testing.T) {
-	in := &pb.ResourceSetMessage{
-		Name: "/hello/world",
-	}
-	server := NewShowcaseServer(nil)
-	out, err := server.ResourceSet(context.Background(), in)
-	if err != nil {
-		t.Error(err)
-	}
-	if in != out {
-		t.Errorf("ResourceSet expected to pass back the input.")
-	}
-	if !proto.Equal(in, out) {
-		t.Errorf("ResourceSet unexpectedly altered the input proto.")
 	}
 }

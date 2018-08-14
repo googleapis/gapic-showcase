@@ -84,10 +84,10 @@ jobs:
                 https://github.com/googleapis/api-common-protos.git \
                 tmp/api-common-protos
       - run:
-          name: Stage the showcase proto with it's dependencies.
+          name: Stage the showcase protos with it's dependencies.
           command: |
             mkdir -p tmp/api-common-protos/google/showcase/v1alpha1
-            cp showcase.proto tmp/api-common-protos/google/showcase/v1alpha1/
+            cp schema/echo.proto tmp/api-common-protos/google/showcase/v1alpha1/
       - run:
           name: Compile the proto descriptor set.
           command: |
@@ -95,7 +95,7 @@ jobs:
             protoc --proto_path=tmp/api-common-protos --include_imports \
                 --include_source_info \
                 -o dist/gapic-showcase-v1alpha1-${VERSION}.desc \
-                tmp/api-common-protos/google/showcase/v1alpha1/showcase.proto
+                tmp/api-common-protos/google/showcase/v1alpha1/echo.proto
       - run:
           name: Make a tarball of the protos.
           command: |

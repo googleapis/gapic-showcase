@@ -24,9 +24,8 @@ import (
 	"syscall"
 
 	"github.com/googleapis/gapic-showcase/server"
-	showcasepb "github.com/googleapis/gapic-showcase/server/genproto"
+	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/takama/daemon"
-	lropb "google.golang.org/genproto/googleapis/longrunning"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -93,10 +92,7 @@ func (p *process) manage() (string, error) {
 	}
 	s := grpc.NewServer(opts...)
 	defer s.GracefulStop()
-
-	opStore := server.NewOperationStore()
-	showcasepb.RegisterShowcaseServer(s, server.NewShowcaseServer(opStore))
-	lropb.RegisterOperationsServer(s, server.NewOperationsServer(opStore))
+	pb.RegisterEchoServer(s, server.NewEchoServer())
 
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
