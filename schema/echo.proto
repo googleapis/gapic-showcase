@@ -40,7 +40,8 @@ service Echo {
   // This method simply echos the request. This method is showcases unary rpcs.
   rpc Echo(EchoRequest) returns (EchoResponse) {
     option (google.api.http) = {
-      post: "v1alpha1/echo:echo"
+      post: "/v1alpha1/echo:echo"
+      body: "*"
     };
   }
 
@@ -48,7 +49,8 @@ service Echo {
   // through the stream. This method showcases server-side streaming rpcs.
   rpc Expand(ExpandRequest) returns (stream EchoResponse) {
     option (google.api.http) = {
-      post: "v1alpha1/echo:expand"
+      post: "/v1alpha1/echo:expand"
+      body: "*"
     };
     option (google.api.method_signature) = {
       fields: ["content", "error"]
@@ -60,7 +62,8 @@ service Echo {
   // passed to it. This method showcases client-side streaming rpcs.
   rpc Collect(stream EchoRequest) returns (EchoResponse) {
     option (google.api.http) = {
-      post: "v1alpha1/echo:collect"
+      post: "/v1alpha1/echo:collect"
+      body: "*"
     };
   }
 
@@ -73,7 +76,8 @@ service Echo {
   // This method showcases how a client handles a request timing out.
   rpc Wait(WaitRequest) returns (WaitResponse) {
     option (google.api.http) = {
-      post: "v1alpha1/echo:wait"
+      post: "/v1alpha1/echo:wait"
+      body: "*"
     };
   }
 
@@ -81,6 +85,10 @@ service Echo {
   // If the last number in the page is below the specified maximum, then the
   // response will include a page token indicating the next page.
   rpc Pagination(PaginationRequest) returns (PaginationResponse) {
+    option (google.api.http) = {
+      post: "/v1alpha1/echo:pagination"
+      body: "*"
+    };
     option (google.api.method_signature) = {
       fields: ["max_response", "page_size_override"]
     };
