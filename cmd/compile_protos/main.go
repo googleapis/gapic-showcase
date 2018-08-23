@@ -47,13 +47,17 @@ func main() {
 	runAndLog(cmd)
 	cmd = exec.Command("cp", showcaseDir+"/schema/echo.proto", protoDest)
 	runAndLog(cmd)
+	cmd = exec.Command("cp", showcaseDir+"/schema/testing.proto", protoDest)
+  runAndLog(cmd)
+
 
 	// Compile protos
 	cmd = exec.Command(
 		"protoc",
 		"--go_out=plugins=grpc:"+gopath+"/src",
 		"--proto_path="+showcaseDir+"/tmp/api-common-protos",
-		protoDest+"/echo.proto")
+		protoDest+"/echo.proto",
+		protoDest+"/testing.proto")
 	runAndLog(cmd)
 
 	os.Exit(0)
