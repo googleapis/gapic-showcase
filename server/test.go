@@ -41,9 +41,10 @@ type testImpl struct {
 func NewTestFromProto(t *pb.Test) Test {
   return &testImpl{
 		t: t,
-		answers: []string{},
-		state: pb.ReportSessionResponse_INCOMPLETE,
 		issue: createIssue(t, pb.ReportSessionResponse_Issue_SKIPPED, "This has not been tested."),
+		state: pb.ReportSessionResponse_INCOMPLETE,
+		mu: &sync.Mutex{},
+		answers: []string{},
 	}
 }
 
