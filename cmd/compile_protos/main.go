@@ -48,8 +48,7 @@ func main() {
 	cmd = exec.Command("cp", showcaseDir+"/schema/echo.proto", protoDest)
 	runAndLog(cmd)
 	cmd = exec.Command("cp", showcaseDir+"/schema/testing.proto", protoDest)
-  runAndLog(cmd)
-
+	runAndLog(cmd)
 
 	// Compile protos
 	cmd = exec.Command(

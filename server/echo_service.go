@@ -28,21 +28,20 @@ import (
 )
 
 // NewEchoServer returns a new EchoServer for the Showcase API.
-func NewEchoServer(t Session) pb.EchoServer {
+func NewEchoServer() pb.EchoServer {
 	s := &echoServerImpl{
-		sleepF:      time.Sleep,
-		session: t,
+		sleepF: time.Sleep,
 	}
 	s.setupTests()
 	return s
 }
 
 type echoServerImpl struct {
-	sleepF      func(time.Duration)
-	session 		Session
+	sleepF func(time.Duration)
 }
 
 func (s *echoServerImpl) setupTests() {
+	// session := GetSessionSingleton
 }
 
 func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.EchoResponse, error) {

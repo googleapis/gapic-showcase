@@ -87,13 +87,12 @@ func (p *process) manage() (string, error) {
 	stdlog.Printf("Gapic Showcase V1Alpha1 listening on port: %s", port)
 
 	// Setup Server.
-	testingHandler := server.GetSessionSingleton()
 	opts := []grpc.ServerOption{
 		grpc.UnaryInterceptor(logRequests),
 	}
 	s := grpc.NewServer(opts...)
 	defer s.GracefulStop()
-	pb.RegisterEchoServer(s, server.NewEchoServer(testingHandler))
+	pb.RegisterEchoServer(s, server.NewEchoServer())
 
 	// Register reflection service on gRPC server.
 	reflection.Register(s)

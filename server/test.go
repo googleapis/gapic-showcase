@@ -15,37 +15,42 @@
 package server
 
 import (
-	"sync"
-
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 )
 
 type Test interface {
 	GetName() string
-  GetExpectationLevel() pb.Test_ExpectationLevel
+	GetExpectationLevel() pb.Test_ExpectationLevel
+	GetProto() *pb.Test
 	GetState() pb.ReportSessionResponse_State
 	GetIssue() *pb.ReportSessionResponse_Issue
-	AddAnswers(answers []string)
-	TestAnswers(answers []string)
+	GetAnswers() []string
+
+	HasFailed() bool
 }
 
 type testImpl struct {
-	t 					*pb.Test
-	issue				*pb.ReportSessionResponse_Issue
-	state				pb.ReportSessionResponse_State
-
-  mu          *sync.Mutex
-  answers 		[]string
+	t       *pb.Test
+	issue   *pb.ReportSessionResponse_Issue
+	state   pb.ReportSessionResponse_State
+	answers []string
 }
 
-func NewTestFromProto(t *pb.Test) Test {
-  return &testImpl{
-		t: t,
-		issue: createIssue(t, pb.ReportSessionResponse_Issue_SKIPPED, "This has not been tested."),
-		state: pb.ReportSessionResponse_INCOMPLETE,
-		mu: &sync.Mutex{},
-		answers: []string{},
+func NewTest(t *pb.Test, issue *pb.ReportSessionResponse_Issue, state pb.ReportSessionResponse_State, answers []string) Test {
+	return &testImpl{
+		t:       t,
+		issue:   issue,
+		state:   state,
+		answers: answers,
 	}
+}
+
+func TestFromProto(t *pb.Test) Test {
+	return NewTest(
+		t,
+		createIssue(t, pb.ReportSessionResponse_Issue_SKIPPED, "This has not been tested."),
+		pb.ReportSessionResponse_INCOMPLETE,
+		[]string{})
 }
 
 func (t *testImpl) GetName() string {
@@ -53,70 +58,25 @@ func (t *testImpl) GetName() string {
 }
 
 func (t *testImpl) GetExpectationLevel() pb.Test_ExpectationLevel {
-  return t.t.ExpectationLevel
+	return t.t.ExpectationLevel
 }
 
-func (t *testImpl) GetState() pb.ReportSessionResponse_State {
-	return t.state
+func (t *testImpl) GetProto() *pb.Test {
+	return t.t
 }
 
 func (t *testImpl) GetIssue() *pb.ReportSessionResponse_Issue {
 	return t.issue
 }
 
-func (t *testImpl) AddAnswers(answers []string) {
-  t.mu.Lock()
-  defer t.mu.Unlock()
-
-	t.answers = append(t.answers, answers...)
-
-	if !t.hasFailed() {
-		t.state = pb.ReportSessionResponse_INCOMPLETE
-	}
+func (t *testImpl) GetState() pb.ReportSessionResponse_State {
+	return t.state
 }
 
-func (t *testImpl) TestAnswers(answers []string) {
-  t.mu.Lock()
-  defer t.mu.Unlock()
-
-	if t.hasFailed() {
-		return
-	}
-
-	if len(answers) > len(t.answers) {
-		t.state = pb.ReportSessionResponse_FAILED
-    t.issue = createIssue(t.t, pb.ReportSessionResponse_Issue_INCORRECT_CONFIRMATION, "More answers registered than Showcase expected.")
-		return
-	}
-	for _, a := range answers {
-		if a != t.answers[0] {
-			t.state = pb.ReportSessionResponse_FAILED
-      t.issue = createIssue(t.t, pb.ReportSessionResponse_Issue_INCORRECT_CONFIRMATION, "Incorrect answer registered. Expected '%s' but got '%s'.")
-			return
-		}
-		t.answers = t.answers[1:]
-    if len(t.answers) == 0 {
-      t.state = pb.ReportSessionResponse_PASSED
-      t.issue = nil
-    }
-	}
+func (t *testImpl) GetAnswers() []string {
+	return t.answers
 }
 
-func (t *testImpl) hasFailed() bool {
+func (t *testImpl) HasFailed() bool {
 	return t.state == pb.ReportSessionResponse_FAILED
-}
-
-func createIssue(t *pb.Test, issueType pb.ReportSessionResponse_Issue_Type, desc string) *pb.ReportSessionResponse_Issue {
-  var severity pb.ReportSessionResponse_Issue_Severity
-  if (t.ExpectationLevel <= pb.Test_REQUIRED) {
-    severity = pb.ReportSessionResponse_Issue_ERROR
-  } else {
-    severity = pb.ReportSessionResponse_Issue_WARNING
-  }
-  return &pb.ReportSessionResponse_Issue{
-    Test: t.Name,
-    Type: issueType,
-    Severity: severity,
-    Description: desc,
-  }
 }

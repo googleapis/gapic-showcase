@@ -16,6 +16,7 @@ package server
 
 import (
 	"context"
+	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
@@ -23,18 +24,19 @@ import (
 
 // NewTestingServer returns a new TestingServer for the Showcase API.
 func NewTestingServer() pb.TestingServer {
-	return &testingServerImpl{}
+	return &testingServerImpl{session: GetSessionSingleton()}
 }
 
 type testingServerImpl struct {
+	session Session
 }
 
 func (s *testingServerImpl) ReportSession(ctx context.Context, in *pb.ReportSessionRequest) (*pb.ReportSessionResponse, error) {
-	return GetSessionSingleton().GetReport()
+	return s.session.GetReport(), nil
 }
 
 func (s *testingServerImpl) DeleteTest(ctx context.Context, in *pb.DeleteTestRequest) (*empty.Empty, error) {
-	err := GetSessionSingleton().DeleteTest(in.Name)
+	err := s.session.DeleteTest(in.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -42,5 +44,14 @@ func (s *testingServerImpl) DeleteTest(ctx context.Context, in *pb.DeleteTestReq
 }
 
 func (s *testingServerImpl) RegisterTest(ctx context.Context, in *pb.RegisterTestRequest) (*empty.Empty, error) {
-	return nil, nil
+	name := in.Name
+	name = strings.TrimPrefix(name, "/sessions/-")
+	name = strings.TrimPrefix(name, "/tests")
+	name = strings.TrimPrefix(name, "/")
+
+	err := s.session.TestAnswers(name, in.Answers)
+	if err != nil {
+		return nil, err
+	}
+	return &empty.Empty{}, nil
 }

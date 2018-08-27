@@ -166,10 +166,7 @@ message RegisterTestRequest {
   string name = 1 [(google.api.resource_type) = "Test"];
 
   // The answer from the test.
-  string answer = 2;
-
-  // The answers from a test if multiple answers should be verified.
-  repeated string answers = 3;
+  repeated string answers = 2;
 }
 
 // A session is a suite of tests, generally being made in the context

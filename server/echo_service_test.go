@@ -33,10 +33,7 @@ import (
 func TestEcho_success(t *testing.T) {
 	table := []string{"hello world", ""}
 
-	server := &echoServerImpl{
-		sleepF:      nil,
-		session: nil,
-	}
+	server := NewEchoServer()
 	for _, val := range table {
 		in := &pb.EchoRequest{Response: &pb.EchoRequest_Content{Content: val}}
 		out, err := server.Echo(context.Background(), in)
@@ -59,10 +56,7 @@ func TestEcho_success(t *testing.T) {
 func TestEcho_error(t *testing.T) {
 	table := []codes.Code{codes.Canceled, codes.InvalidArgument}
 
-	server := &echoServerImpl{
-		sleepF:      nil,
-		session: nil,
-	}
+	server := NewEchoServer()
 	for _, val := range table {
 		in := &pb.EchoRequest{
 			Response: &pb.EchoRequest_Error{
@@ -109,10 +103,7 @@ func TestExpand(t *testing.T) {
 		nil,
 	}
 
-	server := &echoServerImpl{
-		sleepF:      nil,
-		session: nil,
-	}
+	server := NewEchoServer()
 	for _, c := range contentTable {
 		for _, e := range errTable {
 			stream := &mockExpandStream{exp: strings.Fields(c), t: t}
@@ -138,10 +129,7 @@ func (s *errorExpandStream) Send(resp *pb.EchoResponse) error {
 func TestExpand_streamErr(t *testing.T) {
 	e := errors.New("Test Error")
 	stream := &errorExpandStream{err: e}
-	server := &echoServerImpl{
-		sleepF:      nil,
-		session: nil,
-	}
+	server := NewEchoServer()
 	err := server.Expand(&pb.ExpandRequest{Content: "Hello World"}, stream)
 	if e != err {
 		t.Error("Expand expected to pass through stream errors.")
@@ -188,10 +176,7 @@ func TestCollect(t *testing.T) {
 		{[]string{}, strPtr(""), nil},
 	}
 
-	server := &echoServerImpl{
-		sleepF:      nil,
-		session: nil,
-	}
+	server := NewEchoServer()
 	for _, test := range tests {
 		reqs := []*pb.EchoRequest{}
 		for _, req := range test.reqs {
@@ -222,10 +207,7 @@ func (s *errorCollectStream) Recv() (*pb.EchoRequest, error) {
 func TestCollect_streamErr(t *testing.T) {
 	e := errors.New("Test Error")
 	stream := &errorCollectStream{err: e}
-	server := &echoServerImpl{
-		sleepF:      nil,
-		session: nil,
-	}
+	server := NewEchoServer()
 	err := server.Collect(stream)
 	if e != err {
 		t.Error("Expand expected to pass through stream errors.")
@@ -269,10 +251,7 @@ func TestChat(t *testing.T) {
 		{[]string{}, &spb.Status{Code: int32(codes.InvalidArgument)}},
 	}
 
-	server := &echoServerImpl{
-		sleepF:      nil,
-		session: nil,
-	}
+	server := NewEchoServer()
 	for _, test := range tests {
 		reqs := []*pb.EchoRequest{}
 		for _, req := range test.reqs {
@@ -304,10 +283,7 @@ func (s *errorChatStream) Recv() (*pb.EchoRequest, error) {
 func TestChat_streamErr(t *testing.T) {
 	e := errors.New("Test Error")
 	stream := &errorChatStream{err: e}
-	server := &echoServerImpl{
-		sleepF:      nil,
-		session: nil,
-	}
+	server := NewEchoServer()
 	err := server.Chat(stream)
 	if e != err {
 		t.Error("Expand expected to pass through stream errors.")
@@ -392,15 +368,13 @@ func zeroNow() time.Time {
 func TestPagination_invalidArgs(t *testing.T) {
 	tests := []*pb.PaginationRequest{
 		{PageSize: 0},
+		{PageSize: -1},
 		{MaxResponse: -1},
 		{PageToken: "-1"},
 		{PageToken: "BOGUS"},
 		{MaxResponse: 1, PageToken: "2"},
 	}
-	server := &echoServerImpl{
-		sleepF:      nil,
-		session: nil,
-	}
+	server := NewEchoServer()
 	for _, in := range tests {
 		_, err := server.Pagination(context.Background(), in)
 		s, _ := status.FromError(err)
@@ -434,10 +408,7 @@ func TestPagination(t *testing.T) {
 		},
 	}
 
-	server := &echoServerImpl{
-		sleepF:      nil,
-		session: nil,
-	}
+	server := &echoServerImpl{sleepF: nil}
 	for _, test := range tests {
 		out, err := server.Pagination(context.Background(), test.in)
 		if err != nil {
