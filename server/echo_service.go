@@ -29,19 +29,13 @@ import (
 
 // NewEchoServer returns a new EchoServer for the Showcase API.
 func NewEchoServer() pb.EchoServer {
-	s := &echoServerImpl{
+	return &echoServerImpl{
 		sleepF: time.Sleep,
 	}
-	s.setupTests()
-	return s
 }
 
 type echoServerImpl struct {
 	sleepF func(time.Duration)
-}
-
-func (s *echoServerImpl) setupTests() {
-	// session := GetSessionSingleton
 }
 
 func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.EchoResponse, error) {
@@ -114,7 +108,7 @@ func (s *echoServerImpl) Wait(ctx context.Context, in *pb.WaitRequest) (*pb.Wait
 }
 
 func (s *echoServerImpl) Pagination(ctx context.Context, in *pb.PaginationRequest) (*pb.PaginationResponse, error) {
-	if in.GetPageSize() < 0 {
+	if in.GetPageSize() < 0 || in.GetPageSizeOverride() < 0 {
 		return nil, status.Error(codes.InvalidArgument, "The page size provided must not be negative.")
 	}
 
@@ -132,8 +126,13 @@ func (s *echoServerImpl) Pagination(ctx context.Context, in *pb.PaginationReques
 		start = token32
 	}
 
-	end := start + in.GetPageSize()
-	if in.GetPageSize() == 0 {
+	actualSize := in.GetPageSize()
+	if in.GetPageSizeOverride() > 0 {
+		actualSize = in.GetPageSizeOverride()
+	}
+
+	end := start + actualSize
+	if actualSize == 0 {
 		end = in.GetMaxResponse()
 	}
 	if end > in.GetMaxResponse() {

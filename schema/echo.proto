@@ -19,7 +19,7 @@ import "google/longrunning/operations.proto";
 import "google/protobuf/duration.proto";
 import "google/rpc/status.proto";
 
-package google.showcase.v1alpha1;
+package google.showcase.v1alpha2;
 
 option go_package = "github.com/googleapis/gapic-showcase/server/genproto";
 option java_package = "com.google.showcase.v1alpha1";
@@ -158,6 +158,10 @@ message PaginationRequest {
   // cause an error to be thrown. This value is a string as opposed to a int32
   // to follow general google api practices.
   string page_token = 3;
+
+  // This field is used to show the client's ability to handle servers that
+  // return a page that is larger the specified page size.
+  int32 page_size_override = 4;
 }
 
 // The response for the Pagination method.
