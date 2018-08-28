@@ -18,7 +18,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
-  "path/filepath"
+	"path/filepath"
 )
 
 func main() {
@@ -47,26 +47,26 @@ func main() {
 	cmd = exec.Command("mkdir", "-p", protoDest)
 	runAndLog(cmd)
 
-  files, err := filepath.Glob(showcaseDir+"/schema/*.proto")
-  if err != nil {
-    log.Fatal("Error: failed to find protos in " + showcaseDir)
-  }
+	files, err := filepath.Glob(showcaseDir + "/schema/*.proto")
+	if err != nil {
+		log.Fatal("Error: failed to find protos in " + showcaseDir)
+	}
 
-  for _, f := range files {
-    cmd = exec.Command("cp", f, protoDest)
-  	runAndLog(cmd)
-  }
+	for _, f := range files {
+		cmd = exec.Command("cp", f, protoDest)
+		runAndLog(cmd)
+	}
 
 	// Compile protos
-  files, err = filepath.Glob(protoDest+"/*.proto")
-  if err != nil {
-    log.Fatal("Error: failed to find protos in " + protoDest)
-  }
-  params := []string{
-    "--go_out=plugins=grpc:"+gopath+"/src",
-    "--proto_path="+showcaseDir+"/tmp/api-common-protos",
-  }
-  params = append(params, files...)
+	files, err = filepath.Glob(protoDest + "/*.proto")
+	if err != nil {
+		log.Fatal("Error: failed to find protos in " + protoDest)
+	}
+	params := []string{
+		"--go_out=plugins=grpc:" + gopath + "/src",
+		"--proto_path=" + showcaseDir + "/tmp/api-common-protos",
+	}
+	params = append(params, files...)
 	cmd = exec.Command("protoc", params...)
 	runAndLog(cmd)
 
