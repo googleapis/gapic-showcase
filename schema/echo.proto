@@ -23,6 +23,7 @@ package google.showcase.v1alpha1;
 
 option go_package = "github.com/googleapis/gapic-showcase/server/genproto";
 option java_package = "com.google.showcase.v1";
+option java_multiple_files = true;
 
 option (google.api.metadata) = {
   product_uri: "https://github.com/googleapis/gapic-showcase"
