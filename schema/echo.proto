@@ -22,7 +22,7 @@ import "google/rpc/status.proto";
 package google.showcase.v1alpha2;
 
 option go_package = "github.com/googleapis/gapic-showcase/server/genproto";
-option java_package = "com.google.showcase.v1alpha1";
+option java_package = "com.google.showcase.v1alpha2";
 
 option (google.api.metadata) = {
   product_uri: "https://github.com/googleapis/gapic-showcase"
