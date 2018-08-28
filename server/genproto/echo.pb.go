@@ -43,7 +43,7 @@ func (m *EchoRequest) Reset()         { *m = EchoRequest{} }
 func (m *EchoRequest) String() string { return proto.CompactTextString(m) }
 func (*EchoRequest) ProtoMessage()    {}
 func (*EchoRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_echo_2dd9e3d76b8121ae, []int{0}
+	return fileDescriptor_echo_2b1536d1ed9d2a5a, []int{0}
 }
 func (m *EchoRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_EchoRequest.Unmarshal(m, b)
@@ -181,7 +181,7 @@ func (m *EchoResponse) Reset()         { *m = EchoResponse{} }
 func (m *EchoResponse) String() string { return proto.CompactTextString(m) }
 func (*EchoResponse) ProtoMessage()    {}
 func (*EchoResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_echo_2dd9e3d76b8121ae, []int{1}
+	return fileDescriptor_echo_2b1536d1ed9d2a5a, []int{1}
 }
 func (m *EchoResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_EchoResponse.Unmarshal(m, b)
@@ -223,7 +223,7 @@ func (m *ExpandRequest) Reset()         { *m = ExpandRequest{} }
 func (m *ExpandRequest) String() string { return proto.CompactTextString(m) }
 func (*ExpandRequest) ProtoMessage()    {}
 func (*ExpandRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_echo_2dd9e3d76b8121ae, []int{2}
+	return fileDescriptor_echo_2b1536d1ed9d2a5a, []int{2}
 }
 func (m *ExpandRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ExpandRequest.Unmarshal(m, b)
@@ -274,7 +274,7 @@ func (m *WaitRequest) Reset()         { *m = WaitRequest{} }
 func (m *WaitRequest) String() string { return proto.CompactTextString(m) }
 func (*WaitRequest) ProtoMessage()    {}
 func (*WaitRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_echo_2dd9e3d76b8121ae, []int{3}
+	return fileDescriptor_echo_2b1536d1ed9d2a5a, []int{3}
 }
 func (m *WaitRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_WaitRequest.Unmarshal(m, b)
@@ -424,7 +424,7 @@ func (m *WaitResponse) Reset()         { *m = WaitResponse{} }
 func (m *WaitResponse) String() string { return proto.CompactTextString(m) }
 func (*WaitResponse) ProtoMessage()    {}
 func (*WaitResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_echo_2dd9e3d76b8121ae, []int{4}
+	return fileDescriptor_echo_2b1536d1ed9d2a5a, []int{4}
 }
 func (m *WaitResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_WaitResponse.Unmarshal(m, b)
@@ -475,7 +475,7 @@ func (m *PaginationRequest) Reset()         { *m = PaginationRequest{} }
 func (m *PaginationRequest) String() string { return proto.CompactTextString(m) }
 func (*PaginationRequest) ProtoMessage()    {}
 func (*PaginationRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_echo_2dd9e3d76b8121ae, []int{5}
+	return fileDescriptor_echo_2b1536d1ed9d2a5a, []int{5}
 }
 func (m *PaginationRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PaginationRequest.Unmarshal(m, b)
@@ -539,7 +539,7 @@ func (m *PaginationResponse) Reset()         { *m = PaginationResponse{} }
 func (m *PaginationResponse) String() string { return proto.CompactTextString(m) }
 func (*PaginationResponse) ProtoMessage()    {}
 func (*PaginationResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_echo_2dd9e3d76b8121ae, []int{6}
+	return fileDescriptor_echo_2b1536d1ed9d2a5a, []int{6}
 }
 func (m *PaginationResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PaginationResponse.Unmarshal(m, b)
@@ -943,11 +943,11 @@ var _Echo_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("google/showcase/v1alpha1/echo.proto", fileDescriptor_echo_2dd9e3d76b8121ae)
+	proto.RegisterFile("google/showcase/v1alpha1/echo.proto", fileDescriptor_echo_2b1536d1ed9d2a5a)
 }
 
-var fileDescriptor_echo_2dd9e3d76b8121ae = []byte{
-	// 726 bytes of a gzipped FileDescriptorProto
+var fileDescriptor_echo_2b1536d1ed9d2a5a = []byte{
+	// 725 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x54, 0x41, 0x4f, 0x13, 0x41,
 	0x14, 0x66, 0x80, 0x02, 0x9d, 0x02, 0xc2, 0x18, 0x75, 0x59, 0x90, 0xe0, 0x1a, 0x6b, 0x53, 0x71,
 	0x17, 0x0a, 0xd1, 0xd8, 0x5b, 0x0b, 0x24, 0x78, 0x92, 0x14, 0x13, 0x23, 0x97, 0x66, 0xd8, 0x8e,
@@ -991,7 +991,7 @@ var fileDescriptor_echo_2dd9e3d76b8121ae = []byte{
 	0xbd, 0x36, 0x1b, 0x32, 0x17, 0x87, 0x3e, 0xe3, 0xa2, 0xfa, 0x78, 0xf3, 0xd1, 0x93, 0xfa, 0x07,
 	0xf0, 0xad, 0x66, 0xa3, 0x55, 0x5f, 0x88, 0x88, 0x57, 0x1d, 0xc7, 0x0b, 0x84, 0x9f, 0x1c, 0xda,
 	0x2e, 0x6b, 0x3b, 0x99, 0x47, 0x1c, 0x05, 0xdc, 0xf1, 0x70, 0x14, 0xb8, 0x0f, 0xb5, 0x5b, 0xb8,
-	0xe4, 0xb2, 0xf6, 0xa0, 0x12, 0xd6, 0x0f, 0x36, 0x87, 0xe1, 0x70, 0x38, 0x89, 0x8f, 0x48, 0xec,
-	0x78, 0x84, 0x66, 0x7f, 0xdf, 0x09, 0xf9, 0xda, 0xf8, 0x13, 0x00, 0x00, 0xff, 0xff, 0x92, 0x5f,
-	0x90, 0x98, 0x5a, 0x07, 0x00, 0x00,
+	0xe4, 0xb2, 0xf6, 0xc0, 0x12, 0x0e, 0x36, 0x87, 0xe1, 0x70, 0x38, 0x89, 0x8f, 0x48, 0xec, 0x78,
+	0x84, 0x66, 0x7f, 0xdf, 0x09, 0xf9, 0xda, 0xf8, 0x13, 0x00, 0x00, 0xff, 0xff, 0xf6, 0xe0, 0x45,
+	0x69, 0x5a, 0x07, 0x00, 0x00,
 }
