@@ -36,7 +36,6 @@ var Instance Session = &sessionImpl{
 	tests: map[string]Test{},
 }
 
-
 func GetSessionSingleton() Session {
 	return Instance
 }
@@ -53,17 +52,17 @@ func (s *sessionImpl) GetName() string {
 }
 
 type result struct {
-	test int
+	test    int
 	skipped int
-	failed int
-	issues []*pb.ReportSessionResponse_Issue
+	failed  int
+	issues  []*pb.ReportSessionResponse_Issue
 }
 
 func (r *result) ratio() float32 {
 	if r.test == 0 {
 		return float32(0)
 	}
-	return float32(r.test - r.skipped - r.failed) / float32(r.test)
+	return float32(r.test-r.skipped-r.failed) / float32(r.test)
 }
 
 func (s *sessionImpl) GetReport() *pb.ReportSessionResponse {
@@ -78,25 +77,25 @@ func (s *sessionImpl) GetReport() *pb.ReportSessionResponse {
 
 		var r *result
 		switch expLvl {
-			case pb.Test_REQUIRED:
-			  r = &resultRequired
-			case pb.Test_RECOMMENDED:
-				r = &resultRecommended
-			default:
-				r = &resultOptional
+		case pb.Test_REQUIRED:
+			r = &resultRequired
+		case pb.Test_RECOMMENDED:
+			r = &resultRecommended
+		default:
+			r = &resultOptional
 		}
 
 		r.test++
 		resultTotal.test++
 		if issue != nil {
-		  r.issues = append(r.issues, issue)
-		  if issue.Type == pb.ReportSessionResponse_Issue_SKIPPED {
-		    r.skipped++
+			r.issues = append(r.issues, issue)
+			if issue.Type == pb.ReportSessionResponse_Issue_SKIPPED {
+				r.skipped++
 				resultTotal.skipped++
-		  } else {
-		    r.failed++
+			} else {
+				r.failed++
 				resultTotal.skipped++
-		  }
+			}
 		}
 	}
 
