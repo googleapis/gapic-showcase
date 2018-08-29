@@ -44,6 +44,9 @@ func (s *testingServerImpl) DeleteTest(ctx context.Context, in *pb.DeleteTestReq
 }
 
 func (s *testingServerImpl) RegisterTest(ctx context.Context, in *pb.RegisterTestRequest) (*empty.Empty, error) {
+	// Since there is a session singleton, we are simply ignoring these prefixes.
+	// When session support is added in the future, there should be error checking
+	// added here.
 	name := in.Name
 	name = strings.TrimPrefix(name, "/sessions/-")
 	name = strings.TrimPrefix(name, "/tests")

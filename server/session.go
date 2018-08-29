@@ -30,24 +30,21 @@ type Session interface {
 	TestAnswers(name string, answers []string) error
 }
 
-var instance Session
-var once sync.Once
+var Instance Session = &sessionImpl{
+	name:  "-",
+	mu:    sync.Mutex{},
+	tests: map[string]Test{},
+}
+
 
 func GetSessionSingleton() Session {
-	once.Do(func() {
-		instance = &sessionImpl{
-			name:  "-",
-			mu:    &sync.Mutex{},
-			tests: map[string]Test{},
-		}
-	})
-	return instance
+	return Instance
 }
 
 type sessionImpl struct {
 	name string
 
-	mu    *sync.Mutex
+	mu    sync.Mutex
 	tests map[string]Test
 }
 
@@ -55,115 +52,72 @@ func (s *sessionImpl) GetName() string {
 	return s.name
 }
 
+type result struct {
+	test int
+	skipped int
+	failed int
+	issues []*pb.ReportSessionResponse_Issue
+}
+
+func (r *result) ratio() float32 {
+	if r.test == 0 {
+		return float32(0)
+	}
+	return float32(r.test - r.skipped - r.failed) / float32(r.test)
+}
+
 func (s *sessionImpl) GetReport() *pb.ReportSessionResponse {
-	numRequired := 0
-	numRequiredSkipped := 0
-	numRequiredFailed := 0
-
-	numRecommended := 0
-	numRecommendedSkipped := 0
-	numRecommendedFailed := 0
-
-	numOptional := 0
-	numOptionalSkipped := 0
-	numOptionalFailed := 0
-
-	errors := []*pb.ReportSessionResponse_Issue{}
-	warnings := []*pb.ReportSessionResponse_Issue{}
+	resultTotal := result{0, 0, 0, []*pb.ReportSessionResponse_Issue{}}
+	resultRequired := result{0, 0, 0, []*pb.ReportSessionResponse_Issue{}}
+	resultRecommended := result{0, 0, 0, []*pb.ReportSessionResponse_Issue{}}
+	resultOptional := result{0, 0, 0, []*pb.ReportSessionResponse_Issue{}}
 
 	for _, test := range s.tests {
-		expectationLevel := test.GetExpectationLevel()
+		expLvl := test.GetExpectationLevel()
 		issue := test.GetIssue()
 
-		if expectationLevel == pb.Test_REQUIRED {
-			numRequired = numRequired + 1
-
-			if issue != nil {
-				errors = append(errors, issue)
-
-				if issue.Type == pb.ReportSessionResponse_Issue_SKIPPED {
-					numRequiredSkipped = numRequiredSkipped + 1
-				} else {
-					numRequiredFailed = numRequiredFailed + 1
-				}
-			}
+		var r *result
+		switch expLvl {
+			case pb.Test_REQUIRED:
+			  r = &resultRequired
+			case pb.Test_RECOMMENDED:
+				r = &resultRecommended
+			default:
+				r = &resultOptional
 		}
 
-		if expectationLevel == pb.Test_RECOMMENDED {
-			numRecommended = numRecommended + 1
-
-			if issue != nil {
-				warnings = append(warnings, issue)
-
-				if issue.Type == pb.ReportSessionResponse_Issue_SKIPPED {
-					numRecommendedSkipped = numRecommendedSkipped + 1
-				} else {
-					numRecommendedFailed = numRecommendedFailed + 1
-				}
-			}
-		}
-
-		if expectationLevel == pb.Test_OPTIONAL {
-			numOptional = numOptional + 1
-
-			if issue != nil {
-				warnings = append(warnings, issue)
-
-				if issue.Type == pb.ReportSessionResponse_Issue_SKIPPED {
-					numOptionalSkipped = numOptionalSkipped + 1
-				} else {
-					numOptionalFailed = numOptionalFailed + 1
-				}
-			}
+		r.test++
+		resultTotal.test++
+		if issue != nil {
+		  r.issues = append(r.issues, issue)
+		  if issue.Type == pb.ReportSessionResponse_Issue_SKIPPED {
+		    r.skipped++
+				resultTotal.skipped++
+		  } else {
+		    r.failed++
+				resultTotal.skipped++
+		  }
 		}
 	}
 
 	var state pb.ReportSessionResponse_State
-	if numRequired == 0 || (numRequiredFailed == 0 && numRequiredSkipped == 0) {
+	if resultRequired.failed == 0 && resultRequired.skipped == 0 {
 		state = pb.ReportSessionResponse_PASSED
-	} else if numRequiredFailed == 0 {
+	} else if resultRequired.failed == 0 {
 		state = pb.ReportSessionResponse_INCOMPLETE
 	} else {
 		state = pb.ReportSessionResponse_FAILED
 	}
 
-	numTests := numRequired + numRecommended + numOptional
-	numInvalid := numRequiredFailed + numRequiredSkipped +
-		numRecommendedFailed + numRecommendedSkipped +
-		numOptionalFailed + numOptionalSkipped
-
-	totalRatio := float32(0.0)
-	if numTests > 0 {
-		totalRatio = float32(numTests-numInvalid) / float32(numTests)
-	}
-
-	requiredRatio := float32(0.0)
-	if numRequired > 0 {
-		requiredRatio = float32(numRequired-numRequiredFailed-numRequiredSkipped) /
-			float32(numRequired)
-	}
-
-	recommendedRatio := float32(0.0)
-	if numRecommended > 0 {
-		recommendedRatio = float32(numRecommended-numRecommendedFailed-numRecommendedSkipped) /
-			float32(numRecommended)
-	}
-
-	optionalRatio := float32(0.0)
-	if numOptional > 0 {
-		optionalRatio = float32(numOptional-numOptionalFailed-numOptionalSkipped) /
-			float32(numOptional)
-	}
-
 	report := &pb.ReportSessionResponse{
 		State:    state,
-		Errors:   errors,
-		Warnings: warnings,
+		Errors:   resultRequired.issues,
+		Warnings: append(resultRecommended.issues, resultOptional.issues...),
 		Completion: &pb.ReportSessionResponse_Completion{
-			Total:       totalRatio,
-			Required:    requiredRatio,
-			Recommended: recommendedRatio,
-			Optional:    optionalRatio,
+			Total:       resultTotal.ratio(),
+			Required:    resultRequired.ratio(),
+			Recommended: resultRecommended.ratio(),
+			Optional:    resultOptional.ratio(),
 		},
 	}
 	return report

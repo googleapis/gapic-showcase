@@ -32,7 +32,7 @@ func Test_GetSessionSingleton(t *testing.T) {
 func Test_GetReport_empty_report(t *testing.T) {
 	s := &sessionImpl{
 		name:  "-",
-		mu:    &sync.Mutex{},
+		mu:    sync.Mutex{},
 		tests: map[string]Test{},
 	}
 	r := s.GetReport()
@@ -63,7 +63,7 @@ func Test_GetReport_empty_report(t *testing.T) {
 func Test_GetReport_required_tests(t *testing.T) {
 	s := &sessionImpl{
 		name:  "-",
-		mu:    &sync.Mutex{},
+		mu:    sync.Mutex{},
 		tests: map[string]Test{},
 	}
 
@@ -119,7 +119,7 @@ func Test_GetReport_required_tests(t *testing.T) {
 func Test_GetReport_recommended_tests(t *testing.T) {
 	s := &sessionImpl{
 		name:  "-",
-		mu:    &sync.Mutex{},
+		mu:    sync.Mutex{},
 		tests: map[string]Test{},
 	}
 
@@ -175,7 +175,7 @@ func Test_GetReport_recommended_tests(t *testing.T) {
 func Test_GetReport_optional_tests(t *testing.T) {
 	s := &sessionImpl{
 		name:  "-",
-		mu:    &sync.Mutex{},
+		mu:    sync.Mutex{},
 		tests: map[string]Test{},
 	}
 
@@ -231,7 +231,7 @@ func Test_GetReport_optional_tests(t *testing.T) {
 func Test_GetReport_incomplete(t *testing.T) {
 	s := &sessionImpl{
 		name:  "-",
-		mu:    &sync.Mutex{},
+		mu:    sync.Mutex{},
 		tests: map[string]Test{},
 	}
 
@@ -271,7 +271,7 @@ func Test_GetReport_incomplete(t *testing.T) {
 func Test_TestHandling(t *testing.T) {
 	s := &sessionImpl{
 		name:  "-",
-		mu:    &sync.Mutex{},
+		mu:    sync.Mutex{},
 		tests: map[string]Test{},
 	}
 	name := "bacon.required.test"
@@ -310,7 +310,7 @@ func Test_TestHandling(t *testing.T) {
 func Test_AddAnswers_not_found(t *testing.T) {
 	s := &sessionImpl{
 		name:  "-",
-		mu:    &sync.Mutex{},
+		mu:    sync.Mutex{},
 		tests: map[string]Test{},
 	}
 	if err := s.AddAnswers("test", []string{"Shouldn't be found"}); err == nil {
@@ -331,7 +331,7 @@ func Test_AddAnswers_incomplete_tests(t *testing.T) {
 	for _, testCase := range testCases {
 		s := &sessionImpl{
 			name:  "-",
-			mu:    &sync.Mutex{},
+			mu:    sync.Mutex{},
 			tests: map[string]Test{},
 		}
 		s.AddTest(&testImpl{
@@ -362,7 +362,7 @@ func Test_AddAnswers_failed_tests(t *testing.T) {
 	for _, testCase := range testCases {
 		s := &sessionImpl{
 			name:  "-",
-			mu:    &sync.Mutex{},
+			mu:    sync.Mutex{},
 			tests: map[string]Test{},
 		}
 		s.AddTest(&testImpl{
@@ -383,7 +383,7 @@ func Test_AddAnswers_failed_tests(t *testing.T) {
 func Test_TestAnswers_not_found(t *testing.T) {
 	s := &sessionImpl{
 		name:  "-",
-		mu:    &sync.Mutex{},
+		mu:    sync.Mutex{},
 		tests: map[string]Test{},
 	}
 	if err := s.TestAnswers("test", []string{"Shouldn't be found"}); err == nil {
@@ -394,7 +394,7 @@ func Test_TestAnswers_not_found(t *testing.T) {
 func Test_TestAnswers_already_failed(t *testing.T) {
 	s := &sessionImpl{
 		name:  "-",
-		mu:    &sync.Mutex{},
+		mu:    sync.Mutex{},
 		tests: map[string]Test{},
 	}
 
@@ -423,7 +423,7 @@ func Test_TestAnswers_already_failed(t *testing.T) {
 func Test_TestAnswers_more_answers_than_expected(t *testing.T) {
 	s := &sessionImpl{
 		name:  "-",
-		mu:    &sync.Mutex{},
+		mu:    sync.Mutex{},
 		tests: map[string]Test{},
 	}
 
@@ -440,7 +440,7 @@ func Test_TestAnswers_more_answers_than_expected(t *testing.T) {
 func Test_TestAnswers_failed_tests(t *testing.T) {
 	s := &sessionImpl{
 		name:  "-",
-		mu:    &sync.Mutex{},
+		mu:    sync.Mutex{},
 		tests: map[string]Test{},
 	}
 
@@ -460,7 +460,7 @@ func Test_TestAnswers_failed_tests(t *testing.T) {
 func Test_TestAnswers_correct_tests(t *testing.T) {
 	s := &sessionImpl{
 		name:  "-",
-		mu:    &sync.Mutex{},
+		mu:    sync.Mutex{},
 		tests: map[string]Test{},
 	}
 
