@@ -56,7 +56,7 @@ func (x ReportSessionResponse_State) String() string {
 	return proto.EnumName(ReportSessionResponse_State_name, int32(x))
 }
 func (ReportSessionResponse_State) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_testing_cebfa6724675868d, []int{1, 0}
+	return fileDescriptor_testing_56a6fd7f3db1fa17, []int{1, 0}
 }
 
 // The different potential types of issues.
@@ -86,7 +86,7 @@ func (x ReportSessionResponse_Issue_Type) String() string {
 	return proto.EnumName(ReportSessionResponse_Issue_Type_name, int32(x))
 }
 func (ReportSessionResponse_Issue_Type) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_testing_cebfa6724675868d, []int{1, 0, 0}
+	return fileDescriptor_testing_56a6fd7f3db1fa17, []int{1, 0, 0}
 }
 
 // Severity levels.
@@ -115,7 +115,7 @@ func (x ReportSessionResponse_Issue_Severity) String() string {
 	return proto.EnumName(ReportSessionResponse_Issue_Severity_name, int32(x))
 }
 func (ReportSessionResponse_Issue_Severity) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_testing_cebfa6724675868d, []int{1, 0, 1}
+	return fileDescriptor_testing_56a6fd7f3db1fa17, []int{1, 0, 1}
 }
 
 // The specification versions understood by Showcase.
@@ -144,7 +144,7 @@ func (x Session_Version) String() string {
 	return proto.EnumName(Session_Version_name, int32(x))
 }
 func (Session_Version) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_testing_cebfa6724675868d, []int{4, 0}
+	return fileDescriptor_testing_56a6fd7f3db1fa17, []int{4, 0}
 }
 
 // Whether or not a test is required, recommended, or optional.
@@ -190,7 +190,7 @@ func (x Test_ExpectationLevel) String() string {
 	return proto.EnumName(Test_ExpectationLevel_name, int32(x))
 }
 func (Test_ExpectationLevel) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_testing_cebfa6724675868d, []int{5, 0}
+	return fileDescriptor_testing_56a6fd7f3db1fa17, []int{5, 0}
 }
 
 // Request message for reporting on a session.
@@ -206,7 +206,7 @@ func (m *ReportSessionRequest) Reset()         { *m = ReportSessionRequest{} }
 func (m *ReportSessionRequest) String() string { return proto.CompactTextString(m) }
 func (*ReportSessionRequest) ProtoMessage()    {}
 func (*ReportSessionRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_testing_cebfa6724675868d, []int{0}
+	return fileDescriptor_testing_56a6fd7f3db1fa17, []int{0}
 }
 func (m *ReportSessionRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReportSessionRequest.Unmarshal(m, b)
@@ -253,7 +253,7 @@ func (m *ReportSessionResponse) Reset()         { *m = ReportSessionResponse{} }
 func (m *ReportSessionResponse) String() string { return proto.CompactTextString(m) }
 func (*ReportSessionResponse) ProtoMessage()    {}
 func (*ReportSessionResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_testing_cebfa6724675868d, []int{1}
+	return fileDescriptor_testing_56a6fd7f3db1fa17, []int{1}
 }
 func (m *ReportSessionResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReportSessionResponse.Unmarshal(m, b)
@@ -320,7 +320,7 @@ func (m *ReportSessionResponse_Issue) Reset()         { *m = ReportSessionRespon
 func (m *ReportSessionResponse_Issue) String() string { return proto.CompactTextString(m) }
 func (*ReportSessionResponse_Issue) ProtoMessage()    {}
 func (*ReportSessionResponse_Issue) Descriptor() ([]byte, []int) {
-	return fileDescriptor_testing_cebfa6724675868d, []int{1, 0}
+	return fileDescriptor_testing_56a6fd7f3db1fa17, []int{1, 0}
 }
 func (m *ReportSessionResponse_Issue) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReportSessionResponse_Issue.Unmarshal(m, b)
@@ -392,7 +392,7 @@ func (m *ReportSessionResponse_Completion) Reset()         { *m = ReportSessionR
 func (m *ReportSessionResponse_Completion) String() string { return proto.CompactTextString(m) }
 func (*ReportSessionResponse_Completion) ProtoMessage()    {}
 func (*ReportSessionResponse_Completion) Descriptor() ([]byte, []int) {
-	return fileDescriptor_testing_cebfa6724675868d, []int{1, 1}
+	return fileDescriptor_testing_56a6fd7f3db1fa17, []int{1, 1}
 }
 func (m *ReportSessionResponse_Completion) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReportSessionResponse_Completion.Unmarshal(m, b)
@@ -453,7 +453,7 @@ func (m *DeleteTestRequest) Reset()         { *m = DeleteTestRequest{} }
 func (m *DeleteTestRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteTestRequest) ProtoMessage()    {}
 func (*DeleteTestRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_testing_cebfa6724675868d, []int{2}
+	return fileDescriptor_testing_56a6fd7f3db1fa17, []int{2}
 }
 func (m *DeleteTestRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteTestRequest.Unmarshal(m, b)
@@ -495,7 +495,7 @@ func (m *RegisterTestRequest) Reset()         { *m = RegisterTestRequest{} }
 func (m *RegisterTestRequest) String() string { return proto.CompactTextString(m) }
 func (*RegisterTestRequest) ProtoMessage()    {}
 func (*RegisterTestRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_testing_cebfa6724675868d, []int{3}
+	return fileDescriptor_testing_56a6fd7f3db1fa17, []int{3}
 }
 func (m *RegisterTestRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RegisterTestRequest.Unmarshal(m, b)
@@ -549,7 +549,7 @@ func (m *Session) Reset()         { *m = Session{} }
 func (m *Session) String() string { return proto.CompactTextString(m) }
 func (*Session) ProtoMessage()    {}
 func (*Session) Descriptor() ([]byte, []int) {
-	return fileDescriptor_testing_cebfa6724675868d, []int{4}
+	return fileDescriptor_testing_56a6fd7f3db1fa17, []int{4}
 }
 func (m *Session) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Session.Unmarshal(m, b)
@@ -603,7 +603,7 @@ func (m *Test) Reset()         { *m = Test{} }
 func (m *Test) String() string { return proto.CompactTextString(m) }
 func (*Test) ProtoMessage()    {}
 func (*Test) Descriptor() ([]byte, []int) {
-	return fileDescriptor_testing_cebfa6724675868d, []int{5}
+	return fileDescriptor_testing_56a6fd7f3db1fa17, []int{5}
 }
 func (m *Test) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Test.Unmarshal(m, b)
@@ -825,11 +825,11 @@ var _Testing_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("google/showcase/v1alpha2/testing.proto", fileDescriptor_testing_cebfa6724675868d)
+	proto.RegisterFile("google/showcase/v1alpha2/testing.proto", fileDescriptor_testing_56a6fd7f3db1fa17)
 }
 
-var fileDescriptor_testing_cebfa6724675868d = []byte{
-	// 982 bytes of a gzipped FileDescriptorProto
+var fileDescriptor_testing_56a6fd7f3db1fa17 = []byte{
+	// 981 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x56, 0x5f, 0x6f, 0xdb, 0x54,
 	0x14, 0x27, 0x4e, 0xda, 0xa4, 0xa7, 0xdd, 0xe6, 0xde, 0x75, 0x5b, 0x94, 0x0d, 0x54, 0x3c, 0x40,
 	0xa5, 0x65, 0xf6, 0x5a, 0xca, 0x10, 0xe1, 0x8f, 0xe4, 0x25, 0xb7, 0xc8, 0x5a, 0xfe, 0xed, 0xda,
@@ -888,8 +888,8 @@ var fileDescriptor_testing_cebfa6724675868d = []byte{
 	0x4e, 0x8f, 0x11, 0xb9, 0xf7, 0x5f, 0xd5, 0x9e, 0x1b, 0xb7, 0xb9, 0x49, 0xec, 0x8a, 0x24, 0x54,
 	0xe5, 0xbd, 0x0b, 0x24, 0x51, 0x0d, 0x53, 0xe2, 0xca, 0xea, 0x1f, 0xfa, 0x55, 0xd7, 0xef, 0xdb,
 	0xee, 0x91, 0xcf, 0xa3, 0xea, 0x87, 0xbb, 0x0f, 0x3e, 0x7a, 0x68, 0xc1, 0x9d, 0xbe, 0x3f, 0x9c,
-	0x97, 0xd4, 0xf6, 0xfe, 0xee, 0xc0, 0x89, 0x8e, 0x46, 0x07, 0x6a, 0xdf, 0x1f, 0x6a, 0x89, 0x93,
-	0x1d, 0x38, 0x5c, 0x1b, 0xd8, 0x81, 0xd3, 0xbf, 0x37, 0xf9, 0x3c, 0xe1, 0x18, 0x8e, 0x31, 0xd4,
-	0x06, 0xe8, 0x25, 0x79, 0x2e, 0x8a, 0x9f, 0xf7, 0xff, 0x09, 0x00, 0x00, 0xff, 0xff, 0x85, 0x9c,
-	0x5f, 0x66, 0xc8, 0x08, 0x00, 0x00,
+	0x9b, 0xd4, 0xfe, 0xee, 0xc0, 0x89, 0x8e, 0x46, 0x07, 0x6a, 0xdf, 0x1f, 0x6a, 0x89, 0x93, 0x1d,
+	0x38, 0x5c, 0x1b, 0xd8, 0x81, 0xd3, 0xbf, 0x37, 0xf9, 0x3c, 0xe1, 0x18, 0x8e, 0x31, 0xd4, 0x06,
+	0xe8, 0x25, 0x79, 0x2e, 0x8a, 0x9f, 0xf7, 0xff, 0x09, 0x00, 0x00, 0xff, 0xff, 0xe1, 0x23, 0x8a,
+	0x97, 0xc8, 0x08, 0x00, 0x00,
 }
