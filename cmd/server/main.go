@@ -33,7 +33,7 @@ import (
 
 const (
 	name        = "gapic-showcase"
-	description = "Gapic Showcase V1Alpha1 Service"
+	description = "Gapic Showcase V1Alpha2 Service"
 	version     = "0.0.4"
 	port        = ":7469"
 )
@@ -84,7 +84,7 @@ func (p *process) manage() (string, error) {
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
-	stdlog.Printf("Gapic Showcase V1Alpha1 listening on port: %s", port)
+	stdlog.Printf("Gapic Showcase V1Alpha2 listening on port: %s", port)
 
 	// Setup Server.
 	opts := []grpc.ServerOption{
