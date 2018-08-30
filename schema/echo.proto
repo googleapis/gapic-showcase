@@ -19,10 +19,10 @@ import "google/longrunning/operations.proto";
 import "google/protobuf/duration.proto";
 import "google/rpc/status.proto";
 
-package google.showcase.v1alpha1;
+package google.showcase.v1alpha2;
 
 option go_package = "github.com/googleapis/gapic-showcase/server/genproto";
-option java_package = "com.google.showcase.v1";
+option java_package = "com.google.showcase.v1alpha2";
 option java_multiple_files = true;
 
 option (google.api.metadata) = {
