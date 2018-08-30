@@ -30,52 +30,65 @@ func main() {
 
 	// Get proto dependencies
 	gopath := os.Getenv("GOPATH")
-	showcaseDir := gopath + "/" + "src/github.com/googleapis/gapic-showcase"
-	os.RemoveAll(showcaseDir + "/tmp")
+	showcaseDir := filepath.Join(
+		gopath,
+		"src",
+		"github.com",
+		"googleapis",
+		"gapic-showcase")
+	os.RemoveAll(filepath.Join(showcaseDir, "tmp"))
 
-	cmd = exec.Command(
+	err := exec.Command(
 		"git",
 		"clone",
 		"-b",
 		"input-contract",
 		"https://github.com/googleapis/api-common-protos.git",
-		showcaseDir+"/tmp/api-common-protos")
-	runAndLog(cmd)
+		filepath.Join(showcaseDir, "tmp", "api-common-protos"),
+	).Run()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Move showcase protos alongside it's dependencies.
-	protoDest := showcaseDir + "/tmp/api-common-protos/google/showcase/v1alpha1"
-	cmd = exec.Command("mkdir", "-p", protoDest)
-	runAndLog(cmd)
+	protoDest := filepath.Join(
+		showcaseDir,
+		"tmp",
+		"api-common-protos",
+		"google",
+		"showcase",
+		"v1alpha2")
+	err = exec.Command("mkdir", "-p", protoDest).Run()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	files, err := filepath.Glob(showcaseDir + "/schema/*.proto")
+	files, err := filepath.Glob(filepath.Join(showcaseDir, "schema", "*.proto"))
 	if err != nil {
 		log.Fatal("Error: failed to find protos in " + showcaseDir)
 	}
 
 	for _, f := range files {
-		cmd = exec.Command("cp", f, protoDest)
-		runAndLog(cmd)
+		err = exec.Command("cp", f, protoDest).Run()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	// Compile protos
-	files, err = filepath.Glob(protoDest + "/*.proto")
+	files, err = filepath.Glob(filepath.Join(protoDest, "*.proto"))
 	if err != nil {
 		log.Fatal("Error: failed to find protos in " + protoDest)
 	}
 	params := []string{
 		"--go_out=plugins=grpc:" + gopath + "/src",
-		"--proto_path=" + showcaseDir + "/tmp/api-common-protos",
+		"--proto_path=" + filepath.Join(showcaseDir,"tmp", "api-common-protos"),
 	}
 	params = append(params, files...)
-	cmd = exec.Command("protoc", params...)
-	runAndLog(cmd)
+	err = exec.Command("protoc", params...).Run()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	os.Exit(0)
-}
-
-func runAndLog(cmd *exec.Cmd) {
-	stdoutStderr, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Fatalf("%s\n", stdoutStderr)
-	}
 }
