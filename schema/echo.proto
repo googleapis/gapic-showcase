@@ -41,7 +41,7 @@ service Echo {
   // This method simply echos the request. This method is showcases unary rpcs.
   rpc Echo(EchoRequest) returns (EchoResponse) {
     option (google.api.http) = {
-      post: "/v1alpha1/echo:echo"
+      post: "/v1alpha2/echo:echo"
       body: "*"
     };
   }
@@ -50,7 +50,7 @@ service Echo {
   // through the stream. This method showcases server-side streaming rpcs.
   rpc Expand(ExpandRequest) returns (stream EchoResponse) {
     option (google.api.http) = {
-      post: "/v1alpha1/echo:expand"
+      post: "/v1alpha2/echo:expand"
       body: "*"
     };
     option (google.api.method_signature) = {
@@ -63,7 +63,7 @@ service Echo {
   // passed to it. This method showcases client-side streaming rpcs.
   rpc Collect(stream EchoRequest) returns (EchoResponse) {
     option (google.api.http) = {
-      post: "/v1alpha1/echo:collect"
+      post: "/v1alpha2/echo:collect"
       body: "*"
     };
   }
@@ -77,7 +77,7 @@ service Echo {
   // This method showcases how a client handles a request timing out.
   rpc Wait(WaitRequest) returns (WaitResponse) {
     option (google.api.http) = {
-      post: "/v1alpha1/echo:wait"
+      post: "/v1alpha2/echo:wait"
       body: "*"
     };
   }
@@ -87,7 +87,7 @@ service Echo {
   // response will include a page token indicating the next page.
   rpc Pagination(PaginationRequest) returns (PaginationResponse) {
     option (google.api.http) = {
-      post: "/v1alpha1/echo:pagination"
+      post: "/v1alpha2/echo:pagination"
       body: "*"
     };
     option (google.api.method_signature) = {
@@ -159,10 +159,6 @@ message PaginationRequest {
   // cause an error to be thrown. This value is a string as opposed to a int32
   // to follow general google api practices.
   string page_token = 3;
-
-  // This field is used to show the client's ability to handle servers that
-  // return a page that is larger the specified page size.
-  int32 page_size_override = 4;
 }
 
 // The response for the Pagination method.
