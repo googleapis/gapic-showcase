@@ -82,7 +82,7 @@ func main() {
 	}
 	params := []string{
 		"--go_out=plugins=grpc:" + gopath + "/src",
-		"--proto_path=" + filepath.Join(showcaseDir,"tmp", "api-common-protos"),
+		"--proto_path=" + filepath.Join(showcaseDir, "tmp", "api-common-protos"),
 	}
 	params = append(params, files...)
 	err = exec.Command("protoc", params...).Run()
