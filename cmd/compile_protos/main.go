@@ -23,8 +23,7 @@ import (
 
 func main() {
 	// Check if protoc is installed.
-	cmd := exec.Command("protoc", "--version")
-	if err := cmd.Run(); err != nil {
+	if err := exec.Command("protoc", "--version").Run(); err != nil {
 		log.Fatal("Error: 'protoc' is expected to be installed on the path.")
 	}
 
@@ -58,8 +57,7 @@ func main() {
 		"google",
 		"showcase",
 		"v1alpha2")
-	err = exec.Command("mkdir", "-p", protoDest).Run()
-	if err != nil {
+	if err = exec.Command("mkdir", "-p", protoDest).Run(); err != nil {
 		log.Fatal(err)
 	}
 
@@ -69,8 +67,7 @@ func main() {
 	}
 
 	for _, f := range files {
-		err = exec.Command("cp", f, protoDest).Run()
-		if err != nil {
+		if err = exec.Command("cp", f, protoDest).Run(); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -85,8 +82,7 @@ func main() {
 		"--proto_path=" + filepath.Join(showcaseDir, "tmp", "api-common-protos"),
 	}
 	params = append(params, files...)
-	err = exec.Command("protoc", params...).Run()
-	if err != nil {
+	if err = exec.Command("protoc", params...).Run(); err != nil {
 		log.Fatal(err)
 	}
 
