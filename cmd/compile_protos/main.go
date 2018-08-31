@@ -57,7 +57,7 @@ func main() {
 		"google",
 		"showcase",
 		"v1alpha2")
-	if err = exec.Command("mkdir", "-p", protoDest).Run(); err != nil {
+	if err = os.MkdirAll(protoDest, 0755); err != nil {
 		log.Fatal(err)
 	}
 
