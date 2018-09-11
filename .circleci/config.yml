@@ -11,7 +11,7 @@ workflows:
             branches:
               ignore: /.*/
             tags:
-              only: '/^v\d+(\.(\d)+)*$/'
+              only: '/^v\d+(\.\d+)*$/'
 jobs:
   build:
     docker:
