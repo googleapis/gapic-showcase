@@ -46,4 +46,11 @@ func init() {
 	// Setup Loggers
 	stdLog = log.New(os.Stdout, "", log.Ldate|log.Ltime)
 	errLog = log.New(os.Stderr, "", log.Ldate|log.Ltime)
+
+	// Make roots version option only emit the version. This is used in circleci.
+	// The template looks weird on purpose. Leaving as a single line causes the
+	// output to append an extra character.
+	rootCmd.SetVersionTemplate(
+		`{{printf "%s" .Version}}
+`)
 }
