@@ -22,8 +22,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var StdLog, ErrLog *log.Logger
-var Port string
+var stdLog, errLog *log.Logger
 
 var rootCmd = &cobra.Command{
 	Use:   "gapic-showcase",
@@ -31,6 +30,7 @@ var rootCmd = &cobra.Command{
 	Long: `Showcase is an API used to showcase Generate API Client (GAPIC)
 features. This tool is used start the API and as well as being used for
 running any commands to manage the showcase testing infrastructure.`,
+	Version: "0.0.5",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -44,6 +44,6 @@ func Execute() {
 
 func init() {
 	// Setup Loggers
-	StdLog = log.New(os.Stdout, "", log.Ldate|log.Ltime)
-	ErrLog = log.New(os.Stderr, "", log.Ldate|log.Ltime)
+	stdLog = log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	errLog = log.New(os.Stderr, "", log.Ldate|log.Ltime)
 }

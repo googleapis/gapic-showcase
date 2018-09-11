@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 	"strings"
@@ -29,27 +30,26 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var startCmd = &cobra.Command{
-	Use:   "start",
-	Short: "Starts the showcase server",
-	Run: func(cmd *cobra.Command, args []string) {
-		startServer()
-	},
-}
-
 func init() {
+	var port string
+	startCmd := &cobra.Command{
+		Use:   "start",
+		Short: "Starts the showcase server",
+		Run: func(cmd *cobra.Command, args []string) {
+			startServer(port)
+		},
+	}
 	rootCmd.AddCommand(startCmd)
 	startCmd.Flags().StringVarP(
-		&Port,
+		&port,
 		"port",
 		"p",
 		":7469",
 		"The port that showcase will be served on.")
 }
 
-func startServer() {
+func startServer(port string) {
 	// Ensure port is of the right form.
-	port := Port
 	if !strings.HasPrefix(port, ":") {
 		port = ":" + port
 	}
@@ -59,12 +59,12 @@ func startServer() {
 	if err != nil {
 		log.Fatalf("Showcase failed to listen on port '%s': %v", port, err)
 	}
-	StdLog.Printf("Showcase listening on port: %s", port)
+	stdLog.Printf("Showcase listening on port: %s", port)
 
 	// Setup Server.
 	opts := []grpc.ServerOption{
+		grpc.StreamInterceptor(logStreamRequests),
 		grpc.UnaryInterceptor(logUnaryRequests),
-		// grpc.StreamInterceptor(logStreamRequests),
 	}
 	s := grpc.NewServer(opts...)
 	defer s.GracefulStop()
@@ -76,15 +76,15 @@ func startServer() {
 }
 
 func logUnaryRequests(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	StdLog.Printf("Received Unary Request for Method: %s\n", info.FullMethod)
-	StdLog.Printf("    Request:  %+v\n", req)
+	stdLog.Printf("Received Unary Request for Method: %s\n", info.FullMethod)
+	stdLog.Printf("    Request:  %+v\n", req)
 	resp, err := handler(ctx, req)
 	if err == nil {
-		StdLog.Printf("    Returning Response: %+v\n", resp)
+		stdLog.Printf("    Returning Response: %+v\n", resp)
 	} else {
-		StdLog.Printf("    Returning Error: %+v\n", err)
+		stdLog.Printf("    Returning Error: %+v\n", err)
 	}
-	StdLog.Println("")
+	stdLog.Println("")
 	return resp, err
 }
 
@@ -110,17 +110,22 @@ func (s *loggingServerStream) Context() context.Context {
 }
 
 func (s *loggingServerStream) SendMsg(m interface{}) error {
-	StdLog.Printf("%s Stream for Method: %s\n", s.streamType(), s.info.FullMethod)
-	StdLog.Printf("    Sending Message:  %+v\n", m)
+	stdLog.Printf("%s Stream for Method: %s\n", s.streamType(), s.info.FullMethod)
+	stdLog.Printf("    Sending Message:  %+v\n", m)
+	stdLog.Println("")
 
 	return s.s.SendMsg(m)
 }
 
 func (s *loggingServerStream) RecvMsg(m interface{}) error {
-	StdLog.Printf("%s Stream for Method: %s\n", s.streamType(), s.info.FullMethod)
-	StdLog.Printf("    Recieving Message:  %+v\n", m)
+	err := s.s.RecvMsg(m)
+	if fmt.Sprintf("%v", m) != "" {
+		stdLog.Printf("%s Stream for Method: %s\n", s.streamType(), s.info.FullMethod)
+		stdLog.Printf("    Recieving Message:  %v\n", m)
+		stdLog.Println("")
+	}
 
-	return s.s.RecvMsg(m)
+	return err
 }
 
 func (s *loggingServerStream) streamType() string {
