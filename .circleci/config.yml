@@ -9,13 +9,13 @@ workflows:
             - build
           filters:
             branches:
-              ignore: /.*/
+              only: master
             tags:
-              only: /v[0-9]+(\.[0-9]+)*/
+              only: '/^v[\d.]+$/'
 jobs:
   build:
     docker:
-      - image: golang:1.10
+      - image: golang:1.11
     environment:
       GOPATH: /go
     working_directory: /go/src/github.com/googleapis/gapic-showcase
@@ -32,10 +32,23 @@ jobs:
           command: "! go tool vet ./ 2>&1 | read"
       - run:
           name: Install dependencies
-          command: go get -v -t -d ./server/... && go get -v -t -d ./cmd/...
+          command: go get -v -d -t && go install
       - run:
           name: Run tests
           command: go test ./... -coverprofile=coverage.txt -covermode=atomic
+      - run:
+          name: Spin up showcase server.
+          command: gapic-showcase start
+          background: true
+      - run:
+          name: Sanity check the server.
+          command: |
+            gapic-showcase echo hello world!
+            gapic-showcase expand one two three o'clock four o'clock rock
+
+            # The echo needs to sleep to give time for the stream response
+            (echo -e "hello\nworld" && sleep .1) | gapic-showcase collect
+            (echo -e "hello\nworld" && sleep .1) | gapic-showcase chat
       - run:
           name: Submit coverage data to codecov.
           command: bash <(curl -s https://codecov.io/bash)
@@ -43,36 +56,36 @@ jobs:
 
   release:
     docker:
-      - image: golang:1.10
+      - image: golang:1.11
     environment:
       GOPATH: /go
     working_directory: /go/src/github.com/googleapis/gapic-showcase
     steps:
       - checkout
       - run:
-          # TODO(landrito): This can be cached.
-          name: Install server dependencies
-          command: go get -v -t -d ./cmd/...
-      - run:
-          name: Install tools
+          name: Install server
           command: |
-            go get github.com/mitchellh/gox
-            go get github.com/tcnksm/ghr
-            apt-get update && apt-get install -y unzip
+            go get
+            go install
+            echo "export VERSION=$(gapic-showcase --version)" >> $BASH_ENV
       - run:
           name: Cross compile the server binary
-            # TODO(landrito): Figure out a way to get the version from the tag.
           command: |
-            VERSION=$(go run cmd/server/main.go version)
+            # This is a windows dependency that is not implicitly got at
+            # the top level go get.
+            go get github.com/inconshreveable/mousetrap
+            go get github.com/mitchellh/gox
             gox -os="windows linux" -arch="amd64 arm" -output \
                 "dist/gapic-showcase-v1alpha2-${VERSION}-{{.OS}}-{{.Arch}}" \
-                github.com/googleapis/gapic-showcase/cmd/server
+                github.com/googleapis/gapic-showcase/
             gox -os="darwin" -arch="amd64" -output \
                 "dist/gapic-showcase-v1alpha2-${VERSION}-{{.OS}}-{{.Arch}}" \
-                github.com/googleapis/gapic-showcase/cmd/server
+                github.com/googleapis/gapic-showcase/
+            ls dist
       - run:
           name: Install protoc
           command: |
+            apt-get update && apt-get install -y unzip
             curl -o ~/protoc3.zip -L https://github.com/google/protobuf/releases/download/v3.6.1/protoc-3.6.1-linux-x86_64.zip
             unzip ~/protoc3.zip -d ~/protoc3
             mv ~/protoc3/bin/* /usr/local/bin/
@@ -91,22 +104,22 @@ jobs:
       - run:
           name: Compile the proto descriptor set.
           command: |
-            VERSION=$(go run cmd/server/main.go version)
             protoc --proto_path=tmp/api-common-protos --include_imports \
                 --include_source_info \
                 -o dist/gapic-showcase-v1alpha2-${VERSION}.desc \
                 tmp/api-common-protos/google/showcase/v1alpha2/echo.proto
+            ls dist
       - run:
           name: Make a tarball of the protos.
           command: |
-            VERSION=$(go run cmd/server/main.go version)
             mkdir tmp/gapic-showcase-v1alpha2-${VERSION}-protos
             cp -rv tmp/api-common-protos/google tmp/gapic-showcase-v1alpha2-${VERSION}-protos
             cd tmp/ && tar -zcvf ../dist/gapic-showcase-v1alpha2-${VERSION}-protos.tar.gz gapic-showcase-v1alpha2-${VERSION}-protos
+            ls dist
       - run:
           name: Attach compiled stuff to the tag.
           command: |
-            VERSION=$(go run cmd/server/main.go version)
+            go get github.com/tcnksm/ghr
             ghr -t ${GITHUB_TOKEN} \
                 -u ${CIRCLE_PROJECT_USERNAME} \
                 -r ${CIRCLE_PROJECT_REPONAME} \
