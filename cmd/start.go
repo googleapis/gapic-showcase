@@ -26,7 +26,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -89,24 +88,9 @@ func logUnaryRequests(ctx context.Context, req interface{}, info *grpc.UnaryServ
 }
 
 type loggingServerStream struct {
-	s    grpc.ServerStream
 	info *grpc.StreamServerInfo
-}
 
-func (s *loggingServerStream) SetHeader(m metadata.MD) error {
-	return s.s.SetHeader(m)
-}
-
-func (s *loggingServerStream) SendHeader(m metadata.MD) error {
-	return s.s.SendHeader(m)
-}
-
-func (s *loggingServerStream) SetTrailer(m metadata.MD) {
-	s.s.SetTrailer(m)
-}
-
-func (s *loggingServerStream) Context() context.Context {
-	return s.s.Context()
+	grpc.ServerStream
 }
 
 func (s *loggingServerStream) SendMsg(m interface{}) error {
@@ -114,11 +98,11 @@ func (s *loggingServerStream) SendMsg(m interface{}) error {
 	stdLog.Printf("    Sending Message:  %+v\n", m)
 	stdLog.Println("")
 
-	return s.s.SendMsg(m)
+	return s.ServerStream.SendMsg(m)
 }
 
 func (s *loggingServerStream) RecvMsg(m interface{}) error {
-	err := s.s.RecvMsg(m)
+	err := s.ServerStream.RecvMsg(m)
 	if fmt.Sprintf("%v", m) != "" {
 		stdLog.Printf("%s Stream for Method: %s\n", s.streamType(), s.info.FullMethod)
 		stdLog.Printf("    Recieving Message:  %v\n", m)
@@ -138,6 +122,6 @@ func (s *loggingServerStream) streamType() string {
 }
 
 func logStreamRequests(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	loggingStream := &loggingServerStream{s: ss, info: info}
+	loggingStream := &loggingServerStream{info, ss}
 	return handler(srv, loggingStream)
 }
