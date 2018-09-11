@@ -54,7 +54,7 @@ func init() {
 
 	commands := []*cobra.Command{
 		&cobra.Command{
-			Use:    "echo [content to echo]",
+			Use:    "echo [content]",
 			Short:  "Sends an echo request",
 			Args:   cobra.MinimumNArgs(1),
 			PreRun: initClient,
@@ -73,7 +73,7 @@ func init() {
 			PostRun: closeConnection,
 		},
 		&cobra.Command{
-			Use:    "expand",
+			Use:    "expand [content]",
 			Short:  "Starts a server-side stream using the streaming rpc 'expand'.",
 			Args:   cobra.MinimumNArgs(1),
 			PreRun: initClient,
