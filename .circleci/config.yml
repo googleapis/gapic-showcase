@@ -9,9 +9,9 @@ workflows:
             - build
           filters:
             branches:
-              only: master
+              ignore: /.*/
             tags:
-              only: '/^v[\d.]+$/'
+              only: '/^v\d+(\.[\d]+)*$/'
 jobs:
   build:
     docker:
