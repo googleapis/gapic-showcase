@@ -63,25 +63,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install server
-          command: |
-            go get
-            go install
-            echo "export VERSION=$(gapic-showcase --version)" >> $BASH_ENV
-      - run:
-          name: Cross compile the server binary
-          command: |
-            # This is a windows dependency that is not implicitly got at
-            # the top level go get.
-            go get github.com/inconshreveable/mousetrap
-            go get github.com/mitchellh/gox
-            gox -os="windows linux" -arch="amd64 arm" -output \
-                "dist/gapic-showcase-v1alpha2-${VERSION}-{{.OS}}-{{.Arch}}" \
-                github.com/googleapis/gapic-showcase/
-            gox -os="darwin" -arch="amd64" -output \
-                "dist/gapic-showcase-v1alpha2-${VERSION}-{{.OS}}-{{.Arch}}" \
-                github.com/googleapis/gapic-showcase/
-      - run:
           name: Install protoc
           command: |
             apt-get update && apt-get install -y unzip
@@ -90,33 +71,13 @@ jobs:
             mv ~/protoc3/bin/* /usr/local/bin/
             mv ~/protoc3/include/* /usr/local/include/
       - run:
-          name: Get proto dependencies.
+          name: Create release assets
           command: |
-            git clone -b input-contract \
-                https://github.com/googleapis/api-common-protos.git \
-                tmp/api-common-protos
-      - run:
-          name: Stage the showcase protos with it's dependencies.
-          command: |
-            mkdir -p tmp/api-common-protos/google/showcase/v1alpha2
-            cp schema/echo.proto tmp/api-common-protos/google/showcase/v1alpha2/
-      - run:
-          name: Compile the proto descriptor set.
-          command: |
-            protoc --proto_path=tmp/api-common-protos --include_imports \
-                --include_source_info \
-                -o dist/gapic-showcase-v1alpha2-${VERSION}.desc \
-                tmp/api-common-protos/google/showcase/v1alpha2/echo.proto
-      - run:
-          name: Make a tarball of the protos.
-          command: |
-            mkdir tmp/gapic-showcase-v1alpha2-${VERSION}-protos
-            cp -r tmp/api-common-protos/google tmp/gapic-showcase-v1alpha2-${VERSION}-protos
-            cd tmp/ && tar -zcf ../dist/gapic-showcase-v1alpha2-${VERSION}-protos.tar.gz gapic-showcase-v1alpha2-${VERSION}-protos
+            go get ./util/release
+            go run util/release/main.go
       - run:
           name: Attach compiled stuff to the tag.
           command: |
-            ls dist
             go get github.com/tcnksm/ghr
             ghr -t ${GITHUB_TOKEN} \
                 -u ${CIRCLE_PROJECT_USERNAME} \
