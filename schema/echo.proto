@@ -91,7 +91,7 @@ service Echo {
       body: "*"
     };
     option (google.api.method_signature) = {
-      fields: ["max_response", "page_size_override"]
+      fields: ["max_response"]
     };
   }
 }
