@@ -32,15 +32,17 @@ func main() {
 }
 
 func setup() {
-	os.Chdir(showcaseDir())
-
 	distDir := filepath.Join(showcaseDir(), "dist")
 	os.RemoveAll(distDir)
-	os.MkdirAll(distDir, 0755)
+	if err := os.MkdirAll(distDir, 0755); err != nil {
+		log.Fatalf("Failed to make the directory %s: %v", distDir, err)
+	}
 
 	tmpDir := filepath.Join(showcaseDir(), "tmp")
 	os.RemoveAll(tmpDir)
-	os.MkdirAll(tmpDir, 0755)
+	if err := os.MkdirAll(tmpDir, 0755); err != nil {
+		log.Fatalf("Failed to make the directory %s: %v", tmpDir, err)
+	}
 }
 
 func teardown() {
@@ -66,7 +68,9 @@ func stageProtos() {
 		"google",
 		"showcase",
 		"v1alpha2")
-	os.MkdirAll(protoDest, 0755)
+	if err := os.MkdirAll(protoDest, 0755); err != nil {
+		log.Fatalf("Failed to make the dir %s: %v", protoDest, err)
+	}
 
 	files, err := filepath.Glob(filepath.Join(showcaseDir(), "schema", "*.proto"))
 	if err != nil {
@@ -102,32 +106,26 @@ func compileDescriptors() {
 		"--proto_path=" + filepath.Join(showcaseDir(), "tmp", "api-common-protos"),
 		"--include_imports",
 		"--include_source_info",
-		"-o" + filepath.Join(showcaseDir(), "dist", fmt.Sprintf("gapic-showcase-%s.desc", version())),
+		"-o",
+		filepath.Join(showcaseDir(), "dist", fmt.Sprintf("gapic-showcase-%s.desc", version())),
 	}
 	execute(append(command, files...)...)
 }
 
 func tarProtos() {
-	tmpDir := filepath.Join(showcaseDir(), "tmp")
-	stagingDir := filepath.Join(tmpDir, fmt.Sprintf("gapic-showcase-v1alpha2-%s-protos", version()))
+	protoDir := filepath.Join(showcaseDir(), "tmp", "api-common-protos")
 	output := filepath.Join(showcaseDir(), "dist", fmt.Sprintf("gapic-showcase-v1alpha2-%s-protos.tar.gz", version()))
 
-	os.MkdirAll(stagingDir, 0755)
-	execute("cp", "-r", filepath.Join(tmpDir, "api-common-protos", "google"), stagingDir)
-
-	os.Chdir(tmpDir)
-	defer os.Chdir(showcaseDir())
-	execute("tar", "-zcf", output, fmt.Sprintf("gapic-showcase-v1alpha2-%s-protos", version()))
+	execute("tar", "-zcf", output, "-C", protoDir, "google")
 }
 
 func compileBinaries() {
 	stagingDir := filepath.Join(showcaseDir(), "tmp", "x")
 	outputDir := filepath.Join(showcaseDir(), "dist")
-	execute("go", "get", "github.com/mitchellh/gox")
 
-	// This is a windows dependency that is not implicitly got since we only get
-	// the linux dependencies
-	execute("go", "get", "github.com/inconshreveable/mousetrap")
+	// Mousetrap is a windows dependency that is not implicitly got since
+	// we only get the linux dependencies.
+	execute("go", "get", "github.com/mitchellh/gox", "github.com/inconshreveable/mousetrap")
 
 	osArchs := []string{
 		"windows/amd64",
@@ -140,13 +138,12 @@ func compileBinaries() {
 			"gox",
 			fmt.Sprintf("-osarch=%s", osArch),
 			"-output",
-			filepath.Join(stagingDir, fmt.Sprintf("gapic-showcase-v1alpha2-%s-{{.OS}}-{{.Arch}}/gapic-showcase", version())),
+			filepath.Join(stagingDir, fmt.Sprintf("gapic-showcase-v1alpha2-%s-{{.OS}}-{{.Arch}}", version()), "gapic-showcase"),
 			"github.com/googleapis/gapic-showcase")
 	}
 
 	dirs, _ := filepath.Glob(filepath.Join(stagingDir, "*"))
 	for _, dir := range dirs {
-		os.Chdir(dir)
 		// The windows binaries are suffixed with '.exe'. This allows us to create
 		// tarballs of the executables whether or not they contain a suffix.
 		files, _ := filepath.Glob(filepath.Join(dir, "gapic-showcase*"))
@@ -154,9 +151,10 @@ func compileBinaries() {
 			"tar",
 			"-zcf",
 			filepath.Join(outputDir, filepath.Base(dir)+".tar.gz"),
+			"-C",
+			filepath.Dir(files[0]),
 			filepath.Base(files[0]))
 	}
-	os.Chdir(showcaseDir())
 }
 
 func execute(args ...string) {
@@ -166,44 +164,46 @@ func execute(args ...string) {
 	}
 }
 
-var sDirMu sync.Mutex = sync.Mutex{}
+func executeInDir(dir string, args ...string) {
+	log.Printf("Executing in %s: %s", dir, strings.Join(args, " "))
+	cmd := exec.Command(args[0], args[1:]...)
+	cmd.Dir = dir
+	if output, err := cmd.CombinedOutput(); err != nil {
+		log.Fatalf("%s", output)
+	}
+}
+
+var sOnce sync.Once = sync.Once{}
 var showcaseDirMemo string
 
 func showcaseDir() string {
-	sDirMu.Lock()
-	defer sDirMu.Unlock()
-	if showcaseDirMemo != "" {
-		return showcaseDirMemo
-	}
-	gopath := os.Getenv("GOPATH")
-	showcaseDir := filepath.Join(
-		gopath,
-		"src",
-		"github.com",
-		"googleapis",
-		"gapic-showcase")
-	showcaseDirMemo = showcaseDir
+	sOnce.Do(func() {
+		gopath := os.Getenv("GOPATH")
+		showcaseDir := filepath.Join(
+			gopath,
+			"src",
+			"github.com",
+			"googleapis",
+			"gapic-showcase")
+		showcaseDirMemo = showcaseDir
+	})
 	return showcaseDirMemo
 }
 
-var verMu sync.Mutex = sync.Mutex{}
+var verOnce sync.Once = sync.Once{}
 var versionMemo string
 
 func version() string {
-	verMu.Lock()
-	defer verMu.Unlock()
-	if versionMemo != "" {
-		return versionMemo
-	}
-	os.Chdir(showcaseDir())
-	execute("go", "get")
-	execute("go", "install")
-	version, err := exec.Command("gapic-showcase", "--version").Output()
-	if err != nil {
-		log.Fatal("Failed getting showcase version")
-	}
+	verOnce.Do(func() {
+		executeInDir(showcaseDir(), "go", "get")
+		executeInDir(showcaseDir(), "go", "install")
+		version, err := exec.Command("gapic-showcase", "--version").Output()
+		if err != nil {
+			log.Fatal("Failed getting showcase version")
+		}
 
-	versionMemo = strings.TrimSpace(string(version[:]))
+		versionMemo = strings.TrimSpace(string(version))
+	})
 	return versionMemo
 }
 
