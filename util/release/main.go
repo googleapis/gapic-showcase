@@ -33,20 +33,27 @@ func main() {
 
 func setup() {
 	distDir := filepath.Join(showcaseDir(), "dist")
-	os.RemoveAll(distDir)
+	if err := os.RemoveAll(distDir); err != nil {
+		log.Fatalf("Failed to remove the directory %s: %v", distDir, err)
+	}
 	if err := os.MkdirAll(distDir, 0755); err != nil {
 		log.Fatalf("Failed to make the directory %s: %v", distDir, err)
 	}
 
 	tmpDir := filepath.Join(showcaseDir(), "tmp")
-	os.RemoveAll(tmpDir)
+	if err := os.RemoveAll(tmpDir); err != nil {
+		log.Fatalf("Failed to remove the directory %s: %v", tmpDir, err)
+	}
 	if err := os.MkdirAll(tmpDir, 0755); err != nil {
 		log.Fatalf("Failed to make the directory %s: %v", tmpDir, err)
 	}
 }
 
 func teardown() {
-	os.RemoveAll(filepath.Join(showcaseDir(), "tmp"))
+	tmpDir := filepath.Join(showcaseDir(), "tmp")
+	if err := os.RemoveAll(tmpDir); err != nil {
+		log.Fatalf("Failed to remove the directory %s: %v", tmpDir, err)
+	}
 }
 
 func stageProtos() {
@@ -173,7 +180,7 @@ func executeInDir(dir string, args ...string) {
 	}
 }
 
-var sOnce sync.Once = sync.Once{}
+var sOnce sync.Once
 var showcaseDirMemo string
 
 func showcaseDir() string {
@@ -190,7 +197,7 @@ func showcaseDir() string {
 	return showcaseDirMemo
 }
 
-var verOnce sync.Once = sync.Once{}
+var verOnce sync.Once
 var versionMemo string
 
 func version() string {
