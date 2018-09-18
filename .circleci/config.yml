@@ -4,9 +4,11 @@ workflows:
   main:
     jobs:
       - build
+      - kotlin-smoke-test
       - release:
           requires:
             - build
+            - kotlin-smoke-test
           filters:
             branches:
               ignore: /.*/
@@ -53,6 +55,25 @@ jobs:
           name: Submit coverage data to codecov.
           command: bash <(curl -s https://codecov.io/bash)
           when: always
+
+  kotlin-smoke-test:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Stage showcase in proto dependencies
+          command: |
+              git clone -b input-contract https://github.com/googleapis/api-common-protos.git
+              mkdir -p api-common-protos/google/showcase/v1alpha2/
+              cp schema/* api-common-protos/google/showcase/v1alpha2/
+      - run:
+          name: Run kotlin generation
+          command: |
+            mkdir koutput
+            docker run --rm \
+              --mount type=bind,source="$(pwd)"/api-common-protos,target=/proto \
+              --mount type=bind,source="$(pwd)"/koutput,target=/generated \
+              gcr.io/kotlin-gapic/kgen@sha256:e5e7b094ba19e467c5ccf9190ff31e5f7ff55dd98bf5c3b8b4972e75a5f1c5d8
 
   release:
     docker:

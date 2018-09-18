@@ -21,6 +21,7 @@ package google.showcase.v1alpha2;
 
 option go_package = "github.com/googleapis/gapic-showcase/server/genproto";
 option java_package = "com.google.showcase.v1alpha2";
+option java_multiple_files = true;
 
 // A service to facilitate running discrete sets of tests
 // against Showcase.
