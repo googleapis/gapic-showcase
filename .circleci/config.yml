@@ -14,6 +14,16 @@ workflows:
               ignore: /.*/
             tags:
               only: '/^v\d+(\.\d+)*$/'
+      - push-image:
+          requires:
+            - build
+            - kotlin-smoke-test
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: '/^v\d+(\.\d+)*$/'
+
 jobs:
   build:
     docker:
@@ -109,3 +119,28 @@ jobs:
                 -r ${CIRCLE_PROJECT_REPONAME} \
                 -c ${CIRCLE_SHA1} \
                 v${VERSION} ./dist/
+
+  push-image:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Setup Auth
+          command: |
+            echo ${GCLOUD_SERVICE_KEY} > ${HOME}/gcp-key.json
+            gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+      - run:
+          name: Build docker image
+          command: docker build --rm=false -t gcr.io/gapic-showcase/gapic-showcase .
+      - run:
+          name: Get version
+          command: echo "export VERSION=$(docker run -it gcr.io/gapic-showcase/gapic-showcase --version | perl -pe '($_)=/([0-9]+([.][0-9]+)+)/')" >> $BASH_ENV
+      - run:
+          name: Tag image
+          command: docker tag gcr.io/gapic-showcase/gapic-showcase gcr.io/gapic-showcase/gapic-showcase:${VERSION}
+      - run:
+          name: Push image
+          command: |
+            gcloud docker -- push gcr.io/gapic-showcase/gapic-showcase:latest
+            gcloud docker -- push gcr.io/gapic-showcase/gapic-showcase:${VERSION}

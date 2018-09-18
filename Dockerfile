@@ -1,15 +1,16 @@
-FROM golang:1.10
+FROM golang:1.11
 
 # Setup directory
 WORKDIR /go/src/github.com/googleapis/gapic-showcase
 COPY . .
 
-# Install dependencies
-RUN go get -d -v ./...
-RUN go install -v ./...
+# Install showcase
+RUN ["go", "get"]
+RUN ["go", "install"]
 
 # Expose port
-EXPOSE 8080
+EXPOSE 7469
 
 # Run the server.
-CMD go run /go/src/github.com/googleapis/gapic-showcase/cmd/server/main.go
+ENTRYPOINT ["gapic-showcase"]
+CMD ["start"]
