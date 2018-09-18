@@ -132,7 +132,7 @@ jobs:
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
       - run:
           name: Build docker image
-          command: docker build --rm=false -t gcr.io/gapic-showcase/gapic-showcase .
+          command: docker build -t gcr.io/gapic-showcase/gapic-showcase .
       - run:
           name: Get version
           command: echo "export VERSION=$(docker run -it gcr.io/gapic-showcase/gapic-showcase --version | perl -pe '($_)=/([0-9]+([.][0-9]+)+)/')" >> $BASH_ENV
