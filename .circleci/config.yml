@@ -62,7 +62,7 @@ jobs:
       - checkout
       - run:
           name: Get kotlin generator
-          command: docker pull gcr.io/kotlin-gapic/kgen
+          command: docker pull gcr.io/kotlin-gapic/kgen@sha256:e5e7b094ba19e467c5ccf9190ff31e5f7ff55dd98bf5c3b8b4972e75a5f1c5d8
       - run:
           name: Stage showcase in proto dependencies
           command: |
