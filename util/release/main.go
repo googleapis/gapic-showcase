@@ -121,7 +121,7 @@ func compileDescriptors() {
 
 func tarProtos() {
 	protoDir := filepath.Join(showcaseDir(), "tmp", "api-common-protos")
-	output := filepath.Join(showcaseDir(), "dist", fmt.Sprintf("gapic-showcase-v1alpha2-%s-protos.tar.gz", version()))
+	output := filepath.Join(showcaseDir(), "dist", fmt.Sprintf("gapic-showcase-%s-protos.tar.gz", version()))
 
 	execute("tar", "-zcf", output, "-C", protoDir, "google")
 }
@@ -145,7 +145,7 @@ func compileBinaries() {
 			"gox",
 			fmt.Sprintf("-osarch=%s", osArch),
 			"-output",
-			filepath.Join(stagingDir, fmt.Sprintf("gapic-showcase-v1alpha2-%s-{{.OS}}-{{.Arch}}", version()), "gapic-showcase"),
+			filepath.Join(stagingDir, fmt.Sprintf("gapic-showcase-%s-{{.OS}}-{{.Arch}}", version()), "gapic-showcase"),
 			"github.com/googleapis/gapic-showcase")
 	}
 

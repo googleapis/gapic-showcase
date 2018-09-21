@@ -1,131 +1,236 @@
 # GAPIC Showcase
 
-> An API to showcase Generated API Client features and common API patterns used
-by Google.
-
-The GAPIC (Generated API Client) Showcase is an API used to show and describe
-common patterns used by Google APIS as well as features used by GAPICs to make
-calling Google APIs an enjoyable experience. Each method declared by
-the Showcase API serves to show a specific pattern or feature.
-
-## GAPIC Showcase Server
 [![Release Level][releaselevelimg]][releaselevel]
 [![CircleCI][circleimg]][circle]
 [![Code Coverage][codecovimg]][codecov]
 [![GoDoc][godocimg]][godoc]
 
-This repository also includes a [server](server/) implementation of the Showcase API that
-can be used to verify GAPIC generators.
+> GAPIC (Generated API Client) Showcase is an API that showcases features used
+by GAPICs to make calling Google APIs an enjoyable experience.
 
-## Method Types, Patterns and Features
+The main goal of GAPIC Showcase is to be a testing tool that will be able to
+verify the features that a GAPIC implements. GAPIC Showcase services aim to be
+representative of all API Client configurations of Google APIs. With this aim in
+mind, gapic-generators that pass gapic-showcase can have reasonable confidence
+in the clients they are generating.
 
-### Unary Methods
-> A method that sends a single request and returns a single response.
+## Services
+The services of GAPIC Showcase API can be found in [schema/](schema/). Please
+note that these protocol buffer files are not able to be compiled in isolation.
+To get the services staged alongside their dependencies, please see check out
+our [releases](https://github.com/googleapis/gapic-showcase/releases) page.
 
-The *Echo* method is used to show Unary methods. This method
-simply returns the content specified by in the API call. If an error is
-specified to be returned in the API call, the server will respond with the error
-specified.
+## GAPIC Showcase CLI Tool
+### Installation
+The GAPIC Showcase CLI Tool can be installed using three different mechanisms,
+downloading the compiled binary from our our [releases](https://github.com/googleapis/gapic-showcase/releases)
+page, pulling our released docker image from [google container registry](https://gcr.io/gapic-showcase/gapic-showcase),
+or simply by using go commands.
 
-### Server Side Streaming Methods
-> A method that sends a single request but returns multiple responses.
+#### Binary Installation
+```sh
+$ export GAPIC_SHOWCASE_VERSION=0.0.6
+$ export OS=linux
+$ export ARCH=amd64
+$ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${GAPIC_SHOWCASE_VERSION}-${OS}-${ARCH} | sudo tar -zx -- --directory /usr/local/bin/
+$ gapic-showcase start
+> 2018/09/19 02:13:09 Showcase listening on port: :7469
+```
 
-The *Expand* method is used to show server side streaming. This method
-splits the given string into words and passes each word back on the stream.
-If an error is specified to be returned, the server will respond with the
-error code after the all words have been sent on the server.
+#### Docker Installation
+```sh
+$ export GAPIC_SHOWCASE_VERSION=0.0.6
+$ docker pull gcr.io/gapic-showcase/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
+$ docker run -it gcr.io/gapic-showcase/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
+> 2018/09/19 02:13:09 Showcase listening on port: :7469
+```
 
-### Client Side Streaming Methods
-> A method that sends multiple requests resulting in a single response.
+#### Go Installation
+```sh
+$ go install github.com/googleapis/gapic-showcase
+$ gapic-showcase start
+> 2018/09/19 02:13:09 Showcase listening on port: :7469
+```
 
-The *Collect* method is used to show client side streaming. This method
-accepts strings on passed on the stream. Upon closing the stream, the
-strings passed along the stream will be joined on the ' ' character and
-returned to the user. If a client passes an error on the stream, the server
-will respond with an error and drop the information passed previously.
+<!---
+TODO(landrito): figure out a blessed way to install by version using go
+commands.
+-->
+_* Bear in mind this is not a versioned installation so no versioning guarantees
+hold using this installation method._
 
-### Bidirectional Streaming Methods
-> A method that sends multiple requests while receiving multiple responses.
+## Example Usage - Implementing a GAPIC Showcase Integration Test
 
-The *Chat* method is used to show bidirectional streaming. This method
-simply echos the strings that are passed to it. If an error is passed
-on the stream, the server will respond with the error code specified.
+### Step 1. Generate a gapic-showcase client
+To start, a user will download the gapic-showcase protobuf files or proto
+descriptor set from a gapic-showcase release. The user will then feed these
+protobuf files into their gapic-generator. This client will be the client used
+for integration testing their gapic- generator.
 
-### Automatic Timeout Handling
-> A GAPIC feature to time out requests that take too long to respond.
+```sh
+$ export GAPIC_SHOWCASE_VERSION=0.0.6
+$ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${GAPIC_SHOWCASE_VERSION}-protos.tar.gz | sudo tar -zx
+$ protoc google/showcase/v1alpha2/*.proto \
+    --proto_path=. \
+    --${YOUR_GAPIC_GENERATOR}_out=/dest/
+```
 
-The *Timeout* method is used to show how GAPICs handle requests that take too
-long to respond. Upon receiving a request, the server
-will sleep for the requested amount of time end then return the
-response specified in the request. If an error is specified, the server
-will respond with the error code specified after sleeping.
+### Step 2. Write Integration Tests
+Write an Integration test which calls the gapic-showcase server.
 
-### Automatic Retry Handling
-> A GAPIC feature to RetryId on errors that are known to be retry-able.
+#### Ruby Example for [gapic-generator](https://github.com/googleapis/gapic-generator)
+<!---
+TODO(landrito): Add testing service stuff once it is implemented.
+-->
+```rb
+describe Google::Showcase::V1alpha1::EchoClient do
+  before(:all) do
+    # gapic-showcase does not implement any auth so an insecure channel must be
+    # used.
+    channel = credentials: GRPC::Core::Channel.new(
+      "localhost:7469", nil, :this_channel_is_insecure)
+    @echo_client = Google::Showcase::V1alpha2::EchoClient.new(channel)
+  end
 
-This feature allows methods to automatically retry on error codes that
-are known to be safe to retry on.
+  describe 'echo' do
+    it 'invokes echo without error' do
+      # Create expected grpc response
+      content = "Echo Content"
+      expected_response = { content: content }
+      expected_response = Google::Gax::to_proto(
+      expected_response, Google::Showcase::V1alpha1::EchoResponse)
 
-The *Retry* method is used to test how GAPICs automatically handle retrying.
-To test retry features, the user must pass a list of responses to the server
- using the *SetupRetry* method. The *SetupRetry* method will return an ID.
-Subsequent requests to *Retry* passing this ID will respond in with
-the responses specified in the *SetupRetryRequest*.
+      # Call method
+      response = @echo_client.echo(content: content)
 
-### Long Running Operations
-> An API pattern for methods that take a long time to complete.
+      # Verify the response
+      assert_equal(expected_response, response)
+    end
+  end
+end
+```
 
-The long running operations pattern is used for requests that can take a
-long time complete. Generally the first API request returns an operation which
-contain the id of the operation and metadata about the status of the operation.
-Using the id, a separate method can be called to get the updated statues
-of the operation. Whenever an operation is returned, if the operation is
-complete, the response data will be included in the operation.
+### Step 3. Start the Showcase Server
+The integration test needs a server to send its requests to. Download and start
+the server so that gapic-showcase is available for the tests.
 
-The *Longrunning* method is used to show the long running operation pattern.
-The initial request to this method will specify a time that the operation will
-complete. Until the specified completion time, `GetOperation` requests
-will return an unfinished operation. Upon reaching the completion time,
-subsequent `GetOperation` requests will return an operation containing response
-specified in the initial request.
+```sh
+$ export GAPIC_SHOWCASE_VERSION=0.0.6
+$ export OS=linux
+$ export ARCH=amd64
+$ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${OS}-${ARCH} | sudo tar -zx -- --directory /usr/local/bin/
+$ gapic-showcase start
+> 2018/09/19 02:13:09 Showcase listening on port: :7469
+```
 
-### Pagination
-> An API pattern for returning a list of items in pages.
+### Step 4. Run integration tests against the server
+Now the integration test is ready to be run. Invoke your test!
 
-This pagination pattern is used to make it such that the caller can specify the
-amount of items to be returned in an API response. The pagination pattern is
-most often used on LIST methods.
+#### Ruby Example for [gapic-generator](https://github.com/googleapis/gapic-generator)
+```sh
+$ bundle install
+$ bundle exec ruby gapic-showcase-integration-test.rb
+```
+<!---
+TODO(landrito): Add test report once it is implemented.
+-->
 
-The *Pagination* method is used to show the pagination pattern.
+## Released Artifacts
+GAPIC Showcase releases three main artifacts, a CLI tool, the gapic-showcase
+service protobuf files staged alongside its dependencies, and a protocol buffer
+descriptor set compiled from the gapic-showcase service protos.
 
-### Parameter Flattening
-> A GAPIC feature to make a method take in the fields of a request object as
-parameters.
+Check out our [releases](https://github.com/googleapis/gapic-showcase/releases) page to see our released artifacts.
 
-Parameter flattening is a feature to allow methods to be requested
-with the top-level fields of the request object passed as individual
-parameters to the request.
+### CLI Tool
+The GAPIC Showcase CLI Tool is used for two purposes, to start the
+gapic-showcase server, and to make requests to an already running gapic-showcase
+server.
 
-The *ParameterFlattening* method is used to show parameter flattening.
-This method simply returns the request in order to validate that the
-individual parameters are structured in the request object correctly.
+Generally, any questions about using the CLI tool can be answered by running the
+CLI tool with the `--help` flag which will supply usage documentation.
 
-### Resource Naming
-> A GAPIC feature to add type safety to patterned string fields.
+```sh
+$ gapic-showcase [command?] --help
+```
 
-Resource naming is a feature that converts strings with a known pattern
-into classes that enforce the well known pattern.
+#### Starting the Server
+The primary purpose of the CLI tool will be starting the showcase server. This
+server will expose the GAPIC Showcase services port 7469 by default. There will
+be two ways to start the server, either as a blocking process that must be sent
+an interrupt to exit or as a daemon.
 
-The *ResourceNaming* method is used to show resource naming. This method
-simply returns the request in order to validate that the request contained the
-correct string when converting from the resource name class.
+##### Spinning Up the Server
+```sh
+$ gapic-showcase start
+> 2018/09/19 01:57:09 Showcase listening on port: :7469
+
+$ gapic-showcase start --port 1234
+> 2018/09/19 01:57:09 Showcase listening on port: :1234
+```
+
+##### Spinning Up a Server Daemon
+```sh
+Spinning Up a Server Daemon
+$ sudo gapic-showcase daemon install --port 1234
+$ sudo gapic-showcase daemon start
+# Showcase daemon is now running in accepting requests on port 1234.
+$ sudo gapic-showcase daemon stop
+$ sudo gapic-showcase daemon uninstall
+```
+
+#### Making Showcase Service Calls
+The CLI tool will also be able to make requests to a running showcase server.
+This allows you to have a simple way to interact and tinker with the Showcase
+API.
+
+##### Example
+```sh
+$ gapic-showcase start                         
+> 2018/09/19 02:13:09 Showcase listening on port: :7469
+> 2018/09/19 02:14:08 Received Unary Request for Method: /google.showcase.v1alpha2.Echo/Echo
+> 2018/09/19 02:14:08     Request:  content:"hello world"
+> 2018/09/19 02:14:08     Returning Response: content:"hello world"
+```
+```sh
+$ gapic-showcase echo hello world
+> 2018/09/19 02:14:08 Sent Request: content: "hello world"
+> 2018/09/19 02:14:08 Got Response: content: "hello world"
+```
+
+### Staged Protocol Buffer Files
+The [proto files](schema/) found in the gapic-showcase repository are not compilable in
+isolation. This is to avoid duplication of the protofiles that showcase depends
+on, namely the API and API client configurations found in the `input-contract` branch of
+[api-common-protos](https://github.com/googleapis/api-common-protos/tree/input-contract).
+To give the user everything that is needed to compile the showcase protocol
+buffer files, every [release](https://github.com/googleapis/gapic-showcase/releases)
+will have attached a tarball containing a snapshot of the gapic-showcase
+protocol buffer files staged alongside their dependencies.
+
+### Compiled Proto Descriptors
+The compiled proto descriptors for the staged gapic-showcase protos discussed in
+the previous section will be attached to every release. This is intended to make
+it easier to generate clients removing the necessary step of installing protoc.
+
+## Versioning
+GAPIC Showcase follows semantic versioning in which all artifacts that are
+released for a certain version are guaranteed to be compatible with one another.
+To be more explicit, for a certain version, the interfaces and types exposed by
+the protobuf files are compatible with the interface of the implemented server.
+Users of gapic-showcase are expected to implement integration tests against a
+certain version of gapic-showcase rather than implementing against
+gapic-showcase at head.
+
+## Supported Go Versions
+GAPIC Showcase is supported for go versions 1.11 and later.
 
 ## FAQ
 
 ### Is this Showcase API publicly served?
 
-This API is not publicly served. A server implementation of the Showcase API is
-included in this repository.
+This API is not publicly served. Users of gapic-showcase are expected to run the
+server locally.
 
 ## Disclaimer
 
@@ -138,4 +243,4 @@ This is not an official Google product.
 [godoc]: https://godoc.org/github.com/googleapis/gapic-showcase/server
 [godocimg]: https://godoc.org/github.com/googleapis/gapic-showcase/server?status.svg
 [releaselevel]: https://cloud.google.com/terms/launch-stages
-[releaselevelimg]: https://img.shields.io/badge/release%20level-pre%20alpha-red.svg?style&#x3D;flat
+[releaselevelimg]: https://img.shields.io/badge/release%20level-alpha-red.svg?style&#x3D;flat
