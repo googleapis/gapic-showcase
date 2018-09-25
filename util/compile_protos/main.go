@@ -19,6 +19,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 func main() {
@@ -35,19 +36,19 @@ func main() {
 		"github.com",
 		"googleapis",
 		"gapic-showcase")
-	os.RemoveAll(filepath.Join(showcaseDir, "tmp"))
+	tmpDir := filepath.Join(showcaseDir, "tmp")
+	if err := os.RemoveAll(tmpDir); err != nil {
+		log.Fatalf("Error, could not remove path %s: %v", tmpDir, err)
+	}
 
-	err := exec.Command(
+	execute(
 		"git",
 		"clone",
 		"-b",
 		"input-contract",
 		"https://github.com/googleapis/api-common-protos.git",
 		filepath.Join(showcaseDir, "tmp", "api-common-protos"),
-	).Run()
-	if err != nil {
-		log.Fatal(err)
-	}
+	)
 
 	// Move showcase protos alongside it's dependencies.
 	protoDest := filepath.Join(
@@ -57,8 +58,8 @@ func main() {
 		"google",
 		"showcase",
 		"v1alpha2")
-	if err = os.MkdirAll(protoDest, 0755); err != nil {
-		log.Fatal(err)
+	if err := os.MkdirAll(protoDest, 0755); err != nil {
+		log.Fatalf("Error, could not make path %s: %v", protoDest, err)
 	}
 
 	files, err := filepath.Glob(filepath.Join(showcaseDir, "schema", "*.proto"))
@@ -67,9 +68,7 @@ func main() {
 	}
 
 	for _, f := range files {
-		if err = exec.Command("cp", f, protoDest).Run(); err != nil {
-			log.Fatal(err)
-		}
+		execute("cp", f, protoDest)
 	}
 
 	// Compile protos
@@ -77,14 +76,18 @@ func main() {
 	if err != nil {
 		log.Fatal("Error: failed to find protos in " + protoDest)
 	}
-	params := []string{
+	command := []string{
+		"protoc",
 		"--go_out=plugins=grpc:" + gopath + "/src",
 		"--proto_path=" + filepath.Join(showcaseDir, "tmp", "api-common-protos"),
 	}
-	params = append(params, files...)
-	if err = exec.Command("protoc", params...).Run(); err != nil {
-		log.Fatal(err)
-	}
-
+	execute(append(command, files...)...)
 	os.Exit(0)
+}
+
+func execute(args ...string) {
+	log.Print("Executing: ", strings.Join(args, " "))
+	if output, err := exec.Command(args[0], args[1:]...).CombinedOutput(); err != nil {
+		log.Fatalf("%s", output)
+	}
 }
