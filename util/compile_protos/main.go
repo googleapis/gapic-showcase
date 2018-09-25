@@ -78,6 +78,8 @@ func main() {
 	}
 	command := []string{
 		"protoc",
+		"--include_imports",
+		"--include_source_info",
 		"--go_out=plugins=grpc:" + gopath + "/src",
 		"--proto_path=" + filepath.Join(showcaseDir, "tmp", "api-common-protos"),
 	}
