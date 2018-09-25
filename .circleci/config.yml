@@ -5,10 +5,12 @@ workflows:
     jobs:
       - build
       - kotlin-smoke-test
+      - protobufjs-load-test
       - release:
           requires:
             - build
             - kotlin-smoke-test
+            - protobufjs-load-test
           filters:
             branches:
               ignore: /.*/
@@ -18,6 +20,7 @@ workflows:
           requires:
             - build
             - kotlin-smoke-test
+            - protobufjs-load-test
           filters:
             branches:
               ignore: /.*/
@@ -84,6 +87,23 @@ jobs:
               --mount type=bind,source="$(pwd)"/api-common-protos,target=/proto \
               --mount type=bind,source="$(pwd)"/koutput,target=/generated \
               gcr.io/kotlin-gapic/kgen:0.0.1
+
+  protobufjs-load-test:
+    docker:
+      - image: node:8
+    steps:
+      - checkout
+      - run:
+          name: Install protobuf loader
+          command: |
+            npm install google-proto-files
+      - run:
+          name: Check if protos can be loaded by protobufjs
+          command: |
+            # TODO(landrito): make this scalable by using a glob.
+            node -e "require('google-proto-files').loadSync('schema/echo.proto');"
+            node -e "require('google-proto-files').loadSync('schema/testing.proto');"
+
   release:
     docker:
       - image: golang:1.11

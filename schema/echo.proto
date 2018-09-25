@@ -53,8 +53,11 @@ service Echo {
       post: "/v1alpha2/echo:expand"
       body: "*"
     };
+    // TODO(landrito): change this to be `fields: ["content", "error"]` once
+    // github.com/dcodeIO/protobuf.js/issues/1094 has been resolved.
     option (google.api.method_signature) = {
-      fields: ["content", "error"]
+      fields: "content"
+      fields: "error"
     };
   }
 
@@ -90,8 +93,10 @@ service Echo {
       post: "/v1alpha2/echo:pagination"
       body: "*"
     };
+    // TODO(landrito): change this to be `fields: ["max_response"]` once
+    // github.com/dcodeIO/protobuf.js/issues/1094 has been resolved.
     option (google.api.method_signature) = {
-      fields: ["max_response"]
+      fields: "max_response"
     };
   }
 }
