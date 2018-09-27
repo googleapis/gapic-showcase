@@ -36,7 +36,7 @@ option (google.api.metadata) = {
 service Echo {
   // This service is meant to only run locally on the port 7469 (keypad digits
   // for "show").
-  option (google.api.default_host) = "localhost:7469";
+  option (google.api.default_host) = "localhost";
 
   // This method simply echos the request. This method is showcases unary rpcs.
   rpc Echo(EchoRequest) returns (EchoResponse) {
