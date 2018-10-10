@@ -28,8 +28,8 @@ var rootCmd = &cobra.Command{
 	Use:   "gapic-showcase",
 	Short: "An API for showcasing GAPIC features",
 	Long: `Showcase is an API used to showcase Generate API Client (GAPIC)
-features. This tool is used start the API and as well as being used for
-running any commands to manage the showcase testing infrastructure.`,
+features. This tool is used run the gapic-showcase server, and used to make
+to an already running server.`,
 	Version: "0.0.7",
 }
 

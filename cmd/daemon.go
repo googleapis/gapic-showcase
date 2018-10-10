@@ -38,7 +38,7 @@ func init() {
 		Short: "Install the Showcase server daemon",
 		Run: func(cmd *cobra.Command, args []string) {
 			d, _ := daemon.New("Showcase", "Gapic Showcase Service")
-			status, err := d.Install("start", "--port", port)
+			status, err := d.Install("run", "--port", port)
 			if err != nil {
 				errLog.Println(status, "\nError: ", err)
 				os.Exit(1)
