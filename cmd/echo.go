@@ -35,7 +35,6 @@ func init() {
 	var conn *grpc.ClientConn
 
 	initClient := func(cmd *cobra.Command, args []string) {
-		// Set start listening.
 		if !strings.HasPrefix(port, ":") {
 			port = ":" + port
 		}

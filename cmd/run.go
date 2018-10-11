@@ -29,45 +29,41 @@ import (
 
 func init() {
 	var port string
-	startCmd := &cobra.Command{
-		Use:   "start",
-		Short: "Starts the showcase server",
+	runCmd := &cobra.Command{
+		Use:   "run",
+		Short: "Runs the showcase server",
 		Run: func(cmd *cobra.Command, args []string) {
-			startServer(port)
+			// Ensure port is of the right form.
+			if !strings.HasPrefix(port, ":") {
+				port = ":" + port
+			}
+
+			// Start listening.
+			lis, err := net.Listen("tcp", port)
+			if err != nil {
+				log.Fatalf("Showcase failed to listen on port '%s': %v", port, err)
+			}
+			stdLog.Printf("Showcase listening on port: %s", port)
+
+			// Setup Server.
+			opts := []grpc.ServerOption{
+				grpc.StreamInterceptor(logStreamRequests),
+				grpc.UnaryInterceptor(logUnaryRequests),
+			}
+			s := grpc.NewServer(opts...)
+			defer s.GracefulStop()
+			pb.RegisterEchoServer(s, server.NewEchoServer())
+
+			// Register reflection service on gRPC server.
+			reflection.Register(s)
+			s.Serve(lis)
 		},
 	}
-	rootCmd.AddCommand(startCmd)
-	startCmd.Flags().StringVarP(
+	rootCmd.AddCommand(runCmd)
+	runCmd.Flags().StringVarP(
 		&port,
 		"port",
 		"p",
 		":7469",
 		"The port that showcase will be served on.")
-}
-
-func startServer(port string) {
-	// Ensure port is of the right form.
-	if !strings.HasPrefix(port, ":") {
-		port = ":" + port
-	}
-
-	// Start listening.
-	lis, err := net.Listen("tcp", port)
-	if err != nil {
-		log.Fatalf("Showcase failed to listen on port '%s': %v", port, err)
-	}
-	stdLog.Printf("Showcase listening on port: %s", port)
-
-	// Setup Server.
-	opts := []grpc.ServerOption{
-		grpc.StreamInterceptor(logServerStreaming),
-		grpc.UnaryInterceptor(logServerUnary),
-	}
-	s := grpc.NewServer(opts...)
-	defer s.GracefulStop()
-	pb.RegisterEchoServer(s, server.NewEchoServer())
-
-	// Register reflection service on gRPC server.
-	reflection.Register(s)
-	s.Serve(lis)
 }

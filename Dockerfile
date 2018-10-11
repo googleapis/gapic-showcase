@@ -13,4 +13,4 @@ EXPOSE 7469
 
 # Run the server.
 ENTRYPOINT ["gapic-showcase"]
-CMD ["start"]
+CMD ["run"]
