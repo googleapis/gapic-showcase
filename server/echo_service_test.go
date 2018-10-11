@@ -18,11 +18,11 @@ import (
 	"context"
 	"errors"
 	"io"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/golang/protobuf/proto"
 	durpb "github.com/golang/protobuf/ptypes/duration"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
@@ -444,8 +444,7 @@ func TestPagedExpand(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if !reflect.DeepEqual(test.out.GetResponses(), out.GetResponses()) ||
-			test.out.GetNextPageToken() != out.GetNextPageToken() {
+		if !proto.Equal(test.out, out) {
 			t.Errorf("PagedExpand with input '%s', expected: '%s', got: %s",
 				test.in.String(), test.out.String(), out.String())
 		}
