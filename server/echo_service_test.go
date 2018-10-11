@@ -445,7 +445,7 @@ func TestPagedExpand(t *testing.T) {
 			t.Error(err)
 		}
 		if !proto.Equal(test.out, out) {
-			t.Errorf("PagedExpand with input '%s', expected: '%s', got: %s",
+			t.Errorf("PagedExpand with input '%q', expected: '%q', got: %q",
 				test.in.String(), test.out.String(), out.String())
 		}
 	}
