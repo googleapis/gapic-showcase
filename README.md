@@ -156,9 +156,7 @@ $ gapic-showcase [command?] --help
 
 #### Starting the Server
 The primary purpose of the CLI tool will be starting the showcase server. This
-server will expose the GAPIC Showcase services port 7469 by default. There will
-be two ways to start the server, either as a blocking process that must be sent
-an interrupt to exit or as a daemon.
+server will expose the GAPIC Showcase services port 7469 by default.
 
 ##### Spinning Up the Server
 ```sh
@@ -167,16 +165,6 @@ $ gapic-showcase start
 
 $ gapic-showcase start --port 1234
 > 2018/09/19 01:57:09 Showcase listening on port: :1234
-```
-
-##### Spinning Up a Server Daemon
-```sh
-Spinning Up a Server Daemon
-$ sudo gapic-showcase daemon install --port 1234
-$ sudo gapic-showcase daemon start
-# Showcase daemon is now running in accepting requests on port 1234.
-$ sudo gapic-showcase daemon stop
-$ sudo gapic-showcase daemon uninstall
 ```
 
 #### Making Showcase Service Calls
