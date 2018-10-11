@@ -370,6 +370,7 @@ func TestPagedExpand_invalidArgs(t *testing.T) {
 		{PageSize: -1},
 		{PageToken: "-1"},
 		{PageToken: "BOGUS"},
+		{Content: "one", PageToken: "1"},
 		{Content: "one", PageToken: "2"},
 	}
 	server := NewEchoServer()

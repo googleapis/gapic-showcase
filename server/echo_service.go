@@ -106,8 +106,12 @@ func (s *echoServerImpl) PagedExpand(ctx context.Context, in *pb.PagedExpandRequ
 	if in.GetPageToken() != "" {
 		token, err := strconv.Atoi(in.GetPageToken())
 		token32 := int32(token)
-		if err != nil || token32 < 0 || token32 > int32(len(words)) {
-			return nil, status.Errorf(codes.InvalidArgument, "Invalid page token: %s. Token must be within the range [0, %d]", in.GetPageToken(), len(words))
+		if err != nil || token32 < 0 || token32 >= int32(len(words)) {
+			return nil, status.Errorf(
+				codes.InvalidArgument,
+				"Invalid page token: %s. Token must be within the range [0, %d)",
+				in.GetPageToken(),
+				len(words))
 		}
 		start = token32
 	}

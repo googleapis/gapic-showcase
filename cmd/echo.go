@@ -68,6 +68,8 @@ func init() {
 				defer cancel()
 				req := &pb.EchoRequest{
 					Response: &pb.EchoRequest_Content{Content: strings.Join(args, " ")}}
+				// The response or error of this request will be handled by the
+				// registered interceptors.
 				echoClient.Echo(ctx, req)
 			},
 			PostRun: closeConnection,
@@ -82,17 +84,12 @@ func init() {
 				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 				defer cancel()
 				req := &pb.ExpandRequest{Content: strings.Join(args, " ")}
-				stream, err := echoClient.Expand(ctx, req)
-				if err != nil {
-					errLog.Fatalf("%+v", err)
-				}
+				stream, _ := echoClient.Expand(ctx, req)
 				for {
+					// The response or error of this request will be handled by the
+					// registered interceptors.
 					_, err := stream.Recv()
 					if err == io.EOF {
-						return
-					}
-					if err != nil {
-						errLog.Fatalf("%+v", err)
 						return
 					}
 				}
@@ -121,6 +118,8 @@ func init() {
 						Response: &pb.EchoRequest_Content{Content: input}}
 					stream.Send(req)
 				}
+				// The response or error of this request will be handled by the
+				// registered interceptors.
 				stream.CloseAndRecv()
 			},
 			PostRun: closeConnection,
@@ -138,12 +137,10 @@ func init() {
 				// Poll for responses
 				go func() {
 					for {
+						// The response or error of this request will be handled by the
+						// registered interceptors.
 						_, err := stream.Recv()
 						if err == io.EOF {
-							return
-						}
-						if err != nil {
-							errLog.Fatalf("%+v", err)
 							return
 						}
 					}
@@ -180,6 +177,9 @@ func init() {
 				PageToken: pageToken,
 				PageSize:  int32(pageSize),
 			}
+
+			// The response or error of this request will be handled by the
+			// registered interceptors.
 			echoClient.PagedExpand(ctx, req)
 		},
 		PostRun: closeConnection,

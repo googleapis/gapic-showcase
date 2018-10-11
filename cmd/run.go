@@ -47,8 +47,8 @@ func init() {
 
 			// Setup Server.
 			opts := []grpc.ServerOption{
-				grpc.StreamInterceptor(logStreamRequests),
-				grpc.UnaryInterceptor(logUnaryRequests),
+				grpc.StreamInterceptor(logServerStreaming),
+				grpc.UnaryInterceptor(logServerUnary),
 			}
 			s := grpc.NewServer(opts...)
 			defer s.GracefulStop()
