@@ -53,7 +53,7 @@ jobs:
           command: go test ./... -coverprofile=coverage.txt -covermode=atomic
       - run:
           name: Spin up showcase server.
-          command: gapic-showcase start
+          command: gapic-showcase run
           background: true
       - run:
           name: Sanity check the server.

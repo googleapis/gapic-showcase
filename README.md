@@ -33,7 +33,7 @@ $ export GAPIC_SHOWCASE_VERSION=0.0.6
 $ export OS=linux
 $ export ARCH=amd64
 $ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${GAPIC_SHOWCASE_VERSION}-${OS}-${ARCH} | sudo tar -zx -- --directory /usr/local/bin/
-$ gapic-showcase start
+$ gapic-showcase run
 > 2018/09/19 02:13:09 Showcase listening on port: :7469
 ```
 
@@ -48,7 +48,7 @@ $ docker run -it gcr.io/gapic-showcase/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
 #### Go Installation
 ```sh
 $ go install github.com/googleapis/gapic-showcase
-$ gapic-showcase start
+$ gapic-showcase run
 > 2018/09/19 02:13:09 Showcase listening on port: :7469
 ```
 
@@ -110,8 +110,8 @@ describe Google::Showcase::V1alpha1::EchoClient do
 end
 ```
 
-### Step 3. Start the Showcase Server
-The integration test needs a server to send its requests to. Download and start
+### Step 3. Run the Showcase Server
+The integration test needs a server to send its requests to. Download and run
 the server so that gapic-showcase is available for the tests.
 
 ```sh
@@ -119,7 +119,7 @@ $ export GAPIC_SHOWCASE_VERSION=0.0.6
 $ export OS=linux
 $ export ARCH=amd64
 $ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${OS}-${ARCH} | sudo tar -zx -- --directory /usr/local/bin/
-$ gapic-showcase start
+$ gapic-showcase run
 > 2018/09/19 02:13:09 Showcase listening on port: :7469
 ```
 
@@ -143,7 +143,7 @@ descriptor set compiled from the gapic-showcase service protos.
 Check out our [releases](https://github.com/googleapis/gapic-showcase/releases) page to see our released artifacts.
 
 ### CLI Tool
-The GAPIC Showcase CLI Tool is used for two purposes, to start the
+The GAPIC Showcase CLI Tool is used for two purposes, to run the
 gapic-showcase server, and to make requests to an already running gapic-showcase
 server.
 
@@ -160,10 +160,10 @@ server will expose the GAPIC Showcase services port 7469 by default.
 
 ##### Spinning Up the Server
 ```sh
-$ gapic-showcase start
+$ gapic-showcase run
 > 2018/09/19 01:57:09 Showcase listening on port: :7469
 
-$ gapic-showcase start --port 1234
+$ gapic-showcase run --port 1234
 > 2018/09/19 01:57:09 Showcase listening on port: :1234
 ```
 
@@ -174,7 +174,7 @@ API.
 
 ##### Example
 ```sh
-$ gapic-showcase start                         
+$ gapic-showcase run                    
 > 2018/09/19 02:13:09 Showcase listening on port: :7469
 > 2018/09/19 02:14:08 Received Unary Request for Method: /google.showcase.v1alpha2.Echo/Echo
 > 2018/09/19 02:14:08     Request:  content:"hello world"
