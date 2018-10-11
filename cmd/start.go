@@ -15,8 +15,6 @@
 package cmd
 
 import (
-	"context"
-	"fmt"
 	"log"
 	"net"
 	"strings"
@@ -62,8 +60,8 @@ func startServer(port string) {
 
 	// Setup Server.
 	opts := []grpc.ServerOption{
-		grpc.StreamInterceptor(logStreamRequests),
-		grpc.UnaryInterceptor(logUnaryRequests),
+		grpc.StreamInterceptor(logServerStreaming),
+		grpc.UnaryInterceptor(logServerUnary),
 	}
 	s := grpc.NewServer(opts...)
 	defer s.GracefulStop()
@@ -72,56 +70,4 @@ func startServer(port string) {
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
 	s.Serve(lis)
-}
-
-func logUnaryRequests(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	stdLog.Printf("Received Unary Request for Method: %s\n", info.FullMethod)
-	stdLog.Printf("    Request:  %+v\n", req)
-	resp, err := handler(ctx, req)
-	if err == nil {
-		stdLog.Printf("    Returning Response: %+v\n", resp)
-	} else {
-		stdLog.Printf("    Returning Error: %+v\n", err)
-	}
-	stdLog.Println("")
-	return resp, err
-}
-
-type loggingServerStream struct {
-	info *grpc.StreamServerInfo
-
-	grpc.ServerStream
-}
-
-func (s *loggingServerStream) SendMsg(m interface{}) error {
-	stdLog.Printf("%s Stream for Method: %s\n", s.streamType(), s.info.FullMethod)
-	stdLog.Printf("    Sending Message:  %+v\n", m)
-	stdLog.Println("")
-
-	return s.ServerStream.SendMsg(m)
-}
-
-func (s *loggingServerStream) RecvMsg(m interface{}) error {
-	err := s.ServerStream.RecvMsg(m)
-	if fmt.Sprintf("%v", m) != "" {
-		stdLog.Printf("%s Stream for Method: %s\n", s.streamType(), s.info.FullMethod)
-		stdLog.Printf("    Recieving Message:  %v\n", m)
-		stdLog.Println("")
-	}
-
-	return err
-}
-
-func (s *loggingServerStream) streamType() string {
-	if s.info.IsClientStream && s.info.IsServerStream {
-		return "Bi-directional"
-	} else if s.info.IsClientStream {
-		return "Client"
-	}
-	return "Server"
-}
-
-func logStreamRequests(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	loggingStream := &loggingServerStream{info, ss}
-	return handler(srv, loggingStream)
 }

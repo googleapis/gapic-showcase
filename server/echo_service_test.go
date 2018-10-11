@@ -365,58 +365,87 @@ func zeroNow() time.Time {
 	return time.Unix(0, 0)
 }
 
-func TestPagination_invalidArgs(t *testing.T) {
-	tests := []*pb.PaginationRequest{
-		{PageSize: 0},
+func TestPagedExpand_invalidArgs(t *testing.T) {
+	tests := []*pb.PagedExpandRequest{
 		{PageSize: -1},
-		{MaxResponse: -1},
 		{PageToken: "-1"},
 		{PageToken: "BOGUS"},
-		{MaxResponse: 1, PageToken: "2"},
+		{Content: "one", PageToken: "2"},
 	}
 	server := NewEchoServer()
 	for _, in := range tests {
-		_, err := server.Pagination(context.Background(), in)
+		_, err := server.PagedExpand(context.Background(), in)
 		s, _ := status.FromError(err)
 		if s.Code() != codes.InvalidArgument {
-			t.Errorf("Pagination with input '%s', expected to return code '%d' but returned code'%d",
-				in.String(), codes.InvalidArgument, s.Code())
+			t.Errorf("PagedExpand() expected error code: %d, got error code %d",
+				codes.InvalidArgument, s.Code())
 		}
 	}
 }
 
-func TestPagination(t *testing.T) {
+func TestPagedExpand(t *testing.T) {
 	tests := []struct {
-		in  *pb.PaginationRequest
-		out *pb.PaginationResponse
+		in  *pb.PagedExpandRequest
+		out *pb.PagedExpandResponse
 	}{
 		{
-			&pb.PaginationRequest{MaxResponse: 3},
-			&pb.PaginationResponse{Responses: []int32{0, 1, 2}},
+			&pb.PagedExpandRequest{Content: "Hello world!"},
+			&pb.PagedExpandResponse{
+				Responses: []*pb.EchoResponse{
+					&pb.EchoResponse{Content: "Hello"},
+					&pb.EchoResponse{Content: "world!"},
+				},
+			},
 		},
 		{
-			&pb.PaginationRequest{PageSize: 3, MaxResponse: 2},
-			&pb.PaginationResponse{Responses: []int32{0, 1}},
+			&pb.PagedExpandRequest{PageSize: 3, Content: "Hello world!"},
+			&pb.PagedExpandResponse{
+				Responses: []*pb.EchoResponse{
+					&pb.EchoResponse{Content: "Hello"},
+					&pb.EchoResponse{Content: "world!"},
+				},
+			},
 		},
 		{
-			&pb.PaginationRequest{PageSize: 3, MaxResponse: 10},
-			&pb.PaginationResponse{Responses: []int32{0, 1, 2}, NextPageToken: "3"},
+			&pb.PagedExpandRequest{
+				PageSize: 3,
+				Content:  "The rain in Spain falls mainly on the plain!",
+			},
+			&pb.PagedExpandResponse{
+				Responses: []*pb.EchoResponse{
+					&pb.EchoResponse{Content: "The"},
+					&pb.EchoResponse{Content: "rain"},
+					&pb.EchoResponse{Content: "in"},
+				},
+				NextPageToken: "3",
+			},
 		},
 		{
-			&pb.PaginationRequest{PageSize: 3, MaxResponse: 10, PageToken: "3"},
-			&pb.PaginationResponse{Responses: []int32{3, 4, 5}, NextPageToken: "6"},
+			&pb.PagedExpandRequest{
+				PageSize:  3,
+				PageToken: "3",
+				Content:   "The rain in Spain falls mainly on the plain!",
+			},
+			&pb.PagedExpandResponse{
+				Responses: []*pb.EchoResponse{
+					&pb.EchoResponse{Content: "Spain"},
+					&pb.EchoResponse{Content: "falls"},
+					&pb.EchoResponse{Content: "mainly"},
+				},
+				NextPageToken: "6",
+			},
 		},
 	}
 
 	server := &echoServerImpl{sleepF: nil}
 	for _, test := range tests {
-		out, err := server.Pagination(context.Background(), test.in)
+		out, err := server.PagedExpand(context.Background(), test.in)
 		if err != nil {
 			t.Error(err)
 		}
 		if !reflect.DeepEqual(test.out.GetResponses(), out.GetResponses()) ||
 			test.out.GetNextPageToken() != out.GetNextPageToken() {
-			t.Errorf("Pagination with input '%s', expected '%s', but returned %s",
+			t.Errorf("PagedExpand with input '%s', expected: '%s', got: %s",
 				test.in.String(), test.out.String(), out.String())
 		}
 	}
