@@ -64,6 +64,7 @@ jobs:
             # The echo needs to sleep to give time for the stream response
             (echo -e "hello\nworld" && sleep .1) | gapic-showcase collect
             (echo -e "hello\nworld" && sleep .1) | gapic-showcase chat
+            gapic-showcase pagedExpand --page_size 3 --page_token 3 one two three o'clock four o'clock rock
       - run:
           name: Submit coverage data to codecov.
           command: bash <(curl -s https://codecov.io/bash)

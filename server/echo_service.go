@@ -96,6 +96,48 @@ func (s *echoServerImpl) Chat(stream pb.Echo_ChatServer) error {
 	}
 }
 
+func (s *echoServerImpl) PagedExpand(ctx context.Context, in *pb.PagedExpandRequest) (*pb.PagedExpandResponse, error) {
+	if in.GetPageSize() < 0 {
+		return nil, status.Error(codes.InvalidArgument, "The page size provided must not be negative.")
+	}
+	words := strings.Fields(in.GetContent())
+
+	start := int32(0)
+	if in.GetPageToken() != "" {
+		token, err := strconv.Atoi(in.GetPageToken())
+		token32 := int32(token)
+		if err != nil || token32 < 0 || token32 >= int32(len(words)) {
+			return nil, status.Errorf(
+				codes.InvalidArgument,
+				"Invalid page token: %s. Token must be within the range [0, %d)",
+				in.GetPageToken(),
+				len(words))
+		}
+		start = token32
+	}
+
+	pageSize := in.GetPageSize()
+	if pageSize == 0 {
+		pageSize = int32(len(words))
+	}
+	end := min(start+pageSize, int32(len(words)))
+
+	responses := []*pb.EchoResponse{}
+	for _, word := range words[start:end] {
+		responses = append(responses, &pb.EchoResponse{Content: word})
+	}
+
+	nextToken := ""
+	if end < int32(len(words)) {
+		nextToken = strconv.Itoa(int(end))
+	}
+
+	return &pb.PagedExpandResponse{
+		Responses:     responses,
+		NextPageToken: nextToken,
+	}, nil
+}
+
 func (s *echoServerImpl) Wait(ctx context.Context, in *pb.WaitRequest) (*pb.WaitResponse, error) {
 	d, _ := ptypes.Duration(in.GetResponseDelay())
 	s.sleepF(d)
@@ -105,45 +147,9 @@ func (s *echoServerImpl) Wait(ctx context.Context, in *pb.WaitRequest) (*pb.Wait
 	return in.GetSuccess(), nil
 }
 
-func (s *echoServerImpl) Pagination(ctx context.Context, in *pb.PaginationRequest) (*pb.PaginationResponse, error) {
-	if in.GetPageSize() < 0 {
-		return nil, status.Error(codes.InvalidArgument, "The page size provided must not be negative.")
+func min(x int32, y int32) int32 {
+	if x < y {
+		return x
 	}
-
-	if in.GetMaxResponse() <= 0 {
-		return nil, status.Error(codes.InvalidArgument, "The maximum response provided must be positive.")
-	}
-
-	start := int32(0)
-	if in.GetPageToken() != "" {
-		token, err := strconv.Atoi(in.GetPageToken())
-		token32 := int32(token)
-		if err != nil || token32 < 0 || token32 > in.GetMaxResponse() {
-			return nil, status.Errorf(codes.InvalidArgument, "Invalid page token: %s. Token must be within the range [0, request.MaxResponse]", in.GetPageToken())
-		}
-		start = token32
-	}
-
-	end := start + in.GetPageSize()
-	if in.GetPageSize() == 0 {
-		end = in.GetMaxResponse()
-	}
-	if end > in.GetMaxResponse() {
-		end = in.GetMaxResponse()
-	}
-
-	nextToken := ""
-	if end < in.GetMaxResponse() {
-		nextToken = strconv.Itoa(int(end))
-	}
-
-	page := []int32{}
-	for i := start; i < end; i++ {
-		page = append(page, i)
-	}
-
-	return &pb.PaginationResponse{
-		Responses:     page,
-		NextPageToken: nextToken,
-	}, nil
+	return y
 }

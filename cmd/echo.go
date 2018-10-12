@@ -21,7 +21,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang/protobuf/proto"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/spf13/cobra"
 
@@ -30,6 +29,8 @@ import (
 
 func init() {
 	var addr, port string
+	var pageToken string
+	var pageSize int
 	var echoClient pb.EchoClient
 	var conn *grpc.ClientConn
 
@@ -38,7 +39,12 @@ func init() {
 			port = ":" + port
 		}
 		var err error
-		conn, err = grpc.Dial(addr+port, grpc.WithInsecure())
+		conn, err = grpc.Dial(
+			addr+port,
+			grpc.WithInsecure(),
+			grpc.WithUnaryInterceptor(logClientUnary),
+			grpc.WithStreamInterceptor(logClientStreaming),
+		)
 		if err != nil {
 			errLog.Fatalf("did not connect: %v", err)
 		}
@@ -62,12 +68,9 @@ func init() {
 				defer cancel()
 				req := &pb.EchoRequest{
 					Response: &pb.EchoRequest_Content{Content: strings.Join(args, " ")}}
-				resp, err := echoClient.Echo(ctx, req)
-				if err != nil {
-					errLog.Fatalf("%+v", err)
-				}
-				stdLog.Printf("Sent Request: %s", proto.MarshalTextString(req))
-				stdLog.Printf("Got Response: %s", proto.MarshalTextString(resp))
+				// The response or error of this request will be handled by the
+				// registered interceptors.
+				echoClient.Echo(ctx, req)
 			},
 			PostRun: closeConnection,
 		},
@@ -81,24 +84,13 @@ func init() {
 				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 				defer cancel()
 				req := &pb.ExpandRequest{Content: strings.Join(args, " ")}
-				stream, err := echoClient.Expand(ctx, req)
-				if err != nil {
-					errLog.Fatalf("%+v", err)
-				}
-				stdLog.Printf("Sent Request: %s", proto.MarshalTextString(req))
-
-				// Log the responses
+				stream, _ := echoClient.Expand(ctx, req)
 				for {
-					resp, err := stream.Recv()
+					// The response or error of this request will be handled by the
+					// registered interceptors.
+					_, err := stream.Recv()
 					if err == io.EOF {
 						return
-					}
-					if err != nil {
-						stdLog.Printf("Error: %v", err)
-						return
-					}
-					if resp.Content != "" {
-						stdLog.Printf("Got Response: %s", proto.MarshalTextString(resp))
 					}
 				}
 			},
@@ -124,18 +116,11 @@ func init() {
 					}
 					req := &pb.EchoRequest{
 						Response: &pb.EchoRequest_Content{Content: input}}
-					err := stream.Send(req)
-					if err != nil {
-						errLog.Fatalf("%+v", err)
-					}
-					stdLog.Printf("Sent Request: %s", proto.MarshalTextString(req))
+					stream.Send(req)
 				}
-
-				resp, err := stream.CloseAndRecv()
-				if err != nil {
-					errLog.Fatalf("%+v", err)
-				}
-				stdLog.Printf("Got Response: %s", proto.MarshalTextString(resp))
+				// The response or error of this request will be handled by the
+				// registered interceptors.
+				stream.CloseAndRecv()
 			},
 			PostRun: closeConnection,
 		},
@@ -149,19 +134,14 @@ func init() {
 				defer cancel()
 				stream, _ := echoClient.Chat(ctx)
 
-				// Log responses
+				// Poll for responses
 				go func() {
 					for {
-						resp, err := stream.Recv()
+						// The response or error of this request will be handled by the
+						// registered interceptors.
+						_, err := stream.Recv()
 						if err == io.EOF {
 							return
-						}
-						if err != nil {
-							stdLog.Printf("Error: %v", err)
-							return
-						}
-						if resp.Content != "" {
-							stdLog.Printf("Got Response: %s", proto.MarshalTextString(resp))
 						}
 					}
 				}()
@@ -176,16 +156,47 @@ func init() {
 					}
 					req := &pb.EchoRequest{
 						Response: &pb.EchoRequest_Content{Content: input}}
-					err := stream.Send(req)
-					if err != nil {
-						errLog.Fatalf("%+v", err)
-					}
-					stdLog.Printf("Sent Request: %s", proto.MarshalTextString(req))
+					stream.Send(req)
 				}
 			},
 			PostRun: closeConnection,
 		},
 	}
+
+	pagedExpandCmd := &cobra.Command{
+		Use:    "pagedExpand [content]",
+		Short:  "Expands the given content and returns the expansion as a paged list.",
+		Args:   cobra.MinimumNArgs(1),
+		PreRun: initClient,
+		Run: func(cmd *cobra.Command, args []string) {
+			// Make the request
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			req := &pb.PagedExpandRequest{
+				Content:   strings.Join(args, " "),
+				PageToken: pageToken,
+				PageSize:  int32(pageSize),
+			}
+
+			// The response or error of this request will be handled by the
+			// registered interceptors.
+			echoClient.PagedExpand(ctx, req)
+		},
+		PostRun: closeConnection,
+	}
+	pagedExpandCmd.Flags().StringVarP(
+		&pageToken,
+		"page_token",
+		"t",
+		"",
+		"The page token to send with this request.")
+	pagedExpandCmd.Flags().IntVarP(
+		&pageSize,
+		"page_size",
+		"s",
+		0,
+		"The page size to send with this request")
+	commands = append(commands, pagedExpandCmd)
 
 	rootCmd.AddCommand(commands...)
 	for _, command := range commands {
