@@ -150,10 +150,10 @@ func checkName(t *testing.T, req *pb.WaitRequest, op *lropb.Operation) {
 // Mock waiter type used in echo_service_test and operations_service_test to
 // check that they defer to the waiter.
 type mockWaiter struct {
-	called bool
+	req *pb.WaitRequest
 }
 
 func (w *mockWaiter) Wait(req *pb.WaitRequest) *lropb.Operation {
-	w.called = true
+	w.req = req
 	return nil
 }

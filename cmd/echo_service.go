@@ -32,7 +32,7 @@ func init() {
 	var addr, port string
 	var pageToken string
 	var pageSize int
-	var seconds int
+	var duration time.Duration
 	var echoClient pb.EchoClient
 	var conn *grpc.ClientConn
 
@@ -201,7 +201,7 @@ func init() {
 	commands = append(commands, pagedExpandCmd)
 
 	waitCmd := &cobra.Command{
-		Use:    "wait --seconds [amount] [content]",
+		Use:    "wait --duration [amount] [content]",
 		Short:  "Returns an operation that will complete after the given time.",
 		Args:   cobra.MinimumNArgs(1),
 		PreRun: initClient,
@@ -209,7 +209,7 @@ func init() {
 			// Make the request
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
-			endTime, _ := ptypes.TimestampProto(time.Now().Add(time.Second * time.Duration(seconds)))
+			endTime, _ := ptypes.TimestampProto(time.Now().Add(duration))
 			req := &pb.WaitRequest{
 				EndTime: endTime,
 				Response: &pb.WaitRequest_Success{
@@ -224,13 +224,13 @@ func init() {
 	}
 	// TODO(landrito): Add a mechanism to make it so that only the name gets
 	// printed. This will help for chaining wait -> getOperation.
-	waitCmd.Flags().IntVarP(
-		&seconds,
-		"seconds",
-		"s",
-		0,
-		"The page size to send with this request")
-	waitCmd.MarkFlagRequired("seconds")
+	waitCmd.Flags().DurationVarP(
+		&duration,
+		"duration",
+		"d",
+		time.Duration(0),
+		"The amount of time until this operation completes.")
+	waitCmd.MarkFlagRequired("duration")
 	commands = append(commands, waitCmd)
 
 	rootCmd.AddCommand(commands...)

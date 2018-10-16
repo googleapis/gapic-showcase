@@ -19,9 +19,10 @@ import (
 	"encoding/base64"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/golang/protobuf/ptypes"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/grpc/codes"
@@ -29,18 +30,19 @@ import (
 )
 
 func TestGetOperation(t *testing.T) {
-	nameBytes, _ := proto.Marshal(
-		&pb.WaitRequest{EndTime: &timestamp.Timestamp{Seconds: 1}})
+	endTime, _ := ptypes.TimestampProto(time.Now())
+	waitReq := &pb.WaitRequest{EndTime: endTime}
+	nameBytes, _ := proto.Marshal(waitReq)
 	req := &lropb.GetOperationRequest{
 		Name: fmt.Sprintf(
 			"operations/google.showcase.v1alpha2.Echo/Wait/%s",
 			base64.StdEncoding.EncodeToString(nameBytes)),
 	}
 
-	waiter := &mockWaiter{called: false}
+	waiter := &mockWaiter{}
 	server := &operationsServerImpl{waiter: waiter}
 	server.GetOperation(context.Background(), req)
-	if !waiter.called {
+	if !proto.Equal(waiter.req, waitReq) {
 		t.Error("Expected echo.Wait to defer to waiter.")
 	}
 }

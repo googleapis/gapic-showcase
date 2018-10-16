@@ -65,7 +65,7 @@ jobs:
             (echo -e "hello\nworld" && sleep .1) | gapic-showcase collect
             (echo -e "hello\nworld" && sleep .1) | gapic-showcase chat
             gapic-showcase pagedExpand --page_size 3 --page_token 3 one two three o'clock four o'clock rock
-            gapic-showcase wait --seconds 2 hello world!
+            gapic-showcase wait --duration 1s hello world!
             gapic-showcase getOperation --name operations/google.showcase.v1alpha2.Echo/Wait/CgwIxNqN3gUQsI6MxgIaDQoLaGVsbG8gd29ybGQ=
       - run:
           name: Submit coverage data to codecov.

@@ -29,7 +29,7 @@ import (
 
 // NewEchoServer returns a new EchoServer for the Showcase API.
 func NewOperationsServer() lropb.OperationsServer {
-	return &operationsServerImpl{waiter: GetWaiterSingleton()}
+	return &operationsServerImpl{waiter: waiterSingleton}
 }
 
 type operationsServerImpl struct {
@@ -37,18 +37,19 @@ type operationsServerImpl struct {
 }
 
 func (s *operationsServerImpl) GetOperation(ctx context.Context, in *lropb.GetOperationRequest) (*lropb.Operation, error) {
-	if strings.HasPrefix(in.Name, "operations/google.showcase.v1alpha2.Echo/Wait/") {
-		return s.handleWait(in)
+	prefix := "operations/google.showcase.v1alpha2.Echo/Wait/"
+	if !strings.HasPrefix(in.Name, prefix) {
+		return nil, status.Errorf(codes.NotFound, "Operation %q not found.", in.Name)
 	}
-	return nil, status.Errorf(codes.NotFound, "Operation %q not found.", in.Name)
-}
 
-func (s *operationsServerImpl) handleWait(in *lropb.GetOperationRequest) (*lropb.Operation, error) {
 	waitReq := &pb.WaitRequest{}
-	encodedBytes := strings.TrimPrefix(in.Name, "operations/google.showcase.v1alpha2.Echo/Wait/")
-	waitReqBytes, _ := base64.StdEncoding.DecodeString(encodedBytes)
+	encodedBytes := strings.TrimPrefix(in.Name, prefix)
+	waitReqBytes, err := base64.StdEncoding.DecodeString(encodedBytes)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "Operation %q not found.", in.Name)
+	}
 
-	err := proto.Unmarshal(waitReqBytes, waitReq)
+	err = proto.Unmarshal(waitReqBytes, waitReq)
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "Operation %q not found.", in.Name)
 	}

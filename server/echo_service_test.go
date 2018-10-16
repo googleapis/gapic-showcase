@@ -20,8 +20,10 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/ptypes"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
@@ -375,10 +377,12 @@ func TestPagedExpand(t *testing.T) {
 }
 
 func TestWait(t *testing.T) {
-	waiter := &mockWaiter{called: false}
+	endTime, _ := ptypes.TimestampProto(time.Now())
+	req := &pb.WaitRequest{EndTime: endTime}
+	waiter := &mockWaiter{}
 	server := &echoServerImpl{waiter: waiter}
-	server.Wait(context.Background(), nil)
-	if !waiter.called {
+	server.Wait(context.Background(), req)
+	if !proto.Equal(waiter.req, req) {
 		t.Error("Expected echo.Wait to defer to waiter.")
 	}
 }

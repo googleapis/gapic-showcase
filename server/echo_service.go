@@ -29,7 +29,7 @@ import (
 
 // NewEchoServer returns a new EchoServer for the Showcase API.
 func NewEchoServer() pb.EchoServer {
-	return &echoServerImpl{waiter: GetWaiterSingleton()}
+	return &echoServerImpl{waiter: waiterSingleton}
 }
 
 type echoServerImpl struct {

@@ -29,10 +29,6 @@ var waiterSingleton Waiter = &waiterImpl{
 	nowF: time.Now,
 }
 
-func GetWaiterSingleton() Waiter {
-	return waiterSingleton
-}
-
 type Waiter interface {
 	Wait(req *pb.WaitRequest) *lropb.Operation
 }
