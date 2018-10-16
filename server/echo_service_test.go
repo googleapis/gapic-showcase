@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	durpb "github.com/golang/protobuf/ptypes/duration"
+	"github.com/golang/protobuf/ptypes"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
@@ -290,81 +290,6 @@ func TestChat_streamErr(t *testing.T) {
 	}
 }
 
-func TestWaitSuccess(t *testing.T) {
-	tests := []struct {
-		seconds int64
-		nanos   int32
-		resp    string
-	}{
-		{1, int32(1000), "hello"},
-		{10, int32(10), "world"},
-	}
-	for _, test := range tests {
-		server := &echoServerImpl{sleepF: mockSleeper(test.seconds, test.nanos, t)}
-		in := &pb.WaitRequest{
-			ResponseDelay: &durpb.Duration{
-				Seconds: test.seconds,
-				Nanos:   test.nanos,
-			},
-			Response: &pb.WaitRequest_Success{
-				Success: &pb.WaitResponse{Content: test.resp},
-			},
-		}
-		out, err := server.Wait(context.Background(), in)
-		if err != nil {
-			t.Error(err)
-		}
-		if out.GetContent() != test.resp {
-			t.Errorf("Expected Wait test to return %s, but returned %s", out.GetContent(), test.resp)
-		}
-	}
-}
-
-func TestWaitError(t *testing.T) {
-	tests := []struct {
-		seconds int64
-		nanos   int32
-		code    codes.Code
-	}{
-		{0, int32(0), codes.InvalidArgument},
-		{1000, int32(1000), codes.Unavailable},
-	}
-
-	for _, test := range tests {
-		server := &echoServerImpl{sleepF: mockSleeper(test.seconds, test.nanos, t)}
-		in := &pb.WaitRequest{
-			ResponseDelay: &durpb.Duration{
-				Seconds: test.seconds,
-				Nanos:   test.nanos,
-			},
-			Response: &pb.WaitRequest_Error{
-				Error: status.New(test.code, "").Proto(),
-			},
-		}
-		out, err := server.Wait(context.Background(), in)
-		if out != nil {
-			t.Errorf("Wait: Expected to error with code %d but returned success", test.code)
-		}
-		s, _ := status.FromError(err)
-		if s.Code() != test.code {
-			t.Errorf("Wait: Expected to error with code %d but errored with code %d", test.code, s.Code())
-		}
-	}
-}
-
-func mockSleeper(seconds int64, nanos int32, t *testing.T) func(d time.Duration) {
-	return func(d time.Duration) {
-		expected := time.Duration(seconds)*time.Second + time.Duration(nanos)*time.Nanosecond
-		if d != expected {
-			t.Errorf("Expected to sleep %d but was sleep was calledwith %d", expected, d)
-		}
-	}
-}
-
-func zeroNow() time.Time {
-	return time.Unix(0, 0)
-}
-
 func TestPagedExpand_invalidArgs(t *testing.T) {
 	tests := []*pb.PagedExpandRequest{
 		{PageSize: -1},
@@ -438,7 +363,7 @@ func TestPagedExpand(t *testing.T) {
 		},
 	}
 
-	server := &echoServerImpl{sleepF: nil}
+	server := NewEchoServer()
 	for _, test := range tests {
 		out, err := server.PagedExpand(context.Background(), test.in)
 		if err != nil {
@@ -448,5 +373,16 @@ func TestPagedExpand(t *testing.T) {
 			t.Errorf("PagedExpand with input '%q', expected: '%q', got: %q",
 				test.in.String(), test.out.String(), out.String())
 		}
+	}
+}
+
+func TestWait(t *testing.T) {
+	endTime, _ := ptypes.TimestampProto(time.Now())
+	req := &pb.WaitRequest{EndTime: endTime}
+	waiter := &mockWaiter{}
+	server := &echoServerImpl{waiter: waiter}
+	server.Wait(context.Background(), req)
+	if !proto.Equal(waiter.req, req) {
+		t.Error("Expected echo.Wait to defer to waiter.")
 	}
 }

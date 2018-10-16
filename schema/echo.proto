@@ -16,7 +16,7 @@ syntax = "proto3";
 
 import "google/api/annotations.proto";
 import "google/longrunning/operations.proto";
-import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
 import "google/rpc/status.proto";
 
 package google.showcase.v1alpha2;
@@ -87,7 +87,7 @@ service Echo {
 
   // This method will wait the requested amount of and then return.
   // This method showcases how a client handles a request timing out.
-  rpc Wait(WaitRequest) returns (WaitResponse) {
+  rpc Wait(WaitRequest) returns (google.longrunning.Operation) {
     option (google.api.http) = {
       post: "/v1alpha2/echo:wait"
       body: "*"
@@ -122,28 +122,6 @@ message ExpandRequest {
   google.rpc.Status error = 2;
 }
 
-// The request for Wait method.
-message WaitRequest {
-  // The amount of time to wait before returning a response.
-  google.protobuf.Duration response_delay = 1 [(google.api.required) = true];
-
-  oneof response {
-    // The error that will be returned by the server. If this code is specified
-    // to be the OK rpc code, an empty response will be returned.
-    google.rpc.Status error = 2;
-
-    // The response to be returned that will signify successful method call.
-    WaitResponse success = 3;
-  }
-}
-
-// The response for Wait method.
-message WaitResponse {
-  // This content can contain anything, the server will not depend on a value
-  // here.
-  string content = 1;
-}
-
 // The request for the PagedExpand method.
 message PagedExpandRequest {
   // The string to expand.
@@ -163,4 +141,32 @@ message PagedExpandResponse {
 
   // The next page token.
   string next_page_token = 2;
+}
+
+// The request for Wait method.
+message WaitRequest {
+  // The time that this operation will complete.
+  google.protobuf.Timestamp end_time = 1;
+
+
+  oneof response {
+    // The error that will be returned by the server. If this code is specified
+    // to be the OK rpc code, an empty response will be returned.
+    google.rpc.Status error = 2;
+
+    // The response to be returned on operation completion.
+    WaitResponse success = 3;
+  }
+}
+
+// The result of the Wait operation.
+message WaitResponse {
+  // This content of the result.
+  string content = 1;
+}
+
+// The metadata for Wait operation.
+message WaitMetadata {
+  // The time that this operation will complete.
+  google.protobuf.Timestamp end_time =1;
 }

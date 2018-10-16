@@ -21,6 +21,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/golang/protobuf/ptypes"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/spf13/cobra"
 
@@ -31,6 +32,7 @@ func init() {
 	var addr, port string
 	var pageToken string
 	var pageSize int
+	var duration time.Duration
 	var echoClient pb.EchoClient
 	var conn *grpc.ClientConn
 
@@ -197,6 +199,39 @@ func init() {
 		0,
 		"The page size to send with this request")
 	commands = append(commands, pagedExpandCmd)
+
+	waitCmd := &cobra.Command{
+		Use:    "wait --duration [amount] [content]",
+		Short:  "Returns an operation that will complete after the given time.",
+		Args:   cobra.MinimumNArgs(1),
+		PreRun: initClient,
+		Run: func(cmd *cobra.Command, args []string) {
+			// Make the request
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			endTime, _ := ptypes.TimestampProto(time.Now().Add(duration))
+			req := &pb.WaitRequest{
+				EndTime: endTime,
+				Response: &pb.WaitRequest_Success{
+					Success: &pb.WaitResponse{Content: strings.Join(args, " ")}},
+			}
+
+			// The response or error of this request will be handled by the
+			// registered interceptors.
+			echoClient.Wait(ctx, req)
+		},
+		PostRun: closeConnection,
+	}
+	// TODO(landrito): Add a mechanism to make it so that only the name gets
+	// printed. This will help for chaining wait -> getOperation.
+	waitCmd.Flags().DurationVarP(
+		&duration,
+		"duration",
+		"d",
+		time.Duration(0),
+		"The amount of time until this operation completes.")
+	waitCmd.MarkFlagRequired("duration")
+	commands = append(commands, waitCmd)
 
 	rootCmd.AddCommand(commands...)
 	for _, command := range commands {

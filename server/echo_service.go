@@ -19,21 +19,21 @@ import (
 	"io"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
+
+	lropb "google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 // NewEchoServer returns a new EchoServer for the Showcase API.
 func NewEchoServer() pb.EchoServer {
-	return &echoServerImpl{sleepF: time.Sleep}
+	return &echoServerImpl{waiter: waiterSingleton}
 }
 
 type echoServerImpl struct {
-	sleepF func(time.Duration)
+	waiter Waiter
 }
 
 func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.EchoResponse, error) {
@@ -138,18 +138,13 @@ func (s *echoServerImpl) PagedExpand(ctx context.Context, in *pb.PagedExpandRequ
 	}, nil
 }
 
-func (s *echoServerImpl) Wait(ctx context.Context, in *pb.WaitRequest) (*pb.WaitResponse, error) {
-	d, _ := ptypes.Duration(in.GetResponseDelay())
-	s.sleepF(d)
-	if in.GetError() != nil {
-		return nil, status.ErrorProto(in.GetError())
-	}
-	return in.GetSuccess(), nil
-}
-
 func min(x int32, y int32) int32 {
 	if x < y {
 		return x
 	}
 	return y
+}
+
+func (s *echoServerImpl) Wait(ctx context.Context, in *pb.WaitRequest) (*lropb.Operation, error) {
+	return s.waiter.Wait(in), nil
 }
