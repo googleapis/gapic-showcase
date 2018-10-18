@@ -22,6 +22,8 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/googleapis/gapic-showcase/util"
 )
 
 func main() {
@@ -31,6 +33,8 @@ func main() {
 	teardown()
 }
 
+// TODO(landrito): theres a lot of similar things happening here in and in the
+// compile protos command. Consolodate the repeated code into a base util file.
 func setup() {
 	distDir := filepath.Join(showcaseDir(), "dist")
 	if err := os.RemoveAll(distDir); err != nil {
@@ -58,7 +62,7 @@ func teardown() {
 
 func stageProtos() {
 	// Get proto dependencies
-	execute(
+	util.Execute(
 		"git",
 		"clone",
 		"-b",
@@ -85,7 +89,7 @@ func stageProtos() {
 	}
 
 	for _, f := range files {
-		execute("cp", f, protoDest)
+		util.Execute("cp", f, protoDest)
 	}
 }
 
@@ -116,14 +120,14 @@ func compileDescriptors() {
 		"-o",
 		filepath.Join(showcaseDir(), "dist", fmt.Sprintf("gapic-showcase-%s.desc", version())),
 	}
-	execute(append(command, files...)...)
+	util.Execute(append(command, files...)...)
 }
 
 func tarProtos() {
 	protoDir := filepath.Join(showcaseDir(), "tmp", "api-common-protos")
 	output := filepath.Join(showcaseDir(), "dist", fmt.Sprintf("gapic-showcase-%s-protos.tar.gz", version()))
 
-	execute("tar", "-zcf", output, "-C", protoDir, "google")
+	util.Execute("tar", "-zcf", output, "-C", protoDir, "google")
 }
 
 func compileBinaries() {
@@ -132,7 +136,7 @@ func compileBinaries() {
 
 	// Mousetrap is a windows dependency that is not implicitly got since
 	// we only get the linux dependencies.
-	execute("go", "get", "github.com/mitchellh/gox", "github.com/inconshreveable/mousetrap")
+	util.Execute("go", "get", "github.com/mitchellh/gox", "github.com/inconshreveable/mousetrap")
 
 	osArchs := []string{
 		"windows/amd64",
@@ -141,7 +145,7 @@ func compileBinaries() {
 		"linux/arm",
 	}
 	for _, osArch := range osArchs {
-		execute(
+		util.Execute(
 			"gox",
 			fmt.Sprintf("-osarch=%s", osArch),
 			"-output",
@@ -154,29 +158,13 @@ func compileBinaries() {
 		// The windows binaries are suffixed with '.exe'. This allows us to create
 		// tarballs of the executables whether or not they contain a suffix.
 		files, _ := filepath.Glob(filepath.Join(dir, "gapic-showcase*"))
-		execute(
+		util.Execute(
 			"tar",
 			"-zcf",
 			filepath.Join(outputDir, filepath.Base(dir)+".tar.gz"),
 			"-C",
 			filepath.Dir(files[0]),
 			filepath.Base(files[0]))
-	}
-}
-
-func execute(args ...string) {
-	log.Print("Executing: ", strings.Join(args, " "))
-	if output, err := exec.Command(args[0], args[1:]...).CombinedOutput(); err != nil {
-		log.Fatalf("%s", output)
-	}
-}
-
-func executeInDir(dir string, args ...string) {
-	log.Printf("Executing in %s: %s", dir, strings.Join(args, " "))
-	cmd := exec.Command(args[0], args[1:]...)
-	cmd.Dir = dir
-	if output, err := cmd.CombinedOutput(); err != nil {
-		log.Fatalf("%s", output)
 	}
 }
 
@@ -202,8 +190,8 @@ var versionMemo string
 
 func version() string {
 	verOnce.Do(func() {
-		executeInDir(showcaseDir(), "go", "get")
-		executeInDir(showcaseDir(), "go", "install")
+		util.ExecuteInDir(showcaseDir(), "go", "get")
+		util.ExecuteInDir(showcaseDir(), "go", "install")
 		version, err := exec.Command("gapic-showcase", "--version").Output()
 		if err != nil {
 			log.Fatal("Failed getting showcase version")

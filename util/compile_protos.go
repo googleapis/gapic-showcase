@@ -12,17 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package util
 
 import (
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 )
 
-func main() {
+func CompileProtos(version string) {
 	// Check if protoc is installed.
 	if err := exec.Command("protoc", "--version").Run(); err != nil {
 		log.Fatal("Error: 'protoc' is expected to be installed on the path.")
@@ -41,7 +40,7 @@ func main() {
 		log.Fatalf("Error, could not remove path %s: %v", tmpDir, err)
 	}
 
-	execute(
+	Execute(
 		"git",
 		"clone",
 		"-b",
@@ -57,7 +56,7 @@ func main() {
 		"api-common-protos",
 		"google",
 		"showcase",
-		"v1alpha2")
+		version)
 	if err := os.MkdirAll(protoDest, 0755); err != nil {
 		log.Fatalf("Error, could not make path %s: %v", protoDest, err)
 	}
@@ -68,7 +67,7 @@ func main() {
 	}
 
 	for _, f := range files {
-		execute("cp", f, protoDest)
+		Execute("cp", f, protoDest)
 	}
 
 	// Compile protos
@@ -83,13 +82,5 @@ func main() {
 		"--go_out=plugins=grpc:" + gopath + "/src",
 		"--proto_path=" + filepath.Join(showcaseDir, "tmp", "api-common-protos"),
 	}
-	execute(append(command, files...)...)
-	os.Exit(0)
-}
-
-func execute(args ...string) {
-	log.Print("Executing: ", strings.Join(args, " "))
-	if output, err := exec.Command(args[0], args[1:]...).CombinedOutput(); err != nil {
-		log.Fatalf("%s", output)
-	}
+	Execute(append(command, files...)...)
 }
