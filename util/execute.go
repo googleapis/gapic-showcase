@@ -17,18 +17,15 @@ package util
 import (
 	"log"
 	"os/exec"
-	"strings"
 )
 
 func Execute(args ...string) {
-	log.Print("Executing: ", strings.Join(args, " "))
 	if output, err := exec.Command(args[0], args[1:]...).CombinedOutput(); err != nil {
 		log.Fatalf("%s", output)
 	}
 }
 
 func ExecuteInDir(dir string, args ...string) {
-	log.Printf("Executing in %s: %s", dir, strings.Join(args, " "))
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Dir = dir
 	if output, err := cmd.CombinedOutput(); err != nil {

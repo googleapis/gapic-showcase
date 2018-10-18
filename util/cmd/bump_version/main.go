@@ -15,12 +15,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -45,8 +45,7 @@ func main() {
 			}
 
 			if bumpMajor || bumpMinor || bumpPatch {
-				re := regexp.MustCompile("[0-9]+")
-				versions := re.FindAllString(CURRENT_RELEASE, 3)
+				versions := strings.Split(CURRENT_RELEASE, ".")
 
 				major, _ := strconv.Atoi(versions[0])
 				newMajor := major + btoi(bumpMajor)
@@ -107,52 +106,39 @@ func replace(old, new string) {
 		"googleapis",
 		"gapic-showcase")
 
-	filePatterns := []string{"*.go", "*.md", "*.yml"}
-
-	for _, pattern := range filePatterns {
-		err := filepath.Walk(showcaseDir, replacer(pattern, old, new))
-		if err != nil {
-			log.Fatalf("%v", err)
-		}
+	filetypes := []string{".go", ".md", ".yml"}
+	err := filepath.Walk(showcaseDir, replacer(filetypes, old, new))
+	if err != nil {
+		log.Fatalf("%v", err)
 	}
 }
 
-func replacer(pattern, old, new string) filepath.WalkFunc {
+func replacer(filetypes []string, old, new string) filepath.WalkFunc {
 	return func(path string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-
-		if old == new {
-			return nil
-		}
-
 		if fi.IsDir() {
 			return nil
 		}
 
-		matched, err := filepath.Match(pattern, fi.Name())
+		matched := false
+		for _, t := range filetypes {
+			matched = matched || strings.HasSuffix(path, t)
+		}
+		if !matched {
+			return nil
+		}
 
-		if matched {
-			replaced := false
-			read, err := ioutil.ReadFile(path)
-			if err != nil {
+		oldBytes, err := ioutil.ReadFile(path)
+		if err != nil {
+			log.Fatalf("%v", err)
+		}
+
+		newBytes := bytes.Replace(oldBytes, []byte(old), []byte(new), -1)
+		if !bytes.Equal(oldBytes, newBytes) {
+			if err = ioutil.WriteFile(path, newBytes, 0); err != nil {
 				log.Fatalf("%v", err)
-			}
-
-			if strings.Contains(string(read), old) {
-				replaced = true
-			}
-
-			newContents := strings.Replace(string(read), old, new, -1)
-
-			err = ioutil.WriteFile(path, []byte(newContents), 0)
-			if err != nil {
-				log.Fatalf("%v", err)
-			}
-
-			if replaced {
-				log.Printf("Replaced %s with %s in %s", old, new, path)
 			}
 		}
 		return nil
