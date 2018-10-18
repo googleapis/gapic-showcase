@@ -45,19 +45,27 @@ func main() {
 			}
 
 			if bumpMajor || bumpMinor || bumpPatch {
+				if !oneof(bumpMajor, bumpMinor, bumpPatch) {
+					log.Fatalf("Expected only one of --major, --minor, and --patch.")
+				}
 				versions := strings.Split(CURRENT_RELEASE, ".")
-
 				major, _ := strconv.Atoi(versions[0])
-				newMajor := major + btoi(bumpMajor)
-
 				minor, _ := strconv.Atoi(versions[1])
-				newMinor := minor + btoi(bumpMinor)
-
 				patch, _ := strconv.Atoi(versions[2])
-				newPatch := patch + btoi(bumpPatch)
 
-				newRelease := fmt.Sprintf("%d.%d.%d", newMajor, newMinor, newPatch)
-				replace(CURRENT_RELEASE, newRelease)
+				if bumpMajor {
+					major = major + btoi(bumpMajor)
+					minor = 0
+					patch = 0
+				}
+				if bumpMinor {
+					minor = minor + btoi(bumpMinor)
+					patch = 0
+				}
+				if bumpPatch {
+					patch = patch + btoi(bumpPatch)
+				}
+				replace(CURRENT_RELEASE, fmt.Sprintf("%d.%d.%d", major, minor, patch))
 			}
 
 			if newApi != "" && CURRENT_API != newApi {
@@ -143,6 +151,19 @@ func replacer(filetypes []string, old, new string) filepath.WalkFunc {
 		}
 		return nil
 	}
+}
+
+func oneof(bs ...bool) bool {
+	ret := false
+	for _, b := range bs {
+		if ret && b {
+			return false
+		}
+		if b {
+			ret = true
+		}
+	}
+	return ret
 }
 
 func btoi(b bool) int {
