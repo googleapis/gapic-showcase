@@ -43,7 +43,7 @@ func (w *waiterImpl) Wait(req *pb.WaitRequest) *lropb.Operation {
 	done := w.nowF().After(endTime)
 
 	name := fmt.Sprintf(
-		"operations/google.showcase.v1alpha2.Echo/Wait/%s",
+		"operations/google.showcase.v1alpha3.Echo/Wait/%s",
 		base64.StdEncoding.EncodeToString(reqBytes))
 	answer := &lropb.Operation{
 		Name: name,

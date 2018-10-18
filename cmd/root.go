@@ -30,7 +30,7 @@ var rootCmd = &cobra.Command{
 	Long: `Showcase is an API used to showcase Generate API Client (GAPIC)
 features. This tool is used run the gapic-showcase server, and used to make
 to an already running server.`,
-	Version: "0.0.7",
+	Version: "0.0.8",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

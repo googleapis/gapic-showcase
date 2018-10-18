@@ -29,7 +29,7 @@ or simply by using go commands.
 
 #### Binary Installation
 ```sh
-$ export GAPIC_SHOWCASE_VERSION=0.0.6
+$ export GAPIC_SHOWCASE_VERSION=0.0.8
 $ export OS=linux
 $ export ARCH=amd64
 $ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${GAPIC_SHOWCASE_VERSION}-${OS}-${ARCH} | sudo tar -zx -- --directory /usr/local/bin/
@@ -39,7 +39,7 @@ $ gapic-showcase run
 
 #### Docker Installation
 ```sh
-$ export GAPIC_SHOWCASE_VERSION=0.0.6
+$ export GAPIC_SHOWCASE_VERSION=0.0.8
 $ docker pull gcr.io/gapic-showcase/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
 $ docker run -it gcr.io/gapic-showcase/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
 > 2018/09/19 02:13:09 Showcase listening on port: :7469
@@ -68,9 +68,9 @@ protobuf files into their gapic-generator. This client will be the client used
 for integration testing their gapic- generator.
 
 ```sh
-$ export GAPIC_SHOWCASE_VERSION=0.0.6
+$ export GAPIC_SHOWCASE_VERSION=0.0.8
 $ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${GAPIC_SHOWCASE_VERSION}-protos.tar.gz | sudo tar -zx
-$ protoc google/showcase/v1alpha2/*.proto \
+$ protoc google/showcase/v1alpha3/*.proto \
     --proto_path=. \
     --${YOUR_GAPIC_GENERATOR}_out=/dest/
 ```
@@ -115,7 +115,7 @@ The integration test needs a server to send its requests to. Download and run
 the server so that gapic-showcase is available for the tests.
 
 ```sh
-$ export GAPIC_SHOWCASE_VERSION=0.0.6
+$ export GAPIC_SHOWCASE_VERSION=0.0.8
 $ export OS=linux
 $ export ARCH=amd64
 $ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${OS}-${ARCH} | sudo tar -zx -- --directory /usr/local/bin/
@@ -176,7 +176,7 @@ API.
 ```sh
 $ gapic-showcase run                    
 > 2018/09/19 02:13:09 Showcase listening on port: :7469
-> 2018/09/19 02:14:08 Received Unary Request for Method: /google.showcase.v1alpha2.Echo/Echo
+> 2018/09/19 02:14:08 Received Unary Request for Method: /google.showcase.v1alpha3.Echo/Echo
 > 2018/09/19 02:14:08     Request:  content:"hello world"
 > 2018/09/19 02:14:08     Returning Response: content:"hello world"
 ```
