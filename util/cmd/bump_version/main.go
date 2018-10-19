@@ -49,21 +49,30 @@ func main() {
 					log.Fatalf("Expected only one of --major, --minor, and --patch.")
 				}
 				versions := strings.Split(CURRENT_RELEASE, ".")
+
+				atoi := func(s string) int {
+					i, err := strconv.Atoi(s)
+					if err != nil {
+						log.Fatal(err)
+					}
+					return i
+				}
+
 				major := atoi(versions[0])
 				minor := atoi(versions[1])
 				patch := atoi(versions[2])
 
 				if bumpMajor {
-					major = major + btoi(bumpMajor)
+					major += 1
 					minor = 0
 					patch = 0
 				}
 				if bumpMinor {
-					minor = minor + btoi(bumpMinor)
+					minor += 1
 					patch = 0
 				}
 				if bumpPatch {
-					patch = patch + btoi(bumpPatch)
+					patch += 1
 				}
 				replace(CURRENT_RELEASE, fmt.Sprintf("%d.%d.%d", major, minor, patch))
 			}
@@ -156,22 +165,9 @@ func replacer(filetypes []string, old, new string) filepath.WalkFunc {
 func oneof(bs ...bool) bool {
 	t := 0
 	for _, b := range bs {
-		t += btoi(b)
+		if b {
+			t += 1
+		}
 	}
 	return t == 1
-}
-
-func atoi(s string) int {
-	i, err := strconv.Atoi(s)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return i
-}
-
-func btoi(b bool) int {
-	if b {
-		return 1
-	}
-	return 0
 }
