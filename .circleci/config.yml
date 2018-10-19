@@ -141,6 +141,9 @@ jobs:
                 -u ${CIRCLE_PROJECT_USERNAME} \
                 -r ${CIRCLE_PROJECT_REPONAME} \
                 -c ${CIRCLE_SHA1} \
+                --prerelease \
+                -n v${VERSION} \
+                -b "[![release level](https://img.shields.io/badge/release%20level-alpha-orange.svg?style&#x3D;flat)](https://cloud.google.com/terms/launch-stages)" \
                 v${VERSION} ./dist/
 
   push-image:
