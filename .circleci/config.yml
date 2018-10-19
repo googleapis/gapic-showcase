@@ -132,7 +132,7 @@ jobs:
             mv ~/protoc3/include/* /usr/local/include/
       - run:
           name: Create release assets
-          command: go run util/release/main.go
+          command: go run util/cmd/release/main.go
       - run:
           name: Attach compiled stuff to the tag.
           command: |
