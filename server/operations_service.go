@@ -37,7 +37,7 @@ type operationsServerImpl struct {
 }
 
 func (s *operationsServerImpl) GetOperation(ctx context.Context, in *lropb.GetOperationRequest) (*lropb.Operation, error) {
-	prefix := "operations/google.showcase.v1alpha2.Echo/Wait/"
+	prefix := "operations/google.showcase.v1alpha3.Echo/Wait/"
 	if !strings.HasPrefix(in.Name, prefix) {
 		return nil, status.Errorf(codes.NotFound, "Operation %q not found.", in.Name)
 	}

@@ -35,7 +35,7 @@ func TestGetOperation(t *testing.T) {
 	nameBytes, _ := proto.Marshal(waitReq)
 	req := &lropb.GetOperationRequest{
 		Name: fmt.Sprintf(
-			"operations/google.showcase.v1alpha2.Echo/Wait/%s",
+			"operations/google.showcase.v1alpha3.Echo/Wait/%s",
 			base64.StdEncoding.EncodeToString(nameBytes)),
 	}
 
@@ -61,7 +61,24 @@ func TestGetOperation_notFoundOperation(t *testing.T) {
 
 func TestGetOperation_invalidEncodedName(t *testing.T) {
 	req := &lropb.GetOperationRequest{
-		Name: "operations/google.showcase.v1alpha2.Echo/Wait/BOGUS",
+		Name: "operations/google.showcase.v1alpha3.Echo/Wait/BOGUS",
+	}
+	server := NewOperationsServer()
+	_, err := server.GetOperation(context.Background(), req)
+	s, _ := status.FromError(err)
+	if codes.NotFound != s.Code() {
+		t.Errorf("GetOperation with invalid name expected code=%d, got %d", codes.NotFound, s.Code())
+	}
+}
+
+func TestGetOperation_invalidMarshalledProto(t *testing.T) {
+	prefix := "operations/google.showcase.v1alpha3.Echo/Wait"
+	name := fmt.Sprintf(
+		"%s/%s",
+		prefix,
+		base64.StdEncoding.EncodeToString([]byte("BOGUS")))
+	req := &lropb.GetOperationRequest{
+		Name: name,
 	}
 	server := NewOperationsServer()
 	_, err := server.GetOperation(context.Background(), req)

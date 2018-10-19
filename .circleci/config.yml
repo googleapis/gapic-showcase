@@ -66,7 +66,7 @@ jobs:
             (echo -e "hello\nworld" && sleep .1) | gapic-showcase chat
             gapic-showcase pagedExpand --page_size 3 --page_token 3 one two three o'clock four o'clock rock
             gapic-showcase wait --duration 1s hello world!
-            gapic-showcase getOperation --name operations/google.showcase.v1alpha2.Echo/Wait/CgwIxNqN3gUQsI6MxgIaDQoLaGVsbG8gd29ybGQ=
+            gapic-showcase getOperation --name operations/google.showcase.v1alpha3.Echo/Wait/CgwIxNqN3gUQsI6MxgIaDQoLaGVsbG8gd29ybGQ=
       - run:
           name: Submit coverage data to codecov.
           command: bash <(curl -s https://codecov.io/bash)
@@ -80,8 +80,8 @@ jobs:
           name: Stage showcase in proto dependencies
           command: |
               git clone -b input-contract https://github.com/googleapis/api-common-protos.git
-              mkdir -p api-common-protos/google/showcase/v1alpha2/
-              cp schema/* api-common-protos/google/showcase/v1alpha2/
+              mkdir -p api-common-protos/google/showcase/v1alpha3/
+              cp schema/* api-common-protos/google/showcase/v1alpha3/
       - run:
           name: Run kotlin generation
           command: |
