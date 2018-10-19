@@ -3,29 +3,30 @@ workflows:
   version: 2
   main:
     jobs:
-      - build
-      - kotlin-smoke-test
-      - protobufjs-load-test
-      - release:
+      - build:
+          filters: &all_commits
+            tags:
+              only: /.*/
+      - kotlin-smoke-test:
+          filters: *all_commits
+      - protobufjs-load-test:
+          filters: *all_commits
+      - github_release:
           requires:
             - build
             - kotlin-smoke-test
             - protobufjs-load-test
-          filters:
+          filters: &releases
             branches:
               ignore: /.*/
             tags:
-              only: '/^v\d+(\.\d+)*$/'
+              only: '/^v[\d.]+$/'
       - push-image:
           requires:
             - build
             - kotlin-smoke-test
             - protobufjs-load-test
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: '/^v\d+(\.\d+)*$/'
+          filters: *releases
 
 jobs:
   build:
@@ -107,7 +108,7 @@ jobs:
             node -e "require('google-proto-files').loadSync('schema/echo.proto');"
             node -e "require('google-proto-files').loadSync('schema/testing.proto');"
 
-  release:
+  github_release:
     docker:
       - image: golang:1.11
     environment:
