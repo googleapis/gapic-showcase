@@ -1,0 +1,343 @@
+// Copyright 2018 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "google/longrunning/operations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/rpc/error_details.proto";
+
+package google.showcase.v1alpha3;
+
+option go_package = "github.com/googleapis/gapic-showcase/server/genproto";
+option java_package = "com.google.showcase.v1alpha3";
+option java_multiple_files = true;
+
+option (google.api.metadata) = {
+  product_uri: "https://github.com/googleapis/gapic-showcase"
+};
+
+service ChatRoom {
+  rpc CreateRoom(CreateRoomRequest) returns (Room) {
+    option (google.api.http) = {
+      post: "/v1alpha3/rooms"
+      body: "*"
+    };
+    option (google.api.method_signature) = {
+      fields: ["display_name", "description"]
+    };
+  }
+
+  rpc GetRoom(GetRoomRequest) returns (Room) {
+    option (google.api.http) = {
+      get: "/v1alpha3/{name=rooms/*}"
+    };
+    option (google.api.method_signature) = {
+      fields: ["name"]
+    };
+  }
+
+  rpc UpdateRoom(UpdateRoomRequest) returns (Room) {
+    option (google.api.http) = {
+      patch: "/v1alpha3/{name=rooms/*}"
+      body: "*"
+    };
+    option (google.api.method_signature) = {
+      fields: ["name", "room.display_name"]
+      additional_signatures: {
+        fields: ["name", "room.display_name", "room.description"]
+      }
+    };
+  }
+
+  rpc DeleteRoom(DeleteRoomRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1alpha3/{name=rooms/*}"
+    };
+    option (google.api.method_signature) = {
+      fields: ["name"]
+    };
+  }
+
+  rpc ListRooms(ListRoomsRequest) returns (ListRoomsResponse) {
+    option (google.api.http) = {
+      get: "/v1alpha3/rooms"
+    };
+  }
+
+  rpc StreamRoom(StreamRoomRequest) returns (stream Message) {
+    option (google.api.http) = {
+      post: "/v1alpha3/{name=rooms/*}:streamRoom"
+      body: "*"
+      additional_bindings: {
+        post: "/v1alpha3/{name=global}:streamRoom"
+        body: "*"
+      }
+    };
+  }
+
+  rpc SearchAll(SearchAllRequest) returns (google.longrunning.Operation) {
+    option (google.api.http) = {
+      post: "/v1alpha3:searchAll"
+      body: "*"
+    };
+    option (google.api.operation) = {
+      response_type: "google.showcase.v1alpha3.SearchAllResponse"
+      metadata_type: "google.showcase.v1alpha3.SearchAllMetadata"
+    };
+    option (google.api.method_signature) = {
+      fields: ["query"]
+    };
+  }
+
+  rpc CreateMessage(CreateMessageRequest) returns (Message) {
+    option (google.api.http) = {
+      post: "/v1alpha3/{parent=rooms/*}/messages"
+      body: "*"
+      additional_bindings: {
+        post: "/v1alpha3/{parent=global}/messages",
+        body: "*"
+      }
+    };
+    option (google.api.method_signature) = {
+      fields: ["parent", "message"]
+    };
+  }
+
+  rpc GetMessage(GetMessageRequest) returns (Message) {
+    option (google.api.http) = {
+      get: "/v1alpha3/{parent=rooms/*}/{name=messages/*}"
+      additional_bindings: {
+        get: "/v1alpha3/{parent=global}/name={messages/*}"
+      }
+    };
+  }
+
+  rpc UpdateMessage(UpdateMessageRequest) returns (Message) {
+    option (google.api.http) = {
+      patch: "/v1alpha3/{parent=rooms/*}/{name=messages/*}"
+      body: "*"
+      additional_bindings: {
+        patch: "/v1alpha3/{parent=global}/{name=messages/*}"
+      }
+    };
+  }
+
+  rpc DeleteMessage(DeleteMessageRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1alpha3/{parent=rooms/*}/{name=messages/*}"
+      additional_bindings: {
+        patch: "/v1alpha3/{parent=global}/{name=messages/*}"
+      }
+    };
+  }
+
+  rpc ListMessages(ListMessagesRequest) returns (ListMessagesResponse) {
+    option (google.api.http) = {
+      get: "/v1alpha3/{parent=rooms/*}/messages"
+      additional_bindings: {
+        get: "/v1alpha3/{parent=global}/messages"
+      }
+    };
+  }
+
+  rpc StreamMessages(stream CreateMessageRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/v1alpha3/{parent=rooms/*}:streamMessages"
+      body: "*"
+      additional_bindings: {
+        post: "/v1alpha3/{parent=global}:streamMessages",
+        body: "*"
+      }
+    };
+  }
+
+  rpc Chat(stream CreateMessageRequest) returns (stream Message);
+}
+
+message Room {
+  string name = 1 [
+    (google.api.resource_set) = {
+      base_name: "Room"
+      resources: [
+        {base_name: "UserRoom"    path: "rooms/*"},
+        {base_name: "GlobalRoom"  path: "global"}
+      ]
+    }];
+
+  string display_name = 2;
+
+  string description = 3;
+
+  google.protobuf.Timestamp create_time = 4;
+
+  google.protobuf.Timestamp update_time = 5;
+}
+
+message CreateRoomRequest {
+  Room room = 1;
+}
+
+message GetRoomRequest {
+  string name = 1 [
+    (google.api.resource_type) = "google.showcase.v1alpha3.Room",
+    (google.api.required) = true
+  ];
+}
+
+message UpdateRoomRequest {
+  string name = 1 [
+    (google.api.resource_type) = "google.showcase.v1alpha3.Room",
+    (google.api.required) = true
+  ];
+
+  Room room = 2;
+}
+
+message DeleteRoomRequest {
+  string name = 1 [
+    (google.api.resource_type) = "google.showcase.v1alpha3.Room",
+    (google.api.required) = true
+  ];
+}
+
+message ListRoomsRequest {
+  int32 page_size = 1;
+
+  string page_token = 2;
+}
+
+message ListRoomsResponse {
+  repeated Room rooms = 1;
+
+  string next_page_token = 2;
+}
+
+message StreamRoomRequest {
+  string name = 1 [
+    (google.api.resource_type) = "google.showcase.v1alpha3.Room",
+    (google.api.required) = true
+  ];
+}
+
+message SearchAllRequest {
+  string query = 1 [(google.api.required) = true];
+}
+
+message SearchAllMetadata {
+  google.rpc.RetryInfo retry_info = 1;
+}
+
+message SearchAllResponse {
+  repeated Message messages = 1;
+}
+
+message Message {
+  string parent = 1 [
+    (google.api.resource_type) = "google.showcase.v1alpha3.Room"];
+
+  string name = 2 [(google.api.resource).path = "messages/*"];
+
+  // This will eventually become a User message that will cover add coverage for
+  // shared resources.
+  string author = 3;
+
+  string content = 4;
+
+  bytes image = 5;
+
+  google.protobuf.Timestamp create_time = 6;
+
+  google.protobuf.Timestamp update_time = 7;
+}
+
+message CreateMessageRequest {
+  string parent = 1 [
+    (google.api.resource_type) = "google.showcase.v1alpha3.Room",
+    (google.api.required) = true
+  ];
+
+  Message message = 2;
+}
+
+message GetMessageRequest {
+  string parent = 1 [
+    (google.api.resource_type) = "google.showcase.v1alpha3.Room",
+    (google.api.required) = true
+  ];
+
+  string name = 2 [
+    (google.api.resource_type) = "google.showcase.v1alpha3.Message",
+    (google.api.required) = true
+  ];
+}
+
+message UpdateMessageRequest {
+  string parent = 1 [
+    (google.api.resource_type) = "google.showcase.v1alpha3.Room",
+    (google.api.required) = true
+  ];
+
+  string name = 2 [
+    (google.api.resource_type) = "google.showcase.v1alpha3.Message",
+    (google.api.required) = true
+  ];
+
+  Message message = 3;
+}
+
+message DeleteMessageRequest {
+  string parent = 1 [
+    (google.api.resource_type) = "google.showcase.v1alpha3.Room",
+    (google.api.required) = true
+  ];
+
+  string name = 2 [
+    (google.api.resource_type) = "google.showcase.v1alpha3.Message",
+    (google.api.required) = true
+  ];
+}
+
+message ListMessagesRequest {
+  string parent = 1 [
+    (google.api.resource_type) = "google.showcase.v1alpha3.Room",
+    (google.api.required) = true
+  ];
+
+  string name = 2 [
+    (google.api.resource_type) = "google.showcase.v1alpha3.Message",
+    (google.api.required) = true
+  ];
+
+  int32 page_size = 3;
+
+  string page_token = 4;
+}
+
+message ListMessagesResponse {
+  repeated Message messages = 1;
+
+  string next_page_token = 2;
+}
+
+message ChatroomBehaviorHeader {
+  enum ServerBehavior {
+    BEHAVIOR_UNSPECIFIED = 0;
+    DEFAULT_BEHAVIOR = 1;
+    STATELESS_BEHAVIOR = 2;
+  }
+  ServerBehavior behavior = 1;
+}
