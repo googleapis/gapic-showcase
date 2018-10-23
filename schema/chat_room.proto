@@ -109,6 +109,9 @@ service ChatRoom {
     option (google.api.http) = {
       delete: "/v1alpha3/{name=rooms/*/messages/*}"
     };
+    option (google.api.method_signature) = {
+      fields: ["name"]
+    };
   }
 
   rpc ListMessages(ListMessagesRequest) returns (ListMessagesResponse) {
