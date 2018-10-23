@@ -37,8 +37,8 @@ option (google.api.resource_definition) = {
 };
 
 option (google.api.resource_definition) = {
-  name: "BlogMessage"
-  path: "blogs/{blog_id}/messages/{message_id}"
+  name: "ProfileMessage"
+  path: "users/{user_id}/profile/messages/{message_id}"
 };
 
 service Messaging {
@@ -48,7 +48,7 @@ service Messaging {
       body: "*"
     };
     option (google.api.method_signature) = {
-      fields: ["display_name", "description"]
+      fields: ["room.display_name", "room.description"]
     };
   }
 
@@ -65,12 +65,6 @@ service Messaging {
     option (google.api.http) = {
       patch: "/v1alpha3/{room.name=rooms/*}"
       body: "*"
-    };
-    option (google.api.method_signature) = {
-      fields: ["room.name", "room.display_name"]
-    };
-    option (google.api.method_signature) = {
-        fields: ["room.name", "room.display_name", "room.description"]
     };
   }
 
@@ -89,26 +83,20 @@ service Messaging {
     };
   }
 
-  rpc GetBlogForTopic(GetBlogForTopicRequest) returns (Blog) {
-    option (google.api.http) = {
-      post: "/v1alpha3/blogs"
-    };
-    option (google.api.method_signature) = {
-      fields: ["topic"]
-    };
-  }
-
   rpc CreateMessage(CreateMessageRequest) returns (Message) {
     option (google.api.http) = {
       post: "/v1alpha3/{parent=rooms/*}/messages"
       body: "*"
       additional_bindings: {
-        post: "v1alpha3/{parent=blogs/*}/messages"
+        post: "v1alpha3/{parent=users/*/profile}/messages"
         body: "*"
       }
     };
     option (google.api.method_signature) = {
-      fields: ["parent", "message"]
+      fields: ["parent", "message.text", "message.author"]
+    };
+    option (google.api.method_signature) = {
+      fields: ["parent", "message.image", "message.author"]
     };
   }
 
@@ -116,7 +104,7 @@ service Messaging {
     option (google.api.http) = {
       get: "/v1alpha3/{name=rooms/*/messages/*}"
       additional_bindings: {
-        get: "v1alpha3/{name=blogs/*/messages/*}"
+        get: "v1alpha3/{name=users/*/profile/messages/*}"
       }
     };
     option (google.api.method_signature) = {
@@ -129,7 +117,7 @@ service Messaging {
       patch: "/v1alpha3/{message.name=rooms/*/messages/*}"
       body: "*"
       additional_bindings: {
-        patch: "v1alpha3/{message.name=blogs/*/messages/*}"
+        patch: "v1alpha3/{message.name=users/*/profile/messages/*}"
         body: "*"
       }
     };
@@ -139,7 +127,7 @@ service Messaging {
     option (google.api.http) = {
       delete: "/v1alpha3/{name=rooms/*/messages/*}"
       additional_bindings: {
-        delete: "v1alpha3/{name=blogs/*/messages/*}"
+        delete: "v1alpha3/{name=users/*/profile/messages/*}"
       }
     };
     option (google.api.method_signature) = {
@@ -151,7 +139,7 @@ service Messaging {
     option (google.api.http) = {
       get: "/v1alpha3/{parent=rooms/*}/messages"
       additional_bindings: {
-        get: "v1alpha3/{parent=blogs/*}/messages}"
+        get: "v1alpha3/{parent=users/*/profile}/messages}"
       }
     };
     option (google.api.method_signature) = {
@@ -178,7 +166,7 @@ service Messaging {
       post: "/v1alpha3/{name=rooms/*}/messages:stream"
       body: "*"
       additional_bindings: {
-        post: "v1alpha3/{parent=blogs/*}/messages:stream"
+        post: "v1alpha3/{parent=users/*/profile}/messages:stream"
         body: "*"
       }
     };
@@ -189,7 +177,7 @@ service Messaging {
       post: "/v1alpha3/{parent=rooms/*}/messages:send"
       body: "*"
       additional_bindings: {
-        post: "v1alpha3/{parent=blogs/*}/messages:send"
+        post: "v1alpha3/{parent=users/*/profile}/messages:send"
         body: "*"
       }
     };
@@ -246,25 +234,19 @@ message ListRoomsResponse {
   string next_page_token = 2;
 }
 
-message Blog {
-  string name = 1 [(google.api.resource).path = "blogs/{blog_id}"];
-
-  string topic = 2;
-}
-
-message GetBlogForTopicRequest {
-  string topic = 1;
-}
-
 message Message {
   string name = 1 [
     (google.api.resource_set) = {
-      resource_types: ["RoomMessages", "BlogMessages"]
+      resource_types: [
+        "google.showcase.v1alpha3.RoomMessage",
+        "google.showcase.v1alpha3.ProfileMessage"]
     }];
 
   // This will eventually become a User message that will cover add coverage for
   // shared resources.
-  string author = 2 [(google.api.field_behavior) = REQUIRED];
+  string author = 2 [
+    (google.api.resource_type) = "google.showcase.v1alpha3.User",
+    (google.api.field_behavior) = REQUIRED];
 
   oneof content {
     string text = 3;

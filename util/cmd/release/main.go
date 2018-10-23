@@ -78,7 +78,7 @@ func stageProtos() {
 		"api-common-protos",
 		"google",
 		"showcase",
-		"v1alpha2")
+		"v1alpha3")
 	if err := os.MkdirAll(protoDest, 0755); err != nil {
 		log.Fatalf("Failed to make the dir %s: %v", protoDest, err)
 	}
@@ -106,7 +106,7 @@ func compileDescriptors() {
 		"api-common-protos",
 		"google",
 		"showcase",
-		"v1alpha2")
+		"v1alpha3")
 
 	files, err := filepath.Glob(filepath.Join(protoDest, "*.proto"))
 	if err != nil {

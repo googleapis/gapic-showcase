@@ -19,5 +19,5 @@ import (
 )
 
 func main() {
-	util.CompileProtos("v1alpha2")
+	util.CompileProtos("v1alpha3")
 }
