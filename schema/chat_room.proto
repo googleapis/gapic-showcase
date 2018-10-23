@@ -155,7 +155,7 @@ service ChatRoom {
 }
 
 message Room {
-  string name = 1 [(google.api.resource).path = "rooms/*"];
+  string name = 1 [(google.api.resource).path = "rooms/{room_id}"];
 
   string display_name = 2;
 
@@ -203,7 +203,9 @@ message ListRoomsResponse {
 }
 
 message Message {
-  string name = 1 [(google.api.resource).path = "rooms/*/messages/*"];
+  string name = 1 [
+    (google.api.resource).path = "rooms/{room_id}/messages/{message_id}"
+  ];
 
   // This will eventually become a User message that will cover add coverage for
   // shared resources.
