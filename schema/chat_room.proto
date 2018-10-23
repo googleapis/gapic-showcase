@@ -286,12 +286,3 @@ message StreamMessagesRequest {
 }
 
 message SendMessagesResponse {}
-
-message ChatroomBehaviorHeader {
-  enum ServerBehavior {
-    BEHAVIOR_UNSPECIFIED = 0;
-    DEFAULT = 1;
-    STATELESS = 2;
-  }
-  ServerBehavior behavior = 1;
-}
