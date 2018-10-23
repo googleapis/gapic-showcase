@@ -93,6 +93,9 @@ service ChatRoom {
     option (google.api.http) = {
       get: "/v1alpha3/{name=rooms/*/messages/*}"
     };
+    option (google.api.method_signature) = {
+      fields: ["name"]
+    };
   }
 
   rpc UpdateMessage(UpdateMessageRequest) returns (Message) {
