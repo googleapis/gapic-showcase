@@ -17,6 +17,7 @@ syntax = "proto3";
 import "google/api/annotations.proto";
 import "google/longrunning/operations.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
 import "google/rpc/error_details.proto";
 
@@ -52,14 +53,14 @@ service ChatRoom {
 
   rpc UpdateRoom(UpdateRoomRequest) returns (Room) {
     option (google.api.http) = {
-      patch: "/v1alpha3/{name=rooms/*}"
+      patch: "/v1alpha3/{room.name=rooms/*}"
       body: "*"
     };
     option (google.api.method_signature) = {
-      fields: ["name", "room.display_name"]
-      additional_signatures: {
-        fields: ["name", "room.display_name", "room.description"]
-      }
+      fields: ["room.name", "room.display_name"]
+    };
+    option (google.api.method_signature) = {
+        fields: ["room.name", "room.display_name", "room.description"]
     };
   }
 
@@ -78,39 +79,10 @@ service ChatRoom {
     };
   }
 
-  rpc StreamRoom(StreamRoomRequest) returns (stream Message) {
-    option (google.api.http) = {
-      post: "/v1alpha3/{name=rooms/*}:streamRoom"
-      body: "*"
-      additional_bindings: {
-        post: "/v1alpha3/{name=global}:streamRoom"
-        body: "*"
-      }
-    };
-  }
-
-  rpc SearchAll(SearchAllRequest) returns (google.longrunning.Operation) {
-    option (google.api.http) = {
-      post: "/v1alpha3:searchAll"
-      body: "*"
-    };
-    option (google.api.operation) = {
-      response_type: "google.showcase.v1alpha3.SearchAllResponse"
-      metadata_type: "google.showcase.v1alpha3.SearchAllMetadata"
-    };
-    option (google.api.method_signature) = {
-      fields: ["query"]
-    };
-  }
-
   rpc CreateMessage(CreateMessageRequest) returns (Message) {
     option (google.api.http) = {
       post: "/v1alpha3/{parent=rooms/*}/messages"
       body: "*"
-      additional_bindings: {
-        post: "/v1alpha3/{parent=global}/messages",
-        body: "*"
-      }
     };
     option (google.api.method_signature) = {
       fields: ["parent", "message"]
@@ -119,64 +91,62 @@ service ChatRoom {
 
   rpc GetMessage(GetMessageRequest) returns (Message) {
     option (google.api.http) = {
-      get: "/v1alpha3/{parent=rooms/*}/{name=messages/*}"
-      additional_bindings: {
-        get: "/v1alpha3/{parent=global}/name={messages/*}"
-      }
+      get: "/v1alpha3/{name=rooms/*/messages/*}"
     };
   }
 
   rpc UpdateMessage(UpdateMessageRequest) returns (Message) {
     option (google.api.http) = {
-      patch: "/v1alpha3/{parent=rooms/*}/{name=messages/*}"
+      patch: "/v1alpha3/{message.name=rooms/*/messages/*}"
       body: "*"
-      additional_bindings: {
-        patch: "/v1alpha3/{parent=global}/{name=messages/*}"
-      }
     };
   }
 
   rpc DeleteMessage(DeleteMessageRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/v1alpha3/{parent=rooms/*}/{name=messages/*}"
-      additional_bindings: {
-        patch: "/v1alpha3/{parent=global}/{name=messages/*}"
-      }
+      delete: "/v1alpha3/{name=rooms/*/messages/*}"
     };
   }
 
   rpc ListMessages(ListMessagesRequest) returns (ListMessagesResponse) {
     option (google.api.http) = {
       get: "/v1alpha3/{parent=rooms/*}/messages"
-      additional_bindings: {
-        get: "/v1alpha3/{parent=global}/messages"
-      }
     };
   }
 
-  rpc StreamMessages(stream CreateMessageRequest) returns (google.protobuf.Empty) {
+  rpc SearchMessages(SearchMessagesRequest) returns (google.longrunning.Operation) {
     option (google.api.http) = {
-      post: "/v1alpha3/{parent=rooms/*}:streamMessages"
+      post: "/v1alpha3/rooms/-/messages:search"
       body: "*"
-      additional_bindings: {
-        post: "/v1alpha3/{parent=global}:streamMessages",
-        body: "*"
-      }
+    };
+    option (google.api.operation) = {
+      response_type: "google.showcase.v1alpha3.SearchMessagesResponse"
+      metadata_type: "google.showcase.v1alpha3.SearchMessagesMetadata"
+    };
+    option (google.api.method_signature) = {
+      fields: ["query"]
     };
   }
 
-  rpc Chat(stream CreateMessageRequest) returns (stream Message);
+  rpc StreamMessages(StreamMessagesRequest) returns (stream Message) {
+    option (google.api.http) = {
+      post: "/v1alpha3/{name=rooms/*}/messages:stream"
+      body: "*"
+    };
+  }
+
+  rpc SendMessages(stream CreateMessageRequest) returns (SendMessagesResponse) {
+    option (google.api.http) = {
+      post: "/v1alpha3/{parent=rooms/*}/messages:send"
+      body: "*"
+    };
+  }
+
+  rpc Connect(stream CreateMessageRequest) returns (stream Message);
 }
 
 message Room {
-  string name = 1 [
-    (google.api.resource_set) = {
-      base_name: "Room"
-      resources: [
-        {base_name: "UserRoom"    path: "rooms/*"},
-        {base_name: "GlobalRoom"  path: "global"}
-      ]
-    }];
+  string name = 1 [(google.api.resource).path = "rooms/*"];
 
   string display_name = 2;
 
@@ -194,23 +164,20 @@ message CreateRoomRequest {
 message GetRoomRequest {
   string name = 1 [
     (google.api.resource_type) = "google.showcase.v1alpha3.Room",
-    (google.api.required) = true
+    (google.api.field_behavior) = REQUIRED
   ];
 }
 
 message UpdateRoomRequest {
-  string name = 1 [
-    (google.api.resource_type) = "google.showcase.v1alpha3.Room",
-    (google.api.required) = true
-  ];
+  Room room = 1;
 
-  Room room = 2;
+  google.protobuf.FieldMask update_mask = 2;
 }
 
 message DeleteRoomRequest {
   string name = 1 [
     (google.api.resource_type) = "google.showcase.v1alpha3.Room",
-    (google.api.required) = true
+    (google.api.field_behavior) = REQUIRED
   ];
 }
 
@@ -226,100 +193,57 @@ message ListRoomsResponse {
   string next_page_token = 2;
 }
 
-message StreamRoomRequest {
-  string name = 1 [
-    (google.api.resource_type) = "google.showcase.v1alpha3.Room",
-    (google.api.required) = true
-  ];
-}
-
-message SearchAllRequest {
-  string query = 1 [(google.api.required) = true];
-}
-
-message SearchAllMetadata {
-  google.rpc.RetryInfo retry_info = 1;
-}
-
-message SearchAllResponse {
-  repeated Message messages = 1;
-}
-
 message Message {
-  string parent = 1 [
-    (google.api.resource_type) = "google.showcase.v1alpha3.Room"];
-
-  string name = 2 [(google.api.resource).path = "messages/*"];
+  string name = 1 [(google.api.resource).path = "rooms/*/messages/*"];
 
   // This will eventually become a User message that will cover add coverage for
   // shared resources.
-  string author = 3;
+  string author = 2 [(google.api.field_behavior) = REQUIRED];
 
-  string content = 4;
+  oneof content {
+    string text = 3;
 
-  bytes image = 5;
+    bytes image = 4;
+  }
 
-  google.protobuf.Timestamp create_time = 6;
+  google.protobuf.Timestamp create_time = 5;
 
-  google.protobuf.Timestamp update_time = 7;
+  google.protobuf.Timestamp update_time = 6;
 }
 
 message CreateMessageRequest {
   string parent = 1 [
     (google.api.resource_type) = "google.showcase.v1alpha3.Room",
-    (google.api.required) = true
+    (google.api.field_behavior) = REQUIRED
   ];
 
   Message message = 2;
 }
 
 message GetMessageRequest {
-  string parent = 1 [
-    (google.api.resource_type) = "google.showcase.v1alpha3.Room",
-    (google.api.required) = true
-  ];
-
-  string name = 2 [
+  string name = 1 [
     (google.api.resource_type) = "google.showcase.v1alpha3.Message",
-    (google.api.required) = true
+    (google.api.field_behavior) = REQUIRED
   ];
 }
 
 message UpdateMessageRequest {
-  string parent = 1 [
-    (google.api.resource_type) = "google.showcase.v1alpha3.Room",
-    (google.api.required) = true
-  ];
+  Message message = 1;
 
-  string name = 2 [
-    (google.api.resource_type) = "google.showcase.v1alpha3.Message",
-    (google.api.required) = true
-  ];
-
-  Message message = 3;
+  google.protobuf.FieldMask update_mask = 2;
 }
 
 message DeleteMessageRequest {
-  string parent = 1 [
-    (google.api.resource_type) = "google.showcase.v1alpha3.Room",
-    (google.api.required) = true
-  ];
-
-  string name = 2 [
+  string name = 1 [
     (google.api.resource_type) = "google.showcase.v1alpha3.Message",
-    (google.api.required) = true
+    (google.api.field_behavior) = REQUIRED
   ];
 }
 
 message ListMessagesRequest {
   string parent = 1 [
     (google.api.resource_type) = "google.showcase.v1alpha3.Room",
-    (google.api.required) = true
-  ];
-
-  string name = 2 [
-    (google.api.resource_type) = "google.showcase.v1alpha3.Message",
-    (google.api.required) = true
+    (google.api.field_behavior) = REQUIRED
   ];
 
   int32 page_size = 3;
@@ -333,11 +257,32 @@ message ListMessagesResponse {
   string next_page_token = 2;
 }
 
+message SearchMessagesRequest {
+  string query = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message SearchMessagesMetadata {
+  google.rpc.RetryInfo retry_info = 1;
+}
+
+message SearchMessagesResponse {
+  repeated Message messages = 1;
+}
+
+message StreamMessagesRequest {
+  string name = 1 [
+    (google.api.resource_type) = "google.showcase.v1alpha3.Room",
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+
+message SendMessagesResponse {}
+
 message ChatroomBehaviorHeader {
   enum ServerBehavior {
     BEHAVIOR_UNSPECIFIED = 0;
-    DEFAULT_BEHAVIOR = 1;
-    STATELESS_BEHAVIOR = 2;
+    DEFAULT = 1;
+    STATELESS = 2;
   }
   ServerBehavior behavior = 1;
 }
