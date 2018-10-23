@@ -118,6 +118,9 @@ service ChatRoom {
     option (google.api.http) = {
       get: "/v1alpha3/{parent=rooms/*}/messages"
     };
+    option (google.api.method_signature) = {
+      fields: ["parent"]
+    };
   }
 
   rpc SearchMessages(SearchMessagesRequest) returns (google.longrunning.Operation) {
