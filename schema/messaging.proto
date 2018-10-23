@@ -31,7 +31,17 @@ option (google.api.metadata) = {
   product_uri: "https://github.com/googleapis/gapic-showcase"
 };
 
-service ChatRoom {
+option (google.api.resource_definition) = {
+  name: "RoomMessage"
+  path: "rooms/{room_id}/messages/{message_id}"
+};
+
+option (google.api.resource_definition) = {
+  name: "BlogMessage"
+  path: "blogs/{blog_id}/messages/{message_id}"
+};
+
+service Messaging {
   rpc CreateRoom(CreateRoomRequest) returns (Room) {
     option (google.api.http) = {
       post: "/v1alpha3/rooms"
@@ -79,10 +89,23 @@ service ChatRoom {
     };
   }
 
+  rpc GetBlogForTopic(GetBlogForTopicRequest) returns (Blog) {
+    option (google.api.http) = {
+      post: "/v1alpha3/blogs"
+    };
+    option (google.api.method_signature) = {
+      fields: ["topic"]
+    };
+  }
+
   rpc CreateMessage(CreateMessageRequest) returns (Message) {
     option (google.api.http) = {
       post: "/v1alpha3/{parent=rooms/*}/messages"
       body: "*"
+      additional_bindings: {
+        post: "v1alpha3/{parent=blogs/*}/messages"
+        body: "*"
+      }
     };
     option (google.api.method_signature) = {
       fields: ["parent", "message"]
@@ -92,6 +115,9 @@ service ChatRoom {
   rpc GetMessage(GetMessageRequest) returns (Message) {
     option (google.api.http) = {
       get: "/v1alpha3/{name=rooms/*/messages/*}"
+      additional_bindings: {
+        get: "v1alpha3/{name=blogs/*/messages/*}"
+      }
     };
     option (google.api.method_signature) = {
       fields: ["name"]
@@ -102,12 +128,19 @@ service ChatRoom {
     option (google.api.http) = {
       patch: "/v1alpha3/{message.name=rooms/*/messages/*}"
       body: "*"
+      additional_bindings: {
+        patch: "v1alpha3/{message.name=blogs/*/messages/*}"
+        body: "*"
+      }
     };
   }
 
   rpc DeleteMessage(DeleteMessageRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/v1alpha3/{name=rooms/*/messages/*}"
+      additional_bindings: {
+        delete: "v1alpha3/{name=blogs/*/messages/*}"
+      }
     };
     option (google.api.method_signature) = {
       fields: ["name"]
@@ -117,6 +150,9 @@ service ChatRoom {
   rpc ListMessages(ListMessagesRequest) returns (ListMessagesResponse) {
     option (google.api.http) = {
       get: "/v1alpha3/{parent=rooms/*}/messages"
+      additional_bindings: {
+        get: "v1alpha3/{parent=blogs/*}/messages}"
+      }
     };
     option (google.api.method_signature) = {
       fields: ["parent"]
@@ -141,6 +177,10 @@ service ChatRoom {
     option (google.api.http) = {
       post: "/v1alpha3/{name=rooms/*}/messages:stream"
       body: "*"
+      additional_bindings: {
+        post: "v1alpha3/{parent=blogs/*}/messages:stream"
+        body: "*"
+      }
     };
   }
 
@@ -148,6 +188,10 @@ service ChatRoom {
     option (google.api.http) = {
       post: "/v1alpha3/{parent=rooms/*}/messages:send"
       body: "*"
+      additional_bindings: {
+        post: "v1alpha3/{parent=blogs/*}/messages:send"
+        body: "*"
+      }
     };
   }
 
@@ -202,10 +246,21 @@ message ListRoomsResponse {
   string next_page_token = 2;
 }
 
+message Blog {
+  string name = 1 [(google.api.resource).path = "blogs/{blog_id}"];
+
+  string topic = 2;
+}
+
+message GetBlogForTopicRequest {
+  string topic = 1;
+}
+
 message Message {
   string name = 1 [
-    (google.api.resource).path = "rooms/{room_id}/messages/{message_id}"
-  ];
+    (google.api.resource_set) = {
+      resource_types: ["RoomMessages", "BlogMessages"]
+    }];
 
   // This will eventually become a User message that will cover add coverage for
   // shared resources.
