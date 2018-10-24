@@ -39,19 +39,6 @@ option (google.api.resource_definition) = {
   path: "users/{user_id}"
 };
 
-// A resource set defining the possible parent paths of a
-// message.
-option (google.api.resource_set_definition) = {
-  name: "MessageParent"
-  resources: [{
-    name: "Profile",
-    path: "users/{user_id}/profile"
-  }]
-  resource_references: [
-    "google.showcase.v1alpha3.Room"
-  ]
-};
-
 // A simple messaging service that implements chat rooms and profile posts.
 //
 // This messaging service showcases the features that API clients
@@ -358,7 +345,16 @@ message CreateMessageRequest {
   // The URI of the chat room or user profile that this message will be tied
   // to.
   string parent = 1 [
-    (google.api.resource_reference) = "google.showcase.v1alpha3.MessageParent",
+    (google.api.resource_set) = {
+      name: "MessageParent"
+      resources: [{
+        name: "Profile",
+        path: "users/{user_id}/profile"
+      }]
+      resource_references: [
+        "google.showcase.v1alpha3.Room"
+      ]
+    },
     (google.api.field_behavior) = REQUIRED
   ];
 
