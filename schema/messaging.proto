@@ -31,16 +31,6 @@ option (google.api.metadata) = {
   product_uri: "https://github.com/googleapis/gapic-showcase"
 };
 
-option (google.api.resource_definition) = {
-  name: "RoomMessage"
-  path: "rooms/{room_id}/messages/{message_id}"
-};
-
-option (google.api.resource_definition) = {
-  name: "ProfileMessage"
-  path: "users/{user_id}/profile/messages/{message_id}"
-};
-
 service Messaging {
   rpc CreateRoom(CreateRoomRequest) returns (Room) {
     option (google.api.http) = {
@@ -237,9 +227,10 @@ message ListRoomsResponse {
 message Message {
   string name = 1 [
     (google.api.resource_set) = {
-      resource_types: [
-        "google.showcase.v1alpha3.RoomMessage",
-        "google.showcase.v1alpha3.ProfileMessage"]
+      resources: [
+        {name: "RoomMessage", path: "rooms/{room_id}/messages/{message_id}"},
+        {name: "ProfileMessage", path: "user/{user_id}/profile/messages/{message_id}"}
+      ]
     }];
 
   // This will eventually become a User message that will cover add coverage for
