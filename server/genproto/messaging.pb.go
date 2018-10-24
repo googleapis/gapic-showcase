@@ -33,7 +33,7 @@ const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 // A chat room.
 type Room struct {
-	// The uri of the chat room.
+	// The URI of the chat room.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// The human readable name of the chat room.
 	DisplayName string `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
@@ -154,7 +154,7 @@ func (m *CreateRoomRequest) GetRoom() *Room {
 // The request message for the google.showcase.v1alpha3.Messaging\GetRoom
 // method.
 type GetRoomRequest struct {
-	// The uri of the requested room.
+	// The URI of the requested room.
 	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -248,7 +248,7 @@ func (m *UpdateRoomRequest) GetUpdateMask() *field_mask.FieldMask {
 // The request message for the google.showcase.v1alpha3.Messaging\DeleteRoom
 // method.
 type DeleteRoomRequest struct {
-	// The uri of the requested room.
+	// The URI of the requested room.
 	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -399,9 +399,9 @@ func (m *ListRoomsResponse) GetNextPageToken() string {
 // This protocol buffer message represents a message sent to a chat room or
 // posted on a user profile.
 type Message struct {
-	// The uri of the chat room.
+	// The URI of the chat room.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// The uri of the author of this method.
+	// The URI of the author of this method.
 	Author string `protobuf:"bytes,2,opt,name=author,proto3" json:"author,omitempty"`
 	// Types that are valid to be assigned to Content:
 	//	*Message_Text
@@ -575,7 +575,7 @@ func _Message_OneofSizer(msg proto.Message) (n int) {
 // The request message for the google.showcase.v1alpha3.Messaging\CreateMessage
 // method.
 type CreateMessageRequest struct {
-	// The uri of the chat room or user profile that this message will be tied
+	// The URI of the chat room or user profile that this message will be tied
 	// to.
 	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
 	// The message to be created. The "message.name", "message.create_time", and
@@ -628,7 +628,7 @@ func (m *CreateMessageRequest) GetMessage() *Message {
 // The request message for the google.showcase.v1alpha3.Messaging\GetMessage
 // method.
 type GetMessageRequest struct {
-	// The uri of the requested message.
+	// The URI of the requested message.
 	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -722,7 +722,7 @@ func (m *UpdateMessageRequest) GetUpdateMask() *field_mask.FieldMask {
 // The request message for the google.showcase.v1alpha3.Messaging\DeleteMessage
 // method.
 type DeleteMessageRequest struct {
-	// The uri of the requested message.
+	// The URI of the requested message.
 	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -764,7 +764,7 @@ func (m *DeleteMessageRequest) GetName() string {
 // The request message for the google.showcase.v1alpha3.Messaging\ListMessages
 // method.
 type ListMessagesRequest struct {
-	// The uri of the requested room or profile whos messages are to be listed.
+	// The URI of the requested room or profile whos messages are to be listed.
 	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
 	// The maximum number of rooms to be returned. Server may return fewer rooms
 	// than requested. If unspecified, server will pick an appropriate default.
@@ -1009,7 +1009,7 @@ func (m *SearchMessagesResponse) GetMessages() []*Message {
 // The request message for the google.showcase.v1alpha3.Messaging\StreamMessages
 // method.
 type StreamMessagesRequest struct {
-	// The uri of a chat room or user profile whos massages are to be streamed.
+	// The URI of a chat room or user profile whos massages are to be streamed.
 	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -1115,32 +1115,29 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MessagingClient interface {
-	// Creates a room. The fields "room.name", "room.create_time", and
-	// "room.update_time" will be ignored if passed to this method.
+	// Creates a room.
 	CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*Room, error)
-	// Retrieves the Room with the given uri.
+	// Retrieves the Room with the given URI.
 	GetRoom(ctx context.Context, in *GetRoomRequest, opts ...grpc.CallOption) (*Room, error)
 	// Updates a room.
 	UpdateRoom(ctx context.Context, in *UpdateRoomRequest, opts ...grpc.CallOption) (*Room, error)
-	// Deletes a room and all of it's messages.
+	// Deletes a room and all of its messages.
 	DeleteRoom(ctx context.Context, in *DeleteRoomRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	// Lists all chat rooms.
 	ListRooms(ctx context.Context, in *ListRoomsRequest, opts ...grpc.CallOption) (*ListRoomsResponse, error)
 	// Creates a message. If the parent field corresponds to a RoomMessage
 	// resource, the message is understood to be a message in a chatroom. If the
 	// parent field is a ProfileMessage resource name, the message is understood
-	// to be a post on a user profile. The fields "message.name",
-	// "message.create_time", and "message.update_time" will be ignored if passed
-	// to this method.
+	// to be a post on a user profile.
 	CreateMessage(ctx context.Context, in *CreateMessageRequest, opts ...grpc.CallOption) (*Message, error)
-	// Retrieves the Message with the given uri.
+	// Retrieves the Message with the given URI.
 	GetMessage(ctx context.Context, in *GetMessageRequest, opts ...grpc.CallOption) (*Message, error)
 	// Updates a message.
 	UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*Message, error)
 	// Deletes a message.
 	DeleteMessage(ctx context.Context, in *DeleteMessageRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	// Lists messages for a specific chat room or user profile depending on the
-	// parent uri.
+	// parent URI.
 	ListMessages(ctx context.Context, in *ListMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error)
 	// This method searches through all messages across all rooms and profiles
 	// for messages containing to words found in the query. Only posts that
@@ -1365,32 +1362,29 @@ func (x *messagingConnectClient) Recv() (*Message, error) {
 
 // MessagingServer is the server API for Messaging service.
 type MessagingServer interface {
-	// Creates a room. The fields "room.name", "room.create_time", and
-	// "room.update_time" will be ignored if passed to this method.
+	// Creates a room.
 	CreateRoom(context.Context, *CreateRoomRequest) (*Room, error)
-	// Retrieves the Room with the given uri.
+	// Retrieves the Room with the given URI.
 	GetRoom(context.Context, *GetRoomRequest) (*Room, error)
 	// Updates a room.
 	UpdateRoom(context.Context, *UpdateRoomRequest) (*Room, error)
-	// Deletes a room and all of it's messages.
+	// Deletes a room and all of its messages.
 	DeleteRoom(context.Context, *DeleteRoomRequest) (*empty.Empty, error)
 	// Lists all chat rooms.
 	ListRooms(context.Context, *ListRoomsRequest) (*ListRoomsResponse, error)
 	// Creates a message. If the parent field corresponds to a RoomMessage
 	// resource, the message is understood to be a message in a chatroom. If the
 	// parent field is a ProfileMessage resource name, the message is understood
-	// to be a post on a user profile. The fields "message.name",
-	// "message.create_time", and "message.update_time" will be ignored if passed
-	// to this method.
+	// to be a post on a user profile.
 	CreateMessage(context.Context, *CreateMessageRequest) (*Message, error)
-	// Retrieves the Message with the given uri.
+	// Retrieves the Message with the given URI.
 	GetMessage(context.Context, *GetMessageRequest) (*Message, error)
 	// Updates a message.
 	UpdateMessage(context.Context, *UpdateMessageRequest) (*Message, error)
 	// Deletes a message.
 	DeleteMessage(context.Context, *DeleteMessageRequest) (*empty.Empty, error)
 	// Lists messages for a specific chat room or user profile depending on the
-	// parent uri.
+	// parent URI.
 	ListMessages(context.Context, *ListMessagesRequest) (*ListMessagesResponse, error)
 	// This method searches through all messages across all rooms and profiles
 	// for messages containing to words found in the query. Only posts that

@@ -31,17 +31,12 @@ option (google.api.metadata) = {
 
 // A simple identity service.
 service Identity {
-  // Creates a user. The fields "user.name", "user.create_time", and
-  // "user.update_time" will be ignored if passed to this method.
+  // Creates a user.
   rpc CreateUser(CreateUserRequest) returns (User) {
     option (google.api.http) = {
       post: "/v1alpha3/users"
       body: "*"
     };
-
-    // This option signifies that the resulting generated client could include
-    // a method overload which accepts the following listed fields as
-    // parameters.
     option (google.api.method_signature) = {
       fields: ["user.username", "user.email"]
     };
@@ -52,10 +47,6 @@ service Identity {
     option (google.api.http) = {
       get: "/v1alpha3/{name=users/*}"
     };
-
-    // This option signifies that the resulting generated client could include
-    // a method overload which accepts the following listed fields as
-    // parameters.
     option (google.api.method_signature) = {
       fields: ["name"]
     };
@@ -74,10 +65,6 @@ service Identity {
     option (google.api.http) = {
       delete: "/v1alpha3/{name=users/*}"
     };
-
-    // This option signifies that the resulting generated client could include
-    // a method overload which accepts the following listed fields as
-    // parameters.
     option (google.api.method_signature) = {
       fields: ["name"]
     };
@@ -127,7 +114,7 @@ message CreateUserRequest {
 message GetUserRequest {
   // The uri of the requested user.
   string name = 1 [
-    (google.api.resource_type) = "google.showcase.v1alpha3.User",
+    (google.api.resource_reference) = "google.showcase.v1alpha3.User",
     (google.api.field_behavior) = REQUIRED
   ];
 }
@@ -148,7 +135,7 @@ message UpdateUserRequest {
 message DeleteUserRequest {
   // The uri of the user to be deleted.
   string name = 1 [
-    (google.api.resource_type) = "google.showcase.v1alpha3.User",
+    (google.api.resource_reference) = "google.showcase.v1alpha3.User",
     (google.api.field_behavior) = REQUIRED
   ];
 }

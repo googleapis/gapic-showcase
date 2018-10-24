@@ -63,7 +63,7 @@ service Testing {
 // Request message for reporting on a session.
 message ReportSessionRequest {
   // The session to be reported on.
-  string name = 1 [(google.api.resource_type) = "Session"];
+  string name = 1 [(google.api.resource_reference) = "Session"];
 }
 
 // Response message for reporting on a session.
@@ -158,13 +158,13 @@ message ReportSessionResponse {
 // Request message for deleting a test.
 message DeleteTestRequest {
   // The test to be deleted.
-  string name = 1 [(google.api.resource_type) = "Test"];
+  string name = 1 [(google.api.resource_reference) = "Test"];
 }
 
 // Register an answer from a test.
 message RegisterTestRequest {
   // The test to have an answer registered to it.
-  string name = 1 [(google.api.resource_type) = "Test"];
+  string name = 1 [(google.api.resource_reference) = "Test"];
 
   // The answer from the test.
   repeated string answers = 2;

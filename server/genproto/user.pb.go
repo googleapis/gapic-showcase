@@ -416,8 +416,7 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type IdentityClient interface {
-	// Creates a user. The fields "user.name", "user.create_time", and
-	// "user.update_time" will be ignored if passed to this method.
+	// Creates a user.
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
 	// Retrieves the User with the given uri.
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error)
@@ -484,8 +483,7 @@ func (c *identityClient) ListUsers(ctx context.Context, in *ListUsersRequest, op
 
 // IdentityServer is the server API for Identity service.
 type IdentityServer interface {
-	// Creates a user. The fields "user.name", "user.create_time", and
-	// "user.update_time" will be ignored if passed to this method.
+	// Creates a user.
 	CreateUser(context.Context, *CreateUserRequest) (*User, error)
 	// Retrieves the User with the given uri.
 	GetUser(context.Context, *GetUserRequest) (*User, error)
