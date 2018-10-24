@@ -29,26 +29,39 @@ option (google.api.metadata) = {
   product_uri: "https://github.com/googleapis/gapic-showcase"
 };
 
+// A simple identity service.
 service Identity {
+  // Creates a user. The fields "user.name", "user.create_time", and
+  // "user.update_time" will be ignored if passed to this method.
   rpc CreateUser(CreateUserRequest) returns (User) {
     option (google.api.http) = {
       post: "/v1alpha3/users"
       body: "*"
     };
+
+    // This option signifies that the resulting generated client could include
+    // a method overload which accepts the following listed fields as
+    // parameters.
     option (google.api.method_signature) = {
       fields: ["user.username", "user.email"]
     };
   }
 
+  // Retrieves the User with the given uri.
   rpc GetUser(GetUserRequest) returns (User) {
     option (google.api.http) = {
       get: "/v1alpha3/{name=users/*}"
     };
+
+    // This option signifies that the resulting generated client could include
+    // a method overload which accepts the following listed fields as
+    // parameters.
     option (google.api.method_signature) = {
       fields: ["name"]
     };
   }
 
+  // Updates a user.
   rpc UpdateUser(UpdateUserRequest) returns (User) {
     option (google.api.http) = {
       patch: "/v1alpha3/{user.name=users/*}"
@@ -56,15 +69,21 @@ service Identity {
     };
   }
 
+  // Deletes a user, their profile, and all of their authored messages.
   rpc DeleteUser(DeleteUserRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/v1alpha3/{name=users/*}"
     };
+
+    // This option signifies that the resulting generated client could include
+    // a method overload which accepts the following listed fields as
+    // parameters.
     option (google.api.method_signature) = {
       fields: ["name"]
     };
   }
 
+  // Lists all users.
   rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
     option (google.api.http) = {
       get: "/v1alpha3/users"
@@ -72,50 +91,91 @@ service Identity {
   }
 }
 
+// A user.
 message User {
+  // The uri of the user.
   string name = 1 [(google.api.resource).path = "users/{user_id}"];
 
+  // The username of the user.
   string username = 2 [(google.api.field_behavior) = REQUIRED];
 
+  // The email address of the user.
   string email = 3 [(google.api.field_behavior) = REQUIRED];
 
-  google.protobuf.Timestamp create_time = 4;
+  // The timestamp at which the user was created.
+  google.protobuf.Timestamp create_time = 4 [
+    (google.api.field_behavior) = IMMUTABLE,
+    (google.api.field_behavior) = OUTPUT_ONLY
+  ];
 
-  google.protobuf.Timestamp update_time = 5;
+  // The latest timestamp at which the user was updated.
+  google.protobuf.Timestamp update_time = 5 [
+    (google.api.field_behavior) = OUTPUT_ONLY
+  ];
 }
 
+// The request message for the google.showcase.v1alpha3.Identity\CreateUser
+// method.
 message CreateUserRequest {
+  // The user to be created. The "user.name", "user.create_time", and
+  // "user.update_time" fields will be ignored by the server in this request.
   User user = 1;
 }
 
+// The request message for the google.showcase.v1alpha3.Identity\GetUser
+// method.
 message GetUserRequest {
+  // The uri of the requested user.
   string name = 1 [
     (google.api.resource_type) = "google.showcase.v1alpha3.User",
     (google.api.field_behavior) = REQUIRED
   ];
 }
 
+// The request message for the google.showcase.v1alpha3.Identity\UpdateUser
+// method.
 message UpdateUserRequest {
+  // The user to be updated.
   User user = 1;
 
+  // The field mask to determine wich fields are to be updated. If empty, the
+  // server will assume all fields are to be updated.
   google.protobuf.FieldMask update_mask = 2;
 }
 
+// The request message for the google.showcase.v1alpha3.Identity\DeleteUser
+// method.
 message DeleteUserRequest {
+  // The uri of the user to be deleted.
   string name = 1 [
     (google.api.resource_type) = "google.showcase.v1alpha3.User",
     (google.api.field_behavior) = REQUIRED
   ];
 }
 
+// The request message for the google.showcase.v1alpha3.Identity\ListUsers
+// method.
 message ListUsersRequest {
+  // The maximum number of users to be returned. Server may return fewer users
+  // than requested. If unspecified, server will pick an appropriate default.
   int32 page_size = 1;
 
+  // Typically, this is the value of
+  // google.showcase.v1alpha3.ListUsersResponse.next_page_token
+  // returned from the previous call to
+  // `google.showcase.v1alpha3.Identity\ListUsers` method.
   string page_token = 2;
 }
 
+// The response message for the google.showcase.v1alpha3.Identity\ListUsers
+// method.
 message ListUsersResponse {
+  // The list of users.
   repeated User users = 1;
 
+  // A token to retrieve next page of results.
+  // Pass this value in ListUsersRequest.page_token field in the subsequent
+  // call to `google.showcase.v1alpha3.Message\ListUsers` method to retrieve the
+  // next page of results.
   string next_page_token = 2;
 }
