@@ -31,6 +31,11 @@ option (google.api.metadata) = {
   product_uri: "https://github.com/googleapis/gapic-showcase"
 };
 
+option (google.api.resource_definition) = {
+  name: "User",
+  path: "users/{user_id}"
+};
+
 service Messaging {
   rpc CreateRoom(CreateRoomRequest) returns (Room) {
     option (google.api.http) = {
@@ -145,9 +150,6 @@ service Messaging {
     option (google.api.operation) = {
       response_type: "google.showcase.v1alpha3.SearchMessagesResponse"
       metadata_type: "google.showcase.v1alpha3.SearchMessagesMetadata"
-    };
-    option (google.api.method_signature) = {
-      fields: ["query"]
     };
   }
 
@@ -298,6 +300,8 @@ message ListMessagesResponse {
 
 message SearchMessagesRequest {
   string query = 1 [(google.api.field_behavior) = REQUIRED];
+
+  string author = 2 [(google.api.resource_type) = "google.showcase.v1alpha3.User"];
 }
 
 message SearchMessagesMetadata {
