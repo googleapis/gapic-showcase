@@ -467,7 +467,7 @@ message SearchBlurbsResponse {
 // The request message for the google.showcase.v1alpha3.Messaging\StreamBlurbs
 // method.
 message StreamBlurbsRequest {
-  // The resource name of a chat room or user profile whos massages to stream.
+  // The resource name of a chat room or user profile whos blurbs to stream.
   string name = 1 [
     (google.api.resource_reference) = "google.showcase.v1alpha3.Room",
     (google.api.field_behavior) = REQUIRED
