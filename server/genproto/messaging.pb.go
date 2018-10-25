@@ -111,7 +111,7 @@ func (m *Room) GetUpdateTime() *timestamp.Timestamp {
 // The request message for the google.showcase.v1alpha3.Messaging\CreateRoom
 // method.
 type CreateRoomRequest struct {
-	// The room to be created.
+	// The room to create.
 	Room                 *Room    `protobuf:"bytes,1,opt,name=room,proto3" json:"room,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -195,7 +195,7 @@ func (m *GetRoomRequest) GetName() string {
 // The request message for the google.showcase.v1alpha3.Messaging\UpdateRoom
 // method.
 type UpdateRoomRequest struct {
-	// The room to be updated.
+	// The room to update.
 	Room *Room `protobuf:"bytes,1,opt,name=room,proto3" json:"room,omitempty"`
 	// The field mask to determine wich fields are to be updated. If empty, the
 	// server will assume all fields are to be updated.
@@ -289,7 +289,7 @@ func (m *DeleteRoomRequest) GetName() string {
 // The request message for the google.showcase.v1alpha3.Messaging\ListRooms
 // method.
 type ListRoomsRequest struct {
-	// The maximum number of rooms to be returned. Server may return fewer rooms
+	// The maximum number of rooms return. Server may return fewer rooms
 	// than requested. If unspecified, server will pick an appropriate default.
 	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// The value of google.showcase.v1alpha3.ListRoomsResponse.next_page_token
@@ -399,7 +399,7 @@ func (m *ListRoomsResponse) GetNextPageToken() string {
 type Blurb struct {
 	// The resource name of the chat room.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// The resource name of the author of this method.
+	// The resource name of the blurb's author.
 	User string `protobuf:"bytes,2,opt,name=user,proto3" json:"user,omitempty"`
 	// Types that are valid to be assigned to Content:
 	//	*Blurb_Text
@@ -576,7 +576,7 @@ type CreateBlurbRequest struct {
 	// The resource name of the chat room or user profile that this blurb will
 	// be tied to.
 	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	// The blurb to be created.
+	// The blurb to create.
 	Blurb                *Blurb   `protobuf:"bytes,2,opt,name=blurb,proto3" json:"blurb,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -667,7 +667,7 @@ func (m *GetBlurbRequest) GetName() string {
 // The request message for the google.showcase.v1alpha3.Messaging\UpdateBlurb
 // method.
 type UpdateBlurbRequest struct {
-	// The blurb to be updated.
+	// The blurb to update.
 	Blurb *Blurb `protobuf:"bytes,1,opt,name=blurb,proto3" json:"blurb,omitempty"`
 	// The field mask to determine wich fields are to be updated. If empty, the
 	// server will assume all fields are to be updated.
@@ -763,7 +763,7 @@ func (m *DeleteBlurbRequest) GetName() string {
 type ListBlurbsRequest struct {
 	// The resource name of the requested room or profile whos blurbs to list.
 	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	// The maximum number of blurbs to be returned. Server may return fewer
+	// The maximum number of blurbs to return. Server may return fewer
 	// blurbs than requested. If unspecified, server will pick an appropriate
 	// default.
 	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
@@ -882,7 +882,7 @@ type SearchBlurbsRequest struct {
 	// The query used to search for blurbs containing to words of this string.
 	// Only posts that contain an exact match of a queried word will be returned.
 	Query string `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
-	// The maximum number of blurbs to be returned. Server may return fewer
+	// The maximum number of blurbs return. Server may return fewer
 	// blurbs than requested. If unspecified, server will pick an appropriate
 	// default.
 	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`

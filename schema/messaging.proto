@@ -250,7 +250,7 @@ message Room {
 // The request message for the google.showcase.v1alpha3.Messaging\CreateRoom
 // method.
 message CreateRoomRequest {
-  // The room to be created.
+  // The room to create.
   Room room = 1;
 }
 
@@ -267,7 +267,7 @@ message GetRoomRequest {
 // The request message for the google.showcase.v1alpha3.Messaging\UpdateRoom
 // method.
 message UpdateRoomRequest {
-  // The room to be updated.
+  // The room to update.
   Room room = 1;
 
   // The field mask to determine wich fields are to be updated. If empty, the
@@ -288,7 +288,7 @@ message DeleteRoomRequest {
 // The request message for the google.showcase.v1alpha3.Messaging\ListRooms
 // method.
 message ListRoomsRequest {
-  // The maximum number of rooms to be returned. Server may return fewer rooms
+  // The maximum number of rooms return. Server may return fewer rooms
   // than requested. If unspecified, server will pick an appropriate default.
   int32 page_size = 1;
 
@@ -323,7 +323,7 @@ message Blurb {
       ]
     }];
 
-  // The resource name of the author of this method.
+  // The resource name of the blurb's author.
   string user = 2 [
     (google.api.resource_reference) = "google.showcase.v1alpha3.User",
     (google.api.field_behavior) = REQUIRED];
@@ -356,7 +356,7 @@ message CreateBlurbRequest {
     (google.api.resource_reference) = "google.showcase.v1alpha3.BlurbParent"
   ];
 
-  // The blurb to be created.
+  // The blurb to create.
   Blurb blurb = 2;
 }
 
@@ -373,7 +373,7 @@ message GetBlurbRequest {
 // The request message for the google.showcase.v1alpha3.Messaging\UpdateBlurb
 // method.
 message UpdateBlurbRequest {
-  // The blurb to be updated.
+  // The blurb to update.
   Blurb blurb = 1;
 
   // The field mask to determine wich fields are to be updated. If empty, the
@@ -401,7 +401,7 @@ message ListBlurbsRequest {
   ];
 
 
-  // The maximum number of blurbs to be returned. Server may return fewer
+  // The maximum number of blurbs to return. Server may return fewer
   // blurbs than requested. If unspecified, server will pick an appropriate
   // default.
   int32 page_size = 2;
@@ -432,7 +432,7 @@ message SearchBlurbsRequest {
   // Only posts that contain an exact match of a queried word will be returned.
   string query = 1 [(google.api.field_behavior) = REQUIRED];
 
-  // The maximum number of blurbs to be returned. Server may return fewer
+  // The maximum number of blurbs return. Server may return fewer
   // blurbs than requested. If unspecified, server will pick an appropriate
   // default.
   int32 page_size = 2;
