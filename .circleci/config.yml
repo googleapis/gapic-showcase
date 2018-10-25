@@ -80,7 +80,7 @@ jobs:
       - run:
           name: Stage showcase in proto dependencies
           command: |
-              git clone -b input-contract-edits https://github.com/googleapis/api-common-protos.git
+              git clone -b input-contract https://github.com/googleapis/api-common-protos.git
               mkdir -p api-common-protos/google/showcase/v1alpha3/
               cp schema/* api-common-protos/google/showcase/v1alpha3/
       - run:

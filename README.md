@@ -189,8 +189,8 @@ $ gapic-showcase echo hello world
 ### Staged Protocol Buffer Files
 The [proto files](schema/) found in the gapic-showcase repository are not compilable in
 isolation. This is to avoid duplication of the protofiles that showcase depends
-on, namely the API and API client configurations found in the `input-contract-edits` branch of
-[api-common-protos](https://github.com/googleapis/api-common-protos/tree/input-contract-edits).
+on, namely the API and API client configurations found in the `input-contract` branch of
+[api-common-protos](https://github.com/googleapis/api-common-protos/tree/input-contract).
 To give the user everything that is needed to compile the showcase protocol
 buffer files, every [release](https://github.com/googleapis/gapic-showcase/releases)
 will have attached a tarball containing a snapshot of the gapic-showcase

@@ -39,6 +39,18 @@ option (google.api.resource_definition) = {
   path: "users/{user_id}"
 };
 
+// A resource set defining the possible parent paths of a	blurb.
+option (google.api.resource_set_definition) = {
+  name: "BlurbParent"
+  resources: [{
+    name: "Profile",
+    path: "users/{user_id}/profile"
+  }]
+  resource_references: [
+    "google.showcase.v1alpha3.Room"
+  ]
+};
+
 // A simple messaging service that implements chat rooms and profile posts.
 //
 // This messaging service showcases the features that API clients
@@ -55,7 +67,7 @@ service Messaging {
     };
   }
 
-  // Retrieves the Room with the given URI.
+  // Retrieves the Room with the given resource name.
   rpc GetRoom(GetRoomRequest) returns (Room) {
     option (google.api.http) = {
       get: "/v1alpha3/{name=rooms/*}"
@@ -73,7 +85,7 @@ service Messaging {
     };
   }
 
-  // Deletes a room and all of its messages.
+  // Deletes a room and all of its blurbs.
   rpc DeleteRoom(DeleteRoomRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/v1alpha3/{name=rooms/*}"
@@ -90,33 +102,33 @@ service Messaging {
     };
   }
 
-  // Creates a message. If the parent field corresponds to a RoomMessage
-  // resource, the message is understood to be a message in a chatroom. If the
-  // parent field is a ProfileMessage resource name, the message is understood
+  // Creates a blurb. If the parent field corresponds to a RoomBlurb
+  // resource, the blurb is understood to be a message in a chatroom. If the
+  // parent field is a ProfileBlurb resource name, the blurb is understood
   // to be a post on a user profile.
-  rpc CreateMessage(CreateMessageRequest) returns (Message) {
+  rpc CreateBlurb(CreateBlurbRequest) returns (Blurb) {
     option (google.api.http) = {
-      post: "/v1alpha3/{parent=rooms/*}/messages"
+      post: "/v1alpha3/{parent=rooms/*}/blurbs"
       body: "*"
       additional_bindings: {
-        post: "v1alpha3/{parent=users/*/profile}/messages"
+        post: "v1alpha3/{parent=users/*/profile}/blurbs"
         body: "*"
       }
     };
     option (google.api.method_signature) = {
-      fields: ["parent", "message.text", "message.author"]
+      fields: ["parent", "blurb.text", "blurb.user"]
     };
     option (google.api.method_signature) = {
-      fields: ["parent", "message.image", "message.author"]
+      fields: ["parent", "blurb.image", "blurb.user"]
     };
   }
 
-  // Retrieves the Message with the given URI.
-  rpc GetMessage(GetMessageRequest) returns (Message) {
+  // Retrieves the Blurb with the given resource name.
+  rpc GetBlurb(GetBlurbRequest) returns (Blurb) {
     option (google.api.http) = {
-      get: "/v1alpha3/{name=rooms/*/messages/*}"
+      get: "/v1alpha3/{name=rooms/*/blurbs/*}"
       additional_bindings: {
-        get: "v1alpha3/{name=users/*/profile/messages/*}"
+        get: "v1alpha3/{name=users/*/profile/blurbs/*}"
       }
     };
     option (google.api.method_signature) = {
@@ -124,24 +136,24 @@ service Messaging {
     };
   }
 
-  // Updates a message.
-  rpc UpdateMessage(UpdateMessageRequest) returns (Message) {
+  // Updates a blurb.
+  rpc UpdateBlurb(UpdateBlurbRequest) returns (Blurb) {
     option (google.api.http) = {
-      patch: "/v1alpha3/{message.name=rooms/*/messages/*}"
+      patch: "/v1alpha3/{blurb.name=rooms/*/blurbs/*}"
       body: "*"
       additional_bindings: {
-        patch: "v1alpha3/{message.name=users/*/profile/messages/*}"
+        patch: "v1alpha3/{blurb.name=users/*/profile/blurbs/*}"
         body: "*"
       }
     };
   }
 
-  // Deletes a message.
-  rpc DeleteMessage(DeleteMessageRequest) returns (google.protobuf.Empty) {
+  // Deletes a blurb.
+  rpc DeleteBlurb(DeleteBlurbRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/v1alpha3/{name=rooms/*/messages/*}"
+      delete: "/v1alpha3/{name=rooms/*/blurbs/*}"
       additional_bindings: {
-        delete: "v1alpha3/{name=users/*/profile/messages/*}"
+        delete: "v1alpha3/{name=users/*/profile/blurbs/*}"
       }
     };
     option (google.api.method_signature) = {
@@ -149,13 +161,13 @@ service Messaging {
     };
   }
 
-  // Lists messages for a specific chat room or user profile depending on the
-  // parent URI.
-  rpc ListMessages(ListMessagesRequest) returns (ListMessagesResponse) {
+  // Lists blurbs for a specific chat room or user profile depending on the
+  // parent resource name.
+  rpc ListBlurbs(ListBlurbsRequest) returns (ListBlurbsResponse) {
     option (google.api.http) = {
-      get: "/v1alpha3/{parent=rooms/*}/messages"
+      get: "/v1alpha3/{parent=rooms/*}/blurbs"
       additional_bindings: {
-        get: "v1alpha3/{parent=users/*/profile}/messages}"
+        get: "v1alpha3/{parent=users/*/profile}/blurbs}"
       }
     };
     option (google.api.method_signature) = {
@@ -163,59 +175,59 @@ service Messaging {
     };
   }
 
-  // This method searches through all messages across all rooms and profiles
-  // for messages containing to words found in the query. Only posts that
+  // This method searches through all blurbs across all rooms and profiles
+  // for blurbs containing to words found in the query. Only posts that
   // contain an exact match of a queried word will be returned.
-  rpc SearchMessages(SearchMessagesRequest) returns (google.longrunning.Operation) {
+  rpc SearchBlurbs(SearchBlurbsRequest) returns (google.longrunning.Operation) {
     option (google.api.http) = {
-      post: "/v1alpha3/rooms/-/messages:search"
+      post: "/v1alpha3/rooms/-/blurbs:search"
       body: "*"
     };
     option (google.api.operation) = {
-      response_type: "google.showcase.v1alpha3.SearchMessagesResponse"
-      metadata_type: "google.showcase.v1alpha3.SearchMessagesMetadata"
+      response_type: "google.showcase.v1alpha3.SearchBlurbsResponse"
+      metadata_type: "google.showcase.v1alpha3.SearchBlurbsMetadata"
     };
     option (google.api.method_signature) = {
       fields: ["query"]
     };
   }
 
-  // This returns a stream that emits the messages that are created for a
+  // This returns a stream that emits the blurbs that are created for a
   // particular chat room or user profile.
-  rpc StreamMessages(StreamMessagesRequest) returns (stream Message) {
+  rpc StreamBlurbs(StreamBlurbsRequest) returns (stream Blurb) {
     option (google.api.http) = {
-      post: "/v1alpha3/{name=rooms/*}/messages:stream"
+      post: "/v1alpha3/{name=rooms/*}/blurbs:stream"
       body: "*"
       additional_bindings: {
-        post: "v1alpha3/{parent=users/*/profile}/messages:stream"
+        post: "v1alpha3/{parent=users/*/profile}/blurbs:stream"
         body: "*"
       }
     };
   }
 
-  // This is a stream to create multiple messages. If an invalid message is
+  // This is a stream to create multiple blurbs. If an invalid blurb is
   // requested to be created, the stream will close with an error.
-  rpc SendMessages(stream CreateMessageRequest) returns (SendMessagesResponse) {
+  rpc SendBlurbs(stream CreateBlurbRequest) returns (SendBlurbsResponse) {
     option (google.api.http) = {
-      post: "/v1alpha3/{parent=rooms/*}/messages:send"
+      post: "/v1alpha3/{parent=rooms/*}/blurbs:send"
       body: "*"
       additional_bindings: {
-        post: "v1alpha3/{parent=users/*/profile}/messages:send"
+        post: "v1alpha3/{parent=users/*/profile}/blurbs:send"
         body: "*"
       }
     };
   }
 
-  // This method starts a bidirectional stream that receives all messages that
+  // This method starts a bidirectional stream that receives all blurbs that
   // are being created after the stream has started and sends requests to create
-  // messages. If an invalid message is requested to be created, the stream will
+  // blurbs. If an invalid blurb is requested to be created, the stream will
   // close with an error.
-  rpc Connect(stream CreateMessageRequest) returns (stream Message);
+  rpc Connect(stream CreateBlurbRequest) returns (stream Blurb);
 }
 
 // A chat room.
 message Room {
-  // The URI of the chat room.
+  // The resource name of the chat room.
   string name = 1 [(google.api.resource).path = "rooms/{room_id}"];
 
   // The human readable name of the chat room.
@@ -238,15 +250,14 @@ message Room {
 // The request message for the google.showcase.v1alpha3.Messaging\CreateRoom
 // method.
 message CreateRoomRequest {
-  // The room to be created. The "room.name", "room.create_time", and
-  // "room.update_time" fields will be ignored by the server in this request.
+  // The room to be created.
   Room room = 1;
 }
 
 // The request message for the google.showcase.v1alpha3.Messaging\GetRoom
 // method.
 message GetRoomRequest {
-  // The URI of the requested room.
+  // The resource name of the requested room.
   string name = 1 [
     (google.api.resource_reference) = "google.showcase.v1alpha3.Room",
     (google.api.field_behavior) = REQUIRED
@@ -267,7 +278,7 @@ message UpdateRoomRequest {
 // The request message for the google.showcase.v1alpha3.Messaging\DeleteRoom
 // method.
 message DeleteRoomRequest {
-  // The URI of the requested room.
+  // The resource name of the requested room.
   string name = 1 [
     (google.api.resource_reference) = "google.showcase.v1alpha3.Room",
     (google.api.field_behavior) = REQUIRED
@@ -281,8 +292,7 @@ message ListRoomsRequest {
   // than requested. If unspecified, server will pick an appropriate default.
   int32 page_size = 1;
 
-  // Typically, this is the value of
-  // google.showcase.v1alpha3.ListRoomsResponse.next_page_token
+  // The value of google.showcase.v1alpha3.ListRoomsResponse.next_page_token
   // returned from the previous call to
   // `google.showcase.v1alpha3.Messaging\ListRooms` method.
   string page_token = 2;
@@ -296,168 +306,179 @@ message ListRoomsResponse {
 
   // A token to retrieve next page of results.
   // Pass this value in ListRoomsRequest.page_token field in the subsequent
-  // call to `google.showcase.v1alpha3.Message\ListRooms` method to retrieve the
+  // call to `google.showcase.v1alpha3.Messaging\ListRooms` method to retrieve the
   // next page of results.
   string next_page_token = 2;
 }
 
-// This protocol buffer message represents a message sent to a chat room or
+// This protocol buffer message represents a blurb sent to a chat room or
 // posted on a user profile.
-message Message {
-  // The URI of the chat room.
+message Blurb {
+  // The resource name of the chat room.
   string name = 1 [
     (google.api.resource_set) = {
       resources: [
-        {name: "RoomMessage", path: "rooms/{room_id}/messages/{message_id}"},
-        {name: "ProfileMessage", path: "user/{user_id}/profile/messages/{message_id}"}
+        {name: "RoomBlurb", path: "rooms/{room_id}/blurbs/{blurb_id}"},
+        {name: "ProfileBlurb", path: "user/{user_id}/profile/blurbs/{blurb_id}"}
       ]
     }];
 
-  // The URI of the author of this method.
-  string author = 2 [
+  // The resource name of the author of this method.
+  string user = 2 [
     (google.api.resource_reference) = "google.showcase.v1alpha3.User",
     (google.api.field_behavior) = REQUIRED];
 
   oneof content {
-    // The textual content of this message.
+    // The textual content of this blurb.
     string text = 3;
 
-    // The image content of this message.
+    // The image content of this blurb.
     bytes image = 4;
   }
 
-  // The timestamp at which the message was created.
+  // The timestamp at which the blurb was created.
   google.protobuf.Timestamp create_time = 5 [
     (google.api.field_behavior) = OUTPUT_ONLY
   ];
 
-  // The latest timestamp at which the message was updated.
+  // The latest timestamp at which the blurb was updated.
   google.protobuf.Timestamp update_time = 6 [
     (google.api.field_behavior) = OUTPUT_ONLY
   ];
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\CreateMessage
+// The request message for the google.showcase.v1alpha3.Messaging\CreateBlurb
 // method.
-message CreateMessageRequest {
-  // The URI of the chat room or user profile that this message will be tied
-  // to.
+message CreateBlurbRequest {
+  // The resource name of the chat room or user profile that this blurb will
+  // be tied to.
   string parent = 1 [
-    (google.api.resource_set) = {
-      name: "MessageParent"
-      resources: [{
-        name: "Profile",
-        path: "users/{user_id}/profile"
-      }]
-      resource_references: [
-        "google.showcase.v1alpha3.Room"
-      ]
-    },
-    (google.api.field_behavior) = REQUIRED
+    (google.api.resource_reference) = "google.showcase.v1alpha3.BlurbParent"
   ];
 
-  // The message to be created. The "message.name", "message.create_time", and
-  // "message.update_time" fields will be ignored by the server in this request.
-  Message message = 2;
+  // The blurb to be created.
+  Blurb blurb = 2;
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\GetMessage
+// The request message for the google.showcase.v1alpha3.Messaging\GetBlurb
 // method.
-message GetMessageRequest {
-  // The URI of the requested message.
+message GetBlurbRequest {
+  // The resource name of the requested blurb.
   string name = 1 [
-    (google.api.resource_reference) = "google.showcase.v1alpha3.Message",
+    (google.api.resource_reference) = "google.showcase.v1alpha3.Blurb",
     (google.api.field_behavior) = REQUIRED
   ];
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\UpdateMessage
+// The request message for the google.showcase.v1alpha3.Messaging\UpdateBlurb
 // method.
-message UpdateMessageRequest {
-  // The message to be updated.
-  Message message = 1;
+message UpdateBlurbRequest {
+  // The blurb to be updated.
+  Blurb blurb = 1;
 
   // The field mask to determine wich fields are to be updated. If empty, the
   // server will assume all fields are to be updated.
   google.protobuf.FieldMask update_mask = 2;
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\DeleteMessage
+// The request message for the google.showcase.v1alpha3.Messaging\DeleteBlurb
 // method.
-message DeleteMessageRequest {
-  // The URI of the requested message.
+message DeleteBlurbRequest {
+  // The resource name of the requested blurb.
   string name = 1 [
-    (google.api.resource_reference) = "google.showcase.v1alpha3.Message",
+    (google.api.resource_reference) = "google.showcase.v1alpha3.Blurb",
     (google.api.field_behavior) = REQUIRED
   ];
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\ListMessages
+// The request message for the google.showcase.v1alpha3.Messaging\ListBlurbs
 // method.
-message ListMessagesRequest {
-  // The URI of the requested room or profile whos messages are to be listed.
+message ListBlurbsRequest {
+  // The resource name of the requested room or profile whos blurbs are to be
+  // listed.
   string parent = 1 [
-    (google.api.resource_reference) = "google.showcase.v1alpha3.MessageParent",
+    (google.api.resource_reference) = "google.showcase.v1alpha3.BlurbParent",
     (google.api.field_behavior) = REQUIRED
   ];
 
 
-  // The maximum number of rooms to be returned. Server may return fewer rooms
-  // than requested. If unspecified, server will pick an appropriate default.
+  // The maximum number of blurbs to be returned. Server may return fewer
+  // blurbs than requested. If unspecified, server will pick an appropriate
+  // default.
   int32 page_size = 2;
 
-  // Typically, this is the value of
-  // google.showcase.v1alpha3.ListMessagesResponse.next_page_token
+  // The value of google.showcase.v1alpha3.ListBlurbsResponse.next_page_token
   // returned from the previous call to
-  // `google.showcase.v1alpha3.Messaging\ListMessages` method.
+  // `google.showcase.v1alpha3.Messaging\ListBlurbs` method.
   string page_token = 3;
 }
 
-// The response message for the google.showcase.v1alpha3.Messaging\ListMessages
+// The response message for the google.showcase.v1alpha3.Messaging\ListBlurbs
 // method.
-message ListMessagesResponse {
-  // The list of messages.
-  repeated Message messages = 1;
+message ListBlurbsResponse {
+  // The list of blurbs.
+  repeated Blurb blurbs = 1;
 
   // A token to retrieve next page of results.
-  // Pass this value in ListMessagesRequest.page_token field in the subsequent
-  // call to `google.showcase.v1alpha3.Message\ListMessages` method to retrieve
+  // Pass this value in ListBlurbsRequest.page_token field in the subsequent
+  // call to `google.showcase.v1alpha3.Blurb\ListBlurbs` method to retrieve
   // the next page of results.
   string next_page_token = 2;
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\SearchMessages
+// The request message for the google.showcase.v1alpha3.Messaging\SearchBlurbs
 // method.
-message SearchMessagesRequest {
-  // The query used to search for messages containing to words of this string.
+message SearchBlurbsRequest {
+  // The query used to search for blurbs containing to words of this string.
   // Only posts that contain an exact match of a queried word will be returned.
   string query = 1 [(google.api.field_behavior) = REQUIRED];
+
+  // The maximum number of blurbs to be returned. Server may return fewer
+  // blurbs than requested. If unspecified, server will pick an appropriate
+  // default.
+  int32 page_size = 2;
+
+  // The value of
+  // google.showcase.v1alpha3.SearchBlurbsResponse.next_page_token
+  // returned from the previous call to
+  // `google.showcase.v1alpha3.Messaging\SearchBlurbs` method.
+  string page_token = 3;
 }
 
 // The operation metadata message for the
-// google.showcase.v1alpha3.Messaging\SearchMessages method.
-message SearchMessagesMetadata {
-  // This signals to the client to when to next poll for response.
+// google.showcase.v1alpha3.Messaging\SearchBlurbs method.
+message SearchBlurbsMetadata {
+  // This signals to the client when to next poll for response.
   google.rpc.RetryInfo retry_info = 1;
 }
 
 // The operation response message for the
-// google.showcase.v1alpha3.Messaging\SearchMessages method.
-message SearchMessagesResponse {
-  // Messages that matched the search query.
-  repeated Message messages = 1;
+// google.showcase.v1alpha3.Messaging\SearchBlurbs method.
+message SearchBlurbsResponse {
+  // Blurbs that matched the search query.
+  repeated Blurb blurbs = 1;
+
+  // A token to retrieve next page of results.
+  // Pass this value in SearchBlurbsRequest.page_token field in the subsequent
+  // call to `google.showcase.v1alpha3.Blurb\SearchBlurbs` method to
+  // retrieve the next page of results.
+  string next_page_token = 2;
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\StreamMessages
+// The request message for the google.showcase.v1alpha3.Messaging\StreamBlurbs
 // method.
-message StreamMessagesRequest {
-  // The URI of a chat room or user profile whos massages are to be streamed.
+message StreamBlurbsRequest {
+  // The resource name of a chat room or user profile whos massages are to be
+  // streamed.
   string name = 1 [
     (google.api.resource_reference) = "google.showcase.v1alpha3.Room",
     (google.api.field_behavior) = REQUIRED
   ];
 }
 
-// The response message for the google.showcase.v1alpha3.Messaging\SendMessages
+// The response message for the google.showcase.v1alpha3.Messaging\SendBlurbs
 // method.
-message SendMessagesResponse {}
+message SendBlurbsResponse {
+  // The number of successful blurb creations.
+  int32 success_count = 1;
+}

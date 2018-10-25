@@ -66,7 +66,7 @@ func stageProtos() {
 		"git",
 		"clone",
 		"-b",
-		"input-contract-edits",
+		"input-contract",
 		"https://github.com/googleapis/api-common-protos.git",
 		filepath.Join(showcaseDir(), "tmp", "api-common-protos"),
 	)

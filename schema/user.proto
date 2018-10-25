@@ -38,7 +38,7 @@ service Identity {
       body: "*"
     };
     option (google.api.method_signature) = {
-      fields: ["user.username", "user.email"]
+      fields: ["user.display_name", "user.email"]
     };
   }
 
@@ -80,11 +80,11 @@ service Identity {
 
 // A user.
 message User {
-  // The uri of the user.
+  // The resource name of the user.
   string name = 1 [(google.api.resource).path = "users/{user_id}"];
 
-  // The username of the user.
-  string username = 2 [(google.api.field_behavior) = REQUIRED];
+  // The display_name of the user.
+  string display_name = 2 [(google.api.field_behavior) = REQUIRED];
 
   // The email address of the user.
   string email = 3 [(google.api.field_behavior) = REQUIRED];
@@ -103,15 +103,14 @@ message User {
 // The request message for the google.showcase.v1alpha3.Identity\CreateUser
 // method.
 message CreateUserRequest {
-  // The user to be created. The "user.name", "user.create_time", and
-  // "user.update_time" fields will be ignored by the server in this request.
+  // The user to be created.
   User user = 1;
 }
 
 // The request message for the google.showcase.v1alpha3.Identity\GetUser
 // method.
 message GetUserRequest {
-  // The uri of the requested user.
+  // The resource name of the requested user.
   string name = 1 [
     (google.api.resource_reference) = "google.showcase.v1alpha3.User",
     (google.api.field_behavior) = REQUIRED
@@ -132,7 +131,7 @@ message UpdateUserRequest {
 // The request message for the google.showcase.v1alpha3.Identity\DeleteUser
 // method.
 message DeleteUserRequest {
-  // The uri of the user to be deleted.
+  // The resource name of the user to be deleted.
   string name = 1 [
     (google.api.resource_reference) = "google.showcase.v1alpha3.User",
     (google.api.field_behavior) = REQUIRED
@@ -146,8 +145,7 @@ message ListUsersRequest {
   // than requested. If unspecified, server will pick an appropriate default.
   int32 page_size = 1;
 
-  // Typically, this is the value of
-  // google.showcase.v1alpha3.ListUsersResponse.next_page_token
+  // The value of google.showcase.v1alpha3.ListUsersResponse.next_page_token
   // returned from the previous call to
   // `google.showcase.v1alpha3.Identity\ListUsers` method.
   string page_token = 2;
