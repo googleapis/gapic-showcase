@@ -91,7 +91,6 @@ message User {
 
   // The timestamp at which the user was created.
   google.protobuf.Timestamp create_time = 4 [
-    (google.api.field_behavior) = IMMUTABLE,
     (google.api.field_behavior) = OUTPUT_ONLY
   ];
 

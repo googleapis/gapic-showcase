@@ -226,7 +226,6 @@ message Room {
 
   // The timestamp at which the room was created.
   google.protobuf.Timestamp create_time = 4 [
-    (google.api.field_behavior) = IMMUTABLE,
     (google.api.field_behavior) = OUTPUT_ONLY
   ];
 
@@ -329,7 +328,6 @@ message Message {
 
   // The timestamp at which the message was created.
   google.protobuf.Timestamp create_time = 5 [
-    (google.api.field_behavior) = IMMUTABLE,
     (google.api.field_behavior) = OUTPUT_ONLY
   ];
 
