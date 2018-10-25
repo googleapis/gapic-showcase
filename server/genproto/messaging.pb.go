@@ -1041,7 +1041,7 @@ func (m *SearchBlurbsResponse) GetNextPageToken() string {
 // The request message for the google.showcase.v1alpha3.Messaging\StreamBlurbs
 // method.
 type StreamBlurbsRequest struct {
-	// The resource name of a chat room or user profile whos blurbs to stream.
+	// The resource name of a chat room or user profile whose blurbs to stream.
 	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
