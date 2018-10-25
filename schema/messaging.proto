@@ -394,8 +394,7 @@ message DeleteBlurbRequest {
 // The request message for the google.showcase.v1alpha3.Messaging\ListBlurbs
 // method.
 message ListBlurbsRequest {
-  // The resource name of the requested room or profile whos blurbs are to be
-  // listed.
+  // The resource name of the requested room or profile whos blurbs to list.
   string parent = 1 [
     (google.api.resource_reference) = "google.showcase.v1alpha3.BlurbParent",
     (google.api.field_behavior) = REQUIRED
@@ -468,8 +467,7 @@ message SearchBlurbsResponse {
 // The request message for the google.showcase.v1alpha3.Messaging\StreamBlurbs
 // method.
 message StreamBlurbsRequest {
-  // The resource name of a chat room or user profile whos massages are to be
-  // streamed.
+  // The resource name of a chat room or user profile whos massages to stream.
   string name = 1 [
     (google.api.resource_reference) = "google.showcase.v1alpha3.Room",
     (google.api.field_behavior) = REQUIRED

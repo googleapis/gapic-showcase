@@ -109,7 +109,7 @@ func (m *User) GetUpdateTime() *timestamp.Timestamp {
 // The request message for the google.showcase.v1alpha3.Identity\CreateUser
 // method.
 type CreateUserRequest struct {
-	// The user to be created.
+	// The user to create.
 	User                 *User    `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -193,7 +193,7 @@ func (m *GetUserRequest) GetName() string {
 // The request message for the google.showcase.v1alpha3.Identity\UpdateUser
 // method.
 type UpdateUserRequest struct {
-	// The user to be updated.
+	// The user to update.
 	User *User `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
 	// The field mask to determine wich fields are to be updated. If empty, the
 	// server will assume all fields are to be updated.
@@ -245,7 +245,7 @@ func (m *UpdateUserRequest) GetUpdateMask() *field_mask.FieldMask {
 // The request message for the google.showcase.v1alpha3.Identity\DeleteUser
 // method.
 type DeleteUserRequest struct {
-	// The resource name of the user to be deleted.
+	// The resource name of the user to delete.
 	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -287,7 +287,7 @@ func (m *DeleteUserRequest) GetName() string {
 // The request message for the google.showcase.v1alpha3.Identity\ListUsers
 // method.
 type ListUsersRequest struct {
-	// The maximum number of users to be returned. Server may return fewer users
+	// The maximum number of users to return. Server may return fewer users
 	// than requested. If unspecified, server will pick an appropriate default.
 	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// The value of google.showcase.v1alpha3.ListUsersResponse.next_page_token

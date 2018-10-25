@@ -761,8 +761,7 @@ func (m *DeleteBlurbRequest) GetName() string {
 // The request message for the google.showcase.v1alpha3.Messaging\ListBlurbs
 // method.
 type ListBlurbsRequest struct {
-	// The resource name of the requested room or profile whos blurbs are to be
-	// listed.
+	// The resource name of the requested room or profile whos blurbs to list.
 	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
 	// The maximum number of blurbs to be returned. Server may return fewer
 	// blurbs than requested. If unspecified, server will pick an appropriate
@@ -1042,8 +1041,7 @@ func (m *SearchBlurbsResponse) GetNextPageToken() string {
 // The request message for the google.showcase.v1alpha3.Messaging\StreamBlurbs
 // method.
 type StreamBlurbsRequest struct {
-	// The resource name of a chat room or user profile whos massages are to be
-	// streamed.
+	// The resource name of a chat room or user profile whos massages to stream.
 	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`

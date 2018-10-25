@@ -103,7 +103,7 @@ message User {
 // The request message for the google.showcase.v1alpha3.Identity\CreateUser
 // method.
 message CreateUserRequest {
-  // The user to be created.
+  // The user to create.
   User user = 1;
 }
 
@@ -120,7 +120,7 @@ message GetUserRequest {
 // The request message for the google.showcase.v1alpha3.Identity\UpdateUser
 // method.
 message UpdateUserRequest {
-  // The user to be updated.
+  // The user to update.
   User user = 1;
 
   // The field mask to determine wich fields are to be updated. If empty, the
@@ -131,7 +131,7 @@ message UpdateUserRequest {
 // The request message for the google.showcase.v1alpha3.Identity\DeleteUser
 // method.
 message DeleteUserRequest {
-  // The resource name of the user to be deleted.
+  // The resource name of the user to delete.
   string name = 1 [
     (google.api.resource_reference) = "google.showcase.v1alpha3.User",
     (google.api.field_behavior) = REQUIRED
@@ -141,7 +141,7 @@ message DeleteUserRequest {
 // The request message for the google.showcase.v1alpha3.Identity\ListUsers
 // method.
 message ListUsersRequest {
-  // The maximum number of users to be returned. Server may return fewer users
+  // The maximum number of users to return. Server may return fewer users
   // than requested. If unspecified, server will pick an appropriate default.
   int32 page_size = 1;
 
