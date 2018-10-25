@@ -112,7 +112,7 @@ message CreateUserRequest {
 message GetUserRequest {
   // The resource name of the requested user.
   string name = 1 [
-    (google.api.resource_reference) = "google.showcase.v1alpha3.User",
+    (google.api.resource_reference) = "User",
     (google.api.field_behavior) = REQUIRED
   ];
 }
@@ -133,7 +133,7 @@ message UpdateUserRequest {
 message DeleteUserRequest {
   // The resource name of the user to delete.
   string name = 1 [
-    (google.api.resource_reference) = "google.showcase.v1alpha3.User",
+    (google.api.resource_reference) = "User",
     (google.api.field_behavior) = REQUIRED
   ];
 }

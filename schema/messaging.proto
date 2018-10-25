@@ -47,7 +47,7 @@ option (google.api.resource_set_definition) = {
     path: "users/{user_id}/profile"
   }]
   resource_references: [
-    "google.showcase.v1alpha3.Room"
+    "Room"
   ]
 };
 
@@ -184,8 +184,8 @@ service Messaging {
       body: "*"
     };
     option (google.api.operation) = {
-      response_type: "google.showcase.v1alpha3.SearchBlurbsResponse"
-      metadata_type: "google.showcase.v1alpha3.SearchBlurbsMetadata"
+      response_type: "SearchBlurbsResponse"
+      metadata_type: "SearchBlurbsMetadata"
     };
     option (google.api.method_signature) = {
       fields: ["query"]
@@ -259,7 +259,7 @@ message CreateRoomRequest {
 message GetRoomRequest {
   // The resource name of the requested room.
   string name = 1 [
-    (google.api.resource_reference) = "google.showcase.v1alpha3.Room",
+    (google.api.resource_reference) = "Room",
     (google.api.field_behavior) = REQUIRED
   ];
 }
@@ -280,7 +280,7 @@ message UpdateRoomRequest {
 message DeleteRoomRequest {
   // The resource name of the requested room.
   string name = 1 [
-    (google.api.resource_reference) = "google.showcase.v1alpha3.Room",
+    (google.api.resource_reference) = "Room",
     (google.api.field_behavior) = REQUIRED
   ];
 }
@@ -325,7 +325,7 @@ message Blurb {
 
   // The resource name of the blurb's author.
   string user = 2 [
-    (google.api.resource_reference) = "google.showcase.v1alpha3.User",
+    (google.api.resource_reference) = "User",
     (google.api.field_behavior) = REQUIRED];
 
   oneof content {
@@ -353,7 +353,7 @@ message CreateBlurbRequest {
   // The resource name of the chat room or user profile that this blurb will
   // be tied to.
   string parent = 1 [
-    (google.api.resource_reference) = "google.showcase.v1alpha3.BlurbParent"
+    (google.api.resource_reference) = "BlurbParent"
   ];
 
   // The blurb to create.
@@ -365,7 +365,7 @@ message CreateBlurbRequest {
 message GetBlurbRequest {
   // The resource name of the requested blurb.
   string name = 1 [
-    (google.api.resource_reference) = "google.showcase.v1alpha3.Blurb",
+    (google.api.resource_reference) = "Blurb",
     (google.api.field_behavior) = REQUIRED
   ];
 }
@@ -386,7 +386,7 @@ message UpdateBlurbRequest {
 message DeleteBlurbRequest {
   // The resource name of the requested blurb.
   string name = 1 [
-    (google.api.resource_reference) = "google.showcase.v1alpha3.Blurb",
+    (google.api.resource_reference) = "Blurb",
     (google.api.field_behavior) = REQUIRED
   ];
 }
@@ -396,7 +396,7 @@ message DeleteBlurbRequest {
 message ListBlurbsRequest {
   // The resource name of the requested room or profile whos blurbs to list.
   string parent = 1 [
-    (google.api.resource_reference) = "google.showcase.v1alpha3.BlurbParent",
+    (google.api.resource_reference) = "BlurbParent",
     (google.api.field_behavior) = REQUIRED
   ];
 
@@ -469,7 +469,7 @@ message SearchBlurbsResponse {
 message StreamBlurbsRequest {
   // The resource name of a chat room or user profile whose blurbs to stream.
   string name = 1 [
-    (google.api.resource_reference) = "google.showcase.v1alpha3.Room",
+    (google.api.resource_reference) = "Room",
     (google.api.field_behavior) = REQUIRED
   ];
 }
