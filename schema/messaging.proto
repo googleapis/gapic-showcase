@@ -221,7 +221,7 @@ service Messaging {
   // are being created after the stream has started and sends requests to create
   // blurbs. If an invalid blurb is requested to be created, the stream will
   // close with an error.
-  rpc Connect(stream CreateBlurbRequest) returns (stream Blurb);
+  rpc Connect(stream ConnectRequest) returns (stream Blurb);
 }
 
 // A chat room.
@@ -478,4 +478,25 @@ message StreamBlurbsRequest {
 message SendBlurbsResponse {
   // The number of successful blurb creations.
   int32 success_count = 1;
+}
+
+// The request message for the google.showcase.v1alpha3.Messaging\Connect
+// method.
+message ConnectRequest {
+  message ConnectConfig {
+    // The room or profile to follow and create messages for.
+    string parent = 1 [
+      (google.api.resource_reference) = "BlurbParent",
+      (google.api.field_behavior) = REQUIRED
+    ];
+  }
+
+  oneof request {
+    // Provides information that specifies how to process subsequent requests.
+    // The first `ConnectRequest` message must contain a `config`  message.
+    ConnectConfig config = 1;
+
+    // The blurb to be created.
+    Blurb blurb = 2;
+  }
 }
