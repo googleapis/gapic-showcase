@@ -436,14 +436,7 @@ message SearchBlurbsRequest {
 
   // The rooms or profiles to search. If unset, `SearchBlurbs` will search all
   // rooms and all profiles.
-  string parent = 2 [
-    (google.api.resource_set) = {
-      name: "AllBlurbsParent"
-      resources: [
-        {name: "AllRooms", path: "rooms/-"},
-        {name: "AllProfiles", path: "users/-/profile"}
-      ]
-    }];
+  string parent = 2 [(google.api.resource_reference) = "BlurbParent"];
 
   // The maximum number of blurbs return. Server may return fewer
   // blurbs than requested. If unspecified, server will pick an appropriate
