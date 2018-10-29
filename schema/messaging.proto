@@ -102,10 +102,9 @@ service Messaging {
     };
   }
 
-  // Creates a blurb. If the parent field corresponds to a RoomBlurb
-  // resource, the blurb is understood to be a message in a chatroom. If the
-  // parent field is a ProfileBlurb resource name, the blurb is understood
-  // to be a post on a user profile.
+  // Creates a blurb. If the parent is a room, the blurb is understood to be a
+  // message in that room. If the parent is a profile, the blurb is understood
+  // to be a post on the profile.
   rpc CreateBlurb(CreateBlurbRequest) returns (Blurb) {
     option (google.api.http) = {
       post: "/v1alpha3/{parent=rooms/*}/blurbs"
@@ -116,10 +115,10 @@ service Messaging {
       }
     };
     option (google.api.method_signature) = {
-      fields: ["parent", "blurb.text", "blurb.user"]
+      fields: ["parent", "blurb.user", "blurb.text"]
     };
     option (google.api.method_signature) = {
-      fields: ["parent", "blurb.image", "blurb.user"]
+      fields: ["parent", "blurb.user", "blurb.image"]
     };
   }
 
