@@ -28,8 +28,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const CURRENT_API = "v1alpha2"
-const CURRENT_RELEASE = "0.0.7"
+const CURRENT_API = "v1alpha3"
+const CURRENT_RELEASE = "0.0.8"
 
 func main() {
 	var bumpMajor, bumpMinor, bumpPatch bool

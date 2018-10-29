@@ -49,7 +49,7 @@ func CompileProtos(version string) {
 		filepath.Join(showcaseDir, "tmp", "api-common-protos"),
 	)
 
-	// Move showcase protos alongside it's dependencies.
+	// Move showcase protos alongside its dependencies.
 	protoDest := filepath.Join(
 		showcaseDir,
 		"tmp",
