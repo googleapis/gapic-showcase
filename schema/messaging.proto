@@ -355,7 +355,8 @@ message CreateBlurbRequest {
   // The resource name of the chat room or user profile that this blurb will
   // be tied to.
   string parent = 1 [
-    (google.api.resource_reference) = "BlurbParent"
+    (google.api.resource_reference) = "BlurbParent",
+    (google.api.field_behavior) = REQUIRED
   ];
 
   // The blurb to create.
@@ -475,7 +476,7 @@ message SearchBlurbsResponse {
 message StreamBlurbsRequest {
   // The resource name of a chat room or user profile whose blurbs to stream.
   string name = 1 [
-    (google.api.resource_reference) = "Room",
+    (google.api.resource_reference) = "BlurbParent",
     (google.api.field_behavior) = REQUIRED
   ];
 }
