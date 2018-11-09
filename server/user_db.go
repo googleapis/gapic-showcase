@@ -54,6 +54,7 @@ type dbIndex int
 type userDb struct {
 	uid   *uniqID
 	token TokenGenerator
+
 	mu    sync.Mutex
 	keys  map[string]dbIndex
 	users []userEntry
@@ -63,32 +64,25 @@ func (db *userDb) Create(u *pb.User) (*pb.User, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	err := db.validate(u)
+	err := validate(u)
 	if err != nil {
 		return nil, err
 	}
 
 	// Validate Unique Fields.
-	hasSameName := func(x *pb.User) bool {
-		return u.GetDisplayName() == x.GetDisplayName()
+	uniqNameEmail := func(x *pb.User) bool {
+		return (u.GetDisplayName() == x.GetDisplayName() || u.GetEmail() == x.GetEmail())
 	}
-	if db.anyUser(hasSameName) {
+	if db.anyUser(uniqNameEmail) {
 		return nil, status.Errorf(
 			codes.AlreadyExists,
-			"A user with display_name %s already exists.",
-			u.GetDisplayName())
-	}
-
-	hasSameEmail := func(x *pb.User) bool { return u.GetEmail() == x.GetEmail() }
-	if db.anyUser(hasSameEmail) {
-		return nil, status.Errorf(
-			codes.AlreadyExists,
-			"A user with the email %s already exists.",
+			"A user with display_name %s or email %s already exists.",
+			u.GetDisplayName(),
 			u.GetEmail())
 	}
 
 	// Assign info.
-	id := db.uid.id()
+	id := db.uid.next()
 	name := fmt.Sprintf("users/%d", id)
 	now := ptypes.TimestampNow()
 
@@ -105,6 +99,9 @@ func (db *userDb) Create(u *pb.User) (*pb.User, error) {
 }
 
 func (db *userDb) Get(s string) (*pb.User, error) {
+	db.mu.Lock()
+	defer db.mu.Unlock()
+
 	if v, ok := db.keys[s]; ok {
 		entry := db.users[int(v)]
 		if !entry.deleted {
@@ -125,44 +122,41 @@ func (db *userDb) Update(u *pb.User, f *field_mask.FieldMask) (*pb.User, error) 
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	err := db.validate(u)
+	err := validate(u)
 	if err != nil {
 		return nil, err
 	}
+	i, ok := db.keys[u.GetName()]
 
-	if i, ok := db.keys[u.GetName()]; ok {
-		entry := db.users[int(i)]
-		if !entry.deleted {
-			// Validate Unique Fields.
-			hasSameName := func(x *pb.User) bool {
-				return x != entry.user && u.GetDisplayName() == x.GetDisplayName()
-			}
-			if db.anyUser(hasSameName) {
-				return nil, status.Errorf(
-					codes.AlreadyExists,
-					"A user with display_name %s already exists.",
-					u.GetDisplayName())
-			}
-
-			hasSameEmail := func(x *pb.User) bool {
-				return x != entry.user && u.GetEmail() == x.GetEmail()
-			}
-			if db.anyUser(hasSameEmail) {
-				return nil, status.Errorf(
-					codes.AlreadyExists,
-					"A user with the email %s already exists.",
-					u.GetEmail())
-			}
-
-			// Update store.
-			db.users[int(i)] = userEntry{user: u, deleted: false}
-			return u, nil
-		}
+	if !ok || db.users[int(i)].deleted {
+		return nil, status.Errorf(
+			codes.NotFound,
+			"A user with name %s not found.", u.GetName())
 	}
 
-	return nil, status.Errorf(
-		codes.NotFound,
-		"A user with name %s not found.", u.GetName())
+	entry := db.users[int(i)]
+	// Validate Unique Fields.
+	uniqNameEmail := func(x *pb.User) bool {
+		return x != entry.user && (u.GetDisplayName() == x.GetDisplayName() || u.GetEmail() == x.GetEmail())
+	}
+	if db.anyUser(uniqNameEmail) {
+		return nil, status.Errorf(
+			codes.AlreadyExists,
+			"A user with either display_name, %s, or email %s already exists.",
+			u.GetDisplayName(),
+			u.GetEmail())
+	}
+
+	// Update store.
+	updated := &pb.User{
+		Name:        u.GetName(),
+		DisplayName: u.GetDisplayName(),
+		Email:       u.GetEmail(),
+		CreateTime:  entry.user.GetCreateTime(),
+		UpdateTime:  ptypes.TimestampNow(),
+	}
+	db.users[int(i)] = userEntry{user: updated, deleted: false}
+	return u, nil
 }
 
 func (db *userDb) Delete(s string) error {
@@ -210,7 +204,16 @@ func (db *userDb) List(pageSize int32, pageToken string) (*pb.ListUsersResponse,
 	return &pb.ListUsersResponse{Users: users, NextPageToken: nextToken}, nil
 }
 
-func (db *userDb) validate(u *pb.User) error {
+func (db *userDb) anyUser(f func(*pb.User) bool) bool {
+	for _, entry := range db.users {
+		if !entry.deleted && f(entry.user) {
+			return true
+		}
+	}
+	return false
+}
+
+func validate(u *pb.User) error {
 	// Validate Required Fields.
 	if u.GetDisplayName() == "" {
 		return status.Errorf(
@@ -223,13 +226,4 @@ func (db *userDb) validate(u *pb.User) error {
 			"The field `email` is required.")
 	}
 	return nil
-}
-
-func (db *userDb) anyUser(f func(*pb.User) bool) bool {
-	for _, entry := range db.users {
-		if !entry.deleted && f(entry.user) {
-			return true
-		}
-	}
-	return false
 }

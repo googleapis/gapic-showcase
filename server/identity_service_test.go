@@ -88,7 +88,12 @@ func Test_User_lifecycle(t *testing.T) {
 	if err != nil {
 		t.Errorf("Get: unexpected err %+v", err)
 	}
-	if !proto.Equal(updated, got) {
+	// Cannot use proto.Equal here because the update time is changed on updates.
+	if updated.GetName() != got.GetName() ||
+		updated.GetDisplayName() != got.GetDisplayName() ||
+		updated.GetEmail() != got.GetEmail() ||
+		!proto.Equal(updated.GetCreateTime(), got.GetCreateTime()) ||
+		proto.Equal(updated.GetUpdateTime(), got.GetUpdateTime()) {
 		t.Error("Expected to get updated user.")
 	}
 

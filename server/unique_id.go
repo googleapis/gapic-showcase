@@ -22,6 +22,6 @@ type uniqID struct {
 	i int64
 }
 
-func (u *uniqID) id() int64 {
+func (u *uniqID) next() int64 {
 	return atomic.AddInt64(&u.i, 1) - 1
 }
