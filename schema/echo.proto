@@ -92,6 +92,10 @@ service Echo {
       post: "/v1alpha3/echo:wait"
       body: "*"
     };
+    option (google.api.operation) = {
+      response_type: "WaitResponse"
+      metadata_type: "WaitMetadata"
+    };
   }
 }
 
