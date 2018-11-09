@@ -227,10 +227,7 @@ func (db *userDb) validate(u *pb.User) error {
 
 func (db *userDb) anyUser(f func(*pb.User) bool) bool {
 	for _, entry := range db.users {
-		if entry.deleted {
-			continue
-		}
-		if f(entry.user) {
+		if !entry.deleted && f(entry.user) {
 			return true
 		}
 	}

@@ -52,7 +52,7 @@ func Test_User_lifecycle(t *testing.T) {
 		context.Background(),
 		&pb.DeleteUserRequest{Name: delete.Name})
 	if err != nil {
-		t.Errorf("Create: unexpected err %+v", err)
+		t.Errorf("Delete: unexpected err %+v", err)
 	}
 
 	created, err := s.CreateUser(
@@ -89,7 +89,7 @@ func Test_User_lifecycle(t *testing.T) {
 		t.Errorf("Get: unexpected err %+v", err)
 	}
 	if !proto.Equal(updated, got) {
-		t.Error("Expected to get created user.")
+		t.Error("Expected to get updated user.")
 	}
 
 	r, err := s.ListUsers(
@@ -112,7 +112,7 @@ func Test_User_lifecycle(t *testing.T) {
 		t.Errorf("List want: page size %d, got %d", 1, len(r.GetUsers()))
 	}
 	if !proto.Equal(got, r.GetUsers()[0]) {
-		t.Errorf("List want: first user %+v, got %+v", first, r.GetUsers()[0])
+		t.Errorf("List want: updated user %+v, got %+v", first, r.GetUsers()[0])
 	}
 	if r.GetNextPageToken() != "" {
 		t.Error("List want: empty next page token")
@@ -176,7 +176,7 @@ func Test_Get_notFound(t *testing.T) {
 	status, _ := status.FromError(err)
 	if status.Code() != codes.NotFound {
 		t.Errorf(
-			"Create: Want error code %d got %d",
+			"Get: Want error code %d got %d",
 			codes.NotFound,
 			status.Code())
 	}
@@ -206,7 +206,7 @@ func Test_Get_deleted(t *testing.T) {
 	status, _ := status.FromError(err)
 	if status.Code() != codes.NotFound {
 		t.Errorf(
-			"Create: Want error code %d got %d",
+			"Get deleted: Want error code %d got %d",
 			codes.NotFound,
 			status.Code())
 	}
@@ -223,7 +223,7 @@ func Test_Update_fieldmask(t *testing.T) {
 	status, _ := status.FromError(err)
 	if status.Code() != codes.Unimplemented {
 		t.Errorf(
-			"Create: Want error code %d got %d",
+			"Update: Want error code %d got %d",
 			codes.Unimplemented,
 			status.Code())
 	}
@@ -244,7 +244,7 @@ func Test_Update_notFound(t *testing.T) {
 	status, _ := status.FromError(err)
 	if status.Code() != codes.NotFound {
 		t.Errorf(
-			"Create: Want error code %d got %d",
+			"Update: Want error code %d got %d",
 			codes.NotFound,
 			status.Code())
 	}
@@ -276,7 +276,7 @@ func Test_Update_invalid(t *testing.T) {
 		status, _ := status.FromError(err)
 		if status.Code() != codes.InvalidArgument {
 			t.Errorf(
-				"Create: Want error code %d got %d",
+				"Update: Want error code %d got %d",
 				codes.InvalidArgument,
 				status.Code())
 		}
@@ -311,7 +311,7 @@ func Test_Update_alreadyPresent(t *testing.T) {
 		status, _ := status.FromError(err)
 		if status.Code() != codes.AlreadyExists {
 			t.Errorf(
-				"Create: Want error code %d got %d",
+				"Update: Want error code %d got %d",
 				codes.AlreadyExists,
 				status.Code())
 		}
@@ -326,7 +326,7 @@ func Test_Delete_notFound(t *testing.T) {
 	status, _ := status.FromError(err)
 	if status.Code() != codes.NotFound {
 		t.Errorf(
-			"Create: Want error code %d got %d",
+			"Delete: Want error code %d got %d",
 			codes.NotFound,
 			status.Code())
 	}
@@ -355,7 +355,7 @@ func Test_List_invalidToken(t *testing.T) {
 		status, _ := status.FromError(err)
 		if status.Code() != codes.InvalidArgument {
 			t.Errorf(
-				"Create: Want error code %d got %d",
+				"List: Want error code %d got %d",
 				codes.InvalidArgument,
 				status.Code())
 		}
