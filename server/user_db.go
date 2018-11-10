@@ -31,7 +31,7 @@ func NewUserDb() UserDb {
 		uid:   &uniqID{},
 		token: NewTokenGenerator(),
 		mu:    sync.Mutex{},
-		keys:  map[string]dbIndex{},
+		keys:  map[string]int{},
 		users: []userEntry{},
 	}
 }
@@ -49,14 +49,12 @@ type userEntry struct {
 	deleted bool
 }
 
-type dbIndex int
-
 type userDb struct {
 	uid   *uniqID
 	token TokenGenerator
 
 	mu    sync.Mutex
-	keys  map[string]dbIndex
+	keys  map[string]int
 	users []userEntry
 }
 
@@ -64,21 +62,9 @@ func (db *userDb) Create(u *pb.User) (*pb.User, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	err := validate(u)
+	err := db.validate(u)
 	if err != nil {
 		return nil, err
-	}
-
-	// Validate Unique Fields.
-	uniqNameEmail := func(x *pb.User) bool {
-		return (u.GetDisplayName() == x.GetDisplayName() || u.GetEmail() == x.GetEmail())
-	}
-	if db.anyUser(uniqNameEmail) {
-		return nil, status.Errorf(
-			codes.AlreadyExists,
-			"A user with display_name %s or email %s already exists.",
-			u.GetDisplayName(),
-			u.GetEmail())
 	}
 
 	// Assign info.
@@ -91,7 +77,7 @@ func (db *userDb) Create(u *pb.User) (*pb.User, error) {
 	u.UpdateTime = now
 
 	// Insert.
-	index := dbIndex(len(db.users))
+	index := len(db.users)
 	db.users = append(db.users, userEntry{user: u, deleted: false})
 	db.keys[name] = index
 
@@ -102,8 +88,8 @@ func (db *userDb) Get(s string) (*pb.User, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	if v, ok := db.keys[s]; ok {
-		entry := db.users[int(v)]
+	if i, ok := db.keys[s]; ok {
+		entry := db.users[i]
 		if !entry.deleted {
 			return entry.user, nil
 		}
@@ -122,31 +108,18 @@ func (db *userDb) Update(u *pb.User, f *field_mask.FieldMask) (*pb.User, error) 
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	err := validate(u)
-	if err != nil {
-		return nil, err
-	}
 	i, ok := db.keys[u.GetName()]
-
-	if !ok || db.users[int(i)].deleted {
+	if !ok || db.users[i].deleted {
 		return nil, status.Errorf(
 			codes.NotFound,
 			"A user with name %s not found.", u.GetName())
 	}
 
-	entry := db.users[int(i)]
-	// Validate Unique Fields.
-	uniqNameEmail := func(x *pb.User) bool {
-		return x != entry.user && (u.GetDisplayName() == x.GetDisplayName() || u.GetEmail() == x.GetEmail())
+	err := db.validate(u)
+	if err != nil {
+		return nil, err
 	}
-	if db.anyUser(uniqNameEmail) {
-		return nil, status.Errorf(
-			codes.AlreadyExists,
-			"A user with either display_name, %s, or email %s already exists.",
-			u.GetDisplayName(),
-			u.GetEmail())
-	}
-
+	entry := db.users[i]
 	// Update store.
 	updated := &pb.User{
 		Name:        u.GetName(),
@@ -155,7 +128,7 @@ func (db *userDb) Update(u *pb.User, f *field_mask.FieldMask) (*pb.User, error) 
 		CreateTime:  entry.user.GetCreateTime(),
 		UpdateTime:  ptypes.TimestampNow(),
 	}
-	db.users[int(i)] = userEntry{user: updated, deleted: false}
+	db.users[i] = userEntry{user: updated, deleted: false}
 	return u, nil
 }
 
@@ -171,8 +144,8 @@ func (db *userDb) Delete(s string) error {
 			"A user with name %s not found.", s)
 	}
 
-	entry := db.users[int(i)]
-	db.users[int(i)] = userEntry{user: entry.user, deleted: true}
+	entry := db.users[i]
+	db.users[i] = userEntry{user: entry.user, deleted: true}
 
 	return nil
 }
@@ -204,16 +177,7 @@ func (db *userDb) List(pageSize int32, pageToken string) (*pb.ListUsersResponse,
 	return &pb.ListUsersResponse{Users: users, NextPageToken: nextToken}, nil
 }
 
-func (db *userDb) anyUser(f func(*pb.User) bool) bool {
-	for _, entry := range db.users {
-		if !entry.deleted && f(entry.user) {
-			return true
-		}
-	}
-	return false
-}
-
-func validate(u *pb.User) error {
+func (db *userDb) validate(u *pb.User) error {
 	// Validate Required Fields.
 	if u.GetDisplayName() == "" {
 		return status.Errorf(
@@ -224,6 +188,23 @@ func validate(u *pb.User) error {
 		return status.Errorf(
 			codes.InvalidArgument,
 			"The field `email` is required.")
+	}
+	// Validate Unique Fields.
+	for _, x := range db.users {
+		if (u.GetDisplayName() == x.user.GetDisplayName()) &&
+			(u.GetName() != x.user.GetName()) {
+			return status.Errorf(
+				codes.AlreadyExists,
+				"A user with display_name %s already exists.",
+				u.GetDisplayName())
+		}
+		if (u.GetEmail() == x.user.GetEmail()) &&
+			(u.GetName() != x.user.GetName()) {
+			return status.Errorf(
+				codes.AlreadyExists,
+				"A user with email %s already exists.",
+				u.GetEmail())
+		}
 	}
 	return nil
 }

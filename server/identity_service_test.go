@@ -342,7 +342,7 @@ func Test_List_invalidToken(t *testing.T) {
 		uid:   &uniqID{},
 		token: &tokenGenerator{salt: "Ekko"},
 		mu:    sync.Mutex{},
-		keys:  map[string]dbIndex{},
+		keys:  map[string]int{},
 		users: []userEntry{},
 	}
 	s := identityServerImpl{db: db}
