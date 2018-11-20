@@ -17,6 +17,7 @@ package server
 import (
 	"context"
 	"encoding/base64"
+	"strings"
 	"sync"
 	"testing"
 
@@ -700,5 +701,64 @@ func Test_ListBlurbs_noneCreated(t *testing.T) {
 	}
 	if len(resp.GetBlurbs()) > 0 {
 		t.Errorf("List none created: want empty list got %+v", resp)
+	}
+}
+
+func Test_SearchBlurbs(t *testing.T) {
+	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+
+	req := &pb.SearchBlurbsRequest{
+		Query:    "woof bark",
+		Parent:   "users/rumble/profile",
+		PageSize: 100,
+	}
+
+	op, err := s.SearchBlurbs(
+		context.Background(),
+		req)
+	if err != nil {
+		t.Errorf("SearchBlurbs: unexpected err %+v", err)
+	}
+
+	expName := "operations/google.showcase.v1alpha3.Messaging/SearchBlurbs/"
+	if !strings.HasPrefix(op.Name, expName) {
+		t.Errorf(
+			"SearchBlurbs op.Name prefex want: '%s', got: %s'",
+			expName,
+			op.Name)
+	}
+
+	reqProto := &pb.SearchBlurbsRequest{}
+	encodedBytes := strings.TrimPrefix(
+		op.Name,
+		expName)
+	bytes, _ := base64.StdEncoding.DecodeString(encodedBytes)
+	proto.Unmarshal(bytes, reqProto)
+	if !proto.Equal(reqProto, req) {
+		t.Errorf(
+			"SearchBlurbs for %q expected unmarshalled %q, got %q",
+			req,
+			req,
+			reqProto)
+	}
+}
+
+func Test_SearchBlurbs_parentNotFound(t *testing.T) {
+	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+
+	req := &pb.SearchBlurbsRequest{
+		Query:  "woof bark",
+		Parent: "users/rumble/profile",
+	}
+
+	_, err := s.SearchBlurbs(
+		context.Background(),
+		req)
+	status, _ := status.FromError(err)
+	if status.Code() != codes.NotFound {
+		t.Errorf(
+			"SearchBlurbs: Want error code %d got %d",
+			codes.NotFound,
+			status.Code())
 	}
 }

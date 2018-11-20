@@ -16,11 +16,17 @@ package server
 
 import (
 	"context"
+	"encoding/base64"
+	"fmt"
 	"strings"
+	"time"
 
+	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/genproto/googleapis/longrunning"
+	errdetails "google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -107,7 +113,23 @@ func (s *messagingServerImpl) ListBlurbs(ctx context.Context, in *pb.ListBlurbsR
 // for blurbs containing to words found in the query. Only posts that
 // contain an exact match of a queried word will be returned.
 func (s *messagingServerImpl) SearchBlurbs(ctx context.Context, in *pb.SearchBlurbsRequest) (*longrunning.Operation, error) {
-	return nil, nil
+	if err := s.validateParent(in.GetParent()); err != nil {
+		return nil, err
+	}
+	reqBytes, _ := proto.Marshal(in)
+
+	name := fmt.Sprintf(
+		"operations/google.showcase.v1alpha3.Messaging/SearchBlurbs/%s",
+		base64.StdEncoding.EncodeToString(reqBytes))
+	// TODO(landrito) Add randomization to the retry delay.
+	meta, _ := ptypes.MarshalAny(
+		&pb.SearchBlurbsMetadata{
+			RetryInfo: &errdetails.RetryInfo{
+				RetryDelay: ptypes.DurationProto(time.Duration(1) * time.Second),
+			},
+		},
+	)
+	return &longrunning.Operation{Name: name, Done: false, Metadata: meta}, nil
 }
 
 // This returns a stream that emits the blurbs that are created for a

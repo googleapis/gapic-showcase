@@ -45,10 +45,16 @@ type BlurbDb interface {
 	List(r *ListBlurbsDbRequest) (*pb.ListBlurbsResponse, error)
 }
 
+type ReadOnlyBlurbDb interface {
+	Get(name string) (*pb.Blurb, error)
+	List(r *ListBlurbsDbRequest) (*pb.ListBlurbsResponse, error)
+}
+
 type ListBlurbsDbRequest struct {
 	Parent    string
 	PageSize  int32
 	PageToken string
+	Filter    func(*pb.Blurb) bool
 }
 
 type blurbIndex struct {
@@ -189,7 +195,9 @@ func (db *blurbDb) List(r *ListBlurbsDbRequest) (*pb.ListBlurbsResponse, error) 
 		if entry.deleted {
 			continue
 		}
-		blurbs = append(blurbs, entry.blurb)
+		if r.Filter == nil || r.Filter(entry.blurb) {
+			blurbs = append(blurbs, entry.blurb)
+		}
 		if len(blurbs) >= int(r.PageSize) {
 			break
 		}

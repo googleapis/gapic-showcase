@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	lropb "google.golang.org/genproto/googleapis/longrunning"
@@ -28,18 +29,29 @@ import (
 )
 
 // NewEchoServer returns a new EchoServer for the Showcase API.
-func NewOperationsServer() lropb.OperationsServer {
-	return &operationsServerImpl{waiter: waiterSingleton}
+func NewOperationsServer(blurbDb ReadOnlyBlurbDb) lropb.OperationsServer {
+	return &operationsServerImpl{waiter: waiterSingleton, blurbDb: blurbDb}
 }
 
 type operationsServerImpl struct {
-	waiter Waiter
+	blurbDb ReadOnlyBlurbDb
+	waiter  Waiter
 }
 
 func (s *operationsServerImpl) GetOperation(ctx context.Context, in *lropb.GetOperationRequest) (*lropb.Operation, error) {
+	if op, err := s.handleWait(in); op != nil || err != nil {
+		return op, err
+	}
+	if op, err := s.handleSearchBlurbs(in); op != nil || err != nil {
+		return op, err
+	}
+	return nil, status.Errorf(codes.NotFound, "Operation %q not found.", in.Name)
+}
+
+func (s *operationsServerImpl) handleWait(in *lropb.GetOperationRequest) (*lropb.Operation, error) {
 	prefix := "operations/google.showcase.v1alpha3.Echo/Wait/"
 	if !strings.HasPrefix(in.Name, prefix) {
-		return nil, status.Errorf(codes.NotFound, "Operation %q not found.", in.Name)
+		return nil, nil
 	}
 
 	waitReq := &pb.WaitRequest{}
@@ -55,6 +67,60 @@ func (s *operationsServerImpl) GetOperation(ctx context.Context, in *lropb.GetOp
 	}
 
 	return s.waiter.Wait(waitReq), nil
+}
+
+func (s *operationsServerImpl) handleSearchBlurbs(in *lropb.GetOperationRequest) (*lropb.Operation, error) {
+	prefix := "operations/google.showcase.v1alpha3.Messaging/SearchBlurbs/"
+	if !strings.HasPrefix(in.GetName(), prefix) {
+		return nil, nil
+	}
+
+	req := &pb.SearchBlurbsRequest{}
+	encodedBytes := strings.TrimPrefix(in.GetName(), prefix)
+	waitReqBytes, err := base64.StdEncoding.DecodeString(encodedBytes)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "Operation %q not found.", in.Name)
+	}
+
+	err = proto.Unmarshal(waitReqBytes, req)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "Operation %q not found.", in.Name)
+	}
+
+	// TODO(landrito): add some randomization here so that the search blurbs
+	// operation could take multiple get calls to complete.
+	listResp, err := s.blurbDb.List(
+		&ListBlurbsDbRequest{
+			Parent:    req.GetParent(),
+			PageSize:  req.GetPageSize(),
+			PageToken: req.GetPageToken(),
+			Filter:    searchFilterFunc(req.GetQuery()),
+		})
+
+	answer := &lropb.Operation{
+		Name: in.GetName(),
+		Done: true,
+	}
+
+	resp, _ := ptypes.MarshalAny(
+		&pb.SearchBlurbsResponse{
+			Blurbs:        listResp.GetBlurbs(),
+			NextPageToken: listResp.GetNextPageToken(),
+		})
+	answer.Result = &lropb.Operation_Response{Response: resp}
+
+	return answer, nil
+}
+
+func searchFilterFunc(query string) func(b *pb.Blurb) bool {
+	return func(b *pb.Blurb) bool {
+		for _, s := range strings.Fields(query) {
+			if strings.Index(b.GetText(), s) >= 0 {
+				return true
+			}
+		}
+		return false
+	}
 }
 
 func (s operationsServerImpl) CancelOperation(ctx context.Context, in *lropb.CancelOperationRequest) (*empty.Empty, error) {
