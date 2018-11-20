@@ -28,7 +28,7 @@ import (
 )
 
 func Test_Room_lifecycle(t *testing.T) {
-	s := NewMessagingServer()
+	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
 
 	first, err := s.CreateRoom(
 		context.Background(),
@@ -124,7 +124,7 @@ func Test_Room_lifecycle(t *testing.T) {
 }
 
 func Test_CreateRoom_invalid(t *testing.T) {
-	s := NewMessagingServer()
+	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
 	_, err := s.CreateRoom(
 		context.Background(),
 		&pb.CreateRoomRequest{Room: &pb.Room{DisplayName: ""}})
@@ -140,7 +140,7 @@ func Test_CreateRoom_invalid(t *testing.T) {
 func Test_CreateRoom_alreadyPresent(t *testing.T) {
 	room := &pb.Room{DisplayName: "Living Room"}
 
-	s := NewMessagingServer()
+	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
 	_, err := s.CreateRoom(context.Background(), &pb.CreateRoomRequest{Room: room})
 	if err != nil {
 		t.Errorf("Create: unexpected err %+v", err)
@@ -156,7 +156,7 @@ func Test_CreateRoom_alreadyPresent(t *testing.T) {
 }
 
 func Test_GetRoom_notFound(t *testing.T) {
-	s := NewMessagingServer()
+	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
 	_, err := s.GetRoom(
 		context.Background(),
 		&pb.GetRoomRequest{Name: "Weight Room"})
@@ -170,7 +170,7 @@ func Test_GetRoom_notFound(t *testing.T) {
 }
 
 func Test_GetRoom_deleted(t *testing.T) {
-	s := NewMessagingServer()
+	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
 	created, err := s.CreateRoom(
 		context.Background(),
 		&pb.CreateRoomRequest{
@@ -200,7 +200,7 @@ func Test_GetRoom_deleted(t *testing.T) {
 }
 
 func Test_UpdateRoom_fieldmask(t *testing.T) {
-	s := NewMessagingServer()
+	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
 	_, err := s.UpdateRoom(
 		context.Background(),
 		&pb.UpdateRoomRequest{
@@ -217,7 +217,7 @@ func Test_UpdateRoom_fieldmask(t *testing.T) {
 }
 
 func Test_UpdateRoom_notFound(t *testing.T) {
-	s := NewMessagingServer()
+	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
 	_, err := s.UpdateRoom(
 		context.Background(),
 		&pb.UpdateRoomRequest{
@@ -239,7 +239,7 @@ func Test_UpdateRoom_notFound(t *testing.T) {
 func Test_UpdateRoom_invalid(t *testing.T) {
 	first := &pb.Room{DisplayName: "Living Room"}
 	second := &pb.Room{DisplayName: ""}
-	s := NewMessagingServer()
+	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
 	created, err := s.CreateRoom(
 		context.Background(),
 		&pb.CreateRoomRequest{Room: first})
@@ -266,7 +266,7 @@ func Test_UpdateRoom_alreadyPresent(t *testing.T) {
 	}
 	second := &pb.Room{DisplayName: "Weight Room"}
 
-	s := NewMessagingServer()
+	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
 	for i, r := range first {
 		created, err := s.CreateRoom(
 			context.Background(),
@@ -290,7 +290,7 @@ func Test_UpdateRoom_alreadyPresent(t *testing.T) {
 }
 
 func Test_DeleteRoom_notFound(t *testing.T) {
-	s := NewMessagingServer()
+	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
 	_, err := s.DeleteRoom(
 		context.Background(),
 		&pb.DeleteRoomRequest{Name: "Weight Room"})
@@ -330,5 +330,375 @@ func Test_ListRooms_invalidToken(t *testing.T) {
 				codes.InvalidArgument,
 				status.Code())
 		}
+	}
+}
+
+type mockIdentityServer struct{}
+
+func (m *mockIdentityServer) GetUser(_ context.Context, _ *pb.GetUserRequest) (*pb.User, error) {
+	return &pb.User{}, nil
+}
+
+func (m *mockIdentityServer) ListUsers(_ context.Context, _ *pb.ListUsersRequest) (*pb.ListUsersResponse, error) {
+	return nil, nil
+}
+
+func Test_Blurb_lifecycle(t *testing.T) {
+	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+
+	first, err := s.CreateBlurb(
+		context.Background(),
+		&pb.CreateBlurbRequest{
+			Parent: "users/rumble/profile",
+			Blurb: &pb.Blurb{
+				User:    "users/rumble",
+				Content: &pb.Blurb_Text{Text: "woof"},
+			},
+		})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
+	}
+
+	delete, err := s.CreateBlurb(
+		context.Background(),
+		&pb.CreateBlurbRequest{
+			Parent: "users/rumble/profile",
+			Blurb: &pb.Blurb{
+				User:    "users/ekko",
+				Content: &pb.Blurb_Text{Text: "bark"},
+			},
+		})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
+	}
+
+	_, err = s.DeleteBlurb(
+		context.Background(),
+		&pb.DeleteBlurbRequest{Name: delete.Name})
+	if err != nil {
+		t.Errorf("Delete: unexpected err %+v", err)
+	}
+
+	created, err := s.CreateBlurb(
+		context.Background(),
+		&pb.CreateBlurbRequest{
+			Parent: "users/rumble/profile",
+			Blurb: &pb.Blurb{
+				User:    "users/musubi",
+				Content: &pb.Blurb_Text{Text: "meow"},
+			},
+		})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
+	}
+
+	got, err := s.GetBlurb(
+		context.Background(),
+		&pb.GetBlurbRequest{Name: created.GetName()})
+	if err != nil {
+		t.Errorf("Get: unexpected err %+v", err)
+	}
+	if !proto.Equal(created, got) {
+		t.Error("Expected to get created blurb.")
+	}
+
+	got.Content = &pb.Blurb_Text{Text: "purrr"}
+	_, err = s.UpdateBlurb(
+		context.Background(),
+		&pb.UpdateBlurbRequest{Blurb: got, UpdateMask: nil})
+	if err != nil {
+		t.Errorf("Update: unexpected err %+v", err)
+	}
+
+	updated, err := s.GetBlurb(
+		context.Background(),
+		&pb.GetBlurbRequest{Name: got.GetName()})
+	if err != nil {
+		t.Errorf("Get: unexpected err %+v", err)
+	}
+	// Cannot use proto.Equal here because the update time is changed on updates.
+	if updated.GetName() != got.GetName() ||
+		updated.GetUser() != got.GetUser() ||
+		updated.GetText() != got.GetText() ||
+		!proto.Equal(updated.GetCreateTime(), got.GetCreateTime()) ||
+		proto.Equal(updated.GetUpdateTime(), got.GetUpdateTime()) {
+		t.Errorf("Expected to get updated blurb. Want: %+v, got %+v", got, updated)
+	}
+
+	r, err := s.ListBlurbs(
+		context.Background(),
+		&pb.ListBlurbsRequest{
+			Parent:    "users/rumble/profile",
+			PageSize:  1,
+			PageToken: "",
+		})
+	if err != nil {
+		t.Errorf("List: unexpected err %+v", err)
+	}
+	if len(r.GetBlurbs()) != 1 {
+		t.Errorf("List want: page size %d, got %d", 1, len(r.GetBlurbs()))
+	}
+	if !proto.Equal(first, r.GetBlurbs()[0]) {
+		t.Errorf("List want: first blurb %+v, got %+v", first, r.GetBlurbs()[0])
+	}
+	if r.GetNextPageToken() == "" {
+		t.Error("List want: non empty next page token")
+	}
+
+	r, err = s.ListBlurbs(
+		context.Background(),
+		&pb.ListBlurbsRequest{
+			Parent:    "users/rumble/profile",
+			PageSize:  10,
+			PageToken: r.GetNextPageToken(),
+		})
+	if err != nil {
+		t.Errorf("List: unexpected err %+v", err)
+	}
+	if len(r.GetBlurbs()) != 1 {
+		t.Errorf("List want: page size %d, got %d", 1, len(r.GetBlurbs()))
+	}
+	if !proto.Equal(updated, r.GetBlurbs()[0]) {
+		t.Errorf("List want: updated blurb %+v, got %+v", updated, r.GetBlurbs()[0])
+	}
+	if r.GetNextPageToken() != "" {
+		t.Error("List want: empty next page token")
+	}
+}
+
+func Test_CreateBlurb_invalid(t *testing.T) {
+	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+
+	_, err := s.CreateBlurb(
+		context.Background(),
+		&pb.CreateBlurbRequest{Blurb: &pb.Blurb{}})
+	status, _ := status.FromError(err)
+	if status.Code() != codes.InvalidArgument {
+		t.Errorf(
+			"Create: Want error code %d got %d",
+			codes.InvalidArgument,
+			status.Code())
+	}
+}
+
+func Test_CreateBlurb_parentNotFound(t *testing.T) {
+	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+
+	_, err := s.CreateBlurb(
+		context.Background(),
+		&pb.CreateBlurbRequest{Parent: "users/rumble/profile", Blurb: &pb.Blurb{}})
+	status, _ := status.FromError(err)
+	if status.Code() != codes.NotFound {
+		t.Errorf(
+			"Create: Want error code %d got %d",
+			codes.NotFound,
+			status.Code())
+	}
+}
+
+func Test_GetBlurb_notFound(t *testing.T) {
+	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	_, err := s.GetBlurb(
+		context.Background(),
+		&pb.GetBlurbRequest{Name: "users/rumble/profile/blurbs/1"})
+	status, _ := status.FromError(err)
+	if status.Code() != codes.NotFound {
+		t.Errorf(
+			"Get: Want error code %d got %d",
+			codes.NotFound,
+			status.Code())
+	}
+}
+
+func Test_GetBlurb_deleted(t *testing.T) {
+	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	created, err := s.CreateBlurb(
+		context.Background(),
+		&pb.CreateBlurbRequest{
+			Parent: "users/rumble/profile",
+			Blurb: &pb.Blurb{
+				User:    "users/rumble",
+				Content: &pb.Blurb_Text{Text: "woof"},
+			},
+		})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
+	}
+
+	_, err = s.DeleteBlurb(
+		context.Background(),
+		&pb.DeleteBlurbRequest{Name: created.GetName()})
+	if err != nil {
+		t.Errorf("Delete: unexpected err %+v", err)
+	}
+
+	_, err = s.GetBlurb(
+		context.Background(),
+		&pb.GetBlurbRequest{Name: created.GetName()})
+	status, _ := status.FromError(err)
+	if status.Code() != codes.NotFound {
+		t.Errorf(
+			"Get deleted: Want error code %d got %d",
+			codes.NotFound,
+			status.Code())
+	}
+}
+
+func Test_UpdateBlurb_fieldmask(t *testing.T) {
+	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	_, err := s.UpdateBlurb(
+		context.Background(),
+		&pb.UpdateBlurbRequest{
+			Blurb:      nil,
+			UpdateMask: &field_mask.FieldMask{Paths: []string{"email"}},
+		})
+	status, _ := status.FromError(err)
+	if status.Code() != codes.Unimplemented {
+		t.Errorf(
+			"Update: Want error code %d got %d",
+			codes.Unimplemented,
+			status.Code())
+	}
+}
+
+func Test_UpdateBlurb_notFound(t *testing.T) {
+	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	_, err := s.UpdateBlurb(
+		context.Background(),
+		&pb.UpdateBlurbRequest{
+			Blurb: &pb.Blurb{
+				User:    "users/rumble",
+				Content: &pb.Blurb_Text{Text: "woof"},
+			},
+			UpdateMask: nil,
+		})
+	status, _ := status.FromError(err)
+	if status.Code() != codes.NotFound {
+		t.Errorf(
+			"Update: Want error code %d got %d",
+			codes.NotFound,
+			status.Code())
+	}
+}
+
+func Test_UpdateBlurb_invalid(t *testing.T) {
+	first := &pb.Blurb{
+		User:    "users/rumble",
+		Content: &pb.Blurb_Text{Text: "woof"},
+	}
+	second := &pb.Blurb{
+		User:    "",
+		Content: &pb.Blurb_Text{Text: "woof"},
+	}
+	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	created, err := s.CreateBlurb(
+		context.Background(),
+		&pb.CreateBlurbRequest{Blurb: first})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
+	}
+	second.Name = created.GetName()
+	_, err = s.UpdateBlurb(
+		context.Background(),
+		&pb.UpdateBlurbRequest{Blurb: second, UpdateMask: nil})
+	status, _ := status.FromError(err)
+	if status.Code() != codes.InvalidArgument {
+		t.Errorf(
+			"Update: Want error code %d got %d",
+			codes.InvalidArgument,
+			status.Code())
+	}
+}
+
+func Test_DeleteBlurb_notFound(t *testing.T) {
+	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	_, err := s.DeleteBlurb(
+		context.Background(),
+		&pb.DeleteBlurbRequest{Name: "user/rumble/profile/blurbs/1"})
+	status, _ := status.FromError(err)
+	if status.Code() != codes.NotFound {
+		t.Errorf(
+			"Delete: Want error code %d got %d",
+			codes.NotFound,
+			status.Code())
+	}
+}
+
+func Test_ListBlurbs_invalidToken(t *testing.T) {
+	db := &blurbDb{
+		token:      &tokenGenerator{salt: "salt"},
+		blurbMu:    sync.Mutex{},
+		keys:       map[string]blurbIndex{},
+		blurbs:     map[string][]blurbEntry{},
+		parentUids: map[string]*uniqID{},
+	}
+	s := messagingServerImpl{
+		identityServer: &mockIdentityServer{},
+		roomDb:         NewRoomDb(),
+		blurbDb:        db,
+	}
+
+	tests := []string{
+		"1", // Not base64 encoded
+		base64.StdEncoding.EncodeToString([]byte("1")),        // No salt
+		base64.StdEncoding.EncodeToString([]byte("saltblah")), // Invalid index
+	}
+
+	_, err := s.CreateBlurb(
+		context.Background(),
+		&pb.CreateBlurbRequest{
+			Parent: "users/rumble/profile",
+			Blurb: &pb.Blurb{
+				User:    "users/rumble",
+				Content: &pb.Blurb_Text{Text: "woof"},
+			},
+		})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
+	}
+
+	for _, token := range tests {
+		_, err := s.ListBlurbs(
+			context.Background(),
+			&pb.ListBlurbsRequest{
+				Parent:    "users/rumble/profile",
+				PageSize:  1,
+				PageToken: token})
+		status, _ := status.FromError(err)
+		if status.Code() != codes.InvalidArgument {
+			t.Errorf(
+				"List: Want error code %d got %d",
+				codes.InvalidArgument,
+				status.Code())
+		}
+	}
+}
+
+func Test_ListBlurbs_parentNotFound(t *testing.T) {
+	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+
+	_, err := s.ListBlurbs(
+		context.Background(),
+		&pb.ListBlurbsRequest{Parent: "users/rumble/profile"})
+	status, _ := status.FromError(err)
+	if status.Code() != codes.NotFound {
+		t.Errorf(
+			"List: Want error code %d got %d",
+			codes.NotFound,
+			status.Code())
+	}
+}
+
+func Test_ListBlurbs_noneCreated(t *testing.T) {
+	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+
+	resp, err := s.ListBlurbs(
+		context.Background(),
+		&pb.ListBlurbsRequest{Parent: "users/rumble/profile"})
+	if err != nil {
+		t.Errorf("List: unexpected err %+v", err)
+	}
+	if len(resp.GetBlurbs()) > 0 {
+		t.Errorf("List none created: want empty list got %+v", resp)
 	}
 }

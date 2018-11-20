@@ -16,20 +16,27 @@ package server
 
 import (
 	"context"
+	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/genproto/googleapis/longrunning"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
-func NewMessagingServer() pb.MessagingServer {
+func NewMessagingServer(identityServer ReadOnlyIdentityServer, blurbDb BlurbDb) pb.MessagingServer {
 	return &messagingServerImpl{
-		roomDb: NewRoomDb(),
+		identityServer: identityServer,
+		roomDb:         NewRoomDb(),
+		blurbDb:        blurbDb,
 	}
 }
 
 type messagingServerImpl struct {
-	roomDb RoomDb
+	identityServer ReadOnlyIdentityServer
+	roomDb         RoomDb
+	blurbDb        BlurbDb
 }
 
 // Creates a room.
@@ -61,28 +68,39 @@ func (s *messagingServerImpl) ListRooms(ctx context.Context, in *pb.ListRoomsReq
 // message in that room. If the parent is a profile, the blurb is understood
 // to be a post on the profile.
 func (s *messagingServerImpl) CreateBlurb(ctx context.Context, in *pb.CreateBlurbRequest) (*pb.Blurb, error) {
-	return nil, nil
+	if err := s.validateParent(in.GetParent()); err != nil {
+		return nil, err
+	}
+	return s.blurbDb.Create(in.GetParent(), in.GetBlurb())
 }
 
 // Retrieves the Blurb with the given resource name.
 func (s *messagingServerImpl) GetBlurb(ctx context.Context, in *pb.GetBlurbRequest) (*pb.Blurb, error) {
-	return nil, nil
+	return s.blurbDb.Get(in.GetName())
 }
 
 // Updates a blurb.
 func (s *messagingServerImpl) UpdateBlurb(ctx context.Context, in *pb.UpdateBlurbRequest) (*pb.Blurb, error) {
-	return nil, nil
+	return s.blurbDb.Update(in.GetBlurb(), in.GetUpdateMask())
 }
 
 // Deletes a blurb.
 func (s *messagingServerImpl) DeleteBlurb(ctx context.Context, in *pb.DeleteBlurbRequest) (*empty.Empty, error) {
-	return nil, nil
+	return &empty.Empty{}, s.blurbDb.Delete(in.GetName())
 }
 
 // Lists blurbs for a specific chat room or user profile depending on the
 // parent resource name.
 func (s *messagingServerImpl) ListBlurbs(ctx context.Context, in *pb.ListBlurbsRequest) (*pb.ListBlurbsResponse, error) {
-	return nil, nil
+	if err := s.validateParent(in.GetParent()); err != nil {
+		return nil, err
+	}
+	return s.blurbDb.List(
+		&ListBlurbsDbRequest{
+			Parent:    in.GetParent(),
+			PageSize:  in.GetPageSize(),
+			PageToken: in.GetPageToken(),
+		})
 }
 
 // This method searches through all blurbs across all rooms and profiles
@@ -109,5 +127,19 @@ func (s *messagingServerImpl) SendBlurbs(stream pb.Messaging_SendBlurbsServer) e
 // blurbs. If an invalid blurb is requested to be created, the stream will
 // close with an error.
 func (s *messagingServerImpl) Connect(stream pb.Messaging_ConnectServer) error {
+	return nil
+}
+
+func (s *messagingServerImpl) validateParent(p string) error {
+	_, uErr := s.identityServer.GetUser(
+		context.Background(),
+		&pb.GetUserRequest{
+			Name: strings.TrimSuffix(p, "/profile"),
+		},
+	)
+	_, rErr := s.roomDb.Get(p)
+	if uErr != nil && rErr != nil {
+		return status.Errorf(codes.NotFound, "Parent %s not found.", p)
+	}
 	return nil
 }
