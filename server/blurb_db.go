@@ -16,6 +16,7 @@ package server
 
 import (
 	"fmt"
+	"strconv"
 	"sync"
 
 	"github.com/golang/protobuf/proto"
@@ -30,6 +31,9 @@ import (
 func NewBlurbDb() BlurbDb {
 	return &blurbDb{
 		token:      NewTokenGenerator(),
+		obsMu:      sync.Mutex{},
+		obsId:      uniqID{},
+		observers:  map[string]map[string]BlurbObserver{},
 		blurbMu:    sync.Mutex{},
 		keys:       map[string]blurbIndex{},
 		blurbs:     map[string][]blurbEntry{},
@@ -43,6 +47,9 @@ type BlurbDb interface {
 	Update(b *pb.Blurb, f *field_mask.FieldMask) (*pb.Blurb, error)
 	Delete(name string) error
 	List(r *ListBlurbsDbRequest) (*pb.ListBlurbsResponse, error)
+	RegisterObserver(parent string, observer BlurbObserver) string
+	HasObservers(parent string) bool
+	RemoveObserver(parent string, name string)
 }
 
 type ReadOnlyBlurbDb interface {
@@ -57,6 +64,12 @@ type ListBlurbsDbRequest struct {
 	Filter    func(*pb.Blurb) bool
 }
 
+type BlurbObserver interface {
+	OnCreate(b *pb.Blurb)
+	OnUpdate(b *pb.Blurb)
+	OnDelete(b *pb.Blurb)
+}
+
 type blurbIndex struct {
 	// The parent of the blurb.
 	row string
@@ -69,9 +82,19 @@ type blurbEntry struct {
 	deleted bool
 }
 
+type blurbParentContext struct {
+	uid uniqID
+}
+
 type blurbDb struct {
 	// Generates Page Tokens
 	token TokenGenerator
+
+	// Observer pattern to implement StreamBlurbs.
+	obsMu sync.Mutex
+	obsId uniqID
+	// 2d Map where row is the parent and col is the observer id.
+	observers map[string]map[string]BlurbObserver
 
 	blurbMu sync.Mutex
 	// Mapping from blurb name to index.
@@ -113,6 +136,14 @@ func (db *blurbDb) Create(parent string, b *pb.Blurb) (*pb.Blurb, error) {
 	index := len(parentBs)
 	db.blurbs[parent] = append(parentBs, blurbEntry{blurb: b, deleted: false})
 	db.keys[name] = blurbIndex{row: parent, col: index}
+
+	db.obsMu.Lock()
+	defer db.obsMu.Unlock()
+	if parentObservers, ok := db.observers[parent]; ok {
+		for _, o := range parentObservers {
+			o.OnCreate(b)
+		}
+	}
 
 	return b, nil
 }
@@ -156,6 +187,14 @@ func (db *blurbDb) Update(b *pb.Blurb, f *field_mask.FieldMask) (*pb.Blurb, erro
 	updated.UpdateTime = ptypes.TimestampNow()
 	db.blurbs[i.row][i.col] = blurbEntry{blurb: updated, deleted: false}
 
+	db.obsMu.Lock()
+	defer db.obsMu.Unlock()
+	if parentObservers, ok := db.observers[i.row]; ok {
+		for _, o := range parentObservers {
+			o.OnUpdate(b)
+		}
+	}
+
 	return updated, nil
 }
 
@@ -173,6 +212,14 @@ func (db *blurbDb) Delete(s string) error {
 
 	entry := db.blurbs[i.row][i.col]
 	db.blurbs[i.row][i.col] = blurbEntry{blurb: entry.blurb, deleted: true}
+
+	db.obsMu.Lock()
+	defer db.obsMu.Unlock()
+	if parentObservers, ok := db.observers[i.row]; ok {
+		for _, o := range parentObservers {
+			o.OnDelete(entry.blurb)
+		}
+	}
 
 	return nil
 }
@@ -209,6 +256,36 @@ func (db *blurbDb) List(r *ListBlurbsDbRequest) (*pb.ListBlurbsResponse, error) 
 	}
 
 	return &pb.ListBlurbsResponse{Blurbs: blurbs, NextPageToken: nextToken}, nil
+}
+
+func (db *blurbDb) RegisterObserver(parent string, o BlurbObserver) string {
+	db.obsMu.Lock()
+	defer db.obsMu.Unlock()
+	name := strconv.FormatInt(db.obsId.next(), 10)
+	if _, ok := db.observers[parent]; !ok {
+		db.observers[parent] = map[string]BlurbObserver{}
+	}
+	fmt.Printf("%+v", db.observers)
+	db.observers[parent][name] = o
+	return name
+}
+
+func (db *blurbDb) HasObservers(parent string) bool {
+	db.obsMu.Lock()
+	defer db.obsMu.Unlock()
+	if os, ok := db.observers[parent]; ok && len(os) > 0 {
+		return true
+	}
+	return false
+}
+
+func (db *blurbDb) RemoveObserver(parent string, name string) {
+	db.obsMu.Lock()
+	defer db.obsMu.Unlock()
+	delete(db.observers[parent], name)
+	if len(db.observers[parent]) <= 0 {
+		delete(db.observers, parent)
+	}
 }
 
 func validateBlurb(b *pb.Blurb) error {

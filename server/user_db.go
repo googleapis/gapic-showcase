@@ -62,7 +62,7 @@ func (db *userDb) Create(u *pb.User) (*pb.User, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	err := db.validate(u)
+	err := db.validateUser(u)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func (db *userDb) Update(u *pb.User, f *field_mask.FieldMask) (*pb.User, error) 
 			"A user with name %s not found.", u.GetName())
 	}
 
-	err := db.validate(u)
+	err := db.validateUser(u)
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +177,7 @@ func (db *userDb) List(pageSize int32, pageToken string) (*pb.ListUsersResponse,
 	return &pb.ListUsersResponse{Users: users, NextPageToken: nextToken}, nil
 }
 
-func (db *userDb) validate(u *pb.User) error {
+func (db *userDb) validateUser(u *pb.User) error {
 	// Validate Required Fields.
 	if u.GetDisplayName() == "" {
 		return status.Errorf(

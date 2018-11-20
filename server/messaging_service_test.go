@@ -17,11 +17,15 @@ package server
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
+	"io"
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/ptypes"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc/codes"
@@ -628,6 +632,9 @@ func Test_DeleteBlurb_notFound(t *testing.T) {
 func Test_ListBlurbs_invalidToken(t *testing.T) {
 	db := &blurbDb{
 		token:      &tokenGenerator{salt: "salt"},
+		obsMu:      sync.Mutex{},
+		obsId:      uniqID{},
+		observers:  map[string]map[string]BlurbObserver{},
 		blurbMu:    sync.Mutex{},
 		keys:       map[string]blurbIndex{},
 		blurbs:     map[string][]blurbEntry{},
@@ -759,6 +766,1089 @@ func Test_SearchBlurbs_parentNotFound(t *testing.T) {
 		t.Errorf(
 			"SearchBlurbs: Want error code %d got %d",
 			codes.NotFound,
+			status.Code())
+	}
+}
+
+type mockStreamBlurbsStream struct {
+	mu    sync.Mutex
+	resps []*pb.StreamBlurbsResponse
+	pb.Messaging_StreamBlurbsServer
+}
+
+func (m *mockStreamBlurbsStream) Send(resp *pb.StreamBlurbsResponse) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.resps = append(m.resps, resp)
+	return nil
+}
+
+func TestStreamBlurbs_lifecycle(t *testing.T) {
+	// Setup DB
+	db := NewBlurbDb()
+
+	// We specify the now function so we can control when the stream ends.
+	s := &messagingServerImpl{
+		identityServer: &mockIdentityServer{},
+		roomDb:         NewRoomDb(),
+		blurbDb:        db,
+		nowF: func() time.Time {
+			return time.Unix(int64(0), int64(0))
+		},
+	}
+
+	// Set up the mock stream.
+	m := &mockStreamBlurbsStream{resps: []*pb.StreamBlurbsResponse{}}
+
+	// Make the end time some time after the time the now function will return.
+	endTime, err := ptypes.TimestampProto(time.Unix(int64(1), int64(0)))
+	if err != nil {
+		t.Errorf("TimestampProto: unexpected err %+v", err)
+	}
+
+	// The parent to stream
+	p := "users/rumble/profile"
+
+	// Start the stream.
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go (func() {
+		err := s.StreamBlurbs(
+			&pb.StreamBlurbsRequest{
+				Name:       p,
+				ExpireTime: endTime,
+			},
+			m,
+		)
+		if err != nil {
+			t.Errorf("StreamBlurbs: unexpected err %+v", err)
+		}
+		wg.Done()
+	})()
+
+	// Wait for the stream request to propogate the observer to the database.
+	for {
+		if db.HasObservers(p) {
+			break
+		}
+	}
+
+	// Create a blurb.
+	created, err := s.CreateBlurb(
+		context.Background(),
+		&pb.CreateBlurbRequest{
+			Parent: p,
+			Blurb: &pb.Blurb{
+				User:    "users/musubi",
+				Content: &pb.Blurb_Text{Text: "meow"},
+			},
+		})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
+	}
+
+	// Check that the stream sent the blurb info.
+	m.mu.Lock()
+	streamResp := m.resps[len(m.resps)-1]
+	m.mu.Unlock()
+	if streamResp.GetAction() != pb.StreamBlurbsResponse_CREATE {
+		t.Errorf(
+			"StreamBlurbs: want blurb with action %s, got %s",
+			pb.StreamBlurbsResponse_Action_name[int32(pb.StreamBlurbsResponse_CREATE)],
+			pb.StreamBlurbsResponse_Action_name[int32(streamResp.GetAction())])
+	}
+	if !proto.Equal(streamResp.GetBlurb(), created) {
+		t.Errorf(
+			"StreamBlurbs: want created blurb %+v, got %+v",
+			created,
+			streamResp.GetBlurb())
+	}
+
+	// Update the blurb.
+	created.Content = &pb.Blurb_Text{Text: "purrr"}
+	updated, err := s.UpdateBlurb(
+		context.Background(),
+		&pb.UpdateBlurbRequest{Blurb: created, UpdateMask: nil})
+	if err != nil {
+		t.Errorf("Update: unexpected err %+v", err)
+	}
+
+	// Check that the stream sent the blurb info.
+	m.mu.Lock()
+	streamResp = m.resps[len(m.resps)-1]
+	m.mu.Unlock()
+	if streamResp.GetAction() != pb.StreamBlurbsResponse_UPDATE {
+		t.Errorf(
+			"StreamBlurbs: want blurb with action %s, got %s",
+			pb.StreamBlurbsResponse_Action_name[int32(pb.StreamBlurbsResponse_UPDATE)],
+			pb.StreamBlurbsResponse_Action_name[int32(streamResp.GetAction())])
+	}
+	if !proto.Equal(streamResp.GetBlurb(), created) {
+		t.Errorf(
+			"StreamBlurbs: want created blurb %+v, got %+v",
+			updated,
+			streamResp.GetBlurb())
+	}
+
+	// Delete the blurb.
+	_, err = s.DeleteBlurb(
+		context.Background(),
+		&pb.DeleteBlurbRequest{Name: updated.Name})
+	if err != nil {
+		t.Errorf("Delete: unexpected err %+v", err)
+	}
+
+	// Check that the stream sent the blurb info.
+	m.mu.Lock()
+	streamResp = m.resps[len(m.resps)-1]
+	m.mu.Unlock()
+	if streamResp.GetAction() != pb.StreamBlurbsResponse_DELETE {
+		t.Errorf(
+			"StreamBlurbs: want blurb with action %s, got %s",
+			pb.StreamBlurbsResponse_Action_name[int32(pb.StreamBlurbsResponse_DELETE)],
+			pb.StreamBlurbsResponse_Action_name[int32(streamResp.GetAction())])
+	}
+	if !proto.Equal(streamResp.GetBlurb(), updated) {
+		t.Errorf(
+			"StreamBlurbs: want created blurb %+v, got %+v",
+			updated,
+			streamResp.GetBlurb())
+	}
+
+	// Set the now function to return a time after the expire time to close the
+	// stream.
+	s.nowF = func() time.Time {
+		return time.Unix(int64(2), int64(0))
+	}
+
+	// Wait til the stream is closed.
+	wg.Wait()
+}
+
+func Test_StreamBlurbs_parentNotFound(t *testing.T) {
+	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+
+	err := s.StreamBlurbs(
+		&pb.StreamBlurbsRequest{Name: "users/rumble/profile"},
+		nil)
+	status, _ := status.FromError(err)
+	if status.Code() != codes.NotFound {
+		t.Errorf(
+			"Create: Want error code %d got %d",
+			codes.NotFound,
+			status.Code())
+	}
+}
+
+type errorStreamBlurbsStream struct {
+	pb.Messaging_StreamBlurbsServer
+}
+
+func (m *errorStreamBlurbsStream) Send(_ *pb.StreamBlurbsResponse) error {
+	return status.Error(codes.Unknown, "Error")
+}
+
+func Test_StreamBlurbs_sendError(t *testing.T) {
+	// Setup DB.
+	db := NewBlurbDb()
+
+	// We specify the now function so we can control when the stream ends.
+	s := &messagingServerImpl{
+		identityServer: &mockIdentityServer{},
+		roomDb:         NewRoomDb(),
+		blurbDb:        db,
+		nowF: func() time.Time {
+			return time.Unix(int64(0), int64(0))
+		},
+	}
+
+	// Make the end time some time after the time the now function will return.
+	endTime, err := ptypes.TimestampProto(time.Unix(int64(1), int64(0)))
+	if err != nil {
+		t.Errorf("TimestampProto: unexpected err %+v", err)
+	}
+
+	// The parent to stream.
+	p := "users/rumble/profile"
+
+	// Start Stream.
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go (func() {
+		err = s.StreamBlurbs(
+			&pb.StreamBlurbsRequest{Name: p, ExpireTime: endTime},
+			&errorStreamBlurbsStream{})
+		status, _ := status.FromError(err)
+		if status.Code() != codes.Unknown {
+			t.Errorf(
+				"Create: Want error code %d got %d",
+				codes.Unknown,
+				status.Code())
+		}
+		wg.Done()
+	})()
+
+	// Wait for the stream request to propogate the observer to the database.
+	for {
+		if db.HasObservers(p) {
+			break
+		}
+	}
+
+	// Create a blurb to trigger observer.
+	_, err = s.CreateBlurb(
+		context.Background(),
+		&pb.CreateBlurbRequest{
+			Parent: p,
+			Blurb: &pb.Blurb{
+				User:    "users/musubi",
+				Content: &pb.Blurb_Text{Text: "meow"},
+			},
+		})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
+	}
+
+	wg.Wait()
+}
+
+type nilStreamBlurbsStream struct {
+	pb.Messaging_StreamBlurbsServer
+}
+
+func (m *nilStreamBlurbsStream) Send(resp *pb.StreamBlurbsResponse) error {
+	return nil
+}
+
+func Test_StreamBlurbs_parentNotFoundLater(t *testing.T) {
+	// Setup Identity server to validate parent against.
+	is := NewIdentityServer()
+	first, err := is.CreateUser(
+		context.Background(),
+		&pb.CreateUserRequest{
+			User: &pb.User{DisplayName: "rumbledog", Email: "rumble@google.com"},
+		})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
+	}
+
+	// Setup DB.
+	db := NewBlurbDb()
+
+	// We specify the now function so we can control when the stream ends.
+	s := &messagingServerImpl{
+		identityServer: is,
+		roomDb:         NewRoomDb(),
+		blurbDb:        db,
+		nowF: func() time.Time {
+			return time.Unix(int64(0), int64(0))
+		},
+	}
+
+	// Make the end time some time after the time the now function will return.
+	endTime, err := ptypes.TimestampProto(time.Unix(int64(1), int64(0)))
+	if err != nil {
+		t.Errorf("TimestampProto: unexpected err %+v", err)
+	}
+
+	parent := fmt.Sprintf("%s/profile", first.GetName())
+
+	// Start Stream.
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go (func() {
+		err := s.StreamBlurbs(
+			&pb.StreamBlurbsRequest{
+				Name:       parent,
+				ExpireTime: endTime,
+			},
+			&nilStreamBlurbsStream{})
+		status, _ := status.FromError(err)
+		if status.Code() != codes.NotFound {
+			t.Errorf(
+				"StreamBlurbs: Want error code %d got %d",
+				codes.NotFound,
+				status.Code())
+		}
+		wg.Done()
+	})()
+
+	for {
+		if db.HasObservers(parent) {
+			break
+		}
+	}
+
+	// Delete the user so that the parent is invalid.
+	is.DeleteUser(
+		context.Background(),
+		&pb.DeleteUserRequest{Name: first.GetName()})
+
+	// Wait til the stream closes.
+	wg.Wait()
+}
+
+type mockSendBlurbsStream struct {
+	reqs []*pb.CreateBlurbRequest
+	resp *pb.SendBlurbsResponse
+	t    *testing.T
+
+	mu   sync.Mutex
+	next int
+	pb.Messaging_SendBlurbsServer
+}
+
+func (m *mockSendBlurbsStream) SendAndClose(r *pb.SendBlurbsResponse) error {
+	m.resp = r
+	return nil
+}
+
+func (m *mockSendBlurbsStream) Recv() (*pb.CreateBlurbRequest, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.next < len(m.reqs) {
+		cur := m.next
+		m.next += 1
+		return m.reqs[cur], nil
+	}
+	return nil, io.EOF
+}
+
+func TestSendBlurbs(t *testing.T) {
+	reqs := []*pb.CreateBlurbRequest{
+		&pb.CreateBlurbRequest{
+			Parent: "users/rumble/profile",
+			Blurb: &pb.Blurb{
+				User:    "users/rumble",
+				Content: &pb.Blurb_Text{Text: "woof"},
+			},
+		},
+		&pb.CreateBlurbRequest{
+			Parent: "users/rumble/profile",
+			Blurb: &pb.Blurb{
+				User:    "users/musubi",
+				Content: &pb.Blurb_Text{Text: "meow"},
+			},
+		},
+		&pb.CreateBlurbRequest{
+			Parent: "users/musubi/profile",
+			Blurb: &pb.Blurb{
+				User:    "users/ekko",
+				Content: &pb.Blurb_Text{Text: "bark"},
+			},
+		},
+	}
+	m := &mockSendBlurbsStream{
+		reqs: reqs,
+		t:    t,
+		mu:   sync.Mutex{},
+		next: 0,
+	}
+	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+
+	err := s.SendBlurbs(m)
+	if err != nil {
+		t.Errorf("SendBlurbs: unexpected err %+v", err)
+	}
+	for i, name := range m.resp.GetNames() {
+		got, err := s.GetBlurb(
+			context.Background(),
+			&pb.GetBlurbRequest{Name: name})
+		if err != nil {
+			t.Errorf("Get: unexpected err %+v", err)
+		}
+		if reqs[i].GetBlurb().GetUser() != got.GetUser() ||
+			reqs[i].GetBlurb().GetText() != got.GetText() {
+			t.Errorf(
+				"Expected to get created blurb. Want: %+v, got %+v",
+				reqs[i].GetBlurb(),
+				got)
+		}
+	}
+}
+
+type errorSendBlurbsStream struct {
+	reqs []*pb.CreateBlurbRequest
+	resp *pb.SendBlurbsResponse
+	t    *testing.T
+
+	mu   sync.Mutex
+	next int
+	pb.Messaging_SendBlurbsServer
+}
+
+func (m *errorSendBlurbsStream) SendAndClose(r *pb.SendBlurbsResponse) error {
+	m.resp = r
+	return nil
+}
+
+func (m *errorSendBlurbsStream) Recv() (*pb.CreateBlurbRequest, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.next < len(m.reqs) {
+		cur := m.next
+		m.next += 1
+		return m.reqs[cur], nil
+	}
+	return nil, status.Error(codes.Unknown, "Error")
+}
+
+func TestSendBlurbs_error(t *testing.T) {
+	reqs := []*pb.CreateBlurbRequest{
+		&pb.CreateBlurbRequest{
+			Parent: "users/rumble/profile",
+			Blurb: &pb.Blurb{
+				User:    "users/rumble",
+				Content: &pb.Blurb_Text{Text: "woof"},
+			},
+		},
+		&pb.CreateBlurbRequest{
+			Parent: "users/rumble/profile",
+			Blurb: &pb.Blurb{
+				User:    "users/musubi",
+				Content: &pb.Blurb_Text{Text: "meow"},
+			},
+		},
+		&pb.CreateBlurbRequest{
+			Parent: "users/musubi/profile",
+			Blurb: &pb.Blurb{
+				User:    "users/ekko",
+				Content: &pb.Blurb_Text{Text: "bark"},
+			},
+		},
+	}
+	m := &errorSendBlurbsStream{
+		reqs: reqs,
+		t:    t,
+		mu:   sync.Mutex{},
+		next: 0,
+	}
+	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+
+	err := s.SendBlurbs(m)
+	if err == nil {
+		t.Error("SendBlurbs: expected err")
+	}
+
+	st, ok := status.FromError(err)
+	if !ok {
+		t.Errorf("SendBlurbs: expected err to be status %+v", err)
+	}
+	details := st.Proto().GetDetails()
+	if len(details) > 1 {
+		t.Errorf("SendBlurbs: expected err details to be of length 1")
+	}
+	resp := &pb.SendBlurbsResponse{}
+	ptypes.UnmarshalAny(details[0], resp)
+
+	for i, name := range resp.GetNames() {
+		got, err := s.GetBlurb(
+			context.Background(),
+			&pb.GetBlurbRequest{Name: name})
+		if err != nil {
+			t.Errorf("Get: unexpected err %+v", err)
+		}
+		if reqs[i].GetBlurb().GetName() != got.GetName() ||
+			reqs[i].GetBlurb().GetUser() != got.GetUser() ||
+			reqs[i].GetBlurb().GetText() != got.GetText() {
+			t.Errorf("Expected to get updated blurb. Want: %+v, got %+v", reqs, got)
+		}
+	}
+}
+
+func TestSendBlurbs_invalidParent(t *testing.T) {
+	// Setup Identity server to validate parent against.
+	is := NewIdentityServer()
+	first, err := is.CreateUser(
+		context.Background(),
+		&pb.CreateUserRequest{
+			User: &pb.User{DisplayName: "rumbledog", Email: "rumble@google.com"},
+		})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
+	}
+
+	parent := fmt.Sprintf("%s/profile", first.GetName())
+	reqs := []*pb.CreateBlurbRequest{
+		&pb.CreateBlurbRequest{
+			Parent: parent,
+			Blurb: &pb.Blurb{
+				User:    "users/rumble",
+				Content: &pb.Blurb_Text{Text: "woof"},
+			},
+		},
+		&pb.CreateBlurbRequest{
+			Parent: parent,
+			Blurb: &pb.Blurb{
+				User:    "users/musubi",
+				Content: &pb.Blurb_Text{Text: "meow"},
+			},
+		},
+		&pb.CreateBlurbRequest{
+			Parent: "does/not/exist",
+			Blurb: &pb.Blurb{
+				User:    "users/ekko",
+				Content: &pb.Blurb_Text{Text: "bark"},
+			},
+		},
+	}
+	m := &mockSendBlurbsStream{
+		reqs: reqs,
+		t:    t,
+		mu:   sync.Mutex{},
+	}
+	s := NewMessagingServer(is, NewBlurbDb())
+
+	err = s.SendBlurbs(m)
+	if err == nil {
+		t.Error("SendBlurbs: expected err")
+	}
+
+	st, ok := status.FromError(err)
+	if !ok {
+		t.Errorf("SendBlurbs: expected err to be status %+v", err)
+	}
+	details := st.Proto().GetDetails()
+	if len(details) > 1 {
+		t.Errorf("SendBlurbs: expected err details to be of length 1")
+	}
+	resp := &pb.SendBlurbsResponse{}
+	ptypes.UnmarshalAny(details[0], resp)
+
+	for i, name := range resp.GetNames() {
+		got, err := s.GetBlurb(
+			context.Background(),
+			&pb.GetBlurbRequest{Name: name})
+		if err != nil {
+			t.Errorf("Get: unexpected err %+v", err)
+		}
+		if reqs[i].GetBlurb().GetName() != got.GetName() ||
+			reqs[i].GetBlurb().GetUser() != got.GetUser() ||
+			reqs[i].GetBlurb().GetText() != got.GetText() {
+			t.Errorf("Expected to get updated blurb. Want: %+v, got %+v", reqs, got)
+		}
+	}
+}
+
+func TestSendBlurbs_invalidBlurb(t *testing.T) {
+	reqs := []*pb.CreateBlurbRequest{
+		&pb.CreateBlurbRequest{
+			Parent: "users/rumble/profile",
+			Blurb: &pb.Blurb{
+				User:    "users/rumble",
+				Content: &pb.Blurb_Text{Text: "woof"},
+			},
+		},
+		&pb.CreateBlurbRequest{
+			Parent: "users/rumble/profile",
+			Blurb: &pb.Blurb{
+				User:    "users/musubi",
+				Content: &pb.Blurb_Text{Text: "meow"},
+			},
+		},
+		&pb.CreateBlurbRequest{
+			Parent: "users/musubi/profile",
+			Blurb: &pb.Blurb{
+				Content: &pb.Blurb_Text{Text: "bark"},
+			},
+		},
+	}
+	m := &mockSendBlurbsStream{
+		reqs: reqs,
+		t:    t,
+		mu:   sync.Mutex{},
+		next: 0,
+	}
+	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+
+	err := s.SendBlurbs(m)
+	if err == nil {
+		t.Error("SendBlurbs: expected err")
+	}
+
+	st, ok := status.FromError(err)
+	if !ok {
+		t.Errorf("SendBlurbs: expected err to be status %+v", err)
+	}
+	details := st.Proto().GetDetails()
+	if len(details) > 1 {
+		t.Errorf("SendBlurbs: expected err details to be of length 1")
+	}
+	resp := &pb.SendBlurbsResponse{}
+	ptypes.UnmarshalAny(details[0], resp)
+
+	for i, name := range resp.GetNames() {
+		got, err := s.GetBlurb(
+			context.Background(),
+			&pb.GetBlurbRequest{Name: name})
+		if err != nil {
+			t.Errorf("Get: unexpected err %+v", err)
+		}
+		if reqs[i].GetBlurb().GetName() != got.GetName() ||
+			reqs[i].GetBlurb().GetUser() != got.GetUser() ||
+			reqs[i].GetBlurb().GetText() != got.GetText() {
+			t.Errorf("Expected to get updated blurb. Want: %+v, got %+v", reqs, got)
+		}
+	}
+}
+
+type mockConnectStream struct {
+	reqs []*pb.ConnectRequest
+	t    *testing.T
+	stop bool
+
+	respMu sync.Mutex
+	resps  []*pb.StreamBlurbsResponse
+
+	nextMu sync.Mutex
+	next   int
+
+	pb.Messaging_ConnectServer
+}
+
+func (m *mockConnectStream) Recv() (*pb.ConnectRequest, error) {
+	if m.next < len(m.reqs) {
+		req := m.reqs[m.next]
+		m.next += 1
+		return req, nil
+	}
+	if m.stop {
+		return nil, io.EOF
+	}
+	return nil, nil
+}
+
+func (m *mockConnectStream) Send(r *pb.StreamBlurbsResponse) error {
+	m.respMu.Lock()
+	defer m.respMu.Unlock()
+	m.resps = append(m.resps, r)
+	return nil
+}
+
+func TestConnect(t *testing.T) {
+	reqs := []*pb.ConnectRequest{
+		&pb.ConnectRequest{
+			Request: &pb.ConnectRequest_Config{
+				Config: &pb.ConnectRequest_ConnectConfig{
+					Parent: "users/rumble/profile",
+				},
+			},
+		},
+		&pb.ConnectRequest{
+			Request: &pb.ConnectRequest_Blurb{
+				Blurb: &pb.Blurb{
+					User:    "users/rumble",
+					Content: &pb.Blurb_Text{Text: "woof"},
+				},
+			},
+		},
+	}
+	m := &mockConnectStream{
+		reqs:   reqs,
+		t:      t,
+		stop:   false,
+		respMu: sync.Mutex{},
+		resps:  []*pb.StreamBlurbsResponse{},
+		nextMu: sync.Mutex{},
+		next:   0,
+	}
+	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go (func() {
+		err := s.Connect(m)
+		if err != nil {
+			t.Fatalf("Connect: unexpected err %+v", err)
+		}
+		wg.Done()
+	})()
+
+	for {
+		if len(m.resps) > 0 {
+			break
+		}
+	}
+
+	// Check that the stream sent the blurb info.
+	m.respMu.Lock()
+	streamResp := m.resps[len(m.resps)-1]
+	m.respMu.Unlock()
+	if streamResp.GetAction() != pb.StreamBlurbsResponse_CREATE {
+		t.Errorf(
+			"StreamBlurbs: want blurb with action %s, got %s",
+			pb.StreamBlurbsResponse_Action_name[int32(pb.StreamBlurbsResponse_CREATE)],
+			pb.StreamBlurbsResponse_Action_name[int32(streamResp.GetAction())])
+	}
+	if reqs[1].GetBlurb().GetName() != streamResp.GetBlurb().GetName() ||
+		reqs[1].GetBlurb().GetUser() != streamResp.GetBlurb().GetUser() ||
+		reqs[1].GetBlurb().GetText() != streamResp.GetBlurb().GetText() {
+		t.Errorf(
+			"Expected to get created blurb. Want: %+v, got %+v",
+			reqs[1].GetBlurb(),
+			streamResp.GetBlurb())
+	}
+
+	// Create a blurb.
+	created, err := s.CreateBlurb(
+		context.Background(),
+		&pb.CreateBlurbRequest{
+			Parent: "users/rumble/profile",
+			Blurb: &pb.Blurb{
+				User:    "users/musubi",
+				Content: &pb.Blurb_Text{Text: "meow"},
+			},
+		})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
+	}
+
+	// Check that the stream sent the blurb info.
+	m.respMu.Lock()
+	streamResp = m.resps[len(m.resps)-1]
+	m.respMu.Unlock()
+	if streamResp.GetAction() != pb.StreamBlurbsResponse_CREATE {
+		t.Errorf(
+			"StreamBlurbs: want blurb with action %s, got %s",
+			pb.StreamBlurbsResponse_Action_name[int32(pb.StreamBlurbsResponse_CREATE)],
+			pb.StreamBlurbsResponse_Action_name[int32(streamResp.GetAction())])
+	}
+	if !proto.Equal(streamResp.GetBlurb(), created) {
+		t.Errorf(
+			"StreamBlurbs: want created blurb %+v, got %+v",
+			created,
+			streamResp.GetBlurb())
+	}
+
+	// Update the blurb.
+	created.Content = &pb.Blurb_Text{Text: "purrr"}
+	updated, err := s.UpdateBlurb(
+		context.Background(),
+		&pb.UpdateBlurbRequest{Blurb: created, UpdateMask: nil})
+	if err != nil {
+		t.Errorf("Update: unexpected err %+v", err)
+	}
+
+	// Check that the stream sent the blurb info.
+	m.respMu.Lock()
+	streamResp = m.resps[len(m.resps)-1]
+	m.respMu.Unlock()
+	if streamResp.GetAction() != pb.StreamBlurbsResponse_UPDATE {
+		t.Errorf(
+			"StreamBlurbs: want blurb with action %s, got %s",
+			pb.StreamBlurbsResponse_Action_name[int32(pb.StreamBlurbsResponse_UPDATE)],
+			pb.StreamBlurbsResponse_Action_name[int32(streamResp.GetAction())])
+	}
+	if !proto.Equal(streamResp.GetBlurb(), created) {
+		t.Errorf(
+			"StreamBlurbs: want created blurb %+v, got %+v",
+			updated,
+			streamResp.GetBlurb())
+	}
+
+	// Delete the blurb.
+	_, err = s.DeleteBlurb(
+		context.Background(),
+		&pb.DeleteBlurbRequest{Name: updated.Name})
+	if err != nil {
+		t.Errorf("Delete: unexpected err %+v", err)
+	}
+
+	// Check that the stream sent the blurb info.
+	m.respMu.Lock()
+	streamResp = m.resps[len(m.resps)-1]
+	m.respMu.Unlock()
+	if streamResp.GetAction() != pb.StreamBlurbsResponse_DELETE {
+		t.Errorf(
+			"StreamBlurbs: want blurb with action %s, got %s",
+			pb.StreamBlurbsResponse_Action_name[int32(pb.StreamBlurbsResponse_DELETE)],
+			pb.StreamBlurbsResponse_Action_name[int32(streamResp.GetAction())])
+	}
+	if !proto.Equal(streamResp.GetBlurb(), updated) {
+		t.Errorf(
+			"StreamBlurbs: want created blurb %+v, got %+v",
+			updated,
+			streamResp.GetBlurb())
+	}
+
+	m.stop = true
+	wg.Wait()
+}
+
+type errorConnectStream struct {
+	pb.Messaging_ConnectServer
+}
+
+func (m *errorConnectStream) Recv() (*pb.ConnectRequest, error) {
+	return nil, status.Error(codes.Unknown, "Error")
+}
+
+func TestConnect_error(t *testing.T) {
+	m := &errorConnectStream{}
+	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+
+	err := s.Connect(m)
+	status, _ := status.FromError(err)
+	if status.Code() != codes.Unknown {
+		t.Errorf(
+			"Connect: Want error code %d got %d",
+			codes.Unknown,
+			status.Code())
+	}
+}
+
+func TestConnect_notConfigured(t *testing.T) {
+	reqs := []*pb.ConnectRequest{
+		&pb.ConnectRequest{
+			Request: &pb.ConnectRequest_Blurb{
+				Blurb: &pb.Blurb{
+					User:    "users/rumble",
+					Content: &pb.Blurb_Text{Text: "woof"},
+				},
+			},
+		},
+	}
+	m := &mockConnectStream{
+		reqs:   reqs,
+		t:      t,
+		stop:   false,
+		respMu: sync.Mutex{},
+		resps:  []*pb.StreamBlurbsResponse{},
+		nextMu: sync.Mutex{},
+	}
+	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+
+	err := s.Connect(m)
+	if err == nil {
+		t.Fatalf("Connect: expected err")
+	}
+	status, _ := status.FromError(err)
+	if status.Code() != codes.InvalidArgument {
+		t.Errorf(
+			"Connect: Want error code %d got %d",
+			codes.InvalidArgument,
+			status.Code())
+	}
+}
+
+func TestConnect_parentNotFound(t *testing.T) {
+	reqs := []*pb.ConnectRequest{
+		&pb.ConnectRequest{
+			Request: &pb.ConnectRequest_Config{
+				Config: &pb.ConnectRequest_ConnectConfig{
+					Parent: "users/rumble/profile",
+				},
+			},
+		},
+	}
+	m := &mockConnectStream{
+		reqs:   reqs,
+		t:      t,
+		stop:   false,
+		respMu: sync.Mutex{},
+		resps:  []*pb.StreamBlurbsResponse{},
+		nextMu: sync.Mutex{},
+	}
+	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+
+	err := s.Connect(m)
+	if err == nil {
+		t.Fatalf("Connect: expected err")
+	}
+	status, _ := status.FromError(err)
+	if status.Code() != codes.NotFound {
+		t.Errorf(
+			"Connect: Want error code %d got %d",
+			codes.NotFound,
+			status.Code())
+	}
+}
+
+type sendErrorConnectStream struct {
+	reqs []*pb.ConnectRequest
+	t    *testing.T
+	stop bool
+
+	respMu sync.Mutex
+	resps  []*pb.StreamBlurbsResponse
+
+	nextMu sync.Mutex
+	next   int
+
+	pb.Messaging_ConnectServer
+}
+
+func (m *sendErrorConnectStream) Recv() (*pb.ConnectRequest, error) {
+	if m.next < len(m.reqs) {
+		req := m.reqs[m.next]
+		m.next += 1
+		return req, nil
+	}
+	if m.stop {
+		return nil, io.EOF
+	}
+	return nil, nil
+}
+
+func (m *sendErrorConnectStream) Send(r *pb.StreamBlurbsResponse) error {
+	return status.Error(codes.Unknown, "Error")
+}
+
+func TestConnect_sendError(t *testing.T) {
+	reqs := []*pb.ConnectRequest{
+		&pb.ConnectRequest{
+			Request: &pb.ConnectRequest_Config{
+				Config: &pb.ConnectRequest_ConnectConfig{
+					Parent: "users/rumble/profile",
+				},
+			},
+		},
+		&pb.ConnectRequest{
+			Request: &pb.ConnectRequest_Blurb{
+				Blurb: &pb.Blurb{
+					User:    "users/rumble",
+					Content: &pb.Blurb_Text{Text: "woof"},
+				},
+			},
+		},
+	}
+	m := &sendErrorConnectStream{
+		reqs:   reqs,
+		t:      t,
+		stop:   false,
+		respMu: sync.Mutex{},
+		resps:  []*pb.StreamBlurbsResponse{},
+		nextMu: sync.Mutex{},
+	}
+	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+
+	err := s.Connect(m)
+	if err == nil {
+		t.Fatalf("Connect: expected err")
+	}
+	status, _ := status.FromError(err)
+	if status.Code() != codes.Unknown {
+		t.Errorf(
+			"Connect: Want error code %d got %d",
+			codes.Unknown,
+			status.Code())
+	}
+}
+
+func TestConnect_parentNotFoundLater(t *testing.T) {
+	// Setup Identity server to validate parent against.
+	is := NewIdentityServer()
+	first, err := is.CreateUser(
+		context.Background(),
+		&pb.CreateUserRequest{
+			User: &pb.User{DisplayName: "rumbledog", Email: "rumble@google.com"},
+		})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
+	}
+	parent := fmt.Sprintf("%s/profile", first.GetName())
+	reqs := []*pb.ConnectRequest{
+		&pb.ConnectRequest{
+			Request: &pb.ConnectRequest_Config{
+				Config: &pb.ConnectRequest_ConnectConfig{
+					Parent: parent,
+				},
+			},
+		},
+		&pb.ConnectRequest{
+			Request: &pb.ConnectRequest_Blurb{
+				Blurb: &pb.Blurb{
+					User:    "users/rumble",
+					Content: &pb.Blurb_Text{Text: "woof"},
+				},
+			},
+		},
+	}
+	m := &mockConnectStream{
+		reqs:   reqs,
+		t:      t,
+		stop:   false,
+		respMu: sync.Mutex{},
+		resps:  []*pb.StreamBlurbsResponse{},
+		nextMu: sync.Mutex{},
+	}
+	db := NewBlurbDb()
+
+	// We specify the now function so we can control when the stream ends.
+	s := &messagingServerImpl{
+		identityServer: is,
+		roomDb:         NewRoomDb(),
+		blurbDb:        db,
+		nowF:           time.Now,
+	}
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go (func() {
+		err := s.Connect(m)
+		if err == nil {
+			t.Fatalf("Connect: expected err")
+		}
+		status, _ := status.FromError(err)
+		if status.Code() != codes.NotFound {
+			t.Errorf(
+				"Connect: Want error code %d got %d",
+				codes.NotFound,
+				status.Code())
+		}
+		wg.Done()
+	})()
+
+	for {
+		if db.HasObservers(parent) {
+			break
+		}
+	}
+
+	// Delete the user so that the parent is invalid.
+	is.DeleteUser(
+		context.Background(),
+		&pb.DeleteUserRequest{Name: first.GetName()})
+
+	// Wait til the stream closes.
+	wg.Wait()
+}
+
+func Test_Connect_creationFailure(t *testing.T) {
+	reqs := []*pb.ConnectRequest{
+		&pb.ConnectRequest{
+			Request: &pb.ConnectRequest_Config{
+				Config: &pb.ConnectRequest_ConnectConfig{
+					Parent: "users/rumble/profile",
+				},
+			},
+		},
+		&pb.ConnectRequest{
+			Request: &pb.ConnectRequest_Blurb{
+				Blurb: &pb.Blurb{
+					Content: &pb.Blurb_Text{Text: "woof"},
+				},
+			},
+		},
+	}
+	m := &mockConnectStream{
+		reqs:   reqs,
+		t:      t,
+		stop:   false,
+		respMu: sync.Mutex{},
+		resps:  []*pb.StreamBlurbsResponse{},
+		nextMu: sync.Mutex{},
+	}
+	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+
+	err := s.Connect(m)
+	if err == nil {
+		t.Fatalf("Connect: expected err")
+	}
+	status, _ := status.FromError(err)
+	if status.Code() != codes.InvalidArgument {
+		t.Errorf(
+			"Connect: Want error code %d got %d",
+			codes.InvalidArgument,
 			status.Code())
 	}
 }
