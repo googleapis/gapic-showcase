@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"sync"
 	"testing"
 	"time"
 
@@ -48,15 +47,15 @@ func TestGetOperation_wait(t *testing.T) {
 	}
 }
 
-type blurbDbWrapper struct {
-	listReq *ListBlurbsDbRequest
+type messagingServerWrapper struct {
+	listReq *pb.ListBlurbsRequest
 
-	ReadOnlyBlurbDb
+	MessagingServer
 }
 
-func (m *blurbDbWrapper) List(r *ListBlurbsDbRequest) (*pb.ListBlurbsResponse, error) {
+func (m *messagingServerWrapper) FilteredListBlurbs(ctx context.Context, r *pb.ListBlurbsRequest, f func(*pb.Blurb) bool) (*pb.ListBlurbsResponse, error) {
 	m.listReq = r
-	return m.ReadOnlyBlurbDb.List(r)
+	return m.MessagingServer.FilteredListBlurbs(ctx, r, f)
 }
 
 func TestGetOperation_searchBlurbs(t *testing.T) {
@@ -70,11 +69,13 @@ func TestGetOperation_searchBlurbs(t *testing.T) {
 			Content: &pb.Blurb_Text{Text: "bark"},
 		},
 	}
-	wrappedDb := &blurbDbWrapper{
-		ReadOnlyBlurbDb: &blurbDb{
-			token:   NewTokenGenerator(),
-			blurbMu: sync.Mutex{},
-			keys: map[string]blurbIndex{
+	wrapped := &messagingServerWrapper{
+		MessagingServer: &messagingServerImpl{
+			identityServer: &mockIdentityServer{},
+			roomKeys:       map[string]int{},
+			parentUids:     map[string]*uniqID{},
+			token:          NewTokenGenerator(),
+			blurbKeys: map[string]blurbIndex{
 				"users/rumble/profile/messages/1": blurbIndex{
 					row: "users/rumble/profile",
 					col: 1},
@@ -110,7 +111,7 @@ func TestGetOperation_searchBlurbs(t *testing.T) {
 		},
 	}
 
-	server := NewOperationsServer(wrappedDb)
+	server := NewOperationsServer(wrapped)
 
 	searchReq := &pb.SearchBlurbsRequest{
 		Query:    "woof bark",
@@ -128,7 +129,7 @@ func TestGetOperation_searchBlurbs(t *testing.T) {
 		t.Errorf("GetOperation: unexpected err %+v", err)
 	}
 
-	listReq := wrappedDb.listReq
+	listReq := wrapped.listReq
 	if listReq.Parent != searchReq.GetParent() {
 		t.Errorf(
 			"GetOperation searchBlurbs: list request parent expected %s got %s",

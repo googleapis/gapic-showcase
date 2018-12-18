@@ -54,8 +54,7 @@ func init() {
 			s := grpc.NewServer(opts...)
 			defer s.GracefulStop()
 			pb.RegisterEchoServer(s, server.NewEchoServer())
-			blurbDb := server.NewBlurbDb()
-			lropb.RegisterOperationsServer(s, server.NewOperationsServer(blurbDb))
+			lropb.RegisterOperationsServer(s, server.NewOperationsServer(nil))
 
 			// Register reflection service on gRPC server.
 			reflection.Register(s)

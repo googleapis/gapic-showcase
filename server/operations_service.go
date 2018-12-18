@@ -29,13 +29,13 @@ import (
 )
 
 // NewEchoServer returns a new EchoServer for the Showcase API.
-func NewOperationsServer(blurbDb ReadOnlyBlurbDb) lropb.OperationsServer {
-	return &operationsServerImpl{waiter: waiterSingleton, blurbDb: blurbDb}
+func NewOperationsServer(messagingServer MessagingServer) lropb.OperationsServer {
+	return &operationsServerImpl{waiter: waiterSingleton, messagingServer: messagingServer}
 }
 
 type operationsServerImpl struct {
-	blurbDb ReadOnlyBlurbDb
-	waiter  Waiter
+	messagingServer MessagingServer
+	waiter          Waiter
 }
 
 func (s *operationsServerImpl) GetOperation(ctx context.Context, in *lropb.GetOperationRequest) (*lropb.Operation, error) {
@@ -89,13 +89,14 @@ func (s *operationsServerImpl) handleSearchBlurbs(in *lropb.GetOperationRequest)
 
 	// TODO(landrito): add some randomization here so that the search blurbs
 	// operation could take multiple get calls to complete.
-	listResp, err := s.blurbDb.List(
-		&ListBlurbsDbRequest{
+	listResp, err := s.messagingServer.FilteredListBlurbs(
+		context.Background(),
+		&pb.ListBlurbsRequest{
 			Parent:    req.GetParent(),
 			PageSize:  req.GetPageSize(),
 			PageToken: req.GetPageToken(),
-			Filter:    searchFilterFunc(req.GetQuery()),
-		})
+		},
+		searchFilterFunc(req.GetQuery()))
 
 	answer := &lropb.Operation{
 		Name: in.GetName(),

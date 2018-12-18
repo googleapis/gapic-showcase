@@ -33,7 +33,7 @@ import (
 )
 
 func Test_Room_lifecycle(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 
 	first, err := s.CreateRoom(
 		context.Background(),
@@ -129,7 +129,7 @@ func Test_Room_lifecycle(t *testing.T) {
 }
 
 func Test_CreateRoom_invalid(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	_, err := s.CreateRoom(
 		context.Background(),
 		&pb.CreateRoomRequest{Room: &pb.Room{DisplayName: ""}})
@@ -145,7 +145,7 @@ func Test_CreateRoom_invalid(t *testing.T) {
 func Test_CreateRoom_alreadyPresent(t *testing.T) {
 	room := &pb.Room{DisplayName: "Living Room"}
 
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	_, err := s.CreateRoom(context.Background(), &pb.CreateRoomRequest{Room: room})
 	if err != nil {
 		t.Errorf("Create: unexpected err %+v", err)
@@ -161,7 +161,7 @@ func Test_CreateRoom_alreadyPresent(t *testing.T) {
 }
 
 func Test_GetRoom_notFound(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	_, err := s.GetRoom(
 		context.Background(),
 		&pb.GetRoomRequest{Name: "Weight Room"})
@@ -175,7 +175,7 @@ func Test_GetRoom_notFound(t *testing.T) {
 }
 
 func Test_GetRoom_deleted(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	created, err := s.CreateRoom(
 		context.Background(),
 		&pb.CreateRoomRequest{
@@ -205,7 +205,7 @@ func Test_GetRoom_deleted(t *testing.T) {
 }
 
 func Test_UpdateRoom_fieldmask(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	_, err := s.UpdateRoom(
 		context.Background(),
 		&pb.UpdateRoomRequest{
@@ -222,7 +222,7 @@ func Test_UpdateRoom_fieldmask(t *testing.T) {
 }
 
 func Test_UpdateRoom_notFound(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	_, err := s.UpdateRoom(
 		context.Background(),
 		&pb.UpdateRoomRequest{
@@ -244,7 +244,7 @@ func Test_UpdateRoom_notFound(t *testing.T) {
 func Test_UpdateRoom_invalid(t *testing.T) {
 	first := &pb.Room{DisplayName: "Living Room"}
 	second := &pb.Room{DisplayName: ""}
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	created, err := s.CreateRoom(
 		context.Background(),
 		&pb.CreateRoomRequest{Room: first})
@@ -271,7 +271,7 @@ func Test_UpdateRoom_alreadyPresent(t *testing.T) {
 	}
 	second := &pb.Room{DisplayName: "Weight Room"}
 
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	for i, r := range first {
 		created, err := s.CreateRoom(
 			context.Background(),
@@ -295,7 +295,7 @@ func Test_UpdateRoom_alreadyPresent(t *testing.T) {
 }
 
 func Test_DeleteRoom_notFound(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	_, err := s.DeleteRoom(
 		context.Background(),
 		&pb.DeleteRoomRequest{Name: "Weight Room"})
@@ -309,14 +309,10 @@ func Test_DeleteRoom_notFound(t *testing.T) {
 }
 
 func Test_ListRooms_invalidToken(t *testing.T) {
-	db := &roomDb{
-		uid:   &uniqID{},
-		token: &tokenGenerator{salt: "salt"},
-		mu:    sync.Mutex{},
-		keys:  map[string]int{},
-		rooms: []roomEntry{},
+	s := messagingServerImpl{
+		token:    &tokenGenerator{salt: "salt"},
+		roomKeys: map[string]int{},
 	}
-	s := messagingServerImpl{roomDb: db}
 
 	tests := []string{
 		"1", // Not base64 encoded
@@ -349,7 +345,7 @@ func (m *mockIdentityServer) ListUsers(_ context.Context, _ *pb.ListUsersRequest
 }
 
 func Test_Blurb_lifecycle(t *testing.T) {
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 
 	first, err := s.CreateBlurb(
 		context.Background(),
@@ -472,7 +468,7 @@ func Test_Blurb_lifecycle(t *testing.T) {
 }
 
 func Test_CreateBlurb_invalid(t *testing.T) {
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 
 	_, err := s.CreateBlurb(
 		context.Background(),
@@ -487,7 +483,7 @@ func Test_CreateBlurb_invalid(t *testing.T) {
 }
 
 func Test_CreateBlurb_parentNotFound(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 
 	_, err := s.CreateBlurb(
 		context.Background(),
@@ -502,7 +498,7 @@ func Test_CreateBlurb_parentNotFound(t *testing.T) {
 }
 
 func Test_GetBlurb_notFound(t *testing.T) {
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 	_, err := s.GetBlurb(
 		context.Background(),
 		&pb.GetBlurbRequest{Name: "users/rumble/profile/blurbs/1"})
@@ -516,7 +512,7 @@ func Test_GetBlurb_notFound(t *testing.T) {
 }
 
 func Test_GetBlurb_deleted(t *testing.T) {
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 	created, err := s.CreateBlurb(
 		context.Background(),
 		&pb.CreateBlurbRequest{
@@ -550,7 +546,7 @@ func Test_GetBlurb_deleted(t *testing.T) {
 }
 
 func Test_UpdateBlurb_fieldmask(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	_, err := s.UpdateBlurb(
 		context.Background(),
 		&pb.UpdateBlurbRequest{
@@ -567,7 +563,7 @@ func Test_UpdateBlurb_fieldmask(t *testing.T) {
 }
 
 func Test_UpdateBlurb_notFound(t *testing.T) {
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 	_, err := s.UpdateBlurb(
 		context.Background(),
 		&pb.UpdateBlurbRequest{
@@ -595,7 +591,7 @@ func Test_UpdateBlurb_invalid(t *testing.T) {
 		User:    "",
 		Content: &pb.Blurb_Text{Text: "woof"},
 	}
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 	created, err := s.CreateBlurb(
 		context.Background(),
 		&pb.CreateBlurbRequest{Blurb: first})
@@ -616,7 +612,7 @@ func Test_UpdateBlurb_invalid(t *testing.T) {
 }
 
 func Test_DeleteBlurb_notFound(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	_, err := s.DeleteBlurb(
 		context.Background(),
 		&pb.DeleteBlurbRequest{Name: "user/rumble/profile/blurbs/1"})
@@ -630,20 +626,14 @@ func Test_DeleteBlurb_notFound(t *testing.T) {
 }
 
 func Test_ListBlurbs_invalidToken(t *testing.T) {
-	db := &blurbDb{
-		token:      &tokenGenerator{salt: "salt"},
-		obsMu:      sync.Mutex{},
-		obsId:      uniqID{},
-		observers:  map[string]map[string]BlurbObserver{},
-		blurbMu:    sync.Mutex{},
-		keys:       map[string]blurbIndex{},
-		blurbs:     map[string][]blurbEntry{},
-		parentUids: map[string]*uniqID{},
-	}
 	s := messagingServerImpl{
 		identityServer: &mockIdentityServer{},
-		roomDb:         NewRoomDb(),
-		blurbDb:        db,
+		token:          &tokenGenerator{salt: "salt"},
+		roomKeys:       map[string]int{},
+		blurbKeys:      map[string]blurbIndex{},
+		blurbs:         map[string][]blurbEntry{},
+		parentUids:     map[string]*uniqID{},
+		observers:      map[string]map[string]blurbObserver{},
 	}
 
 	tests := []string{
@@ -683,7 +673,7 @@ func Test_ListBlurbs_invalidToken(t *testing.T) {
 }
 
 func Test_ListBlurbs_parentNotFound(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 
 	_, err := s.ListBlurbs(
 		context.Background(),
@@ -698,7 +688,7 @@ func Test_ListBlurbs_parentNotFound(t *testing.T) {
 }
 
 func Test_ListBlurbs_noneCreated(t *testing.T) {
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 
 	resp, err := s.ListBlurbs(
 		context.Background(),
@@ -712,7 +702,7 @@ func Test_ListBlurbs_noneCreated(t *testing.T) {
 }
 
 func Test_SearchBlurbs(t *testing.T) {
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 
 	req := &pb.SearchBlurbsRequest{
 		Query:    "woof bark",
@@ -751,7 +741,7 @@ func Test_SearchBlurbs(t *testing.T) {
 }
 
 func Test_SearchBlurbs_parentNotFound(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 
 	req := &pb.SearchBlurbsRequest{
 		Query:  "woof bark",
@@ -784,14 +774,15 @@ func (m *mockStreamBlurbsStream) Send(resp *pb.StreamBlurbsResponse) error {
 }
 
 func TestStreamBlurbs_lifecycle(t *testing.T) {
-	// Setup DB
-	db := NewBlurbDb()
-
 	// We specify the now function so we can control when the stream ends.
 	s := &messagingServerImpl{
 		identityServer: &mockIdentityServer{},
-		roomDb:         NewRoomDb(),
-		blurbDb:        db,
+		token:          NewTokenGenerator(),
+		roomKeys:       map[string]int{},
+		blurbKeys:      map[string]blurbIndex{},
+		blurbs:         map[string][]blurbEntry{},
+		parentUids:     map[string]*uniqID{},
+		observers:      map[string]map[string]blurbObserver{},
 		nowF: func() time.Time {
 			return time.Unix(int64(0), int64(0))
 		},
@@ -828,7 +819,7 @@ func TestStreamBlurbs_lifecycle(t *testing.T) {
 
 	// Wait for the stream request to propogate the observer to the database.
 	for {
-		if db.HasObservers(p) {
+		if s.hasObservers(p) {
 			break
 		}
 	}
@@ -883,9 +874,9 @@ func TestStreamBlurbs_lifecycle(t *testing.T) {
 			pb.StreamBlurbsResponse_Action_name[int32(pb.StreamBlurbsResponse_UPDATE)],
 			pb.StreamBlurbsResponse_Action_name[int32(streamResp.GetAction())])
 	}
-	if !proto.Equal(streamResp.GetBlurb(), created) {
+	if !proto.Equal(streamResp.GetBlurb(), updated) {
 		t.Errorf(
-			"StreamBlurbs: want created blurb %+v, got %+v",
+			"StreamBlurbs: want updated blurb %+v, got %+v",
 			updated,
 			streamResp.GetBlurb())
 	}
@@ -910,7 +901,7 @@ func TestStreamBlurbs_lifecycle(t *testing.T) {
 	}
 	if !proto.Equal(streamResp.GetBlurb(), updated) {
 		t.Errorf(
-			"StreamBlurbs: want created blurb %+v, got %+v",
+			"StreamBlurbs: want deleted blurb %+v, got %+v",
 			updated,
 			streamResp.GetBlurb())
 	}
@@ -926,7 +917,7 @@ func TestStreamBlurbs_lifecycle(t *testing.T) {
 }
 
 func Test_StreamBlurbs_parentNotFound(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 
 	err := s.StreamBlurbs(
 		&pb.StreamBlurbsRequest{Name: "users/rumble/profile"},
@@ -949,14 +940,16 @@ func (m *errorStreamBlurbsStream) Send(_ *pb.StreamBlurbsResponse) error {
 }
 
 func Test_StreamBlurbs_sendError(t *testing.T) {
-	// Setup DB.
-	db := NewBlurbDb()
-
 	// We specify the now function so we can control when the stream ends.
 	s := &messagingServerImpl{
+
 		identityServer: &mockIdentityServer{},
-		roomDb:         NewRoomDb(),
-		blurbDb:        db,
+		token:          NewTokenGenerator(),
+		roomKeys:       map[string]int{},
+		blurbKeys:      map[string]blurbIndex{},
+		blurbs:         map[string][]blurbEntry{},
+		parentUids:     map[string]*uniqID{},
+		observers:      map[string]map[string]blurbObserver{},
 		nowF: func() time.Time {
 			return time.Unix(int64(0), int64(0))
 		},
@@ -990,7 +983,7 @@ func Test_StreamBlurbs_sendError(t *testing.T) {
 
 	// Wait for the stream request to propogate the observer to the database.
 	for {
-		if db.HasObservers(p) {
+		if s.hasObservers(p) {
 			break
 		}
 	}
@@ -1032,14 +1025,16 @@ func Test_StreamBlurbs_parentNotFoundLater(t *testing.T) {
 		t.Errorf("Create: unexpected err %+v", err)
 	}
 
-	// Setup DB.
-	db := NewBlurbDb()
-
 	// We specify the now function so we can control when the stream ends.
 	s := &messagingServerImpl{
 		identityServer: is,
-		roomDb:         NewRoomDb(),
-		blurbDb:        db,
+
+		token:      NewTokenGenerator(),
+		roomKeys:   map[string]int{},
+		blurbKeys:  map[string]blurbIndex{},
+		blurbs:     map[string][]blurbEntry{},
+		parentUids: map[string]*uniqID{},
+		observers:  map[string]map[string]blurbObserver{},
 		nowF: func() time.Time {
 			return time.Unix(int64(0), int64(0))
 		},
@@ -1074,7 +1069,7 @@ func Test_StreamBlurbs_parentNotFoundLater(t *testing.T) {
 	})()
 
 	for {
-		if db.HasObservers(parent) {
+		if s.hasObservers(parent) {
 			break
 		}
 	}
@@ -1141,10 +1136,8 @@ func TestSendBlurbs(t *testing.T) {
 	m := &mockSendBlurbsStream{
 		reqs: reqs,
 		t:    t,
-		mu:   sync.Mutex{},
-		next: 0,
 	}
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 
 	err := s.SendBlurbs(m)
 	if err != nil {
@@ -1220,10 +1213,8 @@ func TestSendBlurbs_error(t *testing.T) {
 	m := &errorSendBlurbsStream{
 		reqs: reqs,
 		t:    t,
-		mu:   sync.Mutex{},
-		next: 0,
 	}
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 
 	err := s.SendBlurbs(m)
 	if err == nil {
@@ -1295,9 +1286,8 @@ func TestSendBlurbs_invalidParent(t *testing.T) {
 	m := &mockSendBlurbsStream{
 		reqs: reqs,
 		t:    t,
-		mu:   sync.Mutex{},
 	}
-	s := NewMessagingServer(is, NewBlurbDb())
+	s := NewMessagingServer(is)
 
 	err = s.SendBlurbs(m)
 	if err == nil {
@@ -1356,10 +1346,8 @@ func TestSendBlurbs_invalidBlurb(t *testing.T) {
 	m := &mockSendBlurbsStream{
 		reqs: reqs,
 		t:    t,
-		mu:   sync.Mutex{},
-		next: 0,
 	}
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 
 	err := s.SendBlurbs(m)
 	if err == nil {
@@ -1444,15 +1432,11 @@ func TestConnect(t *testing.T) {
 		},
 	}
 	m := &mockConnectStream{
-		reqs:   reqs,
-		t:      t,
-		stop:   false,
-		respMu: sync.Mutex{},
-		resps:  []*pb.StreamBlurbsResponse{},
-		nextMu: sync.Mutex{},
-		next:   0,
+		reqs:  reqs,
+		t:     t,
+		resps: []*pb.StreamBlurbsResponse{},
 	}
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
@@ -1539,9 +1523,9 @@ func TestConnect(t *testing.T) {
 			pb.StreamBlurbsResponse_Action_name[int32(pb.StreamBlurbsResponse_UPDATE)],
 			pb.StreamBlurbsResponse_Action_name[int32(streamResp.GetAction())])
 	}
-	if !proto.Equal(streamResp.GetBlurb(), created) {
+	if !proto.Equal(streamResp.GetBlurb(), updated) {
 		t.Errorf(
-			"StreamBlurbs: want created blurb %+v, got %+v",
+			"StreamBlurbs: want updated blurb %+v, got %+v",
 			updated,
 			streamResp.GetBlurb())
 	}
@@ -1566,7 +1550,7 @@ func TestConnect(t *testing.T) {
 	}
 	if !proto.Equal(streamResp.GetBlurb(), updated) {
 		t.Errorf(
-			"StreamBlurbs: want created blurb %+v, got %+v",
+			"StreamBlurbs: want deleted blurb %+v, got %+v",
 			updated,
 			streamResp.GetBlurb())
 	}
@@ -1585,7 +1569,7 @@ func (m *errorConnectStream) Recv() (*pb.ConnectRequest, error) {
 
 func TestConnect_error(t *testing.T) {
 	m := &errorConnectStream{}
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 
 	err := s.Connect(m)
 	status, _ := status.FromError(err)
@@ -1609,14 +1593,11 @@ func TestConnect_notConfigured(t *testing.T) {
 		},
 	}
 	m := &mockConnectStream{
-		reqs:   reqs,
-		t:      t,
-		stop:   false,
-		respMu: sync.Mutex{},
-		resps:  []*pb.StreamBlurbsResponse{},
-		nextMu: sync.Mutex{},
+		reqs:  reqs,
+		t:     t,
+		resps: []*pb.StreamBlurbsResponse{},
 	}
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 
 	err := s.Connect(m)
 	if err == nil {
@@ -1642,14 +1623,11 @@ func TestConnect_parentNotFound(t *testing.T) {
 		},
 	}
 	m := &mockConnectStream{
-		reqs:   reqs,
-		t:      t,
-		stop:   false,
-		respMu: sync.Mutex{},
-		resps:  []*pb.StreamBlurbsResponse{},
-		nextMu: sync.Mutex{},
+		reqs:  reqs,
+		t:     t,
+		resps: []*pb.StreamBlurbsResponse{},
 	}
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 
 	err := s.Connect(m)
 	if err == nil {
@@ -1713,14 +1691,11 @@ func TestConnect_sendError(t *testing.T) {
 		},
 	}
 	m := &sendErrorConnectStream{
-		reqs:   reqs,
-		t:      t,
-		stop:   false,
-		respMu: sync.Mutex{},
-		resps:  []*pb.StreamBlurbsResponse{},
-		nextMu: sync.Mutex{},
+		reqs:  reqs,
+		t:     t,
+		resps: []*pb.StreamBlurbsResponse{},
 	}
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 
 	err := s.Connect(m)
 	if err == nil {
@@ -1765,21 +1740,22 @@ func TestConnect_parentNotFoundLater(t *testing.T) {
 		},
 	}
 	m := &mockConnectStream{
-		reqs:   reqs,
-		t:      t,
-		stop:   false,
-		respMu: sync.Mutex{},
-		resps:  []*pb.StreamBlurbsResponse{},
-		nextMu: sync.Mutex{},
+		reqs:  reqs,
+		t:     t,
+		resps: []*pb.StreamBlurbsResponse{},
 	}
-	db := NewBlurbDb()
 
 	// We specify the now function so we can control when the stream ends.
 	s := &messagingServerImpl{
 		identityServer: is,
-		roomDb:         NewRoomDb(),
-		blurbDb:        db,
-		nowF:           time.Now,
+
+		token:      NewTokenGenerator(),
+		roomKeys:   map[string]int{},
+		blurbKeys:  map[string]blurbIndex{},
+		blurbs:     map[string][]blurbEntry{},
+		parentUids: map[string]*uniqID{},
+		observers:  map[string]map[string]blurbObserver{},
+		nowF:       time.Now,
 	}
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
@@ -1799,7 +1775,7 @@ func TestConnect_parentNotFoundLater(t *testing.T) {
 	})()
 
 	for {
-		if db.HasObservers(parent) {
+		if s.hasObservers(parent) {
 			break
 		}
 	}
@@ -1831,14 +1807,11 @@ func Test_Connect_creationFailure(t *testing.T) {
 		},
 	}
 	m := &mockConnectStream{
-		reqs:   reqs,
-		t:      t,
-		stop:   false,
-		respMu: sync.Mutex{},
-		resps:  []*pb.StreamBlurbsResponse{},
-		nextMu: sync.Mutex{},
+		reqs:  reqs,
+		t:     t,
+		resps: []*pb.StreamBlurbsResponse{},
 	}
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 
 	err := s.Connect(m)
 	if err == nil {

@@ -19,6 +19,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -33,84 +34,421 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func NewMessagingServer(identityServer ReadOnlyIdentityServer, blurbDb BlurbDb) pb.MessagingServer {
+func NewMessagingServer(identityServer ReadOnlyIdentityServer) MessagingServer {
 	return &messagingServerImpl{
 		identityServer: identityServer,
-		roomDb:         NewRoomDb(),
-		blurbDb:        blurbDb,
 		nowF:           time.Now,
+		token:          NewTokenGenerator(),
+		roomKeys:       map[string]int{},
+		blurbKeys:      map[string]blurbIndex{},
+		blurbs:         map[string][]blurbEntry{},
+		parentUids:     map[string]*uniqID{},
+		observers:      map[string]map[string]blurbObserver{},
 	}
 }
 
+type MessagingServer interface {
+	FilteredListBlurbs(context.Context, *pb.ListBlurbsRequest, func(*pb.Blurb) bool) (*pb.ListBlurbsResponse, error)
+
+	pb.MessagingServer
+}
+
 type messagingServerImpl struct {
-	identityServer ReadOnlyIdentityServer
-	roomDb         RoomDb
-	blurbDb        BlurbDb
 	nowF           func() time.Time
+	token          TokenGenerator
+	identityServer ReadOnlyIdentityServer
+
+	roomUid  uniqID
+	roomMu   sync.Mutex
+	roomKeys map[string]int
+	rooms    []roomEntry
+
+	blurbMu    sync.Mutex
+	blurbKeys  map[string]blurbIndex
+	blurbs     map[string][]blurbEntry
+	parentUids map[string]*uniqID
+
+	obsMu     sync.Mutex
+	obsUid    uniqID
+	observers map[string]map[string]blurbObserver
+}
+
+type roomEntry struct {
+	room    *pb.Room
+	deleted bool
+}
+
+type blurbIndex struct {
+	// The parent of the blurb.
+	row string
+	// The index within the list of blurbs of a parent.
+	col int
+}
+
+type blurbEntry struct {
+	blurb   *pb.Blurb
+	deleted bool
+}
+
+type blurbObserver interface {
+	OnCreate(b *pb.Blurb)
+	OnUpdate(b *pb.Blurb)
+	OnDelete(b *pb.Blurb)
 }
 
 // Creates a room.
 func (s *messagingServerImpl) CreateRoom(ctx context.Context, in *pb.CreateRoomRequest) (*pb.Room, error) {
-	return s.roomDb.Create(in.GetRoom())
+	s.roomMu.Lock()
+	defer s.roomMu.Unlock()
+
+	r := in.GetRoom()
+	err := validateRoom(r)
+	if err != nil {
+		return nil, err
+	}
+
+	// Validate Unique Fields.
+	uniqName := func(x *pb.Room) bool {
+		return (r.GetDisplayName() == x.GetDisplayName())
+	}
+	if s.anyRoom(uniqName) {
+		return nil, status.Errorf(
+			codes.AlreadyExists,
+			"A room with display_name %s already exists.",
+			r.GetDisplayName())
+	}
+
+	// Assign info.
+	id := s.roomUid.next()
+	name := fmt.Sprintf("rooms/%d", id)
+	now := ptypes.TimestampNow()
+
+	r.Name = name
+	r.CreateTime = now
+	r.UpdateTime = now
+
+	// Insert.
+	index := len(s.rooms)
+	s.rooms = append(s.rooms, roomEntry{room: r})
+	s.roomKeys[name] = index
+
+	return r, nil
 }
 
 // Retrieves the Room with the given resource name.
 func (s *messagingServerImpl) GetRoom(ctx context.Context, in *pb.GetRoomRequest) (*pb.Room, error) {
-	return s.roomDb.Get(in.GetName())
+	s.roomMu.Lock()
+	defer s.roomMu.Unlock()
+
+	name := in.GetName()
+	if i, ok := s.roomKeys[name]; ok {
+		entry := s.rooms[i]
+		if !entry.deleted {
+			return entry.room, nil
+		}
+	}
+
+	return nil, status.Errorf(
+		codes.NotFound, "A room with name %s not found.",
+		name)
 }
 
 // Updates a room.
 func (s *messagingServerImpl) UpdateRoom(ctx context.Context, in *pb.UpdateRoomRequest) (*pb.Room, error) {
-	return s.roomDb.Update(in.GetRoom(), in.GetUpdateMask())
+	f := in.GetUpdateMask()
+	r := in.GetRoom()
+	if f != nil && len(f.GetPaths()) > 0 {
+		return nil, status.Error(
+			codes.Unimplemented,
+			"Field masks are currently not supported.")
+	}
+
+	s.roomMu.Lock()
+	defer s.roomMu.Unlock()
+
+	err := validateRoom(r)
+	if err != nil {
+		return nil, err
+	}
+	i, ok := s.roomKeys[r.GetName()]
+
+	if !ok || s.rooms[i].deleted {
+		return nil, status.Errorf(
+			codes.NotFound,
+			"A room with name %s not found.", r.GetName())
+	}
+
+	entry := s.rooms[i]
+	// Validate Unique Fields.
+	uniqName := func(x *pb.Room) bool {
+		return x != entry.room && (r.GetDisplayName() == x.GetDisplayName())
+	}
+	if s.anyRoom(uniqName) {
+		return nil, status.Errorf(
+			codes.AlreadyExists,
+			"A room with either display_name, %s already exists.",
+			r.GetDisplayName())
+	}
+
+	// Update store.
+	updated := &pb.Room{
+		Name:        r.GetName(),
+		DisplayName: r.GetDisplayName(),
+		Description: r.GetDescription(),
+		CreateTime:  entry.room.GetCreateTime(),
+		UpdateTime:  ptypes.TimestampNow(),
+	}
+	s.rooms[i] = roomEntry{room: updated}
+	return updated, nil
 }
 
 // Deletes a room and all of its blurbs.
 func (s *messagingServerImpl) DeleteRoom(ctx context.Context, in *pb.DeleteRoomRequest) (*empty.Empty, error) {
-	return &empty.Empty{}, s.roomDb.Delete(in.GetName())
+	s.roomMu.Lock()
+	defer s.roomMu.Unlock()
+
+	i, ok := s.roomKeys[in.GetName()]
+
+	if !ok {
+		return nil, status.Errorf(
+			codes.NotFound,
+			"A room with name %s not found.", in.GetName())
+	}
+
+	entry := s.rooms[i]
+	s.rooms[i] = roomEntry{room: entry.room, deleted: true}
+
+	return &empty.Empty{}, nil
 }
 
 // Lists all chat rooms.
 func (s *messagingServerImpl) ListRooms(ctx context.Context, in *pb.ListRoomsRequest) (*pb.ListRoomsResponse, error) {
-	return s.roomDb.List(in.GetPageSize(), in.GetPageToken())
+	start, err := s.token.GetIndex(in.GetPageToken())
+	if err != nil {
+		return nil, err
+	}
+
+	offset := 0
+	rooms := []*pb.Room{}
+	for _, entry := range s.rooms[start:] {
+		offset++
+		if entry.deleted {
+			continue
+		}
+		rooms = append(rooms, entry.room)
+		if len(rooms) >= int(in.GetPageSize()) {
+			break
+		}
+	}
+
+	nextToken := ""
+	if start+offset < len(s.rooms) {
+		nextToken = s.token.ForIndex(start + offset)
+	}
+
+	return &pb.ListRoomsResponse{Rooms: rooms, NextPageToken: nextToken}, nil
+}
+
+func (s *messagingServerImpl) anyRoom(f func(*pb.Room) bool) bool {
+	for _, entry := range s.rooms {
+		if !entry.deleted && f(entry.room) {
+			return true
+		}
+	}
+	return false
+}
+
+func validateRoom(r *pb.Room) error {
+	// Validate Required Fields.
+	if r.GetDisplayName() == "" {
+		return status.Errorf(
+			codes.InvalidArgument,
+			"The field `display_name` is required.")
+	}
+	return nil
 }
 
 // Creates a blurb. If the parent is a room, the blurb is understood to be a
 // message in that room. If the parent is a profile, the blurb is understood
 // to be a post on the profile.
 func (s *messagingServerImpl) CreateBlurb(ctx context.Context, in *pb.CreateBlurbRequest) (*pb.Blurb, error) {
-	if err := s.validateParent(in.GetParent()); err != nil {
+	parent := in.GetParent()
+	if err := s.validateParent(parent); err != nil {
 		return nil, err
 	}
-	return s.blurbDb.Create(in.GetParent(), in.GetBlurb())
+
+	s.blurbMu.Lock()
+	defer s.blurbMu.Unlock()
+
+	b := in.GetBlurb()
+	if err := validateBlurb(b); err != nil {
+		return nil, err
+	}
+
+	// Assign info.
+	parentBs, ok := s.blurbs[parent]
+	if !ok {
+		parentBs = []blurbEntry{}
+	}
+	puid, ok := s.parentUids[parent]
+	if !ok {
+		puid = &uniqID{}
+		s.parentUids[parent] = puid
+	}
+
+	id := puid.next()
+	name := fmt.Sprintf("%s/blurbs/%d", parent, id)
+	now := ptypes.TimestampNow()
+
+	b.Name = name
+	b.CreateTime = now
+	b.UpdateTime = now
+
+	// Insert.
+	index := len(parentBs)
+	s.blurbs[parent] = append(parentBs, blurbEntry{blurb: b})
+	s.blurbKeys[name] = blurbIndex{row: parent, col: index}
+
+	// Call observers.
+	s.obsMu.Lock()
+	defer s.obsMu.Unlock()
+	if parentObservers, ok := s.observers[parent]; ok {
+		for _, o := range parentObservers {
+			o.OnCreate(b)
+		}
+	}
+
+	return b, nil
 }
 
 // Retrieves the Blurb with the given resource name.
 func (s *messagingServerImpl) GetBlurb(ctx context.Context, in *pb.GetBlurbRequest) (*pb.Blurb, error) {
-	return s.blurbDb.Get(in.GetName())
+	s.blurbMu.Lock()
+	defer s.blurbMu.Unlock()
+
+	if i, ok := s.blurbKeys[in.GetName()]; ok {
+		entry := s.blurbs[i.row][i.col]
+		if !entry.deleted {
+			return entry.blurb, nil
+		}
+	}
+
+	return nil, status.Errorf(
+		codes.NotFound,
+		"A blurb with name %s not found.",
+		in.GetName())
 }
 
 // Updates a blurb.
 func (s *messagingServerImpl) UpdateBlurb(ctx context.Context, in *pb.UpdateBlurbRequest) (*pb.Blurb, error) {
-	return s.blurbDb.Update(in.GetBlurb(), in.GetUpdateMask())
+	if in.GetUpdateMask() != nil && len(in.GetUpdateMask().GetPaths()) > 0 {
+		return nil, status.Error(
+			codes.Unimplemented,
+			"Field masks are currently not supported.")
+	}
+
+	s.blurbMu.Lock()
+	defer s.blurbMu.Unlock()
+
+	b := in.GetBlurb()
+	i, ok := s.blurbKeys[b.GetName()]
+	if !ok || s.blurbs[i.row][i.col].deleted {
+		return nil, status.Errorf(
+			codes.NotFound,
+			"A blurb with name %s not found.", b.GetName())
+	}
+
+	if err := validateBlurb(b); err != nil {
+		return nil, err
+	}
+	// Update store.
+	updated := proto.Clone(b).(*pb.Blurb)
+	updated.UpdateTime = ptypes.TimestampNow()
+	s.blurbs[i.row][i.col] = blurbEntry{blurb: updated}
+
+	// Call observers.
+	s.obsMu.Lock()
+	defer s.obsMu.Unlock()
+	if parentObservers, ok := s.observers[i.row]; ok {
+		for _, o := range parentObservers {
+			o.OnUpdate(updated)
+		}
+	}
+
+	return updated, nil
 }
 
 // Deletes a blurb.
 func (s *messagingServerImpl) DeleteBlurb(ctx context.Context, in *pb.DeleteBlurbRequest) (*empty.Empty, error) {
-	return &empty.Empty{}, s.blurbDb.Delete(in.GetName())
+	s.blurbMu.Lock()
+	defer s.blurbMu.Unlock()
+
+	i, ok := s.blurbKeys[in.GetName()]
+
+	if !ok {
+		return nil, status.Errorf(
+			codes.NotFound,
+			"A blurb with name %s not found.", in.GetName())
+	}
+
+	entry := s.blurbs[i.row][i.col]
+	s.blurbs[i.row][i.col] = blurbEntry{blurb: entry.blurb, deleted: true}
+
+	// Call observers.
+	s.obsMu.Lock()
+	defer s.obsMu.Unlock()
+	if parentObservers, ok := s.observers[i.row]; ok {
+		for _, o := range parentObservers {
+			o.OnDelete(entry.blurb)
+		}
+	}
+
+	return &empty.Empty{}, nil
 }
 
 // Lists blurbs for a specific chat room or user profile depending on the
 // parent resource name.
 func (s *messagingServerImpl) ListBlurbs(ctx context.Context, in *pb.ListBlurbsRequest) (*pb.ListBlurbsResponse, error) {
+	passFilter := func(_ *pb.Blurb) bool { return true }
+	return s.FilteredListBlurbs(ctx, in, passFilter)
+}
+
+func (s *messagingServerImpl) FilteredListBlurbs(ctx context.Context, in *pb.ListBlurbsRequest, f func(*pb.Blurb) bool) (*pb.ListBlurbsResponse, error) {
 	if err := s.validateParent(in.GetParent()); err != nil {
 		return nil, err
 	}
-	return s.blurbDb.List(
-		&ListBlurbsDbRequest{
-			Parent:    in.GetParent(),
-			PageSize:  in.GetPageSize(),
-			PageToken: in.GetPageToken(),
-		})
+
+	bs, ok := s.blurbs[in.GetParent()]
+	if !ok {
+		return &pb.ListBlurbsResponse{}, nil
+	}
+
+	start, err := s.token.GetIndex(in.GetPageToken())
+	if err != nil {
+		return nil, err
+	}
+
+	offset := 0
+	blurbs := []*pb.Blurb{}
+	for _, entry := range bs[start:] {
+		offset++
+		if entry.deleted {
+			continue
+		}
+		if f(entry.blurb) {
+			blurbs = append(blurbs, entry.blurb)
+		}
+		if len(blurbs) >= int(in.GetPageSize()) {
+			break
+		}
+	}
+
+	nextToken := ""
+	if start+offset < len(s.blurbs[in.GetParent()]) {
+		nextToken = s.token.ForIndex(start + offset)
+	}
+
+	return &pb.ListBlurbsResponse{Blurbs: blurbs, NextPageToken: nextToken}, nil
 }
 
 // This method searches through all blurbs across all rooms and profiles
@@ -150,8 +488,8 @@ func (s *messagingServerImpl) StreamBlurbs(in *pb.StreamBlurbsRequest, stream pb
 		stream: stream.(BlurbsOutStream),
 		mu:     sync.Mutex{},
 	}
-	name := s.blurbDb.RegisterObserver(parent, observer)
-	defer s.blurbDb.RemoveObserver(parent, name)
+	name := s.registerObserver(parent, observer)
+	defer s.removeObserver(parent, name)
 	for {
 		if s.nowF().After(expireTime) {
 			break
@@ -184,7 +522,9 @@ func (s *messagingServerImpl) SendBlurbs(stream pb.Messaging_SendBlurbsServer) e
 		if err := s.validateParent(parent); err != nil {
 			return withCreatedNames(err, names)
 		}
-		blurb, err := s.blurbDb.Create(parent, req.GetBlurb())
+		blurb, err := s.CreateBlurb(
+			context.Background(),
+			&pb.CreateBlurbRequest{Parent: parent, Blurb: req.GetBlurb()})
 		if err != nil {
 			return withCreatedNames(err, names)
 		}
@@ -241,8 +581,8 @@ func (s *messagingServerImpl) Connect(stream pb.Messaging_ConnectServer) error {
 				mu:     sync.Mutex{},
 			}
 			configured = true
-			name := s.blurbDb.RegisterObserver(parent, observer)
-			defer s.blurbDb.RemoveObserver(parent, name)
+			name := s.registerObserver(parent, observer)
+			defer s.removeObserver(parent, name)
 			continue
 		}
 		// Check if there was a send error.
@@ -259,10 +599,23 @@ func (s *messagingServerImpl) Connect(stream pb.Messaging_ConnectServer) error {
 		if req == nil || req.GetBlurb() == nil {
 			continue
 		}
-		if _, err := s.blurbDb.Create(parent, req.GetBlurb()); err != nil {
+		_, err = s.CreateBlurb(
+			context.Background(),
+			&pb.CreateBlurbRequest{Parent: parent, Blurb: req.GetBlurb()})
+		if err != nil {
 			return err
 		}
 	}
+}
+
+func validateBlurb(b *pb.Blurb) error {
+	// Validate Required Fields.
+	if b.GetUser() == "" {
+		return status.Errorf(
+			codes.InvalidArgument,
+			"The field `user` is required.")
+	}
+	return nil
 }
 
 func (s *messagingServerImpl) validateParent(p string) error {
@@ -272,7 +625,7 @@ func (s *messagingServerImpl) validateParent(p string) error {
 			Name: strings.TrimSuffix(p, "/profile"),
 		},
 	)
-	_, rErr := s.roomDb.Get(p)
+	_, rErr := s.GetRoom(context.Background(), &pb.GetRoomRequest{Name: p})
 	if uErr != nil && rErr != nil {
 		return status.Errorf(codes.NotFound, "Parent %s not found.", p)
 	}
@@ -336,4 +689,33 @@ func (o *streamBlurbsObserver) OnDelete(b *pb.Blurb) {
 				Blurb:  b,
 				Action: pb.StreamBlurbsResponse_DELETE,
 			}))
+}
+
+func (s messagingServerImpl) registerObserver(parent string, o blurbObserver) string {
+	s.obsMu.Lock()
+	defer s.obsMu.Unlock()
+	name := strconv.FormatInt(s.obsUid.next(), 10)
+	if _, ok := s.observers[parent]; !ok {
+		s.observers[parent] = map[string]blurbObserver{}
+	}
+	s.observers[parent][name] = o
+	return name
+}
+
+func (s messagingServerImpl) hasObservers(parent string) bool {
+	s.obsMu.Lock()
+	defer s.obsMu.Unlock()
+	if os, ok := s.observers[parent]; ok && len(os) > 0 {
+		return true
+	}
+	return false
+}
+
+func (s messagingServerImpl) removeObserver(parent string, name string) {
+	s.obsMu.Lock()
+	defer s.obsMu.Unlock()
+	delete(s.observers[parent], name)
+	if len(s.observers[parent]) <= 0 {
+		delete(s.observers, parent)
+	}
 }
