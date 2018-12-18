@@ -17,7 +17,6 @@ package server
 import (
 	"context"
 	"encoding/base64"
-	"sync"
 	"testing"
 
 	"github.com/golang/protobuf/proto"
@@ -28,7 +27,7 @@ import (
 )
 
 func Test_Room_lifecycle(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 
 	first, err := s.CreateRoom(
 		context.Background(),
@@ -124,7 +123,7 @@ func Test_Room_lifecycle(t *testing.T) {
 }
 
 func Test_CreateRoom_invalid(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	_, err := s.CreateRoom(
 		context.Background(),
 		&pb.CreateRoomRequest{Room: &pb.Room{DisplayName: ""}})
@@ -140,7 +139,7 @@ func Test_CreateRoom_invalid(t *testing.T) {
 func Test_CreateRoom_alreadyPresent(t *testing.T) {
 	room := &pb.Room{DisplayName: "Living Room"}
 
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	_, err := s.CreateRoom(context.Background(), &pb.CreateRoomRequest{Room: room})
 	if err != nil {
 		t.Errorf("Create: unexpected err %+v", err)
@@ -156,7 +155,7 @@ func Test_CreateRoom_alreadyPresent(t *testing.T) {
 }
 
 func Test_GetRoom_notFound(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	_, err := s.GetRoom(
 		context.Background(),
 		&pb.GetRoomRequest{Name: "Weight Room"})
@@ -170,7 +169,7 @@ func Test_GetRoom_notFound(t *testing.T) {
 }
 
 func Test_GetRoom_deleted(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	created, err := s.CreateRoom(
 		context.Background(),
 		&pb.CreateRoomRequest{
@@ -200,7 +199,7 @@ func Test_GetRoom_deleted(t *testing.T) {
 }
 
 func Test_UpdateRoom_fieldmask(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	_, err := s.UpdateRoom(
 		context.Background(),
 		&pb.UpdateRoomRequest{
@@ -217,7 +216,7 @@ func Test_UpdateRoom_fieldmask(t *testing.T) {
 }
 
 func Test_UpdateRoom_notFound(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	_, err := s.UpdateRoom(
 		context.Background(),
 		&pb.UpdateRoomRequest{
@@ -239,7 +238,7 @@ func Test_UpdateRoom_notFound(t *testing.T) {
 func Test_UpdateRoom_invalid(t *testing.T) {
 	first := &pb.Room{DisplayName: "Living Room"}
 	second := &pb.Room{DisplayName: ""}
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	created, err := s.CreateRoom(
 		context.Background(),
 		&pb.CreateRoomRequest{Room: first})
@@ -266,7 +265,7 @@ func Test_UpdateRoom_alreadyPresent(t *testing.T) {
 	}
 	second := &pb.Room{DisplayName: "Weight Room"}
 
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	for i, r := range first {
 		created, err := s.CreateRoom(
 			context.Background(),
@@ -290,7 +289,7 @@ func Test_UpdateRoom_alreadyPresent(t *testing.T) {
 }
 
 func Test_DeleteRoom_notFound(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	_, err := s.DeleteRoom(
 		context.Background(),
 		&pb.DeleteRoomRequest{Name: "Weight Room"})
@@ -304,14 +303,10 @@ func Test_DeleteRoom_notFound(t *testing.T) {
 }
 
 func Test_ListRooms_invalidToken(t *testing.T) {
-	db := &roomDb{
-		uid:   &uniqID{},
+	s := messagingServerImpl{
 		token: &tokenGenerator{salt: "salt"},
-		mu:    sync.Mutex{},
-		keys:  map[string]int{},
-		rooms: []roomEntry{},
+		roomKeys:  map[string]int{},
 	}
-	s := messagingServerImpl{roomDb: db}
 
 	tests := []string{
 		"1", // Not base64 encoded
@@ -344,7 +339,7 @@ func (m *mockIdentityServer) ListUsers(_ context.Context, _ *pb.ListUsersRequest
 }
 
 func Test_Blurb_lifecycle(t *testing.T) {
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 
 	first, err := s.CreateBlurb(
 		context.Background(),
@@ -467,7 +462,7 @@ func Test_Blurb_lifecycle(t *testing.T) {
 }
 
 func Test_CreateBlurb_invalid(t *testing.T) {
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 
 	_, err := s.CreateBlurb(
 		context.Background(),
@@ -482,7 +477,7 @@ func Test_CreateBlurb_invalid(t *testing.T) {
 }
 
 func Test_CreateBlurb_parentNotFound(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 
 	_, err := s.CreateBlurb(
 		context.Background(),
@@ -497,7 +492,7 @@ func Test_CreateBlurb_parentNotFound(t *testing.T) {
 }
 
 func Test_GetBlurb_notFound(t *testing.T) {
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 	_, err := s.GetBlurb(
 		context.Background(),
 		&pb.GetBlurbRequest{Name: "users/rumble/profile/blurbs/1"})
@@ -511,7 +506,7 @@ func Test_GetBlurb_notFound(t *testing.T) {
 }
 
 func Test_GetBlurb_deleted(t *testing.T) {
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 	created, err := s.CreateBlurb(
 		context.Background(),
 		&pb.CreateBlurbRequest{
@@ -545,7 +540,7 @@ func Test_GetBlurb_deleted(t *testing.T) {
 }
 
 func Test_UpdateBlurb_fieldmask(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	_, err := s.UpdateBlurb(
 		context.Background(),
 		&pb.UpdateBlurbRequest{
@@ -562,7 +557,7 @@ func Test_UpdateBlurb_fieldmask(t *testing.T) {
 }
 
 func Test_UpdateBlurb_notFound(t *testing.T) {
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 	_, err := s.UpdateBlurb(
 		context.Background(),
 		&pb.UpdateBlurbRequest{
@@ -590,7 +585,7 @@ func Test_UpdateBlurb_invalid(t *testing.T) {
 		User:    "",
 		Content: &pb.Blurb_Text{Text: "woof"},
 	}
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 	created, err := s.CreateBlurb(
 		context.Background(),
 		&pb.CreateBlurbRequest{Blurb: first})
@@ -611,7 +606,7 @@ func Test_UpdateBlurb_invalid(t *testing.T) {
 }
 
 func Test_DeleteBlurb_notFound(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 	_, err := s.DeleteBlurb(
 		context.Background(),
 		&pb.DeleteBlurbRequest{Name: "user/rumble/profile/blurbs/1"})
@@ -625,18 +620,14 @@ func Test_DeleteBlurb_notFound(t *testing.T) {
 }
 
 func Test_ListBlurbs_invalidToken(t *testing.T) {
-	db := &blurbDb{
-		token:      &tokenGenerator{salt: "salt"},
-		blurbMu:    sync.Mutex{},
-		keys:       map[string]blurbIndex{},
+	s := messagingServerImpl{
+    identityServer: &mockIdentityServer{},
+    token:      &tokenGenerator{salt: "salt"},
+		roomKeys:  map[string]int{},
+		blurbKeys:  map[string]blurbIndex{},
 		blurbs:     map[string][]blurbEntry{},
 		parentUids: map[string]*uniqID{},
-	}
-	s := messagingServerImpl{
-		identityServer: &mockIdentityServer{},
-		roomDb:         NewRoomDb(),
-		blurbDb:        db,
-	}
+  }
 
 	tests := []string{
 		"1", // Not base64 encoded
@@ -675,7 +666,7 @@ func Test_ListBlurbs_invalidToken(t *testing.T) {
 }
 
 func Test_ListBlurbs_parentNotFound(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer(), NewBlurbDb())
+	s := NewMessagingServer(NewIdentityServer())
 
 	_, err := s.ListBlurbs(
 		context.Background(),
@@ -690,7 +681,7 @@ func Test_ListBlurbs_parentNotFound(t *testing.T) {
 }
 
 func Test_ListBlurbs_noneCreated(t *testing.T) {
-	s := NewMessagingServer(&mockIdentityServer{}, NewBlurbDb())
+	s := NewMessagingServer(&mockIdentityServer{})
 
 	resp, err := s.ListBlurbs(
 		context.Background(),
