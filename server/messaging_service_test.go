@@ -17,7 +17,6 @@ package server
 import (
 	"context"
 	"encoding/base64"
-	"sync"
 	"testing"
 
 	"github.com/golang/protobuf/proto"
@@ -304,14 +303,10 @@ func Test_DeleteRoom_notFound(t *testing.T) {
 }
 
 func Test_ListRooms_invalidToken(t *testing.T) {
-	db := &roomDb{
-		uid:   &uniqID{},
+	s := messagingServerImpl{
 		token: &tokenGenerator{salt: "salt"},
-		mu:    sync.Mutex{},
 		keys:  map[string]int{},
-		rooms: []roomEntry{},
 	}
-	s := messagingServerImpl{roomDb: db}
 
 	tests := []string{
 		"1", // Not base64 encoded
