@@ -25,6 +25,11 @@ func NewIdentityServer() pb.IdentityServer {
 	return &identityServerImpl{db: NewUserDb()}
 }
 
+type ReadOnlyIdentityServer interface {
+	GetUser(context.Context, *pb.GetUserRequest) (*pb.User, error)
+	ListUsers(context.Context, *pb.ListUsersRequest) (*pb.ListUsersResponse, error)
+}
+
 type identityServerImpl struct {
 	db UserDb
 }
