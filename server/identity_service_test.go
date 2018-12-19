@@ -17,7 +17,6 @@ package server
 import (
 	"context"
 	"encoding/base64"
-	"sync"
 	"testing"
 
 	"github.com/golang/protobuf/proto"
@@ -338,14 +337,10 @@ func Test_Delete_notFound(t *testing.T) {
 }
 
 func Test_List_invalidToken(t *testing.T) {
-	db := &userDb{
-		uid:   &uniqID{},
+	s := &identityServerImpl{
 		token: &tokenGenerator{salt: "Ekko"},
-		mu:    sync.Mutex{},
 		keys:  map[string]int{},
-		users: []userEntry{},
 	}
-	s := identityServerImpl{db: db}
 
 	tests := []string{
 		"1", // Not base64 encoded
