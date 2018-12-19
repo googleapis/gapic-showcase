@@ -29,7 +29,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func TestGetOperation(t *testing.T) {
+func TestGetOperation_wait(t *testing.T) {
 	endTime, _ := ptypes.TimestampProto(time.Now())
 	waitReq := &pb.WaitRequest{EndTime: endTime}
 	nameBytes, _ := proto.Marshal(waitReq)
@@ -47,11 +47,145 @@ func TestGetOperation(t *testing.T) {
 	}
 }
 
+type messagingServerWrapper struct {
+	listReq *pb.ListBlurbsRequest
+
+	MessagingServer
+}
+
+func (m *messagingServerWrapper) FilteredListBlurbs(ctx context.Context, r *pb.ListBlurbsRequest, f func(*pb.Blurb) bool) (*pb.ListBlurbsResponse, error) {
+	m.listReq = r
+	return m.MessagingServer.FilteredListBlurbs(ctx, r, f)
+}
+
+func TestGetOperation_searchBlurbs(t *testing.T) {
+	expected := []*pb.Blurb{
+		&pb.Blurb{
+			User:    "users/rumble",
+			Content: &pb.Blurb_Text{Text: "woof"},
+		},
+		&pb.Blurb{
+			User:    "users/ekko",
+			Content: &pb.Blurb_Text{Text: "bark"},
+		},
+	}
+	wrapped := &messagingServerWrapper{
+		MessagingServer: &messagingServerImpl{
+			identityServer: &mockIdentityServer{},
+			roomKeys:       map[string]int{},
+			parentUids:     map[string]*uniqID{},
+			token:          NewTokenGenerator(),
+			blurbKeys: map[string]blurbIndex{
+				"users/rumble/profile/messages/1": blurbIndex{
+					row: "users/rumble/profile",
+					col: 1},
+				"users/rumble/profile/messages/2": blurbIndex{
+					row: "users/rumble/profile",
+					col: 2},
+				"users/rumble/profile/messages/3": blurbIndex{
+					row: "users/rumble/profile",
+					col: 3},
+				"users/rumble/profile/messages/4": blurbIndex{
+					row: "users/rumble/profile",
+					col: 4},
+			},
+			blurbs: map[string][]blurbEntry{
+				"users/rumble/profile": []blurbEntry{
+					blurbEntry{blurb: expected[0]},
+					blurbEntry{
+						blurb: &pb.Blurb{
+							User:    "users/musubi",
+							Content: &pb.Blurb_Text{Text: "meow"},
+						},
+					},
+					blurbEntry{blurb: expected[1]},
+					blurbEntry{blurb: expected[1], deleted: true},
+					blurbEntry{
+						blurb: &pb.Blurb{
+							User:    "users/musubi",
+							Content: &pb.Blurb_Text{Text: "meow"},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	server := NewOperationsServer(wrapped)
+
+	searchReq := &pb.SearchBlurbsRequest{
+		Query:    "woof bark",
+		Parent:   "users/rumble/profile",
+		PageSize: 2,
+	}
+	reqBytes, _ := proto.Marshal(searchReq)
+	req := &lropb.GetOperationRequest{
+		Name: fmt.Sprintf(
+			"operations/google.showcase.v1alpha3.Messaging/SearchBlurbs/%s",
+			base64.StdEncoding.EncodeToString(reqBytes)),
+	}
+	op, err := server.GetOperation(context.Background(), req)
+	if err != nil {
+		t.Errorf("GetOperation: unexpected err %+v", err)
+	}
+
+	listReq := wrapped.listReq
+	if listReq.Parent != searchReq.GetParent() {
+		t.Errorf(
+			"GetOperation searchBlurbs: list request parent expected %s got %s",
+			searchReq.GetParent(),
+			listReq.Parent)
+	}
+	if listReq.PageSize != searchReq.GetPageSize() {
+		t.Errorf(
+			"GetOperation searchBlurbs: list request page size expected %d got %d",
+			searchReq.GetPageSize(),
+			listReq.PageSize)
+	}
+	if listReq.PageToken != searchReq.GetPageToken() {
+		t.Errorf(
+			"GetOperation searchBlurbs: list request page token expected %s got %s",
+			searchReq.GetPageToken(),
+			listReq.PageToken)
+	}
+
+	if !op.Done {
+		t.Errorf("SearchBlurbs() for %q expected done=true got done=false", req)
+	}
+	if op.Metadata != nil {
+		t.Errorf("SearchBlurbs() for %q expected nil metadata, got %q", req, op.Metadata)
+	}
+	if op.GetError() != nil {
+		t.Errorf("SearchBlurbs() expected op.Error=nil, got %q", op.GetError())
+	}
+	if op.GetResponse() == nil {
+		t.Error("SearchBlurbs() expected op.Response!=nil")
+	}
+	resp := &pb.SearchBlurbsResponse{}
+	ptypes.UnmarshalAny(op.GetResponse(), resp)
+	if len(resp.GetBlurbs()) != len(expected) {
+		t.Errorf(
+			"SearchBlurbs() expected blurbs size %d, got %d",
+			len(expected),
+			len(resp.GetBlurbs()))
+	}
+	for i, b := range expected {
+		if !proto.Equal(b, resp.GetBlurbs()[i]) {
+			t.Errorf(
+				"SearchBlurbs().blurbs[%d] want %+v, got %+v",
+				i,
+				b,
+				resp.GetBlurbs()[i],
+			)
+		}
+	}
+}
+
 func TestGetOperation_notFoundOperation(t *testing.T) {
 	req := &lropb.GetOperationRequest{
 		Name: "BOGUS",
 	}
-	server := NewOperationsServer()
+	server := NewOperationsServer(nil)
 	_, err := server.GetOperation(context.Background(), req)
 	s, _ := status.FromError(err)
 	if codes.NotFound != s.Code() {
@@ -60,36 +194,47 @@ func TestGetOperation_notFoundOperation(t *testing.T) {
 }
 
 func TestGetOperation_invalidEncodedName(t *testing.T) {
-	req := &lropb.GetOperationRequest{
-		Name: "operations/google.showcase.v1alpha3.Echo/Wait/BOGUS",
+	prefixes := []string{
+		"operations/google.showcase.v1alpha3.Echo/Wait",
+		"operations/google.showcase.v1alpha3.Messaging/SearchBlurbs",
 	}
-	server := NewOperationsServer()
-	_, err := server.GetOperation(context.Background(), req)
-	s, _ := status.FromError(err)
-	if codes.NotFound != s.Code() {
-		t.Errorf("GetOperation with invalid name expected code=%d, got %d", codes.NotFound, s.Code())
+	for _, p := range prefixes {
+		req := &lropb.GetOperationRequest{
+			Name: fmt.Sprintf("%s/BOGUS", p),
+		}
+		server := NewOperationsServer(nil)
+		_, err := server.GetOperation(context.Background(), req)
+		s, _ := status.FromError(err)
+		if codes.NotFound != s.Code() {
+			t.Errorf("GetOperation with invalid name expected code=%d, got %d", codes.NotFound, s.Code())
+		}
 	}
 }
 
 func TestGetOperation_invalidMarshalledProto(t *testing.T) {
-	prefix := "operations/google.showcase.v1alpha3.Echo/Wait"
-	name := fmt.Sprintf(
-		"%s/%s",
-		prefix,
-		base64.StdEncoding.EncodeToString([]byte("BOGUS")))
-	req := &lropb.GetOperationRequest{
-		Name: name,
+	prefixes := []string{
+		"operations/google.showcase.v1alpha3.Echo/Wait",
+		"operations/google.showcase.v1alpha3.Messaging/SearchBlurbs",
 	}
-	server := NewOperationsServer()
-	_, err := server.GetOperation(context.Background(), req)
-	s, _ := status.FromError(err)
-	if codes.NotFound != s.Code() {
-		t.Errorf("GetOperation with invalid name expected code=%d, got %d", codes.NotFound, s.Code())
+	for _, p := range prefixes {
+		name := fmt.Sprintf(
+			"%s/%s",
+			p,
+			base64.StdEncoding.EncodeToString([]byte("BOGUS")))
+		req := &lropb.GetOperationRequest{
+			Name: name,
+		}
+		server := NewOperationsServer(nil)
+		_, err := server.GetOperation(context.Background(), req)
+		s, _ := status.FromError(err)
+		if codes.NotFound != s.Code() {
+			t.Errorf("GetOperation with invalid name expected code=%d, got %d", codes.NotFound, s.Code())
+		}
 	}
 }
 
 func TestCancelOperation(t *testing.T) {
-	server := NewOperationsServer()
+	server := NewOperationsServer(nil)
 	_, err := server.CancelOperation(context.Background(), nil)
 	s, _ := status.FromError(err)
 	if codes.Unimplemented != s.Code() {
@@ -98,7 +243,7 @@ func TestCancelOperation(t *testing.T) {
 }
 
 func TestServerListOperation(t *testing.T) {
-	server := NewOperationsServer()
+	server := NewOperationsServer(nil)
 	_, err := server.ListOperations(context.Background(), nil)
 	s, _ := status.FromError(err)
 	if codes.Unimplemented != s.Code() {
@@ -107,7 +252,7 @@ func TestServerListOperation(t *testing.T) {
 }
 
 func TestServerDeleteOperation(t *testing.T) {
-	server := NewOperationsServer()
+	server := NewOperationsServer(nil)
 	_, err := server.DeleteOperation(context.Background(), nil)
 	s, _ := status.FromError(err)
 	if codes.Unimplemented != s.Code() {
