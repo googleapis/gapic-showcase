@@ -19,7 +19,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"strings"
-  "sync"
+	"sync"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -34,33 +34,33 @@ import (
 
 func NewMessagingServer(identityServer ReadOnlyIdentityServer) MessagingServer {
 	return &messagingServerImpl{
-    identityServer: identityServer,
-		token: NewTokenGenerator(),
-		roomKeys:  map[string]int{},
-  	blurbKeys: map[string]blurbIndex{},
-  	blurbs: map[string][]blurbEntry{},
-  	parentUids: map[string]*uniqID{},
+		identityServer: identityServer,
+		token:          NewTokenGenerator(),
+		roomKeys:       map[string]int{},
+		blurbKeys:      map[string]blurbIndex{},
+		blurbs:         map[string][]blurbEntry{},
+		parentUids:     map[string]*uniqID{},
 	}
 }
 
 type MessagingServer interface {
-  FilteredListBlurbs(context.Context, *pb.ListBlurbsRequest, func(*pb.Blurb) bool) (*pb.ListBlurbsResponse, error)
+	FilteredListBlurbs(context.Context, *pb.ListBlurbsRequest, func(*pb.Blurb) bool) (*pb.ListBlurbsResponse, error)
 
-  pb.MessagingServer
+	pb.MessagingServer
 }
 
 type messagingServerImpl struct {
-	uid   uniqID
-	token TokenGenerator
-  identityServer ReadOnlyIdentityServer
+	uid            uniqID
+	token          TokenGenerator
+	identityServer ReadOnlyIdentityServer
 
-	roomMu    sync.Mutex
-	roomKeys  map[string]int
-	rooms []roomEntry
+	roomMu   sync.Mutex
+	roomKeys map[string]int
+	rooms    []roomEntry
 
-	blurbMu sync.Mutex
-	blurbKeys map[string]blurbIndex
-	blurbs map[string][]blurbEntry
+	blurbMu    sync.Mutex
+	blurbKeys  map[string]blurbIndex
+	blurbs     map[string][]blurbEntry
 	parentUids map[string]*uniqID
 }
 
@@ -257,7 +257,7 @@ func validateRoom(r *pb.Room) error {
 // message in that room. If the parent is a profile, the blurb is understood
 // to be a post on the profile.
 func (s *messagingServerImpl) CreateBlurb(ctx context.Context, in *pb.CreateBlurbRequest) (*pb.Blurb, error) {
-  parent := in.GetParent()
+	parent := in.GetParent()
 	if err := s.validateParent(parent); err != nil {
 		return nil, err
 	}
@@ -265,7 +265,7 @@ func (s *messagingServerImpl) CreateBlurb(ctx context.Context, in *pb.CreateBlur
 	s.blurbMu.Lock()
 	defer s.blurbMu.Unlock()
 
-  b := in.GetBlurb()
+	b := in.GetBlurb()
 	if err := validateBlurb(b); err != nil {
 		return nil, err
 	}
@@ -310,9 +310,9 @@ func (s *messagingServerImpl) GetBlurb(ctx context.Context, in *pb.GetBlurbReque
 	}
 
 	return nil, status.Errorf(
-    codes.NotFound,
-    "A blurb with name %s not found.",
-    in.GetName())
+		codes.NotFound,
+		"A blurb with name %s not found.",
+		in.GetName())
 }
 
 // Updates a blurb.
@@ -326,7 +326,7 @@ func (s *messagingServerImpl) UpdateBlurb(ctx context.Context, in *pb.UpdateBlur
 	s.blurbMu.Lock()
 	defer s.blurbMu.Unlock()
 
-  b := in.GetBlurb()
+	b := in.GetBlurb()
 	i, ok := s.blurbKeys[b.GetName()]
 	if !ok || s.blurbs[i.row][i.col].deleted {
 		return nil, status.Errorf(
@@ -367,8 +367,8 @@ func (s *messagingServerImpl) DeleteBlurb(ctx context.Context, in *pb.DeleteBlur
 // Lists blurbs for a specific chat room or user profile depending on the
 // parent resource name.
 func (s *messagingServerImpl) ListBlurbs(ctx context.Context, in *pb.ListBlurbsRequest) (*pb.ListBlurbsResponse, error) {
-  passFilter := func(_ *pb.Blurb) bool { return true }
-  return s.FilteredListBlurbs(ctx, in, passFilter)
+	passFilter := func(_ *pb.Blurb) bool { return true }
+	return s.FilteredListBlurbs(ctx, in, passFilter)
 }
 
 func (s *messagingServerImpl) FilteredListBlurbs(ctx context.Context, in *pb.ListBlurbsRequest, f func(*pb.Blurb) bool) (*pb.ListBlurbsResponse, error) {
@@ -393,9 +393,9 @@ func (s *messagingServerImpl) FilteredListBlurbs(ctx context.Context, in *pb.Lis
 		if entry.deleted {
 			continue
 		}
-    if f(entry.blurb) {
-      blurbs = append(blurbs, entry.blurb)
-    }
+		if f(entry.blurb) {
+			blurbs = append(blurbs, entry.blurb)
+		}
 		if len(blurbs) >= int(in.GetPageSize()) {
 			break
 		}

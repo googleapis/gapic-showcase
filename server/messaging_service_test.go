@@ -305,8 +305,8 @@ func Test_DeleteRoom_notFound(t *testing.T) {
 
 func Test_ListRooms_invalidToken(t *testing.T) {
 	s := messagingServerImpl{
-		token: &tokenGenerator{salt: "salt"},
-		roomKeys:  map[string]int{},
+		token:    &tokenGenerator{salt: "salt"},
+		roomKeys: map[string]int{},
 	}
 
 	tests := []string{
@@ -622,13 +622,13 @@ func Test_DeleteBlurb_notFound(t *testing.T) {
 
 func Test_ListBlurbs_invalidToken(t *testing.T) {
 	s := messagingServerImpl{
-    identityServer: &mockIdentityServer{},
-    token:      &tokenGenerator{salt: "salt"},
-		roomKeys:  map[string]int{},
-		blurbKeys:  map[string]blurbIndex{},
-		blurbs:     map[string][]blurbEntry{},
-		parentUids: map[string]*uniqID{},
-  }
+		identityServer: &mockIdentityServer{},
+		token:          &tokenGenerator{salt: "salt"},
+		roomKeys:       map[string]int{},
+		blurbKeys:      map[string]blurbIndex{},
+		blurbs:         map[string][]blurbEntry{},
+		parentUids:     map[string]*uniqID{},
+	}
 
 	tests := []string{
 		"1", // Not base64 encoded

@@ -35,7 +35,7 @@ func NewOperationsServer(messagingServer MessagingServer) lropb.OperationsServer
 
 type operationsServerImpl struct {
 	messagingServer MessagingServer
-	waiter  Waiter
+	waiter          Waiter
 }
 
 func (s *operationsServerImpl) GetOperation(ctx context.Context, in *lropb.GetOperationRequest) (*lropb.Operation, error) {
@@ -90,13 +90,13 @@ func (s *operationsServerImpl) handleSearchBlurbs(in *lropb.GetOperationRequest)
 	// TODO(landrito): add some randomization here so that the search blurbs
 	// operation could take multiple get calls to complete.
 	listResp, err := s.messagingServer.FilteredListBlurbs(
-    context.Background(),
+		context.Background(),
 		&pb.ListBlurbsRequest{
 			Parent:    req.GetParent(),
 			PageSize:  req.GetPageSize(),
 			PageToken: req.GetPageToken(),
 		},
-    searchFilterFunc(req.GetQuery()))
+		searchFilterFunc(req.GetQuery()))
 
 	answer := &lropb.Operation{
 		Name: in.GetName(),

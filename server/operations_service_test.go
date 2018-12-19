@@ -71,10 +71,10 @@ func TestGetOperation_searchBlurbs(t *testing.T) {
 	}
 	wrapped := &messagingServerWrapper{
 		MessagingServer: &messagingServerImpl{
-      identityServer: &mockIdentityServer{},
-  		roomKeys:  map[string]int{},
-  		parentUids: map[string]*uniqID{},
-			token:   NewTokenGenerator(),
+			identityServer: &mockIdentityServer{},
+			roomKeys:       map[string]int{},
+			parentUids:     map[string]*uniqID{},
+			token:          NewTokenGenerator(),
 			blurbKeys: map[string]blurbIndex{
 				"users/rumble/profile/messages/1": blurbIndex{
 					row: "users/rumble/profile",
