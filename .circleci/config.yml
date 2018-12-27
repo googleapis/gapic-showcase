@@ -105,7 +105,7 @@ jobs:
             docker run --rm \
               --mount type=bind,source="$(pwd)"/schema/,destination=/in/google/showcase/v1alpha3/,readonly \
               --mount type=bind,source="$(pwd)"/pyout,target=/out \
-              gcr.io/gapic-images/gapic-generator-python:latest
+              gcr.io/gapic-images/gapic-generator-python:0.2
 
   protobufjs-load-test:
     docker:
