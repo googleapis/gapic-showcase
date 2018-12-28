@@ -29,7 +29,7 @@ or simply by using go commands.
 
 #### Binary Installation
 ```sh
-$ export GAPIC_SHOWCASE_VERSION=0.0.8
+$ export GAPIC_SHOWCASE_VERSION=0.0.9
 $ export OS=linux
 $ export ARCH=amd64
 $ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${GAPIC_SHOWCASE_VERSION}-${OS}-${ARCH} | sudo tar -zx -- --directory /usr/local/bin/
@@ -39,7 +39,7 @@ $ gapic-showcase run
 
 #### Docker Installation
 ```sh
-$ export GAPIC_SHOWCASE_VERSION=0.0.8
+$ export GAPIC_SHOWCASE_VERSION=0.0.9
 $ docker pull gcr.io/gapic-showcase/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
 $ docker run -it gcr.io/gapic-showcase/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
 > 2018/09/19 02:13:09 Showcase listening on port: :7469
@@ -68,7 +68,7 @@ protobuf files into their gapic-generator. This client will be the client used
 for integration testing their gapic- generator.
 
 ```sh
-$ export GAPIC_SHOWCASE_VERSION=0.0.8
+$ export GAPIC_SHOWCASE_VERSION=0.0.9
 $ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${GAPIC_SHOWCASE_VERSION}-protos.tar.gz | sudo tar -zx
 $ protoc google/showcase/v1alpha3/*.proto \
     --proto_path=. \
@@ -115,7 +115,7 @@ The integration test needs a server to send its requests to. Download and run
 the server so that gapic-showcase is available for the tests.
 
 ```sh
-$ export GAPIC_SHOWCASE_VERSION=0.0.8
+$ export GAPIC_SHOWCASE_VERSION=0.0.9
 $ export OS=linux
 $ export ARCH=amd64
 $ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${OS}-${ARCH} | sudo tar -zx -- --directory /usr/local/bin/
