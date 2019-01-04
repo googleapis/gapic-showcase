@@ -27,8 +27,8 @@ import (
 func main() {
 	setup()
 	stageProtos()
-  generate_gapic()
-  generate_cli()
+	generate_gapic()
+	generate_cli()
 	teardown()
 }
 
@@ -104,7 +104,7 @@ func generate_gapic() {
 	command := []string{
 		"protoc",
 		"--proto_path=" + filepath.Join(showcaseDir(), "tmp", "api-common-protos"),
-    "--go_gapic_out=" +  os.Getenv("GOPATH"),
+		"--go_gapic_out=" + os.Getenv("GOPATH"),
 		"--go_gapic_opt=go-gapic-package=github.com/googleapis/gapic-showcase/client;client",
 	}
 	util.Execute(append(command, files...)...)
@@ -132,9 +132,9 @@ func generate_cli() {
 	command := []string{
 		"protoc",
 		"--proto_path=" + filepath.Join(showcaseDir(), "tmp", "api-common-protos"),
-    "--go_cli_out=" +  filepath.Join(showcaseDir(), "cmd", "showcase"),
-    "--go_cli_opt=root=showcase",
-    "--go_cli_opt=gapic=github.com/googleapis/gapic-showcase/client",
+		"--go_cli_out=" + filepath.Join(showcaseDir(), "cmd", "showcase"),
+		"--go_cli_opt=root=showcase",
+		"--go_cli_opt=gapic=github.com/googleapis/gapic-showcase/client",
 	}
 	util.Execute(append(command, files...)...)
 }
