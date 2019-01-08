@@ -104,7 +104,7 @@ func generate_gapic() {
 	command := []string{
 		"protoc",
 		"--proto_path=" + filepath.Join(showcaseDir(), "tmp", "api-common-protos"),
-		"--go_gapic_out=" + os.Getenv("GOPATH"),
+		"--go_gapic_out=" + filepath.Join(os.Getenv("GOPATH"), "src"),
 		"--go_gapic_opt=go-gapic-package=github.com/googleapis/gapic-showcase/client;client",
 	}
 	util.Execute(append(command, files...)...)
