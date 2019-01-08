@@ -40,6 +40,11 @@ func setup() {
 	if err := os.MkdirAll(tmpDir, 0755); err != nil {
 		log.Fatalf("Failed to make the directory %s: %v", tmpDir, err)
 	}
+
+	cmdDir := filepath.Join(showcaseDir(), "cmd", "gapic-showcase")
+	if err := os.MkdirAll(cmdDir, 0755); err != nil {
+		log.Fatalf("Failed to make the directory %s: %v", cmdDir, err)
+	}
 }
 
 func teardown() {
@@ -132,7 +137,7 @@ func generate_cli() {
 	command := []string{
 		"protoc",
 		"--proto_path=" + filepath.Join(showcaseDir(), "tmp", "api-common-protos"),
-		"--go_cli_out=" + filepath.Join(showcaseDir(), "cmd", "showcase"),
+		"--go_cli_out=" + filepath.Join(showcaseDir(), "cmd", "gapic-showcase"),
 		"--go_cli_opt=root=showcase",
 		"--go_cli_opt=gapic=github.com/googleapis/gapic-showcase/client",
 	}
