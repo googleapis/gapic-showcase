@@ -51,7 +51,7 @@ jobs:
           command: "! go tool vet ./ 2>&1 | read"
       - run:
           name: Install dependencies
-          command: go get -v -d -t ./cmd/showcase && go install ./cmd/showcase
+          command: go get -v -d -t ./cmd/gapic-showcase && go install ./cmd/gapic-showcase
       - run:
           name: Run tests
           command: go test ./... -coverprofile=coverage.txt -covermode=atomic
@@ -120,7 +120,7 @@ jobs:
           name: Install server
           command: |
             go get
-            go install
+            go install ./cmd/gapic-showcase
             echo "export VERSION=$(gapic-showcase --version)" >> $BASH_ENV
       - run:
           name: Install protoc

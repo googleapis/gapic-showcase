@@ -14,7 +14,7 @@ ENV GOARCH amd64
 
 # Install showcase.
 RUN go get
-RUN go build -a \
+RUN go build ./cmd/gapic-showcase \
   -installsuffix cgo \
   -ldflags="-w -s" \
   -o /go/bin/gapic-showcase

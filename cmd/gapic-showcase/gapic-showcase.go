@@ -23,8 +23,8 @@ func init() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "showcase",
-	Short: "Root command of showcase",
+	Use:   "gapic-showcase",
+	Short: "Root command of gapic-showcase",
 }
 
 func Execute() {

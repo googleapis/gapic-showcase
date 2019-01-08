@@ -19,10 +19,8 @@ import (
 	"os"
 )
 
-var SERVICES = []string{"ECHO", "IDENTITY", "MESSAGING", "TESTING"}
-
 func init() {
-	for _, service := range SERVICES {
+	for _, service := range []string{"ECHO", "IDENTITY", "MESSAGING", "TESTING"} {
 		if os.Getenv(fmt.Sprintf("SHOWCASE_%s_ADDRESS", service)) == "" {
 			os.Setenv(fmt.Sprintf("SHOWCASE_%s_ADDRESS", service), "localhost:7469")
 		}
