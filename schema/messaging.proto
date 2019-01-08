@@ -200,7 +200,7 @@ service Messaging {
 
   // This returns a stream that emits the blurbs that are created for a
   // particular chat room or user profile.
-  rpc StreamBlurbs(StreamBlurbsRequest) returns (stream Blurb) {
+  rpc StreamBlurbs(StreamBlurbsRequest) returns (stream StreamBlurbsResponse) {
     option (google.api.http) = {
       post: "/v1alpha3/{name=rooms/*}/blurbs:stream"
       body: "*"
@@ -228,7 +228,7 @@ service Messaging {
   // are being created after the stream has started and sends requests to create
   // blurbs. If an invalid blurb is requested to be created, the stream will
   // close with an error.
-  rpc Connect(stream ConnectRequest) returns (stream Blurb);
+  rpc Connect(stream ConnectRequest) returns (stream StreamBlurbsResponse);
 }
 
 // A chat room.
@@ -483,13 +483,42 @@ message StreamBlurbsRequest {
     (google.api.resource_reference) = "BlurbParent",
     (google.api.field_behavior) = REQUIRED
   ];
+
+  // The time at which this stream will close.
+  google.protobuf.Timestamp expire_time = 2 [
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+
+// The response message for the google.showcase.v1alpha3.Messaging\StreamBlurbs
+// method.
+message StreamBlurbsResponse {
+  // The blurb that was either created, updated, or deleted.
+  Blurb blurb = 1;
+
+  // The action that triggered the blurb to be returned.
+  enum Action {
+    ACTION_UNSPECIFIED = 0;
+
+    // Specifies that the blurb was created.
+    CREATE = 1;
+
+    // Specifies that the blurb was updated.
+    UPDATE = 2;
+
+    // Specifies that the blurb was deleted.
+    DELETE = 3;
+  }
+
+  // The action that triggered the blurb to be returned.
+  Action action = 2;
 }
 
 // The response message for the google.showcase.v1alpha3.Messaging\SendBlurbs
 // method.
 message SendBlurbsResponse {
-  // The number of successful blurb creations.
-  int32 success_count = 1;
+  // The names of successful blurb creations.
+  repeated string names = 1;
 }
 
 // The request message for the google.showcase.v1alpha3.Messaging\Connect
