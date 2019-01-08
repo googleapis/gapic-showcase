@@ -37,22 +37,22 @@ func init() {
 	rootCmd.AddCommand(MessagingServiceCmd)
 
 	MessagingConfig = viper.New()
-	MessagingConfig.SetEnvPrefix("SHOWCASE_MESSAGING")
+	MessagingConfig.SetEnvPrefix("GAPIC-SHOWCASE_MESSAGING")
 	MessagingConfig.AutomaticEnv()
 
-	MessagingServiceCmd.PersistentFlags().Bool("insecure", false, "Make insecure client connection. Or use SHOWCASE_MESSAGING_INSECURE. Must be used with \"address\" option")
+	MessagingServiceCmd.PersistentFlags().Bool("insecure", false, "Make insecure client connection. Or use GAPIC-SHOWCASE_MESSAGING_INSECURE. Must be used with \"address\" option")
 	MessagingConfig.BindPFlag("insecure", MessagingServiceCmd.PersistentFlags().Lookup("insecure"))
 	MessagingConfig.BindEnv("insecure")
 
-	MessagingServiceCmd.PersistentFlags().String("address", "", "Set API address used by client. Or use SHOWCASE_MESSAGING_ADDRESS.")
+	MessagingServiceCmd.PersistentFlags().String("address", "", "Set API address used by client. Or use GAPIC-SHOWCASE_MESSAGING_ADDRESS.")
 	MessagingConfig.BindPFlag("address", MessagingServiceCmd.PersistentFlags().Lookup("address"))
 	MessagingConfig.BindEnv("address")
 
-	MessagingServiceCmd.PersistentFlags().String("token", "", "Set Bearer token used by the client. Or use SHOWCASE_MESSAGING_TOKEN.")
+	MessagingServiceCmd.PersistentFlags().String("token", "", "Set Bearer token used by the client. Or use GAPIC-SHOWCASE_MESSAGING_TOKEN.")
 	MessagingConfig.BindPFlag("token", MessagingServiceCmd.PersistentFlags().Lookup("token"))
 	MessagingConfig.BindEnv("token")
 
-	MessagingServiceCmd.PersistentFlags().String("api_key", "", "Set API Key used by the client. Or use SHOWCASE_MESSAGING_API_KEY.")
+	MessagingServiceCmd.PersistentFlags().String("api_key", "", "Set API Key used by the client. Or use GAPIC-SHOWCASE_MESSAGING_API_KEY.")
 	MessagingConfig.BindPFlag("api_key", MessagingServiceCmd.PersistentFlags().Lookup("api_key"))
 	MessagingConfig.BindEnv("api_key")
 }

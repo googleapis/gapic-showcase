@@ -26,22 +26,22 @@ func init() {
 	rootCmd.AddCommand(TestingServiceCmd)
 
 	TestingConfig = viper.New()
-	TestingConfig.SetEnvPrefix("SHOWCASE_TESTING")
+	TestingConfig.SetEnvPrefix("GAPIC-SHOWCASE_TESTING")
 	TestingConfig.AutomaticEnv()
 
-	TestingServiceCmd.PersistentFlags().Bool("insecure", false, "Make insecure client connection. Or use SHOWCASE_TESTING_INSECURE. Must be used with \"address\" option")
+	TestingServiceCmd.PersistentFlags().Bool("insecure", false, "Make insecure client connection. Or use GAPIC-SHOWCASE_TESTING_INSECURE. Must be used with \"address\" option")
 	TestingConfig.BindPFlag("insecure", TestingServiceCmd.PersistentFlags().Lookup("insecure"))
 	TestingConfig.BindEnv("insecure")
 
-	TestingServiceCmd.PersistentFlags().String("address", "", "Set API address used by client. Or use SHOWCASE_TESTING_ADDRESS.")
+	TestingServiceCmd.PersistentFlags().String("address", "", "Set API address used by client. Or use GAPIC-SHOWCASE_TESTING_ADDRESS.")
 	TestingConfig.BindPFlag("address", TestingServiceCmd.PersistentFlags().Lookup("address"))
 	TestingConfig.BindEnv("address")
 
-	TestingServiceCmd.PersistentFlags().String("token", "", "Set Bearer token used by the client. Or use SHOWCASE_TESTING_TOKEN.")
+	TestingServiceCmd.PersistentFlags().String("token", "", "Set Bearer token used by the client. Or use GAPIC-SHOWCASE_TESTING_TOKEN.")
 	TestingConfig.BindPFlag("token", TestingServiceCmd.PersistentFlags().Lookup("token"))
 	TestingConfig.BindEnv("token")
 
-	TestingServiceCmd.PersistentFlags().String("api_key", "", "Set API Key used by the client. Or use SHOWCASE_TESTING_API_KEY.")
+	TestingServiceCmd.PersistentFlags().String("api_key", "", "Set API Key used by the client. Or use GAPIC-SHOWCASE_TESTING_API_KEY.")
 	TestingConfig.BindPFlag("api_key", TestingServiceCmd.PersistentFlags().Lookup("api_key"))
 	TestingConfig.BindEnv("api_key")
 }

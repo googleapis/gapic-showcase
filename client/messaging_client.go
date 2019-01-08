@@ -37,20 +37,20 @@ import (
 
 // MessagingCallOptions contains the retry settings for each method of MessagingClient.
 type MessagingCallOptions struct {
-	CreateRoom   []gax.CallOption
-	GetRoom      []gax.CallOption
-	UpdateRoom   []gax.CallOption
-	DeleteRoom   []gax.CallOption
-	ListRooms    []gax.CallOption
-	CreateBlurb  []gax.CallOption
-	GetBlurb     []gax.CallOption
-	UpdateBlurb  []gax.CallOption
-	DeleteBlurb  []gax.CallOption
-	ListBlurbs   []gax.CallOption
+	CreateRoom []gax.CallOption
+	GetRoom []gax.CallOption
+	UpdateRoom []gax.CallOption
+	DeleteRoom []gax.CallOption
+	ListRooms []gax.CallOption
+	CreateBlurb []gax.CallOption
+	GetBlurb []gax.CallOption
+	UpdateBlurb []gax.CallOption
+	DeleteBlurb []gax.CallOption
+	ListBlurbs []gax.CallOption
 	SearchBlurbs []gax.CallOption
 	StreamBlurbs []gax.CallOption
-	SendBlurbs   []gax.CallOption
-	Connect      []gax.CallOption
+	SendBlurbs []gax.CallOption
+	Connect []gax.CallOption
 }
 
 func defaultMessagingClientOptions() []option.ClientOption {
@@ -62,24 +62,45 @@ func defaultMessagingClientOptions() []option.ClientOption {
 
 func defaultMessagingCallOptions() *MessagingCallOptions {
 	backoff := gax.Backoff{
-		Initial:    100 * time.Millisecond,
-		Max:        time.Minute,
+		Initial: 100 * time.Millisecond,
+		Max: time.Minute,
 		Multiplier: 1.3,
 	}
-	retry := []gax.CallOption{
+
+	idempotent := []gax.CallOption{
 		gax.WithRetry(func() gax.Retryer {
 			return gax.OnCodes([]codes.Code{
+				codes.Aborted,
 				codes.Internal,
+				codes.Unavailable,
+				codes.Unknown,
+			}, backoff)
+		}),
+	}
+
+	nonidempotent := []gax.CallOption{
+		gax.WithRetry(func() gax.Retryer {
+			return gax.OnCodes([]codes.Code{
 				codes.Unavailable,
 			}, backoff)
 		}),
 	}
 
 	return &MessagingCallOptions{
-		GetRoom:    retry,
-		ListRooms:  retry,
-		GetBlurb:   retry,
-		ListBlurbs: retry,
+		GetRoom: idempotent,
+		ListRooms: idempotent,
+		GetBlurb: idempotent,
+		ListBlurbs: idempotent,
+		CreateRoom: nonidempotent,
+		UpdateRoom: nonidempotent,
+		DeleteRoom: nonidempotent,
+		CreateBlurb: nonidempotent,
+		UpdateBlurb: nonidempotent,
+		DeleteBlurb: nonidempotent,
+		SearchBlurbs: nonidempotent,
+		StreamBlurbs: nonidempotent,
+		SendBlurbs: nonidempotent,
+		Connect: nonidempotent,
 	}
 }
 

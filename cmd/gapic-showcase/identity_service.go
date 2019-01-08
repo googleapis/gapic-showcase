@@ -28,22 +28,22 @@ func init() {
 	rootCmd.AddCommand(IdentityServiceCmd)
 
 	IdentityConfig = viper.New()
-	IdentityConfig.SetEnvPrefix("SHOWCASE_IDENTITY")
+	IdentityConfig.SetEnvPrefix("GAPIC-SHOWCASE_IDENTITY")
 	IdentityConfig.AutomaticEnv()
 
-	IdentityServiceCmd.PersistentFlags().Bool("insecure", false, "Make insecure client connection. Or use SHOWCASE_IDENTITY_INSECURE. Must be used with \"address\" option")
+	IdentityServiceCmd.PersistentFlags().Bool("insecure", false, "Make insecure client connection. Or use GAPIC-SHOWCASE_IDENTITY_INSECURE. Must be used with \"address\" option")
 	IdentityConfig.BindPFlag("insecure", IdentityServiceCmd.PersistentFlags().Lookup("insecure"))
 	IdentityConfig.BindEnv("insecure")
 
-	IdentityServiceCmd.PersistentFlags().String("address", "", "Set API address used by client. Or use SHOWCASE_IDENTITY_ADDRESS.")
+	IdentityServiceCmd.PersistentFlags().String("address", "", "Set API address used by client. Or use GAPIC-SHOWCASE_IDENTITY_ADDRESS.")
 	IdentityConfig.BindPFlag("address", IdentityServiceCmd.PersistentFlags().Lookup("address"))
 	IdentityConfig.BindEnv("address")
 
-	IdentityServiceCmd.PersistentFlags().String("token", "", "Set Bearer token used by the client. Or use SHOWCASE_IDENTITY_TOKEN.")
+	IdentityServiceCmd.PersistentFlags().String("token", "", "Set Bearer token used by the client. Or use GAPIC-SHOWCASE_IDENTITY_TOKEN.")
 	IdentityConfig.BindPFlag("token", IdentityServiceCmd.PersistentFlags().Lookup("token"))
 	IdentityConfig.BindEnv("token")
 
-	IdentityServiceCmd.PersistentFlags().String("api_key", "", "Set API Key used by the client. Or use SHOWCASE_IDENTITY_API_KEY.")
+	IdentityServiceCmd.PersistentFlags().String("api_key", "", "Set API Key used by the client. Or use GAPIC-SHOWCASE_IDENTITY_API_KEY.")
 	IdentityConfig.BindPFlag("api_key", IdentityServiceCmd.PersistentFlags().Lookup("api_key"))
 	IdentityConfig.BindEnv("api_key")
 }

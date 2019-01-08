@@ -15,13 +15,13 @@ func init() {
 // completionCmd represents the completion command
 var completionCmd = &cobra.Command{
 	Use:   "completion",
-	Short: "Emits bash a completion for showcase",
+	Short: "Emits bash a completion for gapic-showcase",
 	Long: `Enable bash completion like so:
 		Linux:
-			source <(showcase completion)
+			source <(gapic-showcase completion)
 		Mac:
 			brew install bash-completion
-			showcase completion > $(brew --prefix)/etc/bash_completion.d/showcase`,
+			gapic-showcase completion > $(brew --prefix)/etc/bash_completion.d/gapic-showcase`,
 	Run: func(cmd *cobra.Command, args []string) {
 		rootCmd.GenBashCompletion(os.Stdout)
 	},

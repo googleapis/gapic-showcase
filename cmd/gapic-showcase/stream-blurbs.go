@@ -14,6 +14,8 @@ import (
 	"io"
 
 	"os"
+
+	timestamppb "github.com/golang/protobuf/ptypes/timestamp"
 )
 
 var StreamBlurbsInput genprotopb.StreamBlurbsRequest
@@ -23,7 +25,13 @@ var StreamBlurbsFromFile string
 func init() {
 	MessagingServiceCmd.AddCommand(StreamBlurbsCmd)
 
+	StreamBlurbsInput.ExpireTime = new(timestamppb.Timestamp)
+
 	StreamBlurbsCmd.Flags().StringVar(&StreamBlurbsInput.Name, "name", "", "")
+
+	StreamBlurbsCmd.Flags().Int64Var(&StreamBlurbsInput.ExpireTime.Seconds, "expire_time.seconds", 0, "")
+
+	StreamBlurbsCmd.Flags().Int32Var(&StreamBlurbsInput.ExpireTime.Nanos, "expire_time.nanos", 0, "")
 
 	StreamBlurbsCmd.Flags().StringVar(&StreamBlurbsFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -62,7 +70,7 @@ var StreamBlurbsCmd = &cobra.Command{
 		}
 		resp, err := MessagingClient.StreamBlurbs(ctx, &StreamBlurbsInput)
 
-		var item *genprotopb.Blurb
+		var item *genprotopb.StreamBlurbsResponse
 		for {
 			item, err = resp.Recv()
 			if err != nil {

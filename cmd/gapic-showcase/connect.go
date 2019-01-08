@@ -58,7 +58,7 @@ var ConnectCmd = &cobra.Command{
 
 		// start background stream receive
 		go func() {
-			var res *genprotopb.Blurb
+			var res *genprotopb.StreamBlurbsResponse
 			for {
 				res, err = stream.Recv()
 				if err != nil {

@@ -31,17 +31,18 @@ import (
 	"google.golang.org/api/transport"
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 )
 
 // EchoCallOptions contains the retry settings for each method of EchoClient.
 type EchoCallOptions struct {
-	Echo        []gax.CallOption
-	Expand      []gax.CallOption
-	Collect     []gax.CallOption
-	Chat        []gax.CallOption
+	Echo []gax.CallOption
+	Expand []gax.CallOption
+	Collect []gax.CallOption
+	Chat []gax.CallOption
 	PagedExpand []gax.CallOption
-	Wait        []gax.CallOption
+	Wait []gax.CallOption
 }
 
 func defaultEchoClientOptions() []option.ClientOption {
@@ -52,7 +53,28 @@ func defaultEchoClientOptions() []option.ClientOption {
 }
 
 func defaultEchoCallOptions() *EchoCallOptions {
-	return &EchoCallOptions{}
+	backoff := gax.Backoff{
+		Initial: 100 * time.Millisecond,
+		Max: time.Minute,
+		Multiplier: 1.3,
+	}
+
+	nonidempotent := []gax.CallOption{
+		gax.WithRetry(func() gax.Retryer {
+			return gax.OnCodes([]codes.Code{
+				codes.Unavailable,
+			}, backoff)
+		}),
+	}
+
+	return &EchoCallOptions{
+		Echo: nonidempotent,
+		Expand: nonidempotent,
+		Collect: nonidempotent,
+		Chat: nonidempotent,
+		PagedExpand: nonidempotent,
+		Wait: nonidempotent,
+	}
 }
 
 // EchoClient is a client for interacting with  API.

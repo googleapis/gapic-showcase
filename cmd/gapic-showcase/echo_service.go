@@ -30,22 +30,22 @@ func init() {
 	rootCmd.AddCommand(EchoServiceCmd)
 
 	EchoConfig = viper.New()
-	EchoConfig.SetEnvPrefix("SHOWCASE_ECHO")
+	EchoConfig.SetEnvPrefix("GAPIC-SHOWCASE_ECHO")
 	EchoConfig.AutomaticEnv()
 
-	EchoServiceCmd.PersistentFlags().Bool("insecure", false, "Make insecure client connection. Or use SHOWCASE_ECHO_INSECURE. Must be used with \"address\" option")
+	EchoServiceCmd.PersistentFlags().Bool("insecure", false, "Make insecure client connection. Or use GAPIC-SHOWCASE_ECHO_INSECURE. Must be used with \"address\" option")
 	EchoConfig.BindPFlag("insecure", EchoServiceCmd.PersistentFlags().Lookup("insecure"))
 	EchoConfig.BindEnv("insecure")
 
-	EchoServiceCmd.PersistentFlags().String("address", "", "Set API address used by client. Or use SHOWCASE_ECHO_ADDRESS.")
+	EchoServiceCmd.PersistentFlags().String("address", "", "Set API address used by client. Or use GAPIC-SHOWCASE_ECHO_ADDRESS.")
 	EchoConfig.BindPFlag("address", EchoServiceCmd.PersistentFlags().Lookup("address"))
 	EchoConfig.BindEnv("address")
 
-	EchoServiceCmd.PersistentFlags().String("token", "", "Set Bearer token used by the client. Or use SHOWCASE_ECHO_TOKEN.")
+	EchoServiceCmd.PersistentFlags().String("token", "", "Set Bearer token used by the client. Or use GAPIC-SHOWCASE_ECHO_TOKEN.")
 	EchoConfig.BindPFlag("token", EchoServiceCmd.PersistentFlags().Lookup("token"))
 	EchoConfig.BindEnv("token")
 
-	EchoServiceCmd.PersistentFlags().String("api_key", "", "Set API Key used by the client. Or use SHOWCASE_ECHO_API_KEY.")
+	EchoServiceCmd.PersistentFlags().String("api_key", "", "Set API Key used by the client. Or use GAPIC-SHOWCASE_ECHO_API_KEY.")
 	EchoConfig.BindPFlag("api_key", EchoServiceCmd.PersistentFlags().Lookup("api_key"))
 	EchoConfig.BindEnv("api_key")
 }

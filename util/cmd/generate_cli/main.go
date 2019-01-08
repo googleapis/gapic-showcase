@@ -138,7 +138,7 @@ func generate_cli() {
 		"protoc",
 		"--proto_path=" + filepath.Join(showcaseDir(), "tmp", "api-common-protos"),
 		"--go_cli_out=" + filepath.Join(showcaseDir(), "cmd", "gapic-showcase"),
-		"--go_cli_opt=root=showcase",
+		"--go_cli_opt=root=gapic-showcase",
 		"--go_cli_opt=gapic=github.com/googleapis/gapic-showcase/client",
 	}
 	util.Execute(append(command, files...)...)
