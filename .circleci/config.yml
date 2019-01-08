@@ -118,18 +118,12 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Stage showcase in proto dependencies
-          command: |
-              git clone -b input-contract https://github.com/googleapis/api-common-protos.git
-              mkdir -p api-common-protos/google/showcase/v1alpha3/
-              cp schema/* api-common-protos/google/showcase/v1alpha3/
-      - run:
           name: Run go generation
           command: |
             mkdir goout
             docker run \
               --rm \
-              --mount type=bind,source="$(pwd)"/api-common-protos,destination=/in,readonly \
+              --mount type=bind,source="$(pwd)"/schema,destination=/in/protos/google/showcase/v1alpha3,readonly \
               --mount type=bind,source="$(pwd)"/goout,destination=/out/ \
               gcr.io/gapic-images/gapic-generator-go:v0.2 \
               --go-gapic-package "<github.com/googleapis/gapic-showcase/client;client>"
