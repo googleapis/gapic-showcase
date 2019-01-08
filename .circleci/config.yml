@@ -61,7 +61,7 @@ jobs:
       - run:
           name: Run tests
           command: go test ./... -coverprofile=coverage.txt -covermode=atomic
-      - run:	
+      - run:
           name: Spin up showcase server.
           command: gapic-showcase run
           background: true	
