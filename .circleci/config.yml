@@ -62,12 +62,12 @@ jobs:
           name: Run tests
           command: go test ./... -coverprofile=coverage.txt -covermode=atomic
       - run:
-          name: Spin up showcase server.
+          name: Spin up showcase.
           command: gapic-showcase run
-          background: true	
-      - run:	
-          name: Sanity check the server.	
-          command: gapic-showcase echo echo --response content --response.content hello world!
+          background: true
+      - run:
+          name: Sanity check.
+          command: gapic-showcase echo echo --response content --response.content "hello!"
       - run:
           name: Submit coverage data to codecov.
           command: bash <(curl -s https://codecov.io/bash)
