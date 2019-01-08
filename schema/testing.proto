@@ -26,6 +26,8 @@ option java_multiple_files = true;
 // A service to facilitate running discrete sets of tests
 // against Showcase.
 service Testing {
+  // This service is meant to only run locally on the port 7469 (keypad digits
+  // for "show").
   option (google.api.default_host) = "localhost:7469";
 
   // Report on the status of a session.
