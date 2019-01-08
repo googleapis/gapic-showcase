@@ -35,10 +35,10 @@ import (
 // IdentityCallOptions contains the retry settings for each method of IdentityClient.
 type IdentityCallOptions struct {
 	CreateUser []gax.CallOption
-	GetUser []gax.CallOption
+	GetUser    []gax.CallOption
 	UpdateUser []gax.CallOption
 	DeleteUser []gax.CallOption
-	ListUsers []gax.CallOption
+	ListUsers  []gax.CallOption
 }
 
 func defaultIdentityClientOptions() []option.ClientOption {
@@ -50,8 +50,8 @@ func defaultIdentityClientOptions() []option.ClientOption {
 
 func defaultIdentityCallOptions() *IdentityCallOptions {
 	backoff := gax.Backoff{
-		Initial: 100 * time.Millisecond,
-		Max: time.Minute,
+		Initial:    100 * time.Millisecond,
+		Max:        time.Minute,
 		Multiplier: 1.3,
 	}
 	retry := []gax.CallOption{
@@ -64,7 +64,7 @@ func defaultIdentityCallOptions() *IdentityCallOptions {
 	}
 
 	return &IdentityCallOptions{
-		GetUser: retry,
+		GetUser:   retry,
 		ListUsers: retry,
 	}
 }

@@ -30,8 +30,8 @@ import (
 // TestingCallOptions contains the retry settings for each method of TestingClient.
 type TestingCallOptions struct {
 	ReportSession []gax.CallOption
-	DeleteTest []gax.CallOption
-	RegisterTest []gax.CallOption
+	DeleteTest    []gax.CallOption
+	RegisterTest  []gax.CallOption
 }
 
 func defaultTestingClientOptions() []option.ClientOption {
@@ -42,8 +42,7 @@ func defaultTestingClientOptions() []option.ClientOption {
 }
 
 func defaultTestingCallOptions() *TestingCallOptions {
-	return &TestingCallOptions{
-	}
+	return &TestingCallOptions{}
 }
 
 // TestingClient is a client for interacting with  API.

@@ -16,17 +16,17 @@ package main
 
 import (
 	"context"
-  "log"
-  "os"
-  
+	"log"
+	"os"
+
 	"google.golang.org/grpc"
 )
 
 var stdLog, errLog *log.Logger
 
 func init() {
-  stdLog = log.New(os.Stdout, "", log.Ldate|log.Ltime)
-  errLog = log.New(os.Stderr, "", log.Ldate|log.Ltime)
+	stdLog = log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	errLog = log.New(os.Stderr, "", log.Ldate|log.Ltime)
 }
 
 // This method implements the grpc.UnaryServerInterceptor interface.

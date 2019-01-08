@@ -36,12 +36,12 @@ import (
 
 // EchoCallOptions contains the retry settings for each method of EchoClient.
 type EchoCallOptions struct {
-	Echo []gax.CallOption
-	Expand []gax.CallOption
-	Collect []gax.CallOption
-	Chat []gax.CallOption
+	Echo        []gax.CallOption
+	Expand      []gax.CallOption
+	Collect     []gax.CallOption
+	Chat        []gax.CallOption
 	PagedExpand []gax.CallOption
-	Wait []gax.CallOption
+	Wait        []gax.CallOption
 }
 
 func defaultEchoClientOptions() []option.ClientOption {
@@ -52,8 +52,7 @@ func defaultEchoClientOptions() []option.ClientOption {
 }
 
 func defaultEchoCallOptions() *EchoCallOptions {
-	return &EchoCallOptions{
-	}
+	return &EchoCallOptions{}
 }
 
 // EchoClient is a client for interacting with  API.

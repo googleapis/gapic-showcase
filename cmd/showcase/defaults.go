@@ -15,19 +15,19 @@
 package main
 
 import (
-  "fmt"
-  "os"
+	"fmt"
+	"os"
 )
 
 var SERVICES = []string{"ECHO", "IDENTITY", "MESSAGING", "TESTING"}
 
 func init() {
-  for _, service := range(SERVICES) {
-    if os.Getenv(fmt.Sprintf("SHOWCASE_%s_ADDRESS", service)) == "" {
-      os.Setenv(fmt.Sprintf("SHOWCASE_%s_ADDRESS", service), "localhost:7469")
-    }
-    if os.Getenv(fmt.Sprintf("SHOWCASE_%s_INSECURE")) == "" {
-      os.Setenv(fmt.Sprintf("SHOWCASE_%s_INSECURE", service), "true")
-    }
-  }
+	for _, service := range SERVICES {
+		if os.Getenv(fmt.Sprintf("SHOWCASE_%s_ADDRESS", service)) == "" {
+			os.Setenv(fmt.Sprintf("SHOWCASE_%s_ADDRESS", service), "localhost:7469")
+		}
+		if os.Getenv(fmt.Sprintf("SHOWCASE_%s_INSECURE", service)) == "" {
+			os.Setenv(fmt.Sprintf("SHOWCASE_%s_INSECURE", service), "true")
+		}
+	}
 }

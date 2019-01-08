@@ -36,6 +36,7 @@ jobs:
       - image: golang:1.11
     environment:
       GOPATH: /go
+      GO111MODULE: "off"
     working_directory: /go/src/github.com/googleapis/gapic-showcase
     steps:
       - checkout
