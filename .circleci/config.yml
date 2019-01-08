@@ -11,12 +11,16 @@ workflows:
           filters: *all_commits
       - python-smoke-test:
           filters: *all_commits
+      - go-smoke-test:
+          filters: *all_commits
       - protobufjs-load-test:
           filters: *all_commits
       - github_release:
           requires:
             - build
             - kotlin-smoke-test
+            - python-smoke-test
+            - go-smoke-test
             - protobufjs-load-test
           filters: &releases
             branches:
@@ -27,6 +31,8 @@ workflows:
           requires:
             - build
             - kotlin-smoke-test
+            - python-smoke-test
+            - go-smoke-test
             - protobufjs-load-test
           filters: *releases
 
