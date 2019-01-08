@@ -14,8 +14,25 @@
 
 package main
 
-import "github.com/googleapis/gapic-showcase/cmd"
+import (
+	"fmt"
+	"os"
+)
 
-func main() {
-	cmd.Execute()
+func init() {
+	// Since the showcase server is locally ran, the default address needs to be set
+	// since the go gapic assumes port :443.
+	services := []string{"ECHO", "IDENTITY", "MESSAGING", "TESTING"}
+	envVars := map[string]string{
+		"ADDRESS":  "localhost:7469",
+		"INSECURE": "true",
+	}
+	for _, service := range services {
+		for key, value := range envVars {
+			envName := fmt.Sprintf("GAPIC-SHOWCASE_%s_%s", service, key)
+			if os.Getenv(envName) == "" {
+				os.Setenv(envName, value)
+			}
+		}
+	}
 }

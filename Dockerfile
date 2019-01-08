@@ -7,15 +7,14 @@ RUN apk add --no-cache git gcc musl-dev
 WORKDIR /go/src/github.com/googleapis/gapic-showcase
 COPY . .
 
-# Use go modules, and only compile for Linux.
-ENV GO111MODULE on
+# Compile for Linux.
 ENV CGO_ENABLED 0
 ENV GOOS linux
 ENV GOARCH amd64
 
 # Install showcase.
 RUN go get
-RUN go build -a \
+RUN go build ./cmd/gapic-showcase \
   -installsuffix cgo \
   -ldflags="-w -s" \
   -o /go/bin/gapic-showcase

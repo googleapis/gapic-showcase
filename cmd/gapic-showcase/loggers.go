@@ -12,13 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package main
 
 import (
 	"context"
+	"log"
+	"os"
 
 	"google.golang.org/grpc"
 )
+
+var stdLog, errLog *log.Logger
+
+func init() {
+	stdLog = log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	errLog = log.New(os.Stderr, "", log.Ldate|log.Ltime)
+}
 
 // This method implements the grpc.UnaryServerInterceptor interface.
 func logServerUnary(
@@ -78,73 +87,4 @@ func logServerStreaming(
 	handler grpc.StreamHandler) error {
 	loggingStream := &loggingServerStream{info, ss}
 	return handler(srv, loggingStream)
-}
-
-// This method implements the grpc.UnaryClientInterceptor interface.
-func logClientUnary(
-	ctx context.Context,
-	method string,
-	req interface{},
-	reply interface{},
-	cc *grpc.ClientConn,
-	invoker grpc.UnaryInvoker,
-	opts ...grpc.CallOption) error {
-	stdLog.Printf("Sending Unary Request for Method: %s\n", method)
-	stdLog.Printf("    Request:  %+v\n", req)
-	err := invoker(ctx, method, req, reply, cc, opts...)
-	if err == nil {
-		stdLog.Printf("    Got Response: %+v\n", reply)
-	} else {
-		stdLog.Printf("    Got Error: %+v\n", err)
-	}
-	stdLog.Println("")
-	return err
-}
-
-type loggingClientStream struct {
-	method string
-	desc   *grpc.StreamDesc
-
-	grpc.ClientStream
-}
-
-func (s *loggingClientStream) SendMsg(m interface{}) error {
-	stdLog.Printf("%s Stream for Method: %s\n", s.streamType(), s.method)
-	stdLog.Printf("    Sending Message:  %+v\n", m)
-	stdLog.Println("")
-
-	return s.ClientStream.SendMsg(m)
-}
-
-func (s *loggingClientStream) RecvMsg(m interface{}) error {
-	err := s.ClientStream.RecvMsg(m)
-	stdLog.Printf("%s Stream for Method: %s\n", s.streamType(), s.method)
-	if err != nil {
-		stdLog.Printf("    Recieved Error:  %v\n", err)
-	} else {
-		stdLog.Printf("    Recieving Message:  %v\n", m)
-	}
-	stdLog.Println("")
-
-	return err
-}
-
-func (s *loggingClientStream) streamType() string {
-	if s.desc.ClientStreams && s.desc.ServerStreams {
-		return "Bi-directional"
-	} else if s.desc.ClientStreams {
-		return "Client"
-	}
-	return "Server"
-}
-
-// This method implements the grpc.StreamClientInterceptor interface.
-func logClientStreaming(ctx context.Context,
-	desc *grpc.StreamDesc,
-	cc *grpc.ClientConn,
-	method string,
-	streamer grpc.Streamer,
-	opts ...grpc.CallOption) (grpc.ClientStream, error) {
-	cs, err := streamer(ctx, desc, cc, method, opts...)
-	return &loggingClientStream{method, desc, cs}, err
 }

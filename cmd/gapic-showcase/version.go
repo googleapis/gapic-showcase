@@ -12,45 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
-
-import (
-	"fmt"
-	"log"
-	"os"
-
-	"github.com/spf13/cobra"
-)
-
-var stdLog, errLog *log.Logger
-
-var rootCmd = &cobra.Command{
-	Use:   "gapic-showcase",
-	Short: "An API for showcasing GAPIC features",
-	Long: `Showcase is an API used to showcase Generate API Client (GAPIC)
-features. This tool is used run the gapic-showcase server, and used to make
-to an already running server.`,
-	Version: "0.0.9",
-}
-
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-}
+package main
 
 func init() {
-	// Setup Loggers
-	stdLog = log.New(os.Stdout, "", log.Ldate|log.Ltime)
-	errLog = log.New(os.Stderr, "", log.Ldate|log.Ltime)
-
 	// Make roots version option only emit the version. This is used in circleci.
 	// The template looks weird on purpose. Leaving as a single line causes the
 	// output to append an extra character.
+	rootCmd.Version = "0.0.9"
 	rootCmd.SetVersionTemplate(
-		`{{printf "%s" .Version}}
-`)
+		`{{printf "%s" .Version}}`)
 }
