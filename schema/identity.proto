@@ -31,6 +31,10 @@ option (google.api.metadata) = {
 
 // A simple identity service.
 service Identity {
+  // This service is meant to only run locally on the port 7469 (keypad digits
+  // for "show").
+  option (google.api.default_host) = "localhost:7469";
+
   // Creates a user.
   rpc CreateUser(CreateUserRequest) returns (User) {
     option (google.api.http) = {

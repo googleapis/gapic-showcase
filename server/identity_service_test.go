@@ -116,7 +116,7 @@ func Test_User_lifecycle(t *testing.T) {
 		t.Errorf("List want: page size %d, got %d", 1, len(r.GetUsers()))
 	}
 	if !proto.Equal(got, r.GetUsers()[0]) {
-		t.Errorf("List want: updated user %+v, got %+v", first, r.GetUsers()[0])
+		t.Errorf("List want: updated user %+v, got %+v", got, r.GetUsers()[0])
 	}
 	if r.GetNextPageToken() != "" {
 		t.Error("List want: empty next page token")

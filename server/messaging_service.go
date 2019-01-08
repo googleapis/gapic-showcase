@@ -18,6 +18,8 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"io"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -35,11 +37,13 @@ import (
 func NewMessagingServer(identityServer ReadOnlyIdentityServer) MessagingServer {
 	return &messagingServerImpl{
 		identityServer: identityServer,
+		nowF:           time.Now,
 		token:          NewTokenGenerator(),
 		roomKeys:       map[string]int{},
 		blurbKeys:      map[string]blurbIndex{},
 		blurbs:         map[string][]blurbEntry{},
 		parentUids:     map[string]*uniqID{},
+		observers:      map[string]map[string]blurbObserver{},
 	}
 }
 
@@ -50,10 +54,11 @@ type MessagingServer interface {
 }
 
 type messagingServerImpl struct {
-	uid            uniqID
+	nowF           func() time.Time
 	token          TokenGenerator
 	identityServer ReadOnlyIdentityServer
 
+	roomUid  uniqID
 	roomMu   sync.Mutex
 	roomKeys map[string]int
 	rooms    []roomEntry
@@ -62,6 +67,10 @@ type messagingServerImpl struct {
 	blurbKeys  map[string]blurbIndex
 	blurbs     map[string][]blurbEntry
 	parentUids map[string]*uniqID
+
+	obsMu     sync.Mutex
+	obsUid    uniqID
+	observers map[string]map[string]blurbObserver
 }
 
 type roomEntry struct {
@@ -79,6 +88,12 @@ type blurbIndex struct {
 type blurbEntry struct {
 	blurb   *pb.Blurb
 	deleted bool
+}
+
+type blurbObserver interface {
+	OnCreate(b *pb.Blurb)
+	OnUpdate(b *pb.Blurb)
+	OnDelete(b *pb.Blurb)
 }
 
 // Creates a room.
@@ -104,7 +119,7 @@ func (s *messagingServerImpl) CreateRoom(ctx context.Context, in *pb.CreateRoomR
 	}
 
 	// Assign info.
-	id := s.uid.next()
+	id := s.roomUid.next()
 	name := fmt.Sprintf("rooms/%d", id)
 	now := ptypes.TimestampNow()
 
@@ -294,6 +309,15 @@ func (s *messagingServerImpl) CreateBlurb(ctx context.Context, in *pb.CreateBlur
 	s.blurbs[parent] = append(parentBs, blurbEntry{blurb: b})
 	s.blurbKeys[name] = blurbIndex{row: parent, col: index}
 
+	// Call observers.
+	s.obsMu.Lock()
+	defer s.obsMu.Unlock()
+	if parentObservers, ok := s.observers[parent]; ok {
+		for _, o := range parentObservers {
+			o.OnCreate(b)
+		}
+	}
+
 	return b, nil
 }
 
@@ -342,6 +366,15 @@ func (s *messagingServerImpl) UpdateBlurb(ctx context.Context, in *pb.UpdateBlur
 	updated.UpdateTime = ptypes.TimestampNow()
 	s.blurbs[i.row][i.col] = blurbEntry{blurb: updated}
 
+	// Call observers.
+	s.obsMu.Lock()
+	defer s.obsMu.Unlock()
+	if parentObservers, ok := s.observers[i.row]; ok {
+		for _, o := range parentObservers {
+			o.OnUpdate(updated)
+		}
+	}
+
 	return updated, nil
 }
 
@@ -360,6 +393,15 @@ func (s *messagingServerImpl) DeleteBlurb(ctx context.Context, in *pb.DeleteBlur
 
 	entry := s.blurbs[i.row][i.col]
 	s.blurbs[i.row][i.col] = blurbEntry{blurb: entry.blurb, deleted: true}
+
+	// Call observers.
+	s.obsMu.Lock()
+	defer s.obsMu.Unlock()
+	if parentObservers, ok := s.observers[i.row]; ok {
+		for _, o := range parentObservers {
+			o.OnDelete(entry.blurb)
+		}
+	}
 
 	return &empty.Empty{}, nil
 }
@@ -435,13 +477,73 @@ func (s *messagingServerImpl) SearchBlurbs(ctx context.Context, in *pb.SearchBlu
 // This returns a stream that emits the blurbs that are created for a
 // particular chat room or user profile.
 func (s *messagingServerImpl) StreamBlurbs(in *pb.StreamBlurbsRequest, stream pb.Messaging_StreamBlurbsServer) error {
+	parent := in.GetName()
+	if err := s.validateParent(parent); err != nil {
+		return err
+	}
+
+	expireTime, err := ptypes.Timestamp(in.GetExpireTime())
+	if err != nil {
+		expireTime = time.Unix(int64(0), int64(0))
+	}
+	observer := &streamBlurbsObserver{
+		stream: stream.(BlurbsOutStream),
+		mu:     sync.Mutex{},
+	}
+	name := s.registerObserver(parent, observer)
+	defer s.removeObserver(parent, name)
+	for {
+		if s.nowF().After(expireTime) {
+			break
+		}
+		if observer.getError() != nil {
+			return observer.getError()
+		}
+		if err := s.validateParent(parent); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
 // This is a stream to create multiple blurbs. If an invalid blurb is
 // requested to be created, the stream will close with an error.
 func (s *messagingServerImpl) SendBlurbs(stream pb.Messaging_SendBlurbsServer) error {
-	return nil
+	names := []string{}
+
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			return stream.SendAndClose(
+				&pb.SendBlurbsResponse{Names: names})
+		}
+		if err != nil {
+			return withCreatedNames(err, names)
+		}
+		parent := req.GetParent()
+		if err := s.validateParent(parent); err != nil {
+			return withCreatedNames(err, names)
+		}
+		blurb, err := s.CreateBlurb(
+			context.Background(),
+			&pb.CreateBlurbRequest{Parent: parent, Blurb: req.GetBlurb()})
+		if err != nil {
+			return withCreatedNames(err, names)
+		}
+		names = append(names, blurb.GetName())
+	}
+}
+
+func withCreatedNames(err error, names []string) error {
+	s, _ := status.FromError(err)
+	spb := s.Proto()
+
+	details, err := ptypes.MarshalAny(&pb.SendBlurbsResponse{Names: names})
+	if err == nil {
+		spb.Details = append(spb.Details, details)
+	}
+
+	return status.ErrorProto(spb)
 }
 
 // This method starts a bidirectional stream that receives all blurbs that
@@ -449,6 +551,72 @@ func (s *messagingServerImpl) SendBlurbs(stream pb.Messaging_SendBlurbsServer) e
 // blurbs. If an invalid blurb is requested to be created, the stream will
 // close with an error.
 func (s *messagingServerImpl) Connect(stream pb.Messaging_ConnectServer) error {
+	configured := false
+	parent := ""
+	var observer *streamBlurbsObserver
+
+	for {
+		req, err := stream.Recv()
+
+		// Handle stream errors.
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+
+		// Setup Configuration
+		if !configured && req != nil {
+			if req.GetConfig() == nil {
+				return status.Error(
+					codes.InvalidArgument,
+					"The first request to Connect, must contain a config field")
+			}
+
+			parent = req.GetConfig().GetParent()
+			if err := s.validateParent(parent); err != nil {
+				return err
+			}
+			observer = &streamBlurbsObserver{
+				stream: stream.(BlurbsOutStream),
+				mu:     sync.Mutex{},
+			}
+			configured = true
+			name := s.registerObserver(parent, observer)
+			defer s.removeObserver(parent, name)
+			continue
+		}
+		// Check if there was a send error.
+		if err := observer.getError(); err != nil {
+			return err
+		}
+
+		// Check if the parent still exists.
+		if err := s.validateParent(parent); err != nil {
+			return err
+		}
+
+		// Create the blurb
+		if req == nil || req.GetBlurb() == nil {
+			continue
+		}
+		_, err = s.CreateBlurb(
+			context.Background(),
+			&pb.CreateBlurbRequest{Parent: parent, Blurb: req.GetBlurb()})
+		if err != nil {
+			return err
+		}
+	}
+}
+
+func validateBlurb(b *pb.Blurb) error {
+	// Validate Required Fields.
+	if b.GetUser() == "" {
+		return status.Errorf(
+			codes.InvalidArgument,
+			"The field `user` is required.")
+	}
 	return nil
 }
 
@@ -466,12 +634,90 @@ func (s *messagingServerImpl) validateParent(p string) error {
 	return nil
 }
 
-func validateBlurb(b *pb.Blurb) error {
-	// Validate Required Fields.
-	if b.GetUser() == "" {
-		return status.Errorf(
-			codes.InvalidArgument,
-			"The field `user` is required.")
+// Observer
+type streamBlurbsObserver struct {
+	// The stream to send the blurbs.
+	stream BlurbsOutStream
+
+	// Blurb parent to observe.
+	parent string
+
+	// Holds an error that occurred when sending a blurb.
+	mu  sync.Mutex
+	err error
+}
+
+type BlurbsOutStream interface {
+	Send(*pb.StreamBlurbsResponse) error
+}
+
+func (o *streamBlurbsObserver) getError() error {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	return o.err
+}
+
+func (o *streamBlurbsObserver) updateError(err error) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	if o.err == nil {
+		o.err = err
 	}
-	return nil
+}
+
+func (o *streamBlurbsObserver) OnCreate(b *pb.Blurb) {
+	o.updateError(
+		o.stream.Send(
+			&pb.StreamBlurbsResponse{
+				Blurb:  b,
+				Action: pb.StreamBlurbsResponse_CREATE,
+			}))
+}
+
+func (o *streamBlurbsObserver) OnUpdate(b *pb.Blurb) {
+	o.updateError(
+		o.stream.Send(
+			&pb.StreamBlurbsResponse{
+				Blurb:  b,
+				Action: pb.StreamBlurbsResponse_UPDATE,
+			}))
+}
+
+// Do nothing for now. Need to change the
+func (o *streamBlurbsObserver) OnDelete(b *pb.Blurb) {
+	o.updateError(
+		o.stream.Send(
+			&pb.StreamBlurbsResponse{
+				Blurb:  b,
+				Action: pb.StreamBlurbsResponse_DELETE,
+			}))
+}
+
+func (s messagingServerImpl) registerObserver(parent string, o blurbObserver) string {
+	s.obsMu.Lock()
+	defer s.obsMu.Unlock()
+	name := strconv.FormatInt(s.obsUid.next(), 10)
+	if _, ok := s.observers[parent]; !ok {
+		s.observers[parent] = map[string]blurbObserver{}
+	}
+	s.observers[parent][name] = o
+	return name
+}
+
+func (s messagingServerImpl) hasObservers(parent string) bool {
+	s.obsMu.Lock()
+	defer s.obsMu.Unlock()
+	if os, ok := s.observers[parent]; ok && len(os) > 0 {
+		return true
+	}
+	return false
+}
+
+func (s messagingServerImpl) removeObserver(parent string, name string) {
+	s.obsMu.Lock()
+	defer s.obsMu.Unlock()
+	delete(s.observers[parent], name)
+	if len(s.observers[parent]) <= 0 {
+		delete(s.observers, parent)
+	}
 }
