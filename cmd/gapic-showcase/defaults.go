@@ -29,7 +29,7 @@ func init() {
 	}
 	for _, service := range services {
 		for key, value := range envVars {
-			envName := fmt.Sprintf("SHOWCASE_%s_%s", service, key)
+			envName := fmt.Sprintf("GAPIC-SHOWCASE_%s_%s", service, key)
 			if os.Getenv(envName) == "" {
 				os.Setenv(envName, value)
 			}
