@@ -32,8 +32,8 @@ import (
 // TestingCallOptions contains the retry settings for each method of TestingClient.
 type TestingCallOptions struct {
 	ReportSession []gax.CallOption
-	DeleteTest []gax.CallOption
-	RegisterTest []gax.CallOption
+	DeleteTest    []gax.CallOption
+	RegisterTest  []gax.CallOption
 }
 
 func defaultTestingClientOptions() []option.ClientOption {
@@ -45,8 +45,8 @@ func defaultTestingClientOptions() []option.ClientOption {
 
 func defaultTestingCallOptions() *TestingCallOptions {
 	backoff := gax.Backoff{
-		Initial: 100 * time.Millisecond,
-		Max: time.Minute,
+		Initial:    100 * time.Millisecond,
+		Max:        time.Minute,
 		Multiplier: 1.3,
 	}
 
@@ -60,8 +60,8 @@ func defaultTestingCallOptions() *TestingCallOptions {
 
 	return &TestingCallOptions{
 		ReportSession: nonidempotent,
-		DeleteTest: nonidempotent,
-		RegisterTest: nonidempotent,
+		DeleteTest:    nonidempotent,
+		RegisterTest:  nonidempotent,
 	}
 }
 

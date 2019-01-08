@@ -20,12 +20,19 @@ import (
 )
 
 func init() {
-	for _, service := range []string{"ECHO", "IDENTITY", "MESSAGING", "TESTING"} {
-		if os.Getenv(fmt.Sprintf("SHOWCASE_%s_ADDRESS", service)) == "" {
-			os.Setenv(fmt.Sprintf("SHOWCASE_%s_ADDRESS", service), "localhost:7469")
-		}
-		if os.Getenv(fmt.Sprintf("SHOWCASE_%s_INSECURE", service)) == "" {
-			os.Setenv(fmt.Sprintf("SHOWCASE_%s_INSECURE", service), "true")
+	// Since the showcase server is locally ran, the default address needs to be set
+	// since the go gapic assumes port :443.
+	services := []string{"ECHO", "IDENTITY", "MESSAGING", "TESTING"}
+	envVars := map[string]string{
+		"ADDRESS":  "localhost:7469",
+		"INSECURE": "true",
+	}
+	for _, service := range services {
+		for key, value := range envVars {
+			envName := fmt.Sprintf("SHOWCASE_%s_%s", service, key)
+			if os.Getenv(envName) == "" {
+				os.Setenv(envName, value)
+			}
 		}
 	}
 }
