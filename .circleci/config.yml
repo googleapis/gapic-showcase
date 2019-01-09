@@ -60,7 +60,9 @@ jobs:
           command: go get -v -d -t ./cmd/gapic-showcase && go install ./cmd/gapic-showcase
       - run:
           name: Run tests
-          command: go test ./... -coverprofile=coverage.txt -covermode=atomic
+          command: |
+            go test ./server -coverprofile=coverage.txt -covermode=atomic
+            go test ./client # Don't run coverage for generated tests.
       - run:
           name: Spin up showcase.
           command: gapic-showcase run
