@@ -16,6 +16,7 @@ syntax = "proto3";
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/any.proto";
 
 package google.showcase.v1alpha3;
 
@@ -30,12 +31,48 @@ service Testing {
   // for "show").
   option (google.api.default_host) = "localhost:7469";
 
+  // Creates a new testing session.
+  rpc CreateSession(CreateSessionRequest) returns (Session) {
+    option (google.api.http) = {
+      post: "/v1alpha3/sessions"
+      body: "session"
+    };
+  }
+
+  // Gets a testing session.
+  rpc GetSession(GetSessionRequest) returns (Session) {
+    option (google.api.http) = {
+      get: "/v1alpha3/{name=sessions/*}"
+    };
+  }
+
+  // Lists the current test sessions.
+  rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse) {
+    option (google.api.http) = {
+      get: "/v1alpha3/sessions"
+    };
+  }
+
+  // Delete a test session.
+  rpc DeleteSession(DeleteSessionRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1alpha3/{name=sessions/*}"
+    };
+  }
+
   // Report on the status of a session.
   // This generates a report detailing which tests have been completed,
   // and an overall rollup.
   rpc ReportSession(ReportSessionRequest) returns (ReportSessionResponse) {
     option (google.api.http) = {
       post: "/v1alpha3/{name=sessions/*}:report"
+    };
+  }
+
+  // List the tests of a sessesion.
+  rpc ListTests(ListTestsRequest) returns (ListTestsResponse) {
+    option (google.api.http) = {
+      get: "/v1alpha3/{name=sessions/*}/tests"
     };
   }
 
@@ -55,121 +92,11 @@ service Testing {
   //
   // In cases where a test involves registering a final answer at the
   // end of the test, this method provides the means to do so.
-  rpc RegisterTest(RegisterTestRequest) returns (google.protobuf.Empty) {
+  rpc CheckAnswer(CheckAnswerRequest) returns (CheckAnswerResponse) {
     option (google.api.http) = {
-      post: "/v1alpha3/{name=sessions/*/tests/*}:register"
+      post: "/v1alpha3/{name=sessions/*/tests/*}:check"
     };
   }
-}
-
-// Request message for reporting on a session.
-message ReportSessionRequest {
-  // The session to be reported on.
-  string name = 1 [(google.api.resource_reference) = "Session"];
-}
-
-// Response message for reporting on a session.
-message ReportSessionResponse {
-  // The topline state of the report.
-  enum State {
-    STATE_UNSPECIFIED = 0;
-
-    // The session is complete, and everything passed.
-    PASSED = 1;
-
-    // The session had an explicit failure.
-    FAILED = 2;
-
-    // The session is incomplete.
-    // This is a failure response.
-    INCOMPLETE = 3;
-  }
-
-  // The state of the report.
-  State state = 1;
-
-  // An issue highlighted in the report.
-  message Issue {
-    // The test that is the root of the issue.
-    string test = 1;
-
-    // The different potential types of issues.
-    enum Type {
-      TYPE_UNSPECIFIED = 0;
-
-      // The test was never instrumented.
-      SKIPPED = 1;
-
-      // The test was instrumented, but Showcase got an unexpected
-      // value when the generator tried to confirm success.
-      INCORRECT_CONFIRMATION = 2;
-    }
-
-    // The type of the issue.
-    Type type = 2;
-
-    // Severity levels.
-    enum Severity {
-      SEVERITY_UNSPECIFIED = 0;
-
-      // Errors.
-      ERROR = 1;
-
-      // Warnings.
-      WARNING = 2;
-    }
-
-    // The severity of the issue.
-    Severity severity = 3;
-
-    // A description of the issue.
-    string description = 4;
-  }
-
-  // Issues found which constitute errors.
-  // A non-zero list here requires a failure state for the report overall.
-  repeated Issue errors = 2;
-
-  // Issues found which do not constitute errors.
-  repeated Issue warnings = 3;
-
-  // A message describing the completion level for tests.
-  message Completion {
-    // The ratio of required and recommended tests completed.
-    //
-    // The behavior of the denominator for recommended and optional tests
-    // matches the description in their individual ratios below.
-    float total = 1;
-
-    // The ratio of required tests completed.
-    float required = 2;
-
-    // The ratio of recommended tests completed.
-    // Deleting a recommended test *does not* remove it from the denominator.
-    float recommended = 3;
-
-    // The ratio of optional tests completed.
-    // Deleting an optional test *does* remove it from the denominator.
-    float optional = 4;
-  }
-
-  // The overall completion in the report.
-  Completion completion = 4;
-}
-
-// Request message for deleting a test.
-message DeleteTestRequest {
-  // The test to be deleted.
-  string name = 1 [(google.api.resource_reference) = "Test"];
-}
-
-// Register an answer from a test.
-message RegisterTestRequest {
-  // The test to have an answer registered to it.
-  string name = 1 [(google.api.resource_reference) = "Test"];
-
-  // The answer from the test.
-  repeated string answers = 2;
 }
 
 // A session is a suite of tests, generally being made in the context
@@ -197,9 +124,74 @@ message Session {
   Version version = 2;
 }
 
+// The request for the CreateSession method.
+message CreateSessionRequest {
+  // The session to be created.
+  // Sessions are immutable once they are created (although they can
+  // be deleted).
+  Session session = 1;
+}
 
-// A test is a single test expected by Showcase.
-// The exact way that each test is exercised may vary from test to test.
+// The request for the GetSession method.
+message GetSessionRequest {
+  // The session to be retrieved.
+  string name = 1 [(google.api.resource_reference) = "Session"];
+}
+
+// The request for the ListSessions method.
+message ListSessionsRequest {
+  // The maximum number of sessions to return per page.
+  int32 page_size = 1;
+
+  // The page token, for retrieving subsequent pages.
+  string page_token = 2;
+}
+
+// Response for the ListSessions method.
+message ListSessionsResponse {
+  // The sessions being returned.
+  repeated Session sessions = 1;
+
+  // The next page token, if any.
+  // An empty value here means the last page has been reached.
+  string next_page_token = 2;
+}
+
+// Request for the DeleteSession method.
+message DeleteSessionRequest {
+  // The session to be deleted.
+  string name = 1 [(google.api.resource_reference) = "Session"];
+}
+
+// Request message for reporting on a session.
+message ReportSessionRequest {
+  // The session to be reported on.
+  string name = 1 [(google.api.resource_reference) = "Session"];
+}
+
+// Response message for reporting on a session.
+message ReportSessionResponse {
+  // The topline state of the report.
+  enum Result {
+    RESULT_UNSPECIFIED = 0;
+
+    // The session is complete, and everything passed.
+    PASSED = 1;
+
+    // The session had an explicit failure.
+    FAILED = 2;
+
+    // The session is incomplete. This is a failure response.
+    INCOMPLETE = 3;
+  }
+
+  // The state of the report.
+  Result result = 1;
+
+  // The test runs of this session.
+  repeated TestRun test_runs = 2;
+}
+
 message Test {
   // The name of the test.
   // The tests/* portion of the names are hard-coded, and do not change
@@ -238,4 +230,128 @@ message Test {
 
   // A description of the test.
   string description = 3;
+
+  // A blueprint is an explicit definition of methods and requests that are needed
+  // to be made to test this specific test case. Ideally this would be represented
+  // by something more robust like CEL, but as of writing this, I am unsure if CEL
+  // is ready.
+  message Blueprint {
+    // The id of this blueprint.
+    string id = 1;
+
+    // A description of this blueprint.
+    string description = 2;
+
+    // A message representing a method invocation.
+    message Invocation {
+      // The fully qualified name of the showcase method to be invoked.
+      string method = 1;
+
+      // The request to be made if a specific request is necessary.
+      google.protobuf.Any request = 2;
+    }
+
+    // An ordered list of method calls that can be called to trigger this test.
+    repeated Invocation invocations = 3;
+  }
+
+  // The blueprints that will satisfy this test. There may be multiple blueprints
+  // that can signal to the server that this test case is being exercised. Although
+  // multiple blueprints are specified, only a single blueprint needs to be run to
+  // signal that the test case was exercised.
+  repeated Blueprint blueprints = 4;
+}
+
+// An issue found in the test.
+message Issue {
+  // The different potential types of issues.
+  enum Type {
+    TYPE_UNSPECIFIED = 0;
+
+    // The test was never instrumented.
+    SKIPPED = 1;
+
+    // The test was started but never confirmed.
+    PENDING = 2;
+
+    // The test was instrumented, but Showcase got an unexpected
+    // value when the generator tried to confirm success.
+    INCORRECT_CONFIRMATION = 3;
+  }
+
+  // The type of the issue.
+  Type type = 1;
+
+  // Severity levels.
+  enum Severity {
+    SEVERITY_UNSPECIFIED = 0;
+
+    // Errors.
+    ERROR = 1;
+
+    // Warnings.
+    WARNING = 2;
+  }
+
+  // The severity of the issue.
+  Severity severity = 2;
+
+  // A description of the issue.
+  string description = 3;
+}
+
+// The request for the ListTests method.
+message ListTestsRequest {
+  // The session.
+  string parent = 1 [(google.api.resource_reference) = "Session"];
+
+  // The maximum number of tests to return per page.
+  int32 page_size = 2;
+
+  // The page token, for retrieving subsequent pages.
+  string page_token = 3;
+}
+
+// The response for the ListTests method.
+message ListTestsResponse {
+  // The tests being returned.
+  repeated Test tests = 1;
+
+  // The next page token, if any.
+  // An empty value here means the last page has been reached.
+  string next_page_token = 2;
+}
+
+// A TestRun is the result of running a Test.
+message TestRun {
+  // The name of the test.
+  // The tests/* portion of the names are hard-coded, and do not change
+  // from session to session.
+  string test = 1 [(google.api.resource_reference) = "Test"];
+
+
+  // An issue found with the test run. If empty, this test run was successful.
+  Issue issue = 2;
+}
+
+// Request message for deleting a test.
+message DeleteTestRequest {
+  // The test to be deleted.
+  string name = 1 [(google.api.resource_reference) = "Test"];
+}
+
+message CheckAnswerRequest {
+  // The test to have an answer registered to it.
+  string name = 1 [(google.api.resource_reference) = "Test"];
+
+  // The answer from the test.
+  google.protobuf.Any answer = 2;
+
+  // The answers from the test if multiple are to be checked
+  repeated google.protobuf.Any answers = 3;
+}
+
+message CheckAnswerResponse {
+  // An issue if check answer was unsuccessful. This will be empty if the check answer succeeded.
+  Issue issue = 1;
 }
