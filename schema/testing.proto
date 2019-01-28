@@ -16,7 +16,6 @@ syntax = "proto3";
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
-import "google/protobuf/any.proto";
 
 package google.showcase.v1alpha3;
 
@@ -92,7 +91,7 @@ service Testing {
   //
   // In cases where a test involves registering a final answer at the
   // end of the test, this method provides the means to do so.
-  rpc CheckAnswer(CheckAnswerRequest) returns (CheckAnswerResponse) {
+  rpc CheckTest(CheckTestRequest) returns (CheckTestResponse) {
     option (google.api.http) = {
       post: "/v1alpha3/{name=sessions/*/tests/*}:check"
     };
@@ -107,7 +106,7 @@ service Testing {
 message Session {
   // The name of the session. The ID must conform to ^[a-z]+$
   // If this is not provided, Showcase chooses one at random.
-  string name = 1 [(google.api.resource).path = "sessions/*"];
+  string name = 1 [(google.api.resource).path = "sessions/{session}"];
 
   // The specification versions understood by Showcase.
   enum Version {
@@ -196,7 +195,7 @@ message Test {
   // The name of the test.
   // The tests/* portion of the names are hard-coded, and do not change
   // from session to session.
-  string name = 1 [(google.api.resource).path = "sessions/*/tests/*"];
+  string name = 1 [(google.api.resource).path = "sessions/{session}/tests/{test}"];
 
   // Whether or not a test is required, recommended, or optional.
   enum ExpectationLevel {
@@ -236,8 +235,8 @@ message Test {
   // by something more robust like CEL, but as of writing this, I am unsure if CEL
   // is ready.
   message Blueprint {
-    // The id of this blueprint.
-    string id = 1;
+    // The name of this blueprint.
+    string name = 1 [(google.api.resource).path = "sessions/{session}/tests/{test}/blueprints/{blueprint}"];
 
     // A description of this blueprint.
     string description = 2;
@@ -248,11 +247,14 @@ message Test {
       string method = 1;
 
       // The request to be made if a specific request is necessary.
-      google.protobuf.Any request = 2;
+      bytes serialized_request = 2;
     }
 
+    // The initial request to trigger this test.
+    Invocation request = 3;
+
     // An ordered list of method calls that can be called to trigger this test.
-    repeated Invocation invocations = 3;
+    repeated Invocation additional_requests = 4;
   }
 
   // The blueprints that will satisfy this test. There may be multiple blueprints
@@ -340,18 +342,18 @@ message DeleteTestRequest {
   string name = 1 [(google.api.resource_reference) = "Test"];
 }
 
-message CheckAnswerRequest {
+message CheckTestRequest {
   // The test to have an answer registered to it.
   string name = 1 [(google.api.resource_reference) = "Test"];
 
   // The answer from the test.
-  google.protobuf.Any answer = 2;
+  bytes answer = 2;
 
   // The answers from the test if multiple are to be checked
-  repeated google.protobuf.Any answers = 3;
+  repeated bytes answers = 3;
 }
 
-message CheckAnswerResponse {
+message CheckTestResponse {
   // An issue if check answer was unsuccessful. This will be empty if the check answer succeeded.
   Issue issue = 1;
 }
