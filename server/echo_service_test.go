@@ -378,7 +378,7 @@ func TestPagedExpand(t *testing.T) {
 
 func TestWait(t *testing.T) {
 	endTime, _ := ptypes.TimestampProto(time.Now())
-	req := &pb.WaitRequest{EndTime: endTime}
+	req := &pb.WaitRequest{End: &pb.WaitRequest_EndTime{EndTime: endTime}}
 	waiter := &mockWaiter{}
 	server := &echoServerImpl{waiter: waiter}
 	server.Wait(context.Background(), req)

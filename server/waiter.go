@@ -29,6 +29,7 @@ var waiterSingleton Waiter = &waiterImpl{
 	nowF: time.Now,
 }
 
+// Waiter handles the echo.Wait method for both the LRO service and the echo service.
 type Waiter interface {
 	Wait(req *pb.WaitRequest) *lropb.Operation
 }
@@ -38,10 +39,21 @@ type waiterImpl struct {
 }
 
 func (w *waiterImpl) Wait(req *pb.WaitRequest) *lropb.Operation {
-	reqBytes, _ := proto.Marshal(req)
-	endTime, _ := ptypes.Timestamp(req.EndTime)
-	done := w.nowF().After(endTime)
+	endTime := time.Unix(0, 0).UTC()
+	if ttl := req.GetTtl(); ttl != nil {
+		duration, _ := ptypes.Duration(ttl)
+		endTime = w.nowF().Add(duration)
+	}
+	if end := req.GetEndTime(); end != nil {
+		endTime, _ = ptypes.Timestamp(end)
+	}
+	endTimeProto, _ := ptypes.TimestampProto(endTime)
+	req.End = &pb.WaitRequest_EndTime{
+		EndTime: endTimeProto,
+	}
 
+	done := w.nowF().After(endTime)
+	reqBytes, _ := proto.Marshal(req)
 	name := fmt.Sprintf(
 		"operations/google.showcase.v1alpha3.Echo/Wait/%s",
 		base64.StdEncoding.EncodeToString(reqBytes))
@@ -60,7 +72,7 @@ func (w *waiterImpl) Wait(req *pb.WaitRequest) *lropb.Operation {
 	}
 
 	if !done {
-		meta, _ := ptypes.MarshalAny(&pb.WaitMetadata{EndTime: req.EndTime})
+		meta, _ := ptypes.MarshalAny(&pb.WaitMetadata{EndTime: endTimeProto})
 		answer.Metadata = meta
 	}
 
