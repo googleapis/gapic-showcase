@@ -484,7 +484,7 @@ func (s *messagingServerImpl) StreamBlurbs(in *pb.StreamBlurbsRequest, stream pb
 
 	expireTime, err := ptypes.Timestamp(in.GetExpireTime())
 	if err != nil {
-		expireTime = time.Unix(int64(0), int64(0))
+		return status.Error(codes.InvalidArgument, err.Error())
 	}
 	observer := &streamBlurbsObserver{
 		stream: stream.(BlurbsOutStream),
