@@ -17,9 +17,14 @@ import (
 var TestingConfig *viper.Viper
 var TestingClient *gapic.TestingClient
 var TestingSubCommands []string = []string{
+	"create-session",
+	"get-session",
+	"list-sessions",
+	"delete-session",
 	"report-session",
+	"list-tests",
 	"delete-test",
-	"register-test",
+	"verify-test",
 }
 
 func init() {
