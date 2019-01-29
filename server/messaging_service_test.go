@@ -26,6 +26,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc/codes"
@@ -927,6 +928,31 @@ func Test_StreamBlurbs_parentNotFound(t *testing.T) {
 		t.Errorf(
 			"Create: Want error code %d got %d",
 			codes.NotFound,
+			status.Code())
+	}
+}
+
+func Test_StreamBlurbs_invalidTimestamp(t *testing.T) {
+	is := NewIdentityServer()
+	first, err := is.CreateUser(
+		context.Background(),
+		&pb.CreateUserRequest{
+			User: &pb.User{DisplayName: "rumbledog", Email: "rumble@google.com"},
+		})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
+	}
+	s := NewMessagingServer(is)
+
+	maxValidSeconds := int64(253402300800)
+	err = s.StreamBlurbs(
+		&pb.StreamBlurbsRequest{Name: first.GetName(), ExpireTime: &timestamp.Timestamp{Seconds: maxValidSeconds + 1}},
+		nil)
+	status, _ := status.FromError(err)
+	if status.Code() != codes.InvalidArgument {
+		t.Errorf(
+			"Create: Want error code %d got %d",
+			codes.InvalidArgument,
 			status.Code())
 	}
 }
