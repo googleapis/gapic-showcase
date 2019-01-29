@@ -31,7 +31,7 @@ import (
 
 func TestGetOperation_wait(t *testing.T) {
 	endTime, _ := ptypes.TimestampProto(time.Now())
-	waitReq := &pb.WaitRequest{EndTime: endTime}
+	waitReq := &pb.WaitRequest{End: &pb.WaitRequest_EndTime{EndTime: endTime}}
 	nameBytes, _ := proto.Marshal(waitReq)
 	req := &lropb.GetOperationRequest{
 		Name: fmt.Sprintf(

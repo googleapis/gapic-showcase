@@ -30,33 +30,48 @@ import (
 )
 
 func TestWait_pending(t *testing.T) {
+	now := time.Unix(1, 0)
+	endTime := time.Unix(2, 0)
+	ttl := endTime.Sub(now)
 	nowF := func() time.Time { return time.Unix(1, 0) }
-	endTime := timestampProto(time.Unix(2, 0))
-	req := &pb.WaitRequest{
-		EndTime: endTime,
+	endTimeProto := timestampProto(endTime)
+
+	tests := []*pb.WaitRequest{
+		&pb.WaitRequest{
+			End: &pb.WaitRequest_EndTime{
+				EndTime: endTimeProto,
+			},
+		},
+		&pb.WaitRequest{
+			End: &pb.WaitRequest_Ttl{
+				Ttl: ptypes.DurationProto(ttl),
+			},
+		},
 	}
 
-	server := &echoServerImpl{waiter: &waiterImpl{nowF: nowF}}
-	op, _ := server.Wait(context.Background(), req)
+	for _, req := range tests {
+		server := &echoServerImpl{waiter: &waiterImpl{nowF: nowF}}
+		op, _ := server.Wait(context.Background(), req)
 
-	if op.Done {
-		t.Errorf("Wait() for %q expectee done=false got done=true", req)
-	}
+		if op.Done {
+			t.Errorf("Wait() for %q expectee done=false got done=true", req)
+		}
 
-	checkName(t, req, op)
+		checkName(t, req, op)
 
-	if op.Metadata == nil {
-		t.Errorf("Wait() for %q expected metadata, got nil", req)
-	}
+		if op.Metadata == nil {
+			t.Errorf("Wait() for %q expected metadata, got nil", req)
+		}
 
-	meta := &pb.WaitMetadata{}
-	ptypes.UnmarshalAny(op.Metadata, meta)
-	if !proto.Equal(endTime, meta.EndTime) {
-		t.Errorf(
-			"Wait for %q expected metadata with Endtime=%q, got %q",
-			req,
-			endTime,
-			meta.EndTime)
+		meta := &pb.WaitMetadata{}
+		ptypes.UnmarshalAny(op.Metadata, meta)
+		if !proto.Equal(endTimeProto, meta.EndTime) {
+			t.Errorf(
+				"Wait for %q expected metadata with Endtime=%q, got %q",
+				req,
+				endTimeProto,
+				meta.EndTime)
+		}
 	}
 }
 
@@ -65,7 +80,9 @@ func TestWait_success(t *testing.T) {
 	endTime := timestampProto(time.Unix(2, 0))
 	success := &pb.WaitResponse{Content: "Hello World!"}
 	req := &pb.WaitRequest{
-		EndTime:  endTime,
+		End: &pb.WaitRequest_EndTime{
+			EndTime: endTime,
+		},
 		Response: &pb.WaitRequest_Success{Success: success},
 	}
 
@@ -98,7 +115,9 @@ func TestWait_error(t *testing.T) {
 	endTime := timestampProto(time.Unix(2, 0))
 	expErr := &status.Status{Code: int32(1), Message: "Error!"}
 	req := &pb.WaitRequest{
-		EndTime:  endTime,
+		End: &pb.WaitRequest_EndTime{
+			EndTime: endTime,
+		},
 		Response: &pb.WaitRequest_Error{Error: expErr},
 	}
 

@@ -7,6 +7,8 @@ import (
 
 	anypb "github.com/golang/protobuf/ptypes/any"
 
+	durationpb "github.com/golang/protobuf/ptypes/duration"
+
 	"fmt"
 
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
@@ -28,6 +30,12 @@ var WaitFollow bool
 
 var WaitPollOperation string
 
+var WaitInputEnd string
+
+var WaitInputEndEndTime genprotopb.WaitRequest_EndTime
+
+var WaitInputEndTtl genprotopb.WaitRequest_Ttl
+
 var WaitInputResponse string
 
 var WaitInputResponseError genprotopb.WaitRequest_Error
@@ -39,15 +47,21 @@ var WaitInputResponseErrorDetails []string
 func init() {
 	EchoServiceCmd.AddCommand(WaitCmd)
 
-	WaitInput.EndTime = new(timestamppb.Timestamp)
+	WaitInputEndEndTime.EndTime = new(timestamppb.Timestamp)
+
+	WaitInputEndTtl.Ttl = new(durationpb.Duration)
 
 	WaitInputResponseError.Error = new(statuspb.Status)
 
 	WaitInputResponseSuccess.Success = new(genprotopb.WaitResponse)
 
-	WaitCmd.Flags().Int64Var(&WaitInput.EndTime.Seconds, "end_time.seconds", 0, "")
+	WaitCmd.Flags().Int64Var(&WaitInputEndEndTime.EndTime.Seconds, "end.end_time.seconds", 0, "")
 
-	WaitCmd.Flags().Int32Var(&WaitInput.EndTime.Nanos, "end_time.nanos", 0, "")
+	WaitCmd.Flags().Int32Var(&WaitInputEndEndTime.EndTime.Nanos, "end.end_time.nanos", 0, "")
+
+	WaitCmd.Flags().Int64Var(&WaitInputEndTtl.Ttl.Seconds, "end.ttl.seconds", 0, "")
+
+	WaitCmd.Flags().Int32Var(&WaitInputEndTtl.Ttl.Nanos, "end.ttl.nanos", 0, "")
 
 	WaitCmd.Flags().Int32Var(&WaitInputResponseError.Error.Code, "response.error.code", 0, "")
 
@@ -56,6 +70,8 @@ func init() {
 	WaitCmd.Flags().StringArrayVar(&WaitInputResponseErrorDetails, "response.error.details", []string{}, "")
 
 	WaitCmd.Flags().StringVar(&WaitInputResponseSuccess.Success.Content, "response.success.content", "", "")
+
+	WaitCmd.Flags().StringVar(&WaitInputEnd, "end", "", "")
 
 	WaitCmd.Flags().StringVar(&WaitInputResponse, "response", "", "")
 
@@ -81,6 +97,8 @@ var WaitCmd = &cobra.Command{
 
 		if WaitFromFile == "" {
 
+			cmd.MarkFlagRequired("end")
+
 			cmd.MarkFlagRequired("response")
 
 		}
@@ -102,6 +120,18 @@ var WaitCmd = &cobra.Command{
 			}
 
 		} else {
+
+			switch WaitInputEnd {
+
+			case "end_time":
+				WaitInput.End = &WaitInputEndEndTime
+
+			case "ttl":
+				WaitInput.End = &WaitInputEndTtl
+
+			default:
+				return fmt.Errorf("Missing oneof choice for end")
+			}
 
 			switch WaitInputResponse {
 

@@ -16,6 +16,7 @@ syntax = "proto3";
 
 import "google/api/annotations.proto";
 import "google/longrunning/operations.proto";
+import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 import "google/rpc/status.proto";
 
@@ -149,9 +150,13 @@ message PagedExpandResponse {
 
 // The request for Wait method.
 message WaitRequest {
-  // The time that this operation will complete.
-  google.protobuf.Timestamp end_time = 1;
+  oneof end {
+    // The time that this operation will complete.
+    google.protobuf.Timestamp end_time = 1;
 
+    // The duration of this operation.
+    google.protobuf.Duration ttl = 4;
+  }
 
   oneof response {
     // The error that will be returned by the server. If this code is specified
