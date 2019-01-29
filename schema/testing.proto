@@ -91,7 +91,7 @@ service Testing {
   //
   // In cases where a test involves registering a final answer at the
   // end of the test, this method provides the means to do so.
-  rpc CheckTest(CheckTestRequest) returns (CheckTestResponse) {
+  rpc VerifyTest(VerifyTestRequest) returns (VerifyTestResponse) {
     option (google.api.http) = {
       post: "/v1alpha3/{name=sessions/*/tests/*}:check"
     };
@@ -110,6 +110,8 @@ message Session {
 
   // The specification versions understood by Showcase.
   enum Version {
+    // Unspecified version. If passed on creation, the session will default
+    // to using the latest stable release.
     VERSION_UNSPECIFIED = 0;
 
     // The latest v1. Currently, this is v1.0.
@@ -342,7 +344,7 @@ message DeleteTestRequest {
   string name = 1 [(google.api.resource_reference) = "Test"];
 }
 
-message CheckTestRequest {
+message VerifyTestRequest {
   // The test to have an answer registered to it.
   string name = 1 [(google.api.resource_reference) = "Test"];
 
@@ -353,7 +355,7 @@ message CheckTestRequest {
   repeated bytes answers = 3;
 }
 
-message CheckTestResponse {
+message VerifyTestResponse {
   // An issue if check answer was unsuccessful. This will be empty if the check answer succeeded.
   Issue issue = 1;
 }
