@@ -21,6 +21,7 @@ import (
 
 	client "github.com/googleapis/gapic-showcase/client"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
+	"google.golang.org/api/iterator"
 )
 
 func ExampleNewTestingClient() {
@@ -31,6 +32,82 @@ func ExampleNewTestingClient() {
 	}
 	// TODO: Use client.
 	_ = c
+}
+
+func ExampleTestingClient_CreateSession() {
+	ctx := context.Background()
+	c, err := client.NewTestingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &genprotopb.CreateSessionRequest{
+		// TODO: Fill request struct fields.
+	}
+	resp, err := c.CreateSession(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
+func ExampleTestingClient_GetSession() {
+	ctx := context.Background()
+	c, err := client.NewTestingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &genprotopb.GetSessionRequest{
+		// TODO: Fill request struct fields.
+	}
+	resp, err := c.GetSession(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
+func ExampleTestingClient_ListSessions() {
+	ctx := context.Background()
+	c, err := client.NewTestingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &genprotopb.ListSessionsRequest{
+		// TODO: Fill request struct fields.
+	}
+	it := c.ListSessions(ctx, req)
+	for {
+		resp, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			// TODO: Handle error.
+		}
+		// TODO: Use resp.
+		_ = resp
+	}
+}
+
+func ExampleTestingClient_DeleteSession() {
+	ctx := context.Background()
+	c, err := client.NewTestingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &genprotopb.DeleteSessionRequest{
+		// TODO: Fill request struct fields.
+	}
+	err = c.DeleteSession(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
 }
 
 func ExampleTestingClient_ReportSession() {
@@ -51,6 +128,30 @@ func ExampleTestingClient_ReportSession() {
 	_ = resp
 }
 
+func ExampleTestingClient_ListTests() {
+	ctx := context.Background()
+	c, err := client.NewTestingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &genprotopb.ListTestsRequest{
+		// TODO: Fill request struct fields.
+	}
+	it := c.ListTests(ctx, req)
+	for {
+		resp, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			// TODO: Handle error.
+		}
+		// TODO: Use resp.
+		_ = resp
+	}
+}
+
 func ExampleTestingClient_DeleteTest() {
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
@@ -67,18 +168,20 @@ func ExampleTestingClient_DeleteTest() {
 	}
 }
 
-func ExampleTestingClient_RegisterTest() {
+func ExampleTestingClient_VerifyTest() {
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
 
-	req := &genprotopb.RegisterTestRequest{
+	req := &genprotopb.VerifyTestRequest{
 		// TODO: Fill request struct fields.
 	}
-	err = c.RegisterTest(ctx, req)
+	resp, err := c.VerifyTest(ctx, req)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	// TODO: Use resp.
+	_ = resp
 }

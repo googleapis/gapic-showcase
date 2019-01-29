@@ -18,10 +18,13 @@ package client
 
 import (
 	"context"
+	"math"
 	"time"
 
+	"github.com/golang/protobuf/proto"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	gax "github.com/googleapis/gax-go/v2"
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	"google.golang.org/api/transport"
 	"google.golang.org/grpc"
@@ -31,9 +34,14 @@ import (
 
 // TestingCallOptions contains the retry settings for each method of TestingClient.
 type TestingCallOptions struct {
+	CreateSession []gax.CallOption
+	GetSession    []gax.CallOption
+	ListSessions  []gax.CallOption
+	DeleteSession []gax.CallOption
 	ReportSession []gax.CallOption
+	ListTests     []gax.CallOption
 	DeleteTest    []gax.CallOption
-	RegisterTest  []gax.CallOption
+	VerifyTest    []gax.CallOption
 }
 
 func defaultTestingClientOptions() []option.ClientOption {
@@ -50,6 +58,17 @@ func defaultTestingCallOptions() *TestingCallOptions {
 		Multiplier: 1.3,
 	}
 
+	idempotent := []gax.CallOption{
+		gax.WithRetry(func() gax.Retryer {
+			return gax.OnCodes([]codes.Code{
+				codes.Aborted,
+				codes.Internal,
+				codes.Unavailable,
+				codes.Unknown,
+			}, backoff)
+		}),
+	}
+
 	nonidempotent := []gax.CallOption{
 		gax.WithRetry(func() gax.Retryer {
 			return gax.OnCodes([]codes.Code{
@@ -59,9 +78,14 @@ func defaultTestingCallOptions() *TestingCallOptions {
 	}
 
 	return &TestingCallOptions{
+		GetSession:    idempotent,
+		ListSessions:  idempotent,
+		ListTests:     idempotent,
+		CreateSession: nonidempotent,
+		DeleteSession: nonidempotent,
 		ReportSession: nonidempotent,
 		DeleteTest:    nonidempotent,
-		RegisterTest:  nonidempotent,
+		VerifyTest:    nonidempotent,
 	}
 }
 
@@ -122,6 +146,87 @@ func (c *TestingClient) setGoogleClientInfo(keyval ...string) {
 	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
 }
 
+// CreateSession creates a new testing session.
+func (c *TestingClient) CreateSession(ctx context.Context, req *genprotopb.CreateSessionRequest, opts ...gax.CallOption) (*genprotopb.Session, error) {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append(c.CallOptions.CreateSession[0:len(c.CallOptions.CreateSession):len(c.CallOptions.CreateSession)], opts...)
+	var resp *genprotopb.Session
+	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		var err error
+		resp, err = c.testingClient.CreateSession(ctx, req, settings.GRPC...)
+		return err
+	}, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// GetSession gets a testing session.
+func (c *TestingClient) GetSession(ctx context.Context, req *genprotopb.GetSessionRequest, opts ...gax.CallOption) (*genprotopb.Session, error) {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append(c.CallOptions.GetSession[0:len(c.CallOptions.GetSession):len(c.CallOptions.GetSession)], opts...)
+	var resp *genprotopb.Session
+	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		var err error
+		resp, err = c.testingClient.GetSession(ctx, req, settings.GRPC...)
+		return err
+	}, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// ListSessions lists the current test sessions.
+func (c *TestingClient) ListSessions(ctx context.Context, req *genprotopb.ListSessionsRequest, opts ...gax.CallOption) *SessionIterator {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append(c.CallOptions.ListSessions[0:len(c.CallOptions.ListSessions):len(c.CallOptions.ListSessions)], opts...)
+	it := &SessionIterator{}
+	req = proto.Clone(req).(*genprotopb.ListSessionsRequest)
+	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.Session, string, error) {
+		var resp *genprotopb.ListSessionsResponse
+		req.PageToken = pageToken
+		if pageSize > math.MaxInt32 {
+			req.PageSize = math.MaxInt32
+		} else {
+			req.PageSize = int32(pageSize)
+		}
+		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			var err error
+			resp, err = c.testingClient.ListSessions(ctx, req, settings.GRPC...)
+			return err
+		}, opts...)
+		if err != nil {
+			return nil, "", err
+		}
+		return resp.Sessions, resp.NextPageToken, nil
+	}
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.PageSize)
+	return it
+}
+
+// DeleteSession delete a test session.
+func (c *TestingClient) DeleteSession(ctx context.Context, req *genprotopb.DeleteSessionRequest, opts ...gax.CallOption) error {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append(c.CallOptions.DeleteSession[0:len(c.CallOptions.DeleteSession):len(c.CallOptions.DeleteSession)], opts...)
+	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		var err error
+		_, err = c.testingClient.DeleteSession(ctx, req, settings.GRPC...)
+		return err
+	}, opts...)
+	return err
+}
+
 // ReportSession report on the status of a session.
 // This generates a report detailing which tests have been completed,
 // and an overall rollup.
@@ -138,6 +243,43 @@ func (c *TestingClient) ReportSession(ctx context.Context, req *genprotopb.Repor
 		return nil, err
 	}
 	return resp, nil
+}
+
+// ListTests list the tests of a sessesion.
+func (c *TestingClient) ListTests(ctx context.Context, req *genprotopb.ListTestsRequest, opts ...gax.CallOption) *TestIterator {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append(c.CallOptions.ListTests[0:len(c.CallOptions.ListTests):len(c.CallOptions.ListTests)], opts...)
+	it := &TestIterator{}
+	req = proto.Clone(req).(*genprotopb.ListTestsRequest)
+	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.Test, string, error) {
+		var resp *genprotopb.ListTestsResponse
+		req.PageToken = pageToken
+		if pageSize > math.MaxInt32 {
+			req.PageSize = math.MaxInt32
+		} else {
+			req.PageSize = int32(pageSize)
+		}
+		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			var err error
+			resp, err = c.testingClient.ListTests(ctx, req, settings.GRPC...)
+			return err
+		}, opts...)
+		if err != nil {
+			return nil, "", err
+		}
+		return resp.Tests, resp.NextPageToken, nil
+	}
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.PageSize)
+	return it
 }
 
 // DeleteTest explicitly decline to implement a test.
@@ -157,17 +299,105 @@ func (c *TestingClient) DeleteTest(ctx context.Context, req *genprotopb.DeleteTe
 	return err
 }
 
-// RegisterTest register a response to a test.
+// VerifyTest register a response to a test.
 //
 // In cases where a test involves registering a final answer at the
 // end of the test, this method provides the means to do so.
-func (c *TestingClient) RegisterTest(ctx context.Context, req *genprotopb.RegisterTestRequest, opts ...gax.CallOption) error {
+func (c *TestingClient) VerifyTest(ctx context.Context, req *genprotopb.VerifyTestRequest, opts ...gax.CallOption) (*genprotopb.VerifyTestResponse, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
-	opts = append(c.CallOptions.RegisterTest[0:len(c.CallOptions.RegisterTest):len(c.CallOptions.RegisterTest)], opts...)
+	opts = append(c.CallOptions.VerifyTest[0:len(c.CallOptions.VerifyTest):len(c.CallOptions.VerifyTest)], opts...)
+	var resp *genprotopb.VerifyTestResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		_, err = c.testingClient.RegisterTest(ctx, req, settings.GRPC...)
+		resp, err = c.testingClient.VerifyTest(ctx, req, settings.GRPC...)
 		return err
 	}, opts...)
-	return err
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// SessionIterator manages a stream of *genprotopb.Session.
+type SessionIterator struct {
+	items    []*genprotopb.Session
+	pageInfo *iterator.PageInfo
+	nextFunc func() error
+
+	// InternalFetch is for use by the Google Cloud Libraries only.
+	// It is not part of the stable interface of this package.
+	//
+	// InternalFetch returns results from a single call to the underlying RPC.
+	// The number of results is no greater than pageSize.
+	// If there are no more results, nextPageToken is empty and err is nil.
+	InternalFetch func(pageSize int, pageToken string) (results []*genprotopb.Session, nextPageToken string, err error)
+}
+
+// PageInfo supports pagination. See the google.golang.org/api/iterator package for details.
+func (it *SessionIterator) PageInfo() *iterator.PageInfo {
+	return it.pageInfo
+}
+
+// Next returns the next result. Its second return value is iterator.Done if there are no more
+// results. Once Next returns Done, all subsequent calls will return Done.
+func (it *SessionIterator) Next() (*genprotopb.Session, error) {
+	var item *genprotopb.Session
+	if err := it.nextFunc(); err != nil {
+		return item, err
+	}
+	item = it.items[0]
+	it.items = it.items[1:]
+	return item, nil
+}
+
+func (it *SessionIterator) bufLen() int {
+	return len(it.items)
+}
+
+func (it *SessionIterator) takeBuf() interface{} {
+	b := it.items
+	it.items = nil
+	return b
+}
+
+// TestIterator manages a stream of *genprotopb.Test.
+type TestIterator struct {
+	items    []*genprotopb.Test
+	pageInfo *iterator.PageInfo
+	nextFunc func() error
+
+	// InternalFetch is for use by the Google Cloud Libraries only.
+	// It is not part of the stable interface of this package.
+	//
+	// InternalFetch returns results from a single call to the underlying RPC.
+	// The number of results is no greater than pageSize.
+	// If there are no more results, nextPageToken is empty and err is nil.
+	InternalFetch func(pageSize int, pageToken string) (results []*genprotopb.Test, nextPageToken string, err error)
+}
+
+// PageInfo supports pagination. See the google.golang.org/api/iterator package for details.
+func (it *TestIterator) PageInfo() *iterator.PageInfo {
+	return it.pageInfo
+}
+
+// Next returns the next result. Its second return value is iterator.Done if there are no more
+// results. Once Next returns Done, all subsequent calls will return Done.
+func (it *TestIterator) Next() (*genprotopb.Test, error) {
+	var item *genprotopb.Test
+	if err := it.nextFunc(); err != nil {
+		return item, err
+	}
+	item = it.items[0]
+	it.items = it.items[1:]
+	return item, nil
+}
+
+func (it *TestIterator) bufLen() int {
+	return len(it.items)
+}
+
+func (it *TestIterator) takeBuf() interface{} {
+	b := it.items
+	it.items = nil
+	return b
 }
