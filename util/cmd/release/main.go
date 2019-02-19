@@ -150,7 +150,7 @@ func compileBinaries() {
 			fmt.Sprintf("-osarch=%s", osArch),
 			"-output",
 			filepath.Join(stagingDir, fmt.Sprintf("gapic-showcase-%s-{{.OS}}-{{.Arch}}", version()), "gapic-showcase"),
-			"github.com/googleapis/gapic-showcase")
+			"github.com/googleapis/gapic-showcase/cmd/gapic-showcase")
 	}
 
 	dirs, _ := filepath.Glob(filepath.Join(stagingDir, "*"))
@@ -190,8 +190,8 @@ var versionMemo string
 
 func version() string {
 	verOnce.Do(func() {
-		util.ExecuteInDir(showcaseDir(), "go", "get")
-		util.ExecuteInDir(showcaseDir(), "go", "install")
+		util.ExecuteInDir(showcaseDir(), "go", "get", "./...")
+		util.ExecuteInDir(showcaseDir(), "go", "install", "./cmd/gapic-showcase")
 		version, err := exec.Command("gapic-showcase", "--version").Output()
 		if err != nil {
 			log.Fatal("Failed getting showcase version")
