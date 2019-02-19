@@ -119,7 +119,7 @@ jobs:
               --rm \
               --mount type=bind,source="$(pwd)"/schema,destination=/in/protos/google/showcase/v1alpha3,readonly \
               --mount type=bind,source="$(pwd)"/goout,destination=/out/ \
-              gcr.io/gapic-images/gapic-generator-go:v0.2 \
+              gcr.io/gapic-images/gapic-generator-go:v0.4 \
               --go-gapic-package "<github.com/googleapis/gapic-showcase/client;client>"
 
   protobufjs-load-test:
