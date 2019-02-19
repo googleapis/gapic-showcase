@@ -149,7 +149,7 @@ jobs:
       - run:
           name: Install server
           command: |
-            go get
+            go get ./...
             go install ./cmd/gapic-showcase
             echo "export VERSION=$(gapic-showcase --version)" >> $BASH_ENV
       - run:
