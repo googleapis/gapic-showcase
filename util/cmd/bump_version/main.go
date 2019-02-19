@@ -29,7 +29,7 @@ import (
 )
 
 const CURRENT_API = "v1alpha3"
-const CURRENT_RELEASE = "0.0.10"
+const CURRENT_RELEASE = "0.0.11"
 
 func main() {
 	var bumpMajor, bumpMinor, bumpPatch bool
