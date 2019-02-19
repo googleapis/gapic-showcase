@@ -13,11 +13,11 @@ ENV GOOS linux
 ENV GOARCH amd64
 
 # Install showcase.
-RUN go get
-RUN go build ./cmd/gapic-showcase \
-  -installsuffix cgo \
+RUN go get ./...
+RUN go build -installsuffix cgo \
   -ldflags="-w -s" \
-  -o /go/bin/gapic-showcase
+  -o /go/bin/gapic-showcase \
+  ./cmd/gapic-showcase
 
 # Start a fresh image, and only copy the built binary.
 FROM scratch
