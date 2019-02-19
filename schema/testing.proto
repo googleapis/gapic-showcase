@@ -15,6 +15,8 @@
 syntax = "proto3";
 
 import "google/api/annotations.proto";
+import "google/api/client.proto";
+import "google/api/resource.proto";
 import "google/protobuf/empty.proto";
 
 package google.showcase.v1alpha3;
@@ -106,7 +108,7 @@ service Testing {
 message Session {
   // The name of the session. The ID must conform to ^[a-z]+$
   // If this is not provided, Showcase chooses one at random.
-  string name = 1 [(google.api.resource).path = "sessions/{session}"];
+  string name = 1 [(google.api.resource).pattern = "sessions/{session}"];
 
   // The specification versions understood by Showcase.
   enum Version {
@@ -197,7 +199,7 @@ message Test {
   // The name of the test.
   // The tests/* portion of the names are hard-coded, and do not change
   // from session to session.
-  string name = 1 [(google.api.resource).path = "sessions/{session}/tests/{test}"];
+  string name = 1 [(google.api.resource).pattern = "sessions/{session}/tests/{test}"];
 
   // Whether or not a test is required, recommended, or optional.
   enum ExpectationLevel {
@@ -238,7 +240,7 @@ message Test {
   // is ready.
   message Blueprint {
     // The name of this blueprint.
-    string name = 1 [(google.api.resource).path = "sessions/{session}/tests/{test}/blueprints/{blueprint}"];
+    string name = 1 [(google.api.resource).pattern = "sessions/{session}/tests/{test}/blueprints/{blueprint}"];
 
     // A description of this blueprint.
     string description = 2;
