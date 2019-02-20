@@ -28,10 +28,6 @@ option go_package = "github.com/googleapis/gapic-showcase/server/genproto";
 option java_package = "com.google.showcase.v1alpha3";
 option java_multiple_files = true;
 
-option (google.api.client_package) = {
-  title: "gapic-showcase"
-};
-
 // This service is used showcase the four main types of rpcs - unary, server
 // side streaming, client side streaming, and bidirectional streaming. This
 // service also exposes methods that explicitly implement server delay, and
