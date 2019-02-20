@@ -28,10 +28,6 @@ option go_package = "github.com/googleapis/gapic-showcase/server/genproto";
 option java_package = "com.google.showcase.v1alpha3";
 option java_multiple_files = true;
 
-option (google.api.client_package) = {
-  title: "gapic-showcase"
-};
-
 // A simple identity service.
 service Identity {
   // This service is meant to only run locally on the port 7469 (keypad digits
