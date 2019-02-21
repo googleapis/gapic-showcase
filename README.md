@@ -41,7 +41,8 @@ $ gapic-showcase run
 ```sh
 $ export GAPIC_SHOWCASE_VERSION=0.0.12
 $ docker pull gcr.io/gapic-showcase/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
-$ docker run -it gcr.io/gapic-showcase/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
+$ docker run --rm -p 7469:7469/tcp -p 7469:7469/udp \
+    gcr.io/gapic-showcase/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
 > 2018/09/19 02:13:09 Showcase listening on port: :7469
 ```
 
