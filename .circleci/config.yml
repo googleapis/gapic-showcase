@@ -168,6 +168,7 @@ jobs:
                 -u googleapis \
                 -r gapic-showcase \
                 -c ${CIRCLE_SHA1} \
+                -prerelease \
                 ${CIRCLE_TAG} ./dist
 
   push-image:
