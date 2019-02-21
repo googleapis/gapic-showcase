@@ -24,7 +24,7 @@ our [releases](https://github.com/googleapis/gapic-showcase/releases) page.
 ### Installation
 The GAPIC Showcase CLI Tool can be installed using three different mechanisms,
 downloading the compiled binary from our our [releases](https://github.com/googleapis/gapic-showcase/releases)
-page, pulling our released docker image from [google container registry](https://gcr.io/gapic-showcase/gapic-showcase),
+page, pulling our released docker image from [Google Container Registry](https://gcr.io/gapic-images/gapic-showcase),
 or simply by using go commands.
 
 #### Binary Installation
@@ -40,9 +40,9 @@ $ gapic-showcase run
 #### Docker Installation
 ```sh
 $ export GAPIC_SHOWCASE_VERSION=0.0.12
-$ docker pull gcr.io/gapic-showcase/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
+$ docker pull gcr.io/gapic-images/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
 $ docker run --rm -p 7469:7469/tcp -p 7469:7469/udp \
-    gcr.io/gapic-showcase/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
+    gcr.io/gapic-images/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
 > 2018/09/19 02:13:09 Showcase listening on port: :7469
 ```
 

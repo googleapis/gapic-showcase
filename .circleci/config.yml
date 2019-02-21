@@ -183,12 +183,12 @@ jobs:
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
       - run:
           name: Build docker image
-          command: docker build -t gcr.io/gapic-showcase/gapic-showcase .
+          command: docker build -t gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase .
       - run:
           name: Tag image
-          command: docker tag gcr.io/gapic-showcase/gapic-showcase gcr.io/gapic-showcase/gapic-showcase:${CIRCLE_TAG}
+          command: docker tag gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase:${CIRCLE_TAG}
       - run:
           name: Push image
           command: |
-            gcloud docker -- push gcr.io/gapic-showcase/gapic-showcase:latest
-            gcloud docker -- push gcr.io/gapic-showcase/gapic-showcase:${CIRCLE_TAG}
+            gcloud docker -- push gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase:latest
+            gcloud docker -- push gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase:${CIRCLE_TAG}
