@@ -182,13 +182,16 @@ jobs:
             gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
       - run:
+          name: Parse version tag
+          command: echo "export VERSION=${CIRCLE_TAG#v}" >> $BASH_ENV
+      - run:
           name: Build docker image
           command: docker build -t gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase .
       - run:
           name: Tag image
-          command: docker tag gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase:${CIRCLE_TAG}
+          command: docker tag gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase:${VERSION}
       - run:
           name: Push image
           command: |
             gcloud docker -- push gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase:latest
-            gcloud docker -- push gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase:${CIRCLE_TAG}
+            gcloud docker -- push gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase:${VERSION}
