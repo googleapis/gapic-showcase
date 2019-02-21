@@ -147,11 +147,8 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install server
-          command: |
-            go get ./...
-            go install ./cmd/gapic-showcase
-            echo "export VERSION=$(gapic-showcase --version)" >> $BASH_ENV
+          name: Retrieve dependencies
+          command: go get ./...
       - run:
           name: Install protoc
           command: |
@@ -168,10 +165,10 @@ jobs:
           command: |
             go get github.com/tcnksm/ghr
             ghr -t ${GITHUB_TOKEN} \
-                -u ${CIRCLE_PROJECT_USERNAME} \
-                -r ${CIRCLE_PROJECT_REPONAME} \
+                -u googleapis \
+                -r gapic-showcase \
                 -c ${CIRCLE_SHA1} \
-                v${VERSION} ./dist/
+                ${CIRCLE_TAG} ./dist
 
   push-image:
     machine: true
@@ -187,13 +184,10 @@ jobs:
           name: Build docker image
           command: docker build -t gcr.io/gapic-showcase/gapic-showcase .
       - run:
-          name: Get version
-          command: echo "export VERSION=$(docker run -it gcr.io/gapic-showcase/gapic-showcase --version | perl -pe '($_)=/([0-9]+([.][0-9]+)+)/')" >> $BASH_ENV
-      - run:
           name: Tag image
-          command: docker tag gcr.io/gapic-showcase/gapic-showcase gcr.io/gapic-showcase/gapic-showcase:${VERSION}
+          command: docker tag gcr.io/gapic-showcase/gapic-showcase gcr.io/gapic-showcase/gapic-showcase:${CIRCLE_TAG}
       - run:
           name: Push image
           command: |
             gcloud docker -- push gcr.io/gapic-showcase/gapic-showcase:latest
-            gcloud docker -- push gcr.io/gapic-showcase/gapic-showcase:${VERSION}
+            gcloud docker -- push gcr.io/gapic-showcase/gapic-showcase:${CIRCLE_TAG}
