@@ -18,8 +18,8 @@ workflows:
       - github_release:
           requires:
             - build
-            # - kotlin-smoke-test
-            # - python-smoke-test
+            - kotlin-smoke-test
+            - python-smoke-test
             - go-smoke-test
             - protobufjs-load-test
           filters: &releases
@@ -30,8 +30,8 @@ workflows:
       - push-image:
           requires:
             - build
-            # - kotlin-smoke-test
-            # - python-smoke-test
+            - kotlin-smoke-test
+            - python-smoke-test
             - go-smoke-test
             - protobufjs-load-test
           filters: *releases
@@ -92,7 +92,7 @@ jobs:
             docker run --rm \
               --mount type=bind,source="$(pwd)"/api-common-protos,target=/proto \
               --mount type=bind,source="$(pwd)"/koutput,target=/generated \
-              gcr.io/kotlin-gapic/kgen:0.0.1
+              gcr.io/kotlin-gapic/kgen:0.3.0
 
   python-smoke-test:
     machine: true
@@ -105,7 +105,7 @@ jobs:
             docker run --rm \
               --mount type=bind,source="$(pwd)"/schema/,destination=/in/google/showcase/v1alpha3/,readonly \
               --mount type=bind,source="$(pwd)"/pyout,target=/out \
-              gcr.io/gapic-images/gapic-generator-python:0.2
+              gcr.io/gapic-images/gapic-generator-python:0.6
 
   go-smoke-test:
     machine: true
