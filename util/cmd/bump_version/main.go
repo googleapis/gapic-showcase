@@ -138,6 +138,9 @@ func replacer(filetypes []string, old, new string) filepath.WalkFunc {
 		if fi.IsDir() {
 			return nil
 		}
+		if strings.HasSuffix(fi.Name(), "CHANGELOG.md") {
+			return nil
+		}
 
 		matched := false
 		for _, t := range filetypes {
