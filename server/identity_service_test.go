@@ -144,31 +144,50 @@ func Test_Create_invalid(t *testing.T) {
 }
 
 func Test_Create_alreadyPresent(t *testing.T) {
-	first := []*pb.User{
-		&pb.User{DisplayName: "Ekko", Email: "ekko@google.com"},
-		&pb.User{DisplayName: "Rumble", Email: "rumble@google.com"},
-	}
-	second := []*pb.User{
-		&pb.User{DisplayName: "Ekko", Email: "musubigoogle.com"},
-		&pb.User{DisplayName: "Musubi", Email: "rumble@google.com"},
-	}
+	first := &pb.User{DisplayName: "Rumble", Email: "rumble@google.com"}
+	second := &pb.User{DisplayName: "Musubi", Email: "rumble@google.com"}
+	third := &pb.User{DisplayName: "Rumble", Email: "rumble@google.com"}
 
 	s := NewIdentityServer()
-	for _, u := range first {
-		_, err := s.CreateUser(context.Background(), &pb.CreateUserRequest{User: u})
-		if err != nil {
-			t.Errorf("Create: unexpected err %+v", err)
-		}
+	created, err := s.CreateUser(context.Background(), &pb.CreateUserRequest{User: first})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
 	}
-	for _, u := range second {
-		_, err := s.CreateUser(context.Background(), &pb.CreateUserRequest{User: u})
-		status, _ := status.FromError(err)
-		if status.Code() != codes.AlreadyExists {
-			t.Errorf(
-				"Create: Want error code %d got %d",
-				codes.AlreadyExists,
-				status.Code())
-		}
+
+	_, err = s.CreateUser(context.Background(), &pb.CreateUserRequest{User: second})
+	stat, _ := status.FromError(err)
+	if stat.Code() != codes.AlreadyExists {
+		t.Errorf(
+			"Create: Want error code %d got %d",
+			codes.AlreadyExists,
+			stat.Code())
+	}
+
+	third.Name = created.GetName()
+	_, err = s.CreateUser(context.Background(), &pb.CreateUserRequest{User: third})
+	stat, _ = status.FromError(err)
+	if stat.Code() != codes.AlreadyExists {
+		t.Errorf(
+			"Create: Want error code %d got %d",
+			codes.AlreadyExists,
+			stat.Code())
+	}
+}
+
+func Test_Create_deleted(t *testing.T) {
+	s := NewIdentityServer()
+	u := &pb.User{DisplayName: "Rumble", Email: "rumble@google.com"}
+	u, err := s.CreateUser(context.Background(), &pb.CreateUserRequest{User: u})
+	if err != nil {
+		t.Errorf("Create: unexpected error: %v", err)
+	}
+	_, err = s.DeleteUser(context.Background(), &pb.DeleteUserRequest{Name: u.GetName()})
+	if err != nil {
+		t.Errorf("Delete: unexpected error: %v", err)
+	}
+	u, err = s.CreateUser(context.Background(), &pb.CreateUserRequest{User: u})
+	if err != nil {
+		t.Errorf("Create: a using a deleted email should be allowed, got: %v", err)
 	}
 }
 
@@ -288,37 +307,36 @@ func Test_Update_invalid(t *testing.T) {
 }
 
 func Test_Update_alreadyPresent(t *testing.T) {
-	first := []*pb.User{
-		&pb.User{DisplayName: "Ekko", Email: "ekko@google.com"},
-		&pb.User{DisplayName: "Rumble", Email: "rumble@google.com"},
-	}
-	second := []*pb.User{
-		&pb.User{DisplayName: "Rumble", Email: "ekko@google.com"},
-		&pb.User{DisplayName: "Rumble", Email: "ekko@google.com"},
-	}
+	first := &pb.User{DisplayName: "Rumble", Email: "rumble@google.com"}
+	second := &pb.User{DisplayName: "Ekko", Email: "ekko@google.com"}
 
 	s := NewIdentityServer()
-	for i, u := range first {
-		created, err := s.CreateUser(
-			context.Background(),
-			&pb.CreateUserRequest{User: u})
-		if err != nil {
-			t.Errorf("Create: unexpected err %+v", err)
-		}
-		second[i].Name = created.GetName()
 
+	first, err := s.CreateUser(
+		context.Background(),
+		&pb.CreateUserRequest{User: first})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
 	}
-	for _, u := range second {
-		_, err := s.UpdateUser(
-			context.Background(),
-			&pb.UpdateUserRequest{User: u, UpdateMask: nil})
-		status, _ := status.FromError(err)
-		if status.Code() != codes.AlreadyExists {
-			t.Errorf(
-				"Update: Want error code %d got %d",
-				codes.AlreadyExists,
-				status.Code())
-		}
+
+	second, err = s.CreateUser(
+		context.Background(),
+		&pb.CreateUserRequest{User: second})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
+	}
+
+	second.Email = first.GetEmail()
+
+	_, err = s.UpdateUser(
+		context.Background(),
+		&pb.UpdateUserRequest{User: second, UpdateMask: nil})
+	status, _ := status.FromError(err)
+	if status.Code() != codes.AlreadyExists {
+		t.Errorf(
+			"Update: Want error code %d got %d",
+			codes.AlreadyExists,
+			status.Code())
 	}
 }
 
