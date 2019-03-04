@@ -15,6 +15,9 @@
 syntax = "proto3";
 
 import "google/api/annotations.proto";
+import "google/api/client.proto";
+import "google/api/field_behavior.proto";
+import "google/api/resource.proto";
 import "google/longrunning/operations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/field_mask.proto";
@@ -27,28 +30,12 @@ option go_package = "github.com/googleapis/gapic-showcase/server/genproto";
 option java_package = "com.google.showcase.v1alpha3";
 option java_multiple_files = true;
 
-option (google.api.metadata) = {
-  product_uri: "https://github.com/googleapis/gapic-showcase"
-};
-
 // This resource is defined in google/showcase/v1alpha3/user.proto. Since
 // google/showcase/v1alpha3/user.proto is not imported from this file, the
 // resource needs to be defined here to be used in this API.
 option (google.api.resource_definition) = {
-  name: "User",
-  path: "users/{user_id}"
-};
-
-// A resource set defining the possible parent paths of a	blurb.
-option (google.api.resource_set_definition) = {
-  name: "BlurbParent"
-  resources: [{
-    name: "Profile",
-    path: "users/{user_id}/profile"
-  }]
-  resource_references: [
-    "Room"
-  ]
+  symbol: "User",
+  pattern: "users/{user_id}"
 };
 
 // A simple messaging service that implements chat rooms and profile posts.
@@ -66,9 +53,7 @@ service Messaging {
       post: "/v1alpha3/rooms"
       body: "*"
     };
-    option (google.api.method_signature) = {
-      fields: ["room.display_name", "room.description"]
-    };
+    option (google.api.method_signature) = "room.display_name,room.description";
   }
 
   // Retrieves the Room with the given resource name.
@@ -76,9 +61,7 @@ service Messaging {
     option (google.api.http) = {
       get: "/v1alpha3/{name=rooms/*}"
     };
-    option (google.api.method_signature) = {
-      fields: ["name"]
-    };
+    option (google.api.method_signature) = "name";
   }
 
   // Updates a room.
@@ -94,9 +77,7 @@ service Messaging {
     option (google.api.http) = {
       delete: "/v1alpha3/{name=rooms/*}"
     };
-    option (google.api.method_signature) = {
-      fields: ["name"]
-    };
+    option (google.api.method_signature) = "name";
   }
 
   // Lists all chat rooms.
@@ -118,12 +99,8 @@ service Messaging {
         body: "*"
       }
     };
-    option (google.api.method_signature) = {
-      fields: ["parent", "blurb.user", "blurb.text"]
-    };
-    option (google.api.method_signature) = {
-      fields: ["parent", "blurb.user", "blurb.image"]
-    };
+    option (google.api.method_signature) = "parent,blurb.user,blurb.text";
+    option (google.api.method_signature) = "parent,blurb.user,blurb.image";
   }
 
   // Retrieves the Blurb with the given resource name.
@@ -134,9 +111,7 @@ service Messaging {
         get: "v1alpha3/{name=users/*/profile/blurbs/*}"
       }
     };
-    option (google.api.method_signature) = {
-      fields: ["name"]
-    };
+    option (google.api.method_signature) = "name";
   }
 
   // Updates a blurb.
@@ -159,9 +134,7 @@ service Messaging {
         delete: "v1alpha3/{name=users/*/profile/blurbs/*}"
       }
     };
-    option (google.api.method_signature) = {
-      fields: ["name"]
-    };
+    option (google.api.method_signature) = "name";
   }
 
   // Lists blurbs for a specific chat room or user profile depending on the
@@ -173,9 +146,7 @@ service Messaging {
         get: "v1alpha3/{parent=users/*/profile}/blurbs}"
       }
     };
-    option (google.api.method_signature) = {
-      fields: ["parent"]
-    };
+    option (google.api.method_signature) = "parent";
   }
 
   // This method searches through all blurbs across all rooms and profiles
@@ -189,13 +160,11 @@ service Messaging {
         post: "v1alpha3/{parent=users/-/profile}/blurbs:search"
       }
     };
-    option (google.api.operation) = {
+    option (google.longrunning.operation_info) = {
       response_type: "SearchBlurbsResponse"
       metadata_type: "SearchBlurbsMetadata"
     };
-    option (google.api.method_signature) = {
-      fields: ["query"]
-    };
+    option (google.api.method_signature) = "query";
   }
 
   // This returns a stream that emits the blurbs that are created for a
@@ -234,7 +203,7 @@ service Messaging {
 // A chat room.
 message Room {
   // The resource name of the chat room.
-  string name = 1 [(google.api.resource).path = "rooms/{room_id}"];
+  string name = 1 [(google.api.resource).pattern = "rooms/{room_id}"];
 
   // The human readable name of the chat room.
   string display_name = 2 [(google.api.field_behavior) = REQUIRED];
@@ -324,8 +293,8 @@ message Blurb {
   string name = 1 [
     (google.api.resource_set) = {
       resources: [
-        {name: "RoomBlurb", path: "rooms/{room_id}/blurbs/{blurb_id}"},
-        {name: "ProfileBlurb", path: "user/{user_id}/profile/blurbs/{blurb_id}"}
+        {symbol: "RoomBlurb", pattern: "rooms/{room_id}/blurbs/{blurb_id}"},
+        {symbol: "ProfileBlurb", pattern: "user/{user_id}/profile/blurbs/{blurb_id}"}
       ]
     }];
 

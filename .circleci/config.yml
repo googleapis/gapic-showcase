@@ -92,7 +92,7 @@ jobs:
             docker run --rm \
               --mount type=bind,source="$(pwd)"/api-common-protos,target=/proto \
               --mount type=bind,source="$(pwd)"/koutput,target=/generated \
-              gcr.io/kotlin-gapic/kgen:0.0.1
+              gcr.io/kotlin-gapic/kgen:0.3.0
 
   python-smoke-test:
     machine: true
@@ -105,7 +105,7 @@ jobs:
             docker run --rm \
               --mount type=bind,source="$(pwd)"/schema/,destination=/in/google/showcase/v1alpha3/,readonly \
               --mount type=bind,source="$(pwd)"/pyout,target=/out \
-              gcr.io/gapic-images/gapic-generator-python:0.2
+              gcr.io/gapic-images/gapic-generator-python:0.6
 
   go-smoke-test:
     machine: true
@@ -119,7 +119,7 @@ jobs:
               --rm \
               --mount type=bind,source="$(pwd)"/schema,destination=/in/protos/google/showcase/v1alpha3,readonly \
               --mount type=bind,source="$(pwd)"/goout,destination=/out/ \
-              gcr.io/gapic-images/gapic-generator-go:v0.2 \
+              gcr.io/gapic-images/gapic-generator-go:v0.4 \
               --go-gapic-package "<github.com/googleapis/gapic-showcase/client;client>"
 
   protobufjs-load-test:
@@ -147,11 +147,8 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install server
-          command: |
-            go get
-            go install ./cmd/gapic-showcase
-            echo "export VERSION=$(gapic-showcase --version)" >> $BASH_ENV
+          name: Retrieve dependencies
+          command: go get ./...
       - run:
           name: Install protoc
           command: |
@@ -168,10 +165,11 @@ jobs:
           command: |
             go get github.com/tcnksm/ghr
             ghr -t ${GITHUB_TOKEN} \
-                -u ${CIRCLE_PROJECT_USERNAME} \
-                -r ${CIRCLE_PROJECT_REPONAME} \
+                -u googleapis \
+                -r gapic-showcase \
                 -c ${CIRCLE_SHA1} \
-                v${VERSION} ./dist/
+                -prerelease \
+                ${CIRCLE_TAG} ./dist
 
   push-image:
     machine: true
@@ -184,16 +182,16 @@ jobs:
             gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
       - run:
-          name: Build docker image
-          command: docker build -t gcr.io/gapic-showcase/gapic-showcase .
+          name: Parse version tag
+          command: echo "export VERSION=${CIRCLE_TAG#v}" >> $BASH_ENV
       - run:
-          name: Get version
-          command: echo "export VERSION=$(docker run -it gcr.io/gapic-showcase/gapic-showcase --version | perl -pe '($_)=/([0-9]+([.][0-9]+)+)/')" >> $BASH_ENV
+          name: Build docker image
+          command: docker build -t gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase .
       - run:
           name: Tag image
-          command: docker tag gcr.io/gapic-showcase/gapic-showcase gcr.io/gapic-showcase/gapic-showcase:${VERSION}
+          command: docker tag gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase:${VERSION}
       - run:
           name: Push image
           command: |
-            gcloud docker -- push gcr.io/gapic-showcase/gapic-showcase:latest
-            gcloud docker -- push gcr.io/gapic-showcase/gapic-showcase:${VERSION}
+            gcloud docker -- push gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase:latest
+            gcloud docker -- push gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase:${VERSION}

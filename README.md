@@ -24,12 +24,12 @@ our [releases](https://github.com/googleapis/gapic-showcase/releases) page.
 ### Installation
 The GAPIC Showcase CLI Tool can be installed using three different mechanisms,
 downloading the compiled binary from our our [releases](https://github.com/googleapis/gapic-showcase/releases)
-page, pulling our released docker image from [google container registry](https://gcr.io/gapic-showcase/gapic-showcase),
+page, pulling our released docker image from [Google Container Registry](https://gcr.io/gapic-images/gapic-showcase),
 or simply by using go commands.
 
 #### Binary Installation
 ```sh
-$ export GAPIC_SHOWCASE_VERSION=0.0.10
+$ export GAPIC_SHOWCASE_VERSION=0.0.13
 $ export OS=linux
 $ export ARCH=amd64
 $ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${GAPIC_SHOWCASE_VERSION}-${OS}-${ARCH} | sudo tar -zx -- --directory /usr/local/bin/
@@ -39,9 +39,10 @@ $ gapic-showcase run
 
 #### Docker Installation
 ```sh
-$ export GAPIC_SHOWCASE_VERSION=0.0.10
-$ docker pull gcr.io/gapic-showcase/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
-$ docker run -it gcr.io/gapic-showcase/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
+$ export GAPIC_SHOWCASE_VERSION=0.0.13
+$ docker pull gcr.io/gapic-images/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
+$ docker run --rm -p 7469:7469/tcp -p 7469:7469/udp \
+    gcr.io/gapic-images/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
 > 2018/09/19 02:13:09 Showcase listening on port: :7469
 ```
 
@@ -68,7 +69,7 @@ protobuf files into their gapic-generator. This client will be the client used
 for integration testing their gapic- generator.
 
 ```sh
-$ export GAPIC_SHOWCASE_VERSION=0.0.10
+$ export GAPIC_SHOWCASE_VERSION=0.0.13
 $ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${GAPIC_SHOWCASE_VERSION}-protos.tar.gz | sudo tar -zx
 $ protoc google/showcase/v1alpha3/*.proto \
     --proto_path=. \
@@ -115,7 +116,7 @@ The integration test needs a server to send its requests to. Download and run
 the server so that gapic-showcase is available for the tests.
 
 ```sh
-$ export GAPIC_SHOWCASE_VERSION=0.0.10
+$ export GAPIC_SHOWCASE_VERSION=0.0.13
 $ export OS=linux
 $ export ARCH=amd64
 $ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${OS}-${ARCH} | sudo tar -zx -- --directory /usr/local/bin/

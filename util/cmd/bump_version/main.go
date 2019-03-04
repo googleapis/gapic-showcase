@@ -29,7 +29,7 @@ import (
 )
 
 const CURRENT_API = "v1alpha3"
-const CURRENT_RELEASE = "0.0.10"
+const CURRENT_RELEASE = "0.0.13"
 
 func main() {
 	var bumpMajor, bumpMinor, bumpPatch bool
@@ -136,6 +136,9 @@ func replacer(filetypes []string, old, new string) filepath.WalkFunc {
 			return err
 		}
 		if fi.IsDir() {
+			return nil
+		}
+		if strings.HasSuffix(fi.Name(), "CHANGELOG.md") {
 			return nil
 		}
 

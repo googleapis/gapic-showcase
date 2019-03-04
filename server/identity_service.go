@@ -58,6 +58,10 @@ func (s *identityServerImpl) CreateUser(_ context.Context, in *pb.CreateUserRequ
 	defer s.mu.Unlock()
 
 	u := in.GetUser()
+
+	// Ignore passed in name.
+	u.Name = ""
+
 	err := s.validate(u)
 	if err != nil {
 		return nil, err
@@ -196,12 +200,8 @@ func (s *identityServerImpl) validate(u *pb.User) error {
 	}
 	// Validate Unique Fields.
 	for _, x := range s.users {
-		if (u.GetDisplayName() == x.user.GetDisplayName()) &&
-			(u.GetName() != x.user.GetName()) {
-			return status.Errorf(
-				codes.AlreadyExists,
-				"A user with display_name %s already exists.",
-				u.GetDisplayName())
+		if x.deleted {
+			continue
 		}
 		if (u.GetEmail() == x.user.GetEmail()) &&
 			(u.GetName() != x.user.GetName()) {
