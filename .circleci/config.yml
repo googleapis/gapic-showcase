@@ -15,26 +15,6 @@ workflows:
           filters: *all_commits
       - protobufjs-load-test:
           filters: *all_commits
-      - github_release:
-          requires:
-            - build
-            - kotlin-smoke-test
-            - python-smoke-test
-            - go-smoke-test
-            - protobufjs-load-test
-          filters: &releases
-            branches:
-              ignore: /.*/
-            tags:
-              only: '/^v[\d.]+$/'
-      - push-image:
-          requires:
-            - build
-            - kotlin-smoke-test
-            - python-smoke-test
-            - go-smoke-test
-            - protobufjs-load-test
-          filters: *releases
 
 jobs:
   build:
@@ -137,61 +117,3 @@ jobs:
             # TODO(landrito): make this scalable by using a glob.
             node -e "require('google-proto-files').loadSync('schema/echo.proto');"
             node -e "require('google-proto-files').loadSync('schema/testing.proto');"
-
-  github_release:
-    docker:
-      - image: golang:1.11
-    environment:
-      GOPATH: /go
-    working_directory: /go/src/github.com/googleapis/gapic-showcase
-    steps:
-      - checkout
-      - run:
-          name: Retrieve dependencies
-          command: go get ./...
-      - run:
-          name: Install protoc
-          command: |
-            apt-get update && apt-get install -y unzip
-            curl -o ~/protoc3.zip -L https://github.com/google/protobuf/releases/download/v3.6.1/protoc-3.6.1-linux-x86_64.zip
-            unzip ~/protoc3.zip -d ~/protoc3
-            mv ~/protoc3/bin/* /usr/local/bin/
-            mv ~/protoc3/include/* /usr/local/include/
-      - run:
-          name: Create release assets
-          command: go run util/cmd/release/main.go
-      - run:
-          name: Attach compiled stuff to the tag.
-          command: |
-            go get github.com/tcnksm/ghr
-            ghr -t ${GITHUB_TOKEN} \
-                -u googleapis \
-                -r gapic-showcase \
-                -c ${CIRCLE_SHA1} \
-                -prerelease \
-                ${CIRCLE_TAG} ./dist
-
-  push-image:
-    machine: true
-    steps:
-      - checkout
-      - run:
-          name: Setup Auth
-          command: |
-            echo ${GCLOUD_SERVICE_KEY} > ${HOME}/gcp-key.json
-            gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
-            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
-      - run:
-          name: Parse version tag
-          command: echo "export VERSION=${CIRCLE_TAG#v}" >> $BASH_ENV
-      - run:
-          name: Build docker image
-          command: docker build -t gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase .
-      - run:
-          name: Tag image
-          command: docker tag gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase:${VERSION}
-      - run:
-          name: Push image
-          command: |
-            gcloud docker -- push gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase:latest
-            gcloud docker -- push gcr.io/${GOOGLE_PROJECT_ID}/gapic-showcase:${VERSION}

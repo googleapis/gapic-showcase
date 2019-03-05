@@ -24,7 +24,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/googleapis/gapic-showcase/util"
 	"github.com/spf13/cobra"
 )
 
@@ -79,7 +78,6 @@ func main() {
 
 			if newApi != "" && CURRENT_API != newApi {
 				replace(CURRENT_API, newApi)
-				util.CompileProtos(newApi)
 			}
 		},
 	}
