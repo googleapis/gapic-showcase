@@ -119,12 +119,13 @@ func (s *sessionImpl) GetReport() *pb.ReportSessionResponse {
 
 func (s *sessionImpl) ListTests(in *pb.ListTestsRequest) (*pb.ListTestsResponse, error) {
 	start, err := s.token.GetIndex(in.GetPageToken())
+	if err != nil {
+		return nil, err
+	}
+
 	pageSize := in.GetPageSize()
 	if pageSize == 0 {
 		pageSize = 10
-	}
-	if err != nil {
-		return nil, err
 	}
 
 	offset := 0
