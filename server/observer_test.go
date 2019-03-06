@@ -20,8 +20,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/golang/protobuf/ptypes/empty"
-	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/grpc"
 )
 
@@ -73,14 +71,6 @@ func Test_showcaseObserverRegistry_UnaryInterceptor(t *testing.T) {
 			&grpc.UnaryServerInfo{},
 			false,
 		},
-		{
-			"Deletes observers by name",
-			&pb.DeleteTestRequest{Name: observerName},
-			&empty.Empty{},
-			nil,
-			&grpc.UnaryServerInfo{FullMethod: "/google.showcase.v1alpha3.Testing/DeleteTest"},
-			true,
-		},
 	}
 	for _, tt := range tests {
 		obs := &testUnaryObserver{name: observerName}
@@ -118,72 +108,6 @@ func Test_showcaseObserverRegistry_UnaryInterceptor(t *testing.T) {
 			}
 			if !tt.observerDeleted && obs.info != tt.info {
 				t.Errorf("showcaseObserverRegistry.UnaryInterceptor() want to invoke observers with %v, got %v", tt.info, obs.info)
-			}
-		})
-	}
-}
-
-func Test_showcaseObserverRegistry_deleteTestHandler(t *testing.T) {
-	type fields struct {
-		uObservers     []UnaryObserver
-		sReqObservers  []StreamRequestObserver
-		sRespObservers []StreamResponseObserver
-	}
-	tests := []struct {
-		name    string
-		req     interface{}
-		fields  fields
-		wantErr bool
-	}{
-		{
-			"Deletes Unary Observers",
-			&pb.DeleteTestRequest{Name: "unaryObserver"},
-			fields{uObservers: []UnaryObserver{&testUnaryObserver{name: "unaryObserver"}}},
-			false,
-		},
-		{
-			"Deletes Stream Request Observers",
-			&pb.DeleteTestRequest{Name: "streamRequestObserver"},
-			fields{uObservers: []UnaryObserver{&testUnaryObserver{name: "streamRequestObserver"}}},
-			false,
-		},
-		{
-			"Deletes Stream Response Observers",
-			&pb.DeleteTestRequest{Name: "streamResponseObserver"},
-			fields{uObservers: []UnaryObserver{&testUnaryObserver{name: "streamResponseObserver"}}},
-			false,
-		},
-		{
-			"Returns Error when an observer was not found",
-			&pb.DeleteTestRequest{Name: "notFound"},
-			fields{},
-			true,
-		},
-		{
-			"Returns Error request is not a DeleteTestRequest",
-			"not DeleteTestRequest",
-			fields{},
-			true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			r := &showcaseObserverRegistry{
-				uObservers:     map[string]UnaryObserver{},
-				sReqObservers:  map[string]StreamRequestObserver{},
-				sRespObservers: map[string]StreamResponseObserver{},
-			}
-			for _, obs := range tt.fields.uObservers {
-				r.RegisterUnaryObserver(obs)
-			}
-			for _, obs := range tt.fields.sReqObservers {
-				r.RegisterStreamRequestObserver(obs)
-			}
-			for _, obs := range tt.fields.sRespObservers {
-				r.RegisterStreamResponseObserver(obs)
-			}
-			if err := r.deleteTestHandler(tt.req); (err != nil) != tt.wantErr {
-				t.Errorf("showcaseObserverRegistry.deleteTestHandler() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

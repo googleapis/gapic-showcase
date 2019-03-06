@@ -16,11 +16,8 @@ package server
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"sync"
 
-	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/grpc"
 )
 
@@ -73,8 +70,11 @@ type GrpcObserverRegistry interface {
 		*grpc.StreamServerInfo,
 		grpc.StreamHandler) error
 	RegisterUnaryObserver(UnaryObserver)
+	DeleteUnaryObserver(name string)
 	RegisterStreamRequestObserver(StreamRequestObserver)
+	DeleteStreamRequestObserver(name string)
 	RegisterStreamResponseObserver(StreamResponseObserver)
+	DeleteStreamResponseObserver(name string)
 }
 
 // ShowcaseObserverRegistry returns the showcase specific observer registry.
@@ -101,40 +101,16 @@ func (r *showcaseObserverRegistry) UnaryInterceptor(
 	req interface{},
 	info *grpc.UnaryServerInfo,
 	handler grpc.UnaryHandler) (interface{}, error) {
-	resp, err := handler(ctx, req)
-
-	if info.FullMethod == "/google.showcase.v1alpha3.Testing/DeleteTest" {
-		err = r.deleteTestHandler(req)
-	}
-
 	r.mu.Lock()
 	defer r.mu.Unlock()
+
+	resp, err := handler(ctx, req)
 
 	for _, obs := range r.uObservers {
 		obs.ObserveUnary(ctx, req, resp, info, err)
 	}
 
 	return resp, err
-}
-
-func (r *showcaseObserverRegistry) deleteTestHandler(req interface{}) error {
-	deleteTestRequest, ok := req.(*pb.DeleteTestRequest)
-	if !ok {
-		return errors.New("Failed to delete the test")
-	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	_, uFound := r.uObservers[deleteTestRequest.GetName()]
-	_, sReqFound := r.sReqObservers[deleteTestRequest.GetName()]
-	_, sRespFound := r.sRespObservers[deleteTestRequest.GetName()]
-	if !(uFound || sReqFound || sRespFound) {
-		return fmt.Errorf("Could not find test: %s", deleteTestRequest.GetName())
-	}
-
-	delete(r.uObservers, deleteTestRequest.GetName())
-	delete(r.sReqObservers, deleteTestRequest.GetName())
-	delete(r.sRespObservers, deleteTestRequest.GetName())
-	return nil
 }
 
 type showcaseStream struct {
@@ -182,6 +158,12 @@ func (r *showcaseObserverRegistry) RegisterUnaryObserver(obs UnaryObserver) {
 	r.uObservers[obs.GetName()] = obs
 }
 
+func (r *showcaseObserverRegistry) DeleteUnaryObserver(name string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	delete(r.uObservers, name)
+}
+
 // RegisterStreamRequestObserver registers a stream observer. If an observer of the same name
 // has already been registered, the new observer will override it.
 func (r *showcaseObserverRegistry) RegisterStreamRequestObserver(obs StreamRequestObserver) {
@@ -190,10 +172,22 @@ func (r *showcaseObserverRegistry) RegisterStreamRequestObserver(obs StreamReque
 	r.sReqObservers[obs.GetName()] = obs
 }
 
+func (r *showcaseObserverRegistry) DeleteStreamRequestObserver(name string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	delete(r.sReqObservers, name)
+}
+
 // RegisterStreamResponseObserver registers a stream observer. If an observer of the same name
 // has already been registered, the new observer will override it.
 func (r *showcaseObserverRegistry) RegisterStreamResponseObserver(obs StreamResponseObserver) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.sRespObservers[obs.GetName()] = obs
+}
+
+func (r *showcaseObserverRegistry) DeleteStreamResponseObserver(name string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	delete(r.sRespObservers, name)
 }
