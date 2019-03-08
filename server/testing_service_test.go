@@ -134,21 +134,20 @@ func Test_GetSession_deleted(t *testing.T) {
 }
 
 func Test_ListSessions_invalidToken(t *testing.T) {
-	s := NewTestingServer(ShowcaseObserverRegistry())
+	sessions := []sessionEntry{sessionEntry{session: &sessionMock{}}}
+	keys := map[string]int{"name": len(sessions) - 1}
 
-	tests := []string{
-		"1", // Not base64 encoded
-		base64.StdEncoding.EncodeToString([]byte("1")),        // No salt
-		base64.StdEncoding.EncodeToString([]byte("saltblah")), // Invalid index
+	s := &testingServerImpl{
+		token:    &tokenGenerator{"salt"},
+		keys:     keys,
+		sessions: sessions,
 	}
 
-	_, err := s.CreateSession(
-		context.Background(),
-		&pb.CreateSessionRequest{
-			Session: &pb.Session{Version: pb.Session_V1_0},
-		})
-	if err != nil {
-		t.Errorf("Create: unexpected err %+v", err)
+	tests := []string{
+		"0", // Not base64 encoded
+		base64.StdEncoding.EncodeToString([]byte("0")),        // No salt
+		base64.StdEncoding.EncodeToString([]byte("saltblah")), // Invalid index
+		base64.StdEncoding.EncodeToString([]byte("salt1000")), // index out of range.
 	}
 
 	for _, token := range tests {
@@ -282,6 +281,7 @@ func Test_ListTests(t *testing.T) {
 			got)
 	}
 }
+
 func Test_DeleteTest_notFound(t *testing.T) {
 	s := NewTestingServer(ShowcaseObserverRegistry())
 	_, err := s.DeleteTest(

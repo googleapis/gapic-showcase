@@ -79,11 +79,8 @@ func (s *testingServerImpl) GetSession(_ context.Context, req *pb.GetSessionRequ
 	defer s.mu.Unlock()
 
 	name := req.GetName()
-	if i, ok := s.keys[name]; ok {
-		entry := s.sessions[i]
-		if !entry.deleted {
-			return SessionProto(entry.session), nil
-		}
+	if i, ok := s.keys[name]; ok && !s.sessions[i].deleted {
+		return SessionProto(s.sessions[i].session), nil
 	}
 
 	return nil, status.Errorf(
@@ -92,9 +89,15 @@ func (s *testingServerImpl) GetSession(_ context.Context, req *pb.GetSessionRequ
 }
 
 func (s *testingServerImpl) ListSessions(_ context.Context, in *pb.ListSessionsRequest) (*pb.ListSessionsResponse, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	start, err := s.token.GetIndex(in.GetPageToken())
 	if err != nil {
 		return nil, err
+	}
+	if start >= len(s.sessions) {
+		return nil, InvalidTokenErr
 	}
 
 	offset := 0
@@ -111,8 +114,8 @@ func (s *testingServerImpl) ListSessions(_ context.Context, in *pb.ListSessionsR
 	}
 
 	nextToken := ""
-	if start+offset < len(s.sessions) {
-		nextToken = s.token.ForIndex(start + offset)
+	if next := start + offset; next < len(s.sessions) {
+		nextToken = s.token.ForIndex(next)
 	}
 
 	return &pb.ListSessionsResponse{Sessions: sessions, NextPageToken: nextToken}, nil
@@ -139,7 +142,8 @@ func (s *testingServerImpl) DeleteSession(_ context.Context, req *pb.DeleteSessi
 func (s *testingServerImpl) ReportSession(_ context.Context, req *pb.ReportSessionRequest) (*pb.ReportSessionResponse, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if i, ok := s.keys[req.GetName()]; ok {
+
+	if i, ok := s.keys[req.GetName()]; ok && !s.sessions[i].deleted {
 		return s.sessions[i].session.GetReport(), nil
 	}
 
