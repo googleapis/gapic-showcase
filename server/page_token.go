@@ -34,6 +34,10 @@ type TokenGenerator interface {
 	GetIndex(string) (int, error)
 }
 
+var InvalidTokenErr error = status.Errorf(
+	codes.InvalidArgument,
+	"The field `page_token` is invalid.")
+
 type tokenGenerator struct {
 	salt string
 }
@@ -50,21 +54,17 @@ func (t *tokenGenerator) GetIndex(s string) (int, error) {
 
 	bs, err := base64.StdEncoding.DecodeString(s)
 
-	invalidErr := status.Errorf(
-		codes.InvalidArgument,
-		"The field `page_token` is invalid.")
-
 	if err != nil {
-		return -1, invalidErr
+		return -1, InvalidTokenErr
 	}
 
 	if !strings.HasPrefix(string(bs), t.salt) {
-		return -1, invalidErr
+		return -1, InvalidTokenErr
 	}
 
 	i, err := strconv.Atoi(strings.TrimPrefix(string(bs), t.salt))
 	if err != nil {
-		return -1, invalidErr
+		return -1, InvalidTokenErr
 	}
 	return i, nil
 }
