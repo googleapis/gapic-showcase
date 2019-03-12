@@ -29,62 +29,51 @@ func init() {
 	errLog = log.New(os.Stderr, "", log.Ldate|log.Ltime)
 }
 
-// This method implements the grpc.UnaryServerInterceptor interface.
-func logServerUnary(
+type loggerObserver struct{}
+
+func (l *loggerObserver) GetName() string { return "loggerObserver" }
+
+func (l *loggerObserver) ObserveUnary(
 	ctx context.Context,
 	req interface{},
+	resp interface{},
 	info *grpc.UnaryServerInfo,
-	handler grpc.UnaryHandler) (interface{}, error) {
+	err error) {
 	stdLog.Printf("Received Unary Request for Method: %s\n", info.FullMethod)
 	stdLog.Printf("    Request:  %+v\n", req)
-	resp, err := handler(ctx, req)
 	if err == nil {
 		stdLog.Printf("    Returning Response: %+v\n", resp)
 	} else {
 		stdLog.Printf("    Returning Error: %+v\n", err)
 	}
 	stdLog.Println("")
-	return resp, err
 }
 
-type loggingServerStream struct {
-	info *grpc.StreamServerInfo
-
-	grpc.ServerStream
-}
-
-func (s *loggingServerStream) SendMsg(m interface{}) error {
-	stdLog.Printf("%s Stream for Method: %s\n", s.streamType(), s.info.FullMethod)
-	stdLog.Printf("    Sending Message:  %+v\n", m)
+func (l *loggerObserver) ObserveStreamRequest(
+	_ context.Context,
+	req interface{},
+	info *grpc.StreamServerInfo,
+	_ error) {
+	stdLog.Printf("%s Stream for Method: %s\n", streamType(info), info.FullMethod)
+	stdLog.Printf("    Recieving Message:  %v\n", req)
 	stdLog.Println("")
-
-	return s.ServerStream.SendMsg(m)
 }
 
-func (s *loggingServerStream) RecvMsg(m interface{}) error {
-	err := s.ServerStream.RecvMsg(m)
-	stdLog.Printf("%s Stream for Method: %s\n", s.streamType(), s.info.FullMethod)
-	stdLog.Printf("    Recieving Message:  %v\n", m)
+func (l *loggerObserver) ObserveStreamResponse(
+	_ context.Context,
+	resp interface{},
+	info *grpc.StreamServerInfo,
+	_ error) {
+	stdLog.Printf("%s Stream for Method: %s\n", streamType(info), info.FullMethod)
+	stdLog.Printf("    Sending Message:  %+v\n", resp)
 	stdLog.Println("")
-
-	return err
 }
 
-func (s *loggingServerStream) streamType() string {
-	if s.info.IsClientStream && s.info.IsServerStream {
+func streamType(info *grpc.StreamServerInfo) string {
+	if info.IsClientStream && info.IsServerStream {
 		return "Bi-directional"
-	} else if s.info.IsClientStream {
+	} else if info.IsClientStream {
 		return "Client"
 	}
 	return "Server"
-}
-
-// This method implements the grpc.StreamServerInterceptor interface.
-func logServerStreaming(
-	srv interface{},
-	ss grpc.ServerStream,
-	info *grpc.StreamServerInfo,
-	handler grpc.StreamHandler) error {
-	loggingStream := &loggingServerStream{info, ss}
-	return handler(srv, loggingStream)
 }

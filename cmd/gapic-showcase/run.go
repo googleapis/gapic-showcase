@@ -47,9 +47,15 @@ func init() {
 			stdLog.Printf("Showcase listening on port: %s", port)
 
 			// Setup Server.
+			logger := &loggerObserver{}
+			observerRegistry := server.ShowcaseObserverRegistry()
+			observerRegistry.RegisterUnaryObserver(logger)
+			observerRegistry.RegisterStreamRequestObserver(logger)
+			observerRegistry.RegisterStreamResponseObserver(logger)
+
 			opts := []grpc.ServerOption{
-				grpc.StreamInterceptor(logServerStreaming),
-				grpc.UnaryInterceptor(logServerUnary),
+				grpc.StreamInterceptor(observerRegistry.StreamInterceptor),
+				grpc.UnaryInterceptor(observerRegistry.UnaryInterceptor),
 			}
 			s := grpc.NewServer(opts...)
 			defer s.GracefulStop()
@@ -61,6 +67,7 @@ func init() {
 			messagingServer := server.NewMessagingServer(identityServer)
 			pb.RegisterMessagingServer(s, messagingServer)
 			operationsServer := server.NewOperationsServer(messagingServer)
+			pb.RegisterTestingServer(s, server.NewTestingServer(observerRegistry))
 			lropb.RegisterOperationsServer(s, operationsServer)
 
 			// Register reflection service on gRPC server.
