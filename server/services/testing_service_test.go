@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package services
 
 import (
 	"context"
@@ -21,13 +21,14 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func Test_Session_lifecycle(t *testing.T) {
-	s := NewTestingServer(ShowcaseObserverRegistry())
+	s := NewTestingServer(server.ShowcaseObserverRegistry())
 
 	first, err := s.CreateSession(
 		context.Background(),
@@ -104,7 +105,7 @@ func Test_Session_lifecycle(t *testing.T) {
 }
 
 func Test_GetSession_deleted(t *testing.T) {
-	s := NewTestingServer(ShowcaseObserverRegistry())
+	s := NewTestingServer(server.ShowcaseObserverRegistry())
 	created, err := s.CreateSession(
 		context.Background(),
 		&pb.CreateSessionRequest{
@@ -138,7 +139,7 @@ func Test_ListSessions_invalidToken(t *testing.T) {
 	keys := map[string]int{"name": len(sessions) - 1}
 
 	s := &testingServerImpl{
-		token:    &tokenGenerator{"salt"},
+		token:    server.TokenGeneratorWithSalt("salt"),
 		keys:     keys,
 		sessions: sessions,
 	}
@@ -167,7 +168,7 @@ func Test_ListSessions_invalidToken(t *testing.T) {
 }
 
 func Test_DeleteSession_notFound(t *testing.T) {
-	s := NewTestingServer(ShowcaseObserverRegistry())
+	s := NewTestingServer(server.ShowcaseObserverRegistry())
 	_, err := s.DeleteSession(
 		context.Background(),
 		&pb.DeleteSessionRequest{Name: "invalid"})
@@ -181,7 +182,7 @@ func Test_DeleteSession_notFound(t *testing.T) {
 }
 
 func Test_ReportSession_notFound(t *testing.T) {
-	s := NewTestingServer(ShowcaseObserverRegistry())
+	s := NewTestingServer(server.ShowcaseObserverRegistry())
 	_, err := s.ReportSession(
 		context.Background(),
 		&pb.ReportSessionRequest{Name: "not found"})
@@ -199,7 +200,7 @@ type sessionMock struct {
 	wantList     *pb.ListTestsResponse
 	deleteCalled bool
 
-	Session
+	server.Session
 }
 
 func (s *sessionMock) GetReport() *pb.ReportSessionResponse { return s.wantReport }
@@ -241,7 +242,7 @@ func Test_ReportSession(t *testing.T) {
 }
 
 func Test_ListTests_notFound(t *testing.T) {
-	s := NewTestingServer(ShowcaseObserverRegistry())
+	s := NewTestingServer(server.ShowcaseObserverRegistry())
 	_, err := s.ListTests(
 		context.Background(),
 		&pb.ListTestsRequest{Parent: "not found"})
@@ -262,7 +263,7 @@ func Test_ListTests(t *testing.T) {
 	keys := map[string]int{"name": 0}
 
 	s := &testingServerImpl{
-		token:    NewTokenGenerator(),
+		token:    server.NewTokenGenerator(),
 		keys:     keys,
 		sessions: sessions,
 	}
@@ -283,7 +284,7 @@ func Test_ListTests(t *testing.T) {
 }
 
 func Test_DeleteTest_notFound(t *testing.T) {
-	s := NewTestingServer(ShowcaseObserverRegistry())
+	s := NewTestingServer(server.ShowcaseObserverRegistry())
 	_, err := s.DeleteTest(
 		context.Background(),
 		&pb.DeleteTestRequest{Name: "not found"})
@@ -302,7 +303,7 @@ func Test_DeleteTests(t *testing.T) {
 	keys := map[string]int{"name": 0}
 
 	s := &testingServerImpl{
-		token:    NewTokenGenerator(),
+		token:    server.NewTokenGenerator(),
 		keys:     keys,
 		sessions: sessions,
 	}
@@ -320,7 +321,7 @@ func Test_DeleteTests(t *testing.T) {
 }
 
 func Test_VerifyTest(t *testing.T) {
-	s := NewTestingServer(ShowcaseObserverRegistry())
+	s := NewTestingServer(server.ShowcaseObserverRegistry())
 	got, err := s.VerifyTest(context.Background(), &pb.VerifyTestRequest{})
 	if err != nil {
 		t.Errorf("VerifyTest: unexpected err %+v", err)

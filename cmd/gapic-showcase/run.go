@@ -21,6 +21,7 @@ import (
 
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
+	"github.com/googleapis/gapic-showcase/server/services"
 	"github.com/spf13/cobra"
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 
@@ -61,13 +62,13 @@ func init() {
 			defer s.GracefulStop()
 
 			// Register Services to the server.
-			pb.RegisterEchoServer(s, server.NewEchoServer())
-			identityServer := server.NewIdentityServer()
+			pb.RegisterEchoServer(s, services.NewEchoServer())
+			identityServer := services.NewIdentityServer()
 			pb.RegisterIdentityServer(s, identityServer)
-			messagingServer := server.NewMessagingServer(identityServer)
+			messagingServer := services.NewMessagingServer(identityServer)
 			pb.RegisterMessagingServer(s, messagingServer)
-			operationsServer := server.NewOperationsServer(messagingServer)
-			pb.RegisterTestingServer(s, server.NewTestingServer(observerRegistry))
+			operationsServer := services.NewOperationsServer(messagingServer)
+			pb.RegisterTestingServer(s, services.NewTestingServer(observerRegistry))
 			lropb.RegisterOperationsServer(s, operationsServer)
 
 			// Register reflection service on gRPC server.

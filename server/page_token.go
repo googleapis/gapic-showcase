@@ -25,16 +25,26 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// NewTokenGenerator provides a new instance of a TokenGenerator.
 func NewTokenGenerator() TokenGenerator {
 	return &tokenGenerator{salt: strconv.FormatInt(time.Now().Unix(), 10)}
 }
 
+// TokenGeneratorWithSalt provieds an instance of a TokenGenerator which
+// uses the given salt.
+func TokenGeneratorWithSalt(salt string) TokenGenerator {
+	return &tokenGenerator{salt}
+}
+
+// TokenGenerator generates a page token for a given index.
 type TokenGenerator interface {
 	ForIndex(int) string
 	GetIndex(string) (int, error)
 }
 
-var InvalidTokenErr error = status.Errorf(
+// InvalidTokenErr is the error returned if the token provided is not
+// parseable by the TokenGenerator.
+var InvalidTokenErr = status.Errorf(
 	codes.InvalidArgument,
 	"The field `page_token` is invalid.")
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package services
 
 import (
 	"context"
@@ -21,20 +21,21 @@ import (
 	"sync"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 // NewTestingServer returns a new TestingServer for the Showcase API.
-func NewTestingServer(observerRegistry GrpcObserverRegistry) pb.TestingServer {
+func NewTestingServer(observerRegistry server.GrpcObserverRegistry) pb.TestingServer {
 	name := fmt.Sprintf("sessions/-")
-	defaultSession := NewSession(name, pb.Session_V1_LATEST, observerRegistry)
+	defaultSession := server.NewSession(name, pb.Session_V1_LATEST, observerRegistry)
 	sessions := []sessionEntry{sessionEntry{session: defaultSession}}
 	keys := map[string]int{name: len(sessions) - 1}
 
 	s := &testingServerImpl{
-		token:            NewTokenGenerator(),
+		token:            server.NewTokenGenerator(),
 		observerRegistry: observerRegistry,
 		keys:             keys,
 		sessions:         sessions,
@@ -44,14 +45,14 @@ func NewTestingServer(observerRegistry GrpcObserverRegistry) pb.TestingServer {
 }
 
 type sessionEntry struct {
-	session Session
+	session server.Session
 	deleted bool
 }
 
 type testingServerImpl struct {
-	uid              uniqID
-	token            TokenGenerator
-	observerRegistry GrpcObserverRegistry
+	uid              server.UniqID
+	token            server.TokenGenerator
+	observerRegistry server.GrpcObserverRegistry
 
 	mu       sync.Mutex
 	keys     map[string]int
@@ -63,15 +64,15 @@ func (s *testingServerImpl) CreateSession(_ context.Context, req *pb.CreateSessi
 	defer s.mu.Unlock()
 
 	seshProto := req.GetSession()
-	id := s.uid.next()
+	id := s.uid.Next()
 	name := fmt.Sprintf("sessions/%d", id)
-	sesh := NewSession(name, seshProto.GetVersion(), s.observerRegistry)
+	sesh := server.NewSession(name, seshProto.GetVersion(), s.observerRegistry)
 
 	index := len(s.sessions)
 	s.sessions = append(s.sessions, sessionEntry{session: sesh})
 	s.keys[name] = index
 
-	return SessionProto(sesh), nil
+	return server.SessionProto(sesh), nil
 }
 
 func (s *testingServerImpl) GetSession(_ context.Context, req *pb.GetSessionRequest) (*pb.Session, error) {
@@ -80,7 +81,7 @@ func (s *testingServerImpl) GetSession(_ context.Context, req *pb.GetSessionRequ
 
 	name := req.GetName()
 	if i, ok := s.keys[name]; ok && !s.sessions[i].deleted {
-		return SessionProto(s.sessions[i].session), nil
+		return server.SessionProto(s.sessions[i].session), nil
 	}
 
 	return nil, status.Errorf(
@@ -97,7 +98,7 @@ func (s *testingServerImpl) ListSessions(_ context.Context, in *pb.ListSessionsR
 		return nil, err
 	}
 	if start >= len(s.sessions) {
-		return nil, InvalidTokenErr
+		return nil, server.InvalidTokenErr
 	}
 
 	offset := 0
@@ -107,7 +108,7 @@ func (s *testingServerImpl) ListSessions(_ context.Context, in *pb.ListSessionsR
 		if entry.deleted {
 			continue
 		}
-		sessions = append(sessions, SessionProto(entry.session))
+		sessions = append(sessions, server.SessionProto(entry.session))
 		if len(sessions) >= int(in.GetPageSize()) {
 			break
 		}

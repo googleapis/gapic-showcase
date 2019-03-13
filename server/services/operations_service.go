@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package services
 
 import (
 	"context"
@@ -22,20 +22,21 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-// NewEchoServer returns a new EchoServer for the Showcase API.
+// NewOperationsServer returns a new OperationsServer for the Showcase API.
 func NewOperationsServer(messagingServer MessagingServer) lropb.OperationsServer {
-	return &operationsServerImpl{waiter: waiterSingleton, messagingServer: messagingServer}
+	return &operationsServerImpl{waiter: server.GetWaiterInstance(), messagingServer: messagingServer}
 }
 
 type operationsServerImpl struct {
 	messagingServer MessagingServer
-	waiter          Waiter
+	waiter          server.Waiter
 }
 
 func (s *operationsServerImpl) GetOperation(ctx context.Context, in *lropb.GetOperationRequest) (*lropb.Operation, error) {

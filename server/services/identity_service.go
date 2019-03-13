@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package services
 
 import (
 	"context"
@@ -21,14 +21,16 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
+// NewIdentityServer returns a new instance of showcase identity server.
 func NewIdentityServer() pb.IdentityServer {
 	return &identityServerImpl{
-		token: NewTokenGenerator(),
+		token: server.NewTokenGenerator(),
 		keys:  map[string]int{},
 	}
 }
@@ -38,14 +40,15 @@ type userEntry struct {
 	deleted bool
 }
 
+// ReadOnlyIdentityServer provides a read-only interface of an identity server.
 type ReadOnlyIdentityServer interface {
 	GetUser(context.Context, *pb.GetUserRequest) (*pb.User, error)
 	ListUsers(context.Context, *pb.ListUsersRequest) (*pb.ListUsersResponse, error)
 }
 
 type identityServerImpl struct {
-	uid   uniqID
-	token TokenGenerator
+	uid   server.UniqID
+	token server.TokenGenerator
 
 	mu    sync.Mutex
 	keys  map[string]int
@@ -68,7 +71,7 @@ func (s *identityServerImpl) CreateUser(_ context.Context, in *pb.CreateUserRequ
 	}
 
 	// Assign info.
-	id := s.uid.next()
+	id := s.uid.Next()
 	name := fmt.Sprintf("users/%d", id)
 	now := ptypes.TimestampNow()
 

@@ -61,7 +61,7 @@ jobs:
       - run:
           name: Run tests
           command: |
-            go test ./server -coverprofile=coverage.txt -covermode=atomic
+            go test ./server/... -coverprofile=coverage.txt -covermode=atomic
             go test ./client # Don't run coverage for generated tests.
       - run:
           name: Spin up showcase.

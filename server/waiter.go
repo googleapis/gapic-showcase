@@ -29,6 +29,11 @@ var waiterSingleton Waiter = &waiterImpl{
 	nowF: time.Now,
 }
 
+// GetWaiterInstance returns the waiter singleton.
+func GetWaiterInstance() Waiter {
+	return waiterSingleton
+}
+
 // Waiter handles the echo.Wait method for both the LRO service and the echo service.
 type Waiter interface {
 	Wait(req *pb.WaitRequest) *lropb.Operation

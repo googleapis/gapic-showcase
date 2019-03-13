@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package services
 
 import (
 	"context"
@@ -23,6 +23,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/grpc/codes"
@@ -73,8 +74,8 @@ func TestGetOperation_searchBlurbs(t *testing.T) {
 		MessagingServer: &messagingServerImpl{
 			identityServer: &mockIdentityServer{},
 			roomKeys:       map[string]int{},
-			parentUids:     map[string]*uniqID{},
-			token:          NewTokenGenerator(),
+			parentUids:     map[string]*server.UniqID{},
+			token:          server.NewTokenGenerator(),
 			blurbKeys: map[string]blurbIndex{
 				"users/rumble/profile/messages/1": blurbIndex{
 					row: "users/rumble/profile",
