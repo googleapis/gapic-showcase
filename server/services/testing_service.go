@@ -23,6 +23,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
+	"github.com/googleapis/gapic-showcase/server/spec"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -31,6 +32,7 @@ import (
 func NewTestingServer(observerRegistry server.GrpcObserverRegistry) pb.TestingServer {
 	name := fmt.Sprintf("sessions/-")
 	defaultSession := server.NewSession(name, pb.Session_V1_LATEST, observerRegistry)
+	defaultSession.RegisterTests(spec.ShowcaseTests(name, pb.Session_V1_LATEST))
 	sessions := []sessionEntry{sessionEntry{session: defaultSession}}
 	keys := map[string]int{name: len(sessions) - 1}
 
@@ -67,6 +69,7 @@ func (s *testingServerImpl) CreateSession(_ context.Context, req *pb.CreateSessi
 	id := s.uid.Next()
 	name := fmt.Sprintf("sessions/%d", id)
 	sesh := server.NewSession(name, seshProto.GetVersion(), s.observerRegistry)
+	sesh.RegisterTests(spec.ShowcaseTests(name, seshProto.GetVersion()))
 
 	index := len(s.sessions)
 	s.sessions = append(s.sessions, sessionEntry{session: sesh})
