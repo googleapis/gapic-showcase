@@ -15,7 +15,6 @@
 package server
 
 import (
-	"context"
 	"encoding/base64"
 	"strings"
 	"testing"
@@ -28,6 +27,13 @@ import (
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/genproto/googleapis/rpc/status"
 )
+
+func TestGetWaiterInstance(t *testing.T) {
+	waiter := GetWaiterInstance()
+	if waiter != waiterSingleton {
+		t.Error("GetWaiterInstance: Expected to get waiter singleton.")
+	}
+}
 
 func TestWait_pending(t *testing.T) {
 	now := time.Unix(1, 0)
@@ -50,8 +56,8 @@ func TestWait_pending(t *testing.T) {
 	}
 
 	for _, req := range tests {
-		server := &echoServerImpl{waiter: &waiterImpl{nowF: nowF}}
-		op, _ := server.Wait(context.Background(), req)
+		waiter := &waiterImpl{nowF: nowF}
+		op := waiter.Wait(req)
 
 		if op.Done {
 			t.Errorf("Wait() for %q expectee done=false got done=true", req)
@@ -86,8 +92,8 @@ func TestWait_success(t *testing.T) {
 		Response: &pb.WaitRequest_Success{Success: success},
 	}
 
-	server := &echoServerImpl{waiter: &waiterImpl{nowF: nowF}}
-	op, _ := server.Wait(context.Background(), req)
+	waiter := &waiterImpl{nowF: nowF}
+	op := waiter.Wait(req)
 
 	checkName(t, req, op)
 
@@ -121,8 +127,8 @@ func TestWait_error(t *testing.T) {
 		Response: &pb.WaitRequest_Error{Error: expErr},
 	}
 
-	server := &echoServerImpl{waiter: &waiterImpl{nowF: nowF}}
-	op, _ := server.Wait(context.Background(), req)
+	waiter := &waiterImpl{nowF: nowF}
+	op := waiter.Wait(req)
 
 	checkName(t, req, op)
 
@@ -164,15 +170,4 @@ func checkName(t *testing.T, req *pb.WaitRequest, op *lropb.Operation) {
 			req,
 			nameProto)
 	}
-}
-
-// Mock waiter type used in echo_service_test and operations_service_test to
-// check that they defer to the waiter.
-type mockWaiter struct {
-	req *pb.WaitRequest
-}
-
-func (w *mockWaiter) Wait(req *pb.WaitRequest) *lropb.Operation {
-	w.req = req
-	return nil
 }

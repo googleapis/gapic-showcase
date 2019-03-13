@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package services
 
 import (
 	"context"
@@ -27,6 +27,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc/codes"
@@ -311,7 +312,7 @@ func Test_DeleteRoom_notFound(t *testing.T) {
 
 func Test_ListRooms_invalidToken(t *testing.T) {
 	s := messagingServerImpl{
-		token:    &tokenGenerator{salt: "salt"},
+		token:    server.TokenGeneratorWithSalt("salt"),
 		roomKeys: map[string]int{},
 	}
 
@@ -629,11 +630,11 @@ func Test_DeleteBlurb_notFound(t *testing.T) {
 func Test_ListBlurbs_invalidToken(t *testing.T) {
 	s := messagingServerImpl{
 		identityServer: &mockIdentityServer{},
-		token:          &tokenGenerator{salt: "salt"},
+		token:          server.TokenGeneratorWithSalt("salt"),
 		roomKeys:       map[string]int{},
 		blurbKeys:      map[string]blurbIndex{},
 		blurbs:         map[string][]blurbEntry{},
-		parentUids:     map[string]*uniqID{},
+		parentUids:     map[string]*server.UniqID{},
 		observers:      map[string]map[string]blurbObserver{},
 	}
 
@@ -778,11 +779,11 @@ func TestStreamBlurbs_lifecycle(t *testing.T) {
 	// We specify the now function so we can control when the stream ends.
 	s := &messagingServerImpl{
 		identityServer: &mockIdentityServer{},
-		token:          NewTokenGenerator(),
+		token:          server.NewTokenGenerator(),
 		roomKeys:       map[string]int{},
 		blurbKeys:      map[string]blurbIndex{},
 		blurbs:         map[string][]blurbEntry{},
-		parentUids:     map[string]*uniqID{},
+		parentUids:     map[string]*server.UniqID{},
 		observers:      map[string]map[string]blurbObserver{},
 		nowF: func() time.Time {
 			return time.Unix(int64(0), int64(0))
@@ -970,11 +971,11 @@ func Test_StreamBlurbs_sendError(t *testing.T) {
 	s := &messagingServerImpl{
 
 		identityServer: &mockIdentityServer{},
-		token:          NewTokenGenerator(),
+		token:          server.NewTokenGenerator(),
 		roomKeys:       map[string]int{},
 		blurbKeys:      map[string]blurbIndex{},
 		blurbs:         map[string][]blurbEntry{},
-		parentUids:     map[string]*uniqID{},
+		parentUids:     map[string]*server.UniqID{},
 		observers:      map[string]map[string]blurbObserver{},
 		nowF: func() time.Time {
 			return time.Unix(int64(0), int64(0))
@@ -1055,11 +1056,11 @@ func Test_StreamBlurbs_parentNotFoundLater(t *testing.T) {
 	s := &messagingServerImpl{
 		identityServer: is,
 
-		token:      NewTokenGenerator(),
+		token:      server.NewTokenGenerator(),
 		roomKeys:   map[string]int{},
 		blurbKeys:  map[string]blurbIndex{},
 		blurbs:     map[string][]blurbEntry{},
-		parentUids: map[string]*uniqID{},
+		parentUids: map[string]*server.UniqID{},
 		observers:  map[string]map[string]blurbObserver{},
 		nowF: func() time.Time {
 			return time.Unix(int64(0), int64(0))
@@ -1129,7 +1130,7 @@ func (m *mockSendBlurbsStream) Recv() (*pb.CreateBlurbRequest, error) {
 	defer m.mu.Unlock()
 	if m.next < len(m.reqs) {
 		cur := m.next
-		m.next += 1
+		m.next++
 		return m.reqs[cur], nil
 	}
 	return nil, io.EOF
@@ -1206,7 +1207,7 @@ func (m *errorSendBlurbsStream) Recv() (*pb.CreateBlurbRequest, error) {
 	defer m.mu.Unlock()
 	if m.next < len(m.reqs) {
 		cur := m.next
-		m.next += 1
+		m.next++
 		return m.reqs[cur], nil
 	}
 	return nil, status.Error(codes.Unknown, "Error")
@@ -1423,7 +1424,7 @@ type mockConnectStream struct {
 func (m *mockConnectStream) Recv() (*pb.ConnectRequest, error) {
 	if m.next < len(m.reqs) {
 		req := m.reqs[m.next]
-		m.next += 1
+		m.next++
 		return req, nil
 	}
 	if m.stop {
@@ -1685,7 +1686,7 @@ type sendErrorConnectStream struct {
 func (m *sendErrorConnectStream) Recv() (*pb.ConnectRequest, error) {
 	if m.next < len(m.reqs) {
 		req := m.reqs[m.next]
-		m.next += 1
+		m.next++
 		return req, nil
 	}
 	if m.stop {
@@ -1775,11 +1776,11 @@ func TestConnect_parentNotFoundLater(t *testing.T) {
 	s := &messagingServerImpl{
 		identityServer: is,
 
-		token:      NewTokenGenerator(),
+		token:      server.NewTokenGenerator(),
 		roomKeys:   map[string]int{},
 		blurbKeys:  map[string]blurbIndex{},
 		blurbs:     map[string][]blurbEntry{},
-		parentUids: map[string]*uniqID{},
+		parentUids: map[string]*server.UniqID{},
 		observers:  map[string]map[string]blurbObserver{},
 		nowF:       time.Now,
 	}

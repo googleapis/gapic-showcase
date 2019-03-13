@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package services
 
 import (
 	"context"
@@ -20,8 +20,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -29,11 +29,11 @@ import (
 
 // NewEchoServer returns a new EchoServer for the Showcase API.
 func NewEchoServer() pb.EchoServer {
-	return &echoServerImpl{waiter: waiterSingleton}
+	return &echoServerImpl{waiter: server.GetWaiterInstance()}
 }
 
 type echoServerImpl struct {
-	waiter Waiter
+	waiter server.Waiter
 }
 
 func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.EchoResponse, error) {

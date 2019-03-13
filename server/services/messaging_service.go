@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package services
 
 import (
 	"context"
@@ -27,6 +27,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/genproto/googleapis/longrunning"
 	errdetails "google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -34,19 +35,22 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// NewMessagingServer returns an instance of a messaging server.
 func NewMessagingServer(identityServer ReadOnlyIdentityServer) MessagingServer {
 	return &messagingServerImpl{
 		identityServer: identityServer,
 		nowF:           time.Now,
-		token:          NewTokenGenerator(),
+		token:          server.NewTokenGenerator(),
 		roomKeys:       map[string]int{},
 		blurbKeys:      map[string]blurbIndex{},
 		blurbs:         map[string][]blurbEntry{},
-		parentUids:     map[string]*uniqID{},
+		parentUids:     map[string]*server.UniqID{},
 		observers:      map[string]map[string]blurbObserver{},
 	}
 }
 
+// MessagingServer provides an interface which is the implementation of the
+// MessagingServer proto and as well as a method for filtering the blurbs.
 type MessagingServer interface {
 	FilteredListBlurbs(context.Context, *pb.ListBlurbsRequest, func(*pb.Blurb) bool) (*pb.ListBlurbsResponse, error)
 
@@ -55,10 +59,10 @@ type MessagingServer interface {
 
 type messagingServerImpl struct {
 	nowF           func() time.Time
-	token          TokenGenerator
+	token          server.TokenGenerator
 	identityServer ReadOnlyIdentityServer
 
-	roomUid  uniqID
+	roomUID  server.UniqID
 	roomMu   sync.Mutex
 	roomKeys map[string]int
 	rooms    []roomEntry
@@ -66,10 +70,10 @@ type messagingServerImpl struct {
 	blurbMu    sync.Mutex
 	blurbKeys  map[string]blurbIndex
 	blurbs     map[string][]blurbEntry
-	parentUids map[string]*uniqID
+	parentUids map[string]*server.UniqID
 
 	obsMu     sync.Mutex
-	obsUid    uniqID
+	obsUID    server.UniqID
 	observers map[string]map[string]blurbObserver
 }
 
@@ -119,7 +123,7 @@ func (s *messagingServerImpl) CreateRoom(ctx context.Context, in *pb.CreateRoomR
 	}
 
 	// Assign info.
-	id := s.roomUid.next()
+	id := s.roomUID.Next()
 	name := fmt.Sprintf("rooms/%d", id)
 	now := ptypes.TimestampNow()
 
@@ -292,11 +296,11 @@ func (s *messagingServerImpl) CreateBlurb(ctx context.Context, in *pb.CreateBlur
 	}
 	puid, ok := s.parentUids[parent]
 	if !ok {
-		puid = &uniqID{}
+		puid = &server.UniqID{}
 		s.parentUids[parent] = puid
 	}
 
-	id := puid.next()
+	id := puid.Next()
 	name := fmt.Sprintf("%s/blurbs/%d", parent, id)
 	now := ptypes.TimestampNow()
 
@@ -647,6 +651,8 @@ type streamBlurbsObserver struct {
 	err error
 }
 
+// BlurbsOutStream is the common interface of the connect and streamblurbs streams.
+// This interface allows the observer to handle both streams.
 type BlurbsOutStream interface {
 	Send(*pb.StreamBlurbsResponse) error
 }
@@ -696,7 +702,7 @@ func (o *streamBlurbsObserver) OnDelete(b *pb.Blurb) {
 func (s messagingServerImpl) registerObserver(parent string, o blurbObserver) string {
 	s.obsMu.Lock()
 	defer s.obsMu.Unlock()
-	name := strconv.FormatInt(s.obsUid.next(), 10)
+	name := strconv.FormatInt(s.obsUID.Next(), 10)
 	if _, ok := s.observers[parent]; !ok {
 		s.observers[parent] = map[string]blurbObserver{}
 	}

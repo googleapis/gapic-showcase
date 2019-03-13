@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,18 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package services
 
 import (
-	"sync/atomic"
+	pb "github.com/googleapis/gapic-showcase/server/genproto"
+	lropb "google.golang.org/genproto/googleapis/longrunning"
 )
 
-// UniqID provides a numerical id that is guaranteed to be unique.
-type UniqID struct {
-	i int64
+// Mock waiter type used in echo_service_test and operations_service_test to
+// check that they defer to the waiter.
+type mockWaiter struct {
+	req *pb.WaitRequest
 }
 
-// Next gets the next unique id.
-func (u *UniqID) Next() int64 {
-	return atomic.AddInt64(&u.i, 1) - 1
+func (w *mockWaiter) Wait(req *pb.WaitRequest) *lropb.Operation {
+	w.req = req
+	return nil
 }

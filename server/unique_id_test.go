@@ -14,16 +14,12 @@
 
 package server
 
-import (
-	"sync/atomic"
-)
+import "testing"
 
-// UniqID provides a numerical id that is guaranteed to be unique.
-type UniqID struct {
-	i int64
-}
-
-// Next gets the next unique id.
-func (u *UniqID) Next() int64 {
-	return atomic.AddInt64(&u.i, 1) - 1
+func TestUniqID_Next(t *testing.T) {
+	u := &UniqID{2}
+	got := u.Next()
+	if got != 2 {
+		t.Errorf("Next: got %d, want %d", got, 2)
+	}
 }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package services
 
 import (
 	"context"
@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc/codes"
@@ -356,7 +357,7 @@ func Test_Delete_notFound(t *testing.T) {
 
 func Test_List_invalidToken(t *testing.T) {
 	s := &identityServerImpl{
-		token: &tokenGenerator{salt: "Ekko"},
+		token: server.NewTokenGenerator(),
 		keys:  map[string]int{},
 	}
 
