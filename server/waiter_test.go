@@ -28,6 +28,13 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/status"
 )
 
+func TestGetWaiterInstance(t *testing.T) {
+	waiter := GetWaiterInstance()
+	if waiter != waiterSingleton {
+		t.Error("GetWaiterInstance: Expected to get waiter singleton.")
+	}
+}
+
 func TestWait_pending(t *testing.T) {
 	now := time.Unix(1, 0)
 	endTime := time.Unix(2, 0)
