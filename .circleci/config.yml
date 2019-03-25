@@ -169,6 +169,7 @@ jobs:
                 -u googleapis \
                 -r gapic-showcase \
                 -c ${CIRCLE_SHA1} \
+                -b "$(go run ./util/cmd/print_changes/main.go ${CIRCLE_TAG})" \
                 -prerelease \
                 ${CIRCLE_TAG} ./dist
 
