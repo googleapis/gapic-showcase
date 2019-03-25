@@ -1,5 +1,8 @@
 # Release History
 
+### v0.0.16 / 2019-03-25
+- Fixing some field names in path templates
+
 ### v0.0.15 / 2019-03-25
 - Fixing path templates to make sure curly braces match
 - Use Go modules
