@@ -1,5 +1,9 @@
 # Release History
 
+### 0.0.14 / 2019-03-25
+Serve Testing service CLI service
+Ensure all path templates start with `/`
+
 ### 0.0.13 / 2019-03-01
 Fix issue which tombstones users.
 
