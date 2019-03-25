@@ -260,3 +260,12 @@ func TestServerDeleteOperation(t *testing.T) {
 		t.Errorf("DeleteOperations expected code=%d, got %d", codes.Unimplemented, s.Code())
 	}
 }
+
+func TestServerWaitOperation(t *testing.T) {
+	server := NewOperationsServer(nil)
+	_, err := server.WaitOperation(context.Background(), nil)
+	s, _ := status.FromError(err)
+	if codes.Unimplemented != s.Code() {
+		t.Errorf("DeleteOperations expected code=%d, got %d", codes.Unimplemented, s.Code())
+	}
+}
