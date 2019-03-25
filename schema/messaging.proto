@@ -174,7 +174,7 @@ service Messaging {
       post: "/v1alpha3/{name=rooms/*}/blurbs:stream"
       body: "*"
       additional_bindings: {
-        post: "/v1alpha3/{parent=users/*/profile}/blurbs:stream"
+        post: "/v1alpha3/{name=users/*/profile}/blurbs:stream"
         body: "*"
       }
     };

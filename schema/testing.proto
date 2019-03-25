@@ -73,7 +73,7 @@ service Testing {
   // List the tests of a sessesion.
   rpc ListTests(ListTestsRequest) returns (ListTestsResponse) {
     option (google.api.http) = {
-      get: "/v1alpha3/{name=sessions/*}/tests"
+      get: "/v1alpha3/{parent=sessions/*}/tests"
     };
   }
 
