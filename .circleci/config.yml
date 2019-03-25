@@ -39,10 +39,10 @@ workflows:
 jobs:
   build:
     docker:
-      - image: golang:1.11
+      - image: golang:1.12
     environment:
       GOPATH: /go
-      GO111MODULE: "off"
+      GO111MODULE: "on"
     working_directory: /go/src/github.com/googleapis/gapic-showcase
     steps:
       - checkout
@@ -140,9 +140,10 @@ jobs:
 
   github_release:
     docker:
-      - image: golang:1.11
+      - image: golang:1.12
     environment:
       GOPATH: /go
+      GO111MODULE: "on"
     working_directory: /go/src/github.com/googleapis/gapic-showcase
     steps:
       - checkout
