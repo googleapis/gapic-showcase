@@ -1,5 +1,9 @@
 # Release History
 
+### 0.0.15 / 2019-03-25
+Fixing path templates to make sure curly braces match
+Use Go modules
+
 ### 0.0.14 / 2019-03-25
 Serve Testing service CLI service
 Ensure all path templates start with `/`
