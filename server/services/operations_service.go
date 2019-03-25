@@ -136,3 +136,7 @@ func (s operationsServerImpl) ListOperations(ctx context.Context, in *lropb.List
 func (s operationsServerImpl) DeleteOperation(ctx context.Context, in *lropb.DeleteOperationRequest) (*empty.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "google.longrunning.DeleteOperation is unimplemented.")
 }
+
+func (s operationsServerImpl) WaitOperation(ctx context.Context, in *lropb.WaitOperationRequest) (*lropb.Operation, error) {
+	return nil, status.Error(codes.Unimplemented, "google.longrunning.WaitOperation is unimplemented.")
+}
