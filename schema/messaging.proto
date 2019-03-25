@@ -143,7 +143,7 @@ service Messaging {
     option (google.api.http) = {
       get: "/v1alpha3/{parent=rooms/*}/blurbs"
       additional_bindings: {
-        get: "/v1alpha3/{parent=users/*/profile}/blurbs}"
+        get: "/v1alpha3/{parent=users/*/profile}/blurbs"
       }
     };
     option (google.api.method_signature) = "parent";
