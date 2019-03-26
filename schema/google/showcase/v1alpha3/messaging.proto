@@ -290,13 +290,7 @@ message ListRoomsResponse {
 // posted on a user profile.
 message Blurb {
   // The resource name of the chat room.
-  string name = 1 [
-    (google.api.resource_set) = {
-      resources: [
-        {symbol: "RoomBlurb", pattern: "rooms/{room_id}/blurbs/{blurb_id}"},
-        {symbol: "ProfileBlurb", pattern: "user/{user_id}/profile/blurbs/{blurb_id}"}
-      ]
-    }];
+  string name = 1;
 
   // The resource name of the blurb's author.
   string user = 2 [

@@ -131,7 +131,6 @@ jobs:
           name: Install protobuf loader
           command: |
             npm install google-proto-files
-            npm install glob
       - run:
           name: Check if protos can be loaded by protobufjs
           command: |
