@@ -1,8 +1,10 @@
 # Releasing
 To make a new release of gapic-showcase the following steps should be performed.
 
-1. Create a new branch of the version.
+1. Create a new branch of the version
 ```sh
+git checkout master
+git pull origin master
 git checkout -b v{VERSION}
 ```
 
