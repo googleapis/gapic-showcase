@@ -131,11 +131,14 @@ jobs:
           name: Install protobuf loader
           command: |
             npm install google-proto-files
+            npm install glob
       - run:
           name: Check if protos can be loaded by protobufjs
           command: |
-            # TODO(landrito): make this scalable by using a glob.
-            node -e "require('google-proto-files').loadSync('schema/**/*.proto');"
+            node -e "require('google-proto-files').loadSync('schema/google/showcase/v1alpha3/echo.proto');"
+            node -e "require('google-proto-files').loadSync('schema/google/showcase/v1alpha3/identity.proto');"
+            node -e "require('google-proto-files').loadSync('schema/google/showcase/v1alpha3/messaging.proto');"
+            node -e "require('google-proto-files').loadSync('schema/google/showcase/v1alpha3/testing.proto');"
 
   github_release:
     docker:
