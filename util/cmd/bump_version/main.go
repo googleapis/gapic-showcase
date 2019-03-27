@@ -21,6 +21,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -28,19 +29,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const CURRENT_API = "v1alpha3"
-const CURRENT_RELEASE = "0.0.16"
+const currentAPIVersion = "v1alpha3"
+const currentReleaseVersion = "0.0.16"
 
+// This script updates the release version or API version of files in gapic-showcase.
+// This script is used on API and release version bumps.
+//
+// Usage: go run ./util/cmd/bump_version/main.go -h
 func main() {
 	var bumpMajor, bumpMinor, bumpPatch bool
-	var newApi string
+	var newAPI string
 
-	// This is definitely overkill, I am just lazy and didn't want to write the
-	// code to parse the args. ¯\_(ツ)_/¯
 	cmd := &cobra.Command{
 		Short: "Utility script to bump the API and realease versions in all relevant files.",
 		Run: func(cmd *cobra.Command, args []string) {
-			if newApi == "" && !bumpMajor && !bumpMinor && !bumpPatch {
+			if newAPI == "" && !bumpMajor && !bumpMinor && !bumpPatch {
 				return
 			}
 
@@ -48,7 +51,7 @@ func main() {
 				if !oneof(bumpMajor, bumpMinor, bumpPatch) {
 					log.Fatalf("Expected only one of --major, --minor, and --patch.")
 				}
-				versions := strings.Split(CURRENT_RELEASE, ".")
+				versions := strings.Split(currentReleaseVersion, ".")
 
 				atoi := func(s string) int {
 					i, err := strconv.Atoi(s)
@@ -63,23 +66,32 @@ func main() {
 				patch := atoi(versions[2])
 
 				if bumpMajor {
-					major += 1
+					major++
 					minor = 0
 					patch = 0
 				}
 				if bumpMinor {
-					minor += 1
+					minor++
 					patch = 0
 				}
 				if bumpPatch {
-					patch += 1
+					patch++
 				}
-				replace(CURRENT_RELEASE, fmt.Sprintf("%d.%d.%d", major, minor, patch))
+				replace(currentReleaseVersion, fmt.Sprintf("%d.%d.%d", major, minor, patch))
 			}
 
-			if newApi != "" && CURRENT_API != newApi {
-				replace(CURRENT_API, newApi)
-				util.CompileProtos(newApi)
+			if newAPI != "" && currentAPIVersion != newAPI {
+				versionRegexStr := "^([v]\\d+)([p_]\\d+)?((alpha|beta)\\d*)?"
+				versionRegex, err := regexp.Compile(versionRegexStr)
+				if err != nil {
+					log.Fatalf("Unexpected Error compiling version regex: %+v", err)
+				}
+				if !versionRegex.Match([]byte(newAPI)) {
+					log.Fatalf("The API version must conform to the regex: %s", versionRegexStr)
+				}
+
+				replace(currentAPIVersion, newAPI)
+				util.CompileProtos(newAPI)
 			}
 		},
 	}
@@ -103,7 +115,7 @@ func main() {
 		false,
 		"Pass this flag to bump the patch version")
 	cmd.Flags().StringVarP(
-		&newApi,
+		&newAPI,
 		"api",
 		"a",
 		"",
@@ -116,15 +128,13 @@ func main() {
 }
 
 func replace(old, new string) {
-	showcaseDir := filepath.Join(
-		os.Getenv("GOPATH"),
-		"src",
-		"github.com",
-		"googleapis",
-		"gapic-showcase")
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Error: unable to get working dir: %+v", err)
+	}
 
 	filetypes := []string{".go", ".md", ".yml"}
-	err := filepath.Walk(showcaseDir, replacer(filetypes, old, new))
+	err = filepath.Walk(pwd, replacer(filetypes, old, new))
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
