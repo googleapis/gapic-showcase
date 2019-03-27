@@ -18,6 +18,15 @@ import (
 	"github.com/googleapis/gapic-showcase/util"
 )
 
+// This script regenerates all of the generated source code for the Showcase
+// API including the generated messages, gRPC services, go gapic clients,
+// and the generated CLI. This script must be ran from the root directory
+// of the gapic-showcase repository.
+//
+// This script should be used whenever any changes are made to any of
+// the protos found in schema.
+//
+// Usage: go run ./util/cmd/compile_protos/main.go
 func main() {
 	util.CompileProtos("v1alpha3")
 }
