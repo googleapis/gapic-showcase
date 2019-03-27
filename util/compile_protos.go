@@ -19,6 +19,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 func CompileProtos(version string) {
@@ -27,60 +28,36 @@ func CompileProtos(version string) {
 		log.Fatal("Error: 'protoc' is expected to be installed on the path.")
 	}
 
-	// Get proto dependencies
-	gopath := os.Getenv("GOPATH")
-	showcaseDir := filepath.Join(
-		gopath,
-		"src",
-		"github.com",
-		"googleapis",
-		"gapic-showcase")
-	tmpDir := filepath.Join(showcaseDir, "tmp")
-	if err := os.RemoveAll(tmpDir); err != nil {
-		log.Fatalf("Error, could not remove path %s: %v", tmpDir, err)
+	// Setup paths
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Error: unable to get working dir: %+v", err)
 	}
-
-	Execute(
-		"git",
-		"clone",
-		"-b",
-		"input-contract",
-		"https://github.com/googleapis/api-common-protos.git",
-		filepath.Join(showcaseDir, "tmp", "api-common-protos"),
+	gosrc, err := filepath.Abs(
+		filepath.Join(pwd, "..", "..", ".."),
 	)
-
-	// Move showcase protos alongside its dependencies.
-	protoDest := filepath.Join(
-		showcaseDir,
-		"tmp",
-		"api-common-protos",
-		"google",
-		"showcase",
-		version)
-	if err := os.MkdirAll(protoDest, 0755); err != nil {
-		log.Fatalf("Error, could not make path %s: %v", protoDest, err)
+	if err != nil || !strings.HasSuffix(gosrc, filepath.Join("go", "src")) {
+		log.Fatal("Error: could not find the go src path from the current working dir.")
 	}
 
-	files, err := filepath.Glob(filepath.Join(showcaseDir, "schema", "google", "showcase", version, "*.proto"))
+	protos := filepath.Join("schema", "google", "showcase", version, "*.proto")
+	files, err := filepath.Glob(protos)
 	if err != nil {
-		log.Fatal("Error: failed to find protos in " + showcaseDir)
+		log.Fatal("Error: failed to find protos in " + protos)
 	}
 
-	for _, f := range files {
-		Execute("cp", f, protoDest)
-	}
-
-	// Compile protos
-	files, err = filepath.Glob(filepath.Join(protoDest, "*.proto"))
-	if err != nil {
-		log.Fatal("Error: failed to find protos in " + protoDest)
-	}
+	// Run protoc
 	command := []string{
 		"protoc",
-		"--include_imports",
-		"--include_source_info",
-		"--go_out=plugins=grpc:" + gopath + "/src",
-		"--proto_path=" + filepath.Join(showcaseDir, "tmp", "api-common-protos"),
+		"--proto_path=api-common-protos",
+		"--proto_path=schema",
+		"--go_cli_out=" + filepath.Join("cmd", "gapic-showcase"),
+		"--go_cli_opt=root=gapic-showcase",
+		"--go_cli_opt=gapic=github.com/googleapis/gapic-showcase/client",
+		"--go_cli_opt=fmt=false",
+		"--go_gapic_out=" + gosrc,
+		"--go_gapic_opt=go-gapic-package=github.com/googleapis/gapic-showcase/client;client",
+		"--go_out=plugins=grpc:" + gosrc,
 	}
 	Execute(append(command, files...)...)
 }
