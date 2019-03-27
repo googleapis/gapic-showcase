@@ -29,11 +29,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const currentAPIVersion = "v1alpha3"
+const currentAPIVersion = "v1beta1"
 const currentReleaseVersion = "0.0.16"
 
 // This script updates the release version or API version of files in gapic-showcase.
-// This script is used on API and release version bumps.
+// This script is used on API and release version bumps. This script must be ran in
+// the root directory of gapic-showcase.
 //
 // Usage: go run ./util/cmd/bump_version/main.go -h
 func main() {
@@ -88,6 +89,12 @@ func main() {
 				}
 				if !versionRegex.Match([]byte(newAPI)) {
 					log.Fatalf("The API version must conform to the regex: %s", versionRegexStr)
+				}
+
+				schemaDir := filepath.Join("schema", "google", "showcase")
+				err = os.Rename(filepath.Join(schemaDir, currentAPIVersion), filepath.Join(schemaDir, newAPI))
+				if err != nil {
+					log.Fatalf("Failed to change proto directory: %+v", err)
 				}
 
 				replace(currentAPIVersion, newAPI)
@@ -179,7 +186,7 @@ func oneof(bs ...bool) bool {
 	t := 0
 	for _, b := range bs {
 		if b {
-			t += 1
+			t++
 		}
 	}
 	return t == 1
