@@ -20,124 +20,96 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
-	"sync"
 
 	"github.com/googleapis/gapic-showcase/util"
 )
 
+// This script is ran in CI when a new version tag is pushed to master. This script
+// places the compiled proto descriptor set, a tarball of showcase-protos alongside it's
+// dependencies, and the compiled executables of the gapic-showcase cli tool inside the
+// directory "dist"
+//
+// This script must be ran from the root directory of the gapic-showcase repository.
+//
+// Usage: go run ./util/cmd/release
 func main() {
-	setup()
-	stageProtos()
-	parallelize(compileDescriptors, tarProtos, compileBinaries)
-	teardown()
-}
-
-// TODO(landrito): theres a lot of similar things happening here in and in the
-// compile protos command. Consolodate the repeated code into a base util file.
-func setup() {
-	distDir := filepath.Join(showcaseDir(), "dist")
-	if err := os.RemoveAll(distDir); err != nil {
-		log.Fatalf("Failed to remove the directory %s: %v", distDir, err)
-	}
-	if err := os.MkdirAll(distDir, 0755); err != nil {
-		log.Fatalf("Failed to make the directory %s: %v", distDir, err)
+	if err := os.RemoveAll("tmp"); err != nil {
+		log.Fatalf("Failed to remove the directory 'tmp': %v", err)
 	}
 
-	tmpDir := filepath.Join(showcaseDir(), "tmp")
-	if err := os.RemoveAll(tmpDir); err != nil {
-		log.Fatalf("Failed to remove the directory %s: %v", tmpDir, err)
+	tmpProtoPath := filepath.Join("tmp", "protos")
+	if err := os.MkdirAll(tmpProtoPath, 0755); err != nil {
+		log.Fatalf("Failed to make the directory 'tmp': %v", err)
 	}
-	if err := os.MkdirAll(tmpDir, 0755); err != nil {
-		log.Fatalf("Failed to make the directory %s: %v", tmpDir, err)
+	defer os.RemoveAll("tmp")
+
+	if err := os.RemoveAll("dist"); err != nil {
+		log.Fatalf("Failed to remove the directory 'dist': %v", err)
 	}
-}
-
-func teardown() {
-	tmpDir := filepath.Join(showcaseDir(), "tmp")
-	if err := os.RemoveAll(tmpDir); err != nil {
-		log.Fatalf("Failed to remove the directory %s: %v", tmpDir, err)
-	}
-}
-
-func stageProtos() {
-	// Get proto dependencies
-	util.Execute(
-		"git",
-		"clone",
-		"-b",
-		"input-contract",
-		"https://github.com/googleapis/api-common-protos.git",
-		filepath.Join(showcaseDir(), "tmp", "api-common-protos"),
-	)
-
-	// Move showcase protos alongside its dependencies.
-	protoDest := filepath.Join(
-		showcaseDir(),
-		"tmp",
-		"api-common-protos",
-		"google",
-		"showcase",
-		"v1alpha3")
-	if err := os.MkdirAll(protoDest, 0755); err != nil {
-		log.Fatalf("Failed to make the dir %s: %v", protoDest, err)
+	if err := os.MkdirAll("dist", 0755); err != nil {
+		log.Fatalf("Failed to make the directory 'dist': %v", err)
 	}
 
-	files, err := filepath.Glob(filepath.Join(showcaseDir(), "schema", "google", "showcase", "v1alpha3", "*.proto"))
+	// Move schema files alongside their dependencies.
+	util.Execute("cp", "-rf", filepath.Join("schema", "google"), tmpProtoPath)
+
+	apiPath := filepath.Join("api-common-protos", "google", "api")
+	tmpAPIPath := filepath.Join(tmpProtoPath, "google", "api")
+	os.MkdirAll(tmpAPIPath, 0755)
+	util.Execute("cp", filepath.Join(apiPath, "annotations.proto"), tmpAPIPath)
+	util.Execute("cp", filepath.Join(apiPath, "client.proto"), tmpAPIPath)
+	util.Execute("cp", filepath.Join(apiPath, "field_behavior.proto"), tmpAPIPath)
+	util.Execute("cp", filepath.Join(apiPath, "http.proto"), tmpAPIPath)
+	util.Execute("cp", filepath.Join(apiPath, "resource.proto"), tmpAPIPath)
+
+	longrunningPath := filepath.Join("api-common-protos", "google", "longrunning")
+	tmpLongrunningPath := filepath.Join(tmpProtoPath, "google", "longrunning")
+	os.MkdirAll(tmpLongrunningPath, 0755)
+	util.Execute("cp", filepath.Join(longrunningPath, "operations.proto"), tmpLongrunningPath)
+
+	rpcPath := filepath.Join("api-common-protos", "google", "rpc")
+	tmpRPCPath := filepath.Join(tmpProtoPath, "google", "rpc")
+	os.MkdirAll(tmpRPCPath, 0755)
+	util.Execute("cp", filepath.Join(rpcPath, "status.proto"), tmpRPCPath)
+	util.Execute("cp", filepath.Join(rpcPath, "error_details.proto"), tmpRPCPath)
+
+	// Find gapic-showcase version
+	version, err := exec.Command("go", "run", "./cmd/gapic-showcase", "--version").Output()
 	if err != nil {
-		log.Fatal("Error: failed to find protos in " + showcaseDir())
+		log.Fatalf("Failed getting showcase version: %+v", err)
 	}
 
-	for _, f := range files {
-		util.Execute("cp", f, protoDest)
-	}
-}
+	// Tar Protos
+	output := filepath.Join("dist", fmt.Sprintf("gapic-showcase-%s-protos.tar.gz", version))
+	util.Execute("tar", "-zcf", output, "-C", tmpProtoPath, "google")
 
-func compileDescriptors() {
 	// Check if protoc is installed.
 	if err := exec.Command("protoc", "--version").Run(); err != nil {
 		log.Fatal("Error: 'protoc' is expected to be installed on the path.")
 	}
 
 	// Compile protos
-	protoDest := filepath.Join(
-		showcaseDir(),
-		"tmp",
-		"api-common-protos",
-		"google",
-		"showcase",
-		"v1alpha3")
-
-	files, err := filepath.Glob(filepath.Join(protoDest, "*.proto"))
+	files, err := filepath.Glob(filepath.Join(tmpProtoPath, "google", "showcase", "v1alpha3", "*.proto"))
 	if err != nil {
-		log.Fatal("Error: failed to find protos in " + protoDest)
+		log.Fatal("Error: failed to find protos in " + tmpProtoPath)
 	}
 	command := []string{
 		"protoc",
-		"--proto_path=" + filepath.Join(showcaseDir(), "tmp", "api-common-protos"),
+		"--proto_path=" + tmpProtoPath,
 		"--include_imports",
 		"--include_source_info",
 		"-o",
-		filepath.Join(showcaseDir(), "dist", fmt.Sprintf("gapic-showcase-%s.desc", version())),
+		filepath.Join("dist", fmt.Sprintf("gapic-showcase-%s.desc", version)),
 	}
 	util.Execute(append(command, files...)...)
-}
 
-func tarProtos() {
-	protoDir := filepath.Join(showcaseDir(), "tmp", "api-common-protos")
-	output := filepath.Join(showcaseDir(), "dist", fmt.Sprintf("gapic-showcase-%s-protos.tar.gz", version()))
-
-	util.Execute("tar", "-zcf", output, "-C", protoDir, "google")
-}
-
-func compileBinaries() {
-	stagingDir := filepath.Join(showcaseDir(), "tmp", "x")
-	outputDir := filepath.Join(showcaseDir(), "dist")
-
+	// Get cross compiler
 	// Mousetrap is a windows dependency that is not implicitly got since
 	// we only get the linux dependencies.
 	util.Execute("go", "get", "github.com/mitchellh/gox", "github.com/inconshreveable/mousetrap")
 
+	// Compile binaries
+	stagingDir := filepath.Join("tmp", "binaries")
 	osArchs := []string{
 		"windows/amd64",
 		"linux/amd64",
@@ -149,7 +121,7 @@ func compileBinaries() {
 			"gox",
 			fmt.Sprintf("-osarch=%s", osArch),
 			"-output",
-			filepath.Join(stagingDir, fmt.Sprintf("gapic-showcase-%s-{{.OS}}-{{.Arch}}", version()), "gapic-showcase"),
+			filepath.Join(stagingDir, fmt.Sprintf("gapic-showcase-%s-{{.OS}}-{{.Arch}}", version), "gapic-showcase"),
 			"github.com/googleapis/gapic-showcase/cmd/gapic-showcase")
 	}
 
@@ -161,57 +133,9 @@ func compileBinaries() {
 		util.Execute(
 			"tar",
 			"-zcf",
-			filepath.Join(outputDir, filepath.Base(dir)+".tar.gz"),
+			filepath.Join("dist", filepath.Base(dir)+".tar.gz"),
 			"-C",
 			filepath.Dir(files[0]),
 			filepath.Base(files[0]))
-	}
-}
-
-var sOnce sync.Once
-var showcaseDirMemo string
-
-func showcaseDir() string {
-	sOnce.Do(func() {
-		gopath := os.Getenv("GOPATH")
-		showcaseDir := filepath.Join(
-			gopath,
-			"src",
-			"github.com",
-			"googleapis",
-			"gapic-showcase")
-		showcaseDirMemo = showcaseDir
-	})
-	return showcaseDirMemo
-}
-
-var verOnce sync.Once
-var versionMemo string
-
-func version() string {
-	verOnce.Do(func() {
-		util.ExecuteInDir(showcaseDir(), "go", "get", "./...")
-		util.ExecuteInDir(showcaseDir(), "go", "install", "./cmd/gapic-showcase")
-		version, err := exec.Command("gapic-showcase", "--version").Output()
-		if err != nil {
-			log.Fatal("Failed getting showcase version")
-		}
-
-		versionMemo = strings.TrimSpace(string(version))
-	})
-	return versionMemo
-}
-
-func parallelize(functions ...func()) {
-	var waitGroup sync.WaitGroup
-
-	waitGroup.Add(len(functions))
-	defer waitGroup.Wait()
-
-	for _, function := range functions {
-		go func(copy func()) {
-			copy()
-			waitGroup.Done()
-		}(function)
 	}
 }
