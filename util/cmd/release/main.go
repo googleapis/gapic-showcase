@@ -32,6 +32,8 @@ import (
 // directory "dist"
 //
 // This script must be ran from the root directory of the gapic-showcase repository.
+//
+// Usage: go run ./util/cmd/release
 func main() {
 	if err := os.RemoveAll("tmp"); err != nil {
 		log.Fatalf("Failed to remove the directory 'tmp': %v", err)
