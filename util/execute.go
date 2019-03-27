@@ -24,11 +24,3 @@ func Execute(args ...string) {
 		log.Fatalf("%s", output)
 	}
 }
-
-func ExecuteInDir(dir string, args ...string) {
-	cmd := exec.Command(args[0], args[1:]...)
-	cmd.Dir = dir
-	if output, err := cmd.CombinedOutput(); err != nil {
-		log.Fatalf("%s", output)
-	}
-}
