@@ -23,7 +23,7 @@ git checkout master
 git pull origin master
 ```
 
-6. Create a tag for the version, push. The automated release will take over from here. Please note that version tags should start with the character `v`.
+6. Create a tag for the version and push. The automated release will take over from here. Please note that version tags should start with the character `v`.
 ```sh
 git tag v{VERSION}
 git push --tags
