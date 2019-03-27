@@ -22,6 +22,10 @@ import (
 	"strings"
 )
 
+// CompileProtos regenerates all of the generated source code for the Showcase
+// API including the generated messages, gRPC services, go gapic clients,
+// and the generated CLI. This must be ran from the root directory
+// of the gapic-showcase repository.
 func CompileProtos(version string) {
 	// Check if protoc is installed.
 	if err := exec.Command("protoc", "--version").Run(); err != nil {
