@@ -20,8 +20,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
-	"sync"
 
 	"github.com/googleapis/gapic-showcase/util"
 )
@@ -75,8 +73,14 @@ func main() {
 	util.Execute("cp", filepath.Join(rpcPath, "status.proto"), tmpRPCPath)
 	util.Execute("cp", filepath.Join(rpcPath, "error_details.proto"), tmpRPCPath)
 
+	// Find gapic-showcase version
+	version, err := exec.Command("go", "run", "./cmd/gapic-showcase", "--version").Output()
+	if err != nil {
+		log.Fatalf("Failed getting showcase version: %+v", err)
+	}
+
 	// Tar Protos
-	output := filepath.Join("dist", fmt.Sprintf("gapic-showcase-%s-protos.tar.gz", version()))
+	output := filepath.Join("dist", fmt.Sprintf("gapic-showcase-%s-protos.tar.gz", version))
 	util.Execute("tar", "-zcf", output, "-C", tmpProtoPath, "google")
 
 	// Check if protoc is installed.
@@ -95,7 +99,7 @@ func main() {
 		"--include_imports",
 		"--include_source_info",
 		"-o",
-		filepath.Join("dist", fmt.Sprintf("gapic-showcase-%s.desc", version())),
+		filepath.Join("dist", fmt.Sprintf("gapic-showcase-%s.desc", version)),
 	}
 	util.Execute(append(command, files...)...)
 
@@ -117,7 +121,7 @@ func main() {
 			"gox",
 			fmt.Sprintf("-osarch=%s", osArch),
 			"-output",
-			filepath.Join(stagingDir, fmt.Sprintf("gapic-showcase-%s-{{.OS}}-{{.Arch}}", version()), "gapic-showcase"),
+			filepath.Join(stagingDir, fmt.Sprintf("gapic-showcase-%s-{{.OS}}-{{.Arch}}", version), "gapic-showcase"),
 			"github.com/googleapis/gapic-showcase/cmd/gapic-showcase")
 	}
 
@@ -134,19 +138,4 @@ func main() {
 			filepath.Dir(files[0]),
 			filepath.Base(files[0]))
 	}
-}
-
-var verOnce sync.Once
-var versionMemo string
-
-func version() string {
-	verOnce.Do(func() {
-		version, err := exec.Command("go", "run", "./cmd/gapic-showcase", "--version").Output()
-		if err != nil {
-			log.Fatalf("Failed getting showcase version: %+v", err)
-		}
-
-		versionMemo = strings.TrimSpace(string(version))
-	})
-	return versionMemo
 }
