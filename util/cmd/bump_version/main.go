@@ -29,7 +29,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const currentAPIVersion = "v1beta1"
+const currentAPIVersion = "v1alpha3"
 const currentReleaseVersion = "0.0.16"
 
 // This script updates the release version or API version of files in gapic-showcase.
