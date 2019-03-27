@@ -4,6 +4,8 @@ require (
 	cloud.google.com/go v0.37.1
 	github.com/golang/protobuf v1.3.1
 	github.com/googleapis/gax-go/v2 v2.0.4
+	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/mitchellh/gox v1.0.0 // indirect
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.2
 	golang.org/x/net v0.0.0-20190324223953-e3b2ff56ed87

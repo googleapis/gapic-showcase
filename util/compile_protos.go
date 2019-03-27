@@ -61,7 +61,7 @@ func CompileProtos(version string) {
 		log.Fatalf("Error, could not make path %s: %v", protoDest, err)
 	}
 
-	files, err := filepath.Glob(filepath.Join(showcaseDir, "schema", "*.proto"))
+	files, err := filepath.Glob(filepath.Join(showcaseDir, "schema", "google", "showcase", version, "*.proto"))
 	if err != nil {
 		log.Fatal("Error: failed to find protos in " + showcaseDir)
 	}
