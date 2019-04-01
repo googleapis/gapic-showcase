@@ -18,6 +18,8 @@ workflows:
       - regeneration-check:
           filters: *all_commits
       - regenerate:
+          requires:
+            - regeneration-check
           filters:
             branches:
               only: master
@@ -186,33 +188,18 @@ jobs:
           name: Print instructions if failed.
           command: echo "Regenerating generated source will cause the build to break, please run 'go run ./util/compile_protos' and fix the build."
           when: on_fail
+      - persist_to_workspace:
+          root: /go
+          paths:
+            - src/src/github.com/googleapis/gapic-showcase
 
   regenerate:
     docker:
-      - image: golang:1.12
+      - image: alpine.git:latest
     working_directory: /go/src/github.com/googleapis/gapic-showcase
     steps:
-      - checkout
-      - run:
-          name: Get proto dependencies
-          command: git submodule init && git submodule update
-      - run:
-          name: Install protoc
-          command: |
-            apt-get update && apt-get install -y unzip
-            curl -o ~/protoc3.zip -L https://github.com/google/protobuf/releases/download/v3.6.1/protoc-3.6.1-linux-x86_64.zip
-            unzip ~/protoc3.zip -d ~/protoc3
-            mv ~/protoc3/bin/* /usr/local/bin/
-            mv ~/protoc3/include/* /usr/local/include/
-      - run:
-          name: Get generators
-          command: |
-              go get github.com/golang/protobuf/protoc-gen-go
-              go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli
-              go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic
-      - run:
-          name: Compile protos
-          command: go run ./util/cmd/compile_protos
+      - attach_workspace:
+          at: /go/src/src/github.com/googleapis/gapic-showcase
       - run:
           name: Check if compilation caused diff.
           command: |
