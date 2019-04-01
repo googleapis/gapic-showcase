@@ -16,12 +16,6 @@ workflows:
       - protobufjs-load-test:
           filters: *all_commits
       - regenerate:
-          requires:
-            - build
-            - kotlin-smoke-test
-            - python-smoke-test
-            - go-smoke-test
-            - protobufjs-load-test
           filters:
             branches:
               only: master
