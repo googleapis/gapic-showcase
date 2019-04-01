@@ -181,6 +181,13 @@ jobs:
             git status --porcelain
             git diff --exit-code --quiet || echo 'export DIFF_FOUND=true' >> $BASH_ENV
       - run:
+          name: Run tests if diff was found
+          command: |
+            # Exit early if no diff was found
+            [[ ! -z $DIFF_FOUND ]] || exit 0
+            go test ./server/...
+            go test ./client
+      - run:
           name: Push generated code if a diff was found
           command: |
             # Exit early if no diff was found
