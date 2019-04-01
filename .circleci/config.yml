@@ -182,7 +182,6 @@ jobs:
             # Exit early if no diff was found
             [[ ! -z $DIFF_FOUND ]] || exit 0
             go test ./server/...
-            go test ./client
       - run:
           name: Print instructions if failed.
           command: echo "Regenerating generated source will cause the build to break, please run 'go run ./util/compile_protos' and fix the build."
