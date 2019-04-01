@@ -191,7 +191,7 @@ jobs:
       - persist_to_workspace:
           root: /go
           paths:
-            - src/src/github.com/googleapis/gapic-showcase
+            - src/github.com/googleapis/gapic-showcase
 
   regenerate:
     docker:
