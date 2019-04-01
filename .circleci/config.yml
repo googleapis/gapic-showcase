@@ -17,7 +17,7 @@ workflows:
           filters: *all_commits
       - regeneration-check:
           filters: *all_commits
-      - regenerate:
+      - push-generated-source:
           requires:
             - regeneration-check
           filters:
@@ -193,9 +193,9 @@ jobs:
           paths:
             - src/github.com/googleapis/gapic-showcase
 
-  regenerate:
+  push-generated-source:
     docker:
-      - image: alpine.git:latest
+      - image: alpine/git:latest
     working_directory: /go/src/github.com/googleapis/gapic-showcase
     steps:
       - attach_workspace:
