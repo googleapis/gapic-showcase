@@ -199,7 +199,7 @@ jobs:
     working_directory: /go/src/github.com/googleapis/gapic-showcase
     steps:
       - attach_workspace:
-          at: /go/src/src/github.com/googleapis/gapic-showcase
+          at: /go/src/github.com/googleapis/gapic-showcase
       - run:
           name: Check if compilation caused diff.
           command: |
