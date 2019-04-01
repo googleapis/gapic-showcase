@@ -15,6 +15,7 @@
 package util
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -64,4 +65,32 @@ func CompileProtos(version string) {
 		"--go_out=plugins=grpc:" + gosrc,
 	}
 	Execute(append(command, files...)...)
+
+	// Fix some generated errors.
+	fixes := []struct {
+		file string
+		fix  string
+	}{
+		{
+			"cmd/gapic-showcase/verify-test.go",
+			"/ByteSliceVar/d",
+		},
+		{
+			"cmd/gapic-showcase/wait.go",
+			"s/EndEnd_time/EndEndTime/g",
+		},
+	}
+	command = []string{
+		"sed",
+		"-i.bak",
+	}
+	for _, f := range fixes {
+		Execute(append(command, f.fix, f.file)...)
+
+		// Remove the backup file.
+		Execute("rm", fmt.Sprintf("%s.bak", f.file))
+	}
+
+	// Format generated output
+	Execute("go", "fmt", "./...")
 }
