@@ -53,7 +53,7 @@ func main() {
 	// Move schema files alongside their dependencies.
 	util.Execute("cp", "-rf", filepath.Join("schema", "google"), tmpProtoPath)
 
-	apiPath := filepath.Join("api-common-protos", "google", "api")
+	apiPath := filepath.Join("schema", "api-common-protos", "google", "api")
 	tmpAPIPath := filepath.Join(tmpProtoPath, "google", "api")
 	os.MkdirAll(tmpAPIPath, 0755)
 	util.Execute("cp", filepath.Join(apiPath, "annotations.proto"), tmpAPIPath)
@@ -62,12 +62,12 @@ func main() {
 	util.Execute("cp", filepath.Join(apiPath, "http.proto"), tmpAPIPath)
 	util.Execute("cp", filepath.Join(apiPath, "resource.proto"), tmpAPIPath)
 
-	longrunningPath := filepath.Join("api-common-protos", "google", "longrunning")
+	longrunningPath := filepath.Join("schema", "api-common-protos", "google", "longrunning")
 	tmpLongrunningPath := filepath.Join(tmpProtoPath, "google", "longrunning")
 	os.MkdirAll(tmpLongrunningPath, 0755)
 	util.Execute("cp", filepath.Join(longrunningPath, "operations.proto"), tmpLongrunningPath)
 
-	rpcPath := filepath.Join("api-common-protos", "google", "rpc")
+	rpcPath := filepath.Join("schema", "api-common-protos", "google", "rpc")
 	tmpRPCPath := filepath.Join(tmpProtoPath, "google", "rpc")
 	os.MkdirAll(tmpRPCPath, 0755)
 	util.Execute("cp", filepath.Join(rpcPath, "status.proto"), tmpRPCPath)
