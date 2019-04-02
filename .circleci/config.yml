@@ -89,9 +89,7 @@ jobs:
           at: /go
       - run:
           name: Check if we are using generated source.
-          command: |
-            git status --porcelain
-            git diff --exit-code --quiet || echo 'export DIFF_FOUND="true"' >> $BASH_ENV
+          command: git diff --exit-code --compact-summary cmd client server/genproto || echo 'export DIFF_FOUND="true"' >> $BASH_ENV
       - run:
           name: Check formatting
           command: "! gofmt -l ./ 2>&1 | read"
@@ -139,9 +137,7 @@ jobs:
           at: /go
       - run:
           name: Check if we are using generated source.
-          command: |
-            git status --porcelain
-            git diff --exit-code --quiet || echo 'export DIFF_FOUND="true"' >> $BASH_ENV
+          command: git diff --exit-code --compact-summary cmd client server/genproto || echo 'export DIFF_FOUND="true"' >> $BASH_ENV
       - run:
           name: Create pull request if diff is found.
           command: |
