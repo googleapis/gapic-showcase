@@ -73,21 +73,6 @@ jobs:
       - run:
           name: Compile protos
           command: go run ./util/cmd/compile_protos
-      - run:
-          name: Check if compilation caused diff.
-          command: |
-            git status --porcelain
-            git diff --exit-code --quiet || echo 'export DIFF_FOUND=true' >> $BASH_ENV
-      - run:
-          name: Run tests if diff was found
-          command: |
-            # Exit early if no diff was found
-            [[ ! -z $DIFF_FOUND ]] || exit 0
-            go test ./server/...
-      - run:
-          name: Print instructions if failed.
-          command: echo "Regenerating generated source will cause the build to break, please run 'go run ./util/compile_protos' and fix the build."
-          when: on_fail
       - persist_to_workspace:
           root: /go
           paths:
@@ -108,7 +93,7 @@ jobs:
             git status --porcelain
             git diff --exit-code --quiet || echo 'export DIFF_FOUND="true"' >> $BASH_ENV
       - run:
-          command: echo '$DIFF_FOUND'
+          command: echo ${DIFF_FOUND}
       - run:
           name: Check formatting
           command: "! gofmt -l ./ 2>&1 | read"
@@ -141,7 +126,7 @@ jobs:
           name: Print instructions on regeneration failure.
           command: |
             # Exit early if no diff was found
-            [[ ! -z $DIFF_FOUND ]] || exit 0
+            [[ ! -z ${DIFF_FOUND} ]] || exit 0
             echo "Regenerating generated source probably caused the build to break, please run 'go run ./util/compile_protos' and fix the build."
           when: on_fail
 
@@ -161,7 +146,7 @@ jobs:
           name: Push generated code if a diff was found
           command: |
             # Exit early if no diff was found
-            [[ ! -z $DIFF_FOUND ]] || exit 0
+            [[ ! -z ${DIFF_FOUND} ]] || exit 0
             # Push to generated code to master.
             git config credential.helper 'cache --timeout=120'
             git config user.email "googleapis-publisher@google.com"
