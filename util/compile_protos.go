@@ -53,7 +53,7 @@ func CompileProtos(version string) {
 	// Run protoc
 	command := []string{
 		"protoc",
-		"--proto_path=api-common-protos",
+		"--proto_path=schema/api-common-protos",
 		"--proto_path=schema",
 		"--go_cli_out=" + filepath.Join("cmd", "gapic-showcase"),
 		"--go_cli_opt=root=gapic-showcase",

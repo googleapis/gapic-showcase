@@ -82,15 +82,14 @@ jobs:
       - run:
           name: Stage showcase in proto dependencies
           command: |
-              git clone -b input-contract https://github.com/googleapis/api-common-protos.git
-              mkdir -p api-common-protos/google/showcase/v1alpha3/
-              cp schema/google/showcase/v1alpha3/* api-common-protos/google/showcase/v1alpha3/
+              mkdir -p schema/api-common-protos/google/showcase/v1alpha3/
+              cp schema/google/showcase/v1alpha3/* schema/api-common-protos/google/showcase/v1alpha3/
       - run:
           name: Run kotlin generation
           command: |
             mkdir koutput
             docker run --rm \
-              --mount type=bind,source="$(pwd)"/api-common-protos,target=/proto \
+              --mount type=bind,source="$(pwd)"/schema/api-common-protos,target=/proto \
               --mount type=bind,source="$(pwd)"/koutput,target=/generated \
               gcr.io/kotlin-gapic/kgen:0.3.0
 
