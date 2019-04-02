@@ -8,6 +8,8 @@ workflows:
             tags:
               only: /.*/
       - test:
+          requires:
+            - build
           filters: *all_commits
       - kotlin-smoke-test:
           filters: *all_commits
@@ -17,11 +19,8 @@ workflows:
           filters: *all_commits
       - protobufjs-load-test:
           filters: *all_commits
-      - regeneration-check:
-          filters: *all_commits
       - push-generated-source:
           requires:
-            - build
             - test
           filters:
             branches:
@@ -98,12 +97,11 @@ jobs:
     docker:
       - image: golang:1.12
     environment:
-      GOPATH: /go
       GO111MODULE: "on"
     working_directory: /go/src/github.com/googleapis/gapic-showcase
     steps:
       - attach_workspace:
-          at: /go/src/github.com/googleapis/gapic-showcase
+          at: /go
       - run:
           name: Check formatting
           command: "! gofmt -l ./ 2>&1 | read"
@@ -138,6 +136,8 @@ jobs:
       - image: alpine/git:latest
     working_directory: /go/src/github.com/googleapis/gapic-showcase
     steps:
+      - attach_workspace:
+          at: /go
       - run:
           name: Check if compilation caused diff.
           command: |
