@@ -103,6 +103,11 @@ jobs:
       - attach_workspace:
           at: /go
       - run:
+          name: Check if we are using generated source.
+          command: |
+            git diff --exit-code --quiet || echo 'export DIFF_FOUND=true' >> $BASH_ENV
+            echo $DIFF_FOUND
+      - run:
           name: Check formatting
           command: "! gofmt -l ./ 2>&1 | read"
       - run:
@@ -130,6 +135,13 @@ jobs:
           name: Submit coverage data to codecov.
           command: bash <(curl -s https://codecov.io/bash)
           when: always
+      - run:
+          name: Print instructions on regeneration failure.
+          command: |
+            # Exit early if no diff was found
+            [[ ! -z $DIFF_FOUND ]] || exit 0
+            echo "Regenerating generated source probably caused the build to break, please run 'go run ./util/compile_protos' and fix the build."
+          when: on_fail
 
   push-generated-source:
     docker:
