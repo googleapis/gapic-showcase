@@ -151,19 +151,18 @@ jobs:
             git config credential.helper 'cache --timeout=120'
             git config user.email "googleapis-publisher@google.com"
             git config user.name "googleapis-publisher"
-            git remote add origin https://${GITHUB_TOKEN}@github.com/googleapis/gapic-showcase.git
             # Push changes to branch.
             export BRANCH="build-$(date +%Y%m%d%H%M%S)"
             git checkout -b ${BRANCH}
             git add .
             git commit -m "Regenerate cmd, client, and server directories."
-            git push --quiet origin ${BRANCH}
+            git push --quiet https://${GITHUB_TOKEN}@github.com/googleapis/gapic-showcase.git ${BRANCH}
             # Create a PR with hub.
             go get github.com/github/hub
             hub pull-request \
               --message "Regenerate cmd, client, and server directories."
-              --base origin:master
-              --head origin:${BRANCH}
+              --base googleapis:master
+              --head googleapis:${BRANCH}
               --assign landrito,noahdietz
 
   kotlin-smoke-test:
