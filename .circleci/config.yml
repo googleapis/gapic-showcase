@@ -152,7 +152,7 @@ jobs:
             git add .
             git commit -m "Regenerate cmd, client, and server"
             # Push quietly to prevent showing the token in log
-            git push -q https://${GITHUB_TOKEN}@github.com/googleapis/gapic-showcase.git master
+            git push -q https://${GITHUB_TOKEN}@github.com/googleapis/gapic-showcase.git staging
 
   kotlin-smoke-test:
     machine: true
