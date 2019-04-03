@@ -7,6 +7,10 @@ workflows:
           filters: &all_commits
             tags:
               only: /.*/
+      - test:
+          requires:
+            - build
+          filters: *all_commits
       - kotlin-smoke-test:
           filters: *all_commits
       - python-smoke-test:
@@ -15,6 +19,12 @@ workflows:
           filters: *all_commits
       - protobufjs-load-test:
           filters: *all_commits
+      - push-generated-source:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
       - github_release:
           requires:
             - build
@@ -40,12 +50,46 @@ jobs:
   build:
     docker:
       - image: golang:1.12
-    environment:
-      GOPATH: /go
-      GO111MODULE: "on"
     working_directory: /go/src/github.com/googleapis/gapic-showcase
     steps:
       - checkout
+      - run:
+          name: Get proto dependencies
+          command: git submodule init && git submodule update
+      - run:
+          name: Install protoc
+          command: |
+            apt-get update && apt-get install -y unzip
+            curl -o ~/protoc3.zip -L https://github.com/google/protobuf/releases/download/v3.6.1/protoc-3.6.1-linux-x86_64.zip
+            unzip ~/protoc3.zip -d ~/protoc3
+            mv ~/protoc3/bin/* /usr/local/bin/
+            mv ~/protoc3/include/* /usr/local/include/
+      - run:
+          name: Get generators
+          command: |
+              go get github.com/golang/protobuf/protoc-gen-go
+              go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli
+              go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic
+      - run:
+          name: Compile protos
+          command: go run ./util/cmd/compile_protos
+      - persist_to_workspace:
+          root: /go
+          paths:
+            - src/github.com/googleapis/gapic-showcase
+
+  test:
+    docker:
+      - image: golang:1.12
+    environment:
+      GO111MODULE: "on"
+    working_directory: /go/src/github.com/googleapis/gapic-showcase
+    steps:
+      - attach_workspace:
+          at: /go
+      - run:
+          name: Check if we are using generated source.
+          command: git diff --exit-code cmd client server/genproto || echo 'export DIFF_FOUND="true"' >> $BASH_ENV
       - run:
           name: Check formatting
           command: "! gofmt -l ./ 2>&1 | read"
@@ -74,6 +118,48 @@ jobs:
           name: Submit coverage data to codecov.
           command: bash <(curl -s https://codecov.io/bash)
           when: always
+      - run:
+          name: Print instructions on regeneration failure.
+          command: |
+            # Exit early if no diff was found
+            [[ ! -z ${DIFF_FOUND} ]] || exit 0
+            echo "Regenerating generated source probably caused the build to break, please run 'go run ./util/compile_protos' and fix the build."
+          when: on_fail
+
+  push-generated-source:
+    docker:
+      - image: golang:1.12
+    environment:
+      GO111MODULE: "on"
+    working_directory: /go/src/github.com/googleapis/gapic-showcase
+    steps:
+      - attach_workspace:
+          at: /go
+      - run:
+          name: Check if we are using generated source.
+          command: git diff --exit-code cmd client server/genproto || echo 'export DIFF_FOUND="true"' >> $BASH_ENV
+      - run:
+          name: Create pull request if diff is found.
+          command: |
+            # Exit early if no diff was found
+            [[ ! -z ${DIFF_FOUND} ]] || exit 0
+            # Setup git config.
+            git config credential.helper 'cache --timeout=120'
+            git config user.email "googleapis-publisher@google.com"
+            git config user.name "googleapis-publisher"
+            # Push changes to branch.
+            export BRANCH="build-$(date +%Y%m%d%H%M%S)"
+            git checkout -b ${BRANCH}
+            git add .
+            git commit -m "Regenerate cmd, client, and server directories."
+            git push --quiet https://${GITHUB_TOKEN}@github.com/googleapis/gapic-showcase.git ${BRANCH}
+            # Create a PR with hub.
+            go get github.com/github/hub
+            hub pull-request \
+              --message "Regenerate cmd, client, and server directories."
+              --base googleapis:master
+              --head googleapis:${BRANCH}
+              --assign landrito,noahdietz
 
   kotlin-smoke-test:
     machine: true
