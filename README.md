@@ -5,136 +5,101 @@
 [![Code Coverage][codecovimg]][codecov]
 [![GoDoc][godocimg]][godoc]
 
-> GAPIC (Generated API Client) Showcase is an API that showcases features used
-by GAPICs to make calling Google APIs an enjoyable experience.
+> GAPIC (Generated API Client) Showcase: an API to test your gRPC clients.
 
-The main goal of GAPIC Showcase is to be a testing tool that will be able to
-verify the features that a GAPIC implements. GAPIC Showcase services aim to be
-representative of all API Client configurations of Google APIs. With this aim in
-mind, gapic-generators that pass gapic-showcase can have reasonable confidence
-in the clients they are generating.
+The GAPIC Showcase API is a representative example of the API client
+configurations of Google APIs. GAPIC Showcase provides a tool that allows
+a user to spin up a server that accepts gRPC requests. This tool also exposes
+an interface to make requests to the server but requests from your own
+gRPC clients are accepted.
 
-## Services
-The services of GAPIC Showcase API can be found in [schema/](schema/). Please
-note that these protocol buffer files are not able to be compiled in isolation.
-To get the services staged alongside their dependencies, please see check out
-our [releases](https://github.com/googleapis/gapic-showcase/releases) page.
-
-## GAPIC Showcase CLI Tool
-### Installation
-The GAPIC Showcase CLI Tool can be installed using three different mechanisms,
+## Installation
+The GAPIC Showcase CLI can be installed using three different mechanisms:
+pulling a docker image from [Google Container Registry](https://gcr.io/gapic-images/gapic-showcase),
 downloading the compiled binary from our our [releases](https://github.com/googleapis/gapic-showcase/releases)
-page, pulling our released docker image from [Google Container Registry](https://gcr.io/gapic-images/gapic-showcase),
-or simply by using go commands.
+page, or simply by installing from source using go.
 
-#### Binary Installation
+### Docker
+```sh
+$ docker pull gcr.io/gapic-images/gapic-showcase:0.0.16
+$ docker run \
+    --rm \
+    -p 7469:7469/tcp \
+    -p 7469:7469/udp \
+    gcr.io/gapic-images/gapic-showcase:0.0.16 \
+    --help
+> Root command of gapic-showcase
+>
+> Usage:
+>   gapic-showcase [command]
+>
+> Available Commands:
+>   completion  Emits bash a completion for gapic-showcase
+>   echo        This service is used showcase the four main types...
+>   help        Help about any command
+>   identity    A simple identity service.
+>   messaging   A simple messaging service that implements chat...
+>   run         Runs the showcase server
+>   testing     A service to facilitate running discrete sets of...
+>
+> Flags:
+>   -h, --help      help for gapic-showcase
+>   -j, --json      Print JSON output
+>   -v, --verbose   Print verbose output
+>       --version   version for gapic-showcase
+>
+> Use "gapic-showcase [command] --help" for more information about a command.
+```
+
+### Binary
 ```sh
 $ export GAPIC_SHOWCASE_VERSION=0.0.16
 $ export OS=linux
 $ export ARCH=amd64
 $ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${GAPIC_SHOWCASE_VERSION}-${OS}-${ARCH} | sudo tar -zx -- --directory /usr/local/bin/
-$ gapic-showcase run
-> 2018/09/19 02:13:09 Showcase listening on port: :7469
+$ gapic-showcase --help
+...
 ```
 
-#### Docker Installation
+### Source
 ```sh
-$ export GAPIC_SHOWCASE_VERSION=0.0.16
-$ docker pull gcr.io/gapic-images/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
-$ docker run --rm -p 7469:7469/tcp -p 7469:7469/udp \
-    gcr.io/gapic-images/gapic-showcase:${GAPIC_SHOWCASE_VERSION}
-> 2018/09/19 02:13:09 Showcase listening on port: :7469
+$ go install github.com/googleapis/gapic-showcase/cmd/gapic-showcase
+$ gapic-showcase --help
+...
 ```
-
-#### Go Installation
-```sh
-$ go install github.com/googleapis/gapic-showcase
-$ gapic-showcase run
-> 2018/09/19 02:13:09 Showcase listening on port: :7469
-```
-
-<!---
-TODO(landrito): figure out a blessed way to install by version using go
-commands.
--->
 _* Bear in mind this is not a versioned installation so no versioning guarantees
 hold using this installation method._
 
-## Example Usage - Implementing a GAPIC Showcase Integration Test
+## Schema
+The schema of GAPIC Showcase API can be found in [schema/google/showcase/v1alpha3](schema/google/showcase/v1alpha3)
+It's dependencies can be found in the [schema/api-common-protos](schema/api-common-protos)
+submodule.
 
-### Step 1. Generate a gapic-showcase client
-To start, a user will download the gapic-showcase protobuf files or proto
-descriptor set from a gapic-showcase release. The user will then feed these
-protobuf files into their gapic-generator. This client will be the client used
-for integration testing their gapic- generator.
+## Quick Start
+This quick start guide will show you how to start the server and make a request to it.
 
-```sh
-$ export GAPIC_SHOWCASE_VERSION=0.0.16
-$ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${GAPIC_SHOWCASE_VERSION}-protos.tar.gz | sudo tar -zx
-$ protoc google/showcase/v1alpha3/*.proto \
-    --proto_path=. \
-    --${YOUR_GAPIC_GENERATOR}_out=/dest/
-```
-
-### Step 2. Write Integration Tests
-Write an Integration test which calls the gapic-showcase server.
-
-#### Ruby Example for [gapic-generator](https://github.com/googleapis/gapic-generator)
-<!---
-TODO(landrito): Add testing service stuff once it is implemented.
--->
-```rb
-describe Google::Showcase::V1alpha1::EchoClient do
-  before(:all) do
-    # gapic-showcase does not implement any auth so an insecure channel must be
-    # used.
-    channel = credentials: GRPC::Core::Channel.new(
-      "localhost:7469", nil, :this_channel_is_insecure)
-    @echo_client = Google::Showcase::V1alpha2::EchoClient.new(channel)
-  end
-
-  describe 'echo' do
-    it 'invokes echo without error' do
-      # Create expected grpc response
-      content = "Echo Content"
-      expected_response = { content: content }
-      expected_response = Google::Gax::to_proto(
-      expected_response, Google::Showcase::V1alpha1::EchoResponse)
-
-      # Call method
-      response = @echo_client.echo(content: content)
-
-      # Verify the response
-      assert_equal(expected_response, response)
-    end
-  end
-end
-```
-
-### Step 3. Run the Showcase Server
-The integration test needs a server to send its requests to. Download and run
-the server so that gapic-showcase is available for the tests.
+### Step 1. Run the server
+Run the showcase server to allow requests to be sent to it. This opens port :7469 to
+send and receive requests.
 
 ```sh
-$ export GAPIC_SHOWCASE_VERSION=0.0.16
-$ export OS=linux
-$ export ARCH=amd64
-$ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${OS}-${ARCH} | sudo tar -zx -- --directory /usr/local/bin/
 $ gapic-showcase run
 > 2018/09/19 02:13:09 Showcase listening on port: :7469
 ```
 
-### Step 4. Run integration tests against the server
-Now the integration test is ready to be run. Invoke your test!
-
-#### Ruby Example for [gapic-generator](https://github.com/googleapis/gapic-generator)
+### Step 2. Make a request
+Open a new terminal window and make a request to the server.
 ```sh
-$ bundle install
-$ bundle exec ruby gapic-showcase-integration-test.rb
+$ gapic-showcase \
+  identity \ # Service name
+  create-user \ # Message name
+  --user.display_name Rumble \ # Request fields
+  --user.email rumble@goodboi.com
+> name:"users/0" display_name:"Rumble" email:"rumble@goodboi.com" create_time:<seconds:1554414332 nanos:494679000 > update_time:<seconds:1554414332 nanos:494679000 >
 ```
-<!---
-TODO(landrito): Add test report once it is implemented.
--->
+_* You can make requests to this server from your own client but an insecure channel
+must be used since the server does not implement auth._
+
 
 ## Released Artifacts
 GAPIC Showcase releases three main artifacts, a CLI tool, the gapic-showcase
@@ -143,73 +108,9 @@ descriptor set compiled from the gapic-showcase service protos.
 
 Check out our [releases](https://github.com/googleapis/gapic-showcase/releases) page to see our released artifacts.
 
-### CLI Tool
-The GAPIC Showcase CLI Tool is used for two purposes, to run the
-gapic-showcase server, and to make requests to an already running gapic-showcase
-server.
-
-Generally, any questions about using the CLI tool can be answered by running the
-CLI tool with the `--help` flag which will supply usage documentation.
-
-```sh
-$ gapic-showcase [command?] --help
-```
-
-#### Starting the Server
-The primary purpose of the CLI tool will be starting the showcase server. This
-server will expose the GAPIC Showcase services port 7469 by default.
-
-##### Spinning Up the Server
-```sh
-$ gapic-showcase run
-> 2018/09/19 01:57:09 Showcase listening on port: :7469
-
-$ gapic-showcase run --port 1234
-> 2018/09/19 01:57:09 Showcase listening on port: :1234
-```
-
-#### Making Showcase Service Calls
-The CLI tool will also be able to make requests to a running showcase server.
-This allows you to have a simple way to interact and tinker with the Showcase
-API.
-
-##### Example
-```sh
-$ gapic-showcase run                    
-> 2018/09/19 02:13:09 Showcase listening on port: :7469
-> 2018/09/19 02:14:08 Received Unary Request for Method: /google.showcase.v1alpha3.Echo/Echo
-> 2018/09/19 02:14:08     Request:  content:"hello world"
-> 2018/09/19 02:14:08     Returning Response: content:"hello world"
-```
-```sh
-$ gapic-showcase echo hello world
-> 2018/09/19 02:14:08 Sent Request: content: "hello world"
-> 2018/09/19 02:14:08 Got Response: content: "hello world"
-```
-
-### Staged Protocol Buffer Files
-The [proto files](schema/) found in the gapic-showcase repository are not compilable in
-isolation. This is to avoid duplication of the protofiles that showcase depends
-on, namely the API and API client configurations found in the `input-contract` branch of
-[api-common-protos](https://github.com/googleapis/api-common-protos/tree/input-contract).
-To give the user everything that is needed to compile the showcase protocol
-buffer files, every [release](https://github.com/googleapis/gapic-showcase/releases)
-will have attached a tarball containing a snapshot of the gapic-showcase
-protocol buffer files staged alongside their dependencies.
-
-### Compiled Proto Descriptors
-The compiled proto descriptors for the staged gapic-showcase protos discussed in
-the previous section will be attached to every release. This is intended to make
-it easier to generate clients removing the necessary step of installing protoc.
-
 ## Versioning
-GAPIC Showcase follows semantic versioning in which all artifacts that are
+GAPIC Showcase follows semantic versioning. All artifacts that are
 released for a certain version are guaranteed to be compatible with one another.
-To be more explicit, for a certain version, the interfaces and types exposed by
-the protobuf files are compatible with the interface of the implemented server.
-Users of gapic-showcase are expected to implement integration tests against a
-certain version of gapic-showcase rather than implementing against
-gapic-showcase at head.
 
 ## Supported Go Versions
 GAPIC Showcase is supported for go versions 1.11 and later.
@@ -218,8 +119,7 @@ GAPIC Showcase is supported for go versions 1.11 and later.
 
 ### Is this Showcase API publicly served?
 
-This API is not publicly served. Users of gapic-showcase are expected to run the
-server locally.
+This API is not publicly served.
 
 ## Disclaimer
 
