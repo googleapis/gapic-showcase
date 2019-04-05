@@ -27,7 +27,7 @@ workflows:
               only: master
       - github_release:
           requires:
-            - build
+            - test
             - kotlin-smoke-test
             - python-smoke-test
             - go-smoke-test
@@ -39,7 +39,7 @@ workflows:
               only: '/^v[\d.]+$/'
       - push-image:
           requires:
-            - build
+            - test
             - kotlin-smoke-test
             - python-smoke-test
             - go-smoke-test
