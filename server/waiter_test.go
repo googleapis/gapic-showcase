@@ -152,15 +152,15 @@ func timestampProto(t time.Time) *timestamp.Timestamp {
 }
 
 func checkName(t *testing.T, req *pb.WaitRequest, op *lropb.Operation) {
-	if !strings.HasPrefix(op.Name, "operations/google.showcase.v1alpha3.Echo/Wait/") {
+	if !strings.HasPrefix(op.Name, "operations/google.showcase.v1beta1.Echo/Wait/") {
 		t.Errorf(
-			"Wait() expected op.Name prefex 'operations/google.showcase.v1alpha3.Echo/Wait/', got: %s'",
+			"Wait() expected op.Name prefex 'operations/google.showcase.v1beta1.Echo/Wait/', got: %s'",
 			op.Name)
 	}
 	nameProto := &pb.WaitRequest{}
 	encodedBytes := strings.TrimPrefix(
 		op.Name,
-		"operations/google.showcase.v1alpha3.Echo/Wait/")
+		"operations/google.showcase.v1beta1.Echo/Wait/")
 	bytes, _ := base64.StdEncoding.DecodeString(encodedBytes)
 	proto.Unmarshal(bytes, nameProto)
 	if !proto.Equal(nameProto, req) {

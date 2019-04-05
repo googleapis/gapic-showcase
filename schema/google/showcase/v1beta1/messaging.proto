@@ -24,14 +24,14 @@ import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
 import "google/rpc/error_details.proto";
 
-package google.showcase.v1alpha3;
+package google.showcase.v1beta1;
 
 option go_package = "github.com/googleapis/gapic-showcase/server/genproto";
-option java_package = "com.google.showcase.v1alpha3";
+option java_package = "com.google.showcase.v1beta1";
 option java_multiple_files = true;
 
-// This resource is defined in google/showcase/v1alpha3/user.proto. Since
-// google/showcase/v1alpha3/user.proto is not imported from this file, the
+// This resource is defined in google/showcase/v1beta1/user.proto. Since
+// google/showcase/v1beta1/user.proto is not imported from this file, the
 // resource needs to be defined here to be used in this API.
 option (google.api.resource_definition) = {
   symbol: "User",
@@ -50,7 +50,7 @@ service Messaging {
   // Creates a room.
   rpc CreateRoom(CreateRoomRequest) returns (Room) {
     option (google.api.http) = {
-      post: "/v1alpha3/rooms"
+      post: "/v1beta1/rooms"
       body: "*"
     };
     option (google.api.method_signature) = "room.display_name,room.description";
@@ -59,7 +59,7 @@ service Messaging {
   // Retrieves the Room with the given resource name.
   rpc GetRoom(GetRoomRequest) returns (Room) {
     option (google.api.http) = {
-      get: "/v1alpha3/{name=rooms/*}"
+      get: "/v1beta1/{name=rooms/*}"
     };
     option (google.api.method_signature) = "name";
   }
@@ -67,7 +67,7 @@ service Messaging {
   // Updates a room.
   rpc UpdateRoom(UpdateRoomRequest) returns (Room) {
     option (google.api.http) = {
-      patch: "/v1alpha3/{room.name=rooms/*}"
+      patch: "/v1beta1/{room.name=rooms/*}"
       body: "*"
     };
   }
@@ -75,7 +75,7 @@ service Messaging {
   // Deletes a room and all of its blurbs.
   rpc DeleteRoom(DeleteRoomRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/v1alpha3/{name=rooms/*}"
+      delete: "/v1beta1/{name=rooms/*}"
     };
     option (google.api.method_signature) = "name";
   }
@@ -83,7 +83,7 @@ service Messaging {
   // Lists all chat rooms.
   rpc ListRooms(ListRoomsRequest) returns (ListRoomsResponse) {
     option (google.api.http) = {
-      get: "/v1alpha3/rooms"
+      get: "/v1beta1/rooms"
     };
   }
 
@@ -92,10 +92,10 @@ service Messaging {
   // to be a post on the profile.
   rpc CreateBlurb(CreateBlurbRequest) returns (Blurb) {
     option (google.api.http) = {
-      post: "/v1alpha3/{parent=rooms/*}/blurbs"
+      post: "/v1beta1/{parent=rooms/*}/blurbs"
       body: "*"
       additional_bindings: {
-        post: "/v1alpha3/{parent=users/*/profile}/blurbs"
+        post: "/v1beta1/{parent=users/*/profile}/blurbs"
         body: "*"
       }
     };
@@ -106,9 +106,9 @@ service Messaging {
   // Retrieves the Blurb with the given resource name.
   rpc GetBlurb(GetBlurbRequest) returns (Blurb) {
     option (google.api.http) = {
-      get: "/v1alpha3/{name=rooms/*/blurbs/*}"
+      get: "/v1beta1/{name=rooms/*/blurbs/*}"
       additional_bindings: {
-        get: "/v1alpha3/{name=users/*/profile/blurbs/*}"
+        get: "/v1beta1/{name=users/*/profile/blurbs/*}"
       }
     };
     option (google.api.method_signature) = "name";
@@ -117,10 +117,10 @@ service Messaging {
   // Updates a blurb.
   rpc UpdateBlurb(UpdateBlurbRequest) returns (Blurb) {
     option (google.api.http) = {
-      patch: "/v1alpha3/{blurb.name=rooms/*/blurbs/*}"
+      patch: "/v1beta1/{blurb.name=rooms/*/blurbs/*}"
       body: "*"
       additional_bindings: {
-        patch: "/v1alpha3/{blurb.name=users/*/profile/blurbs/*}"
+        patch: "/v1beta1/{blurb.name=users/*/profile/blurbs/*}"
         body: "*"
       }
     };
@@ -129,9 +129,9 @@ service Messaging {
   // Deletes a blurb.
   rpc DeleteBlurb(DeleteBlurbRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/v1alpha3/{name=rooms/*/blurbs/*}"
+      delete: "/v1beta1/{name=rooms/*/blurbs/*}"
       additional_bindings: {
-        delete: "/v1alpha3/{name=users/*/profile/blurbs/*}"
+        delete: "/v1beta1/{name=users/*/profile/blurbs/*}"
       }
     };
     option (google.api.method_signature) = "name";
@@ -141,9 +141,9 @@ service Messaging {
   // parent resource name.
   rpc ListBlurbs(ListBlurbsRequest) returns (ListBlurbsResponse) {
     option (google.api.http) = {
-      get: "/v1alpha3/{parent=rooms/*}/blurbs"
+      get: "/v1beta1/{parent=rooms/*}/blurbs"
       additional_bindings: {
-        get: "/v1alpha3/{parent=users/*/profile}/blurbs"
+        get: "/v1beta1/{parent=users/*/profile}/blurbs"
       }
     };
     option (google.api.method_signature) = "parent";
@@ -154,10 +154,10 @@ service Messaging {
   // contain an exact match of a queried word will be returned.
   rpc SearchBlurbs(SearchBlurbsRequest) returns (google.longrunning.Operation) {
     option (google.api.http) = {
-      post: "/v1alpha3/{parent=rooms/-}/blurbs:search"
+      post: "/v1beta1/{parent=rooms/-}/blurbs:search"
       body: "*"
       additional_bindings: {
-        post: "/v1alpha3/{parent=users/-/profile}/blurbs:search"
+        post: "/v1beta1/{parent=users/-/profile}/blurbs:search"
       }
     };
     option (google.longrunning.operation_info) = {
@@ -171,10 +171,10 @@ service Messaging {
   // particular chat room or user profile.
   rpc StreamBlurbs(StreamBlurbsRequest) returns (stream StreamBlurbsResponse) {
     option (google.api.http) = {
-      post: "/v1alpha3/{name=rooms/*}/blurbs:stream"
+      post: "/v1beta1/{name=rooms/*}/blurbs:stream"
       body: "*"
       additional_bindings: {
-        post: "/v1alpha3/{name=users/*/profile}/blurbs:stream"
+        post: "/v1beta1/{name=users/*/profile}/blurbs:stream"
         body: "*"
       }
     };
@@ -184,10 +184,10 @@ service Messaging {
   // requested to be created, the stream will close with an error.
   rpc SendBlurbs(stream CreateBlurbRequest) returns (SendBlurbsResponse) {
     option (google.api.http) = {
-      post: "/v1alpha3/{parent=rooms/*}/blurbs:send"
+      post: "/v1beta1/{parent=rooms/*}/blurbs:send"
       body: "*"
       additional_bindings: {
-        post: "/v1alpha3/{parent=users/*/profile}/blurbs:send"
+        post: "/v1beta1/{parent=users/*/profile}/blurbs:send"
         body: "*"
       }
     };
@@ -222,14 +222,14 @@ message Room {
   ];
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\CreateRoom
+// The request message for the google.showcase.v1beta1.Messaging\CreateRoom
 // method.
 message CreateRoomRequest {
   // The room to create.
   Room room = 1;
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\GetRoom
+// The request message for the google.showcase.v1beta1.Messaging\GetRoom
 // method.
 message GetRoomRequest {
   // The resource name of the requested room.
@@ -239,7 +239,7 @@ message GetRoomRequest {
   ];
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\UpdateRoom
+// The request message for the google.showcase.v1beta1.Messaging\UpdateRoom
 // method.
 message UpdateRoomRequest {
   // The room to update.
@@ -250,7 +250,7 @@ message UpdateRoomRequest {
   google.protobuf.FieldMask update_mask = 2;
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\DeleteRoom
+// The request message for the google.showcase.v1beta1.Messaging\DeleteRoom
 // method.
 message DeleteRoomRequest {
   // The resource name of the requested room.
@@ -260,20 +260,20 @@ message DeleteRoomRequest {
   ];
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\ListRooms
+// The request message for the google.showcase.v1beta1.Messaging\ListRooms
 // method.
 message ListRoomsRequest {
   // The maximum number of rooms return. Server may return fewer rooms
   // than requested. If unspecified, server will pick an appropriate default.
   int32 page_size = 1;
 
-  // The value of google.showcase.v1alpha3.ListRoomsResponse.next_page_token
+  // The value of google.showcase.v1beta1.ListRoomsResponse.next_page_token
   // returned from the previous call to
-  // `google.showcase.v1alpha3.Messaging\ListRooms` method.
+  // `google.showcase.v1beta1.Messaging\ListRooms` method.
   string page_token = 2;
 }
 
-// The response message for the google.showcase.v1alpha3.Messaging\ListRooms
+// The response message for the google.showcase.v1beta1.Messaging\ListRooms
 // method.
 message ListRoomsResponse {
   // The list of rooms.
@@ -281,7 +281,7 @@ message ListRoomsResponse {
 
   // A token to retrieve next page of results.
   // Pass this value in ListRoomsRequest.page_token field in the subsequent
-  // call to `google.showcase.v1alpha3.Messaging\ListRooms` method to retrieve the
+  // call to `google.showcase.v1beta1.Messaging\ListRooms` method to retrieve the
   // next page of results.
   string next_page_token = 2;
 }
@@ -316,7 +316,7 @@ message Blurb {
   ];
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\CreateBlurb
+// The request message for the google.showcase.v1beta1.Messaging\CreateBlurb
 // method.
 message CreateBlurbRequest {
   // The resource name of the chat room or user profile that this blurb will
@@ -330,7 +330,7 @@ message CreateBlurbRequest {
   Blurb blurb = 2;
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\GetBlurb
+// The request message for the google.showcase.v1beta1.Messaging\GetBlurb
 // method.
 message GetBlurbRequest {
   // The resource name of the requested blurb.
@@ -340,7 +340,7 @@ message GetBlurbRequest {
   ];
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\UpdateBlurb
+// The request message for the google.showcase.v1beta1.Messaging\UpdateBlurb
 // method.
 message UpdateBlurbRequest {
   // The blurb to update.
@@ -351,7 +351,7 @@ message UpdateBlurbRequest {
   google.protobuf.FieldMask update_mask = 2;
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\DeleteBlurb
+// The request message for the google.showcase.v1beta1.Messaging\DeleteBlurb
 // method.
 message DeleteBlurbRequest {
   // The resource name of the requested blurb.
@@ -361,7 +361,7 @@ message DeleteBlurbRequest {
   ];
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\ListBlurbs
+// The request message for the google.showcase.v1beta1.Messaging\ListBlurbs
 // method.
 message ListBlurbsRequest {
   // The resource name of the requested room or profile whos blurbs to list.
@@ -376,13 +376,13 @@ message ListBlurbsRequest {
   // default.
   int32 page_size = 2;
 
-  // The value of google.showcase.v1alpha3.ListBlurbsResponse.next_page_token
+  // The value of google.showcase.v1beta1.ListBlurbsResponse.next_page_token
   // returned from the previous call to
-  // `google.showcase.v1alpha3.Messaging\ListBlurbs` method.
+  // `google.showcase.v1beta1.Messaging\ListBlurbs` method.
   string page_token = 3;
 }
 
-// The response message for the google.showcase.v1alpha3.Messaging\ListBlurbs
+// The response message for the google.showcase.v1beta1.Messaging\ListBlurbs
 // method.
 message ListBlurbsResponse {
   // The list of blurbs.
@@ -390,12 +390,12 @@ message ListBlurbsResponse {
 
   // A token to retrieve next page of results.
   // Pass this value in ListBlurbsRequest.page_token field in the subsequent
-  // call to `google.showcase.v1alpha3.Blurb\ListBlurbs` method to retrieve
+  // call to `google.showcase.v1beta1.Blurb\ListBlurbs` method to retrieve
   // the next page of results.
   string next_page_token = 2;
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\SearchBlurbs
+// The request message for the google.showcase.v1beta1.Messaging\SearchBlurbs
 // method.
 message SearchBlurbsRequest {
   // The query used to search for blurbs containing to words of this string.
@@ -412,33 +412,33 @@ message SearchBlurbsRequest {
   int32 page_size = 3;
 
   // The value of
-  // google.showcase.v1alpha3.SearchBlurbsResponse.next_page_token
+  // google.showcase.v1beta1.SearchBlurbsResponse.next_page_token
   // returned from the previous call to
-  // `google.showcase.v1alpha3.Messaging\SearchBlurbs` method.
+  // `google.showcase.v1beta1.Messaging\SearchBlurbs` method.
   string page_token = 4;
 }
 
 // The operation metadata message for the
-// google.showcase.v1alpha3.Messaging\SearchBlurbs method.
+// google.showcase.v1beta1.Messaging\SearchBlurbs method.
 message SearchBlurbsMetadata {
   // This signals to the client when to next poll for response.
   google.rpc.RetryInfo retry_info = 1;
 }
 
 // The operation response message for the
-// google.showcase.v1alpha3.Messaging\SearchBlurbs method.
+// google.showcase.v1beta1.Messaging\SearchBlurbs method.
 message SearchBlurbsResponse {
   // Blurbs that matched the search query.
   repeated Blurb blurbs = 1;
 
   // A token to retrieve next page of results.
   // Pass this value in SearchBlurbsRequest.page_token field in the subsequent
-  // call to `google.showcase.v1alpha3.Blurb\SearchBlurbs` method to
+  // call to `google.showcase.v1beta1.Blurb\SearchBlurbs` method to
   // retrieve the next page of results.
   string next_page_token = 2;
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\StreamBlurbs
+// The request message for the google.showcase.v1beta1.Messaging\StreamBlurbs
 // method.
 message StreamBlurbsRequest {
   // The resource name of a chat room or user profile whose blurbs to stream.
@@ -453,7 +453,7 @@ message StreamBlurbsRequest {
   ];
 }
 
-// The response message for the google.showcase.v1alpha3.Messaging\StreamBlurbs
+// The response message for the google.showcase.v1beta1.Messaging\StreamBlurbs
 // method.
 message StreamBlurbsResponse {
   // The blurb that was either created, updated, or deleted.
@@ -477,14 +477,14 @@ message StreamBlurbsResponse {
   Action action = 2;
 }
 
-// The response message for the google.showcase.v1alpha3.Messaging\SendBlurbs
+// The response message for the google.showcase.v1beta1.Messaging\SendBlurbs
 // method.
 message SendBlurbsResponse {
   // The names of successful blurb creations.
   repeated string names = 1;
 }
 
-// The request message for the google.showcase.v1alpha3.Messaging\Connect
+// The request message for the google.showcase.v1beta1.Messaging\Connect
 // method.
 message ConnectRequest {
   message ConnectConfig {

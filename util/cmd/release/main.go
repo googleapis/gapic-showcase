@@ -89,7 +89,7 @@ func main() {
 	}
 
 	// Compile protos
-	files, err := filepath.Glob(filepath.Join(tmpProtoPath, "google", "showcase", "v1alpha3", "*.proto"))
+	files, err := filepath.Glob(filepath.Join(tmpProtoPath, "google", "showcase", "v1beta1", "*.proto"))
 	if err != nil {
 		log.Fatal("Error: failed to find protos in " + tmpProtoPath)
 	}

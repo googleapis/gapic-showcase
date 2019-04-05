@@ -21,12 +21,12 @@ page, or simply by installing from source using go.
 
 ### Docker
 ```sh
-$ docker pull gcr.io/gapic-images/gapic-showcase:0.0.16
+$ docker pull gcr.io/gapic-images/gapic-showcase:0.1.0
 $ docker run \
     --rm \
     -p 7469:7469/tcp \
     -p 7469:7469/udp \
-    gcr.io/gapic-images/gapic-showcase:0.0.16 \
+    gcr.io/gapic-images/gapic-showcase:0.1.0 \
     --help
 > Root command of gapic-showcase
 >
@@ -53,7 +53,7 @@ $ docker run \
 
 ### Binary
 ```sh
-$ export GAPIC_SHOWCASE_VERSION=0.0.16
+$ export GAPIC_SHOWCASE_VERSION=0.1.0
 $ export OS=linux
 $ export ARCH=amd64
 $ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${GAPIC_SHOWCASE_VERSION}-${OS}-${ARCH} | sudo tar -zx -- --directory /usr/local/bin/
@@ -71,7 +71,7 @@ _* Bear in mind this is not a versioned installation so no versioning guarantees
 hold using this installation method._
 
 ## Schema
-The schema of GAPIC Showcase API can be found in [schema/google/showcase/v1alpha3](schema/google/showcase/v1alpha3)
+The schema of GAPIC Showcase API can be found in [schema/google/showcase/v1beta1](schema/google/showcase/v1beta1)
 It's dependencies can be found in the [schema/api-common-protos](schema/api-common-protos)
 submodule.
 
@@ -132,4 +132,4 @@ This is not an official Google product.
 [godoc]: https://godoc.org/github.com/googleapis/gapic-showcase/server
 [godocimg]: https://godoc.org/github.com/googleapis/gapic-showcase/server?status.svg
 [releaselevel]: https://cloud.google.com/terms/launch-stages
-[releaselevelimg]: https://img.shields.io/badge/release%20level-alpha-red.svg?style&#x3D;flat
+[releaselevelimg]: https://img.shields.io/badge/release%20level-beta-red.svg?style&#x3D;flat

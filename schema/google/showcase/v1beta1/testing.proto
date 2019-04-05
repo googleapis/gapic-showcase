@@ -19,10 +19,10 @@ import "google/api/client.proto";
 import "google/api/resource.proto";
 import "google/protobuf/empty.proto";
 
-package google.showcase.v1alpha3;
+package google.showcase.v1beta1;
 
 option go_package = "github.com/googleapis/gapic-showcase/server/genproto";
-option java_package = "com.google.showcase.v1alpha3";
+option java_package = "com.google.showcase.v1beta1";
 option java_multiple_files = true;
 
 // A service to facilitate running discrete sets of tests
@@ -35,7 +35,7 @@ service Testing {
   // Creates a new testing session.
   rpc CreateSession(CreateSessionRequest) returns (Session) {
     option (google.api.http) = {
-      post: "/v1alpha3/sessions"
+      post: "/v1beta1/sessions"
       body: "session"
     };
   }
@@ -43,21 +43,21 @@ service Testing {
   // Gets a testing session.
   rpc GetSession(GetSessionRequest) returns (Session) {
     option (google.api.http) = {
-      get: "/v1alpha3/{name=sessions/*}"
+      get: "/v1beta1/{name=sessions/*}"
     };
   }
 
   // Lists the current test sessions.
   rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse) {
     option (google.api.http) = {
-      get: "/v1alpha3/sessions"
+      get: "/v1beta1/sessions"
     };
   }
 
   // Delete a test session.
   rpc DeleteSession(DeleteSessionRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/v1alpha3/{name=sessions/*}"
+      delete: "/v1beta1/{name=sessions/*}"
     };
   }
 
@@ -66,14 +66,14 @@ service Testing {
   // and an overall rollup.
   rpc ReportSession(ReportSessionRequest) returns (ReportSessionResponse) {
     option (google.api.http) = {
-      post: "/v1alpha3/{name=sessions/*}:report"
+      post: "/v1beta1/{name=sessions/*}:report"
     };
   }
 
   // List the tests of a sessesion.
   rpc ListTests(ListTestsRequest) returns (ListTestsResponse) {
     option (google.api.http) = {
-      get: "/v1alpha3/{parent=sessions/*}/tests"
+      get: "/v1beta1/{parent=sessions/*}/tests"
     };
   }
 
@@ -85,7 +85,7 @@ service Testing {
   // This method will error if attempting to delete a required test.
   rpc DeleteTest(DeleteTestRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/v1alpha3/{name=sessions/*/tests/*}"
+      delete: "/v1beta1/{name=sessions/*/tests/*}"
     };
   }
 
@@ -95,7 +95,7 @@ service Testing {
   // end of the test, this method provides the means to do so.
   rpc VerifyTest(VerifyTestRequest) returns (VerifyTestResponse) {
     option (google.api.http) = {
-      post: "/v1alpha3/{name=sessions/*/tests/*}:check"
+      post: "/v1beta1/{name=sessions/*/tests/*}:check"
     };
   }
 }

@@ -68,7 +68,7 @@ func Test_unaryTest_GetIssue_doesntVerifyForOtherSessions(t *testing.T) {
 		context.Background(),
 		nil,
 		resp,
-		serverInfo("/google.showcase.v1alpha3.Echo/Echo"),
+		serverInfo("/google.showcase.v1beta1.Echo/Echo"),
 		nil)
 	data, _ := proto.Marshal(resp)
 	ut.ObserveUnary(
@@ -78,7 +78,7 @@ func Test_unaryTest_GetIssue_doesntVerifyForOtherSessions(t *testing.T) {
 			Answer: data,
 		},
 		&pb.VerifyTestResponse{},
-		serverInfo("/google.showcase.v1alpha3.Testing/VerifyTest"),
+		serverInfo("/google.showcase.v1beta1.Testing/VerifyTest"),
 		nil)
 
 	got := ut.GetIssue()
@@ -102,7 +102,7 @@ func Test_unaryTest_GetIssue_verified(t *testing.T) {
 		context.Background(),
 		nil,
 		resp,
-		serverInfo("/google.showcase.v1alpha3.Echo/Echo"),
+		serverInfo("/google.showcase.v1beta1.Echo/Echo"),
 		nil)
 	data, _ := proto.Marshal(resp)
 	ut.ObserveUnary(
@@ -112,7 +112,7 @@ func Test_unaryTest_GetIssue_verified(t *testing.T) {
 			Answer: data,
 		},
 		&pb.VerifyTestResponse{},
-		serverInfo("/google.showcase.v1alpha3.Testing/VerifyTest"),
+		serverInfo("/google.showcase.v1beta1.Testing/VerifyTest"),
 		nil)
 	got := ut.GetIssue()
 
@@ -130,7 +130,7 @@ func Test_unaryTest_GetIssue_failedVerification(t *testing.T) {
 		context.Background(),
 		nil,
 		&pb.EchoResponse{Content: "hello world"},
-		serverInfo("/google.showcase.v1alpha3.Echo/Echo"),
+		serverInfo("/google.showcase.v1beta1.Echo/Echo"),
 		nil)
 	data, _ := proto.Marshal(&pb.EchoResponse{Content: "hi world"})
 	ut.ObserveUnary(
@@ -140,7 +140,7 @@ func Test_unaryTest_GetIssue_failedVerification(t *testing.T) {
 			Answer: data,
 		},
 		&pb.VerifyTestResponse{},
-		serverInfo("/google.showcase.v1alpha3.Testing/VerifyTest"),
+		serverInfo("/google.showcase.v1beta1.Testing/VerifyTest"),
 		nil)
 	got := ut.GetIssue()
 	want := &pb.Issue{
@@ -163,7 +163,7 @@ func Test_unaryTest_GetIssue_needsVerification(t *testing.T) {
 		context.Background(),
 		nil,
 		&pb.EchoResponse{Content: "hello world"},
-		serverInfo("/google.showcase.v1alpha3.Echo/Echo"),
+		serverInfo("/google.showcase.v1beta1.Echo/Echo"),
 		nil)
 	got := ut.GetIssue()
 	want := &pb.Issue{
