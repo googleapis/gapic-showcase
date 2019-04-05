@@ -235,6 +235,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Update git submodules.
+          command: git submodule update --init
+      - run:
           name: Retrieve dependencies
           command: go get ./...
       - run:
