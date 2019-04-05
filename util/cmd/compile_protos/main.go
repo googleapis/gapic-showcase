@@ -28,5 +28,5 @@ import (
 //
 // Usage: go run ./util/cmd/compile_protos/main.go
 func main() {
-	util.CompileProtos("v1alpha3")
+	util.CompileProtos("v1beta1")
 }

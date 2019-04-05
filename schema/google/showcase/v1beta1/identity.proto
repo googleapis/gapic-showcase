@@ -22,10 +22,10 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
 
-package google.showcase.v1alpha3;
+package google.showcase.v1beta1;
 
 option go_package = "github.com/googleapis/gapic-showcase/server/genproto";
-option java_package = "com.google.showcase.v1alpha3";
+option java_package = "com.google.showcase.v1beta1";
 option java_multiple_files = true;
 
 // A simple identity service.
@@ -37,7 +37,7 @@ service Identity {
   // Creates a user.
   rpc CreateUser(CreateUserRequest) returns (User) {
     option (google.api.http) = {
-      post: "/v1alpha3/users"
+      post: "/v1beta1/users"
       body: "*"
     };
     option (google.api.method_signature) = "user.display_name,user.email";
@@ -46,7 +46,7 @@ service Identity {
   // Retrieves the User with the given uri.
   rpc GetUser(GetUserRequest) returns (User) {
     option (google.api.http) = {
-      get: "/v1alpha3/{name=users/*}"
+      get: "/v1beta1/{name=users/*}"
     };
     option (google.api.method_signature) = "name";
   }
@@ -54,7 +54,7 @@ service Identity {
   // Updates a user.
   rpc UpdateUser(UpdateUserRequest) returns (User) {
     option (google.api.http) = {
-      patch: "/v1alpha3/{user.name=users/*}"
+      patch: "/v1beta1/{user.name=users/*}"
       body: "*"
     };
   }
@@ -62,7 +62,7 @@ service Identity {
   // Deletes a user, their profile, and all of their authored messages.
   rpc DeleteUser(DeleteUserRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/v1alpha3/{name=users/*}"
+      delete: "/v1beta1/{name=users/*}"
     };
     option (google.api.method_signature) = "name";
   }
@@ -70,7 +70,7 @@ service Identity {
   // Lists all users.
   rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
     option (google.api.http) = {
-      get: "/v1alpha3/users"
+      get: "/v1beta1/users"
     };
   }
 }
@@ -97,14 +97,14 @@ message User {
   ];
 }
 
-// The request message for the google.showcase.v1alpha3.Identity\CreateUser
+// The request message for the google.showcase.v1beta1.Identity\CreateUser
 // method.
 message CreateUserRequest {
   // The user to create.
   User user = 1;
 }
 
-// The request message for the google.showcase.v1alpha3.Identity\GetUser
+// The request message for the google.showcase.v1beta1.Identity\GetUser
 // method.
 message GetUserRequest {
   // The resource name of the requested user.
@@ -114,7 +114,7 @@ message GetUserRequest {
   ];
 }
 
-// The request message for the google.showcase.v1alpha3.Identity\UpdateUser
+// The request message for the google.showcase.v1beta1.Identity\UpdateUser
 // method.
 message UpdateUserRequest {
   // The user to update.
@@ -125,7 +125,7 @@ message UpdateUserRequest {
   google.protobuf.FieldMask update_mask = 2;
 }
 
-// The request message for the google.showcase.v1alpha3.Identity\DeleteUser
+// The request message for the google.showcase.v1beta1.Identity\DeleteUser
 // method.
 message DeleteUserRequest {
   // The resource name of the user to delete.
@@ -135,20 +135,20 @@ message DeleteUserRequest {
   ];
 }
 
-// The request message for the google.showcase.v1alpha3.Identity\ListUsers
+// The request message for the google.showcase.v1beta1.Identity\ListUsers
 // method.
 message ListUsersRequest {
   // The maximum number of users to return. Server may return fewer users
   // than requested. If unspecified, server will pick an appropriate default.
   int32 page_size = 1;
 
-  // The value of google.showcase.v1alpha3.ListUsersResponse.next_page_token
+  // The value of google.showcase.v1beta1.ListUsersResponse.next_page_token
   // returned from the previous call to
-  // `google.showcase.v1alpha3.Identity\ListUsers` method.
+  // `google.showcase.v1beta1.Identity\ListUsers` method.
   string page_token = 2;
 }
 
-// The response message for the google.showcase.v1alpha3.Identity\ListUsers
+// The response message for the google.showcase.v1beta1.Identity\ListUsers
 // method.
 message ListUsersResponse {
   // The list of users.
@@ -156,7 +156,7 @@ message ListUsersResponse {
 
   // A token to retrieve next page of results.
   // Pass this value in ListUsersRequest.page_token field in the subsequent
-  // call to `google.showcase.v1alpha3.Message\ListUsers` method to retrieve the
+  // call to `google.showcase.v1beta1.Message\ListUsers` method to retrieve the
   // next page of results.
   string next_page_token = 2;
 }

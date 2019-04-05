@@ -36,7 +36,7 @@ func TestGetOperation_wait(t *testing.T) {
 	nameBytes, _ := proto.Marshal(waitReq)
 	req := &lropb.GetOperationRequest{
 		Name: fmt.Sprintf(
-			"operations/google.showcase.v1alpha3.Echo/Wait/%s",
+			"operations/google.showcase.v1beta1.Echo/Wait/%s",
 			base64.StdEncoding.EncodeToString(nameBytes)),
 	}
 
@@ -122,7 +122,7 @@ func TestGetOperation_searchBlurbs(t *testing.T) {
 	reqBytes, _ := proto.Marshal(searchReq)
 	req := &lropb.GetOperationRequest{
 		Name: fmt.Sprintf(
-			"operations/google.showcase.v1alpha3.Messaging/SearchBlurbs/%s",
+			"operations/google.showcase.v1beta1.Messaging/SearchBlurbs/%s",
 			base64.StdEncoding.EncodeToString(reqBytes)),
 	}
 	op, err := server.GetOperation(context.Background(), req)
@@ -196,8 +196,8 @@ func TestGetOperation_notFoundOperation(t *testing.T) {
 
 func TestGetOperation_invalidEncodedName(t *testing.T) {
 	prefixes := []string{
-		"operations/google.showcase.v1alpha3.Echo/Wait",
-		"operations/google.showcase.v1alpha3.Messaging/SearchBlurbs",
+		"operations/google.showcase.v1beta1.Echo/Wait",
+		"operations/google.showcase.v1beta1.Messaging/SearchBlurbs",
 	}
 	for _, p := range prefixes {
 		req := &lropb.GetOperationRequest{
@@ -214,8 +214,8 @@ func TestGetOperation_invalidEncodedName(t *testing.T) {
 
 func TestGetOperation_invalidMarshalledProto(t *testing.T) {
 	prefixes := []string{
-		"operations/google.showcase.v1alpha3.Echo/Wait",
-		"operations/google.showcase.v1alpha3.Messaging/SearchBlurbs",
+		"operations/google.showcase.v1beta1.Echo/Wait",
+		"operations/google.showcase.v1beta1.Messaging/SearchBlurbs",
 	}
 	for _, p := range prefixes {
 		name := fmt.Sprintf(

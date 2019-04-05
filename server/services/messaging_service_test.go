@@ -719,7 +719,7 @@ func Test_SearchBlurbs(t *testing.T) {
 		t.Errorf("SearchBlurbs: unexpected err %+v", err)
 	}
 
-	expName := "operations/google.showcase.v1alpha3.Messaging/SearchBlurbs/"
+	expName := "operations/google.showcase.v1beta1.Messaging/SearchBlurbs/"
 	if !strings.HasPrefix(op.Name, expName) {
 		t.Errorf(
 			"SearchBlurbs op.Name prefex want: '%s', got: %s'",

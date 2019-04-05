@@ -1,5 +1,8 @@
 # Release History
 
+### v0.1.0 / 2019-04-04
+- Beta release.
+
 ### v0.0.16 / 2019-03-25
 - Fixing some field names in path templates
 

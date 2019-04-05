@@ -169,8 +169,8 @@ jobs:
           name: Stage showcase in proto dependencies
           command: |
               git clone -b input-contract https://github.com/googleapis/api-common-protos.git
-              mkdir -p api-common-protos/google/showcase/v1alpha3/
-              cp schema/google/showcase/v1alpha3/* api-common-protos/google/showcase/v1alpha3/
+              mkdir -p api-common-protos/google/showcase/v1beta1/
+              cp schema/google/showcase/v1beta1/* api-common-protos/google/showcase/v1beta1/
       - run:
           name: Run kotlin generation
           command: |
@@ -189,7 +189,7 @@ jobs:
           command: |
             mkdir pyout
             docker run --rm \
-              --mount type=bind,source="$(pwd)"/schema/,destination=/in/google/showcase/v1alpha3/,readonly \
+              --mount type=bind,source="$(pwd)"/schema/,destination=/in/google/showcase/v1beta1/,readonly \
               --mount type=bind,source="$(pwd)"/pyout,target=/out \
               gcr.io/gapic-images/gapic-generator-python:0.6
 
@@ -203,7 +203,7 @@ jobs:
             mkdir goout
             docker run \
               --rm \
-              --mount type=bind,source="$(pwd)"/schema,destination=/in/protos/google/showcase/v1alpha3,readonly \
+              --mount type=bind,source="$(pwd)"/schema,destination=/in/protos/google/showcase/v1beta1,readonly \
               --mount type=bind,source="$(pwd)"/goout,destination=/out/ \
               gcr.io/gapic-images/gapic-generator-go:v0.4 \
               --go-gapic-package "<github.com/googleapis/gapic-showcase/client;client>"
@@ -220,10 +220,10 @@ jobs:
       - run:
           name: Check if protos can be loaded by protobufjs
           command: |
-            node -e "require('google-proto-files').loadSync('schema/google/showcase/v1alpha3/echo.proto');"
-            node -e "require('google-proto-files').loadSync('schema/google/showcase/v1alpha3/identity.proto');"
-            node -e "require('google-proto-files').loadSync('schema/google/showcase/v1alpha3/messaging.proto');"
-            node -e "require('google-proto-files').loadSync('schema/google/showcase/v1alpha3/testing.proto');"
+            node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/echo.proto');"
+            node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/identity.proto');"
+            node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/messaging.proto');"
+            node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/testing.proto');"
 
   github_release:
     docker:

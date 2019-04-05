@@ -99,7 +99,7 @@ func (t *unaryTest) ObserveUnary(
 		t.responses = append(t.responses, resp)
 	}
 
-	if info.FullMethod == "/google.showcase.v1alpha3.Testing/VerifyTest" {
+	if info.FullMethod == "/google.showcase.v1beta1.Testing/VerifyTest" {
 		// Only validate for this test.
 		vtReq := req.(*pb.VerifyTestRequest)
 		if vtReq.GetName() != t.GetName() {

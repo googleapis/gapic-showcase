@@ -50,7 +50,7 @@ func (s *operationsServerImpl) GetOperation(ctx context.Context, in *lropb.GetOp
 }
 
 func (s *operationsServerImpl) handleWait(in *lropb.GetOperationRequest) (*lropb.Operation, error) {
-	prefix := "operations/google.showcase.v1alpha3.Echo/Wait/"
+	prefix := "operations/google.showcase.v1beta1.Echo/Wait/"
 	if !strings.HasPrefix(in.Name, prefix) {
 		return nil, nil
 	}
@@ -71,7 +71,7 @@ func (s *operationsServerImpl) handleWait(in *lropb.GetOperationRequest) (*lropb
 }
 
 func (s *operationsServerImpl) handleSearchBlurbs(in *lropb.GetOperationRequest) (*lropb.Operation, error) {
-	prefix := "operations/google.showcase.v1alpha3.Messaging/SearchBlurbs/"
+	prefix := "operations/google.showcase.v1beta1.Messaging/SearchBlurbs/"
 	if !strings.HasPrefix(in.GetName(), prefix) {
 		return nil, nil
 	}
