@@ -7,11 +7,10 @@
 
 > GAPIC (Generated API Client) Showcase: an API to test your gRPC clients.
 
-The GAPIC Showcase API is a representative example of the API client
-configurations of Google APIs. GAPIC Showcase provides a tool that allows
-a user to spin up a server that accepts gRPC requests. This tool also exposes
-an interface to make requests to the server but requests from your own
-gRPC clients are accepted.
+GAPIC Showcase is an API to allow you to test a gRPC server and client.
+It is a simple showcase of an API that follows the [Cloud APIs design guide](https://cloud.google.com/apis/design/).
+This project provides a server and client implementation of the API that
+can be ran locally.
 
 ## Installation
 The GAPIC Showcase CLI can be installed using three different mechanisms:
