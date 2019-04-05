@@ -156,9 +156,9 @@ jobs:
             # Create a PR with hub.
             go get github.com/github/hub
             hub pull-request \
-              --message "Regenerate cmd, client, and server directories."
-              --base googleapis:master
-              --head googleapis:${BRANCH}
+              --message "Regenerate cmd, client, and server directories." \
+              --base googleapis:master \
+              --head googleapis:${BRANCH} \
               --assign landrito,noahdietz
 
   kotlin-smoke-test:
