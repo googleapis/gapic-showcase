@@ -140,7 +140,7 @@ func replace(old, new string) {
 		log.Fatalf("Error: unable to get working dir: %+v", err)
 	}
 
-	filetypes := []string{".go", ".md", ".yml"}
+	filetypes := []string{".go", ".md", ".yml", ".proto"}
 	err = filepath.Walk(pwd, replacer(filetypes, old, new))
 	if err != nil {
 		log.Fatalf("%v", err)
