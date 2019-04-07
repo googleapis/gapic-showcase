@@ -10,7 +10,7 @@
 GAPIC Showcase is an API to allow you to test a gRPC server and client.
 It is a simple showcase of an API that follows the [Cloud APIs design guide](https://cloud.google.com/apis/design/).
 This project provides a server and client implementation of the API that
-can be ran locally.
+can be run locally.
 
 ## Installation
 The GAPIC Showcase CLI can be installed using three different mechanisms:
@@ -71,7 +71,7 @@ hold using this installation method._
 
 ## Schema
 The schema of GAPIC Showcase API can be found in [schema/google/showcase/v1beta1](schema/google/showcase/v1beta1)
-It's dependencies can be found in the [schema/api-common-protos](schema/api-common-protos)
+It's dependencies can be found in the [googleapis/api-common-protos](https://github.com/googleapis/api-common-protos)
 submodule.
 
 ## Quick Start
