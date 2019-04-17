@@ -1,0 +1,39 @@
+{
+  "name": "showcase-nodejs-echo-server",
+  "version": "0.0.1",
+  "description": "",
+  "main": "build/src/index.js",
+  "types": "build/src/index.d.ts",
+  "files": [
+    "build/src"
+  ],
+  "license": "Apache-2.0",
+  "keywords": [],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "check": "gts check",
+    "clean": "gts clean",
+    "precompile": "mkdir -p pbjs-genfiles && pbjs -t static-module -o pbjs-genfiles/echo.js -p ../schema -p node_modules/google-proto-files google/showcase/v1beta1/echo.proto && pbts -o pbjs-genfiles/echo.d.ts pbjs-genfiles/echo.js",
+    "compile": "mkdir -p build && cp -r pbjs-genfiles build/ && tsc -p .",
+    "fix": "gts fix",
+    "prepare": "npm run compile",
+    "pretest": "npm run compile",
+    "posttest": "npm run check",
+    "start": "node build/src/index.js"
+  },
+  "devDependencies": {
+    "@types/long": "^4.0.0",
+    "@types/node": "^11.13.4",
+    "@types/yargs": "^13.0.0",
+    "gts": "^0.9.0",
+    "protobufjs": "^6.8.8",
+    "typescript": "~3.1.0"
+  },
+  "dependencies": {
+    "@grpc/proto-loader": "^0.5.0",
+    "google-proto-files": "^0.20.0",
+    "grpc": "^1.19.0",
+    "long": "^4.0.0",
+    "yargs": "^13.2.2"
+  }
+}
