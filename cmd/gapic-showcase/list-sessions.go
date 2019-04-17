@@ -23,9 +23,9 @@ var ListSessionsFromFile string
 func init() {
 	TestingServiceCmd.AddCommand(ListSessionsCmd)
 
-	ListSessionsCmd.Flags().Int32Var(&ListSessionsInput.PageSize, "page_size", 0, "")
+	ListSessionsCmd.Flags().Int32Var(&ListSessionsInput.PageSize, "page_size", 0, "The maximum number of sessions to return per page.")
 
-	ListSessionsCmd.Flags().StringVar(&ListSessionsInput.PageToken, "page_token", "", "")
+	ListSessionsCmd.Flags().StringVar(&ListSessionsInput.PageToken, "page_token", "", "The page token, for retrieving subsequent pages.")
 
 	ListSessionsCmd.Flags().StringVar(&ListSessionsFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -65,24 +65,25 @@ var ListSessionsCmd = &cobra.Command{
 		iter := TestingClient.ListSessions(ctx, &ListSessionsInput)
 
 		// get requested page
-		page, err := iter.Next()
-		if err != nil {
+		var items []interface{}
+		data := make(map[string]interface{})
+
+		// PageSize could be an integer with a specific precision.
+		// Doing standard i := 0; i < PageSize; i++ creates i as
+		// an int, creating a potential type mismatch.
+		for i := ListSessionsInput.PageSize; i > 0; i-- {
+			item, err := iter.Next()
 			if err == iterator.Done {
-				fmt.Println("No more results")
-				return nil
+				err = nil
+				break
+			} else if err != nil {
+				return err
 			}
 
-			return err
+			items = append(items, item)
 		}
 
-		data := make(map[string]interface{})
-		data["page"] = page
-
-		//get next page token
-		_, err = iter.Next()
-		if err != nil && err != iterator.Done {
-			return err
-		}
+		data["page"] = items
 		data["nextToken"] = iter.PageInfo().Token
 
 		if Verbose {

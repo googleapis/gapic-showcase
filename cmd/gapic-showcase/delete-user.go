@@ -19,7 +19,7 @@ var DeleteUserFromFile string
 func init() {
 	IdentityServiceCmd.AddCommand(DeleteUserCmd)
 
-	DeleteUserCmd.Flags().StringVar(&DeleteUserInput.Name, "name", "", "")
+	DeleteUserCmd.Flags().StringVar(&DeleteUserInput.Name, "name", "", "Required. The resource name of the user to delete.")
 
 	DeleteUserCmd.Flags().StringVar(&DeleteUserFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -32,6 +32,8 @@ var DeleteUserCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if DeleteUserFromFile == "" {
+
+			cmd.MarkFlagRequired("name")
 
 		}
 

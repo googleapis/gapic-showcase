@@ -21,7 +21,7 @@ var GetRoomFromFile string
 func init() {
 	MessagingServiceCmd.AddCommand(GetRoomCmd)
 
-	GetRoomCmd.Flags().StringVar(&GetRoomInput.Name, "name", "", "")
+	GetRoomCmd.Flags().StringVar(&GetRoomInput.Name, "name", "", "Required. The resource name of the requested room.")
 
 	GetRoomCmd.Flags().StringVar(&GetRoomFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -34,6 +34,8 @@ var GetRoomCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if GetRoomFromFile == "" {
+
+			cmd.MarkFlagRequired("name")
 
 		}
 

@@ -23,11 +23,11 @@ var ListBlurbsFromFile string
 func init() {
 	MessagingServiceCmd.AddCommand(ListBlurbsCmd)
 
-	ListBlurbsCmd.Flags().StringVar(&ListBlurbsInput.Parent, "parent", "", "")
+	ListBlurbsCmd.Flags().StringVar(&ListBlurbsInput.Parent, "parent", "", "Required. The resource name of the requested room or profile whos blurbs to list.")
 
-	ListBlurbsCmd.Flags().Int32Var(&ListBlurbsInput.PageSize, "page_size", 0, "")
+	ListBlurbsCmd.Flags().Int32Var(&ListBlurbsInput.PageSize, "page_size", 0, "The maximum number of blurbs to return. Server may return fewer  blurbs than requested. If unspecified, server will pick an appropriate  default.")
 
-	ListBlurbsCmd.Flags().StringVar(&ListBlurbsInput.PageToken, "page_token", "", "")
+	ListBlurbsCmd.Flags().StringVar(&ListBlurbsInput.PageToken, "page_token", "", "The value of google.showcase.v1beta1.ListBlurbsResponse.next_page_token  returned from the previous call to  `google.showcase.v1beta1.Messaging\\ListBlurbs` method.")
 
 	ListBlurbsCmd.Flags().StringVar(&ListBlurbsFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -40,6 +40,8 @@ var ListBlurbsCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if ListBlurbsFromFile == "" {
+
+			cmd.MarkFlagRequired("parent")
 
 		}
 
@@ -67,24 +69,25 @@ var ListBlurbsCmd = &cobra.Command{
 		iter := MessagingClient.ListBlurbs(ctx, &ListBlurbsInput)
 
 		// get requested page
-		page, err := iter.Next()
-		if err != nil {
+		var items []interface{}
+		data := make(map[string]interface{})
+
+		// PageSize could be an integer with a specific precision.
+		// Doing standard i := 0; i < PageSize; i++ creates i as
+		// an int, creating a potential type mismatch.
+		for i := ListBlurbsInput.PageSize; i > 0; i-- {
+			item, err := iter.Next()
 			if err == iterator.Done {
-				fmt.Println("No more results")
-				return nil
+				err = nil
+				break
+			} else if err != nil {
+				return err
 			}
 
-			return err
+			items = append(items, item)
 		}
 
-		data := make(map[string]interface{})
-		data["page"] = page
-
-		//get next page token
-		_, err = iter.Next()
-		if err != nil && err != iterator.Done {
-			return err
-		}
+		data["page"] = items
 		data["nextToken"] = iter.PageInfo().Token
 
 		if Verbose {

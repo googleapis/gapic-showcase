@@ -19,7 +19,7 @@ var DeleteSessionFromFile string
 func init() {
 	TestingServiceCmd.AddCommand(DeleteSessionCmd)
 
-	DeleteSessionCmd.Flags().StringVar(&DeleteSessionInput.Name, "name", "", "")
+	DeleteSessionCmd.Flags().StringVar(&DeleteSessionInput.Name, "name", "", "The session to be deleted.")
 
 	DeleteSessionCmd.Flags().StringVar(&DeleteSessionFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

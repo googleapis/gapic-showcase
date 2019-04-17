@@ -21,7 +21,7 @@ var GetSessionFromFile string
 func init() {
 	TestingServiceCmd.AddCommand(GetSessionCmd)
 
-	GetSessionCmd.Flags().StringVar(&GetSessionInput.Name, "name", "", "")
+	GetSessionCmd.Flags().StringVar(&GetSessionInput.Name, "name", "", "The session to be retrieved.")
 
 	GetSessionCmd.Flags().StringVar(&GetSessionFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

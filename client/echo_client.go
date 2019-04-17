@@ -31,7 +31,6 @@ import (
 	"google.golang.org/api/transport"
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -53,28 +52,7 @@ func defaultEchoClientOptions() []option.ClientOption {
 }
 
 func defaultEchoCallOptions() *EchoCallOptions {
-	backoff := gax.Backoff{
-		Initial:    100 * time.Millisecond,
-		Max:        time.Minute,
-		Multiplier: 1.3,
-	}
-
-	nonidempotent := []gax.CallOption{
-		gax.WithRetry(func() gax.Retryer {
-			return gax.OnCodes([]codes.Code{
-				codes.Unavailable,
-			}, backoff)
-		}),
-	}
-
-	return &EchoCallOptions{
-		Echo:        nonidempotent,
-		Expand:      nonidempotent,
-		Collect:     nonidempotent,
-		Chat:        nonidempotent,
-		PagedExpand: nonidempotent,
-		Wait:        nonidempotent,
-	}
+	return &EchoCallOptions{}
 }
 
 // EchoClient is a client for interacting with .
@@ -243,6 +221,8 @@ func (c *EchoClient) PagedExpand(ctx context.Context, req *genprotopb.PagedExpan
 		if err != nil {
 			return nil, "", err
 		}
+
+		it.Response = resp
 		return resp.Responses, resp.NextPageToken, nil
 	}
 	fetch := func(pageSize int, pageToken string) (string, error) {
@@ -255,6 +235,7 @@ func (c *EchoClient) PagedExpand(ctx context.Context, req *genprotopb.PagedExpan
 	}
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
 	it.pageInfo.MaxSize = int(req.PageSize)
+	it.pageInfo.Token = req.PageToken
 	return it
 }
 
@@ -351,6 +332,10 @@ type EchoResponseIterator struct {
 	items    []*genprotopb.EchoResponse
 	pageInfo *iterator.PageInfo
 	nextFunc func() error
+
+	// Response is the raw response for the current page.
+	// Calling Next() or InternalFetch() updates this value.
+	Response *genprotopb.PagedExpandResponse
 
 	// InternalFetch is for use by the Google Cloud Libraries only.
 	// It is not part of the stable interface of this package.

@@ -23,9 +23,9 @@ var ListUsersFromFile string
 func init() {
 	IdentityServiceCmd.AddCommand(ListUsersCmd)
 
-	ListUsersCmd.Flags().Int32Var(&ListUsersInput.PageSize, "page_size", 0, "")
+	ListUsersCmd.Flags().Int32Var(&ListUsersInput.PageSize, "page_size", 0, "The maximum number of users to return. Server may return fewer users  than requested. If unspecified, server will pick an appropriate default.")
 
-	ListUsersCmd.Flags().StringVar(&ListUsersInput.PageToken, "page_token", "", "")
+	ListUsersCmd.Flags().StringVar(&ListUsersInput.PageToken, "page_token", "", "The value of google.showcase.v1beta1.ListUsersResponse.next_page_token  returned from the previous call to  `google.showcase.v1beta1.Identity\\ListUsers` method.")
 
 	ListUsersCmd.Flags().StringVar(&ListUsersFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -65,24 +65,25 @@ var ListUsersCmd = &cobra.Command{
 		iter := IdentityClient.ListUsers(ctx, &ListUsersInput)
 
 		// get requested page
-		page, err := iter.Next()
-		if err != nil {
+		var items []interface{}
+		data := make(map[string]interface{})
+
+		// PageSize could be an integer with a specific precision.
+		// Doing standard i := 0; i < PageSize; i++ creates i as
+		// an int, creating a potential type mismatch.
+		for i := ListUsersInput.PageSize; i > 0; i-- {
+			item, err := iter.Next()
 			if err == iterator.Done {
-				fmt.Println("No more results")
-				return nil
+				err = nil
+				break
+			} else if err != nil {
+				return err
 			}
 
-			return err
+			items = append(items, item)
 		}
 
-		data := make(map[string]interface{})
-		data["page"] = page
-
-		//get next page token
-		_, err = iter.Next()
-		if err != nil && err != iterator.Done {
-			return err
-		}
+		data["page"] = items
 		data["nextToken"] = iter.PageInfo().Token
 
 		if Verbose {

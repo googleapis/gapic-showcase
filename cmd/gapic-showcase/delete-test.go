@@ -19,7 +19,7 @@ var DeleteTestFromFile string
 func init() {
 	TestingServiceCmd.AddCommand(DeleteTestCmd)
 
-	DeleteTestCmd.Flags().StringVar(&DeleteTestInput.Name, "name", "", "")
+	DeleteTestCmd.Flags().StringVar(&DeleteTestInput.Name, "name", "", "The test to be deleted.")
 
 	DeleteTestCmd.Flags().StringVar(&DeleteTestFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

@@ -78,29 +78,11 @@ func defaultMessagingCallOptions() *MessagingCallOptions {
 		}),
 	}
 
-	nonidempotent := []gax.CallOption{
-		gax.WithRetry(func() gax.Retryer {
-			return gax.OnCodes([]codes.Code{
-				codes.Unavailable,
-			}, backoff)
-		}),
-	}
-
 	return &MessagingCallOptions{
-		GetRoom:      idempotent,
-		ListRooms:    idempotent,
-		GetBlurb:     idempotent,
-		ListBlurbs:   idempotent,
-		CreateRoom:   nonidempotent,
-		UpdateRoom:   nonidempotent,
-		DeleteRoom:   nonidempotent,
-		CreateBlurb:  nonidempotent,
-		UpdateBlurb:  nonidempotent,
-		DeleteBlurb:  nonidempotent,
-		SearchBlurbs: nonidempotent,
-		StreamBlurbs: nonidempotent,
-		SendBlurbs:   nonidempotent,
-		Connect:      nonidempotent,
+		GetRoom:    idempotent,
+		ListRooms:  idempotent,
+		GetBlurb:   idempotent,
+		ListBlurbs: idempotent,
 	}
 }
 
@@ -262,6 +244,8 @@ func (c *MessagingClient) ListRooms(ctx context.Context, req *genprotopb.ListRoo
 		if err != nil {
 			return nil, "", err
 		}
+
+		it.Response = resp
 		return resp.Rooms, resp.NextPageToken, nil
 	}
 	fetch := func(pageSize int, pageToken string) (string, error) {
@@ -274,6 +258,7 @@ func (c *MessagingClient) ListRooms(ctx context.Context, req *genprotopb.ListRoo
 	}
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
 	it.pageInfo.MaxSize = int(req.PageSize)
+	it.pageInfo.Token = req.PageToken
 	return it
 }
 
@@ -366,6 +351,8 @@ func (c *MessagingClient) ListBlurbs(ctx context.Context, req *genprotopb.ListBl
 		if err != nil {
 			return nil, "", err
 		}
+
+		it.Response = resp
 		return resp.Blurbs, resp.NextPageToken, nil
 	}
 	fetch := func(pageSize int, pageToken string) (string, error) {
@@ -378,6 +365,7 @@ func (c *MessagingClient) ListBlurbs(ctx context.Context, req *genprotopb.ListBl
 	}
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
 	it.pageInfo.MaxSize = int(req.PageSize)
+	it.pageInfo.Token = req.PageToken
 	return it
 }
 
@@ -531,6 +519,10 @@ type BlurbIterator struct {
 	pageInfo *iterator.PageInfo
 	nextFunc func() error
 
+	// Response is the raw response for the current page.
+	// Calling Next() or InternalFetch() updates this value.
+	Response *genprotopb.ListBlurbsResponse
+
 	// InternalFetch is for use by the Google Cloud Libraries only.
 	// It is not part of the stable interface of this package.
 	//
@@ -572,6 +564,10 @@ type RoomIterator struct {
 	items    []*genprotopb.Room
 	pageInfo *iterator.PageInfo
 	nextFunc func() error
+
+	// Response is the raw response for the current page.
+	// Calling Next() or InternalFetch() updates this value.
+	Response *genprotopb.ListRoomsResponse
 
 	// InternalFetch is for use by the Google Cloud Libraries only.
 	// It is not part of the stable interface of this package.

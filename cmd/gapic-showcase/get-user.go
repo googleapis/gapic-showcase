@@ -21,7 +21,7 @@ var GetUserFromFile string
 func init() {
 	IdentityServiceCmd.AddCommand(GetUserCmd)
 
-	GetUserCmd.Flags().StringVar(&GetUserInput.Name, "name", "", "")
+	GetUserCmd.Flags().StringVar(&GetUserInput.Name, "name", "", "Required. The resource name of the requested user.")
 
 	GetUserCmd.Flags().StringVar(&GetUserFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -34,6 +34,8 @@ var GetUserCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if GetUserFromFile == "" {
+
+			cmd.MarkFlagRequired("name")
 
 		}
 

@@ -19,7 +19,7 @@ var DeleteBlurbFromFile string
 func init() {
 	MessagingServiceCmd.AddCommand(DeleteBlurbCmd)
 
-	DeleteBlurbCmd.Flags().StringVar(&DeleteBlurbInput.Name, "name", "", "")
+	DeleteBlurbCmd.Flags().StringVar(&DeleteBlurbInput.Name, "name", "", "Required. The resource name of the requested blurb.")
 
 	DeleteBlurbCmd.Flags().StringVar(&DeleteBlurbFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -32,6 +32,8 @@ var DeleteBlurbCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if DeleteBlurbFromFile == "" {
+
+			cmd.MarkFlagRequired("name")
 
 		}
 

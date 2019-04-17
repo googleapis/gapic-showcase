@@ -14,8 +14,6 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 
 	"os"
-
-	timestamppb "github.com/golang/protobuf/ptypes/timestamp"
 )
 
 var UpdateBlurbInput genprotopb.UpdateBlurbRequest
@@ -33,27 +31,15 @@ func init() {
 
 	UpdateBlurbInput.Blurb = new(genprotopb.Blurb)
 
-	UpdateBlurbInput.Blurb.CreateTime = new(timestamppb.Timestamp)
-
-	UpdateBlurbInput.Blurb.UpdateTime = new(timestamppb.Timestamp)
-
 	UpdateBlurbInput.UpdateMask = new(field_maskpb.FieldMask)
 
-	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbInput.Blurb.Name, "blurb.name", "", "")
+	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbInput.Blurb.Name, "blurb.name", "", "The resource name of the chat room.")
 
-	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbInput.Blurb.User, "blurb.user", "", "")
+	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbInput.Blurb.User, "blurb.user", "", "Required. The resource name of the blurb's author.")
 
-	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbInputBlurbContentText.Text, "blurb.content.text", "", "")
+	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbInputBlurbContentText.Text, "blurb.content.text", "", "The textual content of this blurb.")
 
-	UpdateBlurbCmd.Flags().BytesHexVar(&UpdateBlurbInputBlurbContentImage.Image, "blurb.content.image", []byte{}, "")
-
-	UpdateBlurbCmd.Flags().Int64Var(&UpdateBlurbInput.Blurb.CreateTime.Seconds, "blurb.create_time.seconds", 0, "")
-
-	UpdateBlurbCmd.Flags().Int32Var(&UpdateBlurbInput.Blurb.CreateTime.Nanos, "blurb.create_time.nanos", 0, "")
-
-	UpdateBlurbCmd.Flags().Int64Var(&UpdateBlurbInput.Blurb.UpdateTime.Seconds, "blurb.update_time.seconds", 0, "")
-
-	UpdateBlurbCmd.Flags().Int32Var(&UpdateBlurbInput.Blurb.UpdateTime.Nanos, "blurb.update_time.nanos", 0, "")
+	UpdateBlurbCmd.Flags().BytesHexVar(&UpdateBlurbInputBlurbContentImage.Image, "blurb.content.image", []byte{}, "The image content of this blurb.")
 
 	UpdateBlurbCmd.Flags().StringSliceVar(&UpdateBlurbInput.UpdateMask.Paths, "update_mask.paths", []string{}, "")
 
@@ -70,6 +56,8 @@ var UpdateBlurbCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if UpdateBlurbFromFile == "" {
+
+			cmd.MarkFlagRequired("blurb.user")
 
 			cmd.MarkFlagRequired("blurb.content")
 

@@ -23,9 +23,9 @@ var ListRoomsFromFile string
 func init() {
 	MessagingServiceCmd.AddCommand(ListRoomsCmd)
 
-	ListRoomsCmd.Flags().Int32Var(&ListRoomsInput.PageSize, "page_size", 0, "")
+	ListRoomsCmd.Flags().Int32Var(&ListRoomsInput.PageSize, "page_size", 0, "The maximum number of rooms return. Server may return fewer rooms  than requested. If unspecified, server will pick an appropriate default.")
 
-	ListRoomsCmd.Flags().StringVar(&ListRoomsInput.PageToken, "page_token", "", "")
+	ListRoomsCmd.Flags().StringVar(&ListRoomsInput.PageToken, "page_token", "", "The value of google.showcase.v1beta1.ListRoomsResponse.next_page_token  returned from the previous call to  `google.showcase.v1beta1.Messaging\\ListRooms` method.")
 
 	ListRoomsCmd.Flags().StringVar(&ListRoomsFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -65,24 +65,25 @@ var ListRoomsCmd = &cobra.Command{
 		iter := MessagingClient.ListRooms(ctx, &ListRoomsInput)
 
 		// get requested page
-		page, err := iter.Next()
-		if err != nil {
+		var items []interface{}
+		data := make(map[string]interface{})
+
+		// PageSize could be an integer with a specific precision.
+		// Doing standard i := 0; i < PageSize; i++ creates i as
+		// an int, creating a potential type mismatch.
+		for i := ListRoomsInput.PageSize; i > 0; i-- {
+			item, err := iter.Next()
 			if err == iterator.Done {
-				fmt.Println("No more results")
-				return nil
+				err = nil
+				break
+			} else if err != nil {
+				return err
 			}
 
-			return err
+			items = append(items, item)
 		}
 
-		data := make(map[string]interface{})
-		data["page"] = page
-
-		//get next page token
-		_, err = iter.Next()
-		if err != nil && err != iterator.Done {
-			return err
-		}
+		data["page"] = items
 		data["nextToken"] = iter.PageInfo().Token
 
 		if Verbose {

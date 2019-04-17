@@ -21,7 +21,7 @@ var ReportSessionFromFile string
 func init() {
 	TestingServiceCmd.AddCommand(ReportSessionCmd)
 
-	ReportSessionCmd.Flags().StringVar(&ReportSessionInput.Name, "name", "", "")
+	ReportSessionCmd.Flags().StringVar(&ReportSessionInput.Name, "name", "", "The session to be reported on.")
 
 	ReportSessionCmd.Flags().StringVar(&ReportSessionFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
