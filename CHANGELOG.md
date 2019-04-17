@@ -1,6 +1,6 @@
 # Release History
 
-## v0.1.1 / 2019-04-16
+## v0.1.1 / 2019-04-17
 - Regenerate GAPIC & GCLI to capture fixes for paged RPCs & commands
 
 ### v0.1.0 / 2019-04-04
