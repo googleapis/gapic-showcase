@@ -27,7 +27,7 @@ func init() {
 
 	StreamBlurbsInput.ExpireTime = new(timestamppb.Timestamp)
 
-	StreamBlurbsCmd.Flags().StringVar(&StreamBlurbsInput.Name, "name", "", "")
+	StreamBlurbsCmd.Flags().StringVar(&StreamBlurbsInput.Name, "name", "", "Required. The resource name of a chat room or user profile whose blurbs to stream.")
 
 	StreamBlurbsCmd.Flags().Int64Var(&StreamBlurbsInput.ExpireTime.Seconds, "expire_time.seconds", 0, "")
 
@@ -44,6 +44,8 @@ var StreamBlurbsCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if StreamBlurbsFromFile == "" {
+
+			cmd.MarkFlagRequired("name")
 
 		}
 

@@ -69,7 +69,7 @@ func init() {
 
 	WaitCmd.Flags().StringArrayVar(&WaitInputResponseErrorDetails, "response.error.details", []string{}, "")
 
-	WaitCmd.Flags().StringVar(&WaitInputResponseSuccess.Success.Content, "response.success.content", "", "")
+	WaitCmd.Flags().StringVar(&WaitInputResponseSuccess.Success.Content, "response.success.content", "", "This content of the result.")
 
 	WaitCmd.Flags().StringVar(&WaitInputEnd, "end", "", "")
 

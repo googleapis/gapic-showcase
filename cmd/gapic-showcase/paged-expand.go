@@ -23,11 +23,11 @@ var PagedExpandFromFile string
 func init() {
 	EchoServiceCmd.AddCommand(PagedExpandCmd)
 
-	PagedExpandCmd.Flags().StringVar(&PagedExpandInput.Content, "content", "", "")
+	PagedExpandCmd.Flags().StringVar(&PagedExpandInput.Content, "content", "", "Required. The string to expand.")
 
-	PagedExpandCmd.Flags().Int32Var(&PagedExpandInput.PageSize, "page_size", 0, "")
+	PagedExpandCmd.Flags().Int32Var(&PagedExpandInput.PageSize, "page_size", 0, "The amount of words to returned in each page.")
 
-	PagedExpandCmd.Flags().StringVar(&PagedExpandInput.PageToken, "page_token", "", "")
+	PagedExpandCmd.Flags().StringVar(&PagedExpandInput.PageToken, "page_token", "", "The position of the page to be returned.")
 
 	PagedExpandCmd.Flags().StringVar(&PagedExpandFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -40,6 +40,8 @@ var PagedExpandCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if PagedExpandFromFile == "" {
+
+			cmd.MarkFlagRequired("content")
 
 		}
 
@@ -67,24 +69,25 @@ var PagedExpandCmd = &cobra.Command{
 		iter := EchoClient.PagedExpand(ctx, &PagedExpandInput)
 
 		// get requested page
-		page, err := iter.Next()
-		if err != nil {
+		var items []interface{}
+		data := make(map[string]interface{})
+
+		// PageSize could be an integer with a specific precision.
+		// Doing standard i := 0; i < PageSize; i++ creates i as
+		// an int, creating a potential type mismatch.
+		for i := PagedExpandInput.PageSize; i > 0; i-- {
+			item, err := iter.Next()
 			if err == iterator.Done {
-				fmt.Println("No more results")
-				return nil
+				err = nil
+				break
+			} else if err != nil {
+				return err
 			}
 
-			return err
+			items = append(items, item)
 		}
 
-		data := make(map[string]interface{})
-		data["page"] = page
-
-		//get next page token
-		_, err = iter.Next()
-		if err != nil && err != iterator.Done {
-			return err
-		}
+		data["page"] = items
 		data["nextToken"] = iter.PageInfo().Token
 
 		if Verbose {

@@ -69,23 +69,10 @@ func defaultTestingCallOptions() *TestingCallOptions {
 		}),
 	}
 
-	nonidempotent := []gax.CallOption{
-		gax.WithRetry(func() gax.Retryer {
-			return gax.OnCodes([]codes.Code{
-				codes.Unavailable,
-			}, backoff)
-		}),
-	}
-
 	return &TestingCallOptions{
-		GetSession:    idempotent,
-		ListSessions:  idempotent,
-		ListTests:     idempotent,
-		CreateSession: nonidempotent,
-		DeleteSession: nonidempotent,
-		ReportSession: nonidempotent,
-		DeleteTest:    nonidempotent,
-		VerifyTest:    nonidempotent,
+		GetSession:   idempotent,
+		ListSessions: idempotent,
+		ListTests:    idempotent,
 	}
 }
 
@@ -201,6 +188,8 @@ func (c *TestingClient) ListSessions(ctx context.Context, req *genprotopb.ListSe
 		if err != nil {
 			return nil, "", err
 		}
+
+		it.Response = resp
 		return resp.Sessions, resp.NextPageToken, nil
 	}
 	fetch := func(pageSize int, pageToken string) (string, error) {
@@ -213,6 +202,7 @@ func (c *TestingClient) ListSessions(ctx context.Context, req *genprotopb.ListSe
 	}
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
 	it.pageInfo.MaxSize = int(req.PageSize)
+	it.pageInfo.Token = req.PageToken
 	return it
 }
 
@@ -271,6 +261,8 @@ func (c *TestingClient) ListTests(ctx context.Context, req *genprotopb.ListTests
 		if err != nil {
 			return nil, "", err
 		}
+
+		it.Response = resp
 		return resp.Tests, resp.NextPageToken, nil
 	}
 	fetch := func(pageSize int, pageToken string) (string, error) {
@@ -283,6 +275,7 @@ func (c *TestingClient) ListTests(ctx context.Context, req *genprotopb.ListTests
 	}
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
 	it.pageInfo.MaxSize = int(req.PageSize)
+	it.pageInfo.Token = req.PageToken
 	return it
 }
 
@@ -330,6 +323,10 @@ type SessionIterator struct {
 	pageInfo *iterator.PageInfo
 	nextFunc func() error
 
+	// Response is the raw response for the current page.
+	// Calling Next() or InternalFetch() updates this value.
+	Response *genprotopb.ListSessionsResponse
+
 	// InternalFetch is for use by the Google Cloud Libraries only.
 	// It is not part of the stable interface of this package.
 	//
@@ -371,6 +368,10 @@ type TestIterator struct {
 	items    []*genprotopb.Test
 	pageInfo *iterator.PageInfo
 	nextFunc func() error
+
+	// Response is the raw response for the current page.
+	// Calling Next() or InternalFetch() updates this value.
+	Response *genprotopb.ListTestsResponse
 
 	// InternalFetch is for use by the Google Cloud Libraries only.
 	// It is not part of the stable interface of this package.

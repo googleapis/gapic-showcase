@@ -14,8 +14,6 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 
 	"os"
-
-	timestamppb "github.com/golang/protobuf/ptypes/timestamp"
 )
 
 var UpdateRoomInput genprotopb.UpdateRoomRequest
@@ -27,25 +25,13 @@ func init() {
 
 	UpdateRoomInput.Room = new(genprotopb.Room)
 
-	UpdateRoomInput.Room.CreateTime = new(timestamppb.Timestamp)
-
-	UpdateRoomInput.Room.UpdateTime = new(timestamppb.Timestamp)
-
 	UpdateRoomInput.UpdateMask = new(field_maskpb.FieldMask)
 
-	UpdateRoomCmd.Flags().StringVar(&UpdateRoomInput.Room.Name, "room.name", "", "")
+	UpdateRoomCmd.Flags().StringVar(&UpdateRoomInput.Room.Name, "room.name", "", "The resource name of the chat room.")
 
-	UpdateRoomCmd.Flags().StringVar(&UpdateRoomInput.Room.DisplayName, "room.display_name", "", "")
+	UpdateRoomCmd.Flags().StringVar(&UpdateRoomInput.Room.DisplayName, "room.display_name", "", "Required. The human readable name of the chat room.")
 
-	UpdateRoomCmd.Flags().StringVar(&UpdateRoomInput.Room.Description, "room.description", "", "")
-
-	UpdateRoomCmd.Flags().Int64Var(&UpdateRoomInput.Room.CreateTime.Seconds, "room.create_time.seconds", 0, "")
-
-	UpdateRoomCmd.Flags().Int32Var(&UpdateRoomInput.Room.CreateTime.Nanos, "room.create_time.nanos", 0, "")
-
-	UpdateRoomCmd.Flags().Int64Var(&UpdateRoomInput.Room.UpdateTime.Seconds, "room.update_time.seconds", 0, "")
-
-	UpdateRoomCmd.Flags().Int32Var(&UpdateRoomInput.Room.UpdateTime.Nanos, "room.update_time.nanos", 0, "")
+	UpdateRoomCmd.Flags().StringVar(&UpdateRoomInput.Room.Description, "room.description", "", "The description of the chat room.")
 
 	UpdateRoomCmd.Flags().StringSliceVar(&UpdateRoomInput.UpdateMask.Paths, "update_mask.paths", []string{}, "")
 
@@ -60,6 +46,8 @@ var UpdateRoomCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if UpdateRoomFromFile == "" {
+
+			cmd.MarkFlagRequired("room.display_name")
 
 		}
 

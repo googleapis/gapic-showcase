@@ -21,7 +21,7 @@ var GetBlurbFromFile string
 func init() {
 	MessagingServiceCmd.AddCommand(GetBlurbCmd)
 
-	GetBlurbCmd.Flags().StringVar(&GetBlurbInput.Name, "name", "", "")
+	GetBlurbCmd.Flags().StringVar(&GetBlurbInput.Name, "name", "", "Required. The resource name of the requested blurb.")
 
 	GetBlurbCmd.Flags().StringVar(&GetBlurbFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -34,6 +34,8 @@ var GetBlurbCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if GetBlurbFromFile == "" {
+
+			cmd.MarkFlagRequired("name")
 
 		}
 

@@ -21,9 +21,9 @@ var VerifyTestFromFile string
 func init() {
 	TestingServiceCmd.AddCommand(VerifyTestCmd)
 
-	VerifyTestCmd.Flags().StringVar(&VerifyTestInput.Name, "name", "", "")
+	VerifyTestCmd.Flags().StringVar(&VerifyTestInput.Name, "name", "", "The test to have an answer registered to it.")
 
-	VerifyTestCmd.Flags().BytesHexVar(&VerifyTestInput.Answer, "answer", []byte{}, "")
+	VerifyTestCmd.Flags().BytesHexVar(&VerifyTestInput.Answer, "answer", []byte{}, "The answer from the test.")
 
 	VerifyTestCmd.Flags().StringVar(&VerifyTestFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

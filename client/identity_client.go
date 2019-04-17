@@ -66,20 +66,9 @@ func defaultIdentityCallOptions() *IdentityCallOptions {
 		}),
 	}
 
-	nonidempotent := []gax.CallOption{
-		gax.WithRetry(func() gax.Retryer {
-			return gax.OnCodes([]codes.Code{
-				codes.Unavailable,
-			}, backoff)
-		}),
-	}
-
 	return &IdentityCallOptions{
-		GetUser:    idempotent,
-		ListUsers:  idempotent,
-		CreateUser: nonidempotent,
-		UpdateUser: nonidempotent,
-		DeleteUser: nonidempotent,
+		GetUser:   idempotent,
+		ListUsers: idempotent,
 	}
 }
 
@@ -223,6 +212,8 @@ func (c *IdentityClient) ListUsers(ctx context.Context, req *genprotopb.ListUser
 		if err != nil {
 			return nil, "", err
 		}
+
+		it.Response = resp
 		return resp.Users, resp.NextPageToken, nil
 	}
 	fetch := func(pageSize int, pageToken string) (string, error) {
@@ -235,6 +226,7 @@ func (c *IdentityClient) ListUsers(ctx context.Context, req *genprotopb.ListUser
 	}
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
 	it.pageInfo.MaxSize = int(req.PageSize)
+	it.pageInfo.Token = req.PageToken
 	return it
 }
 
@@ -243,6 +235,10 @@ type UserIterator struct {
 	items    []*genprotopb.User
 	pageInfo *iterator.PageInfo
 	nextFunc func() error
+
+	// Response is the raw response for the current page.
+	// Calling Next() or InternalFetch() updates this value.
+	Response *genprotopb.ListUsersResponse
 
 	// InternalFetch is for use by the Google Cloud Libraries only.
 	// It is not part of the stable interface of this package.

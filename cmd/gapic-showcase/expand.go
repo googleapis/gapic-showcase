@@ -31,7 +31,7 @@ func init() {
 
 	ExpandInput.Error = new(statuspb.Status)
 
-	ExpandCmd.Flags().StringVar(&ExpandInput.Content, "content", "", "")
+	ExpandCmd.Flags().StringVar(&ExpandInput.Content, "content", "", "The content that will be split into words and returned on the stream.")
 
 	ExpandCmd.Flags().Int32Var(&ExpandInput.Error.Code, "error.code", 0, "")
 

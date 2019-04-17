@@ -19,7 +19,7 @@ var DeleteRoomFromFile string
 func init() {
 	MessagingServiceCmd.AddCommand(DeleteRoomCmd)
 
-	DeleteRoomCmd.Flags().StringVar(&DeleteRoomInput.Name, "name", "", "")
+	DeleteRoomCmd.Flags().StringVar(&DeleteRoomInput.Name, "name", "", "Required. The resource name of the requested room.")
 
 	DeleteRoomCmd.Flags().StringVar(&DeleteRoomFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -32,6 +32,8 @@ var DeleteRoomCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if DeleteRoomFromFile == "" {
+
+			cmd.MarkFlagRequired("name")
 
 		}
 

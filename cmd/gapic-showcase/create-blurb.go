@@ -12,8 +12,6 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 
 	"os"
-
-	timestamppb "github.com/golang/protobuf/ptypes/timestamp"
 )
 
 var CreateBlurbInput genprotopb.CreateBlurbRequest
@@ -31,27 +29,15 @@ func init() {
 
 	CreateBlurbInput.Blurb = new(genprotopb.Blurb)
 
-	CreateBlurbInput.Blurb.CreateTime = new(timestamppb.Timestamp)
+	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInput.Parent, "parent", "", "Required. The resource name of the chat room or user profile that this blurb will  be tied to.")
 
-	CreateBlurbInput.Blurb.UpdateTime = new(timestamppb.Timestamp)
+	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInput.Blurb.Name, "blurb.name", "", "The resource name of the chat room.")
 
-	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInput.Parent, "parent", "", "")
+	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInput.Blurb.User, "blurb.user", "", "Required. The resource name of the blurb's author.")
 
-	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInput.Blurb.Name, "blurb.name", "", "")
+	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInputBlurbContentText.Text, "blurb.content.text", "", "The textual content of this blurb.")
 
-	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInput.Blurb.User, "blurb.user", "", "")
-
-	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInputBlurbContentText.Text, "blurb.content.text", "", "")
-
-	CreateBlurbCmd.Flags().BytesHexVar(&CreateBlurbInputBlurbContentImage.Image, "blurb.content.image", []byte{}, "")
-
-	CreateBlurbCmd.Flags().Int64Var(&CreateBlurbInput.Blurb.CreateTime.Seconds, "blurb.create_time.seconds", 0, "")
-
-	CreateBlurbCmd.Flags().Int32Var(&CreateBlurbInput.Blurb.CreateTime.Nanos, "blurb.create_time.nanos", 0, "")
-
-	CreateBlurbCmd.Flags().Int64Var(&CreateBlurbInput.Blurb.UpdateTime.Seconds, "blurb.update_time.seconds", 0, "")
-
-	CreateBlurbCmd.Flags().Int32Var(&CreateBlurbInput.Blurb.UpdateTime.Nanos, "blurb.update_time.nanos", 0, "")
+	CreateBlurbCmd.Flags().BytesHexVar(&CreateBlurbInputBlurbContentImage.Image, "blurb.content.image", []byte{}, "The image content of this blurb.")
 
 	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInputBlurbContent, "blurb.content", "", "")
 
@@ -66,6 +52,10 @@ var CreateBlurbCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if CreateBlurbFromFile == "" {
+
+			cmd.MarkFlagRequired("parent")
+
+			cmd.MarkFlagRequired("blurb.user")
 
 			cmd.MarkFlagRequired("blurb.content")
 

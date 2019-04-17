@@ -14,8 +14,6 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 
 	"os"
-
-	timestamppb "github.com/golang/protobuf/ptypes/timestamp"
 )
 
 var UpdateUserInput genprotopb.UpdateUserRequest
@@ -27,25 +25,13 @@ func init() {
 
 	UpdateUserInput.User = new(genprotopb.User)
 
-	UpdateUserInput.User.CreateTime = new(timestamppb.Timestamp)
-
-	UpdateUserInput.User.UpdateTime = new(timestamppb.Timestamp)
-
 	UpdateUserInput.UpdateMask = new(field_maskpb.FieldMask)
 
-	UpdateUserCmd.Flags().StringVar(&UpdateUserInput.User.Name, "user.name", "", "")
+	UpdateUserCmd.Flags().StringVar(&UpdateUserInput.User.Name, "user.name", "", "The resource name of the user.")
 
-	UpdateUserCmd.Flags().StringVar(&UpdateUserInput.User.DisplayName, "user.display_name", "", "")
+	UpdateUserCmd.Flags().StringVar(&UpdateUserInput.User.DisplayName, "user.display_name", "", "Required. The display_name of the user.")
 
-	UpdateUserCmd.Flags().StringVar(&UpdateUserInput.User.Email, "user.email", "", "")
-
-	UpdateUserCmd.Flags().Int64Var(&UpdateUserInput.User.CreateTime.Seconds, "user.create_time.seconds", 0, "")
-
-	UpdateUserCmd.Flags().Int32Var(&UpdateUserInput.User.CreateTime.Nanos, "user.create_time.nanos", 0, "")
-
-	UpdateUserCmd.Flags().Int64Var(&UpdateUserInput.User.UpdateTime.Seconds, "user.update_time.seconds", 0, "")
-
-	UpdateUserCmd.Flags().Int32Var(&UpdateUserInput.User.UpdateTime.Nanos, "user.update_time.nanos", 0, "")
+	UpdateUserCmd.Flags().StringVar(&UpdateUserInput.User.Email, "user.email", "", "Required. The email address of the user.")
 
 	UpdateUserCmd.Flags().StringSliceVar(&UpdateUserInput.UpdateMask.Paths, "update_mask.paths", []string{}, "")
 
@@ -60,6 +46,10 @@ var UpdateUserCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if UpdateUserFromFile == "" {
+
+			cmd.MarkFlagRequired("user.display_name")
+
+			cmd.MarkFlagRequired("user.email")
 
 		}
 

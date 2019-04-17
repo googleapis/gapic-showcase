@@ -35,7 +35,7 @@ func init() {
 
 	EchoInputResponseError.Error = new(statuspb.Status)
 
-	EchoCmd.Flags().StringVar(&EchoInputResponseContent.Content, "response.content", "", "")
+	EchoCmd.Flags().StringVar(&EchoInputResponseContent.Content, "response.content", "", "The content to be echoed by the server.")
 
 	EchoCmd.Flags().Int32Var(&EchoInputResponseError.Error.Code, "response.error.code", 0, "")
 
