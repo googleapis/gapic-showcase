@@ -1,14 +1,18 @@
 import * as protoLoader from '@grpc/proto-loader';
 import * as grpc from 'grpc';
 import * as path from 'path';
-import * as yargs from 'yargs';
-import {Argv} from 'yargs';
-import {EchoServer} from './echoServer';
-import {OperationsServer} from './operationsServer';
+import * as yargs from 'yargs-parser';
+import { EchoServer } from './echoServer';
+import { OperationsServer } from './operationsServer';
 
 const protoRoot = path.join(__dirname, '..', '..', '..', 'schema');
-const commonRoot =
-    path.join(__dirname, '..', '..', 'node_modules', 'google-proto-files');
+const commonRoot = path.join(
+  __dirname,
+  '..',
+  '..',
+  'node_modules',
+  'google-proto-files'
+);
 const protoPath = path.join('google', 'showcase', 'v1beta1', 'echo.proto');
 
 function loadProtos() {
@@ -18,7 +22,7 @@ function loadProtos() {
     enums: String,
     defaults: true,
     oneofs: true,
-    includeDirs: [protoRoot, commonRoot]
+    includeDirs: [protoRoot, commonRoot],
   };
   const packageDefinition = protoLoader.loadSync(protoPath, options);
   return packageDefinition;
@@ -31,16 +35,20 @@ function createServer(verbose: boolean) {
   const operationsServer = new OperationsServer(verbose);
   const echoServer = new EchoServer(verbose, operationsServer);
   server.addService(
-      // @ts-ignore unknown types
-      descriptor.google.showcase.v1beta1.Echo.service, echoServer);
+    // @ts-ignore unknown types
+    descriptor.google.showcase.v1beta1.Echo.service,
+    echoServer
+  );
   server.addService(
-      // @ts-ignore unknown types
-      descriptor.google.longrunning.Operations.service, operationsServer);
+    // @ts-ignore unknown types
+    descriptor.google.longrunning.Operations.service,
+    operationsServer
+  );
   return server;
 }
 
 function main() {
-  const argv = yargs.argv;
+  const argv = yargs(process.argv.splice(2));
 
   if (argv['help'] || argv['usage']) {
     console.log('Command line options: ');
@@ -53,8 +61,10 @@ function main() {
   const verbose = argv['verbose'] as boolean;
 
   const server = createServer(verbose);
-  const port =
-      server.bind(bindAddress, grpc.ServerCredentials.createInsecure());
+  const port = server.bind(
+    bindAddress,
+    grpc.ServerCredentials.createInsecure()
+  );
   if (port <= 0) {
     console.log(`Failed to bind on ${bindAddress}, exiting.`);
     process.exit(1);

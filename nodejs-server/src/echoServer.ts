@@ -6,27 +6,27 @@ import * as echoTypes from '../pbjs-genfiles/echo.js';
 import showcaseV1Beta1 = echoTypes.google.showcase.v1beta1;
 import google = echoTypes.google;
 import longrunning = google.longrunning;
-import {OperationsServer} from './operationsServer.js';
+import { OperationsServer } from './operationsServer.js';
 
 /**
  * Implements Echo server based on echo.proto.
  */
 export class EchoServer {
   private requestCount: number;
-  private paginationOutput: {[index: string]: string[]};
-  private paginationRequest: {[index: string]: string|null|undefined};
+  private paginationOutput: Map<string, string[]>;
+  private paginationRequest: Map<string, string>;
   private operationsServer: OperationsServer;
   private verbose: boolean;
 
   constructor(verbose: boolean, operationsServer: OperationsServer) {
     this.requestCount = 0;
-    this.paginationOutput = {};
-    this.paginationRequest = {};
+    this.paginationOutput = new Map<string, string[]>();
+    this.paginationRequest = new Map<string, string>();
     this.operationsServer = operationsServer;
     this.verbose = verbose;
   }
 
-  private log(request: number, ...args: Array<string|{}>) {
+  private log(request: number, ...args: Array<string | {}>) {
     if (this.verbose) {
       console.log(`[EchoServer request #${request}]`, ...args);
     }
@@ -36,19 +36,20 @@ export class EchoServer {
    * Helper function to extract `google.rpc.Status` from some requests that
    * contain this field.
    */
-  private static requestToStatus(request:
-                                     showcaseV1Beta1.EchoRequest|
-                                 showcaseV1Beta1.ExpandRequest|
-                                 showcaseV1Beta1.WaitRequest):
-      google.rpc.Status {
-    const message = request.error && request.error.message ?
-        request.error.message :
-        'Error';
-    const code = request.error && request.error.code ?
-        request.error.code :
-        grpc.status.INVALID_ARGUMENT;
+  private static requestToStatus(
+    request:
+      | showcaseV1Beta1.EchoRequest
+      | showcaseV1Beta1.ExpandRequest
+      | showcaseV1Beta1.WaitRequest
+  ): google.rpc.Status {
+    const message =
+      request.error && request.error.message ? request.error.message : 'Error';
+    const code =
+      request.error && request.error.code
+        ? request.error.code
+        : grpc.status.INVALID_ARGUMENT;
     const details =
-        request.error && request.error.details ? request.error.details : [];
+      request.error && request.error.details ? request.error.details : [];
     const error = new google.rpc.Status();
     error.code = code;
     error.message = message;
@@ -59,11 +60,12 @@ export class EchoServer {
   /**
    * Helper function to build `grpc.ServiceError` out of `google.rpc.Status`.
    */
-  private static requestToError(request:
-                                    showcaseV1Beta1.EchoRequest|
-                                showcaseV1Beta1.ExpandRequest|
-                                showcaseV1Beta1.WaitRequest):
-      grpc.ServiceError {
+  private static requestToError(
+    request:
+      | showcaseV1Beta1.EchoRequest
+      | showcaseV1Beta1.ExpandRequest
+      | showcaseV1Beta1.WaitRequest
+  ): grpc.ServiceError {
     const status = EchoServer.requestToStatus(request);
     const error = new Error(status.message) as grpc.ServiceError;
     error.code = status.code;
@@ -74,8 +76,9 @@ export class EchoServer {
    * Unary call example. Echoes the request.
    */
   echo(
-      call: grpc.ServerUnaryCall<showcaseV1Beta1.EchoRequest>,
-      callback: grpc.requestCallback<showcaseV1Beta1.EchoResponse>): void {
+    call: grpc.ServerUnaryCall<showcaseV1Beta1.EchoRequest>,
+    callback: grpc.requestCallback<showcaseV1Beta1.EchoResponse>
+  ): void {
     const requestId = ++this.requestCount;
     const request = call.request;
     this.log(requestId, 'echo request:', request);
@@ -95,8 +98,9 @@ export class EchoServer {
    * Server streaming call example. Splits the request string into a list of
    * words returned as a stream.
    */
-  expand(call: grpc.ServerWriteableStream<showcaseV1Beta1.ExpandRequest>):
-      void {
+  expand(
+    call: grpc.ServerWriteableStream<showcaseV1Beta1.ExpandRequest>
+  ): void {
     const requestId = ++this.requestCount;
     const request = call.request;
     this.log(requestId, 'expand request:', request);
@@ -124,11 +128,12 @@ export class EchoServer {
    * stream into a string.
    */
   collect(
-      call: grpc.ServerReadableStream<showcaseV1Beta1.EchoRequest>,
-      callback: grpc.requestCallback<showcaseV1Beta1.EchoResponse>): void {
+    call: grpc.ServerReadableStream<showcaseV1Beta1.EchoRequest>,
+    callback: grpc.requestCallback<showcaseV1Beta1.EchoResponse>
+  ): void {
     const requestId = ++this.requestCount;
     const results: string[] = [];
-    let error: grpc.ServiceError|undefined = undefined;
+    let error: grpc.ServiceError | undefined;
     this.log(requestId, 'collect reading from stream:');
     call.on('data', (request: showcaseV1Beta1.EchoRequest) => {
       this.log(requestId, 'collect request:', request);
@@ -155,8 +160,12 @@ export class EchoServer {
    * Bi-directional streaming example. Sends all the data received from the
    * client stream back to the server stream.
    */
-  chat(call: grpc.ServerDuplexStream<
-       showcaseV1Beta1.EchoRequest, showcaseV1Beta1.EchoResponse>): void {
+  chat(
+    call: grpc.ServerDuplexStream<
+      showcaseV1Beta1.EchoRequest,
+      showcaseV1Beta1.EchoResponse
+    >
+  ): void {
     const requestId = ++this.requestCount;
     this.log(requestId, 'chat reading from stream, writing to stream:');
     call.on('data', (request: showcaseV1Beta1.EchoRequest) => {
@@ -177,9 +186,9 @@ export class EchoServer {
    * in pages as requested.
    */
   pagedExpand(
-      call: grpc.ServerUnaryCall<showcaseV1Beta1.PagedExpandRequest>,
-      callback: grpc.requestCallback<showcaseV1Beta1.PagedExpandResponse>):
-      void {
+    call: grpc.ServerUnaryCall<showcaseV1Beta1.PagedExpandRequest>,
+    callback: grpc.requestCallback<showcaseV1Beta1.PagedExpandResponse>
+  ): void {
     const requestId = ++this.requestCount;
     const request = call.request;
     this.log(requestId, 'pagedExpand request:', request);
@@ -189,11 +198,12 @@ export class EchoServer {
     this.log(requestId, 'pagedExpand request:', request);
     let words: string[] = [];
     if (request.pageToken) {
-      let errorMessage: string|undefined = undefined;
-      if (!this.paginationOutput[request.pageToken]) {
+      let errorMessage: string | undefined;
+      if (!this.paginationOutput.has(request.pageToken)) {
         errorMessage = `Bad page token ${request.pageToken}`;
       } else if (
-          this.paginationRequest[request.pageToken] !== request.content) {
+        this.paginationRequest.get(request.pageToken) !== request.content
+      ) {
         errorMessage = `Page token does not match the original request`;
       }
       if (errorMessage) {
@@ -202,7 +212,7 @@ export class EchoServer {
         callback(error);
         return;
       }
-      words = this.paginationOutput[request.pageToken];
+      words = this.paginationOutput.get(request.pageToken) || [];
     } else if (request.content) {
       words = request.content.split(/\s+/);
     }
@@ -214,8 +224,8 @@ export class EchoServer {
       return echoResponse;
     });
     if (words.length > 0) {
-      this.paginationOutput[requestId.toString()] = words;
-      this.paginationRequest[requestId.toString()] = request.content;
+      this.paginationOutput.set(requestId.toString(), words);
+      this.paginationRequest.set(requestId.toString(), request.content);
       response.nextPageToken = requestId.toString();
     }
     this.log(requestId, 'pagedExpand response:', response);
@@ -227,8 +237,9 @@ export class EchoServer {
    * milliseconds.
    */
   private static toMilliseconds(
-      seconds: number|Long|null|undefined,
-      nanos: number|null|undefined): number {
+    seconds: number | Long | null | undefined,
+    nanos: number | null | undefined
+  ): number {
     let milliseconds = 0;
     if (Long.isLong(seconds)) {
       milliseconds += (seconds as Long).toNumber() * 1000;
@@ -251,8 +262,9 @@ export class EchoServer {
    * Long running operation.
    */
   wait(
-      call: grpc.ServerUnaryCall<showcaseV1Beta1.WaitRequest>,
-      callback: grpc.requestCallback<longrunning.Operation>): void {
+    call: grpc.ServerUnaryCall<showcaseV1Beta1.WaitRequest>,
+    callback: grpc.requestCallback<longrunning.Operation>
+  ): void {
     const requestId = ++this.requestCount;
     const request = call.request;
     this.log(requestId, 'wait request:', request);
@@ -260,16 +272,20 @@ export class EchoServer {
     // calculate how long to sleep based on the request
     let sleepIntervalMs = 0;
     if (request.endTime) {
-      sleepIntervalMs = EchoServer.toMilliseconds(
-                            request.endTime.seconds, request.endTime.nanos) -
-          (new Date()).getTime();
-    } else if (request.ttl) {
       sleepIntervalMs =
-          EchoServer.toMilliseconds(request.ttl.seconds, request.ttl.nanos);
+        EchoServer.toMilliseconds(
+          request.endTime.seconds,
+          request.endTime.nanos
+        ) - new Date().getTime();
+    } else if (request.ttl) {
+      sleepIntervalMs = EchoServer.toMilliseconds(
+        request.ttl.seconds,
+        request.ttl.nanos
+      );
     }
 
     // fill the metadata with our expected sleep end time
-    const endTimeMs = (new Date()).getTime() + sleepIntervalMs;
+    const endTimeMs = new Date().getTime() + sleepIntervalMs;
     const [endSeconds, endNanos] = EchoServer.toSecondsNanos(endTimeMs);
     const metadata = new showcaseV1Beta1.WaitMetadata();
     metadata.endTime = new google.protobuf.Timestamp();
@@ -280,7 +296,7 @@ export class EchoServer {
     const metadataAny = new google.protobuf.Any();
     metadataAny.value = showcaseV1Beta1.WaitMetadata.encode(metadata).finish();
     metadataAny.type_url =
-        'type.googleapis.com/google.showcase.v1beta1.WaitMetadata';
+      'type.googleapis.com/google.showcase.v1beta1.WaitMetadata';
 
     // create a new long running operation and return it
     const operation = this.operationsServer.newOperation();
@@ -298,10 +314,11 @@ export class EchoServer {
 
         // encode response into google.protobuf.Any
         const responseAny = new google.protobuf.Any();
-        responseAny.value =
-            showcaseV1Beta1.WaitResponse.encode(response).finish();
+        responseAny.value = showcaseV1Beta1.WaitResponse.encode(
+          response
+        ).finish();
         responseAny.type_url =
-            'type.googleapis.com/google.showcase.v1beta1.WaitResponse';
+          'type.googleapis.com/google.showcase.v1beta1.WaitResponse';
 
         // return result of the long running operation
         this.log(requestId, 'wait result:', response);
