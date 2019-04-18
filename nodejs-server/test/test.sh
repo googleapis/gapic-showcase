@@ -7,6 +7,9 @@ VOLUME="$FIXTURES":/root/fixtures
 
 OUTPUT=`mktemp`
 
+### Pull client image
+docker pull $IMAGE
+
 ### Start server
 node build/src/index.js &
 server_pid=$!
