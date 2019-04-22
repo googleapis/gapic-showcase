@@ -1,7 +1,14 @@
 #!/bin/sh
 
 IMAGE=gcr.io/gapic-images/gapic-showcase:0.1.1
-SERVER=host.docker.internal:7469
+UNAME=`uname -s`
+
+if [ "$UNAME" == "Darwin" ]; then
+  SERVER=host.docker.internal:7469
+else
+  SERVER=localhost:7469
+fi
+
 FIXTURES=`pwd`/test/fixtures
 VOLUME="$FIXTURES":/root/fixtures
 
