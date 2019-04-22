@@ -71,7 +71,7 @@ if ! diff "$FIXTURES/test.baseline" "$OUTPUT"; then
   retval=2
 fi
 
-if [ $retval == 0 ]; then
+if [ "$retval" == "0" ]; then
   echo "Tests passed!"
 fi
 
