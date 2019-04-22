@@ -4,6 +4,12 @@ This is Node.js gRPC server that can serve RPCs defined in
 [echo.proto](https://github.com/googleapis/gapic-showcase/blob/master/schema/google/showcase/v1beta1/echo.proto) 
 (including long running operations). 
 
+This is an experimental showcase server implementation. It will eventually
+be upgraded to support all services according to the spec, but for now please
+use 
+[the Go implementation](https://github.com/googleapis/gapic-showcase/tree/master/server)
+(the one shipped in the Docker image) if you need anything more than Echo service.
+
 ### Usage
 
 Start server:
