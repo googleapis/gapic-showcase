@@ -236,12 +236,13 @@ jobs:
       - run:
           name: Install dependencies
           command: |
+            cd nodejs-server
             npm install
       - run:
           name: Test Node.js server
           command: |
+            cd nodejs-server
             npm test
-    working_directory: ~/project/nodejs-server
 
   github_release:
     docker:
