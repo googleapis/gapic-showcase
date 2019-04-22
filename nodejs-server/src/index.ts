@@ -28,7 +28,7 @@ function loadProtos() {
   return packageDefinition;
 }
 
-function createServer(verbose: boolean) {
+export function createServer(bindAddress: string, verbose: boolean) {
   const server = new grpc.Server();
   const packageDefinition = loadProtos();
   const descriptor = grpc.loadPackageDefinition(packageDefinition);
@@ -44,6 +44,13 @@ function createServer(verbose: boolean) {
     descriptor.google.longrunning.Operations.service,
     operationsServer
   );
+  const port = server.bind(
+    bindAddress,
+    grpc.ServerCredentials.createInsecure()
+  );
+  if (port <= 0) {
+    throw new Error(`Failed to bind on ${bindAddress}`);
+  }
   return server;
 }
 
@@ -60,17 +67,10 @@ function main() {
   const bindAddress = (argv['bind'] || '0.0.0.0:7469') as string;
   const verbose = argv['verbose'] as boolean;
 
-  const server = createServer(verbose);
-  const port = server.bind(
-    bindAddress,
-    grpc.ServerCredentials.createInsecure()
-  );
-  if (port <= 0) {
-    console.log(`Failed to bind on ${bindAddress}, exiting.`);
-    process.exit(1);
-  }
-  console.log(`Server is listening on port ${port}.`);
+  const server = createServer(bindAddress, verbose);
   server.start();
 }
 
-main();
+if (require.main === module) {
+  main();
+}

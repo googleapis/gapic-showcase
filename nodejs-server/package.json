@@ -1,7 +1,7 @@
 {
-  "name": "showcase-nodejs-echo-server",
+  "name": "gapic-showcase-server",
   "version": "0.0.1",
-  "description": "gRPC server implementing gapic-showcase Echo service",
+  "description": "gRPC server implementing gapic-showcase service",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
   "files": [
