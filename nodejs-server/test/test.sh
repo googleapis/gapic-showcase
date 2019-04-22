@@ -3,7 +3,7 @@
 IMAGE=gcr.io/gapic-images/gapic-showcase:0.1.1
 UNAME=`uname -s`
 
-if test "x$UNAME" == "xDarwin"; then
+if test "$UNAME" = "Darwin"; then
   SERVER=host.docker.internal:7469
 else
   SERVER=localhost:7469
@@ -78,7 +78,7 @@ if ! diff "$FIXTURES/test.baseline" "$OUTPUT"; then
   retval=2
 fi
 
-if test "x$retval" == "x0" ; then
+if test "$retval" = "0" ; then
   echo "Tests passed!"
 fi
 
