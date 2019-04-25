@@ -195,7 +195,6 @@ export class EchoServer {
     if (!request.pageSize) {
       request.pageSize = 1;
     }
-    this.log(requestId, 'pagedExpand request:', request);
     let words: string[] = [];
     if (request.pageToken) {
       let errorMessage: string | undefined;
