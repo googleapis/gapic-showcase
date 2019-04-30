@@ -1,4 +1,4 @@
 [submodule "schema/api-common-protos"]
 	path = schema/api-common-protos
 	url = https://github.com/googleapis/api-common-protos.git
-  branch = master
+	branch = v0.1.0
