@@ -77,8 +77,13 @@ service Identity {
 
 // A user.
 message User {
+  option (google.api.resource) = {
+    type: "showcase.googleapis.com/User"
+    pattern: "users/{user_id}"
+  };
+
   // The resource name of the user.
-  string name = 1 [(google.api.resource).pattern = "users/{user_id}"];
+  string name = 1;
 
   // The display_name of the user.
   string display_name = 2 [(google.api.field_behavior) = REQUIRED];
@@ -109,7 +114,7 @@ message CreateUserRequest {
 message GetUserRequest {
   // The resource name of the requested user.
   string name = 1 [
-    (google.api.resource_reference) = "User",
+    (google.api.resource_reference).type = "showcase.googleapis.com/User",
     (google.api.field_behavior) = REQUIRED
   ];
 }
@@ -130,7 +135,7 @@ message UpdateUserRequest {
 message DeleteUserRequest {
   // The resource name of the user to delete.
   string name = 1 [
-    (google.api.resource_reference) = "User",
+    (google.api.resource_reference).type = "showcase.googleapis.com/User",
     (google.api.field_behavior) = REQUIRED
   ];
 }
