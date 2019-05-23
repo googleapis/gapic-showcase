@@ -28,7 +28,7 @@ func init() {
 var DeleteTestCmd = &cobra.Command{
 	Use:   "delete-test",
 	Short: "Explicitly decline to implement a test.   This...",
-	Long:  "Explicitly decline to implement a test.   This removes the test from subsequent `ListTests` calls, and  attempting to do the test will error.   This method will error if attempting to delete a required test.",
+	Long:  "Explicitly decline to implement a test.   This removes the test from subsequent `ListTests` calls, and  attempting to do the test will error.   This...",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if DeleteTestFromFile == "" {

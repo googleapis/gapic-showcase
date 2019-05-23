@@ -33,7 +33,7 @@ func init() {
 var ConnectCmd = &cobra.Command{
 	Use:   "connect",
 	Short: "This method starts a bidirectional stream that...",
-	Long:  "This method starts a bidirectional stream that receives all blurbs that  are being created after the stream has started and sends requests to create  blurbs. If an invalid blurb is requested to be created, the stream will  close with an error.",
+	Long:  "This method starts a bidirectional stream that receives all blurbs that  are being created after the stream has started and sends requests to create ...",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 	},

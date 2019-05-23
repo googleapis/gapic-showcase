@@ -33,7 +33,7 @@ func init() {
 
 	UpdateRoomCmd.Flags().StringVar(&UpdateRoomInput.Room.Description, "room.description", "", "The description of the chat room.")
 
-	UpdateRoomCmd.Flags().StringSliceVar(&UpdateRoomInput.UpdateMask.Paths, "update_mask.paths", []string{}, "")
+	UpdateRoomCmd.Flags().StringSliceVar(&UpdateRoomInput.UpdateMask.Paths, "update_mask.paths", []string{}, "The set of field mask paths.")
 
 	UpdateRoomCmd.Flags().StringVar(&UpdateRoomFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

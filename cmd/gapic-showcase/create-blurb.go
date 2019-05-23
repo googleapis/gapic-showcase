@@ -29,7 +29,7 @@ func init() {
 
 	CreateBlurbInput.Blurb = new(genprotopb.Blurb)
 
-	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInput.Parent, "parent", "", "Required. The resource name of the chat room or user profile that this blurb will  be tied to.")
+	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInput.Parent, "parent", "", "Required. The resource name of the chat room or user...")
 
 	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInput.Blurb.Name, "blurb.name", "", "The resource name of the chat room.")
 
@@ -48,7 +48,7 @@ func init() {
 var CreateBlurbCmd = &cobra.Command{
 	Use:   "create-blurb",
 	Short: "Creates a blurb. If the parent is a room, the...",
-	Long:  "Creates a blurb. If the parent is a room, the blurb is understood to be a  message in that room. If the parent is a profile, the blurb is understood  to be a post on the profile.",
+	Long:  "Creates a blurb. If the parent is a room, the blurb is understood to be a  message in that room. If the parent is a profile, the blurb is understood ...",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if CreateBlurbFromFile == "" {

@@ -23,9 +23,9 @@ var ListUsersFromFile string
 func init() {
 	IdentityServiceCmd.AddCommand(ListUsersCmd)
 
-	ListUsersCmd.Flags().Int32Var(&ListUsersInput.PageSize, "page_size", 0, "The maximum number of users to return. Server may return fewer users  than requested. If unspecified, server will pick an appropriate default.")
+	ListUsersCmd.Flags().Int32Var(&ListUsersInput.PageSize, "page_size", 0, "The maximum number of users to return. Server may...")
 
-	ListUsersCmd.Flags().StringVar(&ListUsersInput.PageToken, "page_token", "", "The value of google.showcase.v1beta1.ListUsersResponse.next_page_token  returned from the previous call to  `google.showcase.v1beta1.Identity\\ListUsers` method.")
+	ListUsersCmd.Flags().StringVar(&ListUsersInput.PageToken, "page_token", "", "The value of...")
 
 	ListUsersCmd.Flags().StringVar(&ListUsersFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

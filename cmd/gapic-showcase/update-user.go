@@ -33,7 +33,7 @@ func init() {
 
 	UpdateUserCmd.Flags().StringVar(&UpdateUserInput.User.Email, "user.email", "", "Required. The email address of the user.")
 
-	UpdateUserCmd.Flags().StringSliceVar(&UpdateUserInput.UpdateMask.Paths, "update_mask.paths", []string{}, "")
+	UpdateUserCmd.Flags().StringSliceVar(&UpdateUserInput.UpdateMask.Paths, "update_mask.paths", []string{}, "The set of field mask paths.")
 
 	UpdateUserCmd.Flags().StringVar(&UpdateUserFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

@@ -47,6 +47,7 @@ type EchoCallOptions struct {
 func defaultEchoClientOptions() []option.ClientOption {
 	return []option.ClientOption{
 		option.WithEndpoint("localhost:7469"),
+		option.WithGRPCDialOption(grpc.WithDisableServiceConfig()),
 		option.WithScopes(DefaultAuthScopes()...),
 	}
 }

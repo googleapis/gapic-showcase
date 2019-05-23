@@ -31,13 +31,13 @@ func init() {
 
 	ExpandInput.Error = new(statuspb.Status)
 
-	ExpandCmd.Flags().StringVar(&ExpandInput.Content, "content", "", "The content that will be split into words and returned on the stream.")
+	ExpandCmd.Flags().StringVar(&ExpandInput.Content, "content", "", "The content that will be split into words and...")
 
-	ExpandCmd.Flags().Int32Var(&ExpandInput.Error.Code, "error.code", 0, "")
+	ExpandCmd.Flags().Int32Var(&ExpandInput.Error.Code, "error.code", 0, "The status code, which should be an enum value of...")
 
-	ExpandCmd.Flags().StringVar(&ExpandInput.Error.Message, "error.message", "", "")
+	ExpandCmd.Flags().StringVar(&ExpandInput.Error.Message, "error.message", "", "A developer-facing error message, which should be...")
 
-	ExpandCmd.Flags().StringArrayVar(&ExpandInputErrorDetails, "error.details", []string{}, "")
+	ExpandCmd.Flags().StringArrayVar(&ExpandInputErrorDetails, "error.details", []string{}, "A list of messages that carry the error details. ...")
 
 	ExpandCmd.Flags().StringVar(&ExpandFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -80,7 +80,6 @@ var ExpandCmd = &cobra.Command{
 			}
 
 			ExpandInput.Error.Details = append(ExpandInput.Error.Details, &tmp)
-
 		}
 
 		if Verbose {
