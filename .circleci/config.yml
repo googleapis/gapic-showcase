@@ -11,8 +11,6 @@ workflows:
           requires:
             - build
           filters: *all_commits
-      - kotlin-smoke-test:
-          filters: *all_commits
       - python-smoke-test:
           filters: *all_commits
       - go-smoke-test:
@@ -30,7 +28,6 @@ workflows:
       - github_release:
           requires:
             - test
-            - kotlin-smoke-test
             - python-smoke-test
             - go-smoke-test
             - protobufjs-load-test
@@ -43,7 +40,6 @@ workflows:
       - push-image:
           requires:
             - test
-            - kotlin-smoke-test
             - python-smoke-test
             - go-smoke-test
             - protobufjs-load-test
