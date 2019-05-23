@@ -30,14 +30,6 @@ option go_package = "github.com/googleapis/gapic-showcase/server/genproto";
 option java_package = "com.google.showcase.v1beta1";
 option java_multiple_files = true;
 
-// This resource is defined in google/showcase/v1beta1/user.proto. Since
-// google/showcase/v1beta1/user.proto is not imported from this file, the
-// resource needs to be defined here to be used in this API.
-option (google.api.resource_definition) = {
-  symbol: "User",
-  pattern: "users/{user_id}"
-};
-
 // A simple messaging service that implements chat rooms and profile posts.
 //
 // This messaging service showcases the features that API clients
@@ -202,8 +194,13 @@ service Messaging {
 
 // A chat room.
 message Room {
+  option (google.api.resource) = {
+    type: "showcase.googleapis.com/Room"
+    pattern: "rooms/{room_id}"
+  };
+
   // The resource name of the chat room.
-  string name = 1 [(google.api.resource).pattern = "rooms/{room_id}"];
+  string name = 1;
 
   // The human readable name of the chat room.
   string display_name = 2 [(google.api.field_behavior) = REQUIRED];
@@ -234,7 +231,7 @@ message CreateRoomRequest {
 message GetRoomRequest {
   // The resource name of the requested room.
   string name = 1 [
-    (google.api.resource_reference) = "Room",
+    (google.api.resource_reference).type = "showcase.googleapis.com/Room",
     (google.api.field_behavior) = REQUIRED
   ];
 }
@@ -255,7 +252,7 @@ message UpdateRoomRequest {
 message DeleteRoomRequest {
   // The resource name of the requested room.
   string name = 1 [
-    (google.api.resource_reference) = "Room",
+    (google.api.resource_reference).type = "showcase.googleapis.com/Room",
     (google.api.field_behavior) = REQUIRED
   ];
 }
@@ -289,12 +286,18 @@ message ListRoomsResponse {
 // This protocol buffer message represents a blurb sent to a chat room or
 // posted on a user profile.
 message Blurb {
+  option (google.api.resource) = {
+    type: "google.showcase.com/Blurb"
+    pattern: "rooms/{room_id}/blurbs/{blurb_id}"
+    pattern: "user/{user_id}/profile/blurbs/{blurb_id}"
+  };
+
   // The resource name of the chat room.
   string name = 1;
 
   // The resource name of the blurb's author.
   string user = 2 [
-    (google.api.resource_reference) = "User",
+    (google.api.resource_reference).type = "showcase.googleapis.com/User",
     (google.api.field_behavior) = REQUIRED];
 
   oneof content {
@@ -322,7 +325,7 @@ message CreateBlurbRequest {
   // The resource name of the chat room or user profile that this blurb will
   // be tied to.
   string parent = 1 [
-    (google.api.resource_reference) = "BlurbParent",
+    (google.api.resource_reference).child_type = "showcase.googleapis.com/Blurb",
     (google.api.field_behavior) = REQUIRED
   ];
 
@@ -335,7 +338,7 @@ message CreateBlurbRequest {
 message GetBlurbRequest {
   // The resource name of the requested blurb.
   string name = 1 [
-    (google.api.resource_reference) = "Blurb",
+    (google.api.resource_reference).type = "showcase.googleapis.com/Blurb",
     (google.api.field_behavior) = REQUIRED
   ];
 }
@@ -356,7 +359,7 @@ message UpdateBlurbRequest {
 message DeleteBlurbRequest {
   // The resource name of the requested blurb.
   string name = 1 [
-    (google.api.resource_reference) = "Blurb",
+    (google.api.resource_reference).type = "showcase.googleapis.com/Blurb",
     (google.api.field_behavior) = REQUIRED
   ];
 }
@@ -366,7 +369,7 @@ message DeleteBlurbRequest {
 message ListBlurbsRequest {
   // The resource name of the requested room or profile whos blurbs to list.
   string parent = 1 [
-    (google.api.resource_reference) = "BlurbParent",
+    (google.api.resource_reference).child_type = "showcase.googleapis.com/Blurb",
     (google.api.field_behavior) = REQUIRED
   ];
 
@@ -404,7 +407,8 @@ message SearchBlurbsRequest {
 
   // The rooms or profiles to search. If unset, `SearchBlurbs` will search all
   // rooms and all profiles.
-  string parent = 2 [(google.api.resource_reference) = "BlurbParent"];
+  string parent = 2 [
+    (google.api.resource_reference).child_type = "showcase.googleapis.com/Blurb"];
 
   // The maximum number of blurbs return. Server may return fewer
   // blurbs than requested. If unspecified, server will pick an appropriate
@@ -443,7 +447,7 @@ message SearchBlurbsResponse {
 message StreamBlurbsRequest {
   // The resource name of a chat room or user profile whose blurbs to stream.
   string name = 1 [
-    (google.api.resource_reference) = "BlurbParent",
+    (google.api.resource_reference).child_type = "showcase.googleapis.com/Blurb",
     (google.api.field_behavior) = REQUIRED
   ];
 
@@ -489,7 +493,8 @@ message SendBlurbsResponse {
 message ConnectRequest {
   message ConnectConfig {
     // The room or profile to follow and create messages for.
-    string parent = 1 [(google.api.resource_reference) = "BlurbParent"];
+    string parent = 1 [
+      (google.api.resource_reference).child_type = "showcase.googleapis.com/Blurb"];
   }
 
   oneof request {

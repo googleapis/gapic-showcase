@@ -106,9 +106,14 @@ service Testing {
 // A session defines tests it may expect, based on which version of the
 // code generation spec is in use.
 message Session {
+  option (google.api.resource) = {
+    type: "showcase.googleapis.com/Session"
+    pattern: "sessions/{session}"
+  };
+
   // The name of the session. The ID must conform to ^[a-z]+$
   // If this is not provided, Showcase chooses one at random.
-  string name = 1 [(google.api.resource).pattern = "sessions/{session}"];
+  string name = 1;
 
   // The specification versions understood by Showcase.
   enum Version {
@@ -138,7 +143,8 @@ message CreateSessionRequest {
 // The request for the GetSession method.
 message GetSessionRequest {
   // The session to be retrieved.
-  string name = 1 [(google.api.resource_reference) = "Session"];
+  string name = 1 [
+    (google.api.resource_reference).type = "showcase.googleapis.com/Session"];
 }
 
 // The request for the ListSessions method.
@@ -163,13 +169,15 @@ message ListSessionsResponse {
 // Request for the DeleteSession method.
 message DeleteSessionRequest {
   // The session to be deleted.
-  string name = 1 [(google.api.resource_reference) = "Session"];
+  string name = 1 [
+    (google.api.resource_reference).type = "showcase.googleapis.com/Session"];
 }
 
 // Request message for reporting on a session.
 message ReportSessionRequest {
   // The session to be reported on.
-  string name = 1 [(google.api.resource_reference) = "Session"];
+  string name = 1 [
+    (google.api.resource_reference).type = "showcase.googleapis.com/Session"];
 }
 
 // Response message for reporting on a session.
@@ -196,10 +204,15 @@ message ReportSessionResponse {
 }
 
 message Test {
+  option (google.api.resource) = {
+    type: "showcase.googleapis.com/Test"
+    pattern: "sessions/{session}/tests/{test}"
+  };
+
   // The name of the test.
   // The tests/* portion of the names are hard-coded, and do not change
   // from session to session.
-  string name = 1 [(google.api.resource).pattern = "sessions/{session}/tests/{test}"];
+  string name = 1;
 
   // Whether or not a test is required, recommended, or optional.
   enum ExpectationLevel {
@@ -239,8 +252,13 @@ message Test {
   // by something more robust like CEL, but as of writing this, I am unsure if CEL
   // is ready.
   message Blueprint {
+    option (google.api.resource) = {
+      type: "showcase.googleapis.com/Blueprint"
+      pattern: "sessions/{session}/tests/{test}/blueprints/{blueprint}"
+    };
+
     // The name of this blueprint.
-    string name = 1 [(google.api.resource).pattern = "sessions/{session}/tests/{test}/blueprints/{blueprint}"];
+    string name = 1;
 
     // A description of this blueprint.
     string description = 2;
@@ -309,7 +327,8 @@ message Issue {
 // The request for the ListTests method.
 message ListTestsRequest {
   // The session.
-  string parent = 1 [(google.api.resource_reference) = "Session"];
+  string parent = 1 [
+    (google.api.resource_reference).type = "showcase.googleapis.com/Session"];
 
   // The maximum number of tests to return per page.
   int32 page_size = 2;
@@ -333,7 +352,8 @@ message TestRun {
   // The name of the test.
   // The tests/* portion of the names are hard-coded, and do not change
   // from session to session.
-  string test = 1 [(google.api.resource_reference) = "Test"];
+  string test = 1 [
+    (google.api.resource_reference).type = "showcase.googleapis.com/Test"];
 
 
   // An issue found with the test run. If empty, this test run was successful.
@@ -343,12 +363,14 @@ message TestRun {
 // Request message for deleting a test.
 message DeleteTestRequest {
   // The test to be deleted.
-  string name = 1 [(google.api.resource_reference) = "Test"];
+  string name = 1 [
+    (google.api.resource_reference).type = "showcase.googleapis.com/Test"];
 }
 
 message VerifyTestRequest {
   // The test to have an answer registered to it.
-  string name = 1 [(google.api.resource_reference) = "Test"];
+  string name = 1 [
+    (google.api.resource_reference).type = "showcase.googleapis.com/Test"];
 
   // The answer from the test.
   bytes answer = 2;
