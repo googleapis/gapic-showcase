@@ -1,5 +1,12 @@
 # Release History
 
+### v0.1.2 / 2019-05-23
+- Regenerate GAPIC & GCLI with small updates
+- Update resource annotations
+- Fix bug in README
+- Add Node.js EchoService implementation
+- Remove extraneous logging
+
 ### v0.1.1 / 2019-04-17
 - Regenerate GAPIC & GCLI to capture fixes for paged RPCs & commands
 
