@@ -55,19 +55,19 @@ func init() {
 
 	WaitInputResponseSuccess.Success = new(genprotopb.WaitResponse)
 
-	WaitCmd.Flags().Int64Var(&WaitInputEndEndTime.EndTime.Seconds, "end.end_time.seconds", 0, "")
+	WaitCmd.Flags().Int64Var(&WaitInputEndEndTime.EndTime.Seconds, "end.end_time.seconds", 0, "Represents seconds of UTC time since Unix epoch ...")
 
-	WaitCmd.Flags().Int32Var(&WaitInputEndEndTime.EndTime.Nanos, "end.end_time.nanos", 0, "")
+	WaitCmd.Flags().Int32Var(&WaitInputEndEndTime.EndTime.Nanos, "end.end_time.nanos", 0, "Non-negative fractions of a second at nanosecond...")
 
-	WaitCmd.Flags().Int64Var(&WaitInputEndTtl.Ttl.Seconds, "end.ttl.seconds", 0, "")
+	WaitCmd.Flags().Int64Var(&WaitInputEndTtl.Ttl.Seconds, "end.ttl.seconds", 0, "Signed seconds of the span of time. Must be from...")
 
-	WaitCmd.Flags().Int32Var(&WaitInputEndTtl.Ttl.Nanos, "end.ttl.nanos", 0, "")
+	WaitCmd.Flags().Int32Var(&WaitInputEndTtl.Ttl.Nanos, "end.ttl.nanos", 0, "Signed fractions of a second at nanosecond...")
 
-	WaitCmd.Flags().Int32Var(&WaitInputResponseError.Error.Code, "response.error.code", 0, "")
+	WaitCmd.Flags().Int32Var(&WaitInputResponseError.Error.Code, "response.error.code", 0, "The status code, which should be an enum value of...")
 
-	WaitCmd.Flags().StringVar(&WaitInputResponseError.Error.Message, "response.error.message", "", "")
+	WaitCmd.Flags().StringVar(&WaitInputResponseError.Error.Message, "response.error.message", "", "A developer-facing error message, which should be...")
 
-	WaitCmd.Flags().StringArrayVar(&WaitInputResponseErrorDetails, "response.error.details", []string{}, "")
+	WaitCmd.Flags().StringArrayVar(&WaitInputResponseErrorDetails, "response.error.details", []string{}, "A list of messages that carry the error details. ...")
 
 	WaitCmd.Flags().StringVar(&WaitInputResponseSuccess.Success.Content, "response.success.content", "", "This content of the result.")
 
@@ -156,7 +156,6 @@ var WaitCmd = &cobra.Command{
 			}
 
 			WaitInputResponseError.Error.Details = append(WaitInputResponseError.Error.Details, &tmp)
-
 		}
 
 		if Verbose {

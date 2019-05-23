@@ -27,7 +27,7 @@ func init() {
 
 	CreateSessionInput.Session = new(genprotopb.Session)
 
-	CreateSessionCmd.Flags().StringVar(&CreateSessionInput.Session.Name, "session.name", "", "The name of the session. The ID must conform to ^[a-z]+$  If this is not provided, Showcase chooses one at random.")
+	CreateSessionCmd.Flags().StringVar(&CreateSessionInput.Session.Name, "session.name", "", "The name of the session. The ID must conform to...")
 
 	CreateSessionCmd.Flags().StringVar(&CreateSessionInputSessionVersion, "session.version", "", "Required. The version this session is using.")
 

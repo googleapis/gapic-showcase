@@ -37,11 +37,11 @@ func init() {
 
 	EchoCmd.Flags().StringVar(&EchoInputResponseContent.Content, "response.content", "", "The content to be echoed by the server.")
 
-	EchoCmd.Flags().Int32Var(&EchoInputResponseError.Error.Code, "response.error.code", 0, "")
+	EchoCmd.Flags().Int32Var(&EchoInputResponseError.Error.Code, "response.error.code", 0, "The status code, which should be an enum value of...")
 
-	EchoCmd.Flags().StringVar(&EchoInputResponseError.Error.Message, "response.error.message", "", "")
+	EchoCmd.Flags().StringVar(&EchoInputResponseError.Error.Message, "response.error.message", "", "A developer-facing error message, which should be...")
 
-	EchoCmd.Flags().StringArrayVar(&EchoInputResponseErrorDetails, "response.error.details", []string{}, "")
+	EchoCmd.Flags().StringArrayVar(&EchoInputResponseErrorDetails, "response.error.details", []string{}, "A list of messages that carry the error details. ...")
 
 	EchoCmd.Flags().StringVar(&EchoInputResponse, "response", "", "")
 
@@ -102,7 +102,6 @@ var EchoCmd = &cobra.Command{
 			}
 
 			EchoInputResponseError.Error.Details = append(EchoInputResponseError.Error.Details, &tmp)
-
 		}
 
 		if Verbose {

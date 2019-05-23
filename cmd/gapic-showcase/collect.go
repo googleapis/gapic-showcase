@@ -28,7 +28,7 @@ func init() {
 var CollectCmd = &cobra.Command{
 	Use:   "collect",
 	Short: "This method will collect the words given to it....",
-	Long:  "This method will collect the words given to it. When the stream is closed  by the client, this method will return the a concatenation of the strings  passed to it. This method showcases client-side streaming rpcs.",
+	Long:  "This method will collect the words given to it. When the stream is closed  by the client, this method will return the a concatenation of the strings ...",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 	},

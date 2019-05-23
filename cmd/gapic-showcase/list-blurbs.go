@@ -23,11 +23,11 @@ var ListBlurbsFromFile string
 func init() {
 	MessagingServiceCmd.AddCommand(ListBlurbsCmd)
 
-	ListBlurbsCmd.Flags().StringVar(&ListBlurbsInput.Parent, "parent", "", "Required. The resource name of the requested room or profile whos blurbs to list.")
+	ListBlurbsCmd.Flags().StringVar(&ListBlurbsInput.Parent, "parent", "", "Required. The resource name of the requested room or...")
 
-	ListBlurbsCmd.Flags().Int32Var(&ListBlurbsInput.PageSize, "page_size", 0, "The maximum number of blurbs to return. Server may return fewer  blurbs than requested. If unspecified, server will pick an appropriate  default.")
+	ListBlurbsCmd.Flags().Int32Var(&ListBlurbsInput.PageSize, "page_size", 0, "The maximum number of blurbs to return. Server...")
 
-	ListBlurbsCmd.Flags().StringVar(&ListBlurbsInput.PageToken, "page_token", "", "The value of google.showcase.v1beta1.ListBlurbsResponse.next_page_token  returned from the previous call to  `google.showcase.v1beta1.Messaging\\ListBlurbs` method.")
+	ListBlurbsCmd.Flags().StringVar(&ListBlurbsInput.PageToken, "page_token", "", "The value of...")
 
 	ListBlurbsCmd.Flags().StringVar(&ListBlurbsFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

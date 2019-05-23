@@ -27,11 +27,11 @@ func init() {
 
 	StreamBlurbsInput.ExpireTime = new(timestamppb.Timestamp)
 
-	StreamBlurbsCmd.Flags().StringVar(&StreamBlurbsInput.Name, "name", "", "Required. The resource name of a chat room or user profile whose blurbs to stream.")
+	StreamBlurbsCmd.Flags().StringVar(&StreamBlurbsInput.Name, "name", "", "Required. The resource name of a chat room or user profile...")
 
-	StreamBlurbsCmd.Flags().Int64Var(&StreamBlurbsInput.ExpireTime.Seconds, "expire_time.seconds", 0, "")
+	StreamBlurbsCmd.Flags().Int64Var(&StreamBlurbsInput.ExpireTime.Seconds, "expire_time.seconds", 0, "Represents seconds of UTC time since Unix epoch ...")
 
-	StreamBlurbsCmd.Flags().Int32Var(&StreamBlurbsInput.ExpireTime.Nanos, "expire_time.nanos", 0, "")
+	StreamBlurbsCmd.Flags().Int32Var(&StreamBlurbsInput.ExpireTime.Nanos, "expire_time.nanos", 0, "Non-negative fractions of a second at nanosecond...")
 
 	StreamBlurbsCmd.Flags().StringVar(&StreamBlurbsFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

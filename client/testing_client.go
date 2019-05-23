@@ -48,6 +48,7 @@ type TestingCallOptions struct {
 func defaultTestingClientOptions() []option.ClientOption {
 	return []option.ClientOption{
 		option.WithEndpoint("localhost:7469"),
+		option.WithGRPCDialOption(grpc.WithDisableServiceConfig()),
 		option.WithScopes(DefaultAuthScopes()...),
 	}
 }

@@ -32,7 +32,7 @@ func init() {
 var VerifyTestCmd = &cobra.Command{
 	Use:   "verify-test",
 	Short: "Register a response to a test.   In cases where a...",
-	Long:  "Register a response to a test.   In cases where a test involves registering a final answer at the  end of the test, this method provides the means to do so.",
+	Long:  "Register a response to a test.   In cases where a test involves registering a final answer at the  end of the test, this method provides the means to...",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if VerifyTestFromFile == "" {
