@@ -194,7 +194,7 @@ jobs:
             docker run --rm \
               --mount type=bind,source="$(pwd)"/schema/,destination=/in/google/showcase/v1beta1/,readonly \
               --mount type=bind,source="$(pwd)"/pyout,target=/out \
-              gcr.io/gapic-images/gapic-generator-python:0.6
+              gcr.io/gapic-images/gapic-generator-python:0.9
 
   go-smoke-test:
     machine: true
