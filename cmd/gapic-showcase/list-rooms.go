@@ -23,9 +23,9 @@ var ListRoomsFromFile string
 func init() {
 	MessagingServiceCmd.AddCommand(ListRoomsCmd)
 
-	ListRoomsCmd.Flags().Int32Var(&ListRoomsInput.PageSize, "page_size", 0, "The maximum number of rooms return. Server may return fewer rooms  than requested. If unspecified, server will pick an appropriate default.")
+	ListRoomsCmd.Flags().Int32Var(&ListRoomsInput.PageSize, "page_size", 0, "The maximum number of rooms return. Server may...")
 
-	ListRoomsCmd.Flags().StringVar(&ListRoomsInput.PageToken, "page_token", "", "The value of google.showcase.v1beta1.ListRoomsResponse.next_page_token  returned from the previous call to  `google.showcase.v1beta1.Messaging\\ListRooms` method.")
+	ListRoomsCmd.Flags().StringVar(&ListRoomsInput.PageToken, "page_token", "", "The value of...")
 
 	ListRoomsCmd.Flags().StringVar(&ListRoomsFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

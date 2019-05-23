@@ -25,13 +25,13 @@ var SearchBlurbsPollOperation string
 func init() {
 	MessagingServiceCmd.AddCommand(SearchBlurbsCmd)
 
-	SearchBlurbsCmd.Flags().StringVar(&SearchBlurbsInput.Query, "query", "", "Required. The query used to search for blurbs containing to words of this string.  Only posts that contain an exact match of a queried word will be returned.")
+	SearchBlurbsCmd.Flags().StringVar(&SearchBlurbsInput.Query, "query", "", "Required. The query used to search for blurbs containing to...")
 
-	SearchBlurbsCmd.Flags().StringVar(&SearchBlurbsInput.Parent, "parent", "", "The rooms or profiles to search. If unset, `SearchBlurbs` will search all  rooms and all profiles.")
+	SearchBlurbsCmd.Flags().StringVar(&SearchBlurbsInput.Parent, "parent", "", "The rooms or profiles to search. If unset,...")
 
-	SearchBlurbsCmd.Flags().Int32Var(&SearchBlurbsInput.PageSize, "page_size", 0, "The maximum number of blurbs return. Server may return fewer  blurbs than requested. If unspecified, server will pick an appropriate  default.")
+	SearchBlurbsCmd.Flags().Int32Var(&SearchBlurbsInput.PageSize, "page_size", 0, "The maximum number of blurbs return. Server may...")
 
-	SearchBlurbsCmd.Flags().StringVar(&SearchBlurbsInput.PageToken, "page_token", "", "The value of  google.showcase.v1beta1.SearchBlurbsResponse.next_page_token  returned from the previous call to  `google.showcase.v1beta1.Messaging\\SearchBlurbs` method.")
+	SearchBlurbsCmd.Flags().StringVar(&SearchBlurbsInput.PageToken, "page_token", "", "The value of ...")
 
 	SearchBlurbsCmd.Flags().StringVar(&SearchBlurbsFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -50,7 +50,7 @@ func init() {
 var SearchBlurbsCmd = &cobra.Command{
 	Use:   "search-blurbs",
 	Short: "This method searches through all blurbs across...",
-	Long:  "This method searches through all blurbs across all rooms and profiles  for blurbs containing to words found in the query. Only posts that  contain an exact match of a queried word will be returned.",
+	Long:  "This method searches through all blurbs across all rooms and profiles  for blurbs containing to words found in the query. Only posts that  contain an...",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if SearchBlurbsFromFile == "" {
