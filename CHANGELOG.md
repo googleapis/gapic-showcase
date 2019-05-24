@@ -1,6 +1,6 @@
 # Release History
 
-### v0.1.2 / 2019-05-23
+### v0.2.0 / 2019-05-24
 - Regenerate GAPIC & GCLI with small updates
 - Update resource annotations
 - Fix bug in README
