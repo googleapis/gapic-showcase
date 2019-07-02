@@ -22,6 +22,7 @@ import (
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/server/services"
+	fallback "github.com/googleapis/grpc-fallback-go/server"
 	"github.com/spf13/cobra"
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 
@@ -31,6 +32,7 @@ import (
 
 func init() {
 	var port string
+	var fallbackPort string
 	runCmd := &cobra.Command{
 		Use:   "run",
 		Short: "Runs the showcase server",
@@ -71,6 +73,10 @@ func init() {
 			pb.RegisterTestingServer(s, services.NewTestingServer(observerRegistry))
 			lropb.RegisterOperationsServer(s, operationsServer)
 
+			fb := fallback.NewServer(fallbackPort, "localhost"+port)
+			fb.StartBackground()
+			defer fb.Shutdown()
+
 			// Register reflection service on gRPC server.
 			reflection.Register(s)
 			s.Serve(lis)
@@ -83,4 +89,10 @@ func init() {
 		"p",
 		":7469",
 		"The port that showcase will be served on.")
+	runCmd.Flags().StringVarP(
+		&fallbackPort,
+		"fallback-port",
+		"f",
+		":1337",
+		"The port that the fallback-proxy will be served on.")
 }
