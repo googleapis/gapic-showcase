@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"net/url"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -147,7 +148,7 @@ func (c *IdentityClient) CreateUser(ctx context.Context, req *genprotopb.CreateU
 
 // GetUser retrieves the User with the given uri.
 func (c *IdentityClient) GetUser(ctx context.Context, req *genprotopb.GetUserRequest, opts ...gax.CallOption) (*genprotopb.User, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("name=%v", req.GetName()))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.GetUser[0:len(c.CallOptions.GetUser):len(c.CallOptions.GetUser)], opts...)
 	var resp *genprotopb.User
@@ -180,7 +181,7 @@ func (c *IdentityClient) UpdateUser(ctx context.Context, req *genprotopb.UpdateU
 
 // DeleteUser deletes a user, their profile, and all of their authored messages.
 func (c *IdentityClient) DeleteUser(ctx context.Context, req *genprotopb.DeleteUserRequest, opts ...gax.CallOption) error {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("name=%v", req.GetName()))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.DeleteUser[0:len(c.CallOptions.DeleteUser):len(c.CallOptions.DeleteUser)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -238,8 +239,9 @@ type UserIterator struct {
 	nextFunc func() error
 
 	// Response is the raw response for the current page.
+	// It must be cast to the RPC response type.
 	// Calling Next() or InternalFetch() updates this value.
-	Response *genprotopb.ListUsersResponse
+	Response interface{}
 
 	// InternalFetch is for use by the Google Cloud Libraries only.
 	// It is not part of the stable interface of this package.

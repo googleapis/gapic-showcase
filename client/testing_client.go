@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"net/url"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -152,7 +153,7 @@ func (c *TestingClient) CreateSession(ctx context.Context, req *genprotopb.Creat
 
 // GetSession gets a testing session.
 func (c *TestingClient) GetSession(ctx context.Context, req *genprotopb.GetSessionRequest, opts ...gax.CallOption) (*genprotopb.Session, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("name=%v", req.GetName()))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.GetSession[0:len(c.CallOptions.GetSession):len(c.CallOptions.GetSession)], opts...)
 	var resp *genprotopb.Session
@@ -209,7 +210,7 @@ func (c *TestingClient) ListSessions(ctx context.Context, req *genprotopb.ListSe
 
 // DeleteSession delete a test session.
 func (c *TestingClient) DeleteSession(ctx context.Context, req *genprotopb.DeleteSessionRequest, opts ...gax.CallOption) error {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("name=%v", req.GetName()))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.DeleteSession[0:len(c.CallOptions.DeleteSession):len(c.CallOptions.DeleteSession)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -224,7 +225,7 @@ func (c *TestingClient) DeleteSession(ctx context.Context, req *genprotopb.Delet
 // This generates a report detailing which tests have been completed,
 // and an overall rollup.
 func (c *TestingClient) ReportSession(ctx context.Context, req *genprotopb.ReportSessionRequest, opts ...gax.CallOption) (*genprotopb.ReportSessionResponse, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("name=%v", req.GetName()))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.ReportSession[0:len(c.CallOptions.ReportSession):len(c.CallOptions.ReportSession)], opts...)
 	var resp *genprotopb.ReportSessionResponse
@@ -241,7 +242,7 @@ func (c *TestingClient) ReportSession(ctx context.Context, req *genprotopb.Repor
 
 // ListTests list the tests of a sessesion.
 func (c *TestingClient) ListTests(ctx context.Context, req *genprotopb.ListTestsRequest, opts ...gax.CallOption) *TestIterator {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("parent=%v", req.GetParent()))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.ListTests[0:len(c.CallOptions.ListTests):len(c.CallOptions.ListTests)], opts...)
 	it := &TestIterator{}
@@ -287,7 +288,7 @@ func (c *TestingClient) ListTests(ctx context.Context, req *genprotopb.ListTests
 //
 // This method will error if attempting to delete a required test.
 func (c *TestingClient) DeleteTest(ctx context.Context, req *genprotopb.DeleteTestRequest, opts ...gax.CallOption) error {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("name=%v", req.GetName()))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.DeleteTest[0:len(c.CallOptions.DeleteTest):len(c.CallOptions.DeleteTest)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -303,7 +304,7 @@ func (c *TestingClient) DeleteTest(ctx context.Context, req *genprotopb.DeleteTe
 // In cases where a test involves registering a final answer at the
 // end of the test, this method provides the means to do so.
 func (c *TestingClient) VerifyTest(ctx context.Context, req *genprotopb.VerifyTestRequest, opts ...gax.CallOption) (*genprotopb.VerifyTestResponse, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("name=%v", req.GetName()))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.VerifyTest[0:len(c.CallOptions.VerifyTest):len(c.CallOptions.VerifyTest)], opts...)
 	var resp *genprotopb.VerifyTestResponse
@@ -325,8 +326,9 @@ type SessionIterator struct {
 	nextFunc func() error
 
 	// Response is the raw response for the current page.
+	// It must be cast to the RPC response type.
 	// Calling Next() or InternalFetch() updates this value.
-	Response *genprotopb.ListSessionsResponse
+	Response interface{}
 
 	// InternalFetch is for use by the Google Cloud Libraries only.
 	// It is not part of the stable interface of this package.
@@ -371,8 +373,9 @@ type TestIterator struct {
 	nextFunc func() error
 
 	// Response is the raw response for the current page.
+	// It must be cast to the RPC response type.
 	// Calling Next() or InternalFetch() updates this value.
-	Response *genprotopb.ListTestsResponse
+	Response interface{}
 
 	// InternalFetch is for use by the Google Cloud Libraries only.
 	// It is not part of the stable interface of this package.

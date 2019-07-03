@@ -335,8 +335,9 @@ type EchoResponseIterator struct {
 	nextFunc func() error
 
 	// Response is the raw response for the current page.
+	// It must be cast to the RPC response type.
 	// Calling Next() or InternalFetch() updates this value.
-	Response *genprotopb.PagedExpandResponse
+	Response interface{}
 
 	// InternalFetch is for use by the Google Cloud Libraries only.
 	// It is not part of the stable interface of this package.
