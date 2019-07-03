@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"net/url"
 	"time"
 
 	"cloud.google.com/go/longrunning"
@@ -179,7 +180,7 @@ func (c *MessagingClient) CreateRoom(ctx context.Context, req *genprotopb.Create
 
 // GetRoom retrieves the Room with the given resource name.
 func (c *MessagingClient) GetRoom(ctx context.Context, req *genprotopb.GetRoomRequest, opts ...gax.CallOption) (*genprotopb.Room, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("name=%v", req.GetName()))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.GetRoom[0:len(c.CallOptions.GetRoom):len(c.CallOptions.GetRoom)], opts...)
 	var resp *genprotopb.Room
@@ -212,7 +213,7 @@ func (c *MessagingClient) UpdateRoom(ctx context.Context, req *genprotopb.Update
 
 // DeleteRoom deletes a room and all of its blurbs.
 func (c *MessagingClient) DeleteRoom(ctx context.Context, req *genprotopb.DeleteRoomRequest, opts ...gax.CallOption) error {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("name=%v", req.GetName()))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.DeleteRoom[0:len(c.CallOptions.DeleteRoom):len(c.CallOptions.DeleteRoom)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -267,7 +268,7 @@ func (c *MessagingClient) ListRooms(ctx context.Context, req *genprotopb.ListRoo
 // message in that room. If the parent is a profile, the blurb is understood
 // to be a post on the profile.
 func (c *MessagingClient) CreateBlurb(ctx context.Context, req *genprotopb.CreateBlurbRequest, opts ...gax.CallOption) (*genprotopb.Blurb, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("parent=%v", req.GetParent()))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.CreateBlurb[0:len(c.CallOptions.CreateBlurb):len(c.CallOptions.CreateBlurb)], opts...)
 	var resp *genprotopb.Blurb
@@ -284,7 +285,7 @@ func (c *MessagingClient) CreateBlurb(ctx context.Context, req *genprotopb.Creat
 
 // GetBlurb retrieves the Blurb with the given resource name.
 func (c *MessagingClient) GetBlurb(ctx context.Context, req *genprotopb.GetBlurbRequest, opts ...gax.CallOption) (*genprotopb.Blurb, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("name=%v", req.GetName()))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.GetBlurb[0:len(c.CallOptions.GetBlurb):len(c.CallOptions.GetBlurb)], opts...)
 	var resp *genprotopb.Blurb
@@ -317,7 +318,7 @@ func (c *MessagingClient) UpdateBlurb(ctx context.Context, req *genprotopb.Updat
 
 // DeleteBlurb deletes a blurb.
 func (c *MessagingClient) DeleteBlurb(ctx context.Context, req *genprotopb.DeleteBlurbRequest, opts ...gax.CallOption) error {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("name=%v", req.GetName()))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.DeleteBlurb[0:len(c.CallOptions.DeleteBlurb):len(c.CallOptions.DeleteBlurb)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -331,7 +332,7 @@ func (c *MessagingClient) DeleteBlurb(ctx context.Context, req *genprotopb.Delet
 // ListBlurbs lists blurbs for a specific chat room or user profile depending on the
 // parent resource name.
 func (c *MessagingClient) ListBlurbs(ctx context.Context, req *genprotopb.ListBlurbsRequest, opts ...gax.CallOption) *BlurbIterator {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("parent=%v", req.GetParent()))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.ListBlurbs[0:len(c.CallOptions.ListBlurbs):len(c.CallOptions.ListBlurbs)], opts...)
 	it := &BlurbIterator{}
@@ -374,7 +375,7 @@ func (c *MessagingClient) ListBlurbs(ctx context.Context, req *genprotopb.ListBl
 // for blurbs containing to words found in the query. Only posts that
 // contain an exact match of a queried word will be returned.
 func (c *MessagingClient) SearchBlurbs(ctx context.Context, req *genprotopb.SearchBlurbsRequest, opts ...gax.CallOption) (*SearchBlurbsOperation, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("parent=%v", req.GetParent()))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.SearchBlurbs[0:len(c.CallOptions.SearchBlurbs):len(c.CallOptions.SearchBlurbs)], opts...)
 	var resp *longrunningpb.Operation
@@ -394,7 +395,7 @@ func (c *MessagingClient) SearchBlurbs(ctx context.Context, req *genprotopb.Sear
 // StreamBlurbs this returns a stream that emits the blurbs that are created for a
 // particular chat room or user profile.
 func (c *MessagingClient) StreamBlurbs(ctx context.Context, req *genprotopb.StreamBlurbsRequest, opts ...gax.CallOption) (genprotopb.Messaging_StreamBlurbsClient, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("name=%v", req.GetName()))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.StreamBlurbs[0:len(c.CallOptions.StreamBlurbs):len(c.CallOptions.StreamBlurbs)], opts...)
 	var resp genprotopb.Messaging_StreamBlurbsClient
@@ -521,8 +522,9 @@ type BlurbIterator struct {
 	nextFunc func() error
 
 	// Response is the raw response for the current page.
+	// It must be cast to the RPC response type.
 	// Calling Next() or InternalFetch() updates this value.
-	Response *genprotopb.ListBlurbsResponse
+	Response interface{}
 
 	// InternalFetch is for use by the Google Cloud Libraries only.
 	// It is not part of the stable interface of this package.
@@ -567,8 +569,9 @@ type RoomIterator struct {
 	nextFunc func() error
 
 	// Response is the raw response for the current page.
+	// It must be cast to the RPC response type.
 	// Calling Next() or InternalFetch() updates this value.
-	Response *genprotopb.ListRoomsResponse
+	Response interface{}
 
 	// InternalFetch is for use by the Google Cloud Libraries only.
 	// It is not part of the stable interface of this package.
