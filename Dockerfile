@@ -23,8 +23,9 @@ RUN go build -installsuffix cgo \
 FROM scratch
 COPY --from=builder /go/bin/gapic-showcase /go/bin/gapic-showcase
 
-# Expose port
+# Expose ports
 EXPOSE 7469
+EXPOSE 1337
 
 # Run the server.
 ENTRYPOINT ["/go/bin/gapic-showcase"]
