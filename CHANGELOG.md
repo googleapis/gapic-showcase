@@ -1,5 +1,10 @@
 # Release History
 
+### v0.2.1 / 2019-07-03
+- Add fallback-proxy to `gapic-showcase run` via grpc-fallback-go
+- Expose fallback-proxy port in Dockerfile
+- Tidy `go.mod`
+
 ### v0.2.0 / 2019-05-24
 - Regenerate GAPIC & GCLI with small updates
 - Update resource annotations
