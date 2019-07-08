@@ -4,7 +4,7 @@ require (
 	cloud.google.com/go v0.37.1
 	github.com/golang/protobuf v1.3.1
 	github.com/googleapis/gax-go/v2 v2.0.4
-	github.com/googleapis/grpc-fallback-go v0.1.0
+	github.com/googleapis/grpc-fallback-go v0.1.1
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/spf13/cobra v0.0.3
