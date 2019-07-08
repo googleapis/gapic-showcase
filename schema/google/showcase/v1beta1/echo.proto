@@ -96,7 +96,7 @@ service Echo {
 }
 
 // The request message used for the Echo, Collect and Chat methods. If content
-// is set in this message then the request will succeed. If a status is
+// is set in this message then the request will succeed.
 message EchoRequest {
   oneof response {
     // The content to be echoed by the server.
