@@ -30,7 +30,8 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 // The request message used for the Echo, Collect and Chat methods. If content
-// is set in this message then the request will succeed. If a status is
+// is set in this message then the request will succeed. If status is set in
+// this message then the status will be returned as an error.
 type EchoRequest struct {
 	// Types that are valid to be assigned to Response:
 	//	*EchoRequest_Content
