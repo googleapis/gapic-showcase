@@ -30,7 +30,7 @@ import (
 )
 
 const currentAPIVersion = "v1beta1"
-const currentReleaseVersion = "0.2.2"
+const currentReleaseVersion = "0.2.3"
 
 // This script updates the release version or API version of files in gapic-showcase.
 // This script is used on API and release version bumps. This script must be ran in
