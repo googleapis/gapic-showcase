@@ -1,5 +1,8 @@
 # Release History
 
+### v0.2.4 / 2019-07-11
+- Update `grpc-fallback-go` version to `v0.1.3`
+
 ### v0.2.3 / 2019-07-09
 - Update `grpc-fallback-go` version to `v0.1.2`
 

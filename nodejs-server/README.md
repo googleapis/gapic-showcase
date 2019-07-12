@@ -20,10 +20,10 @@ $ node build/src/index.js --verbose    # will start on port 7469
 
 Play with client:
 ```sh
-$ docker run --rm --network host gcr.io/gapic-images/gapic-showcase:0.2.3 \
+$ docker run --rm --network host gcr.io/gapic-images/gapic-showcase:0.2.4 \
   echo --address host.docker.internal:7469 echo --response content --response.content okay
 
-$ docker run --rm --network host gcr.io/gapic-images/gapic-showcase:0.2.3 \
+$ docker run --rm --network host gcr.io/gapic-images/gapic-showcase:0.2.4 \
   echo --address host.docker.internal:7469 wait --end ttl --end.ttl.seconds 5 \
   --follow --response success --response.success.content okay
 ```
