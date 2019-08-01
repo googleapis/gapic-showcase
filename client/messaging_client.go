@@ -33,7 +33,6 @@ import (
 	"google.golang.org/api/transport"
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -60,31 +59,27 @@ func defaultMessagingClientOptions() []option.ClientOption {
 		option.WithEndpoint("localhost:7469"),
 		option.WithGRPCDialOption(grpc.WithDisableServiceConfig()),
 		option.WithScopes(DefaultAuthScopes()...),
+		option.WithGRPCDialOption(grpc.WithDefaultCallOptions(
+			grpc.MaxCallRecvMsgSize(math.MaxInt32))),
 	}
 }
 
 func defaultMessagingCallOptions() *MessagingCallOptions {
-	backoff := gax.Backoff{
-		Initial:    100 * time.Millisecond,
-		Max:        time.Minute,
-		Multiplier: 1.3,
-	}
-
-	idempotent := []gax.CallOption{
-		gax.WithRetry(func() gax.Retryer {
-			return gax.OnCodes([]codes.Code{
-				codes.Aborted,
-				codes.Unavailable,
-				codes.Unknown,
-			}, backoff)
-		}),
-	}
-
 	return &MessagingCallOptions{
-		GetRoom:    idempotent,
-		ListRooms:  idempotent,
-		GetBlurb:   idempotent,
-		ListBlurbs: idempotent,
+		CreateRoom:   []gax.CallOption{},
+		GetRoom:      []gax.CallOption{},
+		UpdateRoom:   []gax.CallOption{},
+		DeleteRoom:   []gax.CallOption{},
+		ListRooms:    []gax.CallOption{},
+		CreateBlurb:  []gax.CallOption{},
+		GetBlurb:     []gax.CallOption{},
+		UpdateBlurb:  []gax.CallOption{},
+		DeleteBlurb:  []gax.CallOption{},
+		ListBlurbs:   []gax.CallOption{},
+		SearchBlurbs: []gax.CallOption{},
+		StreamBlurbs: []gax.CallOption{},
+		SendBlurbs:   []gax.CallOption{},
+		Connect:      []gax.CallOption{},
 	}
 }
 
