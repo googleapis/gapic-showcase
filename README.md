@@ -62,7 +62,7 @@ $ gapic-showcase --help
 
 ### Source
 ```sh
-$ go install github.com/googleapis/gapic-showcase/cmd/gapic-showcase
+$ go get github.com/googleapis/gapic-showcase/cmd/gapic-showcase
 $ gapic-showcase --help
 ...
 ```
