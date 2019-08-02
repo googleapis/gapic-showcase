@@ -11,6 +11,8 @@ workflows:
           requires:
             - build
           filters: *all_commits
+      - kotlin-smoke-test:
+          filters: *all_commits
       - python-smoke-test:
           filters: *all_commits
       - go-smoke-test:
@@ -28,6 +30,7 @@ workflows:
       - github_release:
           requires:
             - test
+            - kotlin-smoke-test
             - python-smoke-test
             - go-smoke-test
             - protobufjs-load-test
@@ -40,6 +43,7 @@ workflows:
       - push-image:
           requires:
             - test
+            - kotlin-smoke-test
             - python-smoke-test
             - go-smoke-test
             - protobufjs-load-test
@@ -167,7 +171,7 @@ jobs:
       - run:
           name: Stage showcase in proto dependencies
           command: |
-              git clone -b input-contract https://github.com/googleapis/api-common-protos.git
+              git clone https://github.com/googleapis/api-common-protos.git
               mkdir -p api-common-protos/google/showcase/v1beta1/
               cp schema/google/showcase/v1beta1/* api-common-protos/google/showcase/v1beta1/
       - run:
@@ -177,7 +181,7 @@ jobs:
             docker run --rm \
               --mount type=bind,source="$(pwd)"/api-common-protos,target=/proto \
               --mount type=bind,source="$(pwd)"/koutput,target=/generated \
-              gcr.io/kotlin-gapic/kgen:0.3.0
+              gcr.io/kotlin-gapic/kgen:0.6.0
 
   python-smoke-test:
     machine: true
