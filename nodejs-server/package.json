@@ -22,12 +22,12 @@
     "start": "node build/src/index.js"
   },
   "devDependencies": {
-    "@types/long": "^4.0.0",
-    "@types/node": "^11.13.4",
-    "@types/yargs-parser": "^13.0.0",
+    "@types/long": "4.0.0",
+    "@types/node": "11.13.18",
+    "@types/yargs-parser": "13.0.0",
     "gts": "1.0.0-0",
-    "protobufjs": "^6.8.8",
-    "typescript": "~3.4.3"
+    "protobufjs": "6.8.8",
+    "typescript": "3.4.5"
   },
   "dependencies": {
     "@grpc/proto-loader": "^0.5.0",
