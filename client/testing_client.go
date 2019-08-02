@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"math"
 	"net/url"
-	"time"
 
 	"github.com/golang/protobuf/proto"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
@@ -30,7 +29,6 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/api/transport"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -51,30 +49,21 @@ func defaultTestingClientOptions() []option.ClientOption {
 		option.WithEndpoint("localhost:7469"),
 		option.WithGRPCDialOption(grpc.WithDisableServiceConfig()),
 		option.WithScopes(DefaultAuthScopes()...),
+		option.WithGRPCDialOption(grpc.WithDefaultCallOptions(
+			grpc.MaxCallRecvMsgSize(math.MaxInt32))),
 	}
 }
 
 func defaultTestingCallOptions() *TestingCallOptions {
-	backoff := gax.Backoff{
-		Initial:    100 * time.Millisecond,
-		Max:        time.Minute,
-		Multiplier: 1.3,
-	}
-
-	idempotent := []gax.CallOption{
-		gax.WithRetry(func() gax.Retryer {
-			return gax.OnCodes([]codes.Code{
-				codes.Aborted,
-				codes.Unavailable,
-				codes.Unknown,
-			}, backoff)
-		}),
-	}
-
 	return &TestingCallOptions{
-		GetSession:   idempotent,
-		ListSessions: idempotent,
-		ListTests:    idempotent,
+		CreateSession: []gax.CallOption{},
+		GetSession:    []gax.CallOption{},
+		ListSessions:  []gax.CallOption{},
+		DeleteSession: []gax.CallOption{},
+		ReportSession: []gax.CallOption{},
+		ListTests:     []gax.CallOption{},
+		DeleteTest:    []gax.CallOption{},
+		VerifyTest:    []gax.CallOption{},
 	}
 }
 

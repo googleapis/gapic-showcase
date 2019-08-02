@@ -49,11 +49,20 @@ func defaultEchoClientOptions() []option.ClientOption {
 		option.WithEndpoint("localhost:7469"),
 		option.WithGRPCDialOption(grpc.WithDisableServiceConfig()),
 		option.WithScopes(DefaultAuthScopes()...),
+		option.WithGRPCDialOption(grpc.WithDefaultCallOptions(
+			grpc.MaxCallRecvMsgSize(math.MaxInt32))),
 	}
 }
 
 func defaultEchoCallOptions() *EchoCallOptions {
-	return &EchoCallOptions{}
+	return &EchoCallOptions{
+		Echo:        []gax.CallOption{},
+		Expand:      []gax.CallOption{},
+		Collect:     []gax.CallOption{},
+		Chat:        []gax.CallOption{},
+		PagedExpand: []gax.CallOption{},
+		Wait:        []gax.CallOption{},
+	}
 }
 
 // EchoClient is a client for interacting with .
