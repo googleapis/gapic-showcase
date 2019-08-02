@@ -27,7 +27,7 @@
     "@types/yargs-parser": "^13.0.0",
     "gts": "1.0.0-0",
     "protobufjs": "^6.8.8",
-    "typescript": "~3.4.3"
+    "typescript": "~3.5.0"
   },
   "dependencies": {
     "@grpc/proto-loader": "^0.5.0",
