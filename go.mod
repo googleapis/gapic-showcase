@@ -9,7 +9,7 @@ require (
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.2
-	golang.org/x/net v0.0.0-20190324223953-e3b2ff56ed87 // indirect
+	golang.org/x/net v0.0.0-20190802183608-ca1201d0de80 // indirect
 	golang.org/x/oauth2 v0.0.0-20190319182350-c85d3e98c914
 	google.golang.org/api v0.2.0
 	google.golang.org/genproto v0.0.0-20190321212433-e79c0c59cdb5
