@@ -24,6 +24,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
+	durpb "github.com/golang/protobuf/ptypes/duration"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
@@ -384,5 +385,69 @@ func TestWait(t *testing.T) {
 	server.Wait(context.Background(), req)
 	if !proto.Equal(waiter.req, req) {
 		t.Error("Expected echo.Wait to defer to waiter.")
+	}
+}
+
+func TestBlockSuccess(t *testing.T) {
+	tests := []struct {
+		seconds int64
+		nanos   int32
+		resp    string
+	}{
+		{1, int32(1000), "hello"},
+		{5, int32(10), "world"},
+	}
+	for _, test := range tests {
+		waiter := &mockWaiter{}
+		server := &echoServerImpl{waiter: waiter}
+		in := &pb.BlockRequest{
+			ResponseDelay: &durpb.Duration{
+				Seconds: test.seconds,
+				Nanos:   test.nanos,
+			},
+			Response: &pb.BlockRequest_Success{
+				Success: &pb.BlockResponse{Content: test.resp},
+			},
+		}
+		out, err := server.Block(context.Background(), in)
+		if err != nil {
+			t.Error(err)
+		}
+		if out.GetContent() != test.resp {
+			t.Errorf("Expected Wait test to return %s, but returned %s", out.GetContent(), test.resp)
+		}
+	}
+}
+
+func TestBlockError(t *testing.T) {
+	tests := []struct {
+		seconds int64
+		nanos   int32
+		code    codes.Code
+	}{
+		{0, int32(0), codes.InvalidArgument},
+		{2, int32(1000), codes.Unavailable},
+	}
+
+	for _, test := range tests {
+		waiter := &mockWaiter{}
+		server := &echoServerImpl{waiter: waiter}
+		in := &pb.BlockRequest{
+			ResponseDelay: &durpb.Duration{
+				Seconds: test.seconds,
+				Nanos:   test.nanos,
+			},
+			Response: &pb.BlockRequest_Error{
+				Error: status.New(test.code, "").Proto(),
+			},
+		}
+		out, err := server.Block(context.Background(), in)
+		if out != nil {
+			t.Errorf("Block: Expected to error with code %d but returned success", test.code)
+		}
+		s, _ := status.FromError(err)
+		if s.Code() != test.code {
+			t.Errorf("Block: Expected to error with code %d but errored with code %d", test.code, s.Code())
+		}
 	}
 }

@@ -23,7 +23,7 @@ var EchoSubCommands []string = []string{
 	"chat",
 	"paged-expand",
 	"wait",
-	"poll-wait",
+	"poll-wait", "block",
 }
 
 func init() {
