@@ -13,6 +13,6 @@ require (
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	google.golang.org/api v0.7.0
 	google.golang.org/genproto v0.0.0-20190802192310-fa694d86fc64
-	google.golang.org/grpc v1.21.1
+	google.golang.org/grpc v1.22.1
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )
