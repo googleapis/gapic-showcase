@@ -42,6 +42,7 @@ type EchoCallOptions struct {
 	Chat        []gax.CallOption
 	PagedExpand []gax.CallOption
 	Wait        []gax.CallOption
+	Block       []gax.CallOption
 }
 
 func defaultEchoClientOptions() []option.ClientOption {
@@ -49,8 +50,6 @@ func defaultEchoClientOptions() []option.ClientOption {
 		option.WithEndpoint("localhost:7469"),
 		option.WithGRPCDialOption(grpc.WithDisableServiceConfig()),
 		option.WithScopes(DefaultAuthScopes()...),
-		option.WithGRPCDialOption(grpc.WithDefaultCallOptions(
-			grpc.MaxCallRecvMsgSize(math.MaxInt32))),
 	}
 }
 
@@ -62,6 +61,7 @@ func defaultEchoCallOptions() *EchoCallOptions {
 		Chat:        []gax.CallOption{},
 		PagedExpand: []gax.CallOption{},
 		Wait:        []gax.CallOption{},
+		Block:       []gax.CallOption{},
 	}
 }
 
@@ -266,6 +266,24 @@ func (c *EchoClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, opts
 	return &WaitOperation{
 		lro: longrunning.InternalNewOperation(c.LROClient, resp),
 	}, nil
+}
+
+// Block this method will block (wait) for the requested amount of time
+// and then return the response or error.
+// This method showcases how a client handles delays or retries.
+func (c *EchoClient) Block(ctx context.Context, req *genprotopb.BlockRequest, opts ...gax.CallOption) (*genprotopb.BlockResponse, error) {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append(c.CallOptions.Block[0:len(c.CallOptions.Block):len(c.CallOptions.Block)], opts...)
+	var resp *genprotopb.BlockResponse
+	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		var err error
+		resp, err = c.echoClient.Block(ctx, req, settings.GRPC...)
+		return err
+	}, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
 // WaitOperation manages a long-running operation from Wait.

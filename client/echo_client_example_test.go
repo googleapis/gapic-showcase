@@ -142,3 +142,23 @@ func ExampleEchoClient_Wait() {
 	// TODO: Use resp.
 	_ = resp
 }
+
+func ExampleEchoClient_Block() {
+	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
+
+	ctx := context.Background()
+	c, err := client.NewEchoClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &genprotopb.BlockRequest{
+		// TODO: Fill request struct fields.
+	}
+	resp, err := c.Block(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}

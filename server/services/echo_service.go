@@ -19,7 +19,9 @@ import (
 	"io"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/golang/protobuf/ptypes"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	lropb "google.golang.org/genproto/googleapis/longrunning"
@@ -147,4 +149,13 @@ func min(x int32, y int32) int32 {
 
 func (s *echoServerImpl) Wait(ctx context.Context, in *pb.WaitRequest) (*lropb.Operation, error) {
 	return s.waiter.Wait(in), nil
+}
+
+func (s *echoServerImpl) Block(ctx context.Context, in *pb.BlockRequest) (*pb.BlockResponse, error) {
+	d, _ := ptypes.Duration(in.GetResponseDelay())
+	time.Sleep(d)
+	if in.GetError() != nil {
+		return nil, status.ErrorProto(in.GetError())
+	}
+	return in.GetSuccess(), nil
 }
