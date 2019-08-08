@@ -50,6 +50,8 @@ func defaultEchoClientOptions() []option.ClientOption {
 		option.WithEndpoint("localhost:7469"),
 		option.WithGRPCDialOption(grpc.WithDisableServiceConfig()),
 		option.WithScopes(DefaultAuthScopes()...),
+		option.WithGRPCDialOption(grpc.WithDefaultCallOptions(
+			grpc.MaxCallRecvMsgSize(math.MaxInt32))),
 	}
 }
 
