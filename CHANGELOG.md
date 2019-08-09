@@ -1,5 +1,13 @@
 # Release History
 
+### v0.3.0 / 2019-08-09
+- Remove nodejs server implementation
+- Update dependencies
+- Update golang docker tag to v1.12
+- Add Block method to Echo service
+- Enable kotlin smoke test
+- Add renovate.json
+
 ### v0.2.4 / 2019-07-11
 - Update `grpc-fallback-go` version to `v0.1.3`
 
