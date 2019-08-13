@@ -128,7 +128,7 @@ func searchFilterFunc(query string) func(b *pb.Blurb) bool {
 	}
 }
 
-// returns a successful response if the resource name is not blank
+// CancelOperation returns a successful response if the resource name is not blank
 func (s operationsServerImpl) CancelOperation(ctx context.Context, in *lropb.CancelOperationRequest) (*empty.Empty, error) {
 	if in.Name == "" {
 		return nil, status.Error(codes.NotFound, "cannot cancel operation without a name.")
@@ -136,7 +136,7 @@ func (s operationsServerImpl) CancelOperation(ctx context.Context, in *lropb.Can
 	return &empty.Empty{}, nil
 }
 
-// returns a fixed response matching the given PageSize if the resource name is not blank
+// ListOperations returns a fixed response matching the given PageSize if the resource name is not blank
 func (s operationsServerImpl) ListOperations(ctx context.Context, in *lropb.ListOperationsRequest) (*lropb.ListOperationsResponse, error) {
 	if in.Name == "" {
 		return nil, status.Error(codes.NotFound, "cannot list operation without a name.")
@@ -168,7 +168,7 @@ func (s operationsServerImpl) ListOperations(ctx context.Context, in *lropb.List
 	}, nil
 }
 
-// returns a successful response if the resource name is not blank
+// DeleteOperation returns a successful response if the resource name is not blank
 func (s operationsServerImpl) DeleteOperation(ctx context.Context, in *lropb.DeleteOperationRequest) (*empty.Empty, error) {
 	if in.Name == "" {
 		return nil, status.Error(codes.NotFound, "cannot delete operation without a name.")
@@ -176,7 +176,7 @@ func (s operationsServerImpl) DeleteOperation(ctx context.Context, in *lropb.Del
 	return &empty.Empty{}, nil
 }
 
-// randomly waits and returns an operation with the same name
+// WaitOperation randomly waits and returns an operation with the same name
 func (s operationsServerImpl) WaitOperation(ctx context.Context, in *lropb.WaitOperationRequest) (*lropb.Operation, error) {
 	if in.Name == "" {
 		return nil, status.Error(codes.NotFound, "cannot wait on a operation without a name.")
