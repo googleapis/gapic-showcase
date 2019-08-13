@@ -307,11 +307,24 @@ func TestServerDeleteOperation_notFound(t *testing.T) {
 
 func TestServerWaitOperation(t *testing.T) {
 	server := NewOperationsServer(nil)
-	_, err := server.WaitOperation(context.Background(), &lropb.WaitOperationRequest{
-		Name: "some/op",
-	})
-	if err != nil {
-		t.Errorf("DeleteOperations should have been successful")
+	done, notDone := false, false
+
+	for {
+		res, err := server.WaitOperation(context.Background(), &lropb.WaitOperationRequest{
+			Name: "some/op",
+		})
+		if err != nil {
+			t.Errorf("DeleteOperations should have been successful")
+		}
+
+		if res.Done {
+			done = true
+		} else {
+			notDone = true
+		}
+		if done && notDone {
+			break
+		}
 	}
 }
 
