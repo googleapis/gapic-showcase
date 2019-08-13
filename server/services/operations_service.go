@@ -17,7 +17,10 @@ package services
 import (
 	"context"
 	"encoding/base64"
+	"math/rand"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
@@ -125,18 +128,70 @@ func searchFilterFunc(query string) func(b *pb.Blurb) bool {
 	}
 }
 
+// returns a successful response if the resource name is not blank
 func (s operationsServerImpl) CancelOperation(ctx context.Context, in *lropb.CancelOperationRequest) (*empty.Empty, error) {
-	return nil, status.Error(codes.Unimplemented, "google.longrunning.CancelOperation is unimplemented.")
+	if in.Name == "" {
+		return nil, status.Error(codes.NotFound, "cannot cancel operation without a name.")
+	}
+	return &empty.Empty{}, nil
 }
 
+// returns a fixed response matching the given PageSize if the resource name is not blank
 func (s operationsServerImpl) ListOperations(ctx context.Context, in *lropb.ListOperationsRequest) (*lropb.ListOperationsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "google.longrunning.ListOperations is unimplemented.")
+	if in.Name == "" {
+		return nil, status.Error(codes.NotFound, "cannot list operation without a name.")
+	}
+
+	var operations []*lropb.Operation
+	if in.PageSize > 0 {
+		for i := 1; i <= int(in.PageSize); i++ {
+			var result *lropb.Operation_Response
+			if i%2 == 0 {
+				result = &lropb.Operation_Response{}
+			}
+			operations = append(operations, &lropb.Operation{
+				Name:   "the/thing/" + strconv.Itoa(i),
+				Done:   result != nil,
+				Result: result,
+			})
+		}
+	} else {
+		operations = append(operations, &lropb.Operation{
+			Name: "a/pending/thing",
+			Done: false,
+		})
+	}
+
+	return &lropb.ListOperationsResponse{
+		Operations:    operations,
+		NextPageToken: "txenNext",
+	}, nil
 }
 
+// returns a successful response if the resource name is not blank
 func (s operationsServerImpl) DeleteOperation(ctx context.Context, in *lropb.DeleteOperationRequest) (*empty.Empty, error) {
-	return nil, status.Error(codes.Unimplemented, "google.longrunning.DeleteOperation is unimplemented.")
+	if in.Name == "" {
+		return nil, status.Error(codes.NotFound, "cannot delete operation without a name.")
+	}
+	return &empty.Empty{}, nil
 }
 
+// randomly waits and returns an operation with the same name
 func (s operationsServerImpl) WaitOperation(ctx context.Context, in *lropb.WaitOperationRequest) (*lropb.Operation, error) {
-	return nil, status.Error(codes.Unimplemented, "google.longrunning.WaitOperation is unimplemented.")
+	if in.Name == "" {
+		return nil, status.Error(codes.NotFound, "cannot wait on a operation without a name.")
+	}
+
+	num := rand.Intn(500)
+	time.Sleep(time.Duration(num) * time.Millisecond)
+
+	var result *lropb.Operation_Response
+	if num%2 == 0 {
+		result = &lropb.Operation_Response{}
+	}
+	return &lropb.Operation{
+		Name:   in.Name,
+		Done:   result != nil,
+		Result: result,
+	}, nil
 }

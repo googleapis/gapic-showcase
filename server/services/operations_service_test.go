@@ -236,36 +236,90 @@ func TestGetOperation_invalidMarshalledProto(t *testing.T) {
 
 func TestCancelOperation(t *testing.T) {
 	server := NewOperationsServer(nil)
-	_, err := server.CancelOperation(context.Background(), nil)
+	_, err := server.CancelOperation(context.Background(), &lropb.CancelOperationRequest{
+		Name: "a/thing",
+	})
+	if err != nil {
+		t.Error("CancelOperation should have been successful")
+	}
+}
+
+func TestCancelOperation_notFound(t *testing.T) {
+	server := NewOperationsServer(nil)
+	_, err := server.CancelOperation(context.Background(), &lropb.CancelOperationRequest{})
 	s, _ := status.FromError(err)
-	if codes.Unimplemented != s.Code() {
-		t.Errorf("CancelOperation expected code=%d, got %d", codes.Unimplemented, s.Code())
+	if codes.NotFound != s.Code() {
+		t.Errorf("CancelOperation expected code=%d, got %d", codes.NotFound, s.Code())
 	}
 }
 
 func TestServerListOperation(t *testing.T) {
 	server := NewOperationsServer(nil)
-	_, err := server.ListOperations(context.Background(), nil)
+	res, err := server.ListOperations(context.Background(), &lropb.ListOperationsRequest{
+		Name: "something",
+	})
+	if err != nil {
+		t.Error("ListOperations should have been successful")
+	}
+	if len(res.Operations) != 1 {
+		t.Error("ListOperations should have a result")
+	}
+
+	res, err = server.ListOperations(context.Background(), &lropb.ListOperationsRequest{
+		Name:     "other",
+		PageSize: 8,
+	})
+	if err != nil {
+		t.Error("ListOperations should have been successful")
+	}
+	if len(res.Operations) != 8 {
+		t.Error("ListOperations should have 8 results")
+	}
+}
+
+func TestServerListOperation_notFound(t *testing.T) {
+	server := NewOperationsServer(nil)
+	_, err := server.ListOperations(context.Background(), &lropb.ListOperationsRequest{})
 	s, _ := status.FromError(err)
-	if codes.Unimplemented != s.Code() {
-		t.Errorf("ListOperations expected code=%d, got %d", codes.Unimplemented, s.Code())
+	if codes.NotFound != s.Code() {
+		t.Errorf("ListOperations expected code=%d, got %d", codes.NotFound, s.Code())
 	}
 }
 
 func TestServerDeleteOperation(t *testing.T) {
 	server := NewOperationsServer(nil)
-	_, err := server.DeleteOperation(context.Background(), nil)
+	_, err := server.DeleteOperation(context.Background(), &lropb.DeleteOperationRequest{
+		Name: "/delete/the/thing",
+	})
+	if err != nil {
+		t.Errorf("DeleteOperations should have been successful")
+	}
+}
+
+func TestServerDeleteOperation_notFound(t *testing.T) {
+	server := NewOperationsServer(nil)
+	_, err := server.DeleteOperation(context.Background(), &lropb.DeleteOperationRequest{})
 	s, _ := status.FromError(err)
-	if codes.Unimplemented != s.Code() {
-		t.Errorf("DeleteOperations expected code=%d, got %d", codes.Unimplemented, s.Code())
+	if codes.NotFound != s.Code() {
+		t.Errorf("DeleteOperations expected code=%d, got %d", codes.NotFound, s.Code())
 	}
 }
 
 func TestServerWaitOperation(t *testing.T) {
 	server := NewOperationsServer(nil)
-	_, err := server.WaitOperation(context.Background(), nil)
+	_, err := server.WaitOperation(context.Background(), &lropb.WaitOperationRequest{
+		Name: "some/op",
+	})
+	if err != nil {
+		t.Errorf("DeleteOperations should have been successful")
+	}
+}
+
+func TestServerWaitOperation_notFound(t *testing.T) {
+	server := NewOperationsServer(nil)
+	_, err := server.WaitOperation(context.Background(), &lropb.WaitOperationRequest{})
 	s, _ := status.FromError(err)
-	if codes.Unimplemented != s.Code() {
-		t.Errorf("DeleteOperations expected code=%d, got %d", codes.Unimplemented, s.Code())
+	if codes.NotFound != s.Code() {
+		t.Errorf("WaitOperations expected code=%d, got %d", codes.NotFound, s.Code())
 	}
 }
