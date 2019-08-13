@@ -1,5 +1,9 @@
 # Release History
 
+### v0.4.0 / 2019-08-13
+- Add dummy LRO service
+- Dependency updates
+
 ### v0.3.0 / 2019-08-09
 - Remove nodejs server implementation
 - Update dependencies
