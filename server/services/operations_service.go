@@ -163,8 +163,7 @@ func (s operationsServerImpl) ListOperations(ctx context.Context, in *lropb.List
 	}
 
 	return &lropb.ListOperationsResponse{
-		Operations:    operations,
-		NextPageToken: "",
+		Operations: operations,
 	}, nil
 }
 
