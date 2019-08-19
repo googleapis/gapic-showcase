@@ -275,6 +275,9 @@ func TestServerListOperation(t *testing.T) {
 	if len(res.Operations) != 8 {
 		t.Error("ListOperations should have 8 results")
 	}
+	if len(res.NextPageToken) > 0 {
+		t.Error("ListOperations should not have more than 1 page")
+	}
 }
 
 func TestServerListOperation_notFound(t *testing.T) {
