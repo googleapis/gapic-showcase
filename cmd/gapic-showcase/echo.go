@@ -43,7 +43,7 @@ func init() {
 
 	EchoCmd.Flags().StringArrayVar(&EchoInputResponseErrorDetails, "response.error.details", []string{}, "A list of messages that carry the error details. ...")
 
-	EchoCmd.Flags().StringVar(&EchoInputResponse, "response", "", "")
+	EchoCmd.Flags().StringVar(&EchoInputResponse, "response", "", "Choices: content, error")
 
 	EchoCmd.Flags().StringVar(&EchoFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

@@ -39,7 +39,7 @@ func init() {
 
 	CreateBlurbCmd.Flags().BytesHexVar(&CreateBlurbInputBlurbContentImage.Image, "blurb.content.image", []byte{}, "The image content of this blurb.")
 
-	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInputBlurbContent, "blurb.content", "", "")
+	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInputBlurbContent, "blurb.content", "", "Choices: text, image")
 
 	CreateBlurbCmd.Flags().StringVar(&CreateBlurbFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

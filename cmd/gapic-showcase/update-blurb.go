@@ -43,7 +43,7 @@ func init() {
 
 	UpdateBlurbCmd.Flags().StringSliceVar(&UpdateBlurbInput.UpdateMask.Paths, "update_mask.paths", []string{}, "The set of field mask paths.")
 
-	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbInputBlurbContent, "blurb.content", "", "")
+	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbInputBlurbContent, "blurb.content", "", "Choices: text, image")
 
 	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
