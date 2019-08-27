@@ -71,9 +71,9 @@ func init() {
 
 	WaitCmd.Flags().StringVar(&WaitInputResponseSuccess.Success.Content, "response.success.content", "", "This content of the result.")
 
-	WaitCmd.Flags().StringVar(&WaitInputEnd, "end", "", "")
+	WaitCmd.Flags().StringVar(&WaitInputEnd, "end", "", "Choices: end_time, ttl")
 
-	WaitCmd.Flags().StringVar(&WaitInputResponse, "response", "", "")
+	WaitCmd.Flags().StringVar(&WaitInputResponse, "response", "", "Choices: error, success")
 
 	WaitCmd.Flags().StringVar(&WaitFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

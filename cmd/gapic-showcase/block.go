@@ -53,7 +53,7 @@ func init() {
 
 	BlockCmd.Flags().StringVar(&BlockInputResponseSuccess.Success.Content, "response.success.content", "", "This content can contain anything, the server...")
 
-	BlockCmd.Flags().StringVar(&BlockInputResponse, "response", "", "")
+	BlockCmd.Flags().StringVar(&BlockInputResponse, "response", "", "Choices: error, success")
 
 	BlockCmd.Flags().StringVar(&BlockFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
