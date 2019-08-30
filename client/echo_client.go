@@ -94,7 +94,8 @@ type EchoClient struct {
 // This service is used showcase the four main types of rpcs - unary, server
 // side streaming, client side streaming, and bidirectional streaming. This
 // service also exposes methods that explicitly implement server delay, and
-// paginated calls.
+// paginated calls. Set the ‘showcase-trailer’ metadata key on any method
+// to have the values echoed in the response trailers.
 func NewEchoClient(ctx context.Context, opts ...option.ClientOption) (*EchoClient, error) {
 	conn, err := transport.DialGRPC(ctx, append(defaultEchoClientOptions(), opts...)...)
 	if err != nil {
