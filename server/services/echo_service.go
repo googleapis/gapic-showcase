@@ -175,6 +175,7 @@ func echoTrailers(ctx context.Context) {
 	if !ok {
 		return
 	}
+
 	values := md.Get("showcase-trailer")
 	for _, value := range values {
 		trailer := metadata.Pairs("showcase-trailer", value)
@@ -187,6 +188,7 @@ func echoStreamingTrailers(stream grpc.ServerStream) {
 	if !ok {
 		return
 	}
+
 	values := md.Get("showcase-trailer")
 	for _, value := range values {
 		trailer := metadata.Pairs("showcase-trailer", value)
