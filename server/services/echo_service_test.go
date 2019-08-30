@@ -90,6 +90,10 @@ func (m *mockExpandStream) Send(resp *pb.EchoResponse) error {
 	return nil
 }
 
+func (m *mockExpandStream) Context() context.Context {
+	return context.Background()
+}
+
 func (m *mockExpandStream) verify() {
 	if len(m.exp) > 0 {
 		m.t.Errorf("Exand did not stream all expected values. %d expected values remaining.", len(m.exp))
@@ -161,6 +165,10 @@ func (m *mockCollectStream) Recv() (*pb.EchoRequest, error) {
 		return ret, nil
 	}
 	return nil, io.EOF
+}
+
+func (m *mockCollectStream) Context() context.Context {
+	return context.Background()
 }
 
 func TestCollect(t *testing.T) {
@@ -240,6 +248,10 @@ func (m *mockChatStream) Send(r *pb.EchoResponse) error {
 		m.curr = nil
 	}
 	return nil
+}
+
+func (m *mockChatStream) Context() context.Context {
+	return context.Background()
 }
 
 func TestChat(t *testing.T) {
