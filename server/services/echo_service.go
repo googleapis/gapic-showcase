@@ -172,22 +172,24 @@ func (s *echoServerImpl) Block(ctx context.Context, in *pb.BlockRequest) (*pb.Bl
 // echo any provided trailing metadata
 func echoTrailers(ctx context.Context) {
 	md, ok := metadata.FromIncomingContext(ctx)
-	if ok {
-		values := md.Get("showcase-trailer")
-		for _, value := range values {
-			trailer := metadata.Pairs("showcase-trailer", value)
-			grpc.SetTrailer(ctx, trailer)
-		}
+	if !ok {
+		return
+	}
+	values := md.Get("showcase-trailer")
+	for _, value := range values {
+		trailer := metadata.Pairs("showcase-trailer", value)
+		grpc.SetTrailer(ctx, trailer)
 	}
 }
 
 func echoStreamingTrailers(stream grpc.ServerStream) {
 	md, ok := metadata.FromIncomingContext(stream.Context())
-	if ok {
-		values := md.Get("showcase-trailer")
-		for _, value := range values {
-			trailer := metadata.Pairs("showcase-trailer", value)
-			stream.SetTrailer(trailer)
-		}
+	if !ok {
+		return
+	}
+	values := md.Get("showcase-trailer")
+	for _, value := range values {
+		trailer := metadata.Pairs("showcase-trailer", value)
+		stream.SetTrailer(trailer)
 	}
 }

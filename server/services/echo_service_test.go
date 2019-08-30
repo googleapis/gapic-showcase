@@ -471,8 +471,7 @@ func TestBlockError(t *testing.T) {
 }
 
 func appendTestOutgoingMetadata(ctx context.Context) context.Context {
-	ctx = metadata.AppendToOutgoingContext(ctx, "showcase-trailer", "show")
-	ctx = metadata.AppendToOutgoingContext(ctx, "showcase-trailer", "case")
+	ctx = metadata.AppendToOutgoingContext(ctx, "showcase-trailer", "show", "showcase-trailer", "case")
 	ctx = metadata.AppendToOutgoingContext(ctx, "trailer", "trail")
 	return ctx
 }
