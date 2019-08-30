@@ -25,7 +25,9 @@ import (
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	lropb "google.golang.org/genproto/googleapis/longrunning"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -43,6 +45,7 @@ func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.Echo
 	if err != nil {
 		return nil, err
 	}
+	echoTrailers(ctx)
 	return &pb.EchoResponse{Content: in.GetContent()}, nil
 }
 
@@ -56,6 +59,7 @@ func (s *echoServerImpl) Expand(in *pb.ExpandRequest, stream pb.Echo_ExpandServe
 	if in.GetError() != nil {
 		return status.ErrorProto(in.GetError())
 	}
+	echoStreamingTrailers(stream)
 	return nil
 }
 
@@ -65,6 +69,7 @@ func (s *echoServerImpl) Collect(stream pb.Echo_CollectServer) error {
 	for {
 		req, err := stream.Recv()
 		if err == io.EOF {
+			echoStreamingTrailers(stream)
 			return stream.SendAndClose(&pb.EchoResponse{Content: strings.Join(resp, " ")})
 		}
 		if err != nil {
@@ -84,6 +89,7 @@ func (s *echoServerImpl) Chat(stream pb.Echo_ChatServer) error {
 	for {
 		req, err := stream.Recv()
 		if err == io.EOF {
+			echoStreamingTrailers(stream)
 			return nil
 		}
 		if err != nil {
@@ -134,6 +140,7 @@ func (s *echoServerImpl) PagedExpand(ctx context.Context, in *pb.PagedExpandRequ
 		nextToken = strconv.Itoa(int(end))
 	}
 
+	echoTrailers(ctx)
 	return &pb.PagedExpandResponse{
 		Responses:     responses,
 		NextPageToken: nextToken,
@@ -148,6 +155,7 @@ func min(x int32, y int32) int32 {
 }
 
 func (s *echoServerImpl) Wait(ctx context.Context, in *pb.WaitRequest) (*lropb.Operation, error) {
+	echoTrailers(ctx)
 	return s.waiter.Wait(in), nil
 }
 
@@ -157,5 +165,33 @@ func (s *echoServerImpl) Block(ctx context.Context, in *pb.BlockRequest) (*pb.Bl
 	if in.GetError() != nil {
 		return nil, status.ErrorProto(in.GetError())
 	}
+	echoTrailers(ctx)
 	return in.GetSuccess(), nil
+}
+
+// echo any provided trailing metadata
+func echoTrailers(ctx context.Context) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return
+	}
+
+	values := md.Get("showcase-trailer")
+	for _, value := range values {
+		trailer := metadata.Pairs("showcase-trailer", value)
+		grpc.SetTrailer(ctx, trailer)
+	}
+}
+
+func echoStreamingTrailers(stream grpc.ServerStream) {
+	md, ok := metadata.FromIncomingContext(stream.Context())
+	if !ok {
+		return
+	}
+
+	values := md.Get("showcase-trailer")
+	for _, value := range values {
+		trailer := metadata.Pairs("showcase-trailer", value)
+		stream.SetTrailer(trailer)
+	}
 }

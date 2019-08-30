@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -27,7 +28,9 @@ import (
 	durpb "github.com/golang/protobuf/ptypes/duration"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -37,21 +40,28 @@ func TestEcho_success(t *testing.T) {
 	server := NewEchoServer()
 	for _, val := range table {
 		in := &pb.EchoRequest{Response: &pb.EchoRequest_Content{Content: val}}
-		out, err := server.Echo(context.Background(), in)
+		mockStream := &mockUnaryStream{t: t}
+		ctx := appendTestOutgoingMetadata(context.Background(), &mockSTS{t: t, stream: mockStream})
+		out, err := server.Echo(ctx, in)
 		if err != nil {
 			t.Error(err)
 		}
 		if out.GetContent() != in.GetContent() {
 			t.Errorf("Echo(%s) returned %s", in.GetContent(), out.GetContent())
 		}
+		mockStream.verify(err != nil)
 	}
 	in := &pb.EchoRequest{
 		Response: &pb.EchoRequest_Error{
 			Error: &spb.Status{Code: int32(codes.OK)}}}
-	_, err := server.Echo(context.Background(), in)
+
+	mockStream := &mockUnaryStream{t: t}
+	ctx := appendTestOutgoingMetadata(context.Background(), &mockSTS{t: t, stream: mockStream})
+	_, err := server.Echo(ctx, in)
 	if err != nil {
 		t.Error(err)
 	}
+	mockStream.verify(err != nil)
 }
 
 func TestEcho_error(t *testing.T) {
@@ -76,9 +86,38 @@ func TestEcho_error(t *testing.T) {
 	}
 }
 
+type mockSTS struct {
+	stream grpc.ServerStream
+	t      *testing.T
+}
+
+func (m *mockSTS) Method() string                  { return "" }
+func (m *mockSTS) SetHeader(md metadata.MD) error  { return m.stream.SetHeader(md) }
+func (m *mockSTS) SendHeader(md metadata.MD) error { return m.stream.SendHeader(md) }
+func (m *mockSTS) SetTrailer(md metadata.MD) error { m.stream.SetTrailer(md); return nil }
+
+type mockUnaryStream struct {
+	trail []string
+	t     *testing.T
+	grpc.ServerStream
+}
+
+func (m *mockUnaryStream) Method() string                   { return "" }
+func (m *mockUnaryStream) Send(resp *pb.EchoResponse) error { return nil }
+func (m *mockUnaryStream) Context() context.Context         { return nil }
+func (m *mockUnaryStream) SetTrailer(md metadata.MD) {
+	m.trail = append(m.trail, md.Get("showcase-trailer")...)
+}
+func (m *mockUnaryStream) verify(expectTrailers bool) {
+	if expectTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) {
+		m.t.Errorf("Unary stream did not get all expected trailers. Got: %+v", m.trail)
+	}
+}
+
 type mockExpandStream struct {
-	exp []string
-	t   *testing.T
+	exp   []string
+	trail []string
+	t     *testing.T
 	pb.Echo_ExpandServer
 }
 
@@ -90,9 +129,20 @@ func (m *mockExpandStream) Send(resp *pb.EchoResponse) error {
 	return nil
 }
 
-func (m *mockExpandStream) verify() {
+func (m *mockExpandStream) Context() context.Context {
+	return appendTestOutgoingMetadata(context.Background(), &mockSTS{stream: m, t: m.t})
+}
+
+func (m *mockExpandStream) SetTrailer(md metadata.MD) {
+	m.trail = append(m.trail, md.Get("showcase-trailer")...)
+}
+
+func (m *mockExpandStream) verify(expectTrailers bool) {
 	if len(m.exp) > 0 {
-		m.t.Errorf("Exand did not stream all expected values. %d expected values remaining.", len(m.exp))
+		m.t.Errorf("Expand did not stream all expected values. %d expected values remaining.", len(m.exp))
+	}
+	if expectTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) {
+		m.t.Errorf("Expand did not get all expected trailers. Got: %+v", m.trail)
 	}
 }
 
@@ -113,7 +163,7 @@ func TestExpand(t *testing.T) {
 			if int32(status.Code()) != e.GetCode() {
 				t.Errorf("Expand expected stream to return status with code %d but code %d", status.Code(), e.GetCode())
 			}
-			stream.verify()
+			stream.verify(e == nil)
 		}
 	}
 }
@@ -138,9 +188,10 @@ func TestExpand_streamErr(t *testing.T) {
 }
 
 type mockCollectStream struct {
-	reqs []*pb.EchoRequest
-	exp  *string
-	t    *testing.T
+	reqs  []*pb.EchoRequest
+	trail []string
+	exp   *string
+	t     *testing.T
 	pb.Echo_CollectServer
 }
 
@@ -161,6 +212,20 @@ func (m *mockCollectStream) Recv() (*pb.EchoRequest, error) {
 		return ret, nil
 	}
 	return nil, io.EOF
+}
+
+func (m *mockCollectStream) Context() context.Context {
+	return appendTestOutgoingMetadata(context.Background(), &mockSTS{stream: m, t: m.t})
+}
+
+func (m *mockCollectStream) SetTrailer(md metadata.MD) {
+	m.trail = append(m.trail, md.Get("showcase-trailer")...)
+}
+
+func (m *mockCollectStream) verify(expectTrailers bool) {
+	if expectTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) {
+		m.t.Errorf("Collect did not get all expected trailers. Got: %+v", m.trail)
+	}
 }
 
 func TestCollect(t *testing.T) {
@@ -193,6 +258,7 @@ func TestCollect(t *testing.T) {
 		if expCode != s.Code() {
 			t.Errorf("Collect expected to return with code %d, but returned %d", expCode, s.Code())
 		}
+		mockStream.verify(test.err == nil)
 	}
 }
 
@@ -216,9 +282,10 @@ func TestCollect_streamErr(t *testing.T) {
 }
 
 type mockChatStream struct {
-	reqs []*pb.EchoRequest
-	curr *pb.EchoRequest
-	t    *testing.T
+	reqs  []*pb.EchoRequest
+	trail []string
+	curr  *pb.EchoRequest
+	t     *testing.T
 	pb.Echo_ChatServer
 }
 
@@ -240,6 +307,20 @@ func (m *mockChatStream) Send(r *pb.EchoResponse) error {
 		m.curr = nil
 	}
 	return nil
+}
+
+func (m *mockChatStream) Context() context.Context {
+	return appendTestOutgoingMetadata(context.Background(), &mockSTS{stream: m, t: m.t})
+}
+
+func (m *mockChatStream) SetTrailer(md metadata.MD) {
+	m.trail = append(m.trail, md.Get("showcase-trailer")...)
+}
+
+func (m *mockChatStream) verify(expectTrailers bool) {
+	if expectTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) {
+		m.t.Errorf("Chat did not get all expected trailers. Got: %+v", m.trail)
+	}
 }
 
 func TestChat(t *testing.T) {
@@ -269,6 +350,7 @@ func TestChat(t *testing.T) {
 		if expCode != s.Code() {
 			t.Errorf("Chat expected to return status with code %d, but returned %d", expCode, s.Code())
 		}
+		mockStream.verify(test.err == nil)
 	}
 }
 
@@ -366,7 +448,9 @@ func TestPagedExpand(t *testing.T) {
 
 	server := NewEchoServer()
 	for _, test := range tests {
-		out, err := server.PagedExpand(context.Background(), test.in)
+		mockStream := &mockUnaryStream{t: t}
+		ctx := appendTestOutgoingMetadata(context.Background(), &mockSTS{t: t, stream: mockStream})
+		out, err := server.PagedExpand(ctx, test.in)
 		if err != nil {
 			t.Error(err)
 		}
@@ -374,6 +458,7 @@ func TestPagedExpand(t *testing.T) {
 			t.Errorf("PagedExpand with input '%q', expected: '%q', got: %q",
 				test.in.String(), test.out.String(), out.String())
 		}
+		mockStream.verify(err == nil)
 	}
 }
 
@@ -382,10 +467,13 @@ func TestWait(t *testing.T) {
 	req := &pb.WaitRequest{End: &pb.WaitRequest_EndTime{EndTime: endTime}}
 	waiter := &mockWaiter{}
 	server := &echoServerImpl{waiter: waiter}
-	server.Wait(context.Background(), req)
+	mockStream := &mockUnaryStream{t: t}
+	ctx := appendTestOutgoingMetadata(context.Background(), &mockSTS{t: t, stream: mockStream})
+	server.Wait(ctx, req)
 	if !proto.Equal(waiter.req, req) {
 		t.Error("Expected echo.Wait to defer to waiter.")
 	}
+	mockStream.verify(true)
 }
 
 func TestBlockSuccess(t *testing.T) {
@@ -409,13 +497,16 @@ func TestBlockSuccess(t *testing.T) {
 				Success: &pb.BlockResponse{Content: test.resp},
 			},
 		}
-		out, err := server.Block(context.Background(), in)
+		mockStream := &mockUnaryStream{t: t}
+		ctx := appendTestOutgoingMetadata(context.Background(), &mockSTS{t: t, stream: mockStream})
+		out, err := server.Block(ctx, in)
 		if err != nil {
 			t.Error(err)
 		}
 		if out.GetContent() != test.resp {
 			t.Errorf("Expected Wait test to return %s, but returned %s", out.GetContent(), test.resp)
 		}
+		mockStream.verify(err == nil)
 	}
 }
 
@@ -450,4 +541,10 @@ func TestBlockError(t *testing.T) {
 			t.Errorf("Block: Expected to error with code %d but errored with code %d", test.code, s.Code())
 		}
 	}
+}
+
+func appendTestOutgoingMetadata(ctx context.Context, stream grpc.ServerTransportStream) context.Context {
+	ctx = grpc.NewContextWithServerTransportStream(ctx, stream)
+	ctx = metadata.NewIncomingContext(ctx, metadata.Pairs("showcase-trailer", "show", "showcase-trailer", "case", "trailer", "trail"))
+	return ctx
 }

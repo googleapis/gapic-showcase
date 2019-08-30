@@ -31,7 +31,8 @@ option java_multiple_files = true;
 // This service is used showcase the four main types of rpcs - unary, server
 // side streaming, client side streaming, and bidirectional streaming. This
 // service also exposes methods that explicitly implement server delay, and
-// paginated calls.
+// paginated calls. Set the 'showcase-trailer' metadata key on any method
+// to have the values echoed in the response trailers.
 service Echo {
   // This service is meant to only run locally on the port 7469 (keypad digits
   // for "show").
