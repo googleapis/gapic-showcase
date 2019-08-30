@@ -28,6 +28,7 @@ import (
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -48,7 +49,9 @@ func TestEcho_success(t *testing.T) {
 	in := &pb.EchoRequest{
 		Response: &pb.EchoRequest_Error{
 			Error: &spb.Status{Code: int32(codes.OK)}}}
-	_, err := server.Echo(context.Background(), in)
+
+	ctx := appendTestOutgoingMetadata(context.Background())
+	_, err := server.Echo(ctx, in)
 	if err != nil {
 		t.Error(err)
 	}
@@ -91,7 +94,7 @@ func (m *mockExpandStream) Send(resp *pb.EchoResponse) error {
 }
 
 func (m *mockExpandStream) Context() context.Context {
-	return context.Background()
+	return appendTestOutgoingMetadata(context.Background())
 }
 
 func (m *mockExpandStream) verify() {
@@ -168,7 +171,7 @@ func (m *mockCollectStream) Recv() (*pb.EchoRequest, error) {
 }
 
 func (m *mockCollectStream) Context() context.Context {
-	return context.Background()
+	return appendTestOutgoingMetadata(context.Background())
 }
 
 func TestCollect(t *testing.T) {
@@ -251,7 +254,7 @@ func (m *mockChatStream) Send(r *pb.EchoResponse) error {
 }
 
 func (m *mockChatStream) Context() context.Context {
-	return context.Background()
+	return appendTestOutgoingMetadata(context.Background())
 }
 
 func TestChat(t *testing.T) {
@@ -378,7 +381,8 @@ func TestPagedExpand(t *testing.T) {
 
 	server := NewEchoServer()
 	for _, test := range tests {
-		out, err := server.PagedExpand(context.Background(), test.in)
+		ctx := appendTestOutgoingMetadata(context.Background())
+		out, err := server.PagedExpand(ctx, test.in)
 		if err != nil {
 			t.Error(err)
 		}
@@ -394,7 +398,8 @@ func TestWait(t *testing.T) {
 	req := &pb.WaitRequest{End: &pb.WaitRequest_EndTime{EndTime: endTime}}
 	waiter := &mockWaiter{}
 	server := &echoServerImpl{waiter: waiter}
-	server.Wait(context.Background(), req)
+	ctx := appendTestOutgoingMetadata(context.Background())
+	server.Wait(ctx, req)
 	if !proto.Equal(waiter.req, req) {
 		t.Error("Expected echo.Wait to defer to waiter.")
 	}
@@ -421,7 +426,8 @@ func TestBlockSuccess(t *testing.T) {
 				Success: &pb.BlockResponse{Content: test.resp},
 			},
 		}
-		out, err := server.Block(context.Background(), in)
+		ctx := appendTestOutgoingMetadata(context.Background())
+		out, err := server.Block(ctx, in)
 		if err != nil {
 			t.Error(err)
 		}
@@ -462,4 +468,11 @@ func TestBlockError(t *testing.T) {
 			t.Errorf("Block: Expected to error with code %d but errored with code %d", test.code, s.Code())
 		}
 	}
+}
+
+func appendTestOutgoingMetadata(ctx context.Context) context.Context {
+	ctx = metadata.AppendToOutgoingContext(ctx, "showcase-trailer", "show")
+	ctx = metadata.AppendToOutgoingContext(ctx, "showcase-trailer", "case")
+	ctx = metadata.AppendToOutgoingContext(ctx, "trailer", "trail")
+	return ctx
 }
