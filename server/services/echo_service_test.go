@@ -41,7 +41,8 @@ func TestEcho_success(t *testing.T) {
 	for _, val := range table {
 		in := &pb.EchoRequest{Response: &pb.EchoRequest_Content{Content: val}}
 		mockStream := &mockUnaryStream{t: t}
-		out, err := server.Echo(appendTestOutgoingMetadata(context.Background(), &mockSTS{t: t, stream: mockStream}), in)
+		ctx := appendTestOutgoingMetadata(context.Background(), &mockSTS{t: t, stream: mockStream})
+		out, err := server.Echo(ctx, in)
 		if err != nil {
 			t.Error(err)
 		}
@@ -55,7 +56,8 @@ func TestEcho_success(t *testing.T) {
 			Error: &spb.Status{Code: int32(codes.OK)}}}
 
 	mockStream := &mockUnaryStream{t: t}
-	_, err := server.Echo(appendTestOutgoingMetadata(context.Background(), &mockSTS{t: t, stream: mockStream}), in)
+	ctx := appendTestOutgoingMetadata(context.Background(), &mockSTS{t: t, stream: mockStream})
+	_, err := server.Echo(ctx, in)
 	if err != nil {
 		t.Error(err)
 	}
