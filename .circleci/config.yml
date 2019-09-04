@@ -49,7 +49,7 @@ workflows:
 jobs:
   build:
     docker:
-      - image: golang:1.12
+      - image: golang:1.13
     working_directory: /go/src/github.com/googleapis/gapic-showcase
     steps:
       - checkout
@@ -80,7 +80,7 @@ jobs:
 
   test:
     docker:
-      - image: golang:1.12
+      - image: golang:1.13
     environment:
       GO111MODULE: "on"
     working_directory: /go/src/github.com/googleapis/gapic-showcase
@@ -128,7 +128,7 @@ jobs:
 
   push-generated-source:
     docker:
-      - image: golang:1.12
+      - image: golang:1.13
     environment:
       GO111MODULE: "on"
     working_directory: /go/src/github.com/googleapis/gapic-showcase
@@ -227,7 +227,7 @@ jobs:
 
   github_release:
     docker:
-      - image: golang:1.12
+      - image: golang:1.13
     environment:
       GOPATH: /go
       GO111MODULE: "on"
