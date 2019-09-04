@@ -1,5 +1,11 @@
 # Release History
 
+### v0.5.0 / 2019-09-04
+- Update to Go version 1.13
+- Update dependencies
+- Add trailers testing support to Echo
+- Fix pagination in operations service
+
 ### v0.4.0 / 2019-08-13
 - Add dummy LRO service
 - Dependency updates
