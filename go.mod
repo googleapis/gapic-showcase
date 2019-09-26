@@ -10,7 +10,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	google.golang.org/api v0.10.0
 	google.golang.org/genproto v0.0.0-20190925194540-b8fbc687dcfb
-	google.golang.org/grpc v1.23.1
+	google.golang.org/grpc v1.24.0
 )
 
 go 1.13
