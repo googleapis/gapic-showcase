@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
+	"path/filepath"
 )
 
 var debugLog *log.Logger
@@ -37,7 +39,11 @@ func main() {
 		os.Exit(RetCodeUsageError)
 	}
 
-	allSuites := GetTestSuites(generatorName, viaProtoc)
+	allSuites, err := GetTestSuites(generatorName, viaProtoc)
+	if err != nil {
+		os.Exit(RetCodeInternalError)
+	}
+
 	success := true
 	for _, suite := range allSuites {
 		if err := suite.Run(); err != nil {
@@ -66,22 +72,47 @@ func getGeneratorData() (string, bool, error) {
 	return "python", true, nil
 }
 
-func GetTestSuites(generatorName string, viaProtoc bool) []*Suite {
+// GetTestSuites returns a list of Suite as found in the specified
+// suite root directory.
+func GetTestSuites(generatorName string, viaProtoc bool) ([]*Suite, error) {
+	suiteRootPath := "../../acceptance"
+
+	debugLog.Printf("GetTestSuites: generator=%q   protoc-%v", generatorName, viaProtoc)
 	allSuites := []*Suite{}
-	defaultShowcasePort := 123 // TODO fix
-	// TODO: iterate over test suites
-	// TODO: get files in each suite
-	suiteFiles := []string{""}
-	newSuite := &Suite{
-		showcasePort: defaultShowcasePort,
-		viaProtoc:    viaProtoc,
-		generator:    generatorName,
-		files:        suiteFiles,
-		debugLog:     debugLog,
+	suiteEntries, err := ioutil.ReadDir(suiteRootPath)
+	if err != nil {
+		return nil, err
 	}
-	debugLog.Printf("adding suite %#v", newSuite)
-	allSuites = append(allSuites, newSuite)
-	return allSuites
+
+	for _, suiteDir := range suiteEntries {
+		if !suiteDir.IsDir() {
+			continue
+		}
+		name := suiteDir.Name()
+		location, err := filepath.Abs(path.Join(suiteRootPath, name))
+		if err != nil {
+			return nil, err
+		}
+
+		suiteFiles, err := getAllFiles(location)
+		if err != nil {
+			return nil, err
+		}
+
+		defaultShowcasePort := 123 // TODO fix
+		newSuite := &Suite{
+			name:         name,
+			location:     location,
+			showcasePort: defaultShowcasePort,
+			viaProtoc:    viaProtoc,
+			generator:    generatorName,
+			files:        suiteFiles,
+			debugLog:     debugLog,
+		}
+		debugLog.Printf("adding suite %#v", newSuite)
+		allSuites = append(allSuites, newSuite)
+	}
+	return allSuites, nil
 }
 
 // startShowcase starts the Showcase server and returns its PID
@@ -95,4 +126,23 @@ func startShowcase() int {
 func endProcess(pid int) {
 	// TODO: fill in
 	debugLog.Printf("endProcess (TODO): %v", pid)
+}
+
+// getAllFiles returns a list of all the files (excluding directories)
+// at any level under `root`.
+func getAllFiles(root string) ([]string, error) {
+	debugLog.Printf("getAllFiles: root=%q", root)
+	allFiles := []string{}
+	err := filepath.Walk(root,
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info.IsDir() {
+				return nil
+			}
+			allFiles = append(allFiles, path)
+			return nil
+		})
+	return allFiles, err
 }
