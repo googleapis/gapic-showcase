@@ -68,9 +68,9 @@ service Echo {
     };
   }
 
-  // This method, upon receiving a request on the stream, the same content will
-  // be passed  back on the stream. This method showcases bidirectional
-  // streaming rpcs.
+  // This method, upon receiving a request on the stream, will pass
+  // the same content back on the stream. This method showcases
+  // bidirectional streaming rpcs.
   rpc Chat(stream EchoRequest) returns (stream EchoResponse);
 
   // This is similar to the Expand method but instead of returning a stream of

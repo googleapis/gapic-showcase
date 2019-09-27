@@ -20,7 +20,7 @@ import (
 
 // This script regenerates all of the generated source code for the Showcase
 // API including the generated messages, gRPC services, go gapic clients,
-// and the generated CLI. This script must be ran from the root directory
+// and the generated CLI. This script must be run from the root directory
 // of the gapic-showcase repository.
 //
 // This script should be used whenever any changes are made to any of
