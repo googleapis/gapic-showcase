@@ -7,6 +7,7 @@ type Suite struct {
 	location string
 	files    []string
 	sandbox  string
+	debugLog *log.Logger
 
 	generator    string
 	showcasePort int
@@ -23,21 +24,21 @@ func (suite *Suite) Run() error {
 }
 
 func (suite *Suite) Generate() error {
-	protos, gapic_yamls, sample_yamls := getGenerationFiles(suite.files)
+	protos, gapic_yamls, sample_yamls := suite.getGenerationFiles(suite.files)
 	suite.sandbox = createSandbox()
 
-	log.Printf("Generate (TODO): protos: %v    gapic_yamls: %v    sample_yamls: %v", protos, gapic_yamls, sample_yamls)
+	suite.debugLog.Printf("Generate (TODO): protos: %v    gapic_yamls: %v    sample_yamls: %v", protos, gapic_yamls, sample_yamls)
 	return nil
 }
 
 func (suite *Suite) CheckGeneration() {
 	// TODO: Fill in
-	log.Printf("CheckGeneration (TODO)")
+	suite.debugLog.Printf("CheckGeneration (TODO)")
 }
 
 func (suite *Suite) RunTests() {
 	// TODO: Fill in
-	log.Printf("RunTests (TODO)")
+	suite.debugLog.Printf("RunTests (TODO)")
 }
 
 func (suite *Suite) Success() bool {
@@ -45,12 +46,12 @@ func (suite *Suite) Success() bool {
 	return true
 }
 
-func getGenerationFiles(paths []string) (protos, gapic_yamls, sample_yamls []string) {
+func (suite *Suite) getGenerationFiles(paths []string) (protos, gapic_yamls, sample_yamls []string) {
 	// TODO: extract all protos
 	// TODO: extract all gapic configs
 	// TODO: extract all sample_configs
 
-	log.Printf("getGenerationFiles (TODO)")
+	suite.debugLog.Printf("getGenerationFiles (TODO)")
 	return nil, nil, nil
 }
 

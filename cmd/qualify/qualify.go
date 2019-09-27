@@ -1,9 +1,13 @@
 package main
 
 import (
+	"io"
+	"io/ioutil"
 	"log"
 	"os"
 )
+
+var debugLog *log.Logger
 
 func main() {
 	const (
@@ -13,6 +17,13 @@ func main() {
 		RetCodeInternalError
 		RetSuiteFailure
 	)
+
+	debugMe := true // TODO: get from CLI args
+	debugStream := io.Writer(os.Stderr)
+	if !debugMe {
+		debugStream = ioutil.Discard
+	}
+	debugLog = log.New(debugStream, "DEBUG: ", log.Ldate|log.Ltime|log.Lshortfile)
 
 	if err := checkDependencies(); err != nil {
 		os.Exit(RetCodeFailedDependencies)
@@ -43,7 +54,7 @@ func main() {
 
 func checkDependencies() error {
 	// TODO: add check for sample-tester
-	log.Printf("checkDependencies (TODO)")
+	debugLog.Printf("checkDependencies (TODO)")
 	return nil
 }
 
@@ -66,8 +77,9 @@ func GetTestSuites(generatorName string, viaProtoc bool) []*Suite {
 		viaProtoc:    viaProtoc,
 		generator:    generatorName,
 		files:        suiteFiles,
+		debugLog:     debugLog,
 	}
-	log.Printf("adding suite %#v", newSuite)
+	debugLog.Printf("adding suite %#v", newSuite)
 	allSuites = append(allSuites, newSuite)
 	return allSuites
 }
@@ -75,12 +87,12 @@ func GetTestSuites(generatorName string, viaProtoc bool) []*Suite {
 // startShowcase starts the Showcase server and returns its PID
 func startShowcase() int {
 	// TODO: fill in
-	log.Printf("startShowcase (TODO)")
+	debugLog.Printf("startShowcase (TODO)")
 	return 0
 }
 
 // endProcess ends the process with the specified PID
 func endProcess(pid int) {
 	// TODO: fill in
-	log.Printf("endProcess (TODO): %v", pid)
+	debugLog.Printf("endProcess (TODO): %v", pid)
 }
