@@ -22,12 +22,15 @@ go run qualify.go suite.go
 
 var debugLog *log.Logger
 
+const showcaseCmd = "gapic-showcase"
+
 func main() {
 	const (
 		RetCodeSuccess = iota
+		RetCodeInternalError
 		RetCodeFailedDependencies
 		RetCodeUsageError
-		RetCodeInternalError
+		RetCodeCantRunShowcase
 		RetSuiteFailure
 	)
 
@@ -42,8 +45,11 @@ func main() {
 		os.Exit(RetCodeFailedDependencies)
 	}
 
-	showcasePID := startShowcase()
-	defer endProcess(showcasePID)
+	showcase, err := startShowcase()
+	if err != nil {
+		os.Exit(RetCodeCantRunShowcase)
+	}
+	defer endProcess(showcase)
 
 	generatorName, viaProtoc, err := getGeneratorData()
 	if err != nil {
@@ -71,10 +77,9 @@ func main() {
 
 func checkDependencies() error {
 	// TODO: add check for sample-tester
-	showcaseCmd := "gapic-showcase"
 	sampleTesterCmd := "sample-tester"
 	notFound := []string{}
-	debugLog.Printf("checkDependencies")
+	debugLog.Printf("checkDependencies()")
 
 	showcasePath, err := exec.LookPath(showcaseCmd)
 	if err != nil {
@@ -109,7 +114,7 @@ func getGeneratorData() (string, bool, error) {
 func GetTestSuites(generatorName string, viaProtoc bool) ([]*Suite, error) {
 	suiteRootPath := "../../acceptance"
 
-	debugLog.Printf("GetTestSuites: generator=%q   protoc-%v", generatorName, viaProtoc)
+	debugLog.Printf("GetTestSuites(generator=%q, protoc=%v)", generatorName, viaProtoc)
 	allSuites := []*Suite{}
 	suiteEntries, err := ioutil.ReadDir(suiteRootPath)
 	if err != nil {
@@ -148,22 +153,39 @@ func GetTestSuites(generatorName string, viaProtoc bool) ([]*Suite, error) {
 }
 
 // startShowcase starts the Showcase server and returns its PID
-func startShowcase() int {
+func startShowcase() (*exec.Cmd, error) {
 	// TODO: fill in
-	debugLog.Printf("startShowcase (TODO)")
-	return 0
+	debugLog.Printf("startShowcase()")
+	cmd := exec.Command(showcaseCmd)
+	err := cmd.Start()
+	return cmd, err
 }
 
 // endProcess ends the process with the specified PID
-func endProcess(pid int) {
+func endProcess(cmd *exec.Cmd) error {
 	// TODO: fill in
-	debugLog.Printf("endProcess (TODO): %v", pid)
+	debugLog.Printf("endProcess(%v)", cmd)
+	process := cmd.Process
+	if err := process.Signal(os.Interrupt); err != nil {
+		msg := fmt.Sprintf("could not end process %v normally", process.Pid)
+		if err := process.Kill(); err != nil {
+			msg = fmt.Sprintf("%s; killing failed. Please kill manually!", msg)
+			log.Printf(msg)
+			return fmt.Errorf(msg)
+		}
+		msg = fmt.Sprintf("%s but killing it succeeded", msg)
+		log.Printf(msg)
+	}
+	debugLog.Printf("waiting for process to end: %v (%v)", process.Pid, cmd.Path)
+	cmd.Wait()
+	debugLog.Printf("process ended:              %v (%v) ended", process.Pid, cmd.Path)
+	return nil
 }
 
 // getAllFiles returns a list of all the files (excluding directories)
 // at any level under `root`.
 func getAllFiles(root string) ([]string, error) {
-	debugLog.Printf("getAllFiles: root=%q", root)
+	debugLog.Printf("getAllFiles(root=%q)", root)
 	allFiles := []string{}
 	err := filepath.Walk(root,
 		func(path string, info os.FileInfo, err error) error {
