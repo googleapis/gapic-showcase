@@ -1,13 +1,24 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 )
+
+/* Development instructions
+
+. ./prepare-t-qualify
+
+=== Sample run ======
+go run qualify.go suite.go
+
+*/
 
 var debugLog *log.Logger
 
@@ -60,7 +71,28 @@ func main() {
 
 func checkDependencies() error {
 	// TODO: add check for sample-tester
-	debugLog.Printf("checkDependencies (TODO)")
+	showcaseCmd := "gapic-showcase"
+	sampleTesterCmd := "sample-tester"
+	notFound := []string{}
+	debugLog.Printf("checkDependencies")
+
+	showcasePath, err := exec.LookPath(showcaseCmd)
+	if err != nil {
+		notFound = append(notFound, showcaseCmd)
+	}
+
+	sampleTesterPath, err := exec.LookPath(sampleTesterCmd)
+	if err != nil {
+		notFound = append(notFound, sampleTesterCmd)
+	}
+
+	if len(notFound) > 0 {
+		msg := fmt.Sprintf("could not find dependencies in $PATH: %q", notFound)
+		log.Printf(msg)
+		return fmt.Errorf(msg)
+	}
+	debugLog.Printf("found %q: %s", showcaseCmd, showcasePath)
+	debugLog.Printf("found %q: %s", sampleTesterCmd, sampleTesterPath)
 	return nil
 }
 

@@ -1,0 +1,36 @@
+#!/bin/bash
+VENV_NAME=venv/qualify
+DATE=$(date +'%Y-%m-%d.%H-%M')
+
+verify() {
+  name=$1
+  $name --version  >& /dev/null || { echo "Please install $name to continue" ; return 2 ; }  
+}
+
+verify python3
+verify pip
+verify curl
+
+INSTALL_DIR=${1:-$(mktemp -d -t qualify.${DATE}.XXXXXX)}
+pushd ${INSTALL_DIR} >& /dev/null
+
+
+VENV_CREATE="python3 -m venv $VENV_NAME"
+SHOWCASE_SEMVER=0.1.0
+HOST_OS=$(go env GOHOSTOS)
+HOST_ARCH=$(go env GOHOSTARCH)
+
+echo '=== creating venv'  && \
+  ${VENV_CREATE} || { python3 -m pip install virtualenv && ${VENV_ACTIVATE} ; } && \
+  echo "=== activating venv"  && \
+  . ${VENV_NAME}/bin/activate && \
+  echo "=== installing pip" && \
+  pip install sample-tester && \
+  echo "=== installing showcase" && \
+  curl -sSL  https://github.com/googleapis/gapic-showcase/releases/download/v${SHOWCASE_SEMVER}/gapic-showcase-${SHOWCASE_SEMVER}-${HOST_OS}-${HOST_ARCH}.tar.gz | tar xz &&
+  export PATH=$(pwd):${PATH}
+
+
+popd >& /dev/null
+echo -e "\nInstalled in: ${INSTALL_DIR}"
+
