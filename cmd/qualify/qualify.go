@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
+
+	trace "github.com/google/go-trace"
 )
 
 /* Development instructions
@@ -25,7 +26,7 @@ https://github.com/go-bindata/go-bindata
 https://github.com/gobuffalo/packr
 Choosing: https://tech.townsourced.com/post/embedding-static-files-in-go/
 
-var debugLog *log.Logger
+*/
 
 const showcaseCmd = "gapic-showcase" // TODO: Consider running in-process
 
@@ -40,11 +41,9 @@ func main() {
 	)
 
 	debugMe := true // TODO: get from CLI args
-	debugStream := io.Writer(os.Stderr)
-	if !debugMe {
-		debugStream = ioutil.Discard
+	if debugMe {
+		trace.On(true)
 	}
-	debugLog = log.New(debugStream, "DEBUG: ", log.Ldate|log.Ltime|log.Lshortfile)
 
 	if err := checkDependencies(); err != nil {
 		os.Exit(RetCodeFailedDependencies)
@@ -84,7 +83,7 @@ func checkDependencies() error {
 	// TODO: add check for sample-tester
 	sampleTesterCmd := "sample-tester"
 	notFound := []string{}
-	debugLog.Printf("checkDependencies()")
+	trace.Trace("")
 
 	showcasePath, err := exec.LookPath(showcaseCmd)
 	if err != nil {
@@ -101,8 +100,8 @@ func checkDependencies() error {
 		log.Printf(msg)
 		return fmt.Errorf(msg)
 	}
-	debugLog.Printf("found %q: %s", showcaseCmd, showcasePath)
-	debugLog.Printf("found %q: %s", sampleTesterCmd, sampleTesterPath)
+	trace.Trace("found %q: %s", showcaseCmd, showcasePath)
+	trace.Trace("found %q: %s", sampleTesterCmd, sampleTesterPath)
 	return nil
 }
 
@@ -119,7 +118,7 @@ func getGeneratorData() (string, bool, error) {
 func GetTestSuites(generatorName string, viaProtoc bool) ([]*Suite, error) {
 	suiteRootPath := "../../acceptance"
 
-	debugLog.Printf("GetTestSuites(generator=%q, protoc=%v)", generatorName, viaProtoc)
+	trace.Trace("(generator=%q, protoc=%v)", generatorName, viaProtoc)
 	allSuites := []*Suite{}
 	suiteEntries, err := ioutil.ReadDir(suiteRootPath)
 	if err != nil {
@@ -149,9 +148,8 @@ func GetTestSuites(generatorName string, viaProtoc bool) ([]*Suite, error) {
 			viaProtoc:    viaProtoc,
 			generator:    generatorName,
 			files:        suiteFiles,
-			debugLog:     debugLog,
 		}
-		debugLog.Printf("adding suite %#v", newSuite)
+		trace.Trace("adding suite %#v", newSuite)
 		allSuites = append(allSuites, newSuite)
 	}
 	return allSuites, nil
@@ -160,7 +158,7 @@ func GetTestSuites(generatorName string, viaProtoc bool) ([]*Suite, error) {
 // startShowcase starts the Showcase server and returns its PID
 func startShowcase() (*exec.Cmd, error) {
 	// TODO: fill in
-	debugLog.Printf("startShowcase()")
+	trace.Trace("")
 	cmd := exec.Command(showcaseCmd)
 	err := cmd.Start()
 	return cmd, err
@@ -169,7 +167,7 @@ func startShowcase() (*exec.Cmd, error) {
 // endProcess ends the process with the specified PID
 func endProcess(cmd *exec.Cmd) error {
 	// TODO: fill in
-	debugLog.Printf("endProcess(%v)", cmd)
+	trace.Trace("cmd=%v)", cmd)
 	process := cmd.Process
 	if err := process.Signal(os.Interrupt); err != nil {
 		msg := fmt.Sprintf("could not end process %v normally", process.Pid)
@@ -181,16 +179,16 @@ func endProcess(cmd *exec.Cmd) error {
 		msg = fmt.Sprintf("%s but killing it succeeded", msg)
 		log.Printf(msg)
 	}
-	debugLog.Printf("waiting for process to end: %v (%v)", process.Pid, cmd.Path)
+	trace.Trace("waiting for process to end: %v (%v)", process.Pid, cmd.Path)
 	cmd.Wait()
-	debugLog.Printf("process ended:              %v (%v) ended", process.Pid, cmd.Path)
+	trace.Trace("process ended:              %v (%v) ended", process.Pid, cmd.Path)
 	return nil
 }
 
 // getAllFiles returns a list of all the files (excluding directories)
 // at any level under `root`.
 func getAllFiles(root string) ([]string, error) {
-	debugLog.Printf("getAllFiles(root=%q)", root)
+	trace.Trace("root=%q", root)
 	allFiles := []string{}
 	err := filepath.Walk(root,
 		func(path string, info os.FileInfo, err error) error {

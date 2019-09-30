@@ -1,13 +1,14 @@
 package main
 
-import "log"
+import (
+	trace "github.com/google/go-trace"
+)
 
 type Suite struct {
 	name     string
 	location string
 	files    []string
 	sandbox  string
-	debugLog *log.Logger
 
 	generator    string
 	showcasePort int
@@ -27,18 +28,18 @@ func (suite *Suite) Generate() error {
 	protos, gapic_yamls, sample_yamls := suite.getGenerationFiles(suite.files)
 	suite.sandbox = createSandbox()
 
-	suite.debugLog.Printf("Generate (TODO): protos: %v    gapic_yamls: %v    sample_yamls: %v", protos, gapic_yamls, sample_yamls)
+	trace.Trace("Generate (TODO): protos: %v    gapic_yamls: %v    sample_yamls: %v", protos, gapic_yamls, sample_yamls)
 	return nil
 }
 
 func (suite *Suite) CheckGeneration() {
 	// TODO: Fill in
-	suite.debugLog.Printf("CheckGeneration (TODO)")
+	trace.Trace("CheckGeneration (TODO)")
 }
 
 func (suite *Suite) RunTests() {
 	// TODO: Fill in
-	suite.debugLog.Printf("RunTests (TODO)")
+	trace.Trace("RunTests (TODO)")
 }
 
 func (suite *Suite) Success() bool {
@@ -51,7 +52,7 @@ func (suite *Suite) getGenerationFiles(paths []string) (protos, gapic_yamls, sam
 	// TODO: extract all gapic configs
 	// TODO: extract all sample_configs
 
-	suite.debugLog.Printf("getGenerationFiles (TODO)")
+	trace.Trace("getGenerationFiles (TODO)")
 	return nil, nil, nil
 }
 
