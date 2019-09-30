@@ -13,16 +13,21 @@ import (
 
 /* Development instructions
 
-. ./prepare-t-qualify
+. ./prepare-to-qualify
 
 === Sample run ======
 go run qualify.go suite.go
 
-*/
+Notes for upcoming development:
+packing assets into Go files:
+https://www.google.com/search?q=golang+ship+data+files+with+binary&oq=golang+ship+data+files+with+binary
+https://github.com/go-bindata/go-bindata
+https://github.com/gobuffalo/packr
+Choosing: https://tech.townsourced.com/post/embedding-static-files-in-go/
 
 var debugLog *log.Logger
 
-const showcaseCmd = "gapic-showcase"
+const showcaseCmd = "gapic-showcase" // TODO: Consider running in-process
 
 func main() {
 	const (
