@@ -80,7 +80,6 @@ func main() {
 }
 
 func checkDependencies() error {
-	// TODO: add check for sample-tester
 	sampleTesterCmd := "sample-tester"
 	notFound := []string{}
 	trace.Trace("")
@@ -105,7 +104,7 @@ func checkDependencies() error {
 	return nil
 }
 
-// getGeneratorData obtains the name of the generaor from the command
+// getGeneratorData obtains the name of the generator from the command
 // line, and whether it is a protoc plugin (if not, it is considered
 // part of the monolith)
 func getGeneratorData() (string, bool, error) {

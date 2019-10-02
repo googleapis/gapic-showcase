@@ -1,14 +1,21 @@
 package main
 
 import (
+	"bytes"
+	"io"
+	"io/ioutil"
+	"path/filepath"
+
 	trace "github.com/google/go-trace"
+	yaml "gopkg.in/yaml.v2"
 )
 
 type Suite struct {
-	name     string
-	location string
-	files    []string
-	sandbox  string
+	name        string
+	location    string
+	files       []string
+	sandbox     string
+	filesByType map[string][]string
 
 	generator    string
 	showcasePort int
@@ -25,10 +32,12 @@ func (suite *Suite) Run() error {
 }
 
 func (suite *Suite) Generate() error {
-	protos, gapic_yamls, sample_yamls := suite.getGenerationFiles(suite.files)
+	if err := suite.getGenerationFiles(); err != nil {
+		return err
+	}
 	suite.sandbox = createSandbox()
 
-	trace.Trace("Generate (TODO): protos: %v    gapic_yamls: %v    sample_yamls: %v", protos, gapic_yamls, sample_yamls)
+	trace.Trace("Generate (TODO)")
 	return nil
 }
 
@@ -47,13 +56,56 @@ func (suite *Suite) Success() bool {
 	return true
 }
 
-func (suite *Suite) getGenerationFiles(paths []string) (protos, gapic_yamls, sample_yamls []string) {
-	// TODO: extract all protos
-	// TODO: extract all gapic configs
-	// TODO: extract all sample_configs
+func (suite *Suite) getGenerationFiles() (err error) {
+	suite.filesByType = make(map[string][]string)
+	for _, thisFile := range suite.files {
+		extension := filepath.Ext(thisFile)
+		var fileTypes []string
+		switch extension {
 
-	trace.Trace("getGenerationFiles (TODO)")
-	return nil, nil, nil
+		case ".proto":
+			fileTypes = []string{"proto"}
+		case ".yaml", ".yml":
+			trace.Trace("reading %s", thisFile)
+			content, err := ioutil.ReadFile(thisFile)
+			if err != nil {
+				trace.Trace("error reading: %s", err)
+				return err
+			}
+			fileTypes, err = yamlDocTypes(content)
+			if err != nil {
+				return err
+			}
+		}
+
+		for _, oneType := range fileTypes {
+			similarFiles := suite.filesByType[oneType]
+			suite.filesByType[oneType] = append(similarFiles, thisFile)
+			trace.Trace("%s: type %q", thisFile, oneType)
+		}
+	}
+	return nil
+}
+
+func yamlDocTypes(fileContent []byte) (docTypes []string, err error) {
+	type docSchema struct {
+		Type string
+	}
+
+	decoder := yaml.NewDecoder(bytes.NewReader(fileContent))
+	for {
+		doc := &docSchema{Type: "(UNKNOWN)"}
+		err = decoder.Decode(doc)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			trace.Trace("error decoding: %s", err)
+			return
+		}
+		docTypes = append(docTypes, doc.Type)
+	}
+	return docTypes, nil
 }
 
 func createSandbox() string {
