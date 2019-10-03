@@ -25,11 +25,11 @@ import (
 )
 
 // This script is ran in CI when a new version tag is pushed to master. This script
-// places the compiled proto descriptor set, a tarball of showcase-protos alongside it's
+// places the compiled proto descriptor set, a tarball of showcase-protos alongside its
 // dependencies, and the compiled executables of the gapic-showcase cli tool inside the
 // directory "dist"
 //
-// This script must be ran from the root directory of the gapic-showcase repository.
+// This script must be run from the root directory of the gapic-showcase repository.
 //
 // Usage: go run ./util/cmd/release
 func main() {

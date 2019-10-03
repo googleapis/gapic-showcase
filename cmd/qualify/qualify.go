@@ -17,7 +17,7 @@ import (
 . ./prepare-to-qualify
 
 === Sample run ======
-go run qualify.go suite.go
+go run *.go
 
 Notes for upcoming development:
 packing assets into Go files:
@@ -55,12 +55,12 @@ func main() {
 	}
 	defer endProcess(showcase)
 
-	generatorName, viaProtoc, err := getGeneratorData()
+	generatorData, err := getGeneratorData()
 	if err != nil {
 		os.Exit(RetCodeUsageError)
 	}
 
-	allSuites, err := GetTestSuites(generatorName, viaProtoc)
+	allSuites, err := GetTestSuites(generatorData)
 	if err != nil {
 		os.Exit(RetCodeInternalError)
 	}
@@ -107,17 +107,25 @@ func checkDependencies() error {
 // getGeneratorData obtains the name of the generator from the command
 // line, and whether it is a protoc plugin (if not, it is considered
 // part of the monolith)
-func getGeneratorData() (string, bool, error) {
-	// TODO: Get from the command line
-	return "python", true, nil
+func getGeneratorData() (*GeneratorInfo, error) {
+	pluginName := "go"                                                                 // TODO: get from CLI args
+	pluginDir := "/tmp/goinstall/bin"                                                  // TODO: get from CLI args
+	pluginOpt := "'go-gapic-package=cloud.google.com/go/showcase/apiv1beta1;showcase'" // TODO: get from CLI args
+	generator := &GeneratorInfo{
+		name:    pluginName,
+		dir:     pluginDir,
+		options: pluginOpt,
+	}
+	trace.Trace("hard-coded generator=%#v", generator)
+	return generator, nil
 }
 
 // GetTestSuites returns a list of Suite as found in the specified
 // suite root directory.
-func GetTestSuites(generatorName string, viaProtoc bool) ([]*Suite, error) {
+func GetTestSuites(generator *GeneratorInfo) ([]*Suite, error) {
 	suiteRootPath := "../../acceptance"
 
-	trace.Trace("(generator=%q, protoc=%v)", generatorName, viaProtoc)
+	trace.Trace("(generator=%#v)", generator)
 	allSuites := []*Suite{}
 	suiteEntries, err := ioutil.ReadDir(suiteRootPath)
 	if err != nil {
@@ -144,8 +152,7 @@ func GetTestSuites(generatorName string, viaProtoc bool) ([]*Suite, error) {
 			name:         name,
 			location:     location,
 			showcasePort: defaultShowcasePort,
-			viaProtoc:    viaProtoc,
-			generator:    generatorName,
+			generator:    generator,
 			files:        suiteFiles,
 		}
 		trace.Trace("adding suite %#v", newSuite)

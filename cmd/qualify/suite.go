@@ -17,9 +17,8 @@ type Suite struct {
 	sandbox     string
 	filesByType map[string][]string
 
-	generator    string
+	generator    *GeneratorInfo
 	showcasePort int
-	viaProtoc    bool
 }
 
 func (suite *Suite) Run() error {

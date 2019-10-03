@@ -1,0 +1,16 @@
+---
+type: sampleconfig
+schema_version: 2
+---
+type: test/sample
+schema_version: 1
+---
+type: inventory
+widget: "$expensive"
+---
+elements:
+  - hydrogen
+  - oxygen
+---
+type: sample/other
+tool: my_yaml

@@ -7,11 +7,12 @@ go build ../gapic-showcase/
 
 verify() {
   name=$1
-  $name --version  >& /dev/null || { echo "Please install $name to continue" ; return 2 ; }  
+  msg=$2
+  $name --version  >& /dev/null || { echo "Please install $name to continue. $2" ; return 2 ; }  
 }
 
 verify python3 || return $?
-# verify protoc || return $?
+verify protoc "See https://github.com/protocolbuffers/protobuf/releases" || return $?
 verify pip || return $?
 verify curl || return $?
 
@@ -35,3 +36,10 @@ echo '=== creating venv'  && \
 popd >& /dev/null
 echo -e "\nInstalled in: ${GAPIC_QUALIFY_DIR}"
 
+# To get the Go plugin to work:
+#
+# VC_PROTO_PATH=/home/vchudnov/Work/ACTools/gapic-showcase/acceptance/passing
+# GO_PLUGIN_DIR=/tmp/goinstall
+# mkdir ${GO_PLUGIN_DIR}
+# GOPATH=${GO_PLUGIN_DIR} go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic
+# protoc --go_gapic_out ./gen --go_gapic_opt 'go-gapic-package=cloud.google.com/go/showcase/apiv1beta1;showcase' --plugin=${GO_PLUGIN_DIR}/bin/protoc-gen-go_gapic --proto_path=${VC_PROTO_PATH} ${VC_PROTO_PATH}/echo.proto
