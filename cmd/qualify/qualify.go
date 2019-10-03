@@ -35,7 +35,7 @@ func main() {
 		RetCodeFailedDependencies
 		RetCodeUsageError
 		RetCodeCantRunShowcase
-		RetSuiteFailure
+		RetScenarioFailure
 	)
 
 	debugMe := true // TODO: get from CLI args
@@ -58,22 +58,22 @@ func main() {
 		os.Exit(RetCodeUsageError)
 	}
 
-	allSuites, err := GetTestSuites(generatorData)
+	allScenarios, err := GetTestScenarios(generatorData)
 	if err != nil {
 		os.Exit(RetCodeInternalError)
 	}
 
 	success := true
-	for _, suite := range allSuites {
-		if err := suite.Run(); err != nil {
+	for _, scenario := range allScenarios {
+		if err := scenario.Run(); err != nil {
 			os.Exit(RetCodeInternalError)
 		}
-		if !suite.Success() {
+		if !scenario.Success() {
 			success = false
 		}
 	}
 	if !success {
-		os.Exit(RetSuiteFailure)
+		os.Exit(RetScenarioFailure)
 	}
 }
 
@@ -119,24 +119,24 @@ func getGeneratorData() (*GeneratorInfo, error) {
 	return generator, nil
 }
 
-// GetTestSuites returns a list of Suite as found in the specified
-// suite root directory.
-func GetTestSuites(generator *GeneratorInfo) ([]*Suite, error) {
-	allSuites := []*Suite{}
-	allSuiteConfigs := GetFilesByDir(AcceptanceSuite)
-	for _, config := range allSuiteConfigs {
+// GetTestScenarios returns a list of Scenario as found in the specified
+// scenario root directory.
+func GetTestScenarios(generator *GeneratorInfo) ([]*Scenario, error) {
+	allScenarios := []*Scenario{}
+	allScenarioConfigs := GetFilesByDir(AcceptanceSuite)
+	for _, config := range allScenarioConfigs {
 		defaultShowcasePort := 123 // TODO fix
-		newSuite := &Suite{
-			name: config.Directory,
-			//			location:     location,
+		newScenario := &Scenario{
+			name:         config.Directory,
 			showcasePort: defaultShowcasePort,
 			generator:    generator,
 			files:        config.Files,
+			fileBox:      AcceptanceSuite,
 		}
-		trace.Trace("adding suite %#v", newSuite)
-		allSuites = append(allSuites, newSuite)
+		trace.Trace("adding scenario %#v", newScenario)
+		allScenarios = append(allScenarios, newScenario)
 	}
-	return allSuites, nil
+	return allScenarios, nil
 }
 
 // startShowcase starts the Showcase server and returns its PID

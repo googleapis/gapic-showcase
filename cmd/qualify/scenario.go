@@ -6,14 +6,15 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	packr "github.com/gobuffalo/packr/v2"
 	trace "github.com/google/go-trace"
 	yaml "gopkg.in/yaml.v2"
 )
 
-type Suite struct {
+type Scenario struct {
 	name        string
-	location    string
 	files       []string
+	fileBox     *packr.Box
 	sandbox     string
 	filesByType map[string][]string
 
@@ -21,43 +22,43 @@ type Suite struct {
 	showcasePort int
 }
 
-func (suite *Suite) Run() error {
-	if err := suite.Generate(); err != nil {
+func (scenario *Scenario) Run() error {
+	if err := scenario.Generate(); err != nil {
 		return err
 	}
-	suite.CheckGeneration()
-	suite.RunTests()
+	scenario.CheckGeneration()
+	scenario.RunTests()
 	return nil
 }
 
-func (suite *Suite) Generate() error {
-	if err := suite.getGenerationFiles(); err != nil {
+func (scenario *Scenario) Generate() error {
+	if err := scenario.getGenerationFiles(); err != nil {
 		return err
 	}
-	suite.sandbox = createSandbox()
+	scenario.sandbox = createSandbox()
 
 	trace.Trace("Generate (TODO)")
 	return nil
 }
 
-func (suite *Suite) CheckGeneration() {
+func (scenario *Scenario) CheckGeneration() {
 	// TODO: Fill in
 	trace.Trace("CheckGeneration (TODO)")
 }
 
-func (suite *Suite) RunTests() {
+func (scenario *Scenario) RunTests() {
 	// TODO: Fill in
 	trace.Trace("RunTests (TODO)")
 }
 
-func (suite *Suite) Success() bool {
+func (scenario *Scenario) Success() bool {
 	// TODO: fill in
 	return true
 }
 
-func (suite *Suite) getGenerationFiles() (err error) {
-	suite.filesByType = make(map[string][]string)
-	for _, thisFile := range suite.files {
+func (scenario *Scenario) getGenerationFiles() (err error) {
+	scenario.filesByType = make(map[string][]string)
+	for _, thisFile := range scenario.files {
 		extension := filepath.Ext(thisFile)
 		var fileTypes []string
 		switch extension {
@@ -78,8 +79,8 @@ func (suite *Suite) getGenerationFiles() (err error) {
 		}
 
 		for _, oneType := range fileTypes {
-			similarFiles := suite.filesByType[oneType]
-			suite.filesByType[oneType] = append(similarFiles, thisFile)
+			similarFiles := scenario.filesByType[oneType]
+			scenario.filesByType[oneType] = append(similarFiles, thisFile)
 			trace.Trace("%s: type %q", thisFile, oneType)
 		}
 	}
