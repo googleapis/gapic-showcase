@@ -2,11 +2,9 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 
 	trace "github.com/google/go-trace"
@@ -41,9 +39,9 @@ func main() {
 	)
 
 	debugMe := true // TODO: get from CLI args
-	if debugMe {
-		trace.On(true)
-	}
+	trace.On(debugMe)
+
+	GetAssets()
 
 	if err := checkDependencies(); err != nil {
 		os.Exit(RetCodeFailedDependencies)
@@ -84,6 +82,7 @@ func checkDependencies() error {
 	notFound := []string{}
 	trace.Trace("")
 
+	// TODO: Run from this repo, rather than requiring external dependency
 	showcasePath, err := exec.LookPath(showcaseCmd)
 	if err != nil {
 		notFound = append(notFound, showcaseCmd)
@@ -123,37 +122,16 @@ func getGeneratorData() (*GeneratorInfo, error) {
 // GetTestSuites returns a list of Suite as found in the specified
 // suite root directory.
 func GetTestSuites(generator *GeneratorInfo) ([]*Suite, error) {
-	suiteRootPath := "../../acceptance"
-
-	trace.Trace("(generator=%#v)", generator)
 	allSuites := []*Suite{}
-	suiteEntries, err := ioutil.ReadDir(suiteRootPath)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, suiteDir := range suiteEntries {
-		if !suiteDir.IsDir() {
-			continue
-		}
-		name := suiteDir.Name()
-		location, err := filepath.Abs(path.Join(suiteRootPath, name))
-		if err != nil {
-			return nil, err
-		}
-
-		suiteFiles, err := getAllFiles(location)
-		if err != nil {
-			return nil, err
-		}
-
+	allSuiteConfigs := GetFilesByDir(AcceptanceSuite)
+	for _, config := range allSuiteConfigs {
 		defaultShowcasePort := 123 // TODO fix
 		newSuite := &Suite{
-			name:         name,
-			location:     location,
+			name: config.Directory,
+			//			location:     location,
 			showcasePort: defaultShowcasePort,
 			generator:    generator,
-			files:        suiteFiles,
+			files:        config.Files,
 		}
 		trace.Trace("adding suite %#v", newSuite)
 		allSuites = append(allSuites, newSuite)
