@@ -37,6 +37,12 @@ func (scenario *Scenario) Generate() error {
 	}
 	scenario.sandbox = createSandbox()
 
+	/* TODO:
+	   - P1. Invoke sample generator with all the protos in the directory
+	   - P2. when creating sandbox, expand files of the form `include.FOO` to be file/dir FOO/ with contents cloned from the location specified in the file
+	        can be a path rooted at schema/
+	        can be an http: which is curled
+	*/
 	trace.Trace("Generate (TODO)")
 	return nil
 }
@@ -58,6 +64,7 @@ func (scenario *Scenario) Success() bool {
 
 func (scenario *Scenario) getGenerationFiles() (err error) {
 	scenario.filesByType = make(map[string][]string)
+	// TODO: process `include.*` files first
 	for _, thisFile := range scenario.files {
 		extension := filepath.Ext(thisFile)
 		var fileTypes []string
@@ -110,5 +117,6 @@ func yamlDocTypes(fileContent []byte) (docTypes []string, err error) {
 
 func createSandbox() string {
 	// TODO: make a temporary directory that can be deleted
+	// TODO: expand `include.*` files (passed in as params)
 	return "/tmp"
 }
