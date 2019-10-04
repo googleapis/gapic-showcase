@@ -34,7 +34,7 @@ func GetFilesByDir(box *packr.Box) []*FilesByDir {
 	}
 
 	// We assume allFiles is returned in a top-down order, so that
-	// all files under each first level directry appear
+	// all files under each first level directory appear
 	// contiguously.
 	allFiles := box.List()
 	previousDir := ""

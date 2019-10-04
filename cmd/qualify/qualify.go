@@ -40,6 +40,7 @@ func main() {
 
 	debugMe := true // TODO: get from CLI args
 	trace.On(debugMe)
+	trace.Trace("timestamp: %s", timestamp)
 
 	GetAssets()
 
