@@ -108,9 +108,9 @@ func checkDependencies() error {
 // line, and whether it is a protoc plugin (if not, it is considered
 // part of the monolith)
 func getGeneratorData() (*GeneratorInfo, error) {
-	pluginName := "go"                                                                 // TODO: get from CLI args
-	pluginDir := "/tmp/goinstall/bin"                                                  // TODO: get from CLI args
-	pluginOpt := "'go-gapic-package=cloud.google.com/go/showcase/apiv1beta1;showcase'" // TODO: get from CLI args
+	pluginName := "go"                                                               // TODO: get from CLI args
+	pluginDir := "/tmp/goinstall/bin"                                                // TODO: get from CLI args
+	pluginOpt := "go-gapic-package=cloud.google.com/go/showcase/apiv1beta1;showcase" // TODO: get from CLI args
 	generator := &GeneratorInfo{
 		name:    pluginName,
 		dir:     pluginDir,

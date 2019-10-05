@@ -23,10 +23,8 @@ func (gi *GeneratorInfo) Run(wdir string, filesByType map[string][]string) ([]by
 	//	allProtos := strings.Join(filesByType["proto"], " ")
 	cmdParts := []string{
 		"protoc",
-		fmt.Sprintf("--%s_gapic_out", gi.name),
-		"./gen",
-		fmt.Sprintf("--%s_gapic_opt", gi.name),
-		gi.options,
+		fmt.Sprintf("--%s_gapic_out", gi.name), "./generated",
+		fmt.Sprintf("--%s_gapic_opt", gi.name), gi.options,
 		fmt.Sprintf("--plugin=%s/protoc-gen-%s_gapic", gi.dir, gi.name),
 	}
 	cmdParts = append(cmdParts, filesByType["proto"]...)
