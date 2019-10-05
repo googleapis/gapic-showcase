@@ -20,7 +20,7 @@ func GetAssets() {
 
 type FilesByDir struct {
 	Directory string
-	Files     []string
+	Files     []string // filenames are relative paths from `Directory`
 }
 
 func GetFilesByDir(box *packr.Box) []*FilesByDir {
@@ -45,7 +45,7 @@ func GetFilesByDir(box *packr.Box) []*FilesByDir {
 			filesInThisDir = &FilesByDir{Directory: dir}
 		}
 		previousDir = dir
-		filesInThisDir.Files = append(filesInThisDir.Files, oneFile)
+		filesInThisDir.Files = append(filesInThisDir.Files, oneFile[len(dir)+len(string(os.PathSeparator)):])
 	}
 	commitThisDir()
 

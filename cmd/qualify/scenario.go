@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	packr "github.com/gobuffalo/packr/v2"
@@ -35,29 +34,29 @@ type Scenario struct {
 	showcasePort int
 }
 
-func (scenario *Scenario) sandboxFileName(srcPath string) string {
+func (scenario *Scenario) sandboxPath(relativePath string) string {
 	if len(scenario.name) == 0 {
-		trace.Trace("scenario name not set yet when trying to get sandbox name for %q!", srcPath)
-		panic("scenario name not set yet when trying to get sandbox name")
+		trace.Trace("scenario name not set yet: relativePath==%q!", relativePath)
+		panic("scenario name not set yet when trying to get sandbox filename")
 	}
 	if len(scenario.sandbox) == 0 {
-		trace.Trace("sandbox not set yet when trying to get sandbox name for %q!", srcPath)
-		panic("sandbox not set yet when trying to get sandbox name")
+		trace.Trace("sandbox name not set yet: relativePath==%q!", relativePath)
+		panic("sandbox name not set yet when trying to get sandbox filename")
 	}
-	if !strings.HasPrefix(srcPath, scenario.name) {
-		trace.Trace("file %q is not part of sandbox %q", srcPath, scenario.sandbox)
-		panic("file not part of sandbox")
-	}
-	trace.Trace("srcPath: %s", srcPath)
 
-	relativePath := srcPath[len(scenario.name):]
-	if len(relativePath) > 0 {
-		// There are other path elements, so remove the leading PathSeparator
-		relativePath = relativePath[len(string(os.PathSeparator)):]
-	}
-	dstPath := filepath.Join(scenario.sandbox, relativePath)
+	return filepath.Join(scenario.sandbox, relativePath)
+}
 
-	return dstPath
+func (scenario *Scenario) fileBoxPath(relativePath string) string {
+	if len(scenario.name) == 0 {
+		trace.Trace("scenario name not set yet: relativePath==%q!", relativePath)
+		panic("scenario name not set yet when trying to get box filename")
+	}
+	return filepath.Join(scenario.name, relativePath)
+}
+
+func (scenario *Scenario) getBoxFile(relativePath string) ([]byte, error) {
+	return scenario.fileBox.Find(scenario.fileBoxPath(relativePath))
 }
 
 func (scenario *Scenario) Run() error {
@@ -121,7 +120,7 @@ func (scenario *Scenario) getGenerationFiles() (err error) {
 			fileTypes = []string{"proto"}
 		case ".yaml", ".yml":
 			trace.Trace("reading %s", thisFile)
-			content, err := scenario.fileBox.Find(thisFile)
+			content, err := scenario.getBoxFile(thisFile)
 			if err != nil {
 				err := fmt.Errorf("error reading %q: %w", thisFile, err)
 				trace.Trace(err)
@@ -165,6 +164,8 @@ func yamlDocTypes(fileContent []byte) (docTypes []string, err error) {
 }
 
 func (scenario *Scenario) createSandbox() (err error) {
+	const filePermissions = 0555
+
 	if scenario.sandbox, err = ioutil.TempDir("", fmt.Sprintf("showcase-qualify.%s.%s.", timestamp, scenario.name)); err != nil {
 		return err
 	}
@@ -175,29 +176,29 @@ func (scenario *Scenario) createSandbox() (err error) {
 		// TODO: expand `include.*` files (passed in as params)
 
 		srcDir := filepath.Dir(srcFile)
-		dstDir := scenario.sandboxFileName(srcDir)
-		trace.Trace("  srcFile: %s", srcFile)
-		trace.Trace("   srcDir: %s", srcDir)
-		trace.Trace("     name: %s", scenario.name)
-		trace.Trace("   dstDir: %s", dstDir)
+		dstDir := scenario.sandboxPath(srcDir)
 		if _, err := os.Stat(dstDir); os.IsNotExist(err) {
 			if err = os.MkdirAll(dstDir, os.ModePerm); err != nil {
-				trace.Trace("could not MkdirAll(%q)", dstDir)
+				err = fmt.Errorf("could not make directory %q: %w", dstDir, err)
+				trace.Trace(err)
 				return err
 			}
 		}
 
 		var contents []byte
-		if contents, err = scenario.fileBox.Find(srcFile); err != nil {
-			trace.Trace("could not find file %q", srcFile)
+		if contents, err = scenario.getBoxFile(srcFile); err != nil {
+			err = fmt.Errorf("could not find file %q: %w", srcFile, err)
+			trace.Trace(err)
 			return err
 		}
 
-		dstFile := scenario.sandboxFileName(srcFile)
-		if err := ioutil.WriteFile(dstFile, contents, 0555); err != nil {
-			trace.Trace("could not WriteFile()")
+		dstFile := scenario.sandboxPath(srcFile)
+		if err := ioutil.WriteFile(dstFile, contents, filePermissions); err != nil {
+			err = fmt.Errorf("could not write file  %q: %w", dstFile, err)
+			trace.Trace(err)
 			return err
 		}
+		trace.Trace(dstFile)
 	}
 	return nil
 }
