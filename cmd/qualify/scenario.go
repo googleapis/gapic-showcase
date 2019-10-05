@@ -79,6 +79,11 @@ func (scenario *Scenario) Generate() (err error) {
 	}
 	trace.Trace("created sandbox: %q", scenario.sandbox)
 
+	var output []byte
+	output, err = scenario.generator.Run(scenario.sandbox, scenario.filesByType)
+	trace.Trace("run error: %s", err)
+	trace.Trace("run output: %s", output)
+
 	/* TODO:
 	   - P1. Invoke sample generator with all the protos in the directory
 	   - P2. when creating sandbox, expand files of the form `include.FOO` to be file/dir FOO/ with contents cloned from the location specified in the file
