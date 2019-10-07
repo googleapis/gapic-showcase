@@ -9,12 +9,17 @@ import (
 )
 
 var AcceptanceSuite *packr.Box
+var SchemaSuite *packr.Box
 
 func GetAssets() {
 	AcceptanceSuite = packr.New("acceptance suite", "../../acceptance")
-
 	trace.Trace("packr suite: %v", AcceptanceSuite)
 	contents := AcceptanceSuite.List()
+	trace.Trace("in the suite: \n  %v", strings.Join(contents, "\n  "))
+
+	SchemaSuite = packr.New("schema suite", "../../schema")
+	trace.Trace("packr suite: %v", SchemaSuite)
+	contents = SchemaSuite.List()
 	trace.Trace("in the suite: \n  %v", strings.Join(contents, "\n  "))
 }
 

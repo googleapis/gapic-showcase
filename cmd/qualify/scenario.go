@@ -164,14 +164,21 @@ func yamlDocTypes(fileContent []byte) (docTypes []string, err error) {
 }
 
 func (scenario *Scenario) createSandbox() (err error) {
-	const filePermissions = 0555
 
 	if scenario.sandbox, err = ioutil.TempDir("", fmt.Sprintf("showcase-qualify.%s.%s.", timestamp, scenario.name)); err != nil {
 		return err
 	}
 
-	// Copy files needed to generate
-	for _, srcFile := range scenario.files {
+	if err = scenario.copyFiles(scenario.files); err != nil {
+		err := fmt.Errorf("could not copy scenario files: %w", err)
+		return err
+	}
+	return nil
+}
+
+func (scenario *Scenario) copyFiles(files []string) (err error) {
+	const filePermissions = 0555
+	for _, srcFile := range files {
 
 		// TODO: expand `include.*` files (passed in as params)
 
