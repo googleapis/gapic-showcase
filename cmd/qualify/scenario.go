@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	packr "github.com/gobuffalo/packr/v2"
@@ -27,6 +28,7 @@ type Scenario struct {
 	name        string
 	files       []string
 	fileBox     *packr.Box
+	schemaBox   *packr.Box
 	sandbox     string
 	filesByType map[string][]string
 
@@ -55,7 +57,7 @@ func (scenario *Scenario) fileBoxPath(relativePath string) string {
 	return filepath.Join(scenario.name, relativePath)
 }
 
-func (scenario *Scenario) getBoxFile(relativePath string) ([]byte, error) {
+func (scenario *Scenario) fromFileBox(relativePath string) ([]byte, error) {
 	return scenario.fileBox.Find(scenario.fileBoxPath(relativePath))
 }
 
@@ -80,7 +82,7 @@ func (scenario *Scenario) Generate() (err error) {
 
 	var output []byte
 	output, err = scenario.generator.Run(scenario.sandbox, scenario.filesByType)
-	trace.Trace("run error: %s", err)
+	trace.Trace("run error: %v", err)
 	trace.Trace("run output: %s", output)
 
 	/* TODO:
@@ -120,7 +122,7 @@ func (scenario *Scenario) getGenerationFiles() (err error) {
 			fileTypes = []string{"proto"}
 		case ".yaml", ".yml":
 			trace.Trace("reading %s", thisFile)
-			content, err := scenario.getBoxFile(thisFile)
+			content, err := scenario.fromFileBox(thisFile)
 			if err != nil {
 				err := fmt.Errorf("error reading %q: %w", thisFile, err)
 				trace.Trace(err)
@@ -166,46 +168,105 @@ func yamlDocTypes(fileContent []byte) (docTypes []string, err error) {
 func (scenario *Scenario) createSandbox() (err error) {
 
 	if scenario.sandbox, err = ioutil.TempDir("", fmt.Sprintf("showcase-qualify.%s.%s.", timestamp, scenario.name)); err != nil {
+		err := fmt.Errorf("could not create sandbox: %w", err)
+		trace.Trace(err)
 		return err
 	}
 
-	if err = scenario.copyFiles(scenario.files); err != nil {
-		err := fmt.Errorf("could not copy scenario files: %w", err)
+	includePaths, err := scenario.copyFiles(scenario.files, true)
+	if err != nil {
+		err = fmt.Errorf("could not copy scenario files: %w", err)
+		trace.Trace(err)
 		return err
+	}
+
+	if err := scenario.getIncludes(includePaths); err != nil {
+		err = fmt.Errorf("could not copy included schema files: %w", err)
+		trace.Trace(err)
+		return err
+	}
+
+	trace.Trace("created sandbox")
+	return nil
+}
+
+const includeFilePrefix = "include."
+
+func (scenario *Scenario) getIncludes(includes []string) error {
+	for _, includeFile := range includes {
+		dstPath := includeFile[len(includeFilePrefix):]
+		content, err := scenario.fromFileBox(includeFile)
+		if err != nil {
+			err = fmt.Errorf("could not read %q: %w", includeFile, err)
+			trace.Trace(err)
+			return err
+		}
+
+		files, srcPath, replacePath, err := GetMatchingFiles(scenario.schemaBox, dstPath, string(content), '/')
+		if err != nil {
+			err = fmt.Errorf("could not process %q: %w", includeFile, err)
+			trace.Trace(err)
+			return err
+		}
+
+		scenario.copyFilesReplacePath(files, false, scenario.schemaBox.Find, srcPath, replacePath)
 	}
 	return nil
 }
 
-func (scenario *Scenario) copyFiles(files []string) (err error) {
+func (scenario *Scenario) copyFiles(files []string, returnIncludes bool) (includes []string, err error) {
+	return scenario.copyFilesReplacePath(files, returnIncludes, scenario.fromFileBox, "", "")
+}
+
+func (scenario *Scenario) copyFilesReplacePath(files []string, returnIncludes bool, fromBox func(string) ([]byte, error), replaceSrc, replaceDst string) (includes []string, err error) {
 	const filePermissions = 0555
+	replace := len(replaceSrc) > 0
+
+	trace.Trace("returnIncludes: %v  replaceSrc:%q  replaceDst:%q  files%q",
+		returnIncludes, replaceSrc, replaceDst, files)
+
 	for _, srcFile := range files {
 
-		// TODO: expand `include.*` files (passed in as params)
+		if returnIncludes && strings.HasPrefix(srcFile, includeFilePrefix) && strings.IndexAny(srcFile, string(os.PathSeparator)) == -1 {
+			// This is an include.* file
+			includes = append(includes, srcFile)
+			continue
+		}
 
-		srcDir := filepath.Dir(srcFile)
-		dstDir := scenario.sandboxPath(srcDir)
-		if _, err := os.Stat(dstDir); os.IsNotExist(err) {
+		renamedFile := srcFile
+		if replace {
+			if !strings.HasPrefix(renamedFile, replaceSrc) {
+				panic(fmt.Sprintf("%q does not begin with %q", srcFile, replaceSrc))
+			}
+			renamedFile = strings.Replace(renamedFile, replaceSrc, replaceDst, 1)
+			trace.Trace("renamedFile: %q", renamedFile)
+		}
+
+		renamedDir := filepath.Dir(renamedFile)
+
+		dstDir := scenario.sandboxPath(renamedDir)
+		if _, err = os.Stat(dstDir); os.IsNotExist(err) {
 			if err = os.MkdirAll(dstDir, os.ModePerm); err != nil {
 				err = fmt.Errorf("could not make directory %q: %w", dstDir, err)
 				trace.Trace(err)
-				return err
+				return includes, err
 			}
 		}
 
 		var contents []byte
-		if contents, err = scenario.getBoxFile(srcFile); err != nil {
+		if contents, err = fromBox(srcFile); err != nil {
 			err = fmt.Errorf("could not find file %q: %w", srcFile, err)
 			trace.Trace(err)
-			return err
+			return includes, err
 		}
 
-		dstFile := scenario.sandboxPath(srcFile)
-		if err := ioutil.WriteFile(dstFile, contents, filePermissions); err != nil {
+		dstFile := scenario.sandboxPath(renamedFile)
+		if err = ioutil.WriteFile(dstFile, contents, filePermissions); err != nil {
 			err = fmt.Errorf("could not write file  %q: %w", dstFile, err)
 			trace.Trace(err)
-			return err
+			return includes, err
 		}
 		trace.Trace(dstFile)
 	}
-	return nil
+	return includes, nil
 }

@@ -133,6 +133,7 @@ func GetTestScenarios(generator *GeneratorInfo) ([]*Scenario, error) {
 			generator:    generator,
 			files:        config.Files,
 			fileBox:      AcceptanceSuite,
+			schemaBox:    SchemaSuite,
 		}
 		trace.Trace("adding scenario %#v", newScenario)
 		allScenarios = append(allScenarios, newScenario)
