@@ -13,15 +13,18 @@ var AcceptanceSuite *packr.Box
 var SchemaSuite *packr.Box
 
 func GetAssets() {
+	// I believe we can't pass the arguments into a function
+	// because otherwise packr won't be able to recognize these
+	// paths should be packed.
 	AcceptanceSuite = packr.New("acceptance suite", "../../acceptance")
-	trace.Trace("packr suite: %v", AcceptanceSuite)
-	contents := AcceptanceSuite.List()
-	trace.Trace("in the suite: \n  %v", strings.Join(contents, "\n  "))
-
 	SchemaSuite = packr.New("schema", "../../schema")
-	trace.Trace("packr suite: %v", SchemaSuite)
-	contents = SchemaSuite.List()
-	trace.Trace("in the suite: \n  %v", strings.Join(contents, "\n  "))
+
+	traceBox(AcceptanceSuite)
+	traceBox(SchemaSuite)
+}
+
+func traceBox(box *packr.Box) {
+	trace.Trace("suite %q has %d entries", box.Name, len(box.List()))
 }
 
 type FilesByDir struct {
