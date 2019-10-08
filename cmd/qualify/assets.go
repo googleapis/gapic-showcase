@@ -59,41 +59,33 @@ func GetFilesByDir(box *packr.Box) []*FilesByDir {
 }
 
 // GetMatchingFiles returns the a list of files in `box` matching
-// `pattern`. `pattern` should end with `pathSeparator` iff it refers
+// `srcPath`. `srcPath` should end with `os.PathSeparator` iff it refers
 // to a directory.
 //
-// This also returns a couple of additional values. These are useful
-// for copying files within matched directories, and are provided as a
-// convenience:
+// As a convenience, this also returns an additional value, useful
+// for copying files within matched directories:
 //
-//  * `srcPath`: a version of `pattern` modified so that
-//    `pathSeparator`, if any, becomes `os.PathSeparator`
-//  * `replacePath`: a version of `dstPath` (which is assumed to have
-//     no trailing separator) with `os.PathSeparator` appended.
-func GetMatchingFiles(box *packr.Box, dstPath string, pattern string, pathSeparator rune) (files []string, srcPath string, replacePath string, err error) {
+//  * `replacePath`: a copy of `dstPath` (which is assumed to have no
+//     trailing separator), with `os.PathSeparator` appended if
+//     `srcPath` refers to a directory
+func GetMatchingFiles(box *packr.Box, dstPath string, srcPath string) (files []string, replacePath string, err error) {
 
-	trace.Trace("reading %q with separator %c", pattern, pathSeparator)
+	trace.Trace("reading %q", srcPath)
 
 	replacePath = dstPath
-	srcPath = pattern
 
-	// If `pattern` specifies a single file, match just that.
-	if !strings.HasSuffix(pattern, string(pathSeparator)) {
-		if !box.Has(pattern) {
-			err = fmt.Errorf("file box %q has no file %q", box.Name, pattern)
+	// If `srcPath` specifies a single file, match just that.
+	if !strings.HasSuffix(srcPath, string(os.PathSeparator)) {
+		if !box.Has(srcPath) {
+			err = fmt.Errorf("file box %q has no file %q", box.Name, srcPath)
 			return
 		}
-		files = []string{pattern}
+		files = []string{srcPath}
 		return
 	}
 
-	// Replace the trailing pathSeparator (hard-coded in text)
-	// with the os.PathSeparator presumably used by packr, which
-	// varies by OS
-	srcPath = string(append([]rune(srcPath)[:len(srcPath)-1], os.PathSeparator))
-
-	// Likewise, let the caller replace the directory part of the
-	// path with the separator included.
+	// Let the caller replace the directory part of the path with
+	// the separator included.
 	replacePath = dstPath + string(os.PathSeparator)
 
 	for _, entry := range box.List() {
@@ -102,9 +94,10 @@ func GetMatchingFiles(box *packr.Box, dstPath string, pattern string, pathSepara
 		}
 	}
 	if len(files) == 0 {
-		err = fmt.Errorf("file box %q has no files matching %q", box.Name, pattern)
+		err = fmt.Errorf("file box %q has no files matching %q", box.Name, srcPath)
 		return
 	}
-	trace.Trace("obtained files %q", files)
+
+	trace.Trace("obtained %d files", len(files))
 	return
 }

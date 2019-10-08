@@ -17,14 +17,18 @@ import (
 
 var timestamp string
 
+const includeFilePrefix = "include."
+const includeFileDirectorySeparator = '/'
+
 func init() {
 	timestamp = time.Now().Format("20060102.150405")
 	trace.Trace("timestamp = %q", timestamp)
 }
 
 type Scenario struct {
-	// Every f in `files` must begin with `name`:
-	// strings.HasPrefix(f, name)
+	// Every f in `files` corresponds to a file in `fileBox` under
+	// a directory called `name`, which is NOT part of the string
+	// f itself.
 	name        string
 	files       []string
 	fileBox     *packr.Box
@@ -110,37 +114,69 @@ func (scenario *Scenario) Success() bool {
 	return true
 }
 
+// getGenerationFiles classifies all the files in the scenario,
+// storing the results in `scenario.filesByType`. Each file is
+// classified as either an "include" file or a "scenario"
+// file. Scenario files are also classified by the type of data they
+// contain. Thus, "scenario" files have at least two labels (ie
+// multiple entries in `scenario.filesByType`).
 func (scenario *Scenario) getGenerationFiles() (err error) {
 	scenario.filesByType = make(map[string][]string)
 	// TODO: process `include.*` files first
 	for _, thisFile := range scenario.files {
-		extension := filepath.Ext(thisFile)
-		var fileTypes []string
-		switch extension {
-
-		case ".proto":
-			fileTypes = []string{"proto"}
-		case ".yaml", ".yml":
-			trace.Trace("reading %s", thisFile)
-			content, err := scenario.fromFileBox(thisFile)
-			if err != nil {
-				err := fmt.Errorf("error reading %q: %w", thisFile, err)
-				trace.Trace(err)
-				return err
-			}
-			fileTypes, err = yamlDocTypes(content)
-			if err != nil {
-				return err
-			}
+		fileTypes, err := scenario.getFileTypes(thisFile)
+		if err != nil {
+			return err
 		}
-
 		for _, oneType := range fileTypes {
 			similarFiles := scenario.filesByType[oneType]
 			scenario.filesByType[oneType] = append(similarFiles, thisFile)
-			trace.Trace("%s: type %q", thisFile, oneType)
 		}
+		trace.Trace("%s: type %q", thisFile, fileTypes)
 	}
 	return nil
+}
+
+// getFileTypes gets the various type labels for `thisFile`. The type
+// labels are either the singleton list {"include"}, or a list
+// {"scenario", ...} that includes the various types of data included
+// in that file.
+func (scenario *Scenario) getFileTypes(thisFile string) (fileTypes []string, err error) {
+
+	for idx := strings.Index(thisFile, includeFilePrefix); idx >= 0; idx = strings.Index(thisFile[idx+1:], includeFilePrefix) {
+		if !(idx == 0 || thisFile[idx-1] == os.PathSeparator) {
+			// The directory entry does not start with
+			// this pattern, so it's not an include file.
+			continue
+		}
+		if strings.Index(thisFile[idx+1:], string(os.PathListSeparator)) != -1 {
+			// There is a sub-directory component, so this is not a file.
+			continue
+		}
+
+		// This looks like a legitimate include file. Cease classifying.
+		return []string{"include"}, nil
+	}
+
+	extension := filepath.Ext(thisFile)
+	switch extension {
+	case ".proto":
+		fileTypes = []string{"proto"}
+	case ".yaml", ".yml":
+		trace.Trace("reading %s", thisFile)
+		content, err := scenario.fromFileBox(thisFile)
+		if err != nil {
+			err := fmt.Errorf("error reading %q: %w", thisFile, err)
+			trace.Trace(err)
+			return fileTypes, err
+		}
+		fileTypes, err = yamlDocTypes(content)
+		if err != nil {
+			return fileTypes, err
+		}
+	}
+	fileTypes = append(fileTypes, "scenario")
+	return fileTypes, err
 }
 
 func yamlDocTypes(fileContent []byte) (docTypes []string, err error) {
@@ -173,14 +209,14 @@ func (scenario *Scenario) createSandbox() (err error) {
 		return err
 	}
 
-	includePaths, err := scenario.copyFiles(scenario.files, true)
+	err = scenario.copyFiles(scenario.filesByType["scenario"])
 	if err != nil {
 		err = fmt.Errorf("could not copy scenario files: %w", err)
 		trace.Trace(err)
 		return err
 	}
 
-	if err := scenario.getIncludes(includePaths); err != nil {
+	if err = scenario.getIncludes(scenario.filesByType["include"]); err != nil {
 		err = fmt.Errorf("could not copy included schema files: %w", err)
 		trace.Trace(err)
 		return err
@@ -190,11 +226,19 @@ func (scenario *Scenario) createSandbox() (err error) {
 	return nil
 }
 
-const includeFilePrefix = "include."
-
 func (scenario *Scenario) getIncludes(includes []string) error {
 	for _, includeFile := range includes {
-		dstPath := includeFile[len(includeFilePrefix):]
+
+		// The following guards against includeFilePrefix being present elsewhere in includeFile. Otherwise, we could use `dstPath := strings.Replace(includeFile, includeFilePrefix, "")`
+		prefixStartIdx := strings.LastIndex(includeFile, includeFilePrefix)
+		prefixEndIdx := prefixStartIdx + len(includeFilePrefix)
+		if prefixStartIdx < 0 || prefixEndIdx >= len(includeFile) {
+			msg := fmt.Sprintf("logic error: start %d, end %d outside of range [0, %d] for %q", prefixStartIdx, prefixEndIdx, len(includeFile), includeFile)
+			trace.Trace(msg)
+			panic(msg)
+		}
+		dstPath := includeFile[0:prefixStartIdx] + includeFile[prefixEndIdx:]
+
 		content, err := scenario.fromFileBox(includeFile)
 		if err != nil {
 			err = fmt.Errorf("could not read %q: %w", includeFile, err)
@@ -202,44 +246,37 @@ func (scenario *Scenario) getIncludes(includes []string) error {
 			return err
 		}
 
-		files, srcPath, replacePath, err := GetMatchingFiles(scenario.schemaBox, dstPath, string(content), '/')
+		srcPath := strings.TrimSpace(string(content))
+		srcPath = strings.ReplaceAll(srcPath, string(includeFileDirectorySeparator), string(os.PathSeparator))
+		files, replacePath, err := GetMatchingFiles(scenario.schemaBox, dstPath, srcPath)
 		if err != nil {
 			err = fmt.Errorf("could not process %q: %w", includeFile, err)
 			trace.Trace(err)
 			return err
 		}
 
-		scenario.copyFilesReplacePath(files, false, scenario.schemaBox.Find, srcPath, replacePath)
+		scenario.copyFilesReplacePath(files, scenario.schemaBox.Find, srcPath, replacePath)
 	}
 	return nil
 }
 
-func (scenario *Scenario) copyFiles(files []string, returnIncludes bool) (includes []string, err error) {
-	return scenario.copyFilesReplacePath(files, returnIncludes, scenario.fromFileBox, "", "")
+func (scenario *Scenario) copyFiles(files []string) error {
+	return scenario.copyFilesReplacePath(files, scenario.fromFileBox, "", "")
 }
 
-func (scenario *Scenario) copyFilesReplacePath(files []string, returnIncludes bool, fromBox func(string) ([]byte, error), replaceSrc, replaceDst string) (includes []string, err error) {
+func (scenario *Scenario) copyFilesReplacePath(files []string, fromBox func(string) ([]byte, error), replaceSrc, replaceDst string) (err error) {
 	const filePermissions = 0555
 	replace := len(replaceSrc) > 0
 
-	trace.Trace("returnIncludes: %v  replaceSrc:%q  replaceDst:%q  files%q",
-		returnIncludes, replaceSrc, replaceDst, files)
+	trace.Trace("replaceSrc:%q  replaceDst:%q  len(files):%d", replaceSrc, replaceDst, len(files))
 
 	for _, srcFile := range files {
-
-		if returnIncludes && strings.HasPrefix(srcFile, includeFilePrefix) && strings.IndexAny(srcFile, string(os.PathSeparator)) == -1 {
-			// This is an include.* file
-			includes = append(includes, srcFile)
-			continue
-		}
-
 		renamedFile := srcFile
 		if replace {
 			if !strings.HasPrefix(renamedFile, replaceSrc) {
 				panic(fmt.Sprintf("%q does not begin with %q", srcFile, replaceSrc))
 			}
 			renamedFile = strings.Replace(renamedFile, replaceSrc, replaceDst, 1)
-			trace.Trace("renamedFile: %q", renamedFile)
 		}
 
 		renamedDir := filepath.Dir(renamedFile)
@@ -249,7 +286,7 @@ func (scenario *Scenario) copyFilesReplacePath(files []string, returnIncludes bo
 			if err = os.MkdirAll(dstDir, os.ModePerm); err != nil {
 				err = fmt.Errorf("could not make directory %q: %w", dstDir, err)
 				trace.Trace(err)
-				return includes, err
+				return err
 			}
 		}
 
@@ -257,16 +294,15 @@ func (scenario *Scenario) copyFilesReplacePath(files []string, returnIncludes bo
 		if contents, err = fromBox(srcFile); err != nil {
 			err = fmt.Errorf("could not find file %q: %w", srcFile, err)
 			trace.Trace(err)
-			return includes, err
+			return err
 		}
 
 		dstFile := scenario.sandboxPath(renamedFile)
 		if err = ioutil.WriteFile(dstFile, contents, filePermissions); err != nil {
 			err = fmt.Errorf("could not write file  %q: %w", dstFile, err)
 			trace.Trace(err)
-			return includes, err
+			return err
 		}
-		trace.Trace(dstFile)
 	}
-	return includes, nil
+	return nil
 }
