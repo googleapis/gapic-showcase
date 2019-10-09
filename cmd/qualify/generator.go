@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -17,14 +18,14 @@ type GeneratorInfo struct {
 	isMonolith bool
 }
 
-func (gi *GeneratorInfo) Run(wdir string, filesByType map[string][]string) ([]byte, error) {
+func (gi *GeneratorInfo) Run(wdir string, filesByType map[string][]string) ([]byte, *os.ProcessState, error) {
 	generationDir := "generated"
 	if gi.isMonolith {
-		return nil, fmt.Errorf("monolith not implemented yet")
+		return nil, nil, fmt.Errorf("monolith not implemented yet")
 	}
 
 	if err := os.MkdirAll(path.Join(wdir, generationDir), os.ModePerm); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	cmdParts := []string{
@@ -39,5 +40,12 @@ func (gi *GeneratorInfo) Run(wdir string, filesByType map[string][]string) ([]by
 	trace.Trace("running: %s", cmdString)
 	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
 	cmd.Dir = wdir
-	return cmd.CombinedOutput()
+	output, err := cmd.CombinedOutput()
+
+	var exitError *exec.ExitError
+	if errors.As(err, &exitError) {
+		err = nil
+		trace.Trace("clearing exit error: %v", exitError)
+	}
+	return output, cmd.ProcessState, err
 }

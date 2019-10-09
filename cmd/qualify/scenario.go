@@ -38,15 +38,19 @@ type Scenario struct {
 
 	generator    *GeneratorInfo
 	showcasePort int
+
+	generationOutput       []byte
+	generationProcessState *os.ProcessState
+	generationPassed       bool
 }
 
 func (scenario *Scenario) sandboxPath(relativePath string) string {
 	if len(scenario.name) == 0 {
-		trace.Trace("scenario name not set yet: relativePath==%q!", relativePath)
+		trace.Trace("scenario name not set yet: relativePath==%q", relativePath)
 		panic("scenario name not set yet when trying to get sandbox filename")
 	}
 	if len(scenario.sandbox) == 0 {
-		trace.Trace("sandbox name not set yet: relativePath==%q!", relativePath)
+		trace.Trace("sandbox name not set yet: relativePath==%q", relativePath)
 		panic("sandbox name not set yet when trying to get sandbox filename")
 	}
 
@@ -55,7 +59,7 @@ func (scenario *Scenario) sandboxPath(relativePath string) string {
 
 func (scenario *Scenario) fileBoxPath(relativePath string) string {
 	if len(scenario.name) == 0 {
-		trace.Trace("scenario name not set yet: relativePath==%q!", relativePath)
+		trace.Trace("scenario name not set yet: relativePath==%q", relativePath)
 		panic("scenario name not set yet when trying to get box filename")
 	}
 	return filepath.Join(scenario.name, relativePath)
@@ -66,6 +70,15 @@ func (scenario *Scenario) fromFileBox(relativePath string) ([]byte, error) {
 }
 
 func (scenario *Scenario) Run() error {
+	if err := scenario.classifyConfigs(); err != nil {
+		return fmt.Errorf("could not classify config files for scenario %q: %w", scenario.name, err)
+	}
+
+	if err := scenario.createSandbox(); err != nil {
+		return fmt.Errorf("could not create sandbox for scenario %q: %w", scenario.name, err)
+	}
+	trace.Trace("created sandbox: %q", scenario.sandbox)
+
 	if err := scenario.Generate(); err != nil {
 		return err
 	}
@@ -74,34 +87,18 @@ func (scenario *Scenario) Run() error {
 	return nil
 }
 
-func (scenario *Scenario) Generate() (err error) {
-	if err = scenario.getGenerationFiles(); err != nil {
-		return err
-	}
-	err = scenario.createSandbox()
-	if err != nil {
-		return fmt.Errorf("could not create sandbox: %w", err)
-	}
-	trace.Trace("created sandbox: %q", scenario.sandbox)
-
-	var output []byte
-	output, err = scenario.generator.Run(scenario.sandbox, scenario.filesByType)
+func (scenario *Scenario) Generate() error {
+	var err error
+	scenario.generationOutput, scenario.generationProcessState, err = scenario.generator.Run(scenario.sandbox, scenario.filesByType)
 	trace.Trace("run error: %v", err)
-	trace.Trace("run output: %s", output)
-
-	/* TODO:
-	   - P1. Invoke sample generator with all the protos in the directory
-	   - P2. when creating sandbox, expand files of the form `include.FOO` to be file/dir FOO/ with contents cloned from the location specified in the file
-	        can be a path rooted at schema/
-	        can be an http: which is curled
-	*/
-	trace.Trace("Generate (TODO)")
-	return nil
+	trace.Trace("run scenario.generationOutput: %s", scenario.generationOutput)
+	return err
 }
 
 func (scenario *Scenario) CheckGeneration() {
-	// TODO: Fill in
-	trace.Trace("CheckGeneration (TODO)")
+	// TODO: Fill in in order to handle expected, configured failures
+	trace.Trace("CheckGeneration")
+	scenario.generationPassed = scenario.generationProcessState.Success()
 }
 
 func (scenario *Scenario) RunTests() {
@@ -114,13 +111,11 @@ func (scenario *Scenario) Success() bool {
 	return true
 }
 
-// getGenerationFiles classifies all the files in the scenario,
-// storing the results in `scenario.filesByType`. Each file is
-// classified as either an "include" file or a "scenario"
-// file. Scenario files are also classified by the type of data they
-// contain. Thus, "scenario" files have at least two labels (ie
-// multiple entries in `scenario.filesByType`).
-func (scenario *Scenario) getGenerationFiles() (err error) {
+// classifyConfigs classifies all the files in the scenario, storing the results in
+// `scenario.filesByType`. Each file is classified as either an "include" file or a "scenario"
+// file. Scenario files are also classified by the type of data they contain. Thus, "scenario" files
+// have at least two labels (ie multiple entries in `scenario.filesByType`).
+func (scenario *Scenario) classifyConfigs() (err error) {
 	scenario.filesByType = make(map[string][]string)
 	// TODO: process `include.*` files first
 	for _, thisFile := range scenario.files {
@@ -137,10 +132,9 @@ func (scenario *Scenario) getGenerationFiles() (err error) {
 	return nil
 }
 
-// getFileTypes gets the various type labels for `thisFile`. The type
-// labels are either the singleton list {"include"}, or a list
-// {"scenario", ...} that includes the various types of data included
-// in that file.
+// getFileTypes gets the various type labels for `thisFile`. The type labels are either the
+// singleton list {"include"}, or a list {"scenario", ...} that includes the various types of data
+// included in that file.
 func (scenario *Scenario) getFileTypes(thisFile string) (fileTypes []string, err error) {
 
 	for idx := strings.Index(thisFile, includeFilePrefix); idx >= 0; idx = strings.Index(thisFile[idx+1:], includeFilePrefix) {
@@ -226,10 +220,21 @@ func (scenario *Scenario) createSandbox() (err error) {
 	return nil
 }
 
+// getIncludes processes include files (whose names start with `includeFilePrefix`) by replacing
+// them with the file or directory referenced in the file's contents. The only currently supported
+// type of reference is to either an entry in `scenario.schemaBox`, or a directory that resolves to
+// one or more entries in `scenario.schemaBox`. If an include file does not resolve to any entries
+// in `scenario.schemaBox`, this function returns an error.
+//
+// If there's need in the future, we could potentially grow to support fetching files or directories
+// from public repositories on the web.
 func (scenario *Scenario) getIncludes(includes []string) error {
 	for _, includeFile := range includes {
 
-		// The following guards against includeFilePrefix being present elsewhere in includeFile. Otherwise, we could use `dstPath := strings.Replace(includeFile, includeFilePrefix, "")`
+		// The following guards against includeFilePrefix being present elsewhere in
+		// includeFile. Otherwise, we could simply use
+		//
+		//   `dstPath := strings.Replace(includeFile, includeFilePrefix, "")`
 		prefixStartIdx := strings.LastIndex(includeFile, includeFilePrefix)
 		prefixEndIdx := prefixStartIdx + len(includeFilePrefix)
 		if prefixStartIdx < 0 || prefixEndIdx >= len(includeFile) {
