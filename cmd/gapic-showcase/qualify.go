@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strconv"
 	"time"
 
 	trace "github.com/google/go-trace"
@@ -17,17 +18,20 @@ func init() {
 	trace.Trace("timestamp = %q", timestamp)
 
 	settings := &qualifier.Settings{
-		Timestamp: timestamp,
-		Verbose:   Verbose,
+		Timestamp:    timestamp,
+		Verbose:      Verbose,
+		ShowcasePort: 7469,
 	}
 	qualifyCmd := &cobra.Command{
 		Use:   "qualify",
 		Short: "Tests a provided GAPIC generator against an acceptance suite",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
+			servers := RunShowcase(strconv.Itoa(settings.ShowcasePort), "")
 			settings.Language = args[0]
 			trace.Trace("settings: %v", settings)
 			qualifier.Run(settings)
+			servers.Shutdown()
 		},
 	}
 	rootCmd.AddCommand(qualifyCmd)

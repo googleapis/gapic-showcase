@@ -22,19 +22,22 @@ go run *.go
 
 type Settings struct {
 	Generator
-	Timestamp string
-	Verbose   bool
+	ShowcasePort int
+	Timestamp    string
+	Verbose      bool
 }
 
 const showcaseCmd = "gapic-showcase" // TODO: Consider running in-process
 
 func Run(settings *Settings) {
+	// TODO: Return an error rather than exiting. We can return an error type ErrorCode that
+	// wraps the current errors and includes the appropriate return code, and change main() so
+	// that if the error it gets is of type ErrorCode, it exits with that code.
 	const (
 		RetCodeSuccess = iota
 		RetCodeInternalError
 		RetCodeFailedDependencies
 		RetCodeUsageError
-		RetCodeCantRunShowcase
 		RetScenarioFailure
 	)
 
@@ -43,12 +46,6 @@ func Run(settings *Settings) {
 	if err := checkDependencies(); err != nil {
 		os.Exit(RetCodeFailedDependencies)
 	}
-
-	showcase, err := startShowcase()
-	if err != nil {
-		os.Exit(RetCodeCantRunShowcase)
-	}
-	defer endProcess(showcase)
 
 	allScenarios, err := GetTestScenarios(settings)
 	if err != nil {
@@ -77,12 +74,6 @@ func checkDependencies() error {
 	notFound := []string{}
 	trace.Trace("")
 
-	// TODO: Run from this repo, rather than requiring external dependency
-	showcasePath, err := exec.LookPath(showcaseCmd)
-	if err != nil {
-		notFound = append(notFound, showcaseCmd)
-	}
-
 	sampleTesterPath, err := exec.LookPath(sampleTesterCmd)
 	if err != nil {
 		notFound = append(notFound, sampleTesterCmd)
@@ -93,7 +84,6 @@ func checkDependencies() error {
 		log.Printf(msg)
 		return fmt.Errorf(msg)
 	}
-	trace.Trace("found %q: %s", showcaseCmd, showcasePath)
 	trace.Trace("found %q: %s", sampleTesterCmd, sampleTesterPath)
 	return nil
 }
@@ -104,11 +94,10 @@ func GetTestScenarios(settings *Settings) ([]*Scenario, error) {
 	allScenarios := []*Scenario{}
 	allScenarioConfigs := GetFilesByDir(AcceptanceSuite)
 	for _, config := range allScenarioConfigs {
-		defaultShowcasePort := 123 // TODO fix
 		newScenario := &Scenario{
 			name:         config.Directory,
 			timestamp:    settings.Timestamp,
-			showcasePort: defaultShowcasePort,
+			showcasePort: settings.ShowcasePort,
 			generator:    &settings.Generator,
 			files:        config.Files,
 			fileBox:      AcceptanceSuite,
