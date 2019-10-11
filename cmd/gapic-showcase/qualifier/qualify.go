@@ -18,18 +18,12 @@ import (
 === Sample run ======
 go run *.go
 
-Notes for upcoming development:
-packing assets into Go files:
-https://www.google.com/search?q=golang+ship+data+files+with+binary&oq=golang+ship+data+files+with+binary
-https://github.com/go-bindata/go-bindata
-https://github.com/gobuffalo/packr
-Choosing: https://tech.townsourced.com/post/embedding-static-files-in-go/
 
 */
 
 const showcaseCmd = "gapic-showcase" // TODO: Consider running in-process
 
-func RunProcess(cmd *cobra.Command, args []string) {
+func Run(cmd *cobra.Command, args []string) {
 	const (
 		RetCodeSuccess = iota
 		RetCodeInternalError

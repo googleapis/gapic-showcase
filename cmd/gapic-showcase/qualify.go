@@ -12,7 +12,7 @@ func init() {
 	qualifyCmd := &cobra.Command{
 		Use:   "qualify",
 		Short: "Tests a provided gapic generator against an acceptance suite",
-		Run:   qualifier.RunProcess,
+		Run:   qualifier.Run,
 	}
 	rootCmd.AddCommand(qualifyCmd)
 }
