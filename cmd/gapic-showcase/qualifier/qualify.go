@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 
 	trace "github.com/google/go-trace"
-	"github.com/spf13/cobra"
 )
 
 /* Development instructions
@@ -21,9 +20,15 @@ go run *.go
 
 */
 
+type Settings struct {
+	Generator
+	Timestamp string
+	Verbose   bool
+}
+
 const showcaseCmd = "gapic-showcase" // TODO: Consider running in-process
 
-func Run(cmd *cobra.Command, args []string) {
+func Run(settings *Settings) {
 	const (
 		RetCodeSuccess = iota
 		RetCodeInternalError
@@ -32,10 +37,6 @@ func Run(cmd *cobra.Command, args []string) {
 		RetCodeCantRunShowcase
 		RetScenarioFailure
 	)
-
-	debugMe := true // TODO: get from CLI args
-	trace.On(debugMe)
-	trace.Trace("timestamp: %s", timestamp)
 
 	GetAssets()
 
@@ -49,12 +50,7 @@ func Run(cmd *cobra.Command, args []string) {
 	}
 	defer endProcess(showcase)
 
-	generatorData, err := getGeneratorData()
-	if err != nil {
-		os.Exit(RetCodeUsageError)
-	}
-
-	allScenarios, err := GetTestScenarios(generatorData)
+	allScenarios, err := GetTestScenarios(settings)
 	if err != nil {
 		os.Exit(RetCodeInternalError)
 	}
@@ -102,42 +98,18 @@ func checkDependencies() error {
 	return nil
 }
 
-// getGeneratorData obtains the name of the generator from the command
-// line, and whether it is a protoc plugin (if not, it is considered
-// part of the monolith)
-func getGeneratorData() (*GeneratorInfo, error) {
-	// pluginName := "go"                                                               // TODO: get from CLI args
-	// pluginDir := "/tmp/goinstall/bin"                                                // TODO: get from CLI args
-	// pluginOpt := "go-gapic-package=cloud.google.com/go/showcase/apiv1beta1;showcase" // TODO: get from CLI args
-	// generator := &GeneratorInfo{
-	// 	name:    pluginName,
-	// 	dir:     pluginDir,
-	// 	options: pluginOpt,
-	// }
-
-	pluginName := "python"
-	pluginDir := ""
-	pluginOpt := ""
-	generator := &GeneratorInfo{
-		name:    pluginName,
-		dir:     pluginDir,
-		options: pluginOpt,
-	}
-	trace.Trace("hard-coded generator=%#v", generator)
-	return generator, nil
-}
-
 // GetTestScenarios returns a list of Scenario as found in the specified
 // scenario root directory.
-func GetTestScenarios(generator *GeneratorInfo) ([]*Scenario, error) {
+func GetTestScenarios(settings *Settings) ([]*Scenario, error) {
 	allScenarios := []*Scenario{}
 	allScenarioConfigs := GetFilesByDir(AcceptanceSuite)
 	for _, config := range allScenarioConfigs {
 		defaultShowcasePort := 123 // TODO fix
 		newScenario := &Scenario{
 			name:         config.Directory,
+			timestamp:    settings.Timestamp,
 			showcasePort: defaultShowcasePort,
-			generator:    generator,
+			generator:    &settings.Generator,
 			files:        config.Files,
 			fileBox:      AcceptanceSuite,
 			schemaBox:    SchemaSuite,

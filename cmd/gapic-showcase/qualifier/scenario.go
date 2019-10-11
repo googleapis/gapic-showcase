@@ -8,35 +8,28 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	packr "github.com/gobuffalo/packr/v2"
 	trace "github.com/google/go-trace"
 	yaml "gopkg.in/yaml.v2"
 )
 
-var timestamp string
-
 const includeFilePrefix = "include."
 const includeFileDirectorySeparator = '/'
-
-func init() {
-	timestamp = time.Now().Format("20060102.150405")
-	trace.Trace("timestamp = %q", timestamp)
-}
 
 type Scenario struct {
 	// Every element in `files` corresponds to a file in `fileBox` under
 	// a directory called `name`, which is NOT part of the string
 	// element itself.
 	name        string
+	timestamp   string
 	files       []string
 	fileBox     *packr.Box
 	schemaBox   *packr.Box
 	sandbox     string
 	filesByType map[string][]string
 
-	generator    *GeneratorInfo
+	generator    *Generator
 	showcasePort int
 
 	generationOutput       []byte
@@ -199,7 +192,7 @@ func yamlDocTypes(fileContent []byte) (docTypes []string, err error) {
 
 func (scenario *Scenario) createSandbox() (err error) {
 
-	if scenario.sandbox, err = ioutil.TempDir("", fmt.Sprintf("showcase-qualify.%s.%s.", timestamp, scenario.name)); err != nil {
+	if scenario.sandbox, err = ioutil.TempDir("", fmt.Sprintf("showcase-qualify.%s.%s.", scenario.timestamp, scenario.name)); err != nil {
 		err := fmt.Errorf("could not create sandbox: %w", err)
 		trace.Trace(err)
 		return err

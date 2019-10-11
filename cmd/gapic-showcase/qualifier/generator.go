@@ -11,20 +11,20 @@ import (
 	trace "github.com/google/go-trace"
 )
 
-// GeneratorInfo has the information needed to run a generator in a given language. The generator
+// Generator has the information needed to run a generator in a given language. The generator
 // will be run as a protoc plugin unless `isMonolith` is set, in which case gapic-generator will be
 // invoked directly.
-type GeneratorInfo struct {
-	name       string
-	dir        string
-	options    string
-	isMonolith bool
+type Generator struct {
+	Language        string
+	PluginDirectory string
+	PluginOptions   string
+	isMonolith      bool
 }
 
-// Run will run `gi` from `work_dir`, obtaining the required files from filesByType.
-func (gi *GeneratorInfo) Run(workDir string, filesByType map[string][]string) ([]byte, *os.ProcessState, error) {
+// Run will run the generator from `work_dir`, obtaining the required files from filesByType.
+func (gen *Generator) Run(workDir string, filesByType map[string][]string) ([]byte, *os.ProcessState, error) {
 	generationDir := "generated"
-	if gi.isMonolith {
+	if gen.isMonolith {
 		return nil, nil, fmt.Errorf("monolith not implemented yet")
 	}
 
@@ -32,10 +32,10 @@ func (gi *GeneratorInfo) Run(workDir string, filesByType map[string][]string) ([
 		return nil, nil, err
 	}
 
-	optionFlag := fmt.Sprintf("--%s_gapic_opt", gi.name)
+	optionFlag := fmt.Sprintf("--%s_gapic_opt", gen.Language)
 	allOptions := []string{}
-	if len(gi.options) > 0 {
-		allOptions = append(allOptions, optionFlag, gi.options)
+	if len(gen.PluginOptions) > 0 {
+		allOptions = append(allOptions, optionFlag, gen.PluginOptions)
 	}
 
 	sampleConfigFiles, _ := filesByType[fileTypeSampleConfig]
@@ -46,11 +46,11 @@ func (gi *GeneratorInfo) Run(workDir string, filesByType map[string][]string) ([
 
 	cmdParts := []string{
 		"protoc",
-		fmt.Sprintf("--%s_gapic_out", gi.name), fmt.Sprintf("./%s", generationDir),
+		fmt.Sprintf("--%s_gapic_out", gen.Language), fmt.Sprintf("./%s", generationDir),
 	}
 	cmdParts = append(cmdParts, allOptions...)
-	if len(gi.dir) > 0 {
-		cmdParts = append(cmdParts, fmt.Sprintf("--plugin=%s/protoc-gen-%s_gapic", gi.dir, gi.name))
+	if len(gen.PluginDirectory) > 0 {
+		cmdParts = append(cmdParts, fmt.Sprintf("--plugin=%s/protoc-gen-%s_gapic", gen.PluginDirectory, gen.Language))
 
 	}
 	cmdParts = append(cmdParts, filesByType[fileTypeProtobuf]...)
