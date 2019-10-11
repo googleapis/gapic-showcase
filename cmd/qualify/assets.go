@@ -12,6 +12,9 @@ import (
 var AcceptanceSuite *packr.Box
 var SchemaSuite *packr.Box
 
+const fileTypeSampleConfig = "com.google.api.codegen.SampleConfigProto"
+const fileTypeProtobuf = "proto"
+
 func GetAssets() {
 	// I believe we can't pass the arguments into a function
 	// because otherwise packr won't be able to recognize these

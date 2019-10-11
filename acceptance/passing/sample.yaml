@@ -1,6 +1,21 @@
 ---
-type: sampleconfig
-schema_version: 2
+type: com.google.api.codegen.SampleConfigProto
+schema_version: 1.2.0
+samples:
+- service: google.showcase.v1beta1.Echo
+  rpc: Echo
+  description: A sample of a simple echo request and response
+  request:
+  - field: content
+    comment: The content to be echoed back
+    value: a resounding echo...echo...echo
+    input_parameter: message
+  response:
+    - comment:
+      - "We simply print the response"
+    - print:
+      - 'Heard back: "%s"'
+      - $resp.content
 ---
 type: test/sample
 schema_version: 1

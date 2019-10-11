@@ -26,9 +26,9 @@ func init() {
 }
 
 type Scenario struct {
-	// Every f in `files` corresponds to a file in `fileBox` under
+	// Every element in `files` corresponds to a file in `fileBox` under
 	// a directory called `name`, which is NOT part of the string
-	// f itself.
+	// element itself.
 	name        string
 	files       []string
 	fileBox     *packr.Box
@@ -42,6 +42,7 @@ type Scenario struct {
 	generationOutput       []byte
 	generationProcessState *os.ProcessState
 	generationPassed       bool
+	sampleTestsPassed      bool
 }
 
 func (scenario *Scenario) sandboxPath(relativePath string) string {
@@ -107,8 +108,9 @@ func (scenario *Scenario) RunTests() {
 }
 
 func (scenario *Scenario) Success() bool {
-	// TODO: fill in
-	return true
+	return scenario.generationPassed && // the generation checks passed and...
+		(!scenario.generationProcessState.Success() || // ...either generation failed, or it succeeded with ...
+			(len(scenario.filesByType["test/samples"]) == 0 || scenario.sampleTestsPassed)) // all sample tests, if any, passing
 }
 
 // classifyConfigs classifies all the files in the scenario, storing the results in
