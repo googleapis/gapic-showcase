@@ -1,4 +1,4 @@
-package main
+package qualifier
 
 import (
 	"fmt"
@@ -19,8 +19,8 @@ func GetAssets() {
 	// I believe we can't pass the arguments into a function
 	// because otherwise packr won't be able to recognize these
 	// paths should be packed.
-	AcceptanceSuite = packr.New("acceptance suite", "../../acceptance")
-	SchemaSuite = packr.New("schema", "../../schema")
+	AcceptanceSuite = packr.New("acceptance suite", "acceptance_suite")
+	SchemaSuite = packr.New("schema", "../../../schema")
 
 	traceBox(AcceptanceSuite)
 	traceBox(SchemaSuite)

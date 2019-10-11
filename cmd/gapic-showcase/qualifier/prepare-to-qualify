@@ -3,7 +3,7 @@ VENV_NAME=venv/qualify
 DATE=$(date +'%Y-%m-%d.%H-%M')
 
 BUILD_DIR=$(pwd)
-go build ../gapic-showcase/
+go build ../../gapic-showcase/
 
 verify() {
   name=$1

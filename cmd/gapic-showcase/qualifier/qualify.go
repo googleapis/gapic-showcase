@@ -1,4 +1,4 @@
-package main
+package qualifier
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	trace "github.com/google/go-trace"
+	"github.com/spf13/cobra"
 )
 
 /* Development instructions
@@ -28,7 +29,7 @@ Choosing: https://tech.townsourced.com/post/embedding-static-files-in-go/
 
 const showcaseCmd = "gapic-showcase" // TODO: Consider running in-process
 
-func main() {
+func RunProcess(cmd *cobra.Command, args []string) {
 	const (
 		RetCodeSuccess = iota
 		RetCodeInternalError
