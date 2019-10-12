@@ -24,7 +24,7 @@ import (
 	"github.com/googleapis/gapic-showcase/util"
 )
 
-// This script is ran in CI when a new version tag is pushed to master. This script
+// This script is run in CI when a new version tag is pushed to master. This script
 // places the compiled proto descriptor set, a tarball of showcase-protos alongside its
 // dependencies, and the compiled executables of the gapic-showcase cli tool inside the
 // directory "dist"
@@ -103,10 +103,15 @@ func main() {
 	}
 	util.Execute(append(command, files...)...)
 
-	// Get cross compiler
-	// Mousetrap is a windows dependency that is not implicitly got since
-	// we only get the linux dependencies.
-	util.Execute("go", "get", "github.com/mitchellh/gox", "github.com/inconshreveable/mousetrap")
+	// Get Packr to generate the boxes with local files before compiling. The caller needs to
+	// make sure the installation directory is in the $PATH.
+	util.Execute("go", "get", "github.com/gobuffalo/packr/v2/packr2")
+	util.Execute("packr2")
+
+	// Get cross compiler. Mousetrap is a windows dependency that is not implicitly got since we
+	// only get the linux dependencies.  The caller needs to make sure the installation
+	// directory is in the $PATH.
+	util.Execute("go", "get", "-u", "github.com/mitchellh/gox", "github.com/inconshreveable/mousetrap")
 
 	// Compile binaries
 	stagingDir := filepath.Join("tmp", "binaries")
@@ -138,4 +143,8 @@ func main() {
 			filepath.Dir(files[0]),
 			filepath.Base(files[0]))
 	}
+
+	// Remove the generated Packr files from the source tree to avoid confusion.
+	util.Execute("packr2", "clean")
+
 }
