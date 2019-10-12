@@ -2,19 +2,17 @@
 VENV_NAME=venv/qualify
 DATE=$(date +'%Y-%m-%d.%H-%M')
 
-BUILD_DIR=$(pwd)
-go build ../../gapic-showcase/
-
 verify() {
   name=$1
   msg=$2
-  $name --version  >& /dev/null || { echo "Please install $name to continue. $2" ; return 2 ; }  
+  which $name  || { echo "Please install $name to continue. $2" ; return 2 ; }  
 }
 
 verify python3 || return $?
 verify protoc "See https://github.com/protocolbuffers/protobuf/releases" || return $?
 verify pip || return $?
 verify curl || return $?
+verify protoc-gen-python_gapic || return $?
 
 export GAPIC_QUALIFY_DIR=${1:-$(mktemp -d -t qualify.${DATE}.XXXXXX)}
 pushd ${GAPIC_QUALIFY_DIR} >& /dev/null
@@ -29,7 +27,6 @@ echo '=== creating venv'  && \
   echo "=== installing pip" && \
   pip install sample-tester && \
   echo "=== installing showcase" && \
-  mv ${BUILD_DIR}/gapic-showcase . && \
   export PATH=$(pwd):${PATH}
 
 
