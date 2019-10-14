@@ -15,15 +15,18 @@ var SchemaSuite *packr.Box
 const fileTypeSampleConfig = "com.google.api.codegen.SampleConfigProto"
 const fileTypeProtobuf = "proto"
 
-func GetAssets() {
-	// I believe we can't pass the arguments into a function
-	// because otherwise packr won't be able to recognize these
-	// paths should be packed.
+func GetAssets() error {
 	AcceptanceSuite = packr.New("acceptance suite", "acceptance_suite")
 	SchemaSuite = packr.New("schema", "../../../schema")
 
+	if len(AcceptanceSuite.List()) == 0 || len(SchemaSuite.List()) == 0 {
+		return fmt.Errorf("release error: some of the asset boxes are empty")
+	}
+
 	traceBox(AcceptanceSuite)
 	traceBox(SchemaSuite)
+
+	return nil
 }
 
 func traceBox(box *packr.Box) {

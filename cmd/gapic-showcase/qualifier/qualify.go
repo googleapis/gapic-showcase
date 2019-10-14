@@ -41,7 +41,9 @@ func Run(settings *Settings) {
 		RetScenarioFailure
 	)
 
-	GetAssets()
+	if err := GetAssets(); err != nil {
+		os.Exit(RetCodeInternalError)
+	}
 
 	if err := checkDependencies(); err != nil {
 		os.Exit(RetCodeFailedDependencies)
