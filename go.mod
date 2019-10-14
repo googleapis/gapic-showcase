@@ -2,6 +2,7 @@ module github.com/googleapis/gapic-showcase
 
 require (
 	cloud.google.com/go v0.47.0
+	github.com/gobuffalo/packr/v2 v2.7.1
 	github.com/golang/protobuf v1.3.2
 	github.com/google/go-trace v0.0.0-20180203010202-d282251f7009
 	github.com/googleapis/gax-go/v2 v2.0.5
