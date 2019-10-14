@@ -27,7 +27,7 @@ type Settings struct {
 	Verbose      bool
 }
 
-const showcaseCmd = "gapic-showcase" // TODO: Consider running in-process
+const showcaseCmd = "gapic-showcase"
 
 func Run(settings *Settings) {
 	// TODO: Return an error rather than exiting. We can return an error type ErrorCode that
@@ -107,36 +107,6 @@ func GetTestScenarios(settings *Settings) ([]*Scenario, error) {
 		allScenarios = append(allScenarios, newScenario)
 	}
 	return allScenarios, nil
-}
-
-// startShowcase starts the Showcase server and returns its PID
-func startShowcase() (*exec.Cmd, error) {
-	// TODO: fill in
-	trace.Trace("")
-	cmd := exec.Command(showcaseCmd)
-	err := cmd.Start()
-	return cmd, err
-}
-
-// endProcess ends the process with the specified PID
-func endProcess(cmd *exec.Cmd) error {
-	// TODO: fill in
-	trace.Trace("cmd=%v)", cmd)
-	process := cmd.Process
-	if err := process.Signal(os.Interrupt); err != nil {
-		msg := fmt.Sprintf("could not end process %v normally", process.Pid)
-		if err := process.Kill(); err != nil {
-			msg = fmt.Sprintf("%s; killing failed. Please kill manually!", msg)
-			log.Printf(msg)
-			return fmt.Errorf(msg)
-		}
-		msg = fmt.Sprintf("%s but killing it succeeded", msg)
-		log.Printf(msg)
-	}
-	trace.Trace("waiting for process to end: %v (%v)", process.Pid, cmd.Path)
-	cmd.Wait()
-	trace.Trace("process ended:              %v (%v) ended", process.Pid, cmd.Path)
-	return nil
 }
 
 // getAllFiles returns a list of all the files (excluding directories)

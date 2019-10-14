@@ -28,10 +28,11 @@ func init() {
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			servers := RunShowcase(strconv.Itoa(settings.ShowcasePort), "")
+			defer servers.Shutdown()
+
 			settings.Language = args[0]
 			trace.Trace("settings: %v", settings)
 			qualifier.Run(settings)
-			servers.Shutdown()
 		},
 	}
 	rootCmd.AddCommand(qualifyCmd)
