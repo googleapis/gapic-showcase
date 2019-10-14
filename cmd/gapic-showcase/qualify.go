@@ -1,3 +1,17 @@
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package main
 
 import (
@@ -11,8 +25,6 @@ import (
 )
 
 func init() {
-	trace.On(false) // set to true for debugging
-
 	var timestamp string
 	timestamp = time.Now().Format("20060102.150405")
 	trace.Trace("timestamp = %q", timestamp)
@@ -27,6 +39,10 @@ func init() {
 		Short: "Tests a provided GAPIC generator against an acceptance suite",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
+			// TODO: Consider moving this to a more central place for debugging all of
+			// showcase.
+			trace.On(false) // set to true for debugging
+
 			servers := RunShowcase(strconv.Itoa(settings.ShowcasePort), "")
 			defer servers.Shutdown()
 
@@ -37,16 +53,16 @@ func init() {
 	}
 	rootCmd.AddCommand(qualifyCmd)
 	qualifyCmd.Flags().StringVarP(
-		&settings.PluginDirectory,
+		&settings.Directory,
 		"dir",
 		"d",
 		"",
 		"The directory in which to find the protoc plugin implementing the given GAPIC generator")
 	qualifyCmd.Flags().StringVarP(
-		&settings.PluginOptions,
+		&settings.Options,
 		"options",
 		"o",
 		"",
-		"The options to pass to the protoc plugin in order to generate a GAPIC for the showcase Echo service")
+		"The options to pass to the generator in order to generate a GAPIC for the showcase Echo service")
 
 }

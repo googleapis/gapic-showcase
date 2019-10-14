@@ -1,3 +1,17 @@
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package qualifier
 
 import (
@@ -14,55 +28,58 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-const includeFilePrefix = "include."
-const includeFileDirectorySeparator = '/'
+// Constants pertaining to the syntax of include files. Include files are akin to symbolic links:
+// they reference content that will be copied at run-time from the indicated location to the include
+// file's location under the indicated names. For example, an include file called "include.boren"
+// with contents "api-common-protos/google/" will be replaced at run-time with a directory called
+// "boren" whose contents will be a copy of everything under "api-common-protos/google/"
+//
+// We need some mechanism for including common protos because the protos under test may reference
+// them. This particular scheme is also useful in that it allows us to explicitly pass to the
+// generator only the protos explicitly listed in the acceptance check, rather than also having to
+// include all the protos that are transitively included.
+const (
+	// In a qualifier suite directory, any file that begins with this prefix is considered an
+	// include file. The rest of the filename after the prefix is the destination filename to
+	// which the files referenced by the content of the include file will be copied.
+	includeFilePrefix = "include."
+
+	// In the contents of an include file, this symbol will be treated as the directory
+	// separator. At run time, it will be replaced the appropriate os.PathSeparator.
+	includeFileDirectorySeparator = '/'
+)
 
 type Scenario struct {
 	// Every element in `files` corresponds to a file in `fileBox` under
 	// a directory called `name`, which is NOT part of the string
 	// element itself.
-	name        string
-	timestamp   string
-	files       []string
-	fileBox     *packr.Box
-	schemaBox   *packr.Box
-	sandbox     string
-	filesByType map[string][]string
+	name        string              // name of the scenario
+	timestamp   string              // timestamp for debug and trace messages
+	files       []string            // a flat list of files in the scenario
+	fileBox     *packr.Box          // the files explicitly specified in the scenario
+	schemaBox   *packr.Box          // additional files that may be referenced by include files in a scenario
+	sandbox     string              // the sandbox created to run this scenario
+	filesByType map[string][]string // scenario files partitioned by file type
 
 	generator    *Generator
-	showcasePort int
+	showcasePort int // the port of the running showcase server against which samples will run
 
-	generationOutput       []byte
-	generationProcessState *os.ProcessState
-	generationPassed       bool
-	sampleTestsPassed      bool
+	generationOutput       []byte           // combined output of the generation process
+	generationProcessState *os.ProcessState // info on the completed generation process
+	generationPassed       bool             // whether all generation checks passed
+	sampleTestsPassed      bool             // whether all sample tests specified passed
 }
 
-func (scenario *Scenario) sandboxPath(relativePath string) string {
-	if len(scenario.name) == 0 {
-		trace.Trace("scenario name not set yet: relativePath==%q", relativePath)
-		panic("scenario name not set yet when trying to get sandbox filename")
-	}
-	if len(scenario.sandbox) == 0 {
-		trace.Trace("sandbox name not set yet: relativePath==%q", relativePath)
-		panic("sandbox name not set yet when trying to get sandbox filename")
-	}
-
-	return filepath.Join(scenario.sandbox, relativePath)
+// Success returns true iff all the expectations for this scenario were met.
+func (scenario *Scenario) Success() bool {
+	return scenario.generationPassed && // the generation checks passed and...
+		(!scenario.generationProcessState.Success() || // ...either generation failed, or it succeeded with ...
+			(len(scenario.filesByType["test/samples"]) == 0 || scenario.sampleTestsPassed)) // all sample tests, if any, passing
 }
 
-func (scenario *Scenario) fileBoxPath(relativePath string) string {
-	if len(scenario.name) == 0 {
-		trace.Trace("scenario name not set yet: relativePath==%q", relativePath)
-		panic("scenario name not set yet when trying to get box filename")
-	}
-	return filepath.Join(scenario.name, relativePath)
-}
-
-func (scenario *Scenario) fromFileBox(relativePath string) ([]byte, error) {
-	return scenario.fileBox.Find(scenario.fileBoxPath(relativePath))
-}
-
+// Run runs this particular acceptance scenario by creating a sandbox in which it generates
+// libraries and samples and then tests that the generation and any sample tests performed as
+// expected.
 func (scenario *Scenario) Run() error {
 	if err := scenario.classifyConfigs(); err != nil {
 		return fmt.Errorf("could not classify config files for scenario %q: %w", scenario.name, err)
@@ -81,6 +98,7 @@ func (scenario *Scenario) Run() error {
 	return nil
 }
 
+// Generate generates the client libraries and samples for this scenario.
 func (scenario *Scenario) Generate() error {
 	var err error
 	scenario.generationOutput, scenario.generationProcessState, err = scenario.generator.Run(scenario.sandbox, scenario.filesByType)
@@ -89,21 +107,47 @@ func (scenario *Scenario) Generate() error {
 	return err
 }
 
+// CheckGeneration verifies that generation matched configured expectations when it succeeded or
+// failed.
 func (scenario *Scenario) CheckGeneration() {
 	// TODO: Fill in in order to handle expected, configured failures
 	trace.Trace("CheckGeneration")
 	scenario.generationPassed = scenario.generationProcessState.Success()
 }
 
+// RunTests runs tests on the generated samples.
 func (scenario *Scenario) RunTests() {
 	// TODO: Fill in
 	trace.Trace("RunTests (TODO)")
 }
 
-func (scenario *Scenario) Success() bool {
-	return scenario.generationPassed && // the generation checks passed and...
-		(!scenario.generationProcessState.Success() || // ...either generation failed, or it succeeded with ...
-			(len(scenario.filesByType["test/samples"]) == 0 || scenario.sampleTestsPassed)) // all sample tests, if any, passing
+// sandboxPath returns `relativePath` re-rooted at `scenario.sandbox`.
+func (scenario *Scenario) sandboxPath(relativePath string) string {
+	if len(scenario.name) == 0 {
+		trace.Trace("scenario name not set yet: relativePath==%q", relativePath)
+		panic("scenario name not set yet when trying to get sandbox filename")
+	}
+	if len(scenario.sandbox) == 0 {
+		trace.Trace("sandbox name not set yet: relativePath==%q", relativePath)
+		panic("sandbox name not set yet when trying to get sandbox filename")
+	}
+
+	return filepath.Join(scenario.sandbox, relativePath)
+}
+
+// fileBoxPath returns relativePath re-rooted at scenario.name, so that it references an object in
+// `scenario.fileBox`.
+func (scenario *Scenario) fileBoxPath(relativePath string) string {
+	if len(scenario.name) == 0 {
+		trace.Trace("scenario name not set yet: relativePath==%q", relativePath)
+		panic("scenario name not set yet when trying to get box filename")
+	}
+	return filepath.Join(scenario.name, relativePath)
+}
+
+// fromFileBox returns the file named by `relativePath` from `scenario.fileBox`.
+func (scenario *Scenario) fromFileBox(relativePath string) ([]byte, error) {
+	return scenario.fileBox.Find(scenario.fileBoxPath(relativePath))
 }
 
 // classifyConfigs classifies all the files in the scenario, storing the results in
@@ -168,6 +212,8 @@ func (scenario *Scenario) getFileTypes(thisFile string) (fileTypes []string, err
 	return fileTypes, err
 }
 
+// yamlDocTypes returns a list of the document types encountered in the (possibly multi-document)
+// YAML payload `fileContent`.
 func yamlDocTypes(fileContent []byte) (docTypes []string, err error) {
 	type docSchema struct {
 		Type string
@@ -190,8 +236,9 @@ func yamlDocTypes(fileContent []byte) (docTypes []string, err error) {
 	return docTypes, nil
 }
 
+// createSandbox creates a sandbox directory within which all the generation and checks for this
+// scenario will be run.
 func (scenario *Scenario) createSandbox() (err error) {
-
 	if scenario.sandbox, err = ioutil.TempDir("", fmt.Sprintf("showcase-qualify.%s.%s.", scenario.timestamp, scenario.name)); err != nil {
 		err := fmt.Errorf("could not create sandbox: %w", err)
 		trace.Trace(err)
@@ -260,10 +307,14 @@ func (scenario *Scenario) getIncludes(includes []string) error {
 	return nil
 }
 
+// copyFiles copies the files listed in `files` from `scenario.fromFileBox` to `scenario.sandbox`.
 func (scenario *Scenario) copyFiles(files []string) error {
 	return scenario.copyFilesReplacePath(files, scenario.fromFileBox, "", "")
 }
 
+// copyFilesReplacePaths copies the files listed in `files` from the source in `fromBox` to the
+// `scenario.sandbox`. In so doing, it replaces a leading `replaceSrc` prefix in each filename with
+// `replaceDst`.
 func (scenario *Scenario) copyFilesReplacePath(files []string, fromBox func(string) ([]byte, error), replaceSrc, replaceDst string) (err error) {
 	const filePermissions = 0555
 	replace := len(replaceSrc) > 0

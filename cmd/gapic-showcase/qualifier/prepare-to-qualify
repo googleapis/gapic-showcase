@@ -1,6 +1,26 @@
 #!/bin/bash
+# Copyright 2019 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# This script is a tool for developers to invoke to prepare for local
+# development. It sets up the environment needed to run
+# `gapic-showcase-qualify`.
+
 VENV_NAME=venv/qualify
 DATE=$(date +'%Y-%m-%d.%H-%M')
+
+# Check external dependencies
 
 verify() {
   name=$1
@@ -14,9 +34,11 @@ verify pip || return $?
 verify curl || return $?
 verify protoc-gen-python_gapic || return $?
 
+
+# Set up environment
+
 export GAPIC_QUALIFY_DIR=${1:-$(mktemp -d -t qualify.${DATE}.XXXXXX)}
 pushd ${GAPIC_QUALIFY_DIR} >& /dev/null
-
 
 VENV_CREATE="python3 -m venv $VENV_NAME"
 

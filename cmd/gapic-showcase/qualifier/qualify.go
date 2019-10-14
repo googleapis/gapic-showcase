@@ -1,34 +1,35 @@
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package qualifier
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"os/exec"
-	"path/filepath"
 
 	trace "github.com/google/go-trace"
 )
 
-/* Development instructions
-
-. ./prepare-to-qualify
-
-=== Sample run ======
-go run *.go
-
-
-*/
-
+// Settings contains the settings for a run of the qualification suite.
 type Settings struct {
 	Generator
 	ShowcasePort int
-	Timestamp    string
+	Timestamp    string // for tracing and diagnostics
 	Verbose      bool
 }
 
-const showcaseCmd = "gapic-showcase"
-
+// Run runs the qualification suite using the values in `settings`.
 func Run(settings *Settings) {
 	// TODO: Return an error rather than exiting. We can return an error type ErrorCode that
 	// wraps the current errors and includes the appropriate return code, and change main() so
@@ -41,7 +42,7 @@ func Run(settings *Settings) {
 		RetScenarioFailure
 	)
 
-	if err := GetAssets(); err != nil {
+	if err := getAssets(); err != nil {
 		os.Exit(RetCodeInternalError)
 	}
 
@@ -49,7 +50,7 @@ func Run(settings *Settings) {
 		os.Exit(RetCodeFailedDependencies)
 	}
 
-	allScenarios, err := GetTestScenarios(settings)
+	allScenarios, err := getTestScenarios(settings)
 	if err != nil {
 		os.Exit(RetCodeInternalError)
 	}
@@ -71,39 +72,19 @@ func Run(settings *Settings) {
 	}
 }
 
-func checkDependencies() error {
-	sampleTesterCmd := "sample-tester"
-	notFound := []string{}
-	trace.Trace("")
-
-	sampleTesterPath, err := exec.LookPath(sampleTesterCmd)
-	if err != nil {
-		notFound = append(notFound, sampleTesterCmd)
-	}
-
-	if len(notFound) > 0 {
-		msg := fmt.Sprintf("could not find dependencies in $PATH: %q", notFound)
-		log.Printf(msg)
-		return fmt.Errorf(msg)
-	}
-	trace.Trace("found %q: %s", sampleTesterCmd, sampleTesterPath)
-	return nil
-}
-
-// GetTestScenarios returns a list of Scenario as found in the specified
-// scenario root directory.
-func GetTestScenarios(settings *Settings) ([]*Scenario, error) {
+// getTestScenarios returns a list of Scenario as found in the acceptanceSuite.
+func getTestScenarios(settings *Settings) ([]*Scenario, error) {
 	allScenarios := []*Scenario{}
-	allScenarioConfigs := GetFilesByDir(AcceptanceSuite)
+	allScenarioConfigs := getFilesByDir(acceptanceSuite)
 	for _, config := range allScenarioConfigs {
 		newScenario := &Scenario{
-			name:         config.Directory,
+			name:         config.directory,
 			timestamp:    settings.Timestamp,
 			showcasePort: settings.ShowcasePort,
 			generator:    &settings.Generator,
-			files:        config.Files,
-			fileBox:      AcceptanceSuite,
-			schemaBox:    SchemaSuite,
+			files:        config.files,
+			fileBox:      acceptanceSuite,
+			schemaBox:    schemaSuite,
 		}
 		trace.Trace("adding scenario %#v", newScenario)
 		allScenarios = append(allScenarios, newScenario)
