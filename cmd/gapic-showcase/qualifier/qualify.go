@@ -110,22 +110,3 @@ func GetTestScenarios(settings *Settings) ([]*Scenario, error) {
 	}
 	return allScenarios, nil
 }
-
-// getAllFiles returns a list of all the files (excluding directories)
-// at any level under `root`.
-func getAllFiles(root string) ([]string, error) {
-	trace.Trace("root=%q", root)
-	allFiles := []string{}
-	err := filepath.Walk(root,
-		func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if info.IsDir() {
-				return nil
-			}
-			allFiles = append(allFiles, path)
-			return nil
-		})
-	return allFiles, err
-}
