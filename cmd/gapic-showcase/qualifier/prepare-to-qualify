@@ -15,7 +15,7 @@
 
 # This script is a tool for developers to invoke to prepare for local
 # development. It sets up the environment needed to run
-# `gapic-showcase-qualify`.
+# `gapic-showcase qualify`.
 
 VENV_NAME=venv/qualify
 DATE=$(date +'%Y-%m-%d.%H-%M')

@@ -82,7 +82,7 @@ func traceBox(box *packr.Box) {
 // includes the path components for `Directory`.
 type filesByDir struct {
 	directory string
-	files     []string // filenames are relative paths from `Directory`
+	files     []string // filenames are paths relative to `Directory`
 }
 
 // getFilesByDir returns a list of `filesByDir` objects, one per top-level directory in `box`.
