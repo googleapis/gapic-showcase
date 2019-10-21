@@ -40,12 +40,13 @@ import (
 // include all the protos that are transitively included.
 const (
 	// In a qualifier suite directory, any file that begins with this prefix is considered an
-	// include file. The rest of the filename after the prefix is the destination filename to
-	// which the files referenced by the content of the include file will be copied.
+	// include file. The rest of the filename after the prefix is the destination file or
+	// directory name to which the files referenced by the content of the include file will be
+	// copied.
 	includeFilePrefix = "include."
 
 	// In the contents of an include file, this symbol will be treated as the directory
-	// separator. At run time, it will be replaced the appropriate os.PathSeparator.
+	// separator. At run time, it will be replaced by the appropriate os.PathSeparator.
 	includeFileDirectorySeparator = '/'
 )
 
@@ -74,7 +75,7 @@ type Scenario struct {
 func (scenario *Scenario) Success() bool {
 	return scenario.generationPassed && // the generation checks passed and...
 		(!scenario.generationProcessState.Success() || // ...either generation failed, or it succeeded with ...
-			(len(scenario.filesByType["test/samples"]) == 0 || scenario.sampleTestsPassed)) // all sample tests, if any, passing
+			(len(scenario.filesByType[fileTypeSampleTest]) == 0 || scenario.sampleTestsPassed)) // all sample tests, if any, passing.
 }
 
 // Run runs this particular acceptance scenario by creating a sandbox in which it generates
@@ -121,27 +122,15 @@ func (scenario *Scenario) RunTests() {
 	trace.Trace("RunTests (TODO)")
 }
 
-// sandboxPath returns `relativePath` re-rooted at `scenario.sandbox`.
+// sandboxPath returns `relativePath` re-rooted at `scenario.sandbox`,
+// which must have been previously set.
 func (scenario *Scenario) sandboxPath(relativePath string) string {
-	if len(scenario.name) == 0 {
-		trace.Trace("scenario name not set yet: relativePath==%q", relativePath)
-		panic("scenario name not set yet when trying to get sandbox filename")
-	}
-	if len(scenario.sandbox) == 0 {
-		trace.Trace("sandbox name not set yet: relativePath==%q", relativePath)
-		panic("sandbox name not set yet when trying to get sandbox filename")
-	}
-
 	return filepath.Join(scenario.sandbox, relativePath)
 }
 
 // fileBoxPath returns relativePath re-rooted at scenario.name, so that it references an object in
 // `scenario.fileBox`.
 func (scenario *Scenario) fileBoxPath(relativePath string) string {
-	if len(scenario.name) == 0 {
-		trace.Trace("scenario name not set yet: relativePath==%q", relativePath)
-		panic("scenario name not set yet when trying to get box filename")
-	}
 	return filepath.Join(scenario.name, relativePath)
 }
 
@@ -157,71 +146,62 @@ func (scenario *Scenario) fromFileBox(relativePath string) ([]byte, error) {
 func (scenario *Scenario) classifyConfigs() (err error) {
 	scenario.filesByType = make(map[string][]string)
 	// TODO: process `include.*` files first
-	for _, thisFile := range scenario.files {
-		fileTypes, err := scenario.getFileTypes(thisFile)
+	for _, file := range scenario.files {
+		types, err := scenario.getFileTypes(file)
 		if err != nil {
 			return err
 		}
-		for _, oneType := range fileTypes {
-			similarFiles := scenario.filesByType[oneType]
-			scenario.filesByType[oneType] = append(similarFiles, thisFile)
+		for _, fType := range types {
+			similarFiles := scenario.filesByType[fType]
+			scenario.filesByType[fType] = append(similarFiles, file)
 		}
-		trace.Trace("%s: type %q", thisFile, fileTypes)
+		trace.Trace("%s: type %q", file, types)
 	}
 	return nil
 }
 
-// getFileTypes gets the various type labels for `thisFile`. The type labels are either the
+// getFileTypes gets the various type labels for `file`. The type labels are either the
 // singleton list {"include"}, or a list {"scenario", ...} that includes the various types of data
 // included in that file.
-func (scenario *Scenario) getFileTypes(thisFile string) (fileTypes []string, err error) {
+func (scenario *Scenario) getFileTypes(file string) (types []string, err error) {
 
-	for idx := strings.Index(thisFile, includeFilePrefix); idx >= 0; idx = strings.Index(thisFile[idx+1:], includeFilePrefix) {
-		if !(idx == 0 || thisFile[idx-1] == os.PathSeparator) {
-			// The directory entry does not start with
-			// this pattern, so it's not an include file.
-			continue
-		}
-		if strings.Index(thisFile[idx+1:], string(os.PathListSeparator)) != -1 {
-			// There is a sub-directory component, so this is not a file.
-			continue
-		}
-
-		// This looks like a legitimate include file. Cease classifying.
+	// Identify include files in the scenario. Include files always begin with `includeFilePrefix`
+	pathParts := strings.Split(file, string(os.PathSeparator))
+	if len(pathParts) > 0 && strings.HasPrefix(pathParts[len(pathParts)-1], includeFilePrefix) {
 		return []string{"include"}, nil
 	}
 
-	extension := filepath.Ext(thisFile)
+	extension := filepath.Ext(file)
 	switch extension {
 	case ".proto":
-		fileTypes = []string{"proto"}
+		types = []string{"proto"}
 	case ".yaml", ".yml":
-		trace.Trace("reading %s", thisFile)
-		content, err := scenario.fromFileBox(thisFile)
+		trace.Trace("reading %s", file)
+		content, err := scenario.fromFileBox(file)
 		if err != nil {
-			err := fmt.Errorf("error reading %q: %w", thisFile, err)
+			err := fmt.Errorf("error reading %q: %w", file, err)
 			trace.Trace(err)
-			return fileTypes, err
+			return types, err
 		}
-		fileTypes, err = yamlDocTypes(content)
+		types, err = yamlDocTypes(content)
 		if err != nil {
-			return fileTypes, err
+			return types, err
 		}
 	}
-	fileTypes = append(fileTypes, "scenario")
-	return fileTypes, err
+	types = append(types, "scenario")
+	return types, err
 }
 
 // yamlDocTypes returns a list of the document types encountered in the (possibly multi-document)
-// YAML payload `fileContent`.
-func yamlDocTypes(fileContent []byte) (docTypes []string, err error) {
+// YAML payload `content`.
+func yamlDocTypes(content []byte) (types []string, err error) {
 	type docSchema struct {
 		Type string
 	}
 
-	decoder := yaml.NewDecoder(bytes.NewReader(fileContent))
+	decoder := yaml.NewDecoder(bytes.NewReader(content))
 	for {
-		doc := &docSchema{Type: "(UNKNOWN)"}
+		doc := &docSchema{Type: fileTypeUnknown}
 		err = decoder.Decode(doc)
 		if err == io.EOF {
 			break
@@ -231,9 +211,9 @@ func yamlDocTypes(fileContent []byte) (docTypes []string, err error) {
 			trace.Trace(err)
 			return
 		}
-		docTypes = append(docTypes, doc.Type)
+		types = append(types, doc.Type)
 	}
-	return docTypes, nil
+	return types, nil
 }
 
 // createSandbox creates a sandbox directory within which all the generation and checks for this
@@ -245,14 +225,14 @@ func (scenario *Scenario) createSandbox() (err error) {
 		return err
 	}
 
-	err = scenario.copyFiles(scenario.filesByType["scenario"])
+	err = scenario.copyFiles(scenario.filesByType[fileTypeScenario])
 	if err != nil {
 		err = fmt.Errorf("could not copy scenario files: %w", err)
 		trace.Trace(err)
 		return err
 	}
 
-	if err = scenario.getIncludes(scenario.filesByType["include"]); err != nil {
+	if err = scenario.getIncludes(scenario.filesByType[fileTypeInclude]); err != nil {
 		err = fmt.Errorf("could not copy included schema files: %w", err)
 		trace.Trace(err)
 		return err
@@ -270,64 +250,66 @@ func (scenario *Scenario) createSandbox() (err error) {
 //
 // If there's need in the future, we could potentially grow to support fetching files or directories
 // from public repositories on the web.
-func (scenario *Scenario) getIncludes(includes []string) error {
-	for _, includeFile := range includes {
+func (scenario *Scenario) getIncludes(includeFiles []string) error {
+	for _, inclusion := range includeFiles {
 
 		// The following guards against includeFilePrefix being present elsewhere in
-		// includeFile. Otherwise, we could simply use
+		// inclusion. Otherwise, we could simply use
 		//
-		//   `dstPath := strings.Replace(includeFile, includeFilePrefix, "")`
-		prefixStartIdx := strings.LastIndex(includeFile, includeFilePrefix)
-		prefixEndIdx := prefixStartIdx + len(includeFilePrefix)
-		if prefixStartIdx < 0 || prefixEndIdx >= len(includeFile) {
-			msg := fmt.Sprintf("logic error: start %d, end %d outside of range [0, %d] for %q", prefixStartIdx, prefixEndIdx, len(includeFile), includeFile)
+		//   `dstPath := strings.Replace(inclusion, includeFilePrefix, "")`
+		prefixStartIdx := strings.LastIndex(inclusion, includeFilePrefix)
+		if prefixStartIdx < 0 {
+			msg := fmt.Sprintf("logic error: did not find prefix %q in %q", includeFilePrefix, inclusion)
 			trace.Trace(msg)
-			panic(msg)
+			return fmt.Errorf(msg)
 		}
-		dstPath := includeFile[0:prefixStartIdx] + includeFile[prefixEndIdx:]
+		prefixEndIdx := prefixStartIdx + len(includeFilePrefix)
+		dstPath := inclusion[:prefixStartIdx] + inclusion[prefixEndIdx:]
 
-		content, err := scenario.fromFileBox(includeFile)
+		content, err := scenario.fromFileBox(inclusion)
 		if err != nil {
-			err = fmt.Errorf("could not read %q: %w", includeFile, err)
+			err = fmt.Errorf("could not read %q: %w", inclusion, err)
 			trace.Trace(err)
 			return err
 		}
 
 		srcPath := strings.TrimSpace(string(content))
-		srcPath = strings.ReplaceAll(srcPath, string(includeFileDirectorySeparator), string(os.PathSeparator))
+		srcPath = strings.ReplaceAll(srcPath, string(inclusion), string(os.PathSeparator))
 		files, replacePath, err := GetMatchingFiles(scenario.schemaBox, dstPath, srcPath)
 		if err != nil {
-			err = fmt.Errorf("could not process %q: %w", includeFile, err)
+			err = fmt.Errorf("could not process %q: %w", inclusion, err)
 			trace.Trace(err)
 			return err
 		}
 
-		scenario.copyFilesReplacePath(files, scenario.schemaBox.Find, srcPath, replacePath)
+		scenario.copyFilesTo(files, scenario.schemaBox.Find, srcPath, replacePath)
 	}
 	return nil
 }
 
 // copyFiles copies the files listed in `files` from `scenario.fromFileBox` to `scenario.sandbox`.
 func (scenario *Scenario) copyFiles(files []string) error {
-	return scenario.copyFilesReplacePath(files, scenario.fromFileBox, "", "")
+	return scenario.copyFilesTo(files, scenario.fromFileBox, "", "")
 }
 
-// copyFilesReplacePaths copies the files listed in `files` from the source in `fromBox` to the
-// `scenario.sandbox`. In so doing, it replaces a leading `replaceSrc` prefix in each filename with
-// `replaceDst`.
-func (scenario *Scenario) copyFilesReplacePath(files []string, fromBox func(string) ([]byte, error), replaceSrc, replaceDst string) (err error) {
+// copyFilesTo copies the files listed in `files` from the source in `fromBox` to
+// `scenario.sandbox`. In so doing, it replaces a leading `prefix` in each filename with
+// `newPrefix`.
+func (scenario *Scenario) copyFilesTo(files []string, fromBox func(string) ([]byte, error), prefix, newPrefix string) (err error) {
 	const filePermissions = 0555
-	replace := len(replaceSrc) > 0
+	replace := len(prefix) > 0
 
-	trace.Trace("replaceSrc:%q  replaceDst:%q  len(files):%d", replaceSrc, replaceDst, len(files))
+	trace.Trace("prefix:%q  newPrefix:%q  len(files):%d", prefix, newPrefix, len(files))
 
 	for _, srcFile := range files {
 		renamedFile := srcFile
 		if replace {
-			if !strings.HasPrefix(renamedFile, replaceSrc) {
-				panic(fmt.Sprintf("%q does not begin with %q", srcFile, replaceSrc))
+			if !strings.HasPrefix(renamedFile, prefix) {
+				err := fmt.Errorf("%q does not begin with %q", srcFile, prefix)
+				trace.Trace(err)
+				return err
 			}
-			renamedFile = strings.Replace(renamedFile, replaceSrc, replaceDst, 1)
+			renamedFile = strings.Replace(renamedFile, prefix, newPrefix, 1)
 		}
 
 		renamedDir := filepath.Dir(renamedFile)

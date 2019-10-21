@@ -31,9 +31,17 @@ var (
 )
 
 const (
-	// various file types for classifying suite files
+	// various types that classify file contents, based on the file extension and/or YAML
+	// document types.
 	fileTypeSampleConfig = "com.google.api.codegen.SampleConfigProto"
+	fileTypeSampleTest   = "test/samples"
 	fileTypeProtobuf     = "proto"
+	fileTypeUnknown      = "(UNKNOWN)"
+
+	// each file in a scenario directory is either a scenario file that helps define a
+	// scenario, or an include file needed to support a scenario (eg commonly used types)
+	fileTypeScenario = "scenario"
+	fileTypeInclude  = "include"
 
 	// external command to run
 	cmdSampleTester = "sample-tester"
@@ -87,12 +95,12 @@ type filesByDir struct {
 
 // getFilesByDir returns a list of `filesByDir` objects, one per top-level directory in `box`.
 func getFilesByDir(box *packr.Box) []*filesByDir {
-	filesInAllDirs := []*filesByDir{}
-	var filesInThisDir *filesByDir
-	commitThisDir := func() {
-		if filesInThisDir != nil {
-			filesInAllDirs = append(filesInAllDirs, filesInThisDir)
-			filesInThisDir = nil
+	allDirs := []*filesByDir{}
+	var currDir *filesByDir
+	commitDir := func() {
+		if currDir != nil {
+			allDirs = append(allDirs, currDir)
+			currDir = nil
 		}
 	}
 
@@ -100,58 +108,57 @@ func getFilesByDir(box *packr.Box) []*filesByDir {
 	// all files under each first level directory appear
 	// contiguously.
 	allFiles := box.List()
-	previousDir := ""
-	for _, oneFile := range allFiles {
-		dir := strings.Split(oneFile, string(os.PathSeparator))[0]
-		if dir != previousDir {
-			commitThisDir()
-			filesInThisDir = &filesByDir{directory: dir}
+	prevName := ""
+	for _, file := range allFiles {
+		name := strings.Split(file, string(os.PathSeparator))[0]
+		if name != prevName {
+			commitDir()
+			currDir = &filesByDir{directory: name}
 		}
-		previousDir = dir
-		filesInThisDir.files = append(filesInThisDir.files, oneFile[len(dir)+len(string(os.PathSeparator)):])
+		prevName = name
+		currDir.files = append(currDir.files, file[len(name)+len(string(os.PathSeparator)):])
 	}
-	commitThisDir()
+	commitDir()
 
-	return filesInAllDirs
+	return allDirs
 }
 
-// GetMatchingFiles returns the a list of files in `box` matching
-// `srcPath`. `srcPath` should end with `os.PathSeparator` iff it refers
+// GetMatchingFiles returns the a list of files in `box` matching the
+// paths `src`. `src` should end with `os.PathSeparator` iff it refers
 // to a directory.
 //
 // As a convenience, this also returns an additional value, useful
 // for copying files within matched directories:
 //
-//  * `replacePath`: a copy of `dstPath` (which is assumed to have no
+//  * `newDst`: a copy of `dst` (which is assumed to have no
 //     trailing separator), with `os.PathSeparator` appended if
-//     `srcPath` refers to a directory
-func GetMatchingFiles(box *packr.Box, dstPath string, srcPath string) (files []string, replacePath string, err error) {
+//     `src` refers to a directory
+func GetMatchingFiles(box *packr.Box, dst, src string) (files []string, newDst string, err error) {
+	trace.Trace("reading %q", src)
 
-	trace.Trace("reading %q", srcPath)
+	newDst = dst
 
-	replacePath = dstPath
-
-	// If `srcPath` specifies a single file, match just that.
-	if !strings.HasSuffix(srcPath, string(os.PathSeparator)) {
-		if !box.Has(srcPath) {
-			err = fmt.Errorf("file box %q has no file %q", box.Name, srcPath)
+	// If `src` specifies a single file, match just that.
+	if !strings.HasSuffix(src, string(os.PathSeparator)) {
+		if !box.Has(src) {
+			err = fmt.Errorf("file box %q has no file %q", box.Name, src)
 			return
 		}
-		files = []string{srcPath}
+		files = []string{src}
 		return
 	}
 
 	// Let the caller replace the directory part of the path with
 	// the separator included.
-	replacePath = dstPath + string(os.PathSeparator)
+	newDst = dst + string(os.PathSeparator)
 
 	for _, entry := range box.List() {
-		if strings.HasPrefix(entry, srcPath) {
+		if strings.HasPrefix(entry, src) {
 			files = append(files, entry)
 		}
 	}
 	if len(files) == 0 {
-		err = fmt.Errorf("file box %q has no files matching %q", box.Name, srcPath)
+		err = fmt.Errorf("file box %q has no files matching %q", box.Name, src)
 		return
 	}
 

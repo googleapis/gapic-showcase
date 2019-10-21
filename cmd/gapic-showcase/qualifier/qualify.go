@@ -35,30 +35,27 @@ func Run(settings *Settings) {
 	// wraps the current errors and includes the appropriate return code, and change main() so
 	// that if the error it gets is of type ErrorCode, it exits with that code.
 	const (
-		RetCodeSuccess = iota
-		RetCodeInternalError
-		RetCodeFailedDependencies
-		RetCodeUsageError
-		RetScenarioFailure
+		retCodeSuccess = iota
+		retCodeInternalError
+		retCodeFailedDependencies
+		retCodeUsageError
+		retCodeScenarioFailure
 	)
 
 	if err := getAssets(); err != nil {
-		os.Exit(RetCodeInternalError)
+		os.Exit(retCodeInternalError)
 	}
 
 	if err := checkDependencies(); err != nil {
-		os.Exit(RetCodeFailedDependencies)
+		os.Exit(retCodeFailedDependencies)
 	}
 
-	allScenarios, err := getTestScenarios(settings)
-	if err != nil {
-		os.Exit(RetCodeInternalError)
-	}
+	allScenarios := getTestScenarios(settings)
 
 	success := true
 	for _, scenario := range allScenarios {
 		if err := scenario.Run(); err != nil {
-			os.Exit(RetCodeInternalError)
+			os.Exit(retCodeInternalError)
 		}
 		status := "SUCCESS"
 		if !scenario.Success() {
@@ -68,16 +65,16 @@ func Run(settings *Settings) {
 		fmt.Printf("scenario %q: %s    %s\n", scenario.name, status, scenario.sandbox)
 	}
 	if !success {
-		os.Exit(RetScenarioFailure)
+		os.Exit(retCodeScenarioFailure)
 	}
 }
 
 // getTestScenarios returns a list of Scenario as found in the acceptanceSuite.
-func getTestScenarios(settings *Settings) ([]*Scenario, error) {
-	allScenarios := []*Scenario{}
-	allScenarioConfigs := getFilesByDir(acceptanceSuite)
-	for _, config := range allScenarioConfigs {
-		newScenario := &Scenario{
+func getTestScenarios(settings *Settings) []*Scenario {
+	scenarios := []*Scenario{}
+	configDirs := getFilesByDir(acceptanceSuite)
+	for _, config := range configDirs {
+		scenarios = append(scenarios, &Scenario{
 			name:         config.directory,
 			timestamp:    settings.Timestamp,
 			showcasePort: settings.ShowcasePort,
@@ -85,9 +82,9 @@ func getTestScenarios(settings *Settings) ([]*Scenario, error) {
 			files:        config.files,
 			fileBox:      acceptanceSuite,
 			schemaBox:    schemaSuite,
-		}
-		trace.Trace("adding scenario %#v", newScenario)
-		allScenarios = append(allScenarios, newScenario)
+		})
+
 	}
-	return allScenarios, nil
+	trace.Trace("adding scenarios %#v", scenarios)
+	return scenarios
 }

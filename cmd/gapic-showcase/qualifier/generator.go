@@ -50,23 +50,23 @@ func (gen *Generator) Run(workDir string, filesByType map[string][]string) ([]by
 
 	// Construct the various arguments to invoke the generator as a protoc plugin.
 
-	optionFlag := fmt.Sprintf("--%s_gapic_opt", gen.Language)
-	allOptions := []string{}
+	pluginOpt := fmt.Sprintf("--%s_gapic_opt", gen.Language)
+	opts := []string{}
 	if len(gen.Options) > 0 {
-		allOptions = append(allOptions, optionFlag, gen.Options)
+		opts = append(opts, pluginOpt, gen.Options)
 	}
 
-	sampleConfigFiles, _ := filesByType[fileTypeSampleConfig]
-	if len(sampleConfigFiles) > 0 {
-		allOptions = append(allOptions, optionFlag,
-			fmt.Sprintf("samples=%s", strings.Join(sampleConfigFiles, ",samples=")))
+	sampleConfigs := filesByType[fileTypeSampleConfig]
+	if len(sampleConfigs) > 0 {
+		opts = append(opts, pluginOpt,
+			fmt.Sprintf("samples=%s", strings.Join(sampleConfigs, ",samples=")))
 	}
 
 	cmdParts := []string{
 		"protoc",
 		fmt.Sprintf("--%s_gapic_out", gen.Language), fmt.Sprintf("./%s", generationDir),
 	}
-	cmdParts = append(cmdParts, allOptions...)
+	cmdParts = append(cmdParts, opts...)
 	if len(gen.Directory) > 0 {
 		cmdParts = append(cmdParts, fmt.Sprintf("--plugin=%s/protoc-gen-%s_gapic", gen.Directory, gen.Language))
 
@@ -75,8 +75,7 @@ func (gen *Generator) Run(workDir string, filesByType map[string][]string) ([]by
 
 	// Execute the command, clear all but internal errors, return.
 
-	cmdString := strings.Join(cmdParts, " ")
-	trace.Trace("running: %s", cmdString)
+	trace.Trace("running: %s", strings.Join(cmdParts, " "))
 
 	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
 	cmd.Dir = workDir

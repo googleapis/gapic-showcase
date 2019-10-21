@@ -35,9 +35,15 @@ func init() {
 		ShowcasePort: 7469,
 	}
 	qualifyCmd := &cobra.Command{
-		Use:   "qualify",
+		Use:   "qualify [language]",
 		Short: "Tests a provided GAPIC generator against an acceptance suite",
-		Args:  cobra.ExactArgs(1),
+		Long: `qualify will execute a suite of acceptance checks against the GAPIC generator for the specified language.
+This confirms that the generator behaves and emits artifacts as specified in generator requirements under
+ a variety of inputs for various types of RPCs. Each acceptance check typically attempts to generate client
+libraries and corresponding standalone samples for the Showcase "Echo" service. The generator is invoked
+ as a protoc plugin; its location  may be specified via --dir, and additional generator options
+ that are needed to successfully generate the GAPIC for this API may be specified via --options,`,
+		Args: cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// TODO: Consider moving this to a more central place for debugging all of
 			// showcase.
@@ -63,6 +69,6 @@ func init() {
 		"options",
 		"o",
 		"",
-		"The options to pass to the generator in order to generate a GAPIC for the showcase Echo service")
+		"The options to pass to the generator in order to generate a GAPIC for the Showcase \"Echo\" service")
 
 }
