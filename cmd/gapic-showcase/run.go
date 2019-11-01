@@ -18,6 +18,7 @@ import (
 	"log"
 	"net"
 	"strings"
+	"sync"
 
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
@@ -37,49 +38,7 @@ func init() {
 		Use:   "run",
 		Short: "Runs the showcase server",
 		Run: func(cmd *cobra.Command, args []string) {
-			// Ensure port is of the right form.
-			if !strings.HasPrefix(port, ":") {
-				port = ":" + port
-			}
-
-			// Start listening.
-			lis, err := net.Listen("tcp", port)
-			if err != nil {
-				log.Fatalf("Showcase failed to listen on port '%s': %v", port, err)
-			}
-			stdLog.Printf("Showcase listening on port: %s", port)
-
-			// Setup Server.
-			logger := &loggerObserver{}
-			observerRegistry := server.ShowcaseObserverRegistry()
-			observerRegistry.RegisterUnaryObserver(logger)
-			observerRegistry.RegisterStreamRequestObserver(logger)
-			observerRegistry.RegisterStreamResponseObserver(logger)
-
-			opts := []grpc.ServerOption{
-				grpc.StreamInterceptor(observerRegistry.StreamInterceptor),
-				grpc.UnaryInterceptor(observerRegistry.UnaryInterceptor),
-			}
-			s := grpc.NewServer(opts...)
-			defer s.GracefulStop()
-
-			// Register Services to the server.
-			pb.RegisterEchoServer(s, services.NewEchoServer())
-			identityServer := services.NewIdentityServer()
-			pb.RegisterIdentityServer(s, identityServer)
-			messagingServer := services.NewMessagingServer(identityServer)
-			pb.RegisterMessagingServer(s, messagingServer)
-			operationsServer := services.NewOperationsServer(messagingServer)
-			pb.RegisterTestingServer(s, services.NewTestingServer(observerRegistry))
-			lropb.RegisterOperationsServer(s, operationsServer)
-
-			fb := fallback.NewServer(fallbackPort, "localhost"+port)
-			fb.StartBackground()
-			defer fb.Shutdown()
-
-			// Register reflection service on gRPC server.
-			reflection.Register(s)
-			s.Serve(lis)
+			RunShowcase(port, fallbackPort).Wait()
 		},
 	}
 	rootCmd.AddCommand(runCmd)
@@ -95,4 +54,87 @@ func init() {
 		"f",
 		":1337",
 		"The port that the fallback-proxy will be served on.")
+}
+
+// RunShowcase sets up and starts the showcase and fallback servers and returns pointers to
+// them. They can be shutdown by showcaseServers.Shutdown() or showcaseServers.Wait().
+func RunShowcase(port string, fallbackPort string) (showcaseServers *ShowcaseServers) {
+	// Ensure port is of the right form.
+	if !strings.HasPrefix(port, ":") {
+		port = ":" + port
+	}
+
+	// Start listening.
+	lis, err := net.Listen("tcp", port)
+	if err != nil {
+		log.Fatalf("Showcase failed to listen on port '%s': %v", port, err)
+	}
+	stdLog.Printf("Showcase listening on port: %s", port)
+
+	// Setup Server.
+	logger := &loggerObserver{}
+	observerRegistry := server.ShowcaseObserverRegistry()
+	observerRegistry.RegisterUnaryObserver(logger)
+	observerRegistry.RegisterStreamRequestObserver(logger)
+	observerRegistry.RegisterStreamResponseObserver(logger)
+
+	opts := []grpc.ServerOption{
+		grpc.StreamInterceptor(observerRegistry.StreamInterceptor),
+		grpc.UnaryInterceptor(observerRegistry.UnaryInterceptor),
+	}
+	s := grpc.NewServer(opts...)
+
+	// Register Services to the server.
+	pb.RegisterEchoServer(s, services.NewEchoServer())
+	identityServer := services.NewIdentityServer()
+	pb.RegisterIdentityServer(s, identityServer)
+	messagingServer := services.NewMessagingServer(identityServer)
+	pb.RegisterMessagingServer(s, messagingServer)
+	operationsServer := services.NewOperationsServer(messagingServer)
+	pb.RegisterTestingServer(s, services.NewTestingServer(observerRegistry))
+	lropb.RegisterOperationsServer(s, operationsServer)
+
+	var fb *fallback.FallbackServer
+	if len(fallbackPort) > 0 {
+		fb = fallback.NewServer(fallbackPort, "localhost"+port)
+		fb.StartBackground()
+	}
+
+	// Register reflection service on gRPC server.
+	reflection.Register(s)
+
+	var wait sync.WaitGroup
+	wait.Add(1)
+	go func() {
+		s.Serve(lis)
+		wait.Done()
+	}()
+	return &ShowcaseServers{s: s, fb: fb, wait: &wait}
+}
+
+// ShowcaseServers encapsulates information on running showcase servers, allowing for them to be
+// shutdown immediately or when they stop serving.
+type ShowcaseServers struct {
+	s    *grpc.Server
+	fb   *fallback.FallbackServer
+	wait *sync.WaitGroup
+}
+
+// Shutdown will immediately start a graceful shutdown of the servers.
+func (srv *ShowcaseServers) Shutdown() {
+	if srv.fb != nil {
+		srv.fb.Shutdown() // unfortunately, this always results in an en error log
+	}
+	if srv.s != nil {
+		srv.s.GracefulStop()
+	}
+}
+
+// Wait will wait until the servers stop serving and then call Shutdown() to shut them down
+// gracefully.
+func (srv *ShowcaseServers) Wait() {
+	if srv.wait != nil {
+		srv.wait.Wait()
+	}
+	srv.Shutdown()
 }

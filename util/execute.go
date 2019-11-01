@@ -22,6 +22,6 @@ import (
 // Execute runs the given strings as a command.
 func Execute(args ...string) {
 	if output, err := exec.Command(args[0], args[1:]...).CombinedOutput(); err != nil {
-		log.Fatalf("%s", output)
+		log.Fatalf("%s running %s", output, args)
 	}
 }
