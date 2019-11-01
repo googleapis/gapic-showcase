@@ -1,5 +1,10 @@
 # Release History
 
+### v0.6.0 / 2019-11-01
+- Add a gRPC ServiceConfig for microgenerator retry config
+- Regen client code with retry config
+- Update dependencies
+
 ### v0.5.0 / 2019-09-04
 - Update to Go version 1.13
 - Update dependencies

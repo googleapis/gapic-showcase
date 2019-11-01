@@ -18,7 +18,7 @@ func init() {
 	// Make roots version option only emit the version. This is used in circleci.
 	// The template looks weird on purpose. Leaving as a single line causes the
 	// output to append an extra character.
-	rootCmd.Version = "0.5.0"
+	rootCmd.Version = "0.6.0"
 	rootCmd.SetVersionTemplate(
 		`{{printf "%s" .Version}}`)
 }
