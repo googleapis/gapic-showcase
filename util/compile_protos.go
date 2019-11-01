@@ -62,6 +62,7 @@ func CompileProtos(version string) {
 		"--go_cli_opt=fmt=false",
 		"--go_gapic_out=" + gosrc,
 		"--go_gapic_opt=go-gapic-package=github.com/googleapis/gapic-showcase/client;client",
+		"--go_gapic_opt=grpc-service-config=schema/google/showcase/v1beta1/showcase_grpc_service_config.json",
 		"--go_out=plugins=grpc:" + gosrc,
 	}
 	Execute(append(command, files...)...)
