@@ -31,6 +31,7 @@ import (
 	"google.golang.org/api/transport"
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -57,13 +58,46 @@ func defaultEchoClientOptions() []option.ClientOption {
 
 func defaultEchoCallOptions() *EchoCallOptions {
 	return &EchoCallOptions{
-		Echo:        []gax.CallOption{},
-		Expand:      []gax.CallOption{},
-		Collect:     []gax.CallOption{},
-		Chat:        []gax.CallOption{},
-		PagedExpand: []gax.CallOption{},
-		Wait:        []gax.CallOption{},
-		Block:       []gax.CallOption{},
+		Echo: []gax.CallOption{
+			gax.WithRetry(func() gax.Retryer {
+				return gax.OnCodes([]codes.Code{
+					codes.Unavailable,
+					codes.Unknown,
+				}, gax.Backoff{
+					Initial:    100 * time.Millisecond,
+					Max:        3000 * time.Millisecond,
+					Multiplier: 2.00,
+				})
+			}),
+		},
+		Expand: []gax.CallOption{
+			gax.WithRetry(func() gax.Retryer {
+				return gax.OnCodes([]codes.Code{
+					codes.Unavailable,
+					codes.Unknown,
+				}, gax.Backoff{
+					Initial:    100 * time.Millisecond,
+					Max:        3000 * time.Millisecond,
+					Multiplier: 2.00,
+				})
+			}),
+		},
+		Collect: []gax.CallOption{},
+		Chat:    []gax.CallOption{},
+		PagedExpand: []gax.CallOption{
+			gax.WithRetry(func() gax.Retryer {
+				return gax.OnCodes([]codes.Code{
+					codes.Unavailable,
+					codes.Unknown,
+				}, gax.Backoff{
+					Initial:    100 * time.Millisecond,
+					Max:        3000 * time.Millisecond,
+					Multiplier: 2.00,
+				})
+			}),
+		},
+		Wait:  []gax.CallOption{},
+		Block: []gax.CallOption{},
 	}
 }
 

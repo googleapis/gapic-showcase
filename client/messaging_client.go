@@ -33,6 +33,7 @@ import (
 	"google.golang.org/api/transport"
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -66,20 +67,86 @@ func defaultMessagingClientOptions() []option.ClientOption {
 
 func defaultMessagingCallOptions() *MessagingCallOptions {
 	return &MessagingCallOptions{
-		CreateRoom:   []gax.CallOption{},
-		GetRoom:      []gax.CallOption{},
-		UpdateRoom:   []gax.CallOption{},
-		DeleteRoom:   []gax.CallOption{},
-		ListRooms:    []gax.CallOption{},
-		CreateBlurb:  []gax.CallOption{},
-		GetBlurb:     []gax.CallOption{},
-		UpdateBlurb:  []gax.CallOption{},
-		DeleteBlurb:  []gax.CallOption{},
-		ListBlurbs:   []gax.CallOption{},
-		SearchBlurbs: []gax.CallOption{},
+		CreateRoom: []gax.CallOption{},
+		GetRoom: []gax.CallOption{
+			gax.WithRetry(func() gax.Retryer {
+				return gax.OnCodes([]codes.Code{
+					codes.Unavailable,
+					codes.Unknown,
+				}, gax.Backoff{
+					Initial:    100 * time.Millisecond,
+					Max:        3000 * time.Millisecond,
+					Multiplier: 2.00,
+				})
+			}),
+		},
+		UpdateRoom: []gax.CallOption{},
+		DeleteRoom: []gax.CallOption{},
+		ListRooms: []gax.CallOption{
+			gax.WithRetry(func() gax.Retryer {
+				return gax.OnCodes([]codes.Code{
+					codes.Unavailable,
+					codes.Unknown,
+				}, gax.Backoff{
+					Initial:    100 * time.Millisecond,
+					Max:        3000 * time.Millisecond,
+					Multiplier: 2.00,
+				})
+			}),
+		},
+		CreateBlurb: []gax.CallOption{},
+		GetBlurb: []gax.CallOption{
+			gax.WithRetry(func() gax.Retryer {
+				return gax.OnCodes([]codes.Code{
+					codes.Unavailable,
+					codes.Unknown,
+				}, gax.Backoff{
+					Initial:    100 * time.Millisecond,
+					Max:        3000 * time.Millisecond,
+					Multiplier: 2.00,
+				})
+			}),
+		},
+		UpdateBlurb: []gax.CallOption{},
+		DeleteBlurb: []gax.CallOption{},
+		ListBlurbs: []gax.CallOption{
+			gax.WithRetry(func() gax.Retryer {
+				return gax.OnCodes([]codes.Code{
+					codes.Unavailable,
+					codes.Unknown,
+				}, gax.Backoff{
+					Initial:    100 * time.Millisecond,
+					Max:        3000 * time.Millisecond,
+					Multiplier: 2.00,
+				})
+			}),
+		},
+		SearchBlurbs: []gax.CallOption{
+			gax.WithRetry(func() gax.Retryer {
+				return gax.OnCodes([]codes.Code{
+					codes.Unavailable,
+					codes.Unknown,
+				}, gax.Backoff{
+					Initial:    100 * time.Millisecond,
+					Max:        3000 * time.Millisecond,
+					Multiplier: 2.00,
+				})
+			}),
+		},
 		StreamBlurbs: []gax.CallOption{},
 		SendBlurbs:   []gax.CallOption{},
-		Connect:      []gax.CallOption{},
+		Connect: []gax.CallOption{
+			gax.WithRetry(func() gax.Retryer {
+				return gax.OnCodes([]codes.Code{
+					codes.Unavailable,
+					codes.Unknown,
+				}, gax.Backoff{
+					Initial:    100 * time.Millisecond,
+					Max:        3000 * time.Millisecond,
+					Multiplier: 2.00,
+				})
+			}),
+		},
 	}
 }
 
