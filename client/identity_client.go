@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"math"
 	"net/url"
+	"time"
 
 	"github.com/golang/protobuf/proto"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
@@ -29,6 +30,7 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/api/transport"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -54,10 +56,32 @@ func defaultIdentityClientOptions() []option.ClientOption {
 func defaultIdentityCallOptions() *IdentityCallOptions {
 	return &IdentityCallOptions{
 		CreateUser: []gax.CallOption{},
-		GetUser:    []gax.CallOption{},
+		GetUser: []gax.CallOption{
+			gax.WithRetry(func() gax.Retryer {
+				return gax.OnCodes([]codes.Code{
+					codes.Unavailable,
+					codes.Unknown,
+				}, gax.Backoff{
+					Initial:    200 * time.Millisecond,
+					Max:        3000 * time.Millisecond,
+					Multiplier: 2.00,
+				})
+			}),
+		},
 		UpdateUser: []gax.CallOption{},
 		DeleteUser: []gax.CallOption{},
-		ListUsers:  []gax.CallOption{},
+		ListUsers: []gax.CallOption{
+			gax.WithRetry(func() gax.Retryer {
+				return gax.OnCodes([]codes.Code{
+					codes.Unavailable,
+					codes.Unknown,
+				}, gax.Backoff{
+					Initial:    200 * time.Millisecond,
+					Max:        3000 * time.Millisecond,
+					Multiplier: 2.00,
+				})
+			}),
+		},
 	}
 }
 
