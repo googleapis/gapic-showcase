@@ -159,7 +159,7 @@ jobs:
               --message "Regenerate cmd, client, and server directories." \
               --base googleapis:master \
               --head googleapis:${BRANCH} \
-              --assign landrito,noahdietz
+              --assign noahdietz,alexander-fenster
 
   kotlin-smoke-test:
     machine: true
