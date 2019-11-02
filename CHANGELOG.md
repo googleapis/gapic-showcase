@@ -1,5 +1,8 @@
 # Release History
 
+### v0.6.1 / 2019-11-01
+- Fix the resource name for Blurb.
+
 ### v0.6.0 / 2019-11-01
 - Add a gRPC ServiceConfig for microgenerator retry config
 - Regen client code with retry config
