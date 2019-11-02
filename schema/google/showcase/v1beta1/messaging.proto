@@ -287,7 +287,7 @@ message ListRoomsResponse {
 // posted on a user profile.
 message Blurb {
   option (google.api.resource) = {
-    type: "google.showcase.com/Blurb"
+    type: "showcase.googleapis.com/Blurb"
     pattern: "rooms/{room_id}/blurbs/{blurb_id}"
     pattern: "user/{user_id}/profile/blurbs/{blurb_id}"
   };
