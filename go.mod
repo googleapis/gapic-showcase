@@ -8,7 +8,7 @@ require (
 	github.com/googleapis/grpc-fallback-go v0.1.3
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.5.0
-	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
+	golang.org/x/oauth2 v0.0.0-20191122200657-5d9234df094c
 	google.golang.org/api v0.14.0
 	google.golang.org/genproto v0.0.0-20191115221424-83cc0476cb11
 	google.golang.org/grpc v1.25.1
