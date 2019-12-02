@@ -176,7 +176,8 @@ func (c *IdentityClient) GetUser(ctx context.Context, req *genprotopb.GetUserReq
 
 // UpdateUser updates a user.
 func (c *IdentityClient) UpdateUser(ctx context.Context, req *genprotopb.UpdateUserRequest, opts ...gax.CallOption) (*genprotopb.User, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "user.name", url.QueryEscape(req.GetUser().GetName())))
+	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.UpdateUser[0:len(c.CallOptions.UpdateUser):len(c.CallOptions.UpdateUser)], opts...)
 	var resp *genprotopb.User
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {

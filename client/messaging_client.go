@@ -259,7 +259,8 @@ func (c *MessagingClient) GetRoom(ctx context.Context, req *genprotopb.GetRoomRe
 
 // UpdateRoom updates a room.
 func (c *MessagingClient) UpdateRoom(ctx context.Context, req *genprotopb.UpdateRoomRequest, opts ...gax.CallOption) (*genprotopb.Room, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "room.name", url.QueryEscape(req.GetRoom().GetName())))
+	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.UpdateRoom[0:len(c.CallOptions.UpdateRoom):len(c.CallOptions.UpdateRoom)], opts...)
 	var resp *genprotopb.Room
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -364,7 +365,8 @@ func (c *MessagingClient) GetBlurb(ctx context.Context, req *genprotopb.GetBlurb
 
 // UpdateBlurb updates a blurb.
 func (c *MessagingClient) UpdateBlurb(ctx context.Context, req *genprotopb.UpdateBlurbRequest, opts ...gax.CallOption) (*genprotopb.Blurb, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "blurb.name", url.QueryEscape(req.GetBlurb().GetName())))
+	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.UpdateBlurb[0:len(c.CallOptions.UpdateBlurb):len(c.CallOptions.UpdateBlurb)], opts...)
 	var resp *genprotopb.Blurb
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
