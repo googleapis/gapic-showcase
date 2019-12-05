@@ -10,7 +10,7 @@ require (
 	github.com/spf13/viper v1.5.0
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
 	google.golang.org/api v0.14.0
-	google.golang.org/genproto v0.0.0-20191203220235-3fa9dbf08042
+	google.golang.org/genproto v0.0.0-20191205163323-51378566eb59
 	google.golang.org/grpc v1.25.1
 	gopkg.in/yaml.v2 v2.2.7 // indirect
 )
