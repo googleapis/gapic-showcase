@@ -7,7 +7,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/googleapis/grpc-fallback-go v0.1.3
 	github.com/spf13/cobra v0.0.5
-	github.com/spf13/viper v1.5.0
+	github.com/spf13/viper v1.6.1
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
 	google.golang.org/api v0.14.0
 	google.golang.org/genproto v0.0.0-20191205163323-51378566eb59
