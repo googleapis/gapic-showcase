@@ -16,11 +16,11 @@ package util
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 )
 
 // CompileProtos regenerates all of the generated source code for the Showcase
@@ -38,12 +38,12 @@ func CompileProtos(version string) {
 	if err != nil {
 		log.Fatalf("Error: unable to get working dir: %+v", err)
 	}
-	gosrc, err := filepath.Abs(
-		filepath.Join(pwd, "..", "..", ".."),
-	)
-	if err != nil || !strings.HasSuffix(gosrc, filepath.Join("go", "src")) {
-		log.Fatal("Error: could not find the go src path from the current working dir.")
+
+	outDir, err := ioutil.TempDir(os.TempDir(), "autogen")
+	if err != nil {
+		log.Fatalf("Error: unable to create a temporary dir: %+v\n", err)
 	}
+	defer os.RemoveAll(outDir)
 
 	protos := filepath.Join("schema", "google", "showcase", version, "*.proto")
 	files, err := filepath.Glob(protos)
@@ -60,12 +60,24 @@ func CompileProtos(version string) {
 		"--go_cli_opt=root=gapic-showcase",
 		"--go_cli_opt=gapic=github.com/googleapis/gapic-showcase/client",
 		"--go_cli_opt=fmt=false",
-		"--go_gapic_out=" + gosrc,
+		"--go_gapic_out=" + outDir,
 		"--go_gapic_opt=go-gapic-package=github.com/googleapis/gapic-showcase/client;client",
 		"--go_gapic_opt=grpc-service-config=schema/google/showcase/v1beta1/showcase_grpc_service_config.json",
-		"--go_out=plugins=grpc:" + gosrc,
+		"--go_out=plugins=grpc:" + outDir,
 	}
 	Execute(append(command, files...)...)
+
+	// Copy generated code back into repo.
+	tempClient := filepath.Join(outDir, "github.com", "googleapis", "gapic-showcase", "client")
+	tempServer := filepath.Join(outDir, "github.com", "googleapis", "gapic-showcase", "server")
+	command = []string{
+		"cp",
+		"-r",
+		tempClient,
+		tempServer,
+		pwd,
+	}
+	Execute(command...)
 
 	// Fix some generated errors.
 	fixes := []struct {
