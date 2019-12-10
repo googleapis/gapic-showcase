@@ -100,7 +100,13 @@ $ gapic-showcase \
 must be used since the server does not implement auth. Client library generators with
 Showcase-based integration tests need to provide the insecure channel to the client library
 in the tests._**
+Example for Node.js:
 
+```js
+const grpc = require('@grpc/grpc-js');
+const showcase = require('showcase');
+const client = new showcase.EchoClient({ grpc, sslCreds: grpc.credentials.createInsecure() });
+```
 
 ## Released Artifacts
 GAPIC Showcase releases three main artifacts, a CLI tool, the gapic-showcase
