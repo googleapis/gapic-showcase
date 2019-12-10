@@ -96,8 +96,10 @@ $ gapic-showcase \
   --user.email rumble@goodboi.com
 > name:"users/0" display_name:"Rumble" email:"rumble@goodboi.com" create_time:<seconds:1554414332 nanos:494679000 > update_time:<seconds:1554414332 nanos:494679000 >
 ```
-_* You can make requests to this server from your own client but an insecure channel
-must be used since the server does not implement auth._
+**_Note: You can make requests to this server from your own client but an insecure channel
+must be used since the server does not implement auth. Client library generators with
+Showcase-based integration tests need to provide the insecure channel to the client library
+in the tests._**
 
 
 ## Released Artifacts
