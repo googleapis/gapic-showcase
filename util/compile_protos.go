@@ -39,7 +39,7 @@ func CompileProtos(version string) {
 		log.Fatalf("Error: unable to get working dir: %+v", err)
 	}
 
-	outDir, err := ioutil.TempDir(os.TempDir(), "autogen")
+	outDir, err := ioutil.TempDir(os.TempDir(), "gapic-showcase")
 	if err != nil {
 		log.Fatalf("Error: unable to create a temporary dir: %+v\n", err)
 	}
