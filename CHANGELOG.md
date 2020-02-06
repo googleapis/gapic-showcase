@@ -1,4 +1,5 @@
 # Release History
+
 ### v0.7.0 / 2020-02-06
 - Regen client and protobuf code for Go grpc.ClientConn interface
 - Update dependencies
