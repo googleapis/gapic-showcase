@@ -1,4 +1,7 @@
 # Release History
+### v0.7.0 / 2020-02-06
+- Regen client and protobuf code for Go grpc.ClientConn interface
+- Update dependencies
 
 ### v0.6.1 / 2019-11-01
 - Fix the resource name for Blurb.
