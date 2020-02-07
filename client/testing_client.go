@@ -27,7 +27,7 @@ import (
 	gax "github.com/googleapis/gax-go/v2"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
-	"google.golang.org/api/transport"
+	gtransport "google.golang.org/api/transport/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -71,8 +71,8 @@ func defaultTestingCallOptions() *TestingCallOptions {
 //
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 type TestingClient struct {
-	// The connection to the service.
-	conn *grpc.ClientConn
+	// Connection pool of gRPC connections to the service.
+	connPool gtransport.ConnPool
 
 	// The gRPC API client.
 	testingClient genprotopb.TestingClient
@@ -89,30 +89,32 @@ type TestingClient struct {
 // A service to facilitate running discrete sets of tests
 // against Showcase.
 func NewTestingClient(ctx context.Context, opts ...option.ClientOption) (*TestingClient, error) {
-	conn, err := transport.DialGRPC(ctx, append(defaultTestingClientOptions(), opts...)...)
+	connPool, err := gtransport.DialPool(ctx, append(defaultTestingClientOptions(), opts...)...)
 	if err != nil {
 		return nil, err
 	}
 	c := &TestingClient{
-		conn:        conn,
+		connPool:    connPool,
 		CallOptions: defaultTestingCallOptions(),
 
-		testingClient: genprotopb.NewTestingClient(conn),
+		testingClient: genprotopb.NewTestingClient(connPool),
 	}
 	c.setGoogleClientInfo()
 
 	return c, nil
 }
 
-// Connection returns the client's connection to the API service.
+// Connection returns a connection to the API service.
+//
+// Deprecated.
 func (c *TestingClient) Connection() *grpc.ClientConn {
-	return c.conn
+	return c.connPool.Conn()
 }
 
 // Close closes the connection to the API service. The user should invoke this when
 // the client is no longer required.
 func (c *TestingClient) Close() error {
-	return c.conn.Close()
+	return c.connPool.Close()
 }
 
 // setGoogleClientInfo sets the name and version of the application in
