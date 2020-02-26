@@ -663,7 +663,9 @@ func init() {
 	proto.RegisterType((*BlockResponse)(nil), "google.showcase.v1beta1.BlockResponse")
 }
 
-func init() { proto.RegisterFile("google/showcase/v1beta1/echo.proto", fileDescriptor_6220e75e6899216f) }
+func init() {
+	proto.RegisterFile("google/showcase/v1beta1/echo.proto", fileDescriptor_6220e75e6899216f)
+}
 
 var fileDescriptor_6220e75e6899216f = []byte{
 	// 854 bytes of a gzipped FileDescriptorProto
