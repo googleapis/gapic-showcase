@@ -25,7 +25,7 @@ func init() {
 
 	ListBlurbsCmd.Flags().StringVar(&ListBlurbsInput.Parent, "parent", "", "Required. The resource name of the requested room or...")
 
-	ListBlurbsCmd.Flags().Int32Var(&ListBlurbsInput.PageSize, "page_size", 0, "The maximum number of blurbs to return. Server...")
+	ListBlurbsCmd.Flags().Int32Var(&ListBlurbsInput.PageSize, "page_size", 10, "Default is 10. The maximum number of blurbs to return. Server...")
 
 	ListBlurbsCmd.Flags().StringVar(&ListBlurbsInput.PageToken, "page_token", "", "The value of...")
 

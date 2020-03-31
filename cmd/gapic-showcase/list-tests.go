@@ -25,7 +25,7 @@ func init() {
 
 	ListTestsCmd.Flags().StringVar(&ListTestsInput.Parent, "parent", "", "The session.")
 
-	ListTestsCmd.Flags().Int32Var(&ListTestsInput.PageSize, "page_size", 0, "The maximum number of tests to return per page.")
+	ListTestsCmd.Flags().Int32Var(&ListTestsInput.PageSize, "page_size", 10, "Default is 10. The maximum number of tests to return per page.")
 
 	ListTestsCmd.Flags().StringVar(&ListTestsInput.PageToken, "page_token", "", "The page token, for retrieving subsequent pages.")
 

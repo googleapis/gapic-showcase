@@ -23,7 +23,7 @@ var ListRoomsFromFile string
 func init() {
 	MessagingServiceCmd.AddCommand(ListRoomsCmd)
 
-	ListRoomsCmd.Flags().Int32Var(&ListRoomsInput.PageSize, "page_size", 0, "The maximum number of rooms return. Server may...")
+	ListRoomsCmd.Flags().Int32Var(&ListRoomsInput.PageSize, "page_size", 10, "Default is 10. The maximum number of rooms return. Server may...")
 
 	ListRoomsCmd.Flags().StringVar(&ListRoomsInput.PageToken, "page_token", "", "The value of...")
 
