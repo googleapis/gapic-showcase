@@ -23,7 +23,7 @@ var ListSessionsFromFile string
 func init() {
 	TestingServiceCmd.AddCommand(ListSessionsCmd)
 
-	ListSessionsCmd.Flags().Int32Var(&ListSessionsInput.PageSize, "page_size", 0, "The maximum number of sessions to return per page.")
+	ListSessionsCmd.Flags().Int32Var(&ListSessionsInput.PageSize, "page_size", 10, "Default is 10. The maximum number of sessions to return per page.")
 
 	ListSessionsCmd.Flags().StringVar(&ListSessionsInput.PageToken, "page_token", "", "The page token, for retrieving subsequent pages.")
 

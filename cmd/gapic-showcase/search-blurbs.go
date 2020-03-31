@@ -29,7 +29,7 @@ func init() {
 
 	SearchBlurbsCmd.Flags().StringVar(&SearchBlurbsInput.Parent, "parent", "", "The rooms or profiles to search. If unset,...")
 
-	SearchBlurbsCmd.Flags().Int32Var(&SearchBlurbsInput.PageSize, "page_size", 0, "The maximum number of blurbs return. Server may...")
+	SearchBlurbsCmd.Flags().Int32Var(&SearchBlurbsInput.PageSize, "page_size", 10, "Default is 10. The maximum number of blurbs return. Server may...")
 
 	SearchBlurbsCmd.Flags().StringVar(&SearchBlurbsInput.PageToken, "page_token", "", "The value of ...")
 
