@@ -23,7 +23,7 @@ var ListUsersFromFile string
 func init() {
 	IdentityServiceCmd.AddCommand(ListUsersCmd)
 
-	ListUsersCmd.Flags().Int32Var(&ListUsersInput.PageSize, "page_size", 0, "The maximum number of users to return. Server may...")
+	ListUsersCmd.Flags().Int32Var(&ListUsersInput.PageSize, "page_size", 10, "Default is 10. The maximum number of users to return. Server may...")
 
 	ListUsersCmd.Flags().StringVar(&ListUsersInput.PageToken, "page_token", "", "The value of...")
 
