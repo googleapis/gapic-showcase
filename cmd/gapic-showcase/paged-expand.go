@@ -25,7 +25,7 @@ func init() {
 
 	PagedExpandCmd.Flags().StringVar(&PagedExpandInput.Content, "content", "", "Required. The string to expand.")
 
-	PagedExpandCmd.Flags().Int32Var(&PagedExpandInput.PageSize, "page_size", 0, "The amount of words to returned in each page.")
+	PagedExpandCmd.Flags().Int32Var(&PagedExpandInput.PageSize, "page_size", 10, "Default is 10. The amount of words to returned in each page.")
 
 	PagedExpandCmd.Flags().StringVar(&PagedExpandInput.PageToken, "page_token", "", "The position of the page to be returned.")
 
