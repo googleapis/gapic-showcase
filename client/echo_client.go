@@ -35,6 +35,8 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+var newEchoClientHook clientHook
+
 // EchoCallOptions contains the retry settings for each method of EchoClient.
 type EchoCallOptions struct {
 	Echo        []gax.CallOption
@@ -131,7 +133,17 @@ type EchoClient struct {
 // paginated calls. Set the ‘showcase-trailer’ metadata key on any method
 // to have the values echoed in the response trailers.
 func NewEchoClient(ctx context.Context, opts ...option.ClientOption) (*EchoClient, error) {
-	connPool, err := gtransport.DialPool(ctx, append(defaultEchoClientOptions(), opts...)...)
+	clientOpts := defaultEchoClientOptions()
+
+	if newEchoClientHook != nil {
+		hookOpts, err := newEchoClientHook(ctx, clientHookParams{})
+		if err != nil {
+			return nil, err
+		}
+		clientOpts = append(clientOpts, hookOpts...)
+	}
+
+	connPool, err := gtransport.DialPool(ctx, append(clientOpts, opts...)...)
 	if err != nil {
 		return nil, err
 	}
