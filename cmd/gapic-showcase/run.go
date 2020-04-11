@@ -15,6 +15,9 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
+	"io/ioutil"
 	"log"
 	"net"
 	"strings"
@@ -27,12 +30,16 @@ import (
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
 )
 
 func init() {
 	var port string
 	var fallbackPort string
+	var tlsCaCert string
+	var tlsCert string
+	var tlsKey string
 	runCmd := &cobra.Command{
 		Use:   "run",
 		Short: "Runs the showcase server",
@@ -59,6 +66,31 @@ func init() {
 			opts := []grpc.ServerOption{
 				grpc.StreamInterceptor(observerRegistry.StreamInterceptor),
 				grpc.UnaryInterceptor(observerRegistry.UnaryInterceptor),
+			}
+
+			// load mutual TLS cert/key and root CA cert
+			if tlsCaCert != "" || tlsCert != "" || tlsKey != "" {
+		    		x509KeyPair, err := tls.LoadX509KeyPair(tlsCert, tlsKey)
+		                if err != nil {
+	            	        	log.Fatalf("Failed to load server TLS cert/key with error:%v", err)
+		    		}
+		    		caCert, err := ioutil.ReadFile(tlsCaCert)
+		    		if err != nil {
+	            			log.Fatalf("Failed to load root CA cert file with error:%v", err)
+		    		}
+				caCertPool := x509.NewCertPool()
+				caCertPool.AppendCertsFromPEM(caCert)
+				ta := credentials.NewTLS(&tls.Config{
+					Certificates: []tls.Certificate{x509KeyPair},
+					ClientCAs:    caCertPool,
+					ClientAuth:   tls.RequireAndVerifyClientCert,
+				})
+
+				opts = []grpc.ServerOption{
+					grpc.StreamInterceptor(observerRegistry.StreamInterceptor),
+					grpc.UnaryInterceptor(observerRegistry.UnaryInterceptor),
+					grpc.Creds(ta),
+				}
 			}
 			s := grpc.NewServer(opts...)
 			defer s.GracefulStop()
@@ -95,4 +127,19 @@ func init() {
 		"f",
 		":1337",
 		"The port that the fallback-proxy will be served on.")
+	runCmd.Flags().StringVar(
+		&tlsCaCert,
+		"mtls-ca-cert",
+		"",
+		"The Root CA certificate path for custom mutual TLS channel.")
+	runCmd.Flags().StringVar(
+		&tlsCert,
+		"mtls-cert",
+		"",
+		"The server certificate path for custom mutual TLS channel.")
+	runCmd.Flags().StringVar(
+		&tlsKey,
+		"mtls-key",
+		"",
+		"The server private key path for custom mutual TLS channel.")
 }
