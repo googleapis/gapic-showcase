@@ -32,6 +32,8 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+var newTestingClientHook clientHook
+
 // TestingCallOptions contains the retry settings for each method of TestingClient.
 type TestingCallOptions struct {
 	CreateSession []gax.CallOption
@@ -89,7 +91,17 @@ type TestingClient struct {
 // A service to facilitate running discrete sets of tests
 // against Showcase.
 func NewTestingClient(ctx context.Context, opts ...option.ClientOption) (*TestingClient, error) {
-	connPool, err := gtransport.DialPool(ctx, append(defaultTestingClientOptions(), opts...)...)
+	clientOpts := defaultTestingClientOptions()
+
+	if newTestingClientHook != nil {
+		hookOpts, err := newTestingClientHook(ctx, clientHookParams{})
+		if err != nil {
+			return nil, err
+		}
+		clientOpts = append(clientOpts, hookOpts...)
+	}
+
+	connPool, err := gtransport.DialPool(ctx, append(clientOpts, opts...)...)
 	if err != nil {
 		return nil, err
 	}

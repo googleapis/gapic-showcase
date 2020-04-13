@@ -34,6 +34,8 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+var newIdentityClientHook clientHook
+
 // IdentityCallOptions contains the retry settings for each method of IdentityClient.
 type IdentityCallOptions struct {
 	CreateUser []gax.CallOption
@@ -106,7 +108,17 @@ type IdentityClient struct {
 //
 // A simple identity service.
 func NewIdentityClient(ctx context.Context, opts ...option.ClientOption) (*IdentityClient, error) {
-	connPool, err := gtransport.DialPool(ctx, append(defaultIdentityClientOptions(), opts...)...)
+	clientOpts := defaultIdentityClientOptions()
+
+	if newIdentityClientHook != nil {
+		hookOpts, err := newIdentityClientHook(ctx, clientHookParams{})
+		if err != nil {
+			return nil, err
+		}
+		clientOpts = append(clientOpts, hookOpts...)
+	}
+
+	connPool, err := gtransport.DialPool(ctx, append(clientOpts, opts...)...)
 	if err != nil {
 		return nil, err
 	}
