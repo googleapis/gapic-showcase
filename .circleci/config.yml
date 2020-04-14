@@ -103,6 +103,9 @@ jobs:
           name: Examine and report suspicious constructs
           command: "! go tool vet ./ 2>&1 | read"
       - run:
+          name: Retrieve dependencies
+          command: go mod download
+      - run:
           name: Install gapic-showcase CLI
           command: go install ./cmd/gapic-showcase
       - run:
