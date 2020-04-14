@@ -51,6 +51,8 @@ jobs:
     docker:
       - image: golang:1.13
     working_directory: /go/src/github.com/googleapis/gapic-showcase
+    environment:
+      GO111MODULE: "on"
     steps:
       - checkout
       - run:
@@ -65,9 +67,10 @@ jobs:
             mv ~/protoc3/bin/* /usr/local/bin/
             mv ~/protoc3/include/* /usr/local/include/
       - run:
-          name: Get generators
+          name: Install generators
           command: |
-              go get github.com/golang/protobuf/protoc-gen-go
+              go mod download
+              go install github.com/golang/protobuf/protoc-gen-go
               go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli
               go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic
       - run:
@@ -100,8 +103,11 @@ jobs:
           name: Examine and report suspicious constructs
           command: "! go tool vet ./ 2>&1 | read"
       - run:
-          name: Install dependencies
-          command: go get -v -d -t ./cmd/gapic-showcase && go install ./cmd/gapic-showcase
+          name: Retrieve dependencies
+          command: go mod download
+      - run:
+          name: Install gapic-showcase CLI
+          command: go install ./cmd/gapic-showcase
       - run:
           name: Run tests
           command: |
@@ -239,7 +245,7 @@ jobs:
           command: git submodule update --init
       - run:
           name: Retrieve dependencies
-          command: go get ./...
+          command: go mod download
       - run:
           name: Install protoc
           command: |
