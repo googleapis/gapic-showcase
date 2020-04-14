@@ -74,6 +74,7 @@ func init() {
 		                if err != nil {
 	            	        	log.Fatalf("Failed to load server TLS cert/key with error:%v", err)
 		    		}
+
 		    		caCert, err := ioutil.ReadFile(tlsCaCert)
 		    		if err != nil {
 	            			log.Fatalf("Failed to load root CA cert file with error:%v", err)
