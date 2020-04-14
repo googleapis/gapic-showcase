@@ -1,5 +1,15 @@
 # Release History
 
+### v0.8.0 / 2020-04-14
+- Add mtls support with user provided cert/key to server
+- Regen cli:
+  - Paginated RPCs only collect a single page
+  - Default page_size changed from 0 to 10 to avoid short circuiting
+- Regen client:
+  - clientHook support added
+- Update CI use of go.mod
+- Update dependencies
+
 ### v0.7.0 / 2020-02-06
 - Regen client and protobuf code for Go grpc.ClientConn interface
 - Update dependencies
