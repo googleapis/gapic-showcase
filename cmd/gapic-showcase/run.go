@@ -69,23 +69,23 @@ func init() {
 			}
 
 			// load mutual TLS cert/key and root CA cert
-			if tlsCaCert != "" || tlsCert != "" || tlsKey != "" {
-		    		x509KeyPair, err := tls.LoadX509KeyPair(tlsCert, tlsKey)
+			if tlsCaCert == "" && tlsCert != "" && tlsKey != "" {
+		    		keyPair, err := tls.LoadX509KeyPair(tlsCert, tlsKey)
 		                if err != nil {
 	            	        	log.Fatalf("Failed to load server TLS cert/key with error:%v", err)
 		    		}
 
-		    		caCert, err := ioutil.ReadFile(tlsCaCert)
+		    		cert, err := ioutil.ReadFile(tlsCaCert)
 		    		if err != nil {
 	            			log.Fatalf("Failed to load root CA cert file with error:%v", err)
 		    		}
 
-				caCertPool := x509.NewCertPool()
-				caCertPool.AppendCertsFromPEM(caCert)
+				pool := x509.NewCertPool()
+				pool.AppendCertsFromPEM(cert)
 
 				ta := credentials.NewTLS(&tls.Config{
-					Certificates: []tls.Certificate{x509KeyPair},
-					ClientCAs:    caCertPool,
+					Certificates: []tls.Certificate{keyPair},
+					ClientCAs:    pool,
 					ClientAuth:   tls.RequireAndVerifyClientCert,
 				})
 
