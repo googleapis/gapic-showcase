@@ -89,11 +89,7 @@ func init() {
 					ClientAuth:   tls.RequireAndVerifyClientCert,
 				})
 
-				opts = []grpc.ServerOption{
-					grpc.StreamInterceptor(observerRegistry.StreamInterceptor),
-					grpc.UnaryInterceptor(observerRegistry.UnaryInterceptor),
-					grpc.Creds(ta),
-				}
+				opts = append(opts, grpc.Creds(ta))
 			}
 			s := grpc.NewServer(opts...)
 			defer s.GracefulStop()
