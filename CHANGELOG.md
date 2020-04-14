@@ -7,6 +7,7 @@
   - Default page_size changed from 0 to 10 to avoid short circuiting
 - Regen client:
   - clientHook support added
+- Update CI use of go.mod
 - Update dependencies
 
 ### v0.7.0 / 2020-02-06
