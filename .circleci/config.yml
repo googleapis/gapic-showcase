@@ -51,6 +51,8 @@ jobs:
     docker:
       - image: golang:1.13
     working_directory: /go/src/github.com/googleapis/gapic-showcase
+    environment:
+      GO111MODULE: "on"
     steps:
       - checkout
       - run:
