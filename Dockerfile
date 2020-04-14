@@ -1,4 +1,4 @@
-FROM golang:1.13-alpine AS builder
+FROM golang:1.14-alpine AS builder
 
 # Install git and gcc.
 RUN apk add --no-cache git gcc musl-dev
