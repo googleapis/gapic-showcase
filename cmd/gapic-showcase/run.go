@@ -78,6 +78,7 @@ func init() {
 		    		if err != nil {
 	            			log.Fatalf("Failed to load root CA cert file with error:%v", err)
 		    		}
+
 				caCertPool := x509.NewCertPool()
 				caCertPool.AppendCertsFromPEM(caCert)
 				ta := credentials.NewTLS(&tls.Config{
