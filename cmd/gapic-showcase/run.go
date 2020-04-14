@@ -82,6 +82,7 @@ func init() {
 
 				caCertPool := x509.NewCertPool()
 				caCertPool.AppendCertsFromPEM(caCert)
+
 				ta := credentials.NewTLS(&tls.Config{
 					Certificates: []tls.Certificate{x509KeyPair},
 					ClientCAs:    caCertPool,
