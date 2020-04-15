@@ -1,5 +1,8 @@
 # Release History
 
+### v0.8.1 / 2020-04-15
+- Fix bug in mTLS configuration resolution
+
 ### v0.8.0 / 2020-04-14
 - Add mtls support with user provided cert/key to server
 - Regen cli:
