@@ -20,6 +20,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
+	"os"
 	"strings"
 
 	"github.com/googleapis/gapic-showcase/server"
@@ -40,6 +41,7 @@ func init() {
 	var tlsCaCert string
 	var tlsCert string
 	var tlsKey string
+	var useSampleTlsCred bool
 	runCmd := &cobra.Command{
 		Use:   "run",
 		Short: "Runs the showcase server",
@@ -68,6 +70,16 @@ func init() {
 				grpc.UnaryInterceptor(observerRegistry.UnaryInterceptor),
 			}
 
+			if useSampleTlsCred {
+				dir, err := os.Getwd()
+				if err != nil {
+					log.Fatalf("Failed to get the file directory with error:%v", err)
+				}
+				tlsCaCert = dir + "/mtls-root.crt"
+				tlsCert = dir + "/mtls.crt"
+				tlsKey = dir + "/mtls.key"
+			}
+			
 			// load mutual TLS cert/key and root CA cert
 			if tlsCaCert != "" && tlsCert != "" && tlsKey != "" {
 				keyPair, err := tls.LoadX509KeyPair(tlsCert, tlsKey)
@@ -141,4 +153,9 @@ func init() {
 		"mtls-key",
 		"",
 		"The server private key path for custom mutual TLS channel.")
+	runCmd.Flags().BoolVar(
+		&useSampleTlsCred,
+		"use-sample-mtls-credentials",
+		false,
+		"Create custom mutual TLS channel with the sample mtls-root.crt, mtls.crt and mtls.key from https://github.com/googleapis/gapic-showcase/tree/master/cmd/gapic-showcase. This option overrides user provided SSL credentials.")
 }
