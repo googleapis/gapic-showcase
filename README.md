@@ -71,7 +71,7 @@ hold using this installation method._
 
 ## Schema
 The schema of GAPIC Showcase API can be found in [schema/google/showcase/v1beta1](schema/google/showcase/v1beta1)
-It's dependencies can be found in the [googleapis/api-common-protos](https://github.com/googleapis/api-common-protos)
+Its dependencies can be found in the [googleapis/api-common-protos](https://github.com/googleapis/api-common-protos)
 submodule.
 
 ## Quick Start
