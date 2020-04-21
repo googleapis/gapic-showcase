@@ -184,7 +184,7 @@ jobs:
             docker run --rm \
               --mount type=bind,source="$(pwd)"/api-common-protos,target=/proto \
               --mount type=bind,source="$(pwd)"/koutput,target=/generated \
-              gcr.io/kotlin-gapic/kgen:0.6.0
+              gcr.io/gapic-images/gapic-generator-kotlin:0.6.0
 
   python-smoke-test:
     machine: true
