@@ -13,6 +13,8 @@ workflows:
           filters: *all_commits
       - kotlin-smoke-test:
           filters: *all_commits
+      - typescript-smoke-test:
+          filters: *all_commits
       - python-smoke-test:
           filters: *all_commits
       - go-smoke-test:
@@ -29,6 +31,7 @@ workflows:
           requires:
             - test
             - kotlin-smoke-test
+            - typescript-smoke-test
             - python-smoke-test
             - go-smoke-test
             - protobufjs-load-test
@@ -41,6 +44,7 @@ workflows:
           requires:
             - test
             - kotlin-smoke-test
+            - typescript-smoke-test
             - python-smoke-test
             - go-smoke-test
             - protobufjs-load-test
@@ -181,10 +185,42 @@ jobs:
           name: Run kotlin generation
           command: |
             mkdir koutput
-            docker run --rm \
+            docker run --rm --user $UID \
               --mount type=bind,source="$(pwd)"/api-common-protos,target=/proto \
               --mount type=bind,source="$(pwd)"/koutput,target=/generated \
               gcr.io/gapic-images/gapic-generator-kotlin:0.6.0
+
+  typescript-smoke-test:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Stage showcase in proto dependencies
+          command: |
+              git clone https://github.com/googleapis/api-common-protos.git
+              mkdir -p api-common-protos/google/showcase/v1beta1/
+              cp schema/google/showcase/v1beta1/* api-common-protos/google/showcase/v1beta1/
+      - run:
+          name: Run TypeScript generation
+          command: |
+            mkdir tsout
+            docker run --rm --user $UID \
+              --mount type=bind,source="$(pwd)"/schema,destination=/in/protos/google/showcase/v1beta1,readonly \
+              --mount type=bind,source="$(pwd)"/tsout,destination=/out/ \
+              gcr.io/gapic-images/gapic-generator-typescript:latest  # it doesn't have versioning yet
+      - run:
+          name: Run auto-generated tests
+          command: |
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+            . "$NVM_DIR/nvm.sh"
+            nvm install 12
+            nvm use 12 # use Node.js v12
+            cd tsout
+            npm install
+            npm test
+            npm run system-test
+          environment:
+            NVM_DIR: /opt/circleci/.nvm
 
   python-smoke-test:
     machine: true
@@ -194,7 +230,7 @@ jobs:
           name: Run python generation
           command: |
             mkdir pyout
-            docker run --rm \
+            docker run --rm --user $UID \
               --mount type=bind,source="$(pwd)"/schema/,destination=/in/google/showcase/v1beta1/,readonly \
               --mount type=bind,source="$(pwd)"/pyout,target=/out \
               gcr.io/gapic-images/gapic-generator-python:0.9
@@ -216,7 +252,7 @@ jobs:
 
   protobufjs-load-test:
     docker:
-      - image: node:8
+      - image: node:12
     steps:
       - checkout
       - run:
