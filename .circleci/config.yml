@@ -185,7 +185,7 @@ jobs:
           name: Run kotlin generation
           command: |
             mkdir koutput
-            docker run --rm --user $UID \
+            docker run --rm \
               --mount type=bind,source="$(pwd)"/api-common-protos,target=/proto \
               --mount type=bind,source="$(pwd)"/koutput,target=/generated \
               gcr.io/gapic-images/gapic-generator-kotlin:0.6.0
