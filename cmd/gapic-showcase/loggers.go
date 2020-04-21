@@ -34,7 +34,7 @@ type loggerObserver struct{}
 
 func (l *loggerObserver) GetName() string { return "loggerObserver" }
 
-func DumpIncomingHeaders(ctx context.Context) {
+func dumpIncomingHeaders(ctx context.Context) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		stdLog.Printf("Cannot get metadata from the context.")
@@ -57,7 +57,7 @@ func (l *loggerObserver) ObserveUnary(
 	err error) {
 	stdLog.Printf("Received Unary Request for Method: %s\n", info.FullMethod)
 	if Verbose {
-		DumpIncomingHeaders(ctx)
+		dumpIncomingHeaders(ctx)
 	}
 	stdLog.Printf("    Request:  %+v\n", req)
 	if err == nil {
@@ -75,7 +75,7 @@ func (l *loggerObserver) ObserveStreamRequest(
 	_ error) {
 	stdLog.Printf("%s Stream for Method: %s\n", streamType(info), info.FullMethod)
 	if Verbose {
-		DumpIncomingHeaders(ctx)
+		dumpIncomingHeaders(ctx)
 	}
 	stdLog.Printf("    Receiving Message:  %v\n", req)
 	stdLog.Println("")
