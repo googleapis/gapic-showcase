@@ -20,6 +20,7 @@ import (
 	"os"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 var stdLog, errLog *log.Logger
@@ -33,6 +34,21 @@ type loggerObserver struct{}
 
 func (l *loggerObserver) GetName() string { return "loggerObserver" }
 
+func dumpIncomingHeaders(ctx context.Context) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		stdLog.Printf("Cannot get metadata from the context.")
+		return
+	}
+
+	stdLog.Printf("    Request headers:")
+	for key, values := range md {
+		for _, value := range values {
+			stdLog.Printf("      %s: %s\n", key, value)
+		}
+	}
+}
+
 func (l *loggerObserver) ObserveUnary(
 	ctx context.Context,
 	req interface{},
@@ -40,6 +56,9 @@ func (l *loggerObserver) ObserveUnary(
 	info *grpc.UnaryServerInfo,
 	err error) {
 	stdLog.Printf("Received Unary Request for Method: %s\n", info.FullMethod)
+	if Verbose {
+		dumpIncomingHeaders(ctx)
+	}
 	stdLog.Printf("    Request:  %+v\n", req)
 	if err == nil {
 		stdLog.Printf("    Returning Response: %+v\n", resp)
@@ -50,12 +69,15 @@ func (l *loggerObserver) ObserveUnary(
 }
 
 func (l *loggerObserver) ObserveStreamRequest(
-	_ context.Context,
+	ctx context.Context,
 	req interface{},
 	info *grpc.StreamServerInfo,
 	_ error) {
 	stdLog.Printf("%s Stream for Method: %s\n", streamType(info), info.FullMethod)
-	stdLog.Printf("    Recieving Message:  %v\n", req)
+	if Verbose {
+		dumpIncomingHeaders(ctx)
+	}
+	stdLog.Printf("    Receiving Message:  %v\n", req)
 	stdLog.Println("")
 }
 
