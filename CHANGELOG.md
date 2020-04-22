@@ -1,5 +1,10 @@
 # Release History
 
+### v0.9.0 / 2020-04-22
+- Print gRPC request headers in verbose mode (`gapic-showcase run -v`)
+- Add TypeScript smoke tests
+- Fix Kotlin smoke tests
+
 ### v0.8.1 / 2020-04-15
 - Fix bug in mTLS configuration resolution
 
