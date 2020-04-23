@@ -153,6 +153,8 @@ jobs:
           command: |
             # Exit early if no diff was found
             [[ ! -z ${DIFF_FOUND} ]] || exit 0
+            # Run go mod tidy to clean up added generation dependencies
+            go mod tidy
             # Setup git config.
             git config credential.helper 'cache --timeout=120'
             git config user.email "googleapis-publisher@google.com"
