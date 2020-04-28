@@ -74,6 +74,24 @@ The schema of GAPIC Showcase API can be found in [schema/google/showcase/v1beta1
 Its dependencies can be found in the [googleapis/api-common-protos](https://github.com/googleapis/api-common-protos)
 submodule.
 
+## Go Environment
+If you are familiar with Go or have gone through this set-up for other projects, please skip this section.
+1. Install Go
+    1. Linux: `sudo apt-get install golang`
+    2. Mac, Windows, or other options: Please see the [official set-up docs](https://golang.org/doc/install).
+    
+2. Set up Go protobuf tools:
+    ```sh
+    go install github.com/golang/protobuf/protoc-gen-go
+    go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli
+    go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic
+    ```
+3. Export the Go path.
+    ```sh
+    export GOPATH=$HOME/go 
+    PATH=$PATH:$GOPATH/bin
+    ``` 
+
 ## Quick Start
 This quick start guide will show you how to start the server and make a request to it.
 
