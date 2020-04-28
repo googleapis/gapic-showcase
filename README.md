@@ -86,10 +86,9 @@ If you are familiar with Go or have gone through this set-up for other projects,
     go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli
     go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic
     ```
-3. Export the Go path.
+3. Export the Go binaries to your environment path.
     ```sh
-    export GOPATH=$HOME/go 
-    PATH=$PATH:$GOPATH/bin
+    PATH=$PATH:~/go/bin
     ``` 
 
 ## Quick Start
