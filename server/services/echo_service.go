@@ -46,6 +46,8 @@ func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.Echo
 		return nil, err
 	}
 	echoTrailers(ctx)
+
+	// bypass the getter for EchoRequest.presence to preserve the exact field value
 	return &pb.EchoResponse{Content: in.GetContent(), Presence: in.Presence}, nil
 }
 
