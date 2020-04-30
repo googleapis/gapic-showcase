@@ -46,7 +46,7 @@ func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.Echo
 		return nil, err
 	}
 	echoTrailers(ctx)
-	return &pb.EchoResponse{Content: in.GetContent()}, nil
+	return &pb.EchoResponse{Content: in.GetContent(), Presence: in.Presence}, nil
 }
 
 func (s *echoServerImpl) Expand(in *pb.ExpandRequest, stream pb.Echo_ExpandServer) error {

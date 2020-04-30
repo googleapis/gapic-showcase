@@ -117,12 +117,16 @@ message EchoRequest {
     // The error to be thrown by the server.
     google.rpc.Status error = 2;
   }
+
+  optional string presence = 3;
 }
 
 // The response message for the Echo methods.
 message EchoResponse {
   // The content specified in the request.
   string content = 1;
+
+  optional string presence = 2;
 }
 
 // The request message for the Expand method.
