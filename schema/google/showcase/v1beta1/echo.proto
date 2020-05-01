@@ -129,7 +129,7 @@ message EchoRequest {
   }
 
   // The option to be echoed by the server.
-  Throwaway opt = 3
+  Throwaway opt = 3;
 }
 
 // The response message for the Echo methods.
