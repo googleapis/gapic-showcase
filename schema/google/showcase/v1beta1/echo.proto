@@ -106,9 +106,19 @@ service Echo {
   };
 }
 
-// The request message used for the Echo, Collect and Chat methods. If content
-// is set in this message then the request will succeed. If status is set in 
-// this message then the status will be returned as an error.
+// A throwaway enum used to test enum capabilities in GAPIC surfaces
+enum Throwaway {
+  UNCECESSARY = 0;
+  NECESSARY = 1;
+  URGENT = 2;
+  CRITICAL = 3;
+}
+
+
+// The request message used for the Echo, Collect and Chat methods.
+// If content or opt are set in this message then the request will succeed.
+// If status is set in this message
+// then the status will be returned as an error.
 message EchoRequest {
   oneof response {
     // The content to be echoed by the server.
@@ -117,12 +127,18 @@ message EchoRequest {
     // The error to be thrown by the server.
     google.rpc.Status error = 2;
   }
+
+  // The option to be echoed by the server.
+  Throwaway opt = 3
 }
 
 // The response message for the Echo methods.
 message EchoResponse {
   // The content specified in the request.
   string content = 1;
+
+  // The option specified in the request.
+  Throwaway opt = 3
 }
 
 // The request message for the Expand method.
