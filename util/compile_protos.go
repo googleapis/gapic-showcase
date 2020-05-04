@@ -54,12 +54,17 @@ func CompileProtos(version string) {
 	// Run protoc
 	command := []string{
 		"protoc",
+		"--experimental_allow_proto3_optional",
 		"--proto_path=schema/api-common-protos",
 		"--proto_path=schema",
-		"--go_cli_out=" + filepath.Join("cmd", "gapic-showcase"),
-		"--go_cli_opt=root=gapic-showcase",
-		"--go_cli_opt=gapic=github.com/googleapis/gapic-showcase/client",
-		"--go_cli_opt=fmt=false",
+		// Disable go_cli generation until the generator supports it.
+		//
+		// TODO(ndietz): reenable once issue is resolved:
+		// https://github.com/googleapis/gapic-generator-go/issues/378
+		// "--go_cli_out=" + filepath.Join("cmd", "gapic-showcase"),
+		// "--go_cli_opt=root=gapic-showcase",
+		// "--go_cli_opt=gapic=github.com/googleapis/gapic-showcase/client",
+		// "--go_cli_opt=fmt=false",
 		"--go_gapic_out=" + outDir,
 		"--go_gapic_opt=go-gapic-package=github.com/googleapis/gapic-showcase/client;client",
 		"--go_gapic_opt=grpc-service-config=schema/google/showcase/v1beta1/showcase_grpc_service_config.json",
