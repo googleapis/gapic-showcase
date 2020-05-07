@@ -106,8 +106,8 @@ service Echo {
   };
 }
 
-// A throwaway enum used to test enum capabilities in GAPIC surfaces
-enum Throwaway {
+// A severity enum used to test enum capabilities in GAPIC surfaces
+enum Severity {
   UNCECESSARY = 0;
   NECESSARY = 1;
   URGENT = 2;
@@ -129,7 +129,7 @@ message EchoRequest {
   }
 
   // The option to be echoed by the server.
-  Throwaway opt = 3;
+  Severity opt = 3;
 }
 
 // The response message for the Echo methods.
@@ -138,7 +138,7 @@ message EchoResponse {
   string content = 1;
 
   // The option specified in the request.
-  Throwaway opt = 2;
+  Severity opt = 2;
 }
 
 // The request message for the Expand method.
