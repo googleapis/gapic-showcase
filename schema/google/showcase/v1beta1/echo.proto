@@ -138,7 +138,7 @@ message EchoResponse {
   string content = 1;
 
   // The option specified in the request.
-  Severity opt = 2;
+  Severity severity = 2;
 }
 
 // The request message for the Expand method.
