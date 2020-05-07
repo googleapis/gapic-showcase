@@ -22,6 +22,9 @@ package genproto
 
 import (
 	context "context"
+	reflect "reflect"
+	sync "sync"
+
 	proto "github.com/golang/protobuf/proto"
 	duration "github.com/golang/protobuf/ptypes/duration"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
@@ -33,8 +36,6 @@ import (
 	status1 "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	reflect "reflect"
-	sync "sync"
 )
 
 const (
@@ -60,6 +61,7 @@ type EchoRequest struct {
 	//	*EchoRequest_Content
 	//	*EchoRequest_Error
 	Response isEchoRequest_Response `protobuf_oneof:"response"`
+	Severity Echo_Severity          `protobuf:"varint,3,opt,name=severity,proto3,enum=google.showcase.v1beta1.Echo_Severity" json:"severity,omitempty"`
 }
 
 func (x *EchoRequest) Reset() {
@@ -133,6 +135,16 @@ func (*EchoRequest_Content) isEchoRequest_Response() {}
 
 func (*EchoRequest_Error) isEchoRequest_Response() {}
 
+type Echo_Severity int32
+
+const (
+	// The severity rating of the echo
+	Echo_UNCECESSARY Echo_Severity = 0
+	Echo_NECESSARY   Echo_Severity = 1
+	Echo_URGENT      Echo_Severity = 2
+	Echo_CRITICAL    Echo_Severity = 3
+)
+
 // The response message for the Echo methods.
 type EchoResponse struct {
 	state         protoimpl.MessageState
@@ -140,7 +152,8 @@ type EchoResponse struct {
 	unknownFields protoimpl.UnknownFields
 
 	// The content specified in the request.
-	Content string `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
+	Content  string        `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
+	Severity Echo_Severity `protobuf:"varint,2,opt,name=severity,proto3,enum=google.showcase.v1beta1.Echo_Severity" json:"severity,omitempty"`
 }
 
 func (x *EchoResponse) Reset() {
