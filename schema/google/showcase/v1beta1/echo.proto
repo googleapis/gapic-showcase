@@ -128,8 +128,8 @@ message EchoRequest {
     google.rpc.Status error = 2;
   }
 
-  // The option to be echoed by the server.
-  Severity opt = 3;
+  // The severity to be echoed by the server.
+  Severity severity = 3;
 }
 
 // The response message for the Echo methods.
