@@ -16,7 +16,7 @@
   "packageRules": [
     {
       "packageNames": ["google.golang.org/genproto"],
-      "extends": ["schedule:on friday after 12pm"]
+      "schedule": "after 12pm on monday"
     }
   ]
 }
