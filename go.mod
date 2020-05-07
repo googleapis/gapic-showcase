@@ -1,7 +1,7 @@
 module github.com/googleapis/gapic-showcase
 
 require (
-	cloud.google.com/go v0.56.0
+	cloud.google.com/go v0.57.0
 	github.com/golang/protobuf v1.4.1
 	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/googleapis/grpc-fallback-go v0.1.3
