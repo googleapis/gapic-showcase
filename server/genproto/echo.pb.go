@@ -61,7 +61,8 @@ type EchoRequest struct {
 	//	*EchoRequest_Content
 	//	*EchoRequest_Error
 	Response isEchoRequest_Response `protobuf_oneof:"response"`
-	Severity Echo_Severity          `protobuf:"varint,3,opt,name=severity,proto3,enum=google.showcase.v1beta1.Echo_Severity" json:"severity,omitempty"`
+	// The severity is a subjective measure of how important the echo is
+	Severity Echo_Severity `protobuf:"varint,3,opt,name=severity,proto3,enum=google.showcase.v1beta1.Echo_Severity" json:"severity,omitempty"`
 }
 
 func (x *EchoRequest) Reset() {
