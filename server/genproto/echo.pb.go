@@ -49,6 +49,16 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
+type Echo_Severity int32
+
+// The severity rating of the echo
+const (
+	Echo_UNNECESSARY Echo_Severity = 0
+	Echo_NECESSARY   Echo_Severity = 1
+	Echo_URGENT      Echo_Severity = 2
+	Echo_CRITICAL    Echo_Severity = 3
+)
+
 // The request message used for the Echo, Collect and Chat methods. If content
 // is set in this message then the request will succeed. If status is set in
 // this message then the status will be returned as an error.
@@ -135,16 +145,6 @@ type EchoRequest_Error struct {
 func (*EchoRequest_Content) isEchoRequest_Response() {}
 
 func (*EchoRequest_Error) isEchoRequest_Response() {}
-
-type Echo_Severity int32
-
-// The severity rating of the echo
-const (
-	Echo_UNNECESSARY Echo_Severity = 0
-	Echo_NECESSARY   Echo_Severity = 1
-	Echo_URGENT      Echo_Severity = 2
-	Echo_CRITICAL    Echo_Severity = 3
-)
 
 // The response message for the Echo methods.
 type EchoResponse struct {
