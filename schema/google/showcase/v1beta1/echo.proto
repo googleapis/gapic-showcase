@@ -108,7 +108,7 @@ service Echo {
 
 // A severity enum used to test enum capabilities in GAPIC surfaces
 enum Severity {
-  UNCECESSARY = 0;
+  UNNECESSARY = 0;
   NECESSARY = 1;
   URGENT = 2;
   CRITICAL = 3;

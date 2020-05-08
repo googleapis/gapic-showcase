@@ -140,7 +140,7 @@ type Echo_Severity int32
 
 const (
 	// The severity rating of the echo
-	Echo_UNCECESSARY Echo_Severity = 0
+	Echo_UNNECESSARY Echo_Severity = 0
 	Echo_NECESSARY   Echo_Severity = 1
 	Echo_URGENT      Echo_Severity = 2
 	Echo_CRITICAL    Echo_Severity = 3
