@@ -138,8 +138,8 @@ func (*EchoRequest_Error) isEchoRequest_Response() {}
 
 type Echo_Severity int32
 
+// The severity rating of the echo
 const (
-	// The severity rating of the echo
 	Echo_UNNECESSARY Echo_Severity = 0
 	Echo_NECESSARY   Echo_Severity = 1
 	Echo_URGENT      Echo_Severity = 2
