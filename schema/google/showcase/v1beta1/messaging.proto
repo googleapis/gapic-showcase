@@ -289,7 +289,10 @@ message Blurb {
   option (google.api.resource) = {
     type: "showcase.googleapis.com/Blurb"
     pattern: "rooms/{room_id}/blurbs/{blurb_id}"
+    pattern: "rooms/{room_id}/blurbs/{blurb_id}.{legacy_room_id}"
     pattern: "user/{user_id}/profile/blurbs/{blurb_id}"
+    pattern: "user/{user_id}/profile/blurbs/{blurb_id}~{legacy_user_id}"
+
   };
 
   // The resource name of the chat room.
@@ -317,6 +320,8 @@ message Blurb {
   google.protobuf.Timestamp update_time = 6 [
     (google.api.field_behavior) = OUTPUT_ONLY
   ];
+  string legacy_room_id = 7;
+  string legacy_user_id = 8;
 }
 
 // The request message for the google.showcase.v1beta1.Messaging\CreateBlurb
