@@ -387,7 +387,7 @@ func Test_Blurb_lifecycle(t *testing.T) {
 	}
 	_, err = s.DeleteBlurb(
 		context.Background(),
-		&pb.DeleteBlurbRequest{Name: second.Name})
+		&pb.DeleteBlurbRequest{Name: second.GetName()})
 	if err != nil {
 		t.Errorf("Delete: unexpected err %+v", err)
 	}
@@ -407,7 +407,7 @@ func Test_Blurb_lifecycle(t *testing.T) {
 
 	_, err = s.DeleteBlurb(
 		context.Background(),
-		&pb.DeleteBlurbRequest{Name: delete.Name})
+		&pb.DeleteBlurbRequest{Name: delete.GetName()})
 	if err != nil {
 		t.Errorf("Delete: unexpected err %+v", err)
 	}
