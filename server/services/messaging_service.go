@@ -303,13 +303,11 @@ func (s *messagingServerImpl) CreateBlurb(ctx context.Context, in *pb.CreateBlur
 	id := puid.Next()
 	name := fmt.Sprintf("%s/blurbs/%d", parent, id)
 	now := ptypes.TimestampNow()
-	if len(b.LegacyRoomId) >0 {
-		roomId := b.LegacyRoomId
-		name := fmt.Sprintf("%s/blurbs/%d.%s", parent, id, roomId)
+	if roomId := b.GetLegacyRoomId(); roomId != "" {
+		name = fmt.Sprintf("%s/blurbs/%d.%s", parent, id, roomId)
 	}
-	if len(b.LegacyUserId) >0  {
-		userId := b.LegacyUserId
-		name := fmt.Sprintf("%s/blurbs/%d~%s", parent, id, userId)
+	if userId := b.GetLegacyUserId(); userId != "" {
+		name = fmt.Sprintf("%s/blurbs/%d~%s", parent, id, userId)
 	}
 	b.Name = name
 	b.CreateTime = now
