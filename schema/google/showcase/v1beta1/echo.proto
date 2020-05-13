@@ -137,7 +137,7 @@ message EchoResponse {
   // The content specified in the request.
   string content = 1;
 
-  // The option specified in the request.
+  // The severity specified in the request.
   Severity severity = 2;
 }
 
