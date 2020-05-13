@@ -41,6 +41,10 @@ func init() {
 
 	UpdateBlurbCmd.Flags().BytesHexVar(&UpdateBlurbInputBlurbContentImage.Image, "blurb.content.image", []byte{}, "The image content of this blurb.")
 
+	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbInput.Blurb.LegacyRoomId, "blurb.legacy_room_id", "", "")
+
+	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbInput.Blurb.LegacyUserId, "blurb.legacy_user_id", "", "")
+
 	UpdateBlurbCmd.Flags().StringSliceVar(&UpdateBlurbInput.UpdateMask.Paths, "update_mask.paths", []string{}, "The set of field mask paths.")
 
 	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbInputBlurbContent, "blurb.content", "", "Choices: text, image")
