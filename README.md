@@ -103,7 +103,7 @@ is the minimum supported version of `protoc`.
 ### Making changes to the protos
 
 If there are any changes to the protobuf files, the generated support code must
-be regenerated. This can be by executing the following command:
+be regenerated. This can be done by executing the following command:
 
     go run ./util/cmd/compile_protos
 
