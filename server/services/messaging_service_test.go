@@ -367,9 +367,9 @@ func Test_Blurb_lifecycle(t *testing.T) {
 		&pb.CreateBlurbRequest{
 			Parent: "users/rumble/profile",
 			Blurb: &pb.Blurb{
-				User:         "users/rumble",
-				Content:      &pb.Blurb_Text{Text: "non-slash resource test."},
-				LegacyUserId: "legacy_rumble",
+				User:     "users/rumble",
+				Content:  &pb.Blurb_Text{Text: "non-slash resource test."},
+				LegacyId: &pb.Blurb_LegacyUserId{LegacyUserId: "legacy_rumble"},
 			},
 		})
 	if err != nil {

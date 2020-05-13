@@ -47,7 +47,7 @@ func init() {
 
 	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInputBlurbLegacyIdLegacyRoomId.LegacyRoomId, "blurb.legacy_id.legacy_room_id", "", "The legacy id of the room. This field is used to...")
 
-	CreateBlurbCmd.Flags().BytesHexVar(&CreateBlurbInputBlurbLegacyIdLegacyUserId.LegacyUserId, "blurb.legacy_id.legacy_user_id", []byte{}, "The legacy id of the user. This field is used to...")
+	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInputBlurbLegacyIdLegacyUserId.LegacyUserId, "blurb.legacy_id.legacy_user_id", "", "The legacy id of the user. This field is used to...")
 
 	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInputBlurbContent, "blurb.content", "", "Choices: text, image")
 

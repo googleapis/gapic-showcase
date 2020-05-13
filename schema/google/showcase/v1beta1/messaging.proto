@@ -330,7 +330,7 @@ message Blurb {
 
     // The legacy id of the user. This field is used to trigger server
     // to return a pattern of `rooms/{room_id}/blurbs/{blurb_id}~{legacy_user_id}`
-    bytes legacy_user_id = 8;
+    string legacy_user_id = 8;
   }
 }
 

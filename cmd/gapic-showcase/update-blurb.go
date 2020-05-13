@@ -49,7 +49,7 @@ func init() {
 
 	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbInputBlurbLegacyIdLegacyRoomId.LegacyRoomId, "blurb.legacy_id.legacy_room_id", "", "The legacy id of the room. This field is used to...")
 
-	UpdateBlurbCmd.Flags().BytesHexVar(&UpdateBlurbInputBlurbLegacyIdLegacyUserId.LegacyUserId, "blurb.legacy_id.legacy_user_id", []byte{}, "The legacy id of the user. This field is used to...")
+	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbInputBlurbLegacyIdLegacyUserId.LegacyUserId, "blurb.legacy_id.legacy_user_id", "", "The legacy id of the user. This field is used to...")
 
 	UpdateBlurbCmd.Flags().StringSliceVar(&UpdateBlurbInput.UpdateMask.Paths, "update_mask.paths", []string{}, "The set of field mask paths.")
 
