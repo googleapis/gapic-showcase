@@ -320,8 +320,18 @@ message Blurb {
   google.protobuf.Timestamp update_time = 6 [
     (google.api.field_behavior) = OUTPUT_ONLY
   ];
-  string legacy_room_id = 7;
-  string legacy_user_id = 8;
+
+  // (-- aip.dev/not-precedent: This is designed for testing non-slash,
+  //     resource patterns --)
+  oneof legacy_id {
+    // The legacy id of the room. This field is used to trigger server
+    // to return a pattern of `rooms/{room_id}/blurbs/{blurb_id}.{legacy_room_id}`
+    string legacy_room_id = 7;
+
+    // The legacy id of the user. This field is used to trigger server
+    // to return a pattern of `rooms/{room_id}/blurbs/{blurb_id}~{legacy_user_id}`
+    bytes legacy_user_id = 8;
+  }
 }
 
 // The request message for the google.showcase.v1beta1.Messaging\CreateBlurb
