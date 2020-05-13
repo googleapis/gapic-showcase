@@ -24,6 +24,12 @@ var CreateBlurbInputBlurbContentImage genprotopb.Blurb_Image
 
 var CreateBlurbInputBlurbContentText genprotopb.Blurb_Text
 
+var CreateBlurbInputBlurbLegacyId string
+
+var CreateBlurbInputBlurbLegacyIdLegacyRoomId genprotopb.Blurb_LegacyRoomId
+
+var CreateBlurbInputBlurbLegacyIdLegacyUserId genprotopb.Blurb_LegacyUserId
+
 func init() {
 	MessagingServiceCmd.AddCommand(CreateBlurbCmd)
 
@@ -39,11 +45,13 @@ func init() {
 
 	CreateBlurbCmd.Flags().BytesHexVar(&CreateBlurbInputBlurbContentImage.Image, "blurb.content.image", []byte{}, "The image content of this blurb.")
 
-	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInput.Blurb.LegacyRoomId, "blurb.legacy_room_id", "", "")
+	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInputBlurbLegacyIdLegacyRoomId.LegacyRoomId, "blurb.legacy_id.legacy_room_id", "", "The legacy id of the room. This field is used to...")
 
-	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInput.Blurb.LegacyUserId, "blurb.legacy_user_id", "", "")
+	CreateBlurbCmd.Flags().BytesHexVar(&CreateBlurbInputBlurbLegacyIdLegacyUserId.LegacyUserId, "blurb.legacy_id.legacy_user_id", []byte{}, "The legacy id of the user. This field is used to...")
 
 	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInputBlurbContent, "blurb.content", "", "Choices: text, image")
+
+	CreateBlurbCmd.Flags().StringVar(&CreateBlurbInputBlurbLegacyId, "blurb.legacy_id", "", "Choices: legacy_room_id, legacy_user_id")
 
 	CreateBlurbCmd.Flags().StringVar(&CreateBlurbFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -62,6 +70,8 @@ var CreateBlurbCmd = &cobra.Command{
 			cmd.MarkFlagRequired("blurb.user")
 
 			cmd.MarkFlagRequired("blurb.content")
+
+			cmd.MarkFlagRequired("blurb.legacy_id")
 
 		}
 
@@ -93,6 +103,18 @@ var CreateBlurbCmd = &cobra.Command{
 
 			default:
 				return fmt.Errorf("Missing oneof choice for blurb.content")
+			}
+
+			switch CreateBlurbInputBlurbLegacyId {
+
+			case "legacy_room_id":
+				CreateBlurbInput.Blurb.LegacyId = &CreateBlurbInputBlurbLegacyIdLegacyRoomId
+
+			case "legacy_user_id":
+				CreateBlurbInput.Blurb.LegacyId = &CreateBlurbInputBlurbLegacyIdLegacyUserId
+
+			default:
+				return fmt.Errorf("Missing oneof choice for blurb.legacy_id")
 			}
 
 		}

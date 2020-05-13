@@ -26,6 +26,12 @@ var UpdateBlurbInputBlurbContentImage genprotopb.Blurb_Image
 
 var UpdateBlurbInputBlurbContentText genprotopb.Blurb_Text
 
+var UpdateBlurbInputBlurbLegacyId string
+
+var UpdateBlurbInputBlurbLegacyIdLegacyRoomId genprotopb.Blurb_LegacyRoomId
+
+var UpdateBlurbInputBlurbLegacyIdLegacyUserId genprotopb.Blurb_LegacyUserId
+
 func init() {
 	MessagingServiceCmd.AddCommand(UpdateBlurbCmd)
 
@@ -41,13 +47,15 @@ func init() {
 
 	UpdateBlurbCmd.Flags().BytesHexVar(&UpdateBlurbInputBlurbContentImage.Image, "blurb.content.image", []byte{}, "The image content of this blurb.")
 
-	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbInput.Blurb.LegacyRoomId, "blurb.legacy_room_id", "", "")
+	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbInputBlurbLegacyIdLegacyRoomId.LegacyRoomId, "blurb.legacy_id.legacy_room_id", "", "The legacy id of the room. This field is used to...")
 
-	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbInput.Blurb.LegacyUserId, "blurb.legacy_user_id", "", "")
+	UpdateBlurbCmd.Flags().BytesHexVar(&UpdateBlurbInputBlurbLegacyIdLegacyUserId.LegacyUserId, "blurb.legacy_id.legacy_user_id", []byte{}, "The legacy id of the user. This field is used to...")
 
 	UpdateBlurbCmd.Flags().StringSliceVar(&UpdateBlurbInput.UpdateMask.Paths, "update_mask.paths", []string{}, "The set of field mask paths.")
 
 	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbInputBlurbContent, "blurb.content", "", "Choices: text, image")
+
+	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbInputBlurbLegacyId, "blurb.legacy_id", "", "Choices: legacy_room_id, legacy_user_id")
 
 	UpdateBlurbCmd.Flags().StringVar(&UpdateBlurbFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -64,6 +72,8 @@ var UpdateBlurbCmd = &cobra.Command{
 			cmd.MarkFlagRequired("blurb.user")
 
 			cmd.MarkFlagRequired("blurb.content")
+
+			cmd.MarkFlagRequired("blurb.legacy_id")
 
 		}
 
@@ -95,6 +105,18 @@ var UpdateBlurbCmd = &cobra.Command{
 
 			default:
 				return fmt.Errorf("Missing oneof choice for blurb.content")
+			}
+
+			switch UpdateBlurbInputBlurbLegacyId {
+
+			case "legacy_room_id":
+				UpdateBlurbInput.Blurb.LegacyId = &UpdateBlurbInputBlurbLegacyIdLegacyRoomId
+
+			case "legacy_user_id":
+				UpdateBlurbInput.Blurb.LegacyId = &UpdateBlurbInputBlurbLegacyIdLegacyUserId
+
+			default:
+				return fmt.Errorf("Missing oneof choice for blurb.legacy_id")
 			}
 
 		}
