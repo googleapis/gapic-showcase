@@ -9,7 +9,7 @@ require (
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.6.3
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	google.golang.org/api v0.23.0
+	google.golang.org/api v0.24.0
 	google.golang.org/genproto v0.0.0-20200507105951-43844f6eee31
 	google.golang.org/grpc v1.29.1
 	google.golang.org/protobuf v1.22.0
