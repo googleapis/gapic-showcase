@@ -324,8 +324,8 @@ message Blurb {
   // (-- aip.dev/not-precedent: This is designed for testing non-slash,
   //     resource patterns --)
   oneof legacy_id {
-    // The legacy id of the room. This field is used to trigger server
-    // to return a pattern of `rooms/{room_id}/blurbs/{blurb_id}.{legacy_room_id}`
+    // The legacy id of the room. This field is used to signal
+    // the use of the compound resource pattern `rooms/{room_id}/blurbs/{blurb_id}.{legacy_room_id}`
     string legacy_room_id = 7;
 
     // The legacy id of the user. This field is used to trigger server
