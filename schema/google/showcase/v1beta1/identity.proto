@@ -41,6 +41,7 @@ service Identity {
       body: "*"
     };
     option (google.api.method_signature) = "user.display_name,user.email";
+    option (google.api.method_signature) = "user.display_name,user.email,user.age,user.nickname";
   }
 
   // Retrieves the User with the given uri.
@@ -100,6 +101,24 @@ message User {
   google.protobuf.Timestamp update_time = 5 [
     (google.api.field_behavior) = OUTPUT_ONLY
   ];
+
+  // The age of the use in years.
+  optional int32 age = 6;
+
+  // The height of the user in feet.
+  optional double height_feet = 7;
+
+  // The nickname of the user.
+  //
+  // (-- aip.dev/not-precedent: An empty string is a valid nickname.
+  //     Ordinarily, proto3_optional should not be used on a `string` field. --)
+  optional string nickname = 8;
+
+  // Enables the receiving of notifications. The default is true if unset.
+  //
+  // (-- aip.dev/not-precedent: The default for the feature is true.
+  //     Ordinarily, the default for a `bool` field should be false. --)
+  optional bool enable_notifications = 9;
 }
 
 // The request message for the google.showcase.v1beta1.Identity\CreateUser
