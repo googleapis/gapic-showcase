@@ -1,3 +1,4 @@
 # Temp directories
 tmp/
 dist/
+coverage.txt
