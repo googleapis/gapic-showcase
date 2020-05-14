@@ -121,6 +121,10 @@ func (x *EchoRequest) GetContent() string {
 	return ""
 }
 
+func (x *EchoRequest) GetSeverity() Echo_Severity {
+	return x.Severity
+}
+
 func (x *EchoRequest) GetError() *status.Status {
 	if x, ok := x.GetResponse().(*EchoRequest_Error); ok {
 		return x.Error
