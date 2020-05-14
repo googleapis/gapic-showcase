@@ -307,7 +307,7 @@ func (s *messagingServerImpl) CreateBlurb(ctx context.Context, in *pb.CreateBlur
 	case *pb.Blurb_LegacyRoomId:
 		name = fmt.Sprintf("%s/blurbs/%d.%s", parent, id, legacyId.LegacyRoomId)
 	case *pb.Blurb_LegacyUserId:
-		name = fmt.Sprintf("%s/blurbs/%d.%s", parent, id, legacyId.LegacyUserId)
+		name = fmt.Sprintf("%s/blurbs/%d~%s", parent, id, legacyId.LegacyUserId)
 	}
 	b.Name = name
 	b.CreateTime = now
