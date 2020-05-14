@@ -41,7 +41,7 @@ service Identity {
       body: "*"
     };
     option (google.api.method_signature) = "user.display_name,user.email";
-    option (google.api.method_signature) = "user.display_name,user.email,user.age,user.nickname";
+    option (google.api.method_signature) = "user.display_name,user.email,user.age,user.nickname,user.enable_notifications,user.height_feet";
   }
 
   // Retrieves the User with the given uri.
