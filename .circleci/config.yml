@@ -11,13 +11,9 @@ workflows:
           requires:
             - build
           filters: *all_commits
-      - kotlin-smoke-test:
-          filters: *all_commits
       - typescript-smoke-test:
           filters: *all_commits
       - python-smoke-test:
-          filters: *all_commits
-      - go-smoke-test:
           filters: *all_commits
       - protobufjs-load-test:
           filters: *all_commits
@@ -30,10 +26,8 @@ workflows:
       - github_release:
           requires:
             - test
-            - kotlin-smoke-test
             - typescript-smoke-test
             - python-smoke-test
-            - go-smoke-test
             - protobufjs-load-test
           filters: &releases
             branches:
@@ -43,10 +37,8 @@ workflows:
       - push-image:
           requires:
             - test
-            - kotlin-smoke-test
             - typescript-smoke-test
             - python-smoke-test
-            - go-smoke-test
             - protobufjs-load-test
           filters: *releases
 
@@ -236,21 +228,6 @@ jobs:
               --mount type=bind,source="$(pwd)"/schema/,destination=/in/google/showcase/v1beta1/,readonly \
               --mount type=bind,source="$(pwd)"/pyout,target=/out \
               gcr.io/gapic-images/gapic-generator-python:0.9
-
-  go-smoke-test:
-    machine: true
-    steps:
-      - checkout
-      - run:
-          name: Run go generation
-          command: |
-            mkdir goout
-            docker run \
-              --rm \
-              --mount type=bind,source="$(pwd)"/schema,destination=/in/protos/google/showcase/v1beta1,readonly \
-              --mount type=bind,source="$(pwd)"/goout,destination=/out/ \
-              gcr.io/gapic-images/gapic-generator-go:0.5 \
-              --go-gapic-package "<github.com/googleapis/gapic-showcase/client;client>"
 
   protobufjs-load-test:
     docker:
