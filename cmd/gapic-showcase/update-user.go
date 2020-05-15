@@ -20,6 +20,14 @@ var UpdateUserInput genprotopb.UpdateUserRequest
 
 var UpdateUserFromFile string
 
+var updateUserInputUserAge int32
+
+var updateUserInputUserHeightFeet float64
+
+var updateUserInputUserNickname string
+
+var updateUserInputUserEnableNotifications bool
+
 func init() {
 	IdentityServiceCmd.AddCommand(UpdateUserCmd)
 
@@ -32,6 +40,14 @@ func init() {
 	UpdateUserCmd.Flags().StringVar(&UpdateUserInput.User.DisplayName, "user.display_name", "", "Required. The display_name of the user.")
 
 	UpdateUserCmd.Flags().StringVar(&UpdateUserInput.User.Email, "user.email", "", "Required. The email address of the user.")
+
+	UpdateUserCmd.Flags().Int32Var(&updateUserInputUserAge, "user.age", 0, "The age of the use in years.")
+
+	UpdateUserCmd.Flags().Float64Var(&updateUserInputUserHeightFeet, "user.height_feet", 0.0, "The height of the user in feet.")
+
+	UpdateUserCmd.Flags().StringVar(&updateUserInputUserNickname, "user.nickname", "", "The nickname of the user.   (--...")
+
+	UpdateUserCmd.Flags().BoolVar(&updateUserInputUserEnableNotifications, "user.enable_notifications", false, "Enables the receiving of notifications. The...")
 
 	UpdateUserCmd.Flags().StringSliceVar(&UpdateUserInput.UpdateMask.Paths, "update_mask.paths", []string{}, "The set of field mask paths.")
 
@@ -67,6 +83,24 @@ var UpdateUserCmd = &cobra.Command{
 			err = jsonpb.Unmarshal(in, &UpdateUserInput)
 			if err != nil {
 				return err
+			}
+
+		} else {
+
+			if cmd.Flags().Changed("user.age") {
+				UpdateUserInput.User.Age = &updateUserInputUserAge
+			}
+
+			if cmd.Flags().Changed("user.height_feet") {
+				UpdateUserInput.User.HeightFeet = &updateUserInputUserHeightFeet
+			}
+
+			if cmd.Flags().Changed("user.nickname") {
+				UpdateUserInput.User.Nickname = &updateUserInputUserNickname
+			}
+
+			if cmd.Flags().Changed("user.enable_notifications") {
+				UpdateUserInput.User.EnableNotifications = &updateUserInputUserEnableNotifications
 			}
 
 		}

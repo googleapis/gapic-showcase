@@ -33,7 +33,7 @@ func Test_User_lifecycle(t *testing.T) {
 	first, err := s.CreateUser(
 		context.Background(),
 		&pb.CreateUserRequest{
-			User: &pb.User{DisplayName: "ekkodog", Email: "ekko@google.com"},
+			User: &pb.User{DisplayName: "ekkodog", Email: "ekko@google.com", Nickname: proto.String("ekko"), Age: proto.Int32(26)},
 		})
 	if err != nil {
 		t.Errorf("Create: unexpected err %+v", err)
@@ -58,7 +58,14 @@ func Test_User_lifecycle(t *testing.T) {
 	created, err := s.CreateUser(
 		context.Background(),
 		&pb.CreateUserRequest{
-			User: &pb.User{DisplayName: "rumbledog", Email: "rumble@google.com"},
+			User: &pb.User{
+				DisplayName:         "rumbledog",
+				Email:               "rumble@google.com",
+				Age:                 proto.Int32(42),
+				EnableNotifications: proto.Bool(false),
+				HeightFeet:          proto.Float64(3.5),
+				Nickname:            proto.String("rumble"),
+			},
 		})
 	if err != nil {
 		t.Errorf("Create: unexpected err %+v", err)
@@ -75,6 +82,7 @@ func Test_User_lifecycle(t *testing.T) {
 	}
 
 	got.DisplayName = "musubi"
+	got.Nickname = proto.String("musu")
 	updated, err := s.UpdateUser(
 		context.Background(),
 		&pb.UpdateUserRequest{User: got, UpdateMask: nil})
@@ -93,7 +101,11 @@ func Test_User_lifecycle(t *testing.T) {
 		updated.GetDisplayName() != got.GetDisplayName() ||
 		updated.GetEmail() != got.GetEmail() ||
 		!proto.Equal(updated.GetCreateTime(), got.GetCreateTime()) ||
-		proto.Equal(updated.GetUpdateTime(), got.GetUpdateTime()) {
+		proto.Equal(updated.GetUpdateTime(), got.GetUpdateTime()) ||
+		updated.GetNickname() != got.GetNickname() ||
+		updated.GetAge() != got.GetAge() ||
+		updated.GetHeightFeet() != got.GetHeightFeet() ||
+		updated.GetEnableNotifications() != got.GetEnableNotifications() {
 		t.Error("Expected to get updated user.")
 	}
 
@@ -126,8 +138,8 @@ func Test_User_lifecycle(t *testing.T) {
 
 func Test_Create_invalid(t *testing.T) {
 	tests := []*pb.User{
-		&pb.User{DisplayName: "", Email: "rumble@google.com"},
-		&pb.User{DisplayName: "Rumble", Email: ""},
+		{DisplayName: "", Email: "rumble@google.com"},
+		{DisplayName: "Rumble", Email: ""},
 	}
 	s := NewIdentityServer()
 	for _, u := range tests {
@@ -276,12 +288,12 @@ func Test_Update_notFound(t *testing.T) {
 
 func Test_Update_invalid(t *testing.T) {
 	first := []*pb.User{
-		&pb.User{DisplayName: "Ekko", Email: "ekko@google.com"},
-		&pb.User{DisplayName: "Rumble", Email: "rumble@google.com"},
+		{DisplayName: "Ekko", Email: "ekko@google.com"},
+		{DisplayName: "Rumble", Email: "rumble@google.com"},
 	}
 	second := []*pb.User{
-		&pb.User{DisplayName: "", Email: "ekko@google.com"},
-		&pb.User{DisplayName: "Rumble", Email: ""},
+		{DisplayName: "", Email: "ekko@google.com"},
+		{DisplayName: "Rumble", Email: ""},
 	}
 	s := NewIdentityServer()
 	for i, u := range first {

@@ -11,14 +11,12 @@ workflows:
           requires:
             - build
           filters: *all_commits
-      - kotlin-smoke-test:
-          filters: *all_commits
-      - typescript-smoke-test:
-          filters: *all_commits
-      - python-smoke-test:
-          filters: *all_commits
-      - go-smoke-test:
-          filters: *all_commits
+      # TODO(fenster): https://github.com/googleapis/gapic-showcase/issues/383
+      # - typescript-smoke-test:
+      #     filters: *all_commits
+      # TODO(dovs): https://github.com/googleapis/gapic-showcase/issues/382
+      # - python-smoke-test:
+      #     filters: *all_commits
       - protobufjs-load-test:
           filters: *all_commits
       - push-generated-source:
@@ -30,10 +28,10 @@ workflows:
       - github_release:
           requires:
             - test
-            - kotlin-smoke-test
-            - typescript-smoke-test
-            - python-smoke-test
-            - go-smoke-test
+            # TODO(fenster): https://github.com/googleapis/gapic-showcase/issues/383
+            # - typescript-smoke-test
+            # TODO(dovs): https://github.com/googleapis/gapic-showcase/issues/382
+            # - python-smoke-test
             - protobufjs-load-test
           filters: &releases
             branches:
@@ -43,10 +41,10 @@ workflows:
       - push-image:
           requires:
             - test
-            - kotlin-smoke-test
-            - typescript-smoke-test
-            - python-smoke-test
-            - go-smoke-test
+            # TODO(fenster): https://github.com/googleapis/gapic-showcase/issues/383
+            # - typescript-smoke-test
+            # TODO(dovs): https://github.com/googleapis/gapic-showcase/issues/382
+            # - python-smoke-test
             - protobufjs-load-test
           filters: *releases
 
@@ -66,7 +64,7 @@ jobs:
           name: Install protoc
           command: |
             apt-get update && apt-get install -y unzip
-            curl -o ~/protoc3.zip -L https://github.com/protocolbuffers/protobuf/releases/download/v3.12.0-rc1/protoc-3.12.0-rc-1-linux-x86_64.zip
+            curl -o ~/protoc3.zip -L https://github.com/protocolbuffers/protobuf/releases/download/v3.12.0-rc2/protoc-3.12.0-rc-2-linux-x86_64.zip
             unzip ~/protoc3.zip -d ~/protoc3
             mv ~/protoc3/bin/* /usr/local/bin/
             mv ~/protoc3/include/* /usr/local/include/
@@ -236,21 +234,6 @@ jobs:
               --mount type=bind,source="$(pwd)"/schema/,destination=/in/google/showcase/v1beta1/,readonly \
               --mount type=bind,source="$(pwd)"/pyout,target=/out \
               gcr.io/gapic-images/gapic-generator-python:0.9
-
-  go-smoke-test:
-    machine: true
-    steps:
-      - checkout
-      - run:
-          name: Run go generation
-          command: |
-            mkdir goout
-            docker run \
-              --rm \
-              --mount type=bind,source="$(pwd)"/schema,destination=/in/protos/google/showcase/v1beta1,readonly \
-              --mount type=bind,source="$(pwd)"/goout,destination=/out/ \
-              gcr.io/gapic-images/gapic-generator-go:0.5 \
-              --go-gapic-package "<github.com/googleapis/gapic-showcase/client;client>"
 
   protobufjs-load-test:
     docker:
