@@ -11,10 +11,10 @@ workflows:
           requires:
             - build
           filters: *all_commits
-      - typescript-smoke-test:
-          filters: *all_commits
-      - python-smoke-test:
-          filters: *all_commits
+      # - typescript-smoke-test:
+      #     filters: *all_commits
+      # - python-smoke-test:
+      #     filters: *all_commits
       - protobufjs-load-test:
           filters: *all_commits
       - push-generated-source:
@@ -26,8 +26,8 @@ workflows:
       - github_release:
           requires:
             - test
-            - typescript-smoke-test
-            - python-smoke-test
+            # - typescript-smoke-test
+            # - python-smoke-test
             - protobufjs-load-test
           filters: &releases
             branches:
@@ -37,8 +37,8 @@ workflows:
       - push-image:
           requires:
             - test
-            - typescript-smoke-test
-            - python-smoke-test
+            # - typescript-smoke-test
+            # - python-smoke-test
             - protobufjs-load-test
           filters: *releases
 
