@@ -11,8 +11,10 @@ workflows:
           requires:
             - build
           filters: *all_commits
+      # TODO(fenster): https://github.com/googleapis/gapic-showcase/issues/383
       # - typescript-smoke-test:
       #     filters: *all_commits
+      # TODO(dovs): https://github.com/googleapis/gapic-showcase/issues/382
       # - python-smoke-test:
       #     filters: *all_commits
       - protobufjs-load-test:
@@ -26,7 +28,9 @@ workflows:
       - github_release:
           requires:
             - test
+            # TODO(fenster): https://github.com/googleapis/gapic-showcase/issues/383
             # - typescript-smoke-test
+            # TODO(dovs): https://github.com/googleapis/gapic-showcase/issues/382
             # - python-smoke-test
             - protobufjs-load-test
           filters: &releases
@@ -37,7 +41,9 @@ workflows:
       - push-image:
           requires:
             - test
+            # TODO(fenster): https://github.com/googleapis/gapic-showcase/issues/383
             # - typescript-smoke-test
+            # TODO(dovs): https://github.com/googleapis/gapic-showcase/issues/382
             # - python-smoke-test
             - protobufjs-load-test
           filters: *releases
