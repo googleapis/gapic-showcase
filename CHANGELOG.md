@@ -1,5 +1,11 @@
 # Release History
 
+### v0.10.0 / 2020-05-18
+- Add use of proto3_optional in schema
+- Upgrade CI protoc to v3.12.0
+- Regen CLI with new proto3_optional fields
+- Update dependencies
+
 ### v0.9.0 / 2020-04-22
 - Print gRPC request headers in verbose mode (`gapic-showcase run -v`)
 - Add TypeScript smoke tests
