@@ -99,6 +99,7 @@ func main() {
 	}
 	command := []string{
 		"protoc",
+		"--experimental_allow_proto3_optional",
 		"--proto_path=" + tmpProtoPath,
 		"--include_imports",
 		"--include_source_info",
