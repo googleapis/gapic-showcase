@@ -289,7 +289,10 @@ message Blurb {
   option (google.api.resource) = {
     type: "showcase.googleapis.com/Blurb"
     pattern: "rooms/{room_id}/blurbs/{blurb_id}"
+    pattern: "rooms/{room_id}/blurbs/legacy/{legacy_room_id}.{blurb_id}"
     pattern: "user/{user_id}/profile/blurbs/{blurb_id}"
+    pattern: "user/{user_id}/profile/blurbs/legacy/{legacy_user_id}~{blurb_id}"
+
   };
 
   // The resource name of the chat room.
@@ -317,6 +320,18 @@ message Blurb {
   google.protobuf.Timestamp update_time = 6 [
     (google.api.field_behavior) = OUTPUT_ONLY
   ];
+
+  // (-- aip.dev/not-precedent: This is designed for testing non-slash
+  //     resource patterns. Ordinarily, non-slash separators are discouraged. --)
+  oneof legacy_id {
+    // The legacy id of the room. This field is used to signal
+    // the use of the compound resource pattern `rooms/{room_id}/blurbs/legacy/{legacy_room_id}.{blurb_id}`
+    string legacy_room_id = 7;
+
+    // The legacy id of the user. This field is used to signal
+    // the use of the compound resource pattern `users/{user_id}/profile/blurbs/legacy/{legacy_user_id}~{blurb_id}`
+    string legacy_user_id = 8;
+  }
 }
 
 // The request message for the google.showcase.v1beta1.Messaging\CreateBlurb

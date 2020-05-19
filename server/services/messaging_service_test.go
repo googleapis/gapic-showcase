@@ -361,6 +361,36 @@ func Test_Blurb_lifecycle(t *testing.T) {
 	if err != nil {
 		t.Errorf("Create: unexpected err %+v", err)
 	}
+	// create a Blurb with legacy_user_id
+	second, err := s.CreateBlurb(
+		context.Background(),
+		&pb.CreateBlurbRequest{
+			Parent: "users/rumble/profile",
+			Blurb: &pb.Blurb{
+				User:     "users/rumble",
+				Content:  &pb.Blurb_Text{Text: "non-slash resource test."},
+				LegacyId: &pb.Blurb_LegacyUserId{LegacyUserId: "legacy_rumble"},
+			},
+		})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
+	}
+	// get the second Blurb from database and verify the legacy_user_id, then delete it.
+	gotSecond, err := s.GetBlurb(
+		context.Background(),
+		&pb.GetBlurbRequest{Name: second.GetName()})
+	if err != nil {
+		t.Errorf("Get: unexpected err %+v", err)
+	}
+	if !proto.Equal(second, gotSecond) {
+		t.Error("Expected to get created blurb.")
+	}
+	_, err = s.DeleteBlurb(
+		context.Background(),
+		&pb.DeleteBlurbRequest{Name: second.GetName()})
+	if err != nil {
+		t.Errorf("Delete: unexpected err %+v", err)
+	}
 
 	delete, err := s.CreateBlurb(
 		context.Background(),
@@ -377,7 +407,7 @@ func Test_Blurb_lifecycle(t *testing.T) {
 
 	_, err = s.DeleteBlurb(
 		context.Background(),
-		&pb.DeleteBlurbRequest{Name: delete.Name})
+		&pb.DeleteBlurbRequest{Name: delete.GetName()})
 	if err != nil {
 		t.Errorf("Delete: unexpected err %+v", err)
 	}
