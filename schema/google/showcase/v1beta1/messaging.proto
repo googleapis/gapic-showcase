@@ -325,7 +325,7 @@ message Blurb {
   //     resource patterns. Ordinarily, non-slash separators are discouraged. --)
   oneof legacy_id {
     // The legacy id of the room. This field is used to signal
-    // the use of the compound resource pattern `rooms/{room_id}/blurbs/{legacy_room_id}.{blurb_id}`
+    // the use of the compound resource pattern `rooms/{room_id}/blurbs/legacy/{legacy_room_id}.{blurb_id}`
     string legacy_room_id = 7;
 
     // The legacy id of the user. This field is used to signal
