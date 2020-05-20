@@ -95,7 +95,7 @@ func Test_User_lifecycle(t *testing.T) {
 	if err != nil {
 		t.Errorf("Update: unexpected err %+v", err)
 	}
-	// Ensure only those proto3_optional fields that were set got updated.
+	// Ensure the proto3_optional fields that were unset did not get updated.
 	if updated.Age == nil {
 		t.Errorf("UpdateUser().Age was unexpectedly set to nil")
 	}
