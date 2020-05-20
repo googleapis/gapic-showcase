@@ -161,7 +161,7 @@ func (s *identityServerImpl) UpdateUser(_ context.Context, in *pb.UpdateUserRequ
 	}
 
 	s.users[i] = userEntry{user: updated}
-	return u, nil
+	return updated, nil
 }
 
 // Deletes a user, their profile, and all of their authored messages.
