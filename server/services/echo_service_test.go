@@ -41,7 +41,7 @@ func TestEcho_success(t *testing.T) {
 	for _, val := range table {
 		in := &pb.EchoRequest{
 			Response: &pb.EchoRequest_Content{Content: val},
-			Severity: pb.Echo_CRITICAL,
+			Severity: pb.Severity_CRITICAL,
 		}
 		mockStream := &mockUnaryStream{t: t}
 		ctx := appendTestOutgoingMetadata(context.Background(), &mockSTS{t: t, stream: mockStream})
