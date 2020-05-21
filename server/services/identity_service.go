@@ -132,14 +132,36 @@ func (s *identityServerImpl) UpdateUser(_ context.Context, in *pb.UpdateUserRequ
 	entry := s.users[i]
 	// Update store.
 	updated := &pb.User{
-		Name:        u.GetName(),
-		DisplayName: u.GetDisplayName(),
-		Email:       u.GetEmail(),
-		CreateTime:  entry.user.GetCreateTime(),
-		UpdateTime:  ptypes.TimestampNow(),
+		Name:                u.GetName(),
+		DisplayName:         u.GetDisplayName(),
+		Email:               u.GetEmail(),
+		CreateTime:          entry.user.GetCreateTime(),
+		UpdateTime:          ptypes.TimestampNow(),
+		Age:                 entry.user.Age,
+		EnableNotifications: entry.user.EnableNotifications,
+		HeightFeet:          entry.user.HeightFeet,
+		Nickname:            entry.user.Nickname,
 	}
+
+	// Use direct field access to avoid unwrapping and rewrapping the pointer value.
+	//
+	// TODO: if field_mask is implemented, do a direct update if included,
+	// regardless of if the optional field is nil.
+	if u.Age != nil {
+		updated.Age = u.Age
+	}
+	if u.EnableNotifications != nil {
+		updated.EnableNotifications = u.EnableNotifications
+	}
+	if u.HeightFeet != nil {
+		updated.HeightFeet = u.HeightFeet
+	}
+	if u.Nickname != nil {
+		updated.Nickname = u.Nickname
+	}
+
 	s.users[i] = userEntry{user: updated}
-	return u, nil
+	return updated, nil
 }
 
 // Deletes a user, their profile, and all of their authored messages.
