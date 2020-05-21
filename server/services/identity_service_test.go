@@ -81,13 +81,29 @@ func Test_User_lifecycle(t *testing.T) {
 		t.Error("Expected to get created user.")
 	}
 
-	got.DisplayName = "musubi"
-	got.Nickname = proto.String("musu")
+	// Make a copy of the User value, then unset proto3_optional fields
+	// to scope the update to DisplayName and Nickname.
+	u := *got
+	u.DisplayName = "musubi"
+	u.Nickname = proto.String("musu")
+	u.Age = nil
+	u.HeightFeet = nil
+	u.EnableNotifications = nil
 	updated, err := s.UpdateUser(
 		context.Background(),
-		&pb.UpdateUserRequest{User: got, UpdateMask: nil})
+		&pb.UpdateUserRequest{User: &u, UpdateMask: nil})
 	if err != nil {
 		t.Errorf("Update: unexpected err %+v", err)
+	}
+	// Ensure the proto3_optional fields that were unset did not get updated.
+	if updated.Age == nil {
+		t.Errorf("UpdateUser().Age was unexpectedly set to nil")
+	}
+	if updated.HeightFeet == nil {
+		t.Errorf("UpdateUser().HeightFeet was unexpectedly set to nil")
+	}
+	if updated.EnableNotifications == nil {
+		t.Errorf("UpdateUser().EnableNotifications was unexpectedly set to nil")
 	}
 
 	got, err = s.GetUser(
@@ -96,17 +112,8 @@ func Test_User_lifecycle(t *testing.T) {
 	if err != nil {
 		t.Errorf("Get: unexpected err %+v", err)
 	}
-	// Cannot use proto.Equal here because the update time is changed on updates.
-	if updated.GetName() != got.GetName() ||
-		updated.GetDisplayName() != got.GetDisplayName() ||
-		updated.GetEmail() != got.GetEmail() ||
-		!proto.Equal(updated.GetCreateTime(), got.GetCreateTime()) ||
-		proto.Equal(updated.GetUpdateTime(), got.GetUpdateTime()) ||
-		updated.GetNickname() != got.GetNickname() ||
-		updated.GetAge() != got.GetAge() ||
-		updated.GetHeightFeet() != got.GetHeightFeet() ||
-		updated.GetEnableNotifications() != got.GetEnableNotifications() {
-		t.Error("Expected to get updated user.")
+	if !proto.Equal(updated, got) {
+		t.Errorf("UpdateUser() = %+v, want %+v", got, updated)
 	}
 
 	r, err := s.ListUsers(

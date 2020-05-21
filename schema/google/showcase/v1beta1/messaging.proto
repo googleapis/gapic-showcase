@@ -288,11 +288,10 @@ message ListRoomsResponse {
 message Blurb {
   option (google.api.resource) = {
     type: "showcase.googleapis.com/Blurb"
+    pattern: "users/{user_id}/profile/blurbs/legacy/{legacy_user_id}~{blurb_id}"
+    pattern: "users/{user_id}/profile/blurbs/{blurb_id}"
     pattern: "rooms/{room_id}/blurbs/{blurb_id}"
     pattern: "rooms/{room_id}/blurbs/legacy/{legacy_room_id}.{blurb_id}"
-    pattern: "users/{user_id}/profile/blurbs/{blurb_id}"
-    pattern: "users/{user_id}/profile/blurbs/legacy/{legacy_user_id}~{blurb_id}"
-
   };
 
   // The resource name of the chat room.
