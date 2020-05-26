@@ -5,7 +5,7 @@
 - Fix typo in User-parented Blurb resource patterns
 - Add an enum to EchoRequest/EchoResponse
 - Regen CLI with new fields
-- Update depedencies
+- Update dependencies
 
 ### v0.10.1 / 2020-05-20
 - Fix UpdateUser handler response to send entire updated resource
