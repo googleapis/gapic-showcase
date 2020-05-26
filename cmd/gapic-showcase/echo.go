@@ -16,6 +16,8 @@ import (
 	"os"
 
 	statuspb "google.golang.org/genproto/googleapis/rpc/status"
+
+	"strings"
 )
 
 var EchoInput genprotopb.EchoRequest
@@ -30,6 +32,8 @@ var EchoInputResponseError genprotopb.EchoRequest_Error
 
 var EchoInputResponseErrorDetails []string
 
+var EchoInputSeverity string
+
 func init() {
 	EchoServiceCmd.AddCommand(EchoCmd)
 
@@ -42,6 +46,8 @@ func init() {
 	EchoCmd.Flags().StringVar(&EchoInputResponseError.Error.Message, "response.error.message", "", "A developer-facing error message, which should be...")
 
 	EchoCmd.Flags().StringArrayVar(&EchoInputResponseErrorDetails, "response.error.details", []string{}, "A list of messages that carry the error details. ...")
+
+	EchoCmd.Flags().StringVar(&EchoInputSeverity, "severity", "", "The severity to be echoed by the server.")
 
 	EchoCmd.Flags().StringVar(&EchoInputResponse, "response", "", "Choices: content, error")
 
@@ -90,6 +96,8 @@ var EchoCmd = &cobra.Command{
 			default:
 				return fmt.Errorf("Missing oneof choice for response")
 			}
+
+			EchoInput.Severity = genprotopb.Severity(genprotopb.Severity_value[strings.ToUpper(EchoInputSeverity)])
 
 		}
 

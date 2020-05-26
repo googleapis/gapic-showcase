@@ -39,7 +39,10 @@ func TestEcho_success(t *testing.T) {
 
 	server := NewEchoServer()
 	for _, val := range table {
-		in := &pb.EchoRequest{Response: &pb.EchoRequest_Content{Content: val}}
+		in := &pb.EchoRequest{
+			Response: &pb.EchoRequest_Content{Content: val},
+			Severity: pb.Severity_CRITICAL,
+		}
 		mockStream := &mockUnaryStream{t: t}
 		ctx := appendTestOutgoingMetadata(context.Background(), &mockSTS{t: t, stream: mockStream})
 		out, err := server.Echo(ctx, in)
@@ -48,6 +51,9 @@ func TestEcho_success(t *testing.T) {
 		}
 		if out.GetContent() != in.GetContent() {
 			t.Errorf("Echo(%s) returned %s", in.GetContent(), out.GetContent())
+		}
+		if out.Severity != in.Severity {
+			t.Errorf("Echo severity(%d) returned %d", in.Severity, out.Severity)
 		}
 		mockStream.verify(err != nil)
 	}
