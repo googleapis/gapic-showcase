@@ -1,5 +1,12 @@
 # Release History
 
+### v0.11.0 / 2020-05-26
+- Add non-slash resource name patterns to Blurb resource
+- Fix typo in User-parented Blurb resource patterns
+- Add an enum to EchoRequest/EchoResponse
+- Regen CLI with new fields
+- Update depedencies
+
 ### v0.10.1 / 2020-05-20
 - Fix UpdateUser handler response to send entire updated resource
 - Note: non-slash resource name changes are not included in this release
