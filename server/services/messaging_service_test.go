@@ -968,7 +968,7 @@ func Test_StreamBlurbs_invalidTimestamp(t *testing.T) {
 	first, err := is.CreateUser(
 		context.Background(),
 		&pb.CreateUserRequest{
-			User: &pb.User{DisplayName: "rumbledog", Email: "rumble@google.com"},
+			User: &pb.User{DisplayName: "rumbledog", Email: "rumble@example.com"},
 		})
 	if err != nil {
 		t.Errorf("Create: unexpected err %+v", err)
@@ -1076,7 +1076,7 @@ func Test_StreamBlurbs_parentNotFoundLater(t *testing.T) {
 	first, err := is.CreateUser(
 		context.Background(),
 		&pb.CreateUserRequest{
-			User: &pb.User{DisplayName: "rumbledog", Email: "rumble@google.com"},
+			User: &pb.User{DisplayName: "rumbledog", Email: "rumble@example.com"},
 		})
 	if err != nil {
 		t.Errorf("Create: unexpected err %+v", err)
@@ -1310,7 +1310,7 @@ func TestSendBlurbs_invalidParent(t *testing.T) {
 	first, err := is.CreateUser(
 		context.Background(),
 		&pb.CreateUserRequest{
-			User: &pb.User{DisplayName: "rumbledog", Email: "rumble@google.com"},
+			User: &pb.User{DisplayName: "rumbledog", Email: "rumble@example.com"},
 		})
 	if err != nil {
 		t.Errorf("Create: unexpected err %+v", err)
@@ -1773,7 +1773,7 @@ func TestConnect_parentNotFoundLater(t *testing.T) {
 	first, err := is.CreateUser(
 		context.Background(),
 		&pb.CreateUserRequest{
-			User: &pb.User{DisplayName: "rumbledog", Email: "rumble@google.com"},
+			User: &pb.User{DisplayName: "rumbledog", Email: "rumble@example.com"},
 		})
 	if err != nil {
 		t.Errorf("Create: unexpected err %+v", err)
