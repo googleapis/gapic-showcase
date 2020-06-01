@@ -33,7 +33,7 @@ func Test_User_lifecycle(t *testing.T) {
 	first, err := s.CreateUser(
 		context.Background(),
 		&pb.CreateUserRequest{
-			User: &pb.User{DisplayName: "ekkodog", Email: "ekko@google.com", Nickname: proto.String("ekko"), Age: proto.Int32(26)},
+			User: &pb.User{DisplayName: "ekkodog", Email: "ekko@example.com", Nickname: proto.String("ekko"), Age: proto.Int32(26)},
 		})
 	if err != nil {
 		t.Errorf("Create: unexpected err %+v", err)
@@ -42,7 +42,7 @@ func Test_User_lifecycle(t *testing.T) {
 	delete, err := s.CreateUser(
 		context.Background(),
 		&pb.CreateUserRequest{
-			User: &pb.User{DisplayName: "mishacat", Email: "misha@google.com"},
+			User: &pb.User{DisplayName: "mishacat", Email: "misha@example.com"},
 		})
 	if err != nil {
 		t.Errorf("Create: unexpected err %+v", err)
@@ -60,7 +60,7 @@ func Test_User_lifecycle(t *testing.T) {
 		&pb.CreateUserRequest{
 			User: &pb.User{
 				DisplayName:         "rumbledog",
-				Email:               "rumble@google.com",
+				Email:               "rumble@example.com",
 				Age:                 proto.Int32(42),
 				EnableNotifications: proto.Bool(false),
 				HeightFeet:          proto.Float64(3.5),
@@ -145,7 +145,7 @@ func Test_User_lifecycle(t *testing.T) {
 
 func Test_Create_invalid(t *testing.T) {
 	tests := []*pb.User{
-		{DisplayName: "", Email: "rumble@google.com"},
+		{DisplayName: "", Email: "rumble@example.com"},
 		{DisplayName: "Rumble", Email: ""},
 	}
 	s := NewIdentityServer()
@@ -164,9 +164,9 @@ func Test_Create_invalid(t *testing.T) {
 }
 
 func Test_Create_alreadyPresent(t *testing.T) {
-	first := &pb.User{DisplayName: "Rumble", Email: "rumble@google.com"}
-	second := &pb.User{DisplayName: "Musubi", Email: "rumble@google.com"}
-	third := &pb.User{DisplayName: "Rumble", Email: "rumble@google.com"}
+	first := &pb.User{DisplayName: "Rumble", Email: "rumble@example.com"}
+	second := &pb.User{DisplayName: "Musubi", Email: "rumble@example.com"}
+	third := &pb.User{DisplayName: "Rumble", Email: "rumble@example.com"}
 
 	s := NewIdentityServer()
 	created, err := s.CreateUser(context.Background(), &pb.CreateUserRequest{User: first})
@@ -196,7 +196,7 @@ func Test_Create_alreadyPresent(t *testing.T) {
 
 func Test_Create_deleted(t *testing.T) {
 	s := NewIdentityServer()
-	u := &pb.User{DisplayName: "Rumble", Email: "rumble@google.com"}
+	u := &pb.User{DisplayName: "Rumble", Email: "rumble@example.com"}
 	u, err := s.CreateUser(context.Background(), &pb.CreateUserRequest{User: u})
 	if err != nil {
 		t.Errorf("Create: unexpected error: %v", err)
@@ -230,7 +230,7 @@ func Test_Get_deleted(t *testing.T) {
 	created, err := s.CreateUser(
 		context.Background(),
 		&pb.CreateUserRequest{
-			User: &pb.User{DisplayName: "rumbledog", Email: "rumble@google.com"},
+			User: &pb.User{DisplayName: "rumbledog", Email: "rumble@example.com"},
 		})
 	if err != nil {
 		t.Errorf("Create: unexpected err %+v", err)
@@ -280,7 +280,7 @@ func Test_Update_notFound(t *testing.T) {
 			User: &pb.User{
 				Name:        "Rumble",
 				DisplayName: "rumbledog",
-				Email:       "rumble@google.com",
+				Email:       "rumble@example.com",
 			},
 			UpdateMask: nil,
 		})
@@ -295,11 +295,11 @@ func Test_Update_notFound(t *testing.T) {
 
 func Test_Update_invalid(t *testing.T) {
 	first := []*pb.User{
-		{DisplayName: "Ekko", Email: "ekko@google.com"},
-		{DisplayName: "Rumble", Email: "rumble@google.com"},
+		{DisplayName: "Ekko", Email: "ekko@example.com"},
+		{DisplayName: "Rumble", Email: "rumble@example.com"},
 	}
 	second := []*pb.User{
-		{DisplayName: "", Email: "ekko@google.com"},
+		{DisplayName: "", Email: "ekko@example.com"},
 		{DisplayName: "Rumble", Email: ""},
 	}
 	s := NewIdentityServer()
@@ -327,8 +327,8 @@ func Test_Update_invalid(t *testing.T) {
 }
 
 func Test_Update_alreadyPresent(t *testing.T) {
-	first := &pb.User{DisplayName: "Rumble", Email: "rumble@google.com"}
-	second := &pb.User{DisplayName: "Ekko", Email: "ekko@google.com"}
+	first := &pb.User{DisplayName: "Rumble", Email: "rumble@example.com"}
+	second := &pb.User{DisplayName: "Ekko", Email: "ekko@example.com"}
 
 	s := NewIdentityServer()
 
