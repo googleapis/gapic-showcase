@@ -80,7 +80,7 @@ service Identity {
 message User {
   option (google.api.resource) = {
     type: "showcase.googleapis.com/User"
-    pattern: "users/{user_id}"
+    pattern: "users/{user}"
   };
 
   // The resource name of the user.
