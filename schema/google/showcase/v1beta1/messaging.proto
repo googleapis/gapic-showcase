@@ -196,7 +196,7 @@ service Messaging {
 message Room {
   option (google.api.resource) = {
     type: "showcase.googleapis.com/Room"
-    pattern: "rooms/{room_id}"
+    pattern: "rooms/{room}"
   };
 
   // The resource name of the chat room.
@@ -288,10 +288,10 @@ message ListRoomsResponse {
 message Blurb {
   option (google.api.resource) = {
     type: "showcase.googleapis.com/Blurb"
-    pattern: "users/{user_id}/profile/blurbs/legacy/{legacy_user_id}~{blurb_id}"
-    pattern: "users/{user_id}/profile/blurbs/{blurb_id}"
-    pattern: "rooms/{room_id}/blurbs/{blurb_id}"
-    pattern: "rooms/{room_id}/blurbs/legacy/{legacy_room_id}.{blurb_id}"
+    pattern: "users/{user}/profile/blurbs/legacy/{legacy_user}~{blurb}"
+    pattern: "users/{user}/profile/blurbs/{blurb}"
+    pattern: "rooms/{room}/blurbs/{blurb}"
+    pattern: "rooms/{room}/blurbs/legacy/{legacy_room}.{blurb}"
   };
 
   // The resource name of the chat room.
@@ -324,11 +324,11 @@ message Blurb {
   //     resource patterns. Ordinarily, non-slash separators are discouraged. --)
   oneof legacy_id {
     // The legacy id of the room. This field is used to signal
-    // the use of the compound resource pattern `rooms/{room_id}/blurbs/legacy/{legacy_room_id}.{blurb_id}`
+    // the use of the compound resource pattern `rooms/{room}/blurbs/legacy/{legacy_room}.{blurb}`
     string legacy_room_id = 7;
 
     // The legacy id of the user. This field is used to signal
-    // the use of the compound resource pattern `users/{user_id}/profile/blurbs/legacy/{legacy_user_id}~{blurb_id}`
+    // the use of the compound resource pattern `users/{user}/profile/blurbs/legacy/{legacy_user}~{blurb}`
     string legacy_user_id = 8;
   }
 }
