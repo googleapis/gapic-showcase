@@ -60,7 +60,7 @@ message Sequence {
         pattern: "sequences/{sequence}"
     };
 
-    string name = 1;
+    string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
 
     repeated google.rpc.Status responses = 2;
 }
@@ -71,7 +71,7 @@ message SequenceReport {
         pattern: "sequences/{sequence}/sequenceReport"
     };
 
-    string name = 1;
+    string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
 
     message Attempt {
         int32 attempt_number = 1;
@@ -79,6 +79,8 @@ message SequenceReport {
         google.protobuf.Timestamp deadline = 2;
 
         google.protobuf.Duration delay = 3;
+
+        google.rpc.Status status = 4;
     }
 
     repeated Attempt attempts = 2;
