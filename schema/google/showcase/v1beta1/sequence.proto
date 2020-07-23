@@ -62,7 +62,17 @@ message Sequence {
 
     string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
 
-    repeated google.rpc.Status responses = 2;
+    // A server response to an RPC Attempt in a sequence.
+    message Response {
+        // The status to return for an individual attempt.
+        google.rpc.Status status = 1;
+
+        // The amount of time to delay sending the response.
+        google.rpc.Duration delay = 2;
+    }
+
+    // Sequence of responses to return in order for each attempt.
+    repeated Response responses = 2;
 }
 
 message SequenceReport {
@@ -73,16 +83,23 @@ message SequenceReport {
 
     string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
 
+    // Contains metrics on individual RPC Attempts in a sequence.
     message Attempt {
+        // The attempt number - starting at 0.
         int32 attempt_number = 1;
 
-        google.protobuf.Timestamp deadline = 2;
+        // The deadline dictated by the attempt to the server.
+        google.protobuf.Timestamp attempt_deadline = 2;
 
-        google.protobuf.Duration delay = 3;
+        // The delay between sending the last response and receiving this
+        // attempt.
+        google.protobuf.Duration attempt_delay = 3;
 
+        // The status returned to the attempt.
         google.rpc.Status status = 4;
     }
 
+    // The set of RPC attempts received by the server for a Sequence.
     repeated Attempt attempts = 2;
 }
 
