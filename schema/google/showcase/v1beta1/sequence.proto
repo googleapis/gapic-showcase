@@ -68,7 +68,7 @@ message Sequence {
         google.rpc.Status status = 1;
 
         // The amount of time to delay sending the response.
-        google.rpc.Duration delay = 2;
+        google.protobuf.Duration delay = 2;
     }
 
     // Sequence of responses to return in order for each attempt.
