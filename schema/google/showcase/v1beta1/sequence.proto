@@ -95,12 +95,16 @@ message SequenceReport {
     // The deadline dictated by the attempt to the server.
     google.protobuf.Timestamp attempt_deadline = 2;
 
-    // The delay between sending the last response and receiving this
-    // attempt.
-    google.protobuf.Duration attempt_delay = 3;
+    // The time that the server responded to the RPC attempt. Used for
+    // calculating attempt_delay.
+    google.protobuf.Timestamp response_time = 3;
+
+    // The server perceived delay between sending the last response and
+    // receiving this attempt. Used for validating attempt delay backoff.
+    google.protobuf.Duration attempt_delay = 4;
 
     // The status returned to the attempt.
-    google.rpc.Status status = 4;
+    google.rpc.Status status = 5;
   }
 
   // The set of RPC attempts received by the server for a Sequence.

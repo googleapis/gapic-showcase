@@ -195,7 +195,7 @@ func (c *TestingClient) ListSessions(ctx context.Context, req *genprotopb.ListSe
 		}
 
 		it.Response = resp
-		return resp.Sessions, resp.NextPageToken, nil
+		return resp.GetSessions(), resp.GetNextPageToken(), nil
 	}
 	fetch := func(pageSize int, pageToken string) (string, error) {
 		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
@@ -206,8 +206,8 @@ func (c *TestingClient) ListSessions(ctx context.Context, req *genprotopb.ListSe
 		return nextPageToken, nil
 	}
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
-	it.pageInfo.MaxSize = int(req.PageSize)
-	it.pageInfo.Token = req.PageToken
+	it.pageInfo.MaxSize = int(req.GetPageSize())
+	it.pageInfo.Token = req.GetPageToken()
 	return it
 }
 
@@ -268,7 +268,7 @@ func (c *TestingClient) ListTests(ctx context.Context, req *genprotopb.ListTests
 		}
 
 		it.Response = resp
-		return resp.Tests, resp.NextPageToken, nil
+		return resp.GetTests(), resp.GetNextPageToken(), nil
 	}
 	fetch := func(pageSize int, pageToken string) (string, error) {
 		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
@@ -279,8 +279,8 @@ func (c *TestingClient) ListTests(ctx context.Context, req *genprotopb.ListTests
 		return nextPageToken, nil
 	}
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
-	it.pageInfo.MaxSize = int(req.PageSize)
-	it.pageInfo.Token = req.PageToken
+	it.pageInfo.MaxSize = int(req.GetPageSize())
+	it.pageInfo.Token = req.GetPageToken()
 	return it
 }
 
