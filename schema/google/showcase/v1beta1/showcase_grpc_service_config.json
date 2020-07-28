@@ -3,7 +3,8 @@
         {
             "name": [
                 {"service": "google.showcase.v1beta1.Echo"},
-                {"service": "google.showcase.v1beta1.Messaging"}
+                {"service": "google.showcase.v1beta1.Messaging"},
+                {"service": "google.showcase.v1beta1.SequenceService"}
             ],
             "timeout": "5s"
         },
