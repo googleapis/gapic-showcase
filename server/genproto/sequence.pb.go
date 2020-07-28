@@ -54,7 +54,8 @@ type Sequence struct {
 	unknownFields protoimpl.UnknownFields
 
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// Sequence of responses to return in order for each attempt.
+	// Sequence of responses to return in order for each attempt. If empty, the
+	// default response is an immediate OK.
 	Responses []*Sequence_Response `protobuf:"bytes,2,rep,name=responses,proto3" json:"responses,omitempty"`
 }
 

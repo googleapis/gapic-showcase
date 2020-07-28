@@ -75,7 +75,8 @@ message Sequence {
     google.protobuf.Duration delay = 2;
   }
 
-  // Sequence of responses to return in order for each attempt.
+  // Sequence of responses to return in order for each attempt. If empty, the
+  // default response is an immediate OK.
   repeated Response responses = 2;
 }
 
