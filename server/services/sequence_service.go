@@ -95,16 +95,19 @@ func (s *sequenceServerImpl) AttemptSequence(ctx context.Context, in *pb.Attempt
 		)
 	}
 
-	// Get the number of attempts, which correlates to the this attempt's number.
+	// Get the number of attempts, which correlates to this attempt's number.
 	n := len(rep.Attempts)
 
 	// Prepare the attempt response defined by the Sequence.
 	st := status.New(codes.OK, "Successful attempt")
 	var delay time.Duration
-	if responses := seq.GetResponses(); len(responses) > 0 {
+	responses := seq.GetResponses()
+	if l := len(responses); l > 0 && n < l {
 		resp := responses[n]
 		delay = resp.GetDelay().AsDuration()
 		st = status.FromProto(resp.GetStatus())
+	} else if n > l {
+		st = status.New(codes.OutOfRange, "Attempt exceeded predefined responses")
 	}
 
 	// A delay of 0 returns immediately.

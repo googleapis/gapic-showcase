@@ -139,6 +139,57 @@ func Test_Sequence_Retry(t *testing.T) {
 	}
 }
 
+func Test_Sequence_OutOfRange(t *testing.T) {
+	s := NewSequenceServer()
+
+	seq, err := s.CreateSequence(context.Background(), &pb.CreateSequenceRequest{})
+	if err != nil {
+		t.Errorf("CreateSequence(out_of_range): unexpected err %+v", err)
+	}
+
+	timeout := 5 * time.Second
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	e, err := s.AttemptSequence(ctx, &pb.AttemptSequenceRequest{Name: seq.GetName()})
+	if err != nil {
+		t.Errorf("AttemptSequence(out_of_range): unexpected err %+v", err)
+	}
+
+	if e == nil {
+		t.Errorf("AttemptSequence(out_of_range): unexpected nil Empty response")
+	}
+
+	_, err = s.AttemptSequence(ctx, &pb.AttemptSequenceRequest{Name: seq.GetName()})
+	if c := status.Code(err); c != codes.OutOfRange {
+		t.Errorf("%s: status was %v wanted %v", t.Name(), c, codes.OutOfRange)
+	}
+
+	_, err = s.AttemptSequence(ctx, &pb.AttemptSequenceRequest{Name: seq.GetName()})
+	if c := status.Code(err); c != codes.OutOfRange {
+		t.Errorf("%s: status was %v wanted %v", t.Name(), c, codes.OutOfRange)
+	}
+
+	r := report(seq.GetName())
+	report, err := s.GetSequenceReport(context.Background(), &pb.GetSequenceReportRequest{Name: r})
+	if err != nil {
+		t.Errorf("GetSequenceReport(out_of_range): unexpected err %+v", err)
+	}
+
+	attempts := report.GetAttempts()
+	if len(attempts) != 3 {
+		t.Errorf("%s: expected number of attempts to be 3 but was %d", t.Name(), len(attempts))
+	}
+
+	a := attempts[0]
+	ad := a.GetAttemptDeadline().AsTime()
+	d, _ := ctx.Deadline()
+
+	if !ad.Equal(d) {
+		t.Errorf("%s: server deadline = %v client deadline = %v", t.Name(), ad, d)
+	}
+}
+
 func Test_GetSequenceReport_NotFound(t *testing.T) {
 	s := NewSequenceServer()
 	_, err := s.GetSequenceReport(context.Background(), &pb.GetSequenceReportRequest{Name: "foo/bar/baz"})
