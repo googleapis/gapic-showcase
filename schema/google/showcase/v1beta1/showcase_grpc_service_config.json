@@ -45,6 +45,10 @@
                 {
                     "service": "google.showcase.v1beta1.Messaging",
                     "method": "Connect"
+                },
+                {
+                  "service": "google.showcase.v1beta1.SequenceService",
+                  "method": "AttemptSequence"
                 }
             ],
             "retryPolicy": {

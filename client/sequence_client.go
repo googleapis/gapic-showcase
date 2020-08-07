@@ -21,12 +21,14 @@ import (
 	"fmt"
 	"math"
 	"net/url"
+	"time"
 
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	gax "github.com/googleapis/gax-go/v2"
 	"google.golang.org/api/option"
 	gtransport "google.golang.org/api/transport/grpc"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -53,7 +55,18 @@ func defaultSequenceCallOptions() *SequenceCallOptions {
 	return &SequenceCallOptions{
 		CreateSequence:    []gax.CallOption{},
 		GetSequenceReport: []gax.CallOption{},
-		AttemptSequence:   []gax.CallOption{},
+		AttemptSequence: []gax.CallOption{
+			gax.WithRetry(func() gax.Retryer {
+				return gax.OnCodes([]codes.Code{
+					codes.Unavailable,
+					codes.Unknown,
+				}, gax.Backoff{
+					Initial:    100 * time.Millisecond,
+					Max:        3000 * time.Millisecond,
+					Multiplier: 2.00,
+				})
+			}),
+		},
 	}
 }
 
