@@ -95,7 +95,7 @@ func (s *sequenceServerImpl) AttemptSequence(ctx context.Context, in *pb.Attempt
 		)
 	}
 
-	// Get the number of attempts, which correlates to this attempt's number.
+	// Get the number of attempts, which coincides with this attempt's number.
 	n := len(rep.Attempts)
 
 	// Prepare the attempt response defined by the Sequence.

@@ -120,21 +120,23 @@ func TestSequenceRetry(t *testing.T) {
 
 	d, _ := ctx.Deadline()
 	for n, a := range attempts {
-		if a.GetAttemptNumber() != int32(n) {
-			t.Errorf("%s: expected attempt #%d but was #%d", t.Name(), n, a.GetAttemptNumber())
+		if got, want := a.GetAttemptNumber(), int32(n); got != want {
+			t.Errorf("%s: expected attempt #%d but was #%d", t.Name(), want, got)
 		}
 
-		ad := a.GetAttemptDeadline().AsTime()
-		if !ad.Equal(d) {
-			t.Errorf("%s: server deadline = %v client deadline = %v", t.Name(), ad, d)
+		if got, want := a.GetAttemptDeadline().AsTime(), d; !got.Equal(want) {
+			t.Errorf("%s: server deadline = %v client deadline = %v", t.Name(), got, want)
 		}
 
-		if a.GetStatus().GetCode() != responses[n].GetStatus().GetCode() {
-			t.Errorf("%s: expected response %v but was %v", t.Name(), responses[n].GetStatus().GetCode(), a.GetStatus().GetCode())
+		if got, want := a.GetStatus().GetCode(), responses[n].GetStatus().GetCode(); got != want {
+			t.Errorf("%s: expected response %v but was %v", t.Name(), want, got)
 		}
 
-		if n > 0 && a.GetAttemptDelay().AsDuration() <= attempts[n-1].GetAttemptDelay().AsDuration() {
-			t.Errorf("%s: expected attempt delay: %v to be larger than previous: %v", t.Name(), a.GetAttemptDelay().AsDuration(), attempts[n-1].GetAttemptDelay().AsDuration())
+		// Check that perceived delay between attempts was changing as expected.
+		if n > 0 {
+			if cur, prev := a.GetAttemptDelay().AsDuration(), attempts[n-1].GetAttemptDelay().AsDuration(); cur <= prev {
+				t.Errorf("%s: expected attempt delay: %v to be larger than previous: %v", t.Name(), cur, prev)
+			}
 		}
 	}
 }
@@ -194,7 +196,7 @@ func TestGetSequenceReportNotFound(t *testing.T) {
 	s := NewSequenceServer()
 	_, err := s.GetSequenceReport(context.Background(), &pb.GetSequenceReportRequest{Name: "foo/bar/baz"})
 	if c := status.Code(err); c != codes.NotFound {
-		t.Errorf("%s: expected error to be %s but was %s", t.Name(), codes.NotFound.String(), c.String())
+		t.Errorf("%s: expected error to be %s but was %s", t.Name(), codes.NotFound, c)
 	}
 }
 
@@ -202,7 +204,7 @@ func TestGetSequenceReportMissingName(t *testing.T) {
 	s := NewSequenceServer()
 	_, err := s.GetSequenceReport(context.Background(), &pb.GetSequenceReportRequest{Name: ""})
 	if c := status.Code(err); c != codes.InvalidArgument {
-		t.Errorf("%s: expected error to be %s but was %s", t.Name(), codes.InvalidArgument.String(), c.String())
+		t.Errorf("%s: expected error to be %s but was %s", t.Name(), codes.InvalidArgument, c)
 	}
 }
 
@@ -210,7 +212,7 @@ func TestAttemptSequenceNotFound(t *testing.T) {
 	s := NewSequenceServer()
 	_, err := s.AttemptSequence(context.Background(), &pb.AttemptSequenceRequest{Name: "foo/bar/baz"})
 	if c := status.Code(err); c != codes.NotFound {
-		t.Errorf("%s: expected error to be %s but was %s", t.Name(), codes.NotFound.String(), c.String())
+		t.Errorf("%s: expected error to be %s but was %s", t.Name(), codes.NotFound, c)
 	}
 }
 
@@ -218,6 +220,6 @@ func TestAttemptSequenceMissingName(t *testing.T) {
 	s := NewSequenceServer()
 	_, err := s.AttemptSequence(context.Background(), &pb.AttemptSequenceRequest{Name: ""})
 	if c := status.Code(err); c != codes.InvalidArgument {
-		t.Errorf("%s: expected error to be %s but was %s", t.Name(), codes.InvalidArgument.String(), c.String())
+		t.Errorf("%s: expected error to be %s but was %s", t.Name(), codes.InvalidArgument, c)
 	}
 }
