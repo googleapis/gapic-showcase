@@ -25,7 +25,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func Test_Sequence_Empty(t *testing.T) {
+func TestSequenceEmpty(t *testing.T) {
 	s := NewSequenceServer()
 
 	seq, err := s.CreateSequence(context.Background(), &pb.CreateSequenceRequest{})
@@ -66,7 +66,7 @@ func Test_Sequence_Empty(t *testing.T) {
 	}
 }
 
-func Test_Sequence_Retry(t *testing.T) {
+func TestSequenceRetry(t *testing.T) {
 	s := NewSequenceServer()
 	responses := []*pb.Sequence_Response{
 		{
@@ -139,7 +139,7 @@ func Test_Sequence_Retry(t *testing.T) {
 	}
 }
 
-func Test_Sequence_OutOfRange(t *testing.T) {
+func TestSequenceOutOfRange(t *testing.T) {
 	s := NewSequenceServer()
 
 	seq, err := s.CreateSequence(context.Background(), &pb.CreateSequenceRequest{})
@@ -190,7 +190,7 @@ func Test_Sequence_OutOfRange(t *testing.T) {
 	}
 }
 
-func Test_GetSequenceReport_NotFound(t *testing.T) {
+func TestGetSequenceReportNotFound(t *testing.T) {
 	s := NewSequenceServer()
 	_, err := s.GetSequenceReport(context.Background(), &pb.GetSequenceReportRequest{Name: "foo/bar/baz"})
 	if c := status.Code(err); c != codes.NotFound {
@@ -198,7 +198,7 @@ func Test_GetSequenceReport_NotFound(t *testing.T) {
 	}
 }
 
-func Test_GetSequenceReport_MissingName(t *testing.T) {
+func TestGetSequenceReportMissingName(t *testing.T) {
 	s := NewSequenceServer()
 	_, err := s.GetSequenceReport(context.Background(), &pb.GetSequenceReportRequest{Name: ""})
 	if c := status.Code(err); c != codes.InvalidArgument {
@@ -206,7 +206,7 @@ func Test_GetSequenceReport_MissingName(t *testing.T) {
 	}
 }
 
-func Test_AttemptSequence_NotFound(t *testing.T) {
+func TestAttemptSequenceNotFound(t *testing.T) {
 	s := NewSequenceServer()
 	_, err := s.AttemptSequence(context.Background(), &pb.AttemptSequenceRequest{Name: "foo/bar/baz"})
 	if c := status.Code(err); c != codes.NotFound {
@@ -214,7 +214,7 @@ func Test_AttemptSequence_NotFound(t *testing.T) {
 	}
 }
 
-func Test_AttemptSequence_MissingName(t *testing.T) {
+func TestAttemptSequenceMissingName(t *testing.T) {
 	s := NewSequenceServer()
 	_, err := s.AttemptSequence(context.Background(), &pb.AttemptSequenceRequest{Name: ""})
 	if c := status.Code(err); c != codes.InvalidArgument {
