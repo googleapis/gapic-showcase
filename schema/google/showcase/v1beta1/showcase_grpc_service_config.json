@@ -3,7 +3,8 @@
         {
             "name": [
                 {"service": "google.showcase.v1beta1.Echo"},
-                {"service": "google.showcase.v1beta1.Messaging"}
+                {"service": "google.showcase.v1beta1.Messaging"},
+                {"service": "google.showcase.v1beta1.SequenceService"}
             ],
             "timeout": "5s"
         },
@@ -44,6 +45,10 @@
                 {
                     "service": "google.showcase.v1beta1.Messaging",
                     "method": "Connect"
+                },
+                {
+                  "service": "google.showcase.v1beta1.SequenceService",
+                  "method": "AttemptSequence"
                 }
             ],
             "retryPolicy": {

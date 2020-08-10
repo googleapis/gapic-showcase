@@ -22,7 +22,7 @@ import (
 func init() {
 	// Since the showcase server is locally ran, the default address needs to be set
 	// since the go gapic assumes port :443.
-	services := []string{"ECHO", "IDENTITY", "MESSAGING", "TESTING"}
+	services := []string{"ECHO", "IDENTITY", "MESSAGING", "TESTING", "SEQUENCE"}
 	envVars := map[string]string{
 		"ADDRESS":  "localhost:7469",
 		"INSECURE": "true",

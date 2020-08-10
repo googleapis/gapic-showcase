@@ -325,7 +325,7 @@ func (c *MessagingClient) ListRooms(ctx context.Context, req *genprotopb.ListRoo
 		}
 
 		it.Response = resp
-		return resp.Rooms, resp.NextPageToken, nil
+		return resp.GetRooms(), resp.GetNextPageToken(), nil
 	}
 	fetch := func(pageSize int, pageToken string) (string, error) {
 		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
@@ -336,8 +336,8 @@ func (c *MessagingClient) ListRooms(ctx context.Context, req *genprotopb.ListRoo
 		return nextPageToken, nil
 	}
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
-	it.pageInfo.MaxSize = int(req.PageSize)
-	it.pageInfo.Token = req.PageToken
+	it.pageInfo.MaxSize = int(req.GetPageSize())
+	it.pageInfo.Token = req.GetPageToken()
 	return it
 }
 
@@ -433,7 +433,7 @@ func (c *MessagingClient) ListBlurbs(ctx context.Context, req *genprotopb.ListBl
 		}
 
 		it.Response = resp
-		return resp.Blurbs, resp.NextPageToken, nil
+		return resp.GetBlurbs(), resp.GetNextPageToken(), nil
 	}
 	fetch := func(pageSize int, pageToken string) (string, error) {
 		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
@@ -444,8 +444,8 @@ func (c *MessagingClient) ListBlurbs(ctx context.Context, req *genprotopb.ListBl
 		return nextPageToken, nil
 	}
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
-	it.pageInfo.MaxSize = int(req.PageSize)
-	it.pageInfo.Token = req.PageToken
+	it.pageInfo.MaxSize = int(req.GetPageSize())
+	it.pageInfo.Token = req.GetPageToken()
 	return it
 }
 

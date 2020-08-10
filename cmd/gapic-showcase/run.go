@@ -96,6 +96,7 @@ func init() {
 
 			// Register Services to the server.
 			pb.RegisterEchoServer(s, services.NewEchoServer())
+			pb.RegisterSequenceServiceServer(s, services.NewSequenceServer())
 			identityServer := services.NewIdentityServer()
 			pb.RegisterIdentityServer(s, identityServer)
 			messagingServer := services.NewMessagingServer(identityServer)
