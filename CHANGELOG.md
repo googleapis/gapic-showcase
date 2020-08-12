@@ -1,5 +1,10 @@
 # Release History
 
+### v0.12.0 / 2020-08-12
+- Add client-side retry/deadline testing surface
+- Regen client & CLI with small updates
+- Update dependencies
+
 ### v0.11.0 / 2020-05-26
 - Add non-slash resource name patterns to Blurb resource
 - Fix typo in User-parented Blurb resource patterns
