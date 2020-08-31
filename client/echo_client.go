@@ -110,6 +110,9 @@ type EchoClient struct {
 	// Connection pool of gRPC connections to the service.
 	connPool gtransport.ConnPool
 
+	// flag to opt out of default deadlines via GOOGLE_API_GO_EXPERIMENTAL_DISABLE_DEFAULT_DEADLINE
+	disableDeadlines bool
+
 	// The gRPC API client.
 	echoClient genprotopb.EchoClient
 
@@ -143,13 +146,19 @@ func NewEchoClient(ctx context.Context, opts ...option.ClientOption) (*EchoClien
 		clientOpts = append(clientOpts, hookOpts...)
 	}
 
+	disableDeadlines, err := checkDisableDeadlines()
+	if err != nil {
+		return nil, err
+	}
+
 	connPool, err := gtransport.DialPool(ctx, append(clientOpts, opts...)...)
 	if err != nil {
 		return nil, err
 	}
 	c := &EchoClient{
-		connPool:    connPool,
-		CallOptions: defaultEchoCallOptions(),
+		connPool:         connPool,
+		disableDeadlines: disableDeadlines,
+		CallOptions:      defaultEchoCallOptions(),
 
 		echoClient: genprotopb.NewEchoClient(connPool),
 	}
@@ -192,6 +201,11 @@ func (c *EchoClient) setGoogleClientInfo(keyval ...string) {
 
 // Echo this method simply echos the request. This method is showcases unary rpcs.
 func (c *EchoClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, opts ...gax.CallOption) (*genprotopb.EchoResponse, error) {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 10000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append(c.CallOptions.Echo[0:len(c.CallOptions.Echo):len(c.CallOptions.Echo)], opts...)
 	var resp *genprotopb.EchoResponse
@@ -303,6 +317,11 @@ func (c *EchoClient) PagedExpand(ctx context.Context, req *genprotopb.PagedExpan
 // Wait this method will wait the requested amount of and then return.
 // This method showcases how a client handles a request timing out.
 func (c *EchoClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, opts ...gax.CallOption) (*WaitOperation, error) {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append(c.CallOptions.Wait[0:len(c.CallOptions.Wait):len(c.CallOptions.Wait)], opts...)
 	var resp *longrunningpb.Operation
@@ -323,6 +342,11 @@ func (c *EchoClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, opts
 // and then return the response or error.
 // This method showcases how a client handles delays or retries.
 func (c *EchoClient) Block(ctx context.Context, req *genprotopb.BlockRequest, opts ...gax.CallOption) (*genprotopb.BlockResponse, error) {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append(c.CallOptions.Block[0:len(c.CallOptions.Block):len(c.CallOptions.Block)], opts...)
 	var resp *genprotopb.BlockResponse

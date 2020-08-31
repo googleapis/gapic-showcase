@@ -77,6 +77,9 @@ type SequenceClient struct {
 	// Connection pool of gRPC connections to the service.
 	connPool gtransport.ConnPool
 
+	// flag to opt out of default deadlines via GOOGLE_API_GO_EXPERIMENTAL_DISABLE_DEFAULT_DEADLINE
+	disableDeadlines bool
+
 	// The gRPC API client.
 	sequenceClient genprotopb.SequenceServiceClient
 
@@ -100,13 +103,19 @@ func NewSequenceClient(ctx context.Context, opts ...option.ClientOption) (*Seque
 		clientOpts = append(clientOpts, hookOpts...)
 	}
 
+	disableDeadlines, err := checkDisableDeadlines()
+	if err != nil {
+		return nil, err
+	}
+
 	connPool, err := gtransport.DialPool(ctx, append(clientOpts, opts...)...)
 	if err != nil {
 		return nil, err
 	}
 	c := &SequenceClient{
-		connPool:    connPool,
-		CallOptions: defaultSequenceCallOptions(),
+		connPool:         connPool,
+		disableDeadlines: disableDeadlines,
+		CallOptions:      defaultSequenceCallOptions(),
 
 		sequenceClient: genprotopb.NewSequenceServiceClient(connPool),
 	}
@@ -138,6 +147,11 @@ func (c *SequenceClient) setGoogleClientInfo(keyval ...string) {
 }
 
 func (c *SequenceClient) CreateSequence(ctx context.Context, req *genprotopb.CreateSequenceRequest, opts ...gax.CallOption) (*genprotopb.Sequence, error) {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append(c.CallOptions.CreateSequence[0:len(c.CallOptions.CreateSequence):len(c.CallOptions.CreateSequence)], opts...)
 	var resp *genprotopb.Sequence
@@ -153,6 +167,11 @@ func (c *SequenceClient) CreateSequence(ctx context.Context, req *genprotopb.Cre
 }
 
 func (c *SequenceClient) GetSequenceReport(ctx context.Context, req *genprotopb.GetSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.SequenceReport, error) {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.GetSequenceReport[0:len(c.CallOptions.GetSequenceReport):len(c.CallOptions.GetSequenceReport)], opts...)
@@ -169,6 +188,11 @@ func (c *SequenceClient) GetSequenceReport(ctx context.Context, req *genprotopb.
 }
 
 func (c *SequenceClient) AttemptSequence(ctx context.Context, req *genprotopb.AttemptSequenceRequest, opts ...gax.CallOption) error {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 10000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.AttemptSequence[0:len(c.CallOptions.AttemptSequence):len(c.CallOptions.AttemptSequence)], opts...)

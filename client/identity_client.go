@@ -94,6 +94,9 @@ type IdentityClient struct {
 	// Connection pool of gRPC connections to the service.
 	connPool gtransport.ConnPool
 
+	// flag to opt out of default deadlines via GOOGLE_API_GO_EXPERIMENTAL_DISABLE_DEFAULT_DEADLINE
+	disableDeadlines bool
+
 	// The gRPC API client.
 	identityClient genprotopb.IdentityClient
 
@@ -118,13 +121,19 @@ func NewIdentityClient(ctx context.Context, opts ...option.ClientOption) (*Ident
 		clientOpts = append(clientOpts, hookOpts...)
 	}
 
+	disableDeadlines, err := checkDisableDeadlines()
+	if err != nil {
+		return nil, err
+	}
+
 	connPool, err := gtransport.DialPool(ctx, append(clientOpts, opts...)...)
 	if err != nil {
 		return nil, err
 	}
 	c := &IdentityClient{
-		connPool:    connPool,
-		CallOptions: defaultIdentityCallOptions(),
+		connPool:         connPool,
+		disableDeadlines: disableDeadlines,
+		CallOptions:      defaultIdentityCallOptions(),
 
 		identityClient: genprotopb.NewIdentityClient(connPool),
 	}
@@ -173,6 +182,11 @@ func (c *IdentityClient) CreateUser(ctx context.Context, req *genprotopb.CreateU
 
 // GetUser retrieves the User with the given uri.
 func (c *IdentityClient) GetUser(ctx context.Context, req *genprotopb.GetUserRequest, opts ...gax.CallOption) (*genprotopb.User, error) {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.GetUser[0:len(c.CallOptions.GetUser):len(c.CallOptions.GetUser)], opts...)
