@@ -159,6 +159,9 @@ type MessagingClient struct {
 	// Connection pool of gRPC connections to the service.
 	connPool gtransport.ConnPool
 
+	// flag to opt out of default deadlines via GOOGLE_API_GO_EXPERIMENTAL_DISABLE_DEFAULT_DEADLINE
+	disableDeadlines bool
+
 	// The gRPC API client.
 	messagingClient genprotopb.MessagingClient
 
@@ -191,13 +194,19 @@ func NewMessagingClient(ctx context.Context, opts ...option.ClientOption) (*Mess
 		clientOpts = append(clientOpts, hookOpts...)
 	}
 
+	disableDeadlines, err := checkDisableDeadlines()
+	if err != nil {
+		return nil, err
+	}
+
 	connPool, err := gtransport.DialPool(ctx, append(clientOpts, opts...)...)
 	if err != nil {
 		return nil, err
 	}
 	c := &MessagingClient{
-		connPool:    connPool,
-		CallOptions: defaultMessagingCallOptions(),
+		connPool:         connPool,
+		disableDeadlines: disableDeadlines,
+		CallOptions:      defaultMessagingCallOptions(),
 
 		messagingClient: genprotopb.NewMessagingClient(connPool),
 	}
@@ -240,6 +249,11 @@ func (c *MessagingClient) setGoogleClientInfo(keyval ...string) {
 
 // CreateRoom creates a room.
 func (c *MessagingClient) CreateRoom(ctx context.Context, req *genprotopb.CreateRoomRequest, opts ...gax.CallOption) (*genprotopb.Room, error) {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append(c.CallOptions.CreateRoom[0:len(c.CallOptions.CreateRoom):len(c.CallOptions.CreateRoom)], opts...)
 	var resp *genprotopb.Room
@@ -256,6 +270,11 @@ func (c *MessagingClient) CreateRoom(ctx context.Context, req *genprotopb.Create
 
 // GetRoom retrieves the Room with the given resource name.
 func (c *MessagingClient) GetRoom(ctx context.Context, req *genprotopb.GetRoomRequest, opts ...gax.CallOption) (*genprotopb.Room, error) {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 10000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.GetRoom[0:len(c.CallOptions.GetRoom):len(c.CallOptions.GetRoom)], opts...)
@@ -273,6 +292,11 @@ func (c *MessagingClient) GetRoom(ctx context.Context, req *genprotopb.GetRoomRe
 
 // UpdateRoom updates a room.
 func (c *MessagingClient) UpdateRoom(ctx context.Context, req *genprotopb.UpdateRoomRequest, opts ...gax.CallOption) (*genprotopb.Room, error) {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "room.name", url.QueryEscape(req.GetRoom().GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.UpdateRoom[0:len(c.CallOptions.UpdateRoom):len(c.CallOptions.UpdateRoom)], opts...)
@@ -290,6 +314,11 @@ func (c *MessagingClient) UpdateRoom(ctx context.Context, req *genprotopb.Update
 
 // DeleteRoom deletes a room and all of its blurbs.
 func (c *MessagingClient) DeleteRoom(ctx context.Context, req *genprotopb.DeleteRoomRequest, opts ...gax.CallOption) error {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.DeleteRoom[0:len(c.CallOptions.DeleteRoom):len(c.CallOptions.DeleteRoom)], opts...)
@@ -345,6 +374,11 @@ func (c *MessagingClient) ListRooms(ctx context.Context, req *genprotopb.ListRoo
 // message in that room. If the parent is a profile, the blurb is understood
 // to be a post on the profile.
 func (c *MessagingClient) CreateBlurb(ctx context.Context, req *genprotopb.CreateBlurbRequest, opts ...gax.CallOption) (*genprotopb.Blurb, error) {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.CreateBlurb[0:len(c.CallOptions.CreateBlurb):len(c.CallOptions.CreateBlurb)], opts...)
@@ -362,6 +396,11 @@ func (c *MessagingClient) CreateBlurb(ctx context.Context, req *genprotopb.Creat
 
 // GetBlurb retrieves the Blurb with the given resource name.
 func (c *MessagingClient) GetBlurb(ctx context.Context, req *genprotopb.GetBlurbRequest, opts ...gax.CallOption) (*genprotopb.Blurb, error) {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 10000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.GetBlurb[0:len(c.CallOptions.GetBlurb):len(c.CallOptions.GetBlurb)], opts...)
@@ -379,6 +418,11 @@ func (c *MessagingClient) GetBlurb(ctx context.Context, req *genprotopb.GetBlurb
 
 // UpdateBlurb updates a blurb.
 func (c *MessagingClient) UpdateBlurb(ctx context.Context, req *genprotopb.UpdateBlurbRequest, opts ...gax.CallOption) (*genprotopb.Blurb, error) {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "blurb.name", url.QueryEscape(req.GetBlurb().GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.UpdateBlurb[0:len(c.CallOptions.UpdateBlurb):len(c.CallOptions.UpdateBlurb)], opts...)
@@ -396,6 +440,11 @@ func (c *MessagingClient) UpdateBlurb(ctx context.Context, req *genprotopb.Updat
 
 // DeleteBlurb deletes a blurb.
 func (c *MessagingClient) DeleteBlurb(ctx context.Context, req *genprotopb.DeleteBlurbRequest, opts ...gax.CallOption) error {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.DeleteBlurb[0:len(c.CallOptions.DeleteBlurb):len(c.CallOptions.DeleteBlurb)], opts...)
@@ -453,6 +502,11 @@ func (c *MessagingClient) ListBlurbs(ctx context.Context, req *genprotopb.ListBl
 // for blurbs containing to words found in the query. Only posts that
 // contain an exact match of a queried word will be returned.
 func (c *MessagingClient) SearchBlurbs(ctx context.Context, req *genprotopb.SearchBlurbsRequest, opts ...gax.CallOption) (*SearchBlurbsOperation, error) {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 10000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.SearchBlurbs[0:len(c.CallOptions.SearchBlurbs):len(c.CallOptions.SearchBlurbs)], opts...)
