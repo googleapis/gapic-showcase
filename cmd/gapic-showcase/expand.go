@@ -45,8 +45,8 @@ func init() {
 
 var ExpandCmd = &cobra.Command{
 	Use:   "expand",
-	Short: "This method split the given content into words...",
-	Long:  "This method split the given content into words and will pass each word back  through the stream. This method showcases server-side streaming rpcs.",
+	Short: "This method splits the given content into words...",
+	Long:  "This method splits the given content into words and will pass each word back  through the stream. This method showcases server-side streaming RPCs.",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if ExpandFromFile == "" {

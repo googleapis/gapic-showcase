@@ -199,7 +199,7 @@ func (c *EchoClient) setGoogleClientInfo(keyval ...string) {
 	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
 }
 
-// Echo this method simply echos the request. This method is showcases unary rpcs.
+// Echo this method simply echoes the request. This method showcases unary RPCs.
 func (c *EchoClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, opts ...gax.CallOption) (*genprotopb.EchoResponse, error) {
 	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
 		cctx, cancel := context.WithTimeout(ctx, 10000*time.Millisecond)
@@ -220,8 +220,8 @@ func (c *EchoClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, opts
 	return resp, nil
 }
 
-// Expand this method split the given content into words and will pass each word back
-// through the stream. This method showcases server-side streaming rpcs.
+// Expand this method splits the given content into words and will pass each word back
+// through the stream. This method showcases server-side streaming RPCs.
 func (c *EchoClient) Expand(ctx context.Context, req *genprotopb.ExpandRequest, opts ...gax.CallOption) (genprotopb.Echo_ExpandClient, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append(c.CallOptions.Expand[0:len(c.CallOptions.Expand):len(c.CallOptions.Expand)], opts...)
@@ -239,7 +239,7 @@ func (c *EchoClient) Expand(ctx context.Context, req *genprotopb.ExpandRequest, 
 
 // Collect this method will collect the words given to it. When the stream is closed
 // by the client, this method will return the a concatenation of the strings
-// passed to it. This method showcases client-side streaming rpcs.
+// passed to it. This method showcases client-side streaming RPCs.
 func (c *EchoClient) Collect(ctx context.Context, opts ...gax.CallOption) (genprotopb.Echo_CollectClient, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append(c.CallOptions.Collect[0:len(c.CallOptions.Collect):len(c.CallOptions.Collect)], opts...)
@@ -255,9 +255,9 @@ func (c *EchoClient) Collect(ctx context.Context, opts ...gax.CallOption) (genpr
 	return resp, nil
 }
 
-// Chat this method, upon receiving a request on the stream, the same content will
-// be passed  back on the stream. This method showcases bidirectional
-// streaming rpcs.
+// Chat this method, upon receiving a request on the stream, will pass the same
+// content back on the stream. This method showcases bidirectional
+// streaming RPCs.
 func (c *EchoClient) Chat(ctx context.Context, opts ...gax.CallOption) (genprotopb.Echo_ChatClient, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append(c.CallOptions.Chat[0:len(c.CallOptions.Chat):len(c.CallOptions.Chat)], opts...)
@@ -314,8 +314,8 @@ func (c *EchoClient) PagedExpand(ctx context.Context, req *genprotopb.PagedExpan
 	return it
 }
 
-// Wait this method will wait the requested amount of and then return.
-// This method showcases how a client handles a request timing out.
+// Wait this method will wait for the requested amount of time and then return.
+// This method showcases how a client handles a request timeout.
 func (c *EchoClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, opts ...gax.CallOption) (*WaitOperation, error) {
 	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
 		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)

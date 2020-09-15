@@ -91,8 +91,8 @@ func init() {
 
 var WaitCmd = &cobra.Command{
 	Use:   "wait",
-	Short: "This method will wait the requested amount of and...",
-	Long:  "This method will wait the requested amount of and then return.  This method showcases how a client handles a request timing out.",
+	Short: "This method will wait for the requested amount of...",
+	Long:  "This method will wait for the requested amount of time and then return.  This method showcases how a client handles a request timeout.",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if WaitFromFile == "" {
