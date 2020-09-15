@@ -33,7 +33,7 @@ func init() {
 var ChatCmd = &cobra.Command{
 	Use:   "chat",
 	Short: "This method, upon receiving a request on the...",
-	Long:  "This method, upon receiving a request on the stream, the same content will  be passed  back on the stream. This method showcases bidirectional ...",
+	Long:  "This method, upon receiving a request on the stream, will pass the same  content back on the stream. This method showcases bidirectional  streaming...",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 	},

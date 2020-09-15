@@ -57,8 +57,8 @@ func init() {
 
 var EchoCmd = &cobra.Command{
 	Use:   "echo",
-	Short: "This method simply echos the request. This method...",
-	Long:  "This method simply echos the request. This method is showcases unary rpcs.",
+	Short: "This method simply echoes the request. This...",
+	Long:  "This method simply echoes the request. This method showcases unary RPCs.",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if EchoFromFile == "" {

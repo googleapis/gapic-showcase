@@ -48,7 +48,7 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
-// A severity enum used to test enum capabilities in GAPIC surfaces
+// A severity enum used to test enum capabilities in GAPIC surfaces.
 type Severity int32
 
 const (
@@ -103,8 +103,8 @@ func (Severity) EnumDescriptor() ([]byte, []int) {
 
 // The request message used for the Echo, Collect and Chat methods.
 // If content or opt are set in this message then the request will succeed.
-// If status is set in this message
-// then the status will be returned as an error.
+// If status is set in this message then the status will be returned as an
+// error.
 type EchoRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1210,24 +1210,24 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type EchoClient interface {
-	// This method simply echos the request. This method is showcases unary rpcs.
+	// This method simply echoes the request. This method showcases unary RPCs.
 	Echo(ctx context.Context, in *EchoRequest, opts ...grpc.CallOption) (*EchoResponse, error)
-	// This method split the given content into words and will pass each word back
-	// through the stream. This method showcases server-side streaming rpcs.
+	// This method splits the given content into words and will pass each word back
+	// through the stream. This method showcases server-side streaming RPCs.
 	Expand(ctx context.Context, in *ExpandRequest, opts ...grpc.CallOption) (Echo_ExpandClient, error)
 	// This method will collect the words given to it. When the stream is closed
 	// by the client, this method will return the a concatenation of the strings
-	// passed to it. This method showcases client-side streaming rpcs.
+	// passed to it. This method showcases client-side streaming RPCs.
 	Collect(ctx context.Context, opts ...grpc.CallOption) (Echo_CollectClient, error)
-	// This method, upon receiving a request on the stream, the same content will
-	// be passed  back on the stream. This method showcases bidirectional
-	// streaming rpcs.
+	// This method, upon receiving a request on the stream, will pass the same
+	// content back on the stream. This method showcases bidirectional
+	// streaming RPCs.
 	Chat(ctx context.Context, opts ...grpc.CallOption) (Echo_ChatClient, error)
 	// This is similar to the Expand method but instead of returning a stream of
 	// expanded words, this method returns a paged list of expanded words.
 	PagedExpand(ctx context.Context, in *PagedExpandRequest, opts ...grpc.CallOption) (*PagedExpandResponse, error)
-	// This method will wait the requested amount of and then return.
-	// This method showcases how a client handles a request timing out.
+	// This method will wait for the requested amount of time and then return.
+	// This method showcases how a client handles a request timeout.
 	Wait(ctx context.Context, in *WaitRequest, opts ...grpc.CallOption) (*longrunning.Operation, error)
 	// This method will block (wait) for the requested amount of time
 	// and then return the response or error.
@@ -1378,24 +1378,24 @@ func (c *echoClient) Block(ctx context.Context, in *BlockRequest, opts ...grpc.C
 
 // EchoServer is the server API for Echo service.
 type EchoServer interface {
-	// This method simply echos the request. This method is showcases unary rpcs.
+	// This method simply echoes the request. This method showcases unary RPCs.
 	Echo(context.Context, *EchoRequest) (*EchoResponse, error)
-	// This method split the given content into words and will pass each word back
-	// through the stream. This method showcases server-side streaming rpcs.
+	// This method splits the given content into words and will pass each word back
+	// through the stream. This method showcases server-side streaming RPCs.
 	Expand(*ExpandRequest, Echo_ExpandServer) error
 	// This method will collect the words given to it. When the stream is closed
 	// by the client, this method will return the a concatenation of the strings
-	// passed to it. This method showcases client-side streaming rpcs.
+	// passed to it. This method showcases client-side streaming RPCs.
 	Collect(Echo_CollectServer) error
-	// This method, upon receiving a request on the stream, the same content will
-	// be passed  back on the stream. This method showcases bidirectional
-	// streaming rpcs.
+	// This method, upon receiving a request on the stream, will pass the same
+	// content back on the stream. This method showcases bidirectional
+	// streaming RPCs.
 	Chat(Echo_ChatServer) error
 	// This is similar to the Expand method but instead of returning a stream of
 	// expanded words, this method returns a paged list of expanded words.
 	PagedExpand(context.Context, *PagedExpandRequest) (*PagedExpandResponse, error)
-	// This method will wait the requested amount of and then return.
-	// This method showcases how a client handles a request timing out.
+	// This method will wait for the requested amount of time and then return.
+	// This method showcases how a client handles a request timeout.
 	Wait(context.Context, *WaitRequest) (*longrunning.Operation, error)
 	// This method will block (wait) for the requested amount of time
 	// and then return the response or error.
