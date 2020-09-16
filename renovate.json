@@ -18,5 +18,6 @@
       "packageNames": ["google.golang.org/genproto"],
       "schedule": "after 12pm on monday"
     }
-  ]
+  ],
+  "timezone": "America/Los_Angeles"
 }
