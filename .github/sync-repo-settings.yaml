@@ -1,0 +1,19 @@
+rebaseMergeAllowed: false
+squashMergeAllowed: true
+mergeCommitAllowed: false
+branchProtectionRules:
+- pattern: master
+  isAdminEnforced: true
+  requiredStatusCheckContexts:
+    - 'ci/circleci: build'
+    - 'ci/circleci: protobufjs-load-test'
+    - 'ci/circleci: push-generated-source'
+    - 'ci/circleci: test'
+    - 'ci/circleci: typescript-smoke-test'
+    - 'cla/google'
+  requiredApprovingReviewCount: 1
+  requiresCodeOwnerReviews: true
+  requiresStrictStatusChecks: true
+permissionRules:
+  - team: actools
+    permission: admin
