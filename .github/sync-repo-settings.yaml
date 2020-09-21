@@ -11,8 +11,6 @@ branchProtectionRules:
     - 'ci/circleci: test'
     - 'ci/circleci: typescript-smoke-test'
     - 'cla/google'
-    - 'codecov/patch'
-    - 'codecov/project'
   requiredApprovingReviewCount: 1
   requiresCodeOwnerReviews: true
   requiresStrictStatusChecks: true
