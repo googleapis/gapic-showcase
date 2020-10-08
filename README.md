@@ -63,6 +63,7 @@ $ gapic-showcase --help
 ### Source
 ```sh
 $ go get github.com/googleapis/gapic-showcase/cmd/gapic-showcase
+$ PATH=$PATH:`go env GOPATH`/bin
 $ gapic-showcase --help
 ...
 ```
@@ -75,6 +76,8 @@ Its dependencies can be found in the [googleapis/api-common-protos](https://gith
 submodule.
 
 ## Development Environment
+To set up this repository for local development, follow these steps:
+
 1. Install `protoc` from the protobuf [release page](https://github.com/protocolbuffers/protobuf/releases)
 or your OS package manager. This API utilizes `proto3_optional`, thus `v3.12.0`
 is the minimum supported version of `protoc`.
@@ -87,7 +90,11 @@ is the minimum supported version of `protoc`.
 1. Install Go
     1. Linux: `sudo apt-get install golang`
     2. Mac, Windows, or other options: Please see the [official set-up docs](https://golang.org/doc/install).
-    
+
+1. Ensure your `$GOPATH` is set up as desired.
+
+1. Clone this repository.
+
 1. Set up Go protobuf tools:
     ```sh
     go install github.com/golang/protobuf/protoc-gen-go
@@ -97,8 +104,15 @@ is the minimum supported version of `protoc`.
 
 1. Export the Go binaries to your environment path.
     ```sh
-    PATH=$PATH:`go env GOPATH`
+    PATH=$PATH:`go env GOPATH`/bin
     ```
+
+1. To generate the Showcase binary, as well as associated development utilities in this repository, run the following after you make changes:
+    ```sh
+    go install ./...
+    ```
+
+
 
 ### Making changes to the protos
 
@@ -112,6 +126,10 @@ If successful, you may see changes in the following directories:
 * `server/genproto`
 * `client/`
 * `cmd/gapic-showcase`
+
+Then, update the binaries:
+
+    go install ./...
 
 ## Quick Start
 This quick start guide will show you how to start the server and make a request to it.
