@@ -91,8 +91,6 @@ is the minimum supported version of `protoc`.
     1. Linux: `sudo apt-get install golang`
     2. Mac, Windows, or other options: Please see the [official set-up docs](https://golang.org/doc/install).
 
-1. Ensure your `$GOPATH` is set up as desired.
-
 1. Clone this repository.
 
 1. Set up Go protobuf tools:
@@ -107,7 +105,7 @@ is the minimum supported version of `protoc`.
     PATH=$PATH:`go env GOPATH`/bin
     ```
 
-1. To generate the Showcase binary, as well as associated development utilities in this repository, run the following after you make changes:
+1. To compile the Showcase binary, as well as associated development utilities in this repository, run the following after you make changes:
     ```sh
     go install ./...
     ```
