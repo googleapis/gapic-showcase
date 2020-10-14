@@ -22,7 +22,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
 
-	"github.com/googleapis/gapic-showcase/util/protoc-gen-go_rest_server/server"
+	"github.com/googleapis/gapic-showcase/util/genrest"
 )
 
 // Adapted from protoc-gen-go_gapic
@@ -34,11 +34,10 @@ func main() {
 
 	var genReq plugin.CodeGeneratorRequest
 	if err := proto.Unmarshal(reqBytes, &genReq); err != nil {
-		// log.Fatalf("%s\nError: %s", outBytes, err)
 		log.Fatal(err)
 	}
 
-	genResp, err := server.Gen(&genReq)
+	genResp, err := genrest.Gen(&genReq)
 	if err != nil {
 		genResp.Error = proto.String(err.Error())
 	}

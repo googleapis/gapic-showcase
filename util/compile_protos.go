@@ -64,8 +64,7 @@ func CompileProtos(version string) {
 		"--go_gapic_out=" + outDir,
 		"--go_gapic_opt=go-gapic-package=github.com/googleapis/gapic-showcase/client;client",
 		"--go_gapic_opt=grpc-service-config=schema/google/showcase/v1beta1/showcase_grpc_service_config.json",
-		// TODO(vchudnov): Change destination
-		"--go_rest_server_out=/tmp/go_rest_server",
+		"--go_rest_server_out=" + filepath.Join("server", "genrest"),
 		"--go_out=plugins=grpc:" + outDir,
 	}
 	Execute(append(command, files...)...)
