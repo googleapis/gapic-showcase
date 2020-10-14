@@ -18,6 +18,11 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/golang/protobuf/proto"
+	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
+
+	"github.com/googleapis/gapic-showcase/util/protoc-gen-go_rest_server/server"
 )
 
 // Adapted from protoc-gen-go_gapic
@@ -27,9 +32,25 @@ func main() {
 		log.Fatal(err)
 	}
 
-	outBytes := append([]byte("===\nRESPONSE is now:\n"), reqBytes...) // STUB
+	var genReq plugin.CodeGeneratorRequest
+	if err := proto.Unmarshal(reqBytes, &genReq); err != nil {
+		// log.Fatalf("%s\nError: %s", outBytes, err)
+		log.Fatal(err)
+	}
+
+	genResp, err := server.Gen(&genReq)
+	if err != nil {
+		genResp.Error = proto.String(err.Error())
+	}
+
+	outBytes, err := proto.Marshal(genResp)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	if _, err := os.Stdout.Write(outBytes); err != nil {
 		log.Fatal(err)
 	}
+
+	log.Printf("Generated file: %q\n", *genResp.File[0].Name)
 }
