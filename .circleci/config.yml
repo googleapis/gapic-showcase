@@ -66,12 +66,15 @@ jobs:
             mv ~/protoc3/bin/* /usr/local/bin/
             mv ~/protoc3/include/* /usr/local/include/
       - run:
-          name: Install generators
+          name: Install external generators
           command: |
               go mod download
               go install github.com/golang/protobuf/protoc-gen-go
               go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli
               go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic
+      - run:
+          name: Install REST server generator
+          command: go install ./util/cmd/protoc-gen-go_rest_server            
       - run:
           name: Compile protos
           command: go run ./util/cmd/compile_protos
