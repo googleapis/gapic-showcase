@@ -23,8 +23,9 @@ import (
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
 )
 
+// TODO(vchudnov-g): Continue filling this in. It's a an initial empty
+// stub at the moment.
 func Gen(genReq *plugin.CodeGeneratorRequest) (*plugin.CodeGeneratorResponse, error) {
-	// TODO(vchudnov-g) Fill in this stub
 	fileName := "showcase-rest-sample-response.txt"
 
 	resp := &plugin.CodeGeneratorResponse{}

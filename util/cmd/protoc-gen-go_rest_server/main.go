@@ -25,7 +25,8 @@ import (
 	"github.com/googleapis/gapic-showcase/util/genrest"
 )
 
-// Adapted from protoc-gen-go_gapic
+// TODO(vchudnov-g): Continue filling this in. It's a an initial empty
+// stub at the moment.
 func main() {
 	reqBytes, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
