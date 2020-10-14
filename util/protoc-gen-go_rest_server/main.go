@@ -20,13 +20,14 @@ import (
 	"os"
 )
 
+// Adapted from protoc-gen-go_gapic
 func main() {
 	reqBytes, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	outBytes := append([]byte("===\nRESPONSE:\n"), reqBytes...) // STUB
+	outBytes := append([]byte("===\nRESPONSE is now:\n"), reqBytes...) // STUB
 
 	if _, err := os.Stdout.Write(outBytes); err != nil {
 		log.Fatal(err)
