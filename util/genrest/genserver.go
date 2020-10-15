@@ -17,7 +17,6 @@ package genrest
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/golang/protobuf/proto"
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
@@ -32,8 +31,7 @@ func Gen(genReq *plugin.CodeGeneratorRequest) (*plugin.CodeGeneratorResponse, er
 	resp.File = append(resp.File, &plugin.CodeGeneratorResponse_File{
 		Name: &fileName,
 		Content: proto.String(
-			fmt.Sprintf("Generated at %s\nFiles:\n%s",
-				time.Now().Format(time.UnixDate),
+			fmt.Sprintf("Files:\n%s",
 				strings.Join(genReq.FileToGenerate, "\n"))),
 	})
 	resp.SupportedFeatures = proto.Uint64(uint64(plugin.CodeGeneratorResponse_FEATURE_PROTO3_OPTIONAL))
