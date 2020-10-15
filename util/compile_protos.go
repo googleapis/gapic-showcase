@@ -25,7 +25,7 @@ import (
 
 // CompileProtos regenerates all of the generated source code for the Showcase
 // API including the generated messages, gRPC services, go gapic clients,
-// and the generated CLI. This must be ran from the root directory
+// and the generated CLI. This must be run from the root directory
 // of the gapic-showcase repository.
 func CompileProtos(version string) {
 	// Check if protoc is installed.
@@ -64,6 +64,7 @@ func CompileProtos(version string) {
 		"--go_gapic_out=" + outDir,
 		"--go_gapic_opt=go-gapic-package=github.com/googleapis/gapic-showcase/client;client",
 		"--go_gapic_opt=grpc-service-config=schema/google/showcase/v1beta1/showcase_grpc_service_config.json",
+		"--go_rest_server_out=" + filepath.Join("server", "genrest"),
 		"--go_out=plugins=grpc:" + outDir,
 	}
 	Execute(append(command, files...)...)

@@ -33,7 +33,7 @@ const currentAPIVersion = "v1beta1"
 const currentReleaseVersion = "0.12.0"
 
 // This script updates the release version or API version of files in gapic-showcase.
-// This script is used on API and release version bumps. This script must be ran in
+// This script is used on API and release version bumps. This script must be run in
 // the root directory of gapic-showcase.
 //
 // Usage: go run ./util/cmd/bump_version/main.go -h
