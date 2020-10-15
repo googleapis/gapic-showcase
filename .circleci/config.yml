@@ -145,7 +145,7 @@ jobs:
           at: /go
       - run:
           name: Check whether we are using generated source.
-          command: git diff --exit-code cmd client server/genproto || echo 'export DIFF_FOUND="true"' >> $BASH_ENV
+          command: git ls-files --deleted --modified --other --directory --exclude-standard cmd client server/genproto server/genrest | grep / && { echo 'export DIFF_FOUND="true"' >> $BASH_ENV ; }  || echo "No new generated files"
       - run:
           name: Create pull request if diff is found.
           command: |
