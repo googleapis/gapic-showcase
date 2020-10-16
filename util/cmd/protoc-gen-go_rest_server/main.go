@@ -15,12 +15,7 @@
 package main
 
 import (
-	"io/ioutil"
-	"log"
-	"os"
-
-	"github.com/golang/protobuf/proto"
-	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
+	"google.golang.org/protobuf/compiler/protogen"
 
 	"github.com/googleapis/gapic-showcase/util/genrest"
 )
@@ -28,29 +23,8 @@ import (
 // TODO(vchudnov-g): Continue filling this in. It's a an initial empty
 // stub at the moment.
 func main() {
-	reqBytes, err := ioutil.ReadAll(os.Stdin)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// https://pkg.go.dev/google.golang.org/protobuf/compiler/protogen#Options
+	opts := &protogen.Options{}
+	opts.Run(genrest.Generate)
 
-	var genReq plugin.CodeGeneratorRequest
-	if err := proto.Unmarshal(reqBytes, &genReq); err != nil {
-		log.Fatal(err)
-	}
-
-	genResp, err := genrest.Gen(&genReq)
-	if err != nil {
-		genResp.Error = proto.String(err.Error())
-	}
-
-	outBytes, err := proto.Marshal(genResp)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if _, err := os.Stdout.Write(outBytes); err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("Generated file: %q\n", *genResp.File[0].Name)
 }
