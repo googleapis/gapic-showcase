@@ -161,15 +161,15 @@ jobs:
             export BRANCH="build-$(date +%Y%m%d%H%M%S)"
             git checkout -b ${BRANCH}
             git add .
-            git commit -m "Regenerate cmd, client, and server directories."
+            git commit -m "chore: regen cmd/client/server directories"
             git push --quiet https://${GITHUB_TOKEN}@github.com/googleapis/gapic-showcase.git ${BRANCH}
             # Create a PR with hub.
             go get github.com/github/hub
             hub pull-request \
-              --message "Regenerate cmd, client, and server directories." \
+              --message "chore: regen cmd/client/server directories" \
               --base googleapis:master \
               --head googleapis:${BRANCH} \
-              --assign noahdietz,alexander-fenster
+              --reviewer noahdietz,vchudnov-g
 
   kotlin-smoke-test:
     machine: true
@@ -287,7 +287,6 @@ jobs:
                 -r gapic-showcase \
                 -c ${CIRCLE_SHA1} \
                 -b "$(go run ./util/cmd/print_changes/main.go ${CIRCLE_TAG})" \
-                -prerelease \
                 ${CIRCLE_TAG} ./dist
 
   push-image:
