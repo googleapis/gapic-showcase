@@ -1,3 +1,4 @@
+Generated via "google.golang.org/protobuf/compiler/protogen"
 Files:
 google/showcase/v1beta1/echo.proto
 google/showcase/v1beta1/identity.proto
