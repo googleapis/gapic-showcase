@@ -15,26 +15,22 @@
 package genrest
 
 import (
-	"fmt"
 	"strings"
 
-	"github.com/golang/protobuf/proto"
-	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
+	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/types/pluginpb"
 )
 
 // TODO(vchudnov-g): Continue filling this in. It's a an initial empty
 // stub at the moment.
-func Gen(genReq *plugin.CodeGeneratorRequest) (*plugin.CodeGeneratorResponse, error) {
-	fileName := "showcase-rest-sample-response.txt"
+func Generate(plugin *protogen.Plugin) error {
+	file := plugin.NewGeneratedFile("showcase-rest-sample-response.txt", "github.com/googleapis/gapic-showcase/server/genrest")
 
-	resp := &plugin.CodeGeneratorResponse{}
-	resp.File = append(resp.File, &plugin.CodeGeneratorResponse_File{
-		Name: &fileName,
-		Content: proto.String(
-			fmt.Sprintf("Files:\n%s",
-				strings.Join(genReq.FileToGenerate, "\n"))),
-	})
-	resp.SupportedFeatures = proto.Uint64(uint64(plugin.CodeGeneratorResponse_FEATURE_PROTO3_OPTIONAL))
-
-	return resp, nil
+	// https://godoc.org/google.golang.org/protobuf/types/pluginpb
+	// The typecasting below appears to be idiomatic as per
+	// https: //github.com/protocolbuffers/protobuf-go/blob/master/cmd/protoc-gen-go/internal_gengo/main.go#L31
+	plugin.SupportedFeatures = uint64(pluginpb.CodeGeneratorResponse_FEATURE_PROTO3_OPTIONAL)
+	file.P("Generated via \"google.golang.org/protobuf/compiler/protogen\"")
+	file.P("Files:\n", strings.Join(plugin.Request.FileToGenerate, "\n"))
+	return nil
 }
