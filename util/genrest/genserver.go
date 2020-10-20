@@ -28,7 +28,7 @@ func Generate(plugin *protogen.Plugin) error {
 
 	// https://godoc.org/google.golang.org/protobuf/types/pluginpb
 	// The typecasting below appears to be idiomatic as per
-	// https: //github.com/protocolbuffers/protobuf-go/blob/master/cmd/protoc-gen-go/internal_gengo/main.go#L31
+	// https://github.com/protocolbuffers/protobuf-go/blob/master/cmd/protoc-gen-go/internal_gengo/main.go#L31
 	plugin.SupportedFeatures = uint64(pluginpb.CodeGeneratorResponse_FEATURE_PROTO3_OPTIONAL)
 	file.P("Generated via \"google.golang.org/protobuf/compiler/protogen\"")
 	file.P("Files:\n", strings.Join(plugin.Request.FileToGenerate, "\n"))
