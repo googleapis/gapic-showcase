@@ -20,12 +20,16 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
+	"net/http"
 	"strings"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/server/services"
 	fallback "github.com/googleapis/grpc-fallback-go/server"
+	"github.com/soheilhy/cmux"
 	"github.com/spf13/cobra"
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 
@@ -110,7 +114,17 @@ func grpcServe(lis net.Listener, config configuration) error {
 	reflection.Register(s)
 	stdLog.Printf("  listening for gRPC connections")
 	return s.Serve(lis)
+}
 
+func httpServe(lis net.Listener, config configuration) error {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/hello", func(w http.ResponseWriter, _ *http.Request) {
+		w.Write([]byte("GAPIC Showcase: HTTP/REST endpoint\n"))
+	})
+
+	s := &http.Server{Handler: mux}
+	stdLog.Printf("  listening for REST connections")
+	return s.Serve(lis)
 }
 
 type configuration struct {
@@ -139,7 +153,16 @@ func init() {
 			}
 			stdLog.Printf("Showcase listening on port: %s", config.port)
 
-			grpcServe(lis, config)
+			m := cmux.New(lis)
+			grpcListener := m.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
+			httpListener := m.Match(cmux.HTTP1Fast())
+
+			g := new(errgroup.Group)
+			g.Go(func() error { return grpcServe(grpcListener, config) })
+			g.Go(func() error { return httpServe(httpListener, config) })
+			g.Go(func() error { return m.Serve() })
+
+			stdLog.Printf("after running server: %x\n", g.Wait())
 
 		},
 	}
