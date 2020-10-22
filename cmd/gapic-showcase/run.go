@@ -15,130 +15,70 @@
 package main
 
 import (
-	"crypto/tls"
-	"crypto/x509"
-	"io/ioutil"
-	"log"
-	"net"
-	"strings"
+	"os"
+	"os/signal"
+	"syscall"
 
-	"github.com/googleapis/gapic-showcase/server"
-	pb "github.com/googleapis/gapic-showcase/server/genproto"
-	"github.com/googleapis/gapic-showcase/server/services"
-	fallback "github.com/googleapis/grpc-fallback-go/server"
 	"github.com/spf13/cobra"
-	lropb "google.golang.org/genproto/googleapis/longrunning"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/reflection"
 )
 
+func message(err error) string {
+	if err == nil {
+		return "ok"
+	}
+	return err.Error()
+}
+
 func init() {
-	var port string
-	var fallbackPort string
-	var tlsCaCert string
-	var tlsCert string
-	var tlsKey string
+	config := RuntimeConfig{}
 	runCmd := &cobra.Command{
 		Use:   "run",
 		Short: "Runs the showcase server",
 		Run: func(cmd *cobra.Command, args []string) {
-			// Ensure port is of the right form.
-			if !strings.HasPrefix(port, ":") {
-				port = ":" + port
-			}
+			cmuxServer := CreateAllEndpoints(config)
 
-			// Start listening.
-			lis, err := net.Listen("tcp", port)
-			if err != nil {
-				log.Fatalf("Showcase failed to listen on port '%s': %v", port, err)
-			}
-			stdLog.Printf("Showcase listening on port: %s", port)
+			done := make(chan os.Signal, 2)
+			signal.Notify(done, os.Interrupt, os.Kill, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGSTOP)
+			go func() {
+				sig := <-done
+				stdLog.Printf("Got signal %q", sig)
+				stdLog.Printf("Shutting down server: %s", message(cmuxServer.Shutdown()))
 
-			// Setup Server.
-			logger := &loggerObserver{}
-			observerRegistry := server.ShowcaseObserverRegistry()
-			observerRegistry.RegisterUnaryObserver(logger)
-			observerRegistry.RegisterStreamRequestObserver(logger)
-			observerRegistry.RegisterStreamResponseObserver(logger)
+				// TODO: Delete the following line once this PR is
+				// merged: https://github.com/soheilhy/cmux/pull/69. The issue is
+				// that the user cannot Ctrl-C the main binary, probably due to
+				// https://github.com/soheilhy/cmux/pull/69#issuecomment-712928041.
+				os.Exit(1)
+			}()
 
-			opts := []grpc.ServerOption{
-				grpc.StreamInterceptor(observerRegistry.StreamInterceptor),
-				grpc.UnaryInterceptor(observerRegistry.UnaryInterceptor),
-			}
-
-			// load mutual TLS cert/key and root CA cert
-			if tlsCaCert != "" && tlsCert != "" && tlsKey != "" {
-				keyPair, err := tls.LoadX509KeyPair(tlsCert, tlsKey)
-				if err != nil {
-					log.Fatalf("Failed to load server TLS cert/key with error:%v", err)
-				}
-
-				cert, err := ioutil.ReadFile(tlsCaCert)
-				if err != nil {
-					log.Fatalf("Failed to load root CA cert file with error:%v", err)
-				}
-
-				pool := x509.NewCertPool()
-				pool.AppendCertsFromPEM(cert)
-
-				ta := credentials.NewTLS(&tls.Config{
-					Certificates: []tls.Certificate{keyPair},
-					ClientCAs:    pool,
-					ClientAuth:   tls.RequireAndVerifyClientCert,
-				})
-
-				opts = append(opts, grpc.Creds(ta))
-			}
-			s := grpc.NewServer(opts...)
-			defer s.GracefulStop()
-
-			// Register Services to the server.
-			pb.RegisterEchoServer(s, services.NewEchoServer())
-			pb.RegisterSequenceServiceServer(s, services.NewSequenceServer())
-			identityServer := services.NewIdentityServer()
-			pb.RegisterIdentityServer(s, identityServer)
-			messagingServer := services.NewMessagingServer(identityServer)
-			pb.RegisterMessagingServer(s, messagingServer)
-			operationsServer := services.NewOperationsServer(messagingServer)
-			pb.RegisterTestingServer(s, services.NewTestingServer(observerRegistry))
-			lropb.RegisterOperationsServer(s, operationsServer)
-
-			fb := fallback.NewServer(fallbackPort, "localhost"+port)
-			fb.StartBackground()
-			defer fb.Shutdown()
-
-			// Register reflection service on gRPC server.
-			reflection.Register(s)
-			s.Serve(lis)
+			stdLog.Printf("Server finished: %s", message(cmuxServer.Serve()))
 		},
 	}
 	rootCmd.AddCommand(runCmd)
 	runCmd.Flags().StringVarP(
-		&port,
+		&config.port,
 		"port",
 		"p",
 		":7469",
 		"The port that showcase will be served on.")
 	runCmd.Flags().StringVarP(
-		&fallbackPort,
+		&config.fallbackPort,
 		"fallback-port",
 		"f",
 		":1337",
 		"The port that the fallback-proxy will be served on.")
 	runCmd.Flags().StringVar(
-		&tlsCaCert,
+		&config.tlsCaCert,
 		"mtls-ca-cert",
 		"",
 		"The Root CA certificate path for custom mutual TLS channel.")
 	runCmd.Flags().StringVar(
-		&tlsCert,
+		&config.tlsCert,
 		"mtls-cert",
 		"",
 		"The server certificate path for custom mutual TLS channel.")
 	runCmd.Flags().StringVar(
-		&tlsKey,
+		&config.tlsKey,
 		"mtls-key",
 		"",
 		"The server private key path for custom mutual TLS channel.")
