@@ -26,6 +26,7 @@ import (
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	gax "github.com/googleapis/gax-go/v2"
 	"google.golang.org/api/option"
+	"google.golang.org/api/option/internaloption"
 	gtransport "google.golang.org/api/transport/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -43,7 +44,8 @@ type SequenceCallOptions struct {
 
 func defaultSequenceClientOptions() []option.ClientOption {
 	return []option.ClientOption{
-		option.WithEndpoint("localhost:7469"),
+		internaloption.WithDefaultEndpoint("localhost:7469"),
+		internaloption.WithDefaultMTLSEndpoint("localhost:7469"),
 		option.WithGRPCDialOption(grpc.WithDisableServiceConfig()),
 		option.WithScopes(DefaultAuthScopes()...),
 		option.WithGRPCDialOption(grpc.WithDefaultCallOptions(
