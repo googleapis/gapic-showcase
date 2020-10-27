@@ -120,8 +120,13 @@ jobs:
           command: gapic-showcase run
           background: true
       - run:
-          name: Sanity check.
+          name: "Basic check: gRPC"
           command: gapic-showcase echo echo --response content --response.content "hello!"
+      - run:
+          name: "Basic check: REST"
+          command: |
+            STATUSCODE=$(curl --silent --output /dev/null --write-out "%{http_code}" http://localhost:7469/hello)
+            [[ $STATUSCODE = "200" ]]
       - run:
           name: Submit coverage data to codecov.
           command: bash <(curl -s https://codecov.io/bash)
