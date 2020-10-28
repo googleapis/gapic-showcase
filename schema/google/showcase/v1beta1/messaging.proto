@@ -146,10 +146,10 @@ service Messaging {
   // contain an exact match of a queried word will be returned.
   rpc SearchBlurbs(SearchBlurbsRequest) returns (google.longrunning.Operation) {
     option (google.api.http) = {
-      post: "/v1beta1/{parent=rooms/-}/blurbs:search"
+      post: "/v1beta1/{parent=rooms/*}/blurbs:search"
       body: "*"
       additional_bindings: {
-        post: "/v1beta1/{parent=users/-/profile}/blurbs:search"
+        post: "/v1beta1/{parent=users/*/profile}/blurbs:search"
       }
     };
     option (google.longrunning.operation_info) = {
