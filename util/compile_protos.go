@@ -21,6 +21,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 // CompileProtos regenerates all of the generated source code for the Showcase
@@ -28,6 +29,8 @@ import (
 // and the generated CLI. This must be run from the root directory
 // of the gapic-showcase repository.
 func CompileProtos(version string) {
+	log.Printf("We are here: A")
+
 	// Check if protoc is installed.
 	if err := exec.Command("protoc", "--version").Run(); err != nil {
 		log.Fatal("Error: 'protoc' is expected to be installed on the path.")
@@ -38,12 +41,14 @@ func CompileProtos(version string) {
 	if err != nil {
 		log.Fatalf("Error: unable to get working dir: %+v", err)
 	}
+	log.Printf("We are here: B %s", pwd)
 
 	outDir, err := ioutil.TempDir(os.TempDir(), "gapic-showcase")
 	if err != nil {
 		log.Fatalf("Error: unable to create a temporary dir: %+v\n", err)
 	}
 	defer os.RemoveAll(outDir)
+	log.Printf("We are here: C %s", outDir)
 
 	protos := filepath.Join("schema", "google", "showcase", version, "*.proto")
 	files, err := filepath.Glob(protos)
@@ -51,6 +56,7 @@ func CompileProtos(version string) {
 		log.Fatal("Error: failed to find protos in " + protos)
 	}
 
+	log.Printf("We are here: D %s", outDir)
 	// Run protoc
 	command := []string{
 		"protoc",
@@ -67,6 +73,7 @@ func CompileProtos(version string) {
 		"--go_rest_server_out=" + filepath.Join("server", "genrest"),
 		"--go_out=plugins=grpc:" + outDir,
 	}
+	log.Printf("Command: %q", strings.Join(append(command, files...), " "))
 	Execute(append(command, files...)...)
 
 	// Copy generated code back into repo.

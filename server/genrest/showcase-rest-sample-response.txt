@@ -1,7 +1,262 @@
-Generated via "google.golang.org/protobuf/compiler/protogen"
+Generated via "google.golang.org/protobuf/compiler/protogen" now
 Files:
 google/showcase/v1beta1/echo.proto
 google/showcase/v1beta1/identity.proto
 google/showcase/v1beta1/messaging.proto
 google/showcase/v1beta1/sequence.proto
 google/showcase/v1beta1/testing.proto
+ProtoFile[00]: "google/api/http.proto" (google.api)
+  Services:
+ProtoFile[01]: "google/protobuf/descriptor.proto" (google.protobuf)
+  Services:
+ProtoFile[02]: "google/api/annotations.proto" (google.api)
+  Services:
+ProtoFile[03]: "google/api/client.proto" (google.api)
+  Services:
+ProtoFile[04]: "google/api/field_behavior.proto" (google.api)
+  Services:
+ProtoFile[05]: "google/protobuf/any.proto" (google.protobuf)
+  Services:
+ProtoFile[06]: "google/protobuf/empty.proto" (google.protobuf)
+  Services:
+ProtoFile[07]: "google/rpc/status.proto" (google.rpc)
+  Services:
+ProtoFile[08]: "google/longrunning/operations.proto" (google.longrunning)
+  Services:
+     0: "Operations"
+        Methods
+        00 ListOperations
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: GET: "/v1/{name=operations}"
+        01 GetOperation
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: GET: "/v1/{name=operations/**}"
+        02 DeleteOperation
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: DELETE: "/v1/{name=operations/**}"
+        03 CancelOperation
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: POST: "/v1/{name=operations/**}:cancel"
+ProtoFile[09]: "google/protobuf/duration.proto" (google.protobuf)
+  Services:
+ProtoFile[10]: "google/protobuf/timestamp.proto" (google.protobuf)
+  Services:
+ProtoFile[11]: "google/showcase/v1beta1/echo.proto" (google.showcase.v1beta1)
+  Services:
+     0: "Echo"
+        Methods
+        00 Echo
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: POST: "/v1beta1/echo:echo"
+        01 Expand
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: POST: "/v1beta1/echo:expand"
+        02 Collect
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: POST: "/v1beta1/echo:collect"
+        03 Chat
+        04 PagedExpand
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: POST: "/v1beta1/echo:pagedExpand"
+        05 Wait
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: POST: "/v1beta1/echo:wait"
+        06 Block
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: POST: "/v1beta1/echo:block"
+ProtoFile[12]: "google/api/resource.proto" (google.api)
+  Services:
+ProtoFile[13]: "google/protobuf/field_mask.proto" (google.protobuf)
+  Services:
+ProtoFile[14]: "google/showcase/v1beta1/identity.proto" (google.showcase.v1beta1)
+  Services:
+     0: "Identity"
+        Methods
+        00 CreateUser
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: POST: "/v1beta1/users"
+        01 GetUser
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: GET: "/v1beta1/{name=users/*}"
+        02 UpdateUser
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: PATCH: "/v1beta1/{user.name=users/*}"
+        03 DeleteUser
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: DELETE: "/v1beta1/{name=users/*}"
+        04 ListUsers
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: GET: "/v1beta1/users"
+ProtoFile[15]: "google/rpc/error_details.proto" (google.rpc)
+  Services:
+ProtoFile[16]: "google/showcase/v1beta1/messaging.proto" (google.showcase.v1beta1)
+  Services:
+     0: "Messaging"
+        Methods
+        00 CreateRoom
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: POST: "/v1beta1/rooms"
+        01 GetRoom
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: GET: "/v1beta1/{name=rooms/*}"
+        02 UpdateRoom
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: PATCH: "/v1beta1/{room.name=rooms/*}"
+        03 DeleteRoom
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: DELETE: "/v1beta1/{name=rooms/*}"
+        04 ListRooms
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: GET: "/v1beta1/rooms"
+        05 CreateBlurb
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: POST: "/v1beta1/{parent=rooms/*}/blurbs"
+           1: POST: "/v1beta1/{parent=users/*/profile}/blurbs"
+        06 GetBlurb
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: GET: "/v1beta1/{name=rooms/*/blurbs/*}"
+           1: GET: "/v1beta1/{name=users/*/profile/blurbs/*}"
+        07 UpdateBlurb
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: PATCH: "/v1beta1/{blurb.name=rooms/*/blurbs/*}"
+           1: PATCH: "/v1beta1/{blurb.name=users/*/profile/blurbs/*}"
+        08 DeleteBlurb
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: DELETE: "/v1beta1/{name=rooms/*/blurbs/*}"
+           1: DELETE: "/v1beta1/{name=users/*/profile/blurbs/*}"
+        09 ListBlurbs
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: GET: "/v1beta1/{parent=rooms/*}/blurbs"
+           1: GET: "/v1beta1/{parent=users/*/profile}/blurbs"
+        10 SearchBlurbs
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: POST: "/v1beta1/{parent=rooms/*}/blurbs:search"
+           1: POST: "/v1beta1/{parent=users/*/profile}/blurbs:search"
+        11 StreamBlurbs
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: POST: "/v1beta1/{name=rooms/*}/blurbs:stream"
+           1: POST: "/v1beta1/{name=users/*/profile}/blurbs:stream"
+        12 SendBlurbs
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: POST: "/v1beta1/{parent=rooms/*}/blurbs:send"
+           1: POST: "/v1beta1/{parent=users/*/profile}/blurbs:send"
+        13 Connect
+ProtoFile[17]: "google/showcase/v1beta1/sequence.proto" (google.showcase.v1beta1)
+  Services:
+     0: "SequenceService"
+        Methods
+        00 CreateSequence
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: POST: "/v1beta1/sequences"
+        01 GetSequenceReport
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: GET: "/v1beta1/{name=sequences/*/sequenceReport}"
+        02 AttemptSequence
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: POST: "/v1beta1/{name=sequences/*}"
+ProtoFile[18]: "google/showcase/v1beta1/testing.proto" (google.showcase.v1beta1)
+  Services:
+     0: "Testing"
+        Methods
+        00 CreateSession
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: POST: "/v1beta1/sessions"
+        01 GetSession
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: GET: "/v1beta1/{name=sessions/*}"
+        02 ListSessions
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: GET: "/v1beta1/sessions"
+        03 DeleteSession
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: DELETE: "/v1beta1/{name=sessions/*}"
+        04 ReportSession
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: POST: "/v1beta1/{name=sessions/*}:report"
+        05 ListTests
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: GET: "/v1beta1/{parent=sessions/*}/tests"
+        06 DeleteTest
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: DELETE: "/v1beta1/{name=sessions/*/tests/*}"
+        07 VerifyTest
+           IDEMPOTENCY_UNKNOWN
+           uninterpreted length: 0
+           Rules:
+           0: POST: "/v1beta1/{name=sessions/*/tests/*}:check"
