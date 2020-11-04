@@ -80,6 +80,9 @@ func Generate(plugin *protogen.Plugin) error {
 		file.P(fmt.Sprintf("ProtoFile[%02d]: %q (%s)\n  Services:", idxProto, *protoFile.Name, *protoFile.Package))
 		for idxSvc, svc := range protoFile.Service {
 			file.P(fmt.Sprintf("    %2d: %q", idxSvc, *svc.Name))
+			eDefaultHost := proto.GetExtension(svc.GetOptions(), annotations.E_DefaultHost)
+			file.P(fmt.Sprintf("       Default host: %q", eDefaultHost))
+
 			for idxSvcOptions, svcOption := range svc.GetOptions().GetUninterpretedOption() {
 				file.P(fmt.Sprintf("       Option[%d]: %s", idxSvcOptions, svcOption))
 			}

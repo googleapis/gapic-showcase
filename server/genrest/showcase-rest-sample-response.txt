@@ -24,6 +24,7 @@ ProtoFile[07]: "google/rpc/status.proto" (google.rpc)
 ProtoFile[08]: "google/longrunning/operations.proto" (google.longrunning)
   Services:
      0: "Operations"
+       Default host: ""
         Methods
         00 ListOperations
            IDEMPOTENCY_UNKNOWN
@@ -52,6 +53,7 @@ ProtoFile[10]: "google/protobuf/timestamp.proto" (google.protobuf)
 ProtoFile[11]: "google/showcase/v1beta1/echo.proto" (google.showcase.v1beta1)
   Services:
      0: "Echo"
+       Default host: "localhost:7469"
         Methods
         00 Echo
            IDEMPOTENCY_UNKNOWN
@@ -91,6 +93,7 @@ ProtoFile[13]: "google/protobuf/field_mask.proto" (google.protobuf)
 ProtoFile[14]: "google/showcase/v1beta1/identity.proto" (google.showcase.v1beta1)
   Services:
      0: "Identity"
+       Default host: "localhost:7469"
         Methods
         00 CreateUser
            IDEMPOTENCY_UNKNOWN
@@ -122,6 +125,7 @@ ProtoFile[15]: "google/rpc/error_details.proto" (google.rpc)
 ProtoFile[16]: "google/showcase/v1beta1/messaging.proto" (google.showcase.v1beta1)
   Services:
      0: "Messaging"
+       Default host: "localhost:7469"
         Methods
         00 CreateRoom
            IDEMPOTENCY_UNKNOWN
@@ -200,6 +204,7 @@ ProtoFile[16]: "google/showcase/v1beta1/messaging.proto" (google.showcase.v1beta
 ProtoFile[17]: "google/showcase/v1beta1/sequence.proto" (google.showcase.v1beta1)
   Services:
      0: "SequenceService"
+       Default host: "localhost:7469"
         Methods
         00 CreateSequence
            IDEMPOTENCY_UNKNOWN
@@ -219,6 +224,7 @@ ProtoFile[17]: "google/showcase/v1beta1/sequence.proto" (google.showcase.v1beta1
 ProtoFile[18]: "google/showcase/v1beta1/testing.proto" (google.showcase.v1beta1)
   Services:
      0: "Testing"
+       Default host: "localhost:7469"
         Methods
         00 CreateSession
            IDEMPOTENCY_UNKNOWN
