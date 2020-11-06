@@ -16,69 +16,129 @@ package genrest
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
-	"github.com/golang/protobuf/protoc-gen-go/descriptor"
+	"github.com/googleapis/gapic-showcase/util/genrest/internal/pbinfo"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/descriptorpb"
 	"google.golang.org/protobuf/types/pluginpb"
 )
 
-func extractBinding(rule *annotations.HttpRule) (binding *HTTPBinding, err error) {
-	binding = &HTTPBinding{}
-	pattern := rule.GetPattern()
-	switch pattern.(type) {
-	case *annotations.HttpRule_Get:
-		binding.method = "GET"
-		binding.pattern = rule.GetGet()
-	case *annotations.HttpRule_Post:
-		binding.method = "POST"
-		binding.pattern = rule.GetPost()
-	case *annotations.HttpRule_Patch:
-		binding.method = "PATCH"
-		binding.pattern = rule.GetPatch()
-	case *annotations.HttpRule_Put:
-		binding.method = "PUT"
-		binding.pattern = rule.GetPut()
-	case *annotations.HttpRule_Delete:
-		binding.method = "DELETE"
-		binding.pattern = rule.GetDelete()
-	default:
-		return nil, fmt.Errorf("unhandled pattern: %#x", pattern)
+////////////////////////////////////////
+// HandlerGenerator
+
+type HandlerGenerator struct {
+	descInfo pbinfo.Info
+	services []*Service
+}
+
+func (hg *HandlerGenerator) String() string {
+	services := make([]string, len(hg.services))
+	for idx, svc := range hg.services {
+		if svc == nil {
+			continue
+		}
+		services[idx] = svc.String()
 	}
-	return binding, nil
+	return strings.Join(services, "\n\n")
 }
 
-func processMethod(method *descriptor.MethodDescriptorProto) string {
-	out := fmt.Sprintf("%s (%s) %s", method.GetName(), *method.InputType, *method.OutputType)
-	return out
-
-	//   Will need to import [[https://github.com/googleapis/gapic-generator-go/tree/v0.15.3/internal/pbinfo][pbinfo.go]] from gapic-generator-go, which means moving it out of ~//internal/~, which means adjusting its [[https://github.com/googleapis/gapic-generator-go/search?q=pbinfo][callers]]. Hmm, either that, or duplicating code.
+func (hg *HandlerGenerator) AddService(service *Service) {
+	hg.services = append(hg.services, service)
 }
 
-// TODO(vchudnov-g): Continue filling this in. It's a an initial empty
-// stub at the moment.
-func Generate(plugin *protogen.Plugin) error {
-	log.Printf("Generating REST!")
-	_, err := NewGenerator(plugin)
-	return err
+////////////////////////////////////////
+// Service
+
+type Service struct {
+	descriptor      *descriptorpb.ServiceDescriptorProto
+	name            string
+	typeName        string
+	patternHandlers []*PatternHandler
+}
+
+func (service *Service) String() string {
+	handlers := make([]string, len(service.patternHandlers))
+	for idx, h := range service.patternHandlers {
+		handlers[idx] = h.String()
+	}
+	indent := "  "
+	return fmt.Sprintf("%s (%s):\n%s%s", service.name, service.typeName, indent, strings.Join(handlers, "\n"+indent))
+}
+
+func NewService(descriptor *descriptorpb.ServiceDescriptorProto) *Service {
+	// might need *descriptor.ProtoReflect().Type() to instantiate Go type and then reflect to get the name?
+	service := &Service{
+		descriptor: descriptor,
+		name:       *descriptor.Name,
+		typeName:   string(descriptor.ProtoReflect().Descriptor().FullName()),
+	}
+	return service
+}
+
+////////////////////////////////////////
+// PatternHandler
+
+type PatternHandler struct {
+	prefix   string
+	handlers []*Handler
+}
+
+func (ph *PatternHandler) String() string {
+	handlers := make([]string, len(ph.handlers))
+	for idx, h := range ph.handlers {
+		handlers[idx] = h.String()
+	}
+	return fmt.Sprintf("%s {%s}", ph.prefix, strings.Join(handlers, "} {"))
+}
+
+////////////////////////////////////////
+// Handler
+
+type Handler struct {
+	methodType  string
+	httpBinding HTTPBinding
+}
+
+func (handler *Handler) String() string {
+	return fmt.Sprintf("%s : %s", handler.methodType, handler.httpBinding)
+}
+
+////////////////////////////////////////
+// HTTPBinding
+
+type HTTPBinding struct {
+	method  string // make an enum?
+	pattern string
+	// maybe RPC, although maybe that should be an enveloping struct
+	// maybe separate patterns for URI and for body
+}
+
+func (binding *HTTPBinding) String() string {
+	return fmt.Sprintf("%s: %q", binding.method, binding.pattern)
+}
+
+func NewGenerator(plugin *protogen.Plugin) (*HandlerGenerator, error) {
+	protoFiles := plugin.Request.GetProtoFile()
+	hg := &HandlerGenerator{
+		descInfo: pbinfo.Of(protoFiles),
+		services: make([]*Service, 0, len(protoFiles)),
+	}
 
 	file := plugin.NewGeneratedFile("showcase-rest-sample-response.txt", "github.com/googleapis/gapic-showcase/server/genrest")
-
-	// https://godoc.org/google.golang.org/protobuf/types/pluginpb
-	// The HTTP annotation proto is defined in https://github.com/googleapis/googleapis/blob/master/google/api/http.proto
 
 	// The typecasting below appears to be idiomatic as per
 	// https://github.com/protocolbuffers/protobuf-go/blob/master/cmd/protoc-gen-go/internal_gengo/main.go#L31
 	plugin.SupportedFeatures = uint64(pluginpb.CodeGeneratorResponse_FEATURE_PROTO3_OPTIONAL)
-	file.P("Generated via \"google.golang.org/protobuf/compiler/protogen\" now")
+	file.P("Generated via \"google.golang.org/protobuf/compiler/protogen\" via HandlerGenerator!")
 	file.P("Files:\n", strings.Join(plugin.Request.FileToGenerate, "\n"))
 
-	for idxProto, protoFile := range plugin.Request.GetProtoFile() {
+	for idxProto, protoFile := range protoFiles {
 		file.P(fmt.Sprintf("ProtoFile[%02d]: %q (%s)\n  Services:", idxProto, *protoFile.Name, *protoFile.Package))
 		for idxSvc, svc := range protoFile.Service {
+			hg.AddService(NewService(svc))
 			file.P(fmt.Sprintf("    %2d: %q", idxSvc, *svc.Name))
 			eDefaultHost := proto.GetExtension(svc.GetOptions(), annotations.E_DefaultHost)
 			file.P(fmt.Sprintf("       Default host: %q", eDefaultHost))
@@ -128,5 +188,9 @@ func Generate(plugin *protogen.Plugin) error {
 			}
 		}
 	}
-	return nil
+
+	file.P("\n\nGenerator structs:")
+	file.P(hg.String())
+
+	return hg, nil
 }
