@@ -1,268 +1,139 @@
-Generated via "google.golang.org/protobuf/compiler/protogen" now
+Generated via "google.golang.org/protobuf/compiler/protogen" via ProtoModel!
 Files:
 google/showcase/v1beta1/echo.proto
 google/showcase/v1beta1/identity.proto
 google/showcase/v1beta1/messaging.proto
 google/showcase/v1beta1/sequence.proto
 google/showcase/v1beta1/testing.proto
-ProtoFile[00]: "google/api/http.proto" (google.api)
-  Services:
-ProtoFile[01]: "google/protobuf/descriptor.proto" (google.protobuf)
-  Services:
-ProtoFile[02]: "google/api/annotations.proto" (google.api)
-  Services:
-ProtoFile[03]: "google/api/client.proto" (google.api)
-  Services:
-ProtoFile[04]: "google/api/field_behavior.proto" (google.api)
-  Services:
-ProtoFile[05]: "google/protobuf/any.proto" (google.protobuf)
-  Services:
-ProtoFile[06]: "google/protobuf/empty.proto" (google.protobuf)
-  Services:
-ProtoFile[07]: "google/rpc/status.proto" (google.rpc)
-  Services:
-ProtoFile[08]: "google/longrunning/operations.proto" (google.longrunning)
-  Services:
-     0: "Operations"
-       Default host: ""
-        Methods
-        00 ListOperations
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: GET: "/v1/{name=operations}"
-        01 GetOperation
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: GET: "/v1/{name=operations/**}"
-        02 DeleteOperation
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: DELETE: "/v1/{name=operations/**}"
-        03 CancelOperation
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: POST: "/v1/{name=operations/**}:cancel"
-ProtoFile[09]: "google/protobuf/duration.proto" (google.protobuf)
-  Services:
-ProtoFile[10]: "google/protobuf/timestamp.proto" (google.protobuf)
-  Services:
-ProtoFile[11]: "google/showcase/v1beta1/echo.proto" (google.showcase.v1beta1)
-  Services:
-     0: "Echo"
-       Default host: "localhost:7469"
-        Methods
-        00 Echo
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: POST: "/v1beta1/echo:echo"
-        01 Expand
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: POST: "/v1beta1/echo:expand"
-        02 Collect
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: POST: "/v1beta1/echo:collect"
-        03 Chat
-        04 PagedExpand
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: POST: "/v1beta1/echo:pagedExpand"
-        05 Wait
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: POST: "/v1beta1/echo:wait"
-        06 Block
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: POST: "/v1beta1/echo:block"
-ProtoFile[12]: "google/api/resource.proto" (google.api)
-  Services:
-ProtoFile[13]: "google/protobuf/field_mask.proto" (google.protobuf)
-  Services:
-ProtoFile[14]: "google/showcase/v1beta1/identity.proto" (google.showcase.v1beta1)
-  Services:
-     0: "Identity"
-       Default host: "localhost:7469"
-        Methods
-        00 CreateUser
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: POST: "/v1beta1/users"
-        01 GetUser
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: GET: "/v1beta1/{name=users/*}"
-        02 UpdateUser
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: PATCH: "/v1beta1/{user.name=users/*}"
-        03 DeleteUser
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: DELETE: "/v1beta1/{name=users/*}"
-        04 ListUsers
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: GET: "/v1beta1/users"
-ProtoFile[15]: "google/rpc/error_details.proto" (google.rpc)
-  Services:
-ProtoFile[16]: "google/showcase/v1beta1/messaging.proto" (google.showcase.v1beta1)
-  Services:
-     0: "Messaging"
-       Default host: "localhost:7469"
-        Methods
-        00 CreateRoom
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: POST: "/v1beta1/rooms"
-        01 GetRoom
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: GET: "/v1beta1/{name=rooms/*}"
-        02 UpdateRoom
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: PATCH: "/v1beta1/{room.name=rooms/*}"
-        03 DeleteRoom
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: DELETE: "/v1beta1/{name=rooms/*}"
-        04 ListRooms
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: GET: "/v1beta1/rooms"
-        05 CreateBlurb
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: POST: "/v1beta1/{parent=rooms/*}/blurbs"
-           1: POST: "/v1beta1/{parent=users/*/profile}/blurbs"
-        06 GetBlurb
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: GET: "/v1beta1/{name=rooms/*/blurbs/*}"
-           1: GET: "/v1beta1/{name=users/*/profile/blurbs/*}"
-        07 UpdateBlurb
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: PATCH: "/v1beta1/{blurb.name=rooms/*/blurbs/*}"
-           1: PATCH: "/v1beta1/{blurb.name=users/*/profile/blurbs/*}"
-        08 DeleteBlurb
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: DELETE: "/v1beta1/{name=rooms/*/blurbs/*}"
-           1: DELETE: "/v1beta1/{name=users/*/profile/blurbs/*}"
-        09 ListBlurbs
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: GET: "/v1beta1/{parent=rooms/*}/blurbs"
-           1: GET: "/v1beta1/{parent=users/*/profile}/blurbs"
-        10 SearchBlurbs
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: POST: "/v1beta1/{parent=rooms/*}/blurbs:search"
-           1: POST: "/v1beta1/{parent=users/*/profile}/blurbs:search"
-        11 StreamBlurbs
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: POST: "/v1beta1/{name=rooms/*}/blurbs:stream"
-           1: POST: "/v1beta1/{name=users/*/profile}/blurbs:stream"
-        12 SendBlurbs
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: POST: "/v1beta1/{parent=rooms/*}/blurbs:send"
-           1: POST: "/v1beta1/{parent=users/*/profile}/blurbs:send"
-        13 Connect
-ProtoFile[17]: "google/showcase/v1beta1/sequence.proto" (google.showcase.v1beta1)
-  Services:
-     0: "SequenceService"
-       Default host: "localhost:7469"
-        Methods
-        00 CreateSequence
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: POST: "/v1beta1/sequences"
-        01 GetSequenceReport
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: GET: "/v1beta1/{name=sequences/*/sequenceReport}"
-        02 AttemptSequence
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: POST: "/v1beta1/{name=sequences/*}"
-ProtoFile[18]: "google/showcase/v1beta1/testing.proto" (google.showcase.v1beta1)
-  Services:
-     0: "Testing"
-       Default host: "localhost:7469"
-        Methods
-        00 CreateSession
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: POST: "/v1beta1/sessions"
-        01 GetSession
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: GET: "/v1beta1/{name=sessions/*}"
-        02 ListSessions
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: GET: "/v1beta1/sessions"
-        03 DeleteSession
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: DELETE: "/v1beta1/{name=sessions/*}"
-        04 ReportSession
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: POST: "/v1beta1/{name=sessions/*}:report"
-        05 ListTests
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: GET: "/v1beta1/{parent=sessions/*}/tests"
-        06 DeleteTest
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: DELETE: "/v1beta1/{name=sessions/*/tests/*}"
-        07 VerifyTest
-           IDEMPOTENCY_UNKNOWN
-           uninterpreted length: 0
-           Rules:
-           0: POST: "/v1beta1/{name=sessions/*/tests/*}:check"
+
+Proto Model:
+Echo (.google.showcase.v1beta1.Echo):
+  .google.showcase.v1beta1.Echo.Echo[0] : POST: "/v1beta1/echo:echo"
+  .google.showcase.v1beta1.Echo.Expand[0] : POST: "/v1beta1/echo:expand"
+  .google.showcase.v1beta1.Echo.Collect[0] : POST: "/v1beta1/echo:collect"
+  .google.showcase.v1beta1.Echo.PagedExpand[0] : POST: "/v1beta1/echo:pagedExpand"
+  .google.showcase.v1beta1.Echo.Wait[0] : POST: "/v1beta1/echo:wait"
+  .google.showcase.v1beta1.Echo.Block[0] : POST: "/v1beta1/echo:block"
+
+Identity (.google.showcase.v1beta1.Identity):
+  .google.showcase.v1beta1.Identity.CreateUser[0] : POST: "/v1beta1/users"
+  .google.showcase.v1beta1.Identity.GetUser[0] : GET: "/v1beta1/{name=users/*}"
+  .google.showcase.v1beta1.Identity.UpdateUser[0] : PATCH: "/v1beta1/{user.name=users/*}"
+  .google.showcase.v1beta1.Identity.DeleteUser[0] : DELETE: "/v1beta1/{name=users/*}"
+  .google.showcase.v1beta1.Identity.ListUsers[0] : GET: "/v1beta1/users"
+
+Messaging (.google.showcase.v1beta1.Messaging):
+  .google.showcase.v1beta1.Messaging.CreateRoom[0] : POST: "/v1beta1/rooms"
+  .google.showcase.v1beta1.Messaging.GetRoom[0] : GET: "/v1beta1/{name=rooms/*}"
+  .google.showcase.v1beta1.Messaging.UpdateRoom[0] : PATCH: "/v1beta1/{room.name=rooms/*}"
+  .google.showcase.v1beta1.Messaging.DeleteRoom[0] : DELETE: "/v1beta1/{name=rooms/*}"
+  .google.showcase.v1beta1.Messaging.ListRooms[0] : GET: "/v1beta1/rooms"
+  .google.showcase.v1beta1.Messaging.CreateBlurb[0] : POST: "/v1beta1/{parent=rooms/*}/blurbs"
+  .google.showcase.v1beta1.Messaging.CreateBlurb[1] : POST: "/v1beta1/{parent=users/*/profile}/blurbs"
+  .google.showcase.v1beta1.Messaging.GetBlurb[0] : GET: "/v1beta1/{name=rooms/*/blurbs/*}"
+  .google.showcase.v1beta1.Messaging.GetBlurb[1] : GET: "/v1beta1/{name=users/*/profile/blurbs/*}"
+  .google.showcase.v1beta1.Messaging.UpdateBlurb[0] : PATCH: "/v1beta1/{blurb.name=rooms/*/blurbs/*}"
+  .google.showcase.v1beta1.Messaging.UpdateBlurb[1] : PATCH: "/v1beta1/{blurb.name=users/*/profile/blurbs/*}"
+  .google.showcase.v1beta1.Messaging.DeleteBlurb[0] : DELETE: "/v1beta1/{name=rooms/*/blurbs/*}"
+  .google.showcase.v1beta1.Messaging.DeleteBlurb[1] : DELETE: "/v1beta1/{name=users/*/profile/blurbs/*}"
+  .google.showcase.v1beta1.Messaging.ListBlurbs[0] : GET: "/v1beta1/{parent=rooms/*}/blurbs"
+  .google.showcase.v1beta1.Messaging.ListBlurbs[1] : GET: "/v1beta1/{parent=users/*/profile}/blurbs"
+  .google.showcase.v1beta1.Messaging.SearchBlurbs[0] : POST: "/v1beta1/{parent=rooms/*}/blurbs:search"
+  .google.showcase.v1beta1.Messaging.SearchBlurbs[1] : POST: "/v1beta1/{parent=users/*/profile}/blurbs:search"
+  .google.showcase.v1beta1.Messaging.StreamBlurbs[0] : POST: "/v1beta1/{name=rooms/*}/blurbs:stream"
+  .google.showcase.v1beta1.Messaging.StreamBlurbs[1] : POST: "/v1beta1/{name=users/*/profile}/blurbs:stream"
+  .google.showcase.v1beta1.Messaging.SendBlurbs[0] : POST: "/v1beta1/{parent=rooms/*}/blurbs:send"
+  .google.showcase.v1beta1.Messaging.SendBlurbs[1] : POST: "/v1beta1/{parent=users/*/profile}/blurbs:send"
+
+SequenceService (.google.showcase.v1beta1.SequenceService):
+  .google.showcase.v1beta1.SequenceService.CreateSequence[0] : POST: "/v1beta1/sequences"
+  .google.showcase.v1beta1.SequenceService.GetSequenceReport[0] : GET: "/v1beta1/{name=sequences/*/sequenceReport}"
+  .google.showcase.v1beta1.SequenceService.AttemptSequence[0] : POST: "/v1beta1/{name=sequences/*}"
+
+Testing (.google.showcase.v1beta1.Testing):
+  .google.showcase.v1beta1.Testing.CreateSession[0] : POST: "/v1beta1/sessions"
+  .google.showcase.v1beta1.Testing.GetSession[0] : GET: "/v1beta1/{name=sessions/*}"
+  .google.showcase.v1beta1.Testing.ListSessions[0] : GET: "/v1beta1/sessions"
+  .google.showcase.v1beta1.Testing.DeleteSession[0] : DELETE: "/v1beta1/{name=sessions/*}"
+  .google.showcase.v1beta1.Testing.ReportSession[0] : POST: "/v1beta1/{name=sessions/*}:report"
+  .google.showcase.v1beta1.Testing.ListTests[0] : GET: "/v1beta1/{parent=sessions/*}/tests"
+  .google.showcase.v1beta1.Testing.DeleteTest[0] : DELETE: "/v1beta1/{name=sessions/*/tests/*}"
+  .google.showcase.v1beta1.Testing.VerifyTest[0] : POST: "/v1beta1/{name=sessions/*/tests/*}:check"
+
+
+
+GoModel
+----------------------------------------
+Shim "Echo" (.google.showcase.v1beta1.Echo)
+  Imports:
+    longrunningpb: "google.golang.org/genproto/googleapis/longrunning" "google.golang.org/genproto/googleapis/longrunning"
+    genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
+  Handlers:
+        POST                                 /v1beta1/echo:echo func Echo(request genprotopb.EchoRequest) (response genprotopb.EchoResponse) {}
+        POST                               /v1beta1/echo:expand func Expand(request genprotopb.ExpandRequest) (response genprotopb.EchoResponse) {}
+        POST                              /v1beta1/echo:collect func Collect(request genprotopb.EchoRequest) (response genprotopb.EchoResponse) {}
+        POST                          /v1beta1/echo:pagedExpand func PagedExpand(request genprotopb.PagedExpandRequest) (response genprotopb.PagedExpandResponse) {}
+        POST                                 /v1beta1/echo:wait func Wait(request genprotopb.WaitRequest) (response longrunningpb.Operation) {}
+        POST                                /v1beta1/echo:block func Block(request genprotopb.BlockRequest) (response genprotopb.BlockResponse) {}
+----------------------------------------
+Shim "Identity" (.google.showcase.v1beta1.Identity)
+  Imports:
+    genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
+    emptypb: "github.com/golang/protobuf/ptypes/empty" "github.com/golang/protobuf/ptypes/empty"
+  Handlers:
+        POST                                     /v1beta1/users func CreateUser(request genprotopb.CreateUserRequest) (response genprotopb.User) {}
+         GET                            /v1beta1/{name=users/*} func GetUser(request genprotopb.GetUserRequest) (response genprotopb.User) {}
+       PATCH                       /v1beta1/{user.name=users/*} func UpdateUser(request genprotopb.UpdateUserRequest) (response genprotopb.User) {}
+      DELETE                            /v1beta1/{name=users/*} func DeleteUser(request genprotopb.DeleteUserRequest) (response emptypb.Empty) {}
+         GET                                     /v1beta1/users func ListUsers(request genprotopb.ListUsersRequest) (response genprotopb.ListUsersResponse) {}
+----------------------------------------
+Shim "Messaging" (.google.showcase.v1beta1.Messaging)
+  Imports:
+    genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
+    emptypb: "github.com/golang/protobuf/ptypes/empty" "github.com/golang/protobuf/ptypes/empty"
+    longrunningpb: "google.golang.org/genproto/googleapis/longrunning" "google.golang.org/genproto/googleapis/longrunning"
+  Handlers:
+        POST                                     /v1beta1/rooms func CreateRoom(request genprotopb.CreateRoomRequest) (response genprotopb.Room) {}
+         GET                            /v1beta1/{name=rooms/*} func GetRoom(request genprotopb.GetRoomRequest) (response genprotopb.Room) {}
+       PATCH                       /v1beta1/{room.name=rooms/*} func UpdateRoom(request genprotopb.UpdateRoomRequest) (response genprotopb.Room) {}
+      DELETE                            /v1beta1/{name=rooms/*} func DeleteRoom(request genprotopb.DeleteRoomRequest) (response emptypb.Empty) {}
+         GET                                     /v1beta1/rooms func ListRooms(request genprotopb.ListRoomsRequest) (response genprotopb.ListRoomsResponse) {}
+        POST                   /v1beta1/{parent=rooms/*}/blurbs func CreateBlurb(request genprotopb.CreateBlurbRequest) (response genprotopb.Blurb) {}
+        POST           /v1beta1/{parent=users/*/profile}/blurbs func CreateBlurb(request genprotopb.CreateBlurbRequest) (response genprotopb.Blurb) {}
+         GET                   /v1beta1/{name=rooms/*/blurbs/*} func GetBlurb(request genprotopb.GetBlurbRequest) (response genprotopb.Blurb) {}
+         GET           /v1beta1/{name=users/*/profile/blurbs/*} func GetBlurb(request genprotopb.GetBlurbRequest) (response genprotopb.Blurb) {}
+       PATCH             /v1beta1/{blurb.name=rooms/*/blurbs/*} func UpdateBlurb(request genprotopb.UpdateBlurbRequest) (response genprotopb.Blurb) {}
+       PATCH     /v1beta1/{blurb.name=users/*/profile/blurbs/*} func UpdateBlurb(request genprotopb.UpdateBlurbRequest) (response genprotopb.Blurb) {}
+      DELETE                   /v1beta1/{name=rooms/*/blurbs/*} func DeleteBlurb(request genprotopb.DeleteBlurbRequest) (response emptypb.Empty) {}
+      DELETE           /v1beta1/{name=users/*/profile/blurbs/*} func DeleteBlurb(request genprotopb.DeleteBlurbRequest) (response emptypb.Empty) {}
+         GET                   /v1beta1/{parent=rooms/*}/blurbs func ListBlurbs(request genprotopb.ListBlurbsRequest) (response genprotopb.ListBlurbsResponse) {}
+         GET           /v1beta1/{parent=users/*/profile}/blurbs func ListBlurbs(request genprotopb.ListBlurbsRequest) (response genprotopb.ListBlurbsResponse) {}
+        POST            /v1beta1/{parent=rooms/*}/blurbs:search func SearchBlurbs(request genprotopb.SearchBlurbsRequest) (response longrunningpb.Operation) {}
+        POST    /v1beta1/{parent=users/*/profile}/blurbs:search func SearchBlurbs(request genprotopb.SearchBlurbsRequest) (response longrunningpb.Operation) {}
+        POST              /v1beta1/{name=rooms/*}/blurbs:stream func StreamBlurbs(request genprotopb.StreamBlurbsRequest) (response genprotopb.StreamBlurbsResponse) {}
+        POST      /v1beta1/{name=users/*/profile}/blurbs:stream func StreamBlurbs(request genprotopb.StreamBlurbsRequest) (response genprotopb.StreamBlurbsResponse) {}
+        POST              /v1beta1/{parent=rooms/*}/blurbs:send func SendBlurbs(request genprotopb.CreateBlurbRequest) (response genprotopb.SendBlurbsResponse) {}
+        POST      /v1beta1/{parent=users/*/profile}/blurbs:send func SendBlurbs(request genprotopb.CreateBlurbRequest) (response genprotopb.SendBlurbsResponse) {}
+----------------------------------------
+Shim "SequenceService" (.google.showcase.v1beta1.SequenceService)
+  Imports:
+    genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
+    emptypb: "github.com/golang/protobuf/ptypes/empty" "github.com/golang/protobuf/ptypes/empty"
+  Handlers:
+        POST                                 /v1beta1/sequences func CreateSequence(request genprotopb.CreateSequenceRequest) (response genprotopb.Sequence) {}
+         GET         /v1beta1/{name=sequences/*/sequenceReport} func GetSequenceReport(request genprotopb.GetSequenceReportRequest) (response genprotopb.SequenceReport) {}
+        POST                        /v1beta1/{name=sequences/*} func AttemptSequence(request genprotopb.AttemptSequenceRequest) (response emptypb.Empty) {}
+----------------------------------------
+Shim "Testing" (.google.showcase.v1beta1.Testing)
+  Imports:
+    genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
+    emptypb: "github.com/golang/protobuf/ptypes/empty" "github.com/golang/protobuf/ptypes/empty"
+  Handlers:
+        POST                                  /v1beta1/sessions func CreateSession(request genprotopb.CreateSessionRequest) (response genprotopb.Session) {}
+         GET                         /v1beta1/{name=sessions/*} func GetSession(request genprotopb.GetSessionRequest) (response genprotopb.Session) {}
+         GET                                  /v1beta1/sessions func ListSessions(request genprotopb.ListSessionsRequest) (response genprotopb.ListSessionsResponse) {}
+      DELETE                         /v1beta1/{name=sessions/*} func DeleteSession(request genprotopb.DeleteSessionRequest) (response emptypb.Empty) {}
+        POST                  /v1beta1/{name=sessions/*}:report func ReportSession(request genprotopb.ReportSessionRequest) (response genprotopb.ReportSessionResponse) {}
+         GET                 /v1beta1/{parent=sessions/*}/tests func ListTests(request genprotopb.ListTestsRequest) (response genprotopb.ListTestsResponse) {}
+      DELETE                 /v1beta1/{name=sessions/*/tests/*} func DeleteTest(request genprotopb.DeleteTestRequest) (response emptypb.Empty) {}
+        POST           /v1beta1/{name=sessions/*/tests/*}:check func VerifyTest(request genprotopb.VerifyTestRequest) (response genprotopb.VerifyTestResponse) {}

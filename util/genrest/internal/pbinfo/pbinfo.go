@@ -97,6 +97,9 @@ func Of(files []*descriptor.FileDescriptorProto) Info {
 		for _, s := range f.Service {
 			fullyQualifiedName := fmt.Sprintf(".%s.%s", f.GetPackage(), s.GetName())
 			info.Serv[fullyQualifiedName] = s
+			for _, m := range s.Method { // NEW!!!!
+				info.Type[fmt.Sprintf("%s.%s", fullyQualifiedName, m.GetName())] = m
+			}
 		}
 	}
 
