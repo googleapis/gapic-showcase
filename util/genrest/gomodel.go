@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/googleapis/gapic-showcase/util/genrest/errorhandling"
 	"github.com/googleapis/gapic-showcase/util/genrest/internal/pbinfo"
 )
 
@@ -25,7 +26,7 @@ import (
 // GoModel
 
 type GoModel struct {
-	ErrorAccumulator
+	errorhandling.Accumulator
 	shim []*GoServiceShim
 }
 
@@ -88,8 +89,9 @@ func (shim *GoServiceShim) AddImports(imports ...*pbinfo.ImportSpec) {
 // RESTHandler
 
 type RESTHandler struct {
-	httpMethod string
-	urlMatcher string
+	httpMethod   string
+	urlMatcher   string
+	pathTemplate PathTemplate
 
 	goMethod                            string
 	requestType                         string
@@ -103,7 +105,7 @@ type RESTHandler struct {
 }
 
 func (rh *RESTHandler) String() string {
-	return fmt.Sprintf("%8s %50s func %s(%s %s.%s) (%s %s.%s) {}", rh.httpMethod, rh.urlMatcher, rh.goMethod, rh.requestVariable, rh.requestTypePackage, rh.requestType, rh.responseVariable, rh.responseTypePackage, rh.responseType)
+	return fmt.Sprintf("%8s %50s func %s(%s %s.%s) (%s %s.%s) {}\n%s\n", rh.httpMethod, rh.urlMatcher, rh.goMethod, rh.requestVariable, rh.requestTypePackage, rh.requestType, rh.responseVariable, rh.responseTypePackage, rh.responseType, rh.pathTemplate)
 }
 
 ////////////////////////////////////////

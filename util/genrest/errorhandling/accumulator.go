@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package genrest
+package errorhandling
 
 import (
 	"fmt"
 	"strings"
 )
 
-type ErrorAccumulator struct {
+type Accumulator struct {
 	errors []error
 }
 
-func (ea *ErrorAccumulator) AccumulateError(err error) {
+func (ea *Accumulator) AccumulateError(err error) {
 	if err == nil {
 		return
 	}
@@ -33,7 +33,7 @@ func (ea *ErrorAccumulator) AccumulateError(err error) {
 	ea.errors = append(ea.errors, err)
 }
 
-func (ea *ErrorAccumulator) Error() error {
+func (ea *Accumulator) Error() error {
 	if len(ea.errors) == 0 {
 		return nil
 	}

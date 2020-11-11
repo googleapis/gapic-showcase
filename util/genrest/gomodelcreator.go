@@ -17,37 +17,42 @@ package genrest
 import (
 	"fmt"
 
+	"github.com/googleapis/gapic-showcase/util/genrest/protomodel"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
 
-func NewGoModel(protoModel *ProtoModel) (*GoModel, error) {
+func NewGoModel(protoModel *protomodel.Model) (*GoModel, error) {
 	goModel := &GoModel{
-		shim: make([]*GoServiceShim, 0, len(protoModel.services)),
+		shim: make([]*GoServiceShim, 0, len(protoModel.Services)),
 	}
 
-	descInfo := protoModel.descInfo
+	protoInfo := protoModel.ProtoInfo
 
-	for _, service := range protoModel.services {
-		shim := &GoServiceShim{path: fmt.Sprintf("%q (%s)", service.name, service.typeName)}
+	for _, service := range protoModel.Services {
+		shim := &GoServiceShim{path: fmt.Sprintf("%q (%s)", service.Name, service.TypeName)}
 		goModel.Add(shim)
-		for _, binding := range service.restBindings {
-			protoMethodType := binding.protoMethod
-			protoMethodDesc, ok := descInfo.Type[protoMethodType].(*descriptorpb.MethodDescriptorProto)
+		for _, binding := range service.RESTBindings {
+			protoMethodType := binding.ProtoMethod
+			protoMethodDesc, ok := protoInfo.Type[protoMethodType].(*descriptorpb.MethodDescriptorProto)
 			if !ok {
-				goModel.AccumulateError(fmt.Errorf("could not get descriptor for %q: %#x", protoMethodType, descInfo.Type[protoMethodType]))
+				goModel.AccumulateError(fmt.Errorf("could not get descriptor for %q: %#x", protoMethodType, protoInfo.Type[protoMethodType]))
 				continue
 			}
-			inProtoType := descInfo.Type[*protoMethodDesc.InputType]
-			inGoType, inImports, err := descInfo.NameSpec(inProtoType)
+			inProtoType := protoInfo.Type[*protoMethodDesc.InputType]
+			inGoType, inImports, err := protoInfo.NameSpec(inProtoType)
 			goModel.AccumulateError(err)
 
-			outProtoType := descInfo.Type[*protoMethodDesc.OutputType]
+			outProtoType := protoInfo.Type[*protoMethodDesc.OutputType]
 			goModel.AccumulateError(err)
-			outGoType, outImports, err := descInfo.NameSpec(outProtoType)
+			outGoType, outImports, err := protoInfo.NameSpec(outProtoType)
+
+			pathTemplate, err := NewPathTemplate(binding.RESTPattern.Pattern)
+			goModel.AccumulateError(err)
 
 			restHandler := &RESTHandler{
-				httpMethod: binding.restPattern.httpMethod,
-				urlMatcher: binding.restPattern.pattern,
+				httpMethod:   binding.RESTPattern.HTTPMethod,
+				urlMatcher:   binding.RESTPattern.Pattern,
+				pathTemplate: pathTemplate,
 
 				goMethod:           protoMethodDesc.GetName(),
 				requestType:        inGoType,

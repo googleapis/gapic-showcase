@@ -16,9 +16,11 @@ package genrest
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
 	"github.com/googleapis/gapic-showcase/util/genrest/internal/pbinfo"
+	"github.com/googleapis/gapic-showcase/util/genrest/protomodel"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
@@ -28,11 +30,11 @@ import (
 ////////////////////////////////////////
 // ProtoModel
 
-func NewProtoModel(plugin *protogen.Plugin) (*ProtoModel, error) {
+func NewProtoModel(plugin *protogen.Plugin) (*protomodel.Model, error) {
 	protoFiles := plugin.Request.GetProtoFile()
-	protoModel := &ProtoModel{
-		descInfo: pbinfo.Of(protoFiles),
-		services: make([]*Service, 0, len(protoFiles)),
+	protoModel := &protomodel.Model{
+		ProtoInfo: pbinfo.Of(protoFiles),
+		Services:  make([]*protomodel.Service, 0, len(protoFiles)),
 	}
 
 	generateFile := map[string]bool{}
@@ -72,22 +74,22 @@ func NewProtoModel(plugin *protogen.Plugin) (*ProtoModel, error) {
 ////////////////////////////////////////
 // Service
 
-func NewServiceBinding(service *Service, method *descriptor.MethodDescriptorProto, rule *annotations.HttpRule, index int) error {
-	binding, err := NewRESTBinding(fullyQualifiedType(service.typeName, method.GetName()), rule, index)
+func NewServiceBinding(service *protomodel.Service, method *descriptor.MethodDescriptorProto, rule *annotations.HttpRule, index int) error {
+	binding, err := NewRESTBinding(fullyQualifiedType(service.TypeName, method.GetName()), rule, index)
 	if err != nil {
-		return fmt.Errorf("service %q: %s", service.name, err)
+		return fmt.Errorf("service %q: %s", service.Name, err)
 	}
 	service.AddBinding(binding)
 	return nil
 }
 
-func NewService(protoPackage string, descriptor *descriptorpb.ServiceDescriptorProto) *Service {
+func NewService(protoPackage string, descriptor *descriptorpb.ServiceDescriptorProto) *protomodel.Service {
 	// might need *descriptor.ProtoReflect().Type() to instantiate Go type and then reflect to get the name?
-	service := &Service{
-		descriptor:   descriptor,
-		name:         *descriptor.Name,
-		typeName:     fullyQualifiedType(protoPackage, descriptor.GetName()),
-		restBindings: make([]*RESTBinding, 0),
+	service := &protomodel.Service{
+		Descriptor:   descriptor,
+		Name:         *descriptor.Name,
+		TypeName:     fullyQualifiedType(protoPackage, descriptor.GetName()),
+		RESTBindings: make([]*protomodel.RESTBinding, 0),
 	}
 	return service
 }
@@ -95,15 +97,15 @@ func NewService(protoPackage string, descriptor *descriptorpb.ServiceDescriptorP
 ////////////////////////////////////////
 // RESTBinding
 
-func NewRESTBinding(methodName string, rule *annotations.HttpRule, index int) (*RESTBinding, error) {
+func NewRESTBinding(methodName string, rule *annotations.HttpRule, index int) (*protomodel.RESTBinding, error) {
 	restPattern, err := NewRESTRequestPattern(rule)
 	if err != nil {
 		return nil, fmt.Errorf("method %q, binding %d: %s", methodName, index, err)
 	}
-	binding := &RESTBinding{
-		index:       index,
-		protoMethod: methodName,
-		restPattern: restPattern,
+	binding := &protomodel.RESTBinding{
+		Index:       index,
+		ProtoMethod: methodName,
+		RESTPattern: restPattern,
 	}
 	return binding, nil
 }
@@ -111,32 +113,40 @@ func NewRESTBinding(methodName string, rule *annotations.HttpRule, index int) (*
 ////////////////////////////////////////
 // RESTRequestPattern
 
-func NewRESTRequestPattern(rule *annotations.HttpRule) (*RESTRequestPattern, error) {
-	binding := &RESTRequestPattern{}
+func NewRESTRequestPattern(rule *annotations.HttpRule) (*protomodel.RESTRequestPattern, error) {
+	binding := &protomodel.RESTRequestPattern{}
 	pattern := rule.GetPattern()
 	switch pattern.(type) {
 	case *annotations.HttpRule_Get:
-		binding.httpMethod = "GET"
-		binding.pattern = rule.GetGet()
+		binding.HTTPMethod = "GET"
+		binding.Pattern = rule.GetGet()
 	case *annotations.HttpRule_Post:
-		binding.httpMethod = "POST"
-		binding.pattern = rule.GetPost()
+		binding.HTTPMethod = "POST"
+		binding.Pattern = rule.GetPost()
 	case *annotations.HttpRule_Patch:
-		binding.httpMethod = "PATCH"
-		binding.pattern = rule.GetPatch()
+		binding.HTTPMethod = "PATCH"
+		binding.Pattern = rule.GetPatch()
 	case *annotations.HttpRule_Put:
-		binding.httpMethod = "PUT"
-		binding.pattern = rule.GetPut()
+		binding.HTTPMethod = "PUT"
+		binding.Pattern = rule.GetPut()
 	case *annotations.HttpRule_Delete:
-		binding.httpMethod = "DELETE"
-		binding.pattern = rule.GetDelete()
+		binding.HTTPMethod = "DELETE"
+		binding.Pattern = rule.GetDelete()
 	default:
 		return nil, fmt.Errorf("unhandled pattern: %#x", pattern)
 	}
-	pathTemplate, err := NewPathTemplate(binding.pattern)
-	if err != nil {
-		return nil, err
-	}
-	binding.pathTemplate = pathTemplate
 	return binding, nil
+}
+
+////////////////////////////////////////
+// misc
+
+func fullyQualifiedType(segments ...string) string {
+	// In descriptors, putting the dot in front means the name is fully-qualified.
+	const dot = "."
+	typeName := strings.Join(segments, dot)
+	if !strings.HasPrefix(typeName, dot) {
+		typeName = dot + typeName
+	}
+	return typeName
 }

@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package genrest
+package protomodel
 
 import (
 	"fmt"
 	"strings"
 
+	"github.com/googleapis/gapic-showcase/util/genrest/errorhandling"
 	"github.com/googleapis/gapic-showcase/util/genrest/internal/pbinfo"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
@@ -25,15 +26,15 @@ import (
 ////////////////////////////////////////
 // ProtoModel
 
-type ProtoModel struct {
-	ErrorAccumulator
-	descInfo pbinfo.Info
-	services []*Service
+type Model struct {
+	errorhandling.Accumulator
+	ProtoInfo pbinfo.Info
+	Services  []*Service
 }
 
-func (model *ProtoModel) String() string {
-	services := make([]string, len(model.services))
-	for idx, svc := range model.services {
+func (model *Model) String() string {
+	services := make([]string, len(model.Services))
+	for idx, svc := range model.Services {
 		if svc == nil {
 			continue
 		}
@@ -42,19 +43,19 @@ func (model *ProtoModel) String() string {
 	return strings.Join(services, "\n\n")
 }
 
-func (model *ProtoModel) AddService(service *Service) *Service {
-	model.services = append(model.services, service)
+func (model *Model) AddService(service *Service) *Service {
+	model.Services = append(model.Services, service)
 	return service
 }
 
-func (model *ProtoModel) CheckConsistency() {
+func (model *Model) CheckConsistency() { // move to gomodel
 	model.CheckBindingsUnique()
 }
 
-func (model *ProtoModel) CheckBindingsUnique() {
+func (model *Model) CheckBindingsUnique() { // move to gomodel
 	allBindings := []*RESTBinding{}
-	for _, service := range model.services {
-		allBindings = append(allBindings, service.restBindings...)
+	for _, service := range model.Services {
+		allBindings = append(allBindings, service.RESTBindings...)
 	}
 
 	for first, firstBinding := range allBindings {
@@ -72,46 +73,36 @@ func (model *ProtoModel) CheckBindingsUnique() {
 // Service
 
 type Service struct {
-	descriptor   *descriptorpb.ServiceDescriptorProto // maybe not needed
-	name         string
-	typeName     string
-	restBindings []*RESTBinding
+	Descriptor   *descriptorpb.ServiceDescriptorProto // maybe not needed
+	Name         string
+	TypeName     string
+	RESTBindings []*RESTBinding
 }
 
 func (service *Service) String() string {
-	handlers := make([]string, len(service.restBindings))
-	for idx, h := range service.restBindings {
+	handlers := make([]string, len(service.RESTBindings))
+	for idx, h := range service.RESTBindings {
 		handlers[idx] = h.String()
 	}
 	indent := "  "
-	return fmt.Sprintf("%s (%s):\n%s%s", service.name, service.typeName, indent, strings.Join(handlers, "\n"+indent))
+	return fmt.Sprintf("%s (%s):\n%s%s", service.Name, service.TypeName, indent, strings.Join(handlers, "\n"+indent))
 }
 
 func (service *Service) AddBinding(binding *RESTBinding) {
-	service.restBindings = append(service.restBindings, binding)
-}
-
-func fullyQualifiedType(segments ...string) string {
-	// In descriptors, putting the dot in front means the name is fully-qualified.
-	const dot = "."
-	typeName := strings.Join(segments, dot)
-	if !strings.HasPrefix(typeName, dot) {
-		typeName = dot + typeName
-	}
-	return typeName
+	service.RESTBindings = append(service.RESTBindings, binding)
 }
 
 ////////////////////////////////////////
 // RESTBinding
 
 type RESTBinding struct {
-	index       int
-	protoMethod string
-	restPattern *RESTRequestPattern
+	Index       int
+	ProtoMethod string
+	RESTPattern *RESTRequestPattern
 }
 
 func (binding *RESTBinding) String() string {
-	return fmt.Sprintf("%s[%d] : %s", binding.protoMethod, binding.index, binding.restPattern)
+	return fmt.Sprintf("%s[%d] : %s", binding.ProtoMethod, binding.Index, binding.RESTPattern)
 }
 
 func (binding *RESTBinding) FindAmbiguityWith(other *RESTBinding) string {
@@ -123,12 +114,11 @@ func (binding *RESTBinding) FindAmbiguityWith(other *RESTBinding) string {
 // RESTRequestPattern
 
 type RESTRequestPattern struct {
-	httpMethod   string // make an enum?
-	pattern      string
-	pathTemplate PathTemplate
+	HTTPMethod string // make an enum?
+	Pattern    string
 	// TODO: Add body info
 }
 
 func (binding *RESTRequestPattern) String() string {
-	return fmt.Sprintf("%s: %q: %s", binding.httpMethod, binding.pattern, binding.pathTemplate)
+	return fmt.Sprintf("%s: %q", binding.HTTPMethod, binding.Pattern)
 }
