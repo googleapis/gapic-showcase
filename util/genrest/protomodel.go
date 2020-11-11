@@ -123,11 +123,12 @@ func (binding *RESTBinding) FindAmbiguityWith(other *RESTBinding) string {
 // RESTRequestPattern
 
 type RESTRequestPattern struct {
-	httpMethod string // make an enum?
-	pattern    string
+	httpMethod   string // make an enum?
+	pattern      string
+	pathTemplate PathTemplate
 	// TODO: Add body info
 }
 
 func (binding *RESTRequestPattern) String() string {
-	return fmt.Sprintf("%s: %q", binding.httpMethod, binding.pattern)
+	return fmt.Sprintf("%s: %q: %s", binding.httpMethod, binding.pattern, binding.pathTemplate)
 }

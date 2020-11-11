@@ -8,57 +8,57 @@ google/showcase/v1beta1/testing.proto
 
 Proto Model:
 Echo (.google.showcase.v1beta1.Echo):
-  .google.showcase.v1beta1.Echo.Echo[0] : POST: "/v1beta1/echo:echo"
-  .google.showcase.v1beta1.Echo.Expand[0] : POST: "/v1beta1/echo:expand"
-  .google.showcase.v1beta1.Echo.Collect[0] : POST: "/v1beta1/echo:collect"
-  .google.showcase.v1beta1.Echo.PagedExpand[0] : POST: "/v1beta1/echo:pagedExpand"
-  .google.showcase.v1beta1.Echo.Wait[0] : POST: "/v1beta1/echo:wait"
-  .google.showcase.v1beta1.Echo.Block[0] : POST: "/v1beta1/echo:block"
+  .google.showcase.v1beta1.Echo.Echo[0] : POST: "/v1beta1/echo:echo": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "echo"} {LITERAL ":"} {LITERAL "echo"}]
+  .google.showcase.v1beta1.Echo.Expand[0] : POST: "/v1beta1/echo:expand": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "echo"} {LITERAL ":"} {LITERAL "expand"}]
+  .google.showcase.v1beta1.Echo.Collect[0] : POST: "/v1beta1/echo:collect": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "echo"} {LITERAL ":"} {LITERAL "collect"}]
+  .google.showcase.v1beta1.Echo.PagedExpand[0] : POST: "/v1beta1/echo:pagedExpand": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "echo"} {LITERAL ":"} {LITERAL "pagedExpand"}]
+  .google.showcase.v1beta1.Echo.Wait[0] : POST: "/v1beta1/echo:wait": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "echo"} {LITERAL ":"} {LITERAL "wait"}]
+  .google.showcase.v1beta1.Echo.Block[0] : POST: "/v1beta1/echo:block": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "echo"} {LITERAL ":"} {LITERAL "block"}]
 
 Identity (.google.showcase.v1beta1.Identity):
-  .google.showcase.v1beta1.Identity.CreateUser[0] : POST: "/v1beta1/users"
-  .google.showcase.v1beta1.Identity.GetUser[0] : GET: "/v1beta1/{name=users/*}"
-  .google.showcase.v1beta1.Identity.UpdateUser[0] : PATCH: "/v1beta1/{user.name=users/*}"
-  .google.showcase.v1beta1.Identity.DeleteUser[0] : DELETE: "/v1beta1/{name=users/*}"
-  .google.showcase.v1beta1.Identity.ListUsers[0] : GET: "/v1beta1/users"
+  .google.showcase.v1beta1.Identity.CreateUser[0] : POST: "/v1beta1/users": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "users"}]
+  .google.showcase.v1beta1.Identity.GetUser[0] : GET: "/v1beta1/{name=users/*}": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+  .google.showcase.v1beta1.Identity.UpdateUser[0] : PATCH: "/v1beta1/{user.name=users/*}": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "user.name" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+  .google.showcase.v1beta1.Identity.DeleteUser[0] : DELETE: "/v1beta1/{name=users/*}": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+  .google.showcase.v1beta1.Identity.ListUsers[0] : GET: "/v1beta1/users": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "users"}]
 
 Messaging (.google.showcase.v1beta1.Messaging):
-  .google.showcase.v1beta1.Messaging.CreateRoom[0] : POST: "/v1beta1/rooms"
-  .google.showcase.v1beta1.Messaging.GetRoom[0] : GET: "/v1beta1/{name=rooms/*}"
-  .google.showcase.v1beta1.Messaging.UpdateRoom[0] : PATCH: "/v1beta1/{room.name=rooms/*}"
-  .google.showcase.v1beta1.Messaging.DeleteRoom[0] : DELETE: "/v1beta1/{name=rooms/*}"
-  .google.showcase.v1beta1.Messaging.ListRooms[0] : GET: "/v1beta1/rooms"
-  .google.showcase.v1beta1.Messaging.CreateBlurb[0] : POST: "/v1beta1/{parent=rooms/*}/blurbs"
-  .google.showcase.v1beta1.Messaging.CreateBlurb[1] : POST: "/v1beta1/{parent=users/*/profile}/blurbs"
-  .google.showcase.v1beta1.Messaging.GetBlurb[0] : GET: "/v1beta1/{name=rooms/*/blurbs/*}"
-  .google.showcase.v1beta1.Messaging.GetBlurb[1] : GET: "/v1beta1/{name=users/*/profile/blurbs/*}"
-  .google.showcase.v1beta1.Messaging.UpdateBlurb[0] : PATCH: "/v1beta1/{blurb.name=rooms/*/blurbs/*}"
-  .google.showcase.v1beta1.Messaging.UpdateBlurb[1] : PATCH: "/v1beta1/{blurb.name=users/*/profile/blurbs/*}"
-  .google.showcase.v1beta1.Messaging.DeleteBlurb[0] : DELETE: "/v1beta1/{name=rooms/*/blurbs/*}"
-  .google.showcase.v1beta1.Messaging.DeleteBlurb[1] : DELETE: "/v1beta1/{name=users/*/profile/blurbs/*}"
-  .google.showcase.v1beta1.Messaging.ListBlurbs[0] : GET: "/v1beta1/{parent=rooms/*}/blurbs"
-  .google.showcase.v1beta1.Messaging.ListBlurbs[1] : GET: "/v1beta1/{parent=users/*/profile}/blurbs"
-  .google.showcase.v1beta1.Messaging.SearchBlurbs[0] : POST: "/v1beta1/{parent=rooms/*}/blurbs:search"
-  .google.showcase.v1beta1.Messaging.SearchBlurbs[1] : POST: "/v1beta1/{parent=users/*/profile}/blurbs:search"
-  .google.showcase.v1beta1.Messaging.StreamBlurbs[0] : POST: "/v1beta1/{name=rooms/*}/blurbs:stream"
-  .google.showcase.v1beta1.Messaging.StreamBlurbs[1] : POST: "/v1beta1/{name=users/*/profile}/blurbs:stream"
-  .google.showcase.v1beta1.Messaging.SendBlurbs[0] : POST: "/v1beta1/{parent=rooms/*}/blurbs:send"
-  .google.showcase.v1beta1.Messaging.SendBlurbs[1] : POST: "/v1beta1/{parent=users/*/profile}/blurbs:send"
+  .google.showcase.v1beta1.Messaging.CreateRoom[0] : POST: "/v1beta1/rooms": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "rooms"}]
+  .google.showcase.v1beta1.Messaging.GetRoom[0] : GET: "/v1beta1/{name=rooms/*}": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+  .google.showcase.v1beta1.Messaging.UpdateRoom[0] : PATCH: "/v1beta1/{room.name=rooms/*}": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "room.name" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+  .google.showcase.v1beta1.Messaging.DeleteRoom[0] : DELETE: "/v1beta1/{name=rooms/*}": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+  .google.showcase.v1beta1.Messaging.ListRooms[0] : GET: "/v1beta1/rooms": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "rooms"}]
+  .google.showcase.v1beta1.Messaging.CreateBlurb[0] : POST: "/v1beta1/{parent=rooms/*}/blurbs": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "parent" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"}]} {LITERAL "/"} {LITERAL "blurbs"}]
+  .google.showcase.v1beta1.Messaging.CreateBlurb[1] : POST: "/v1beta1/{parent=users/*/profile}/blurbs": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "parent" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "profile"}]} {LITERAL "/"} {LITERAL "blurbs"}]
+  .google.showcase.v1beta1.Messaging.GetBlurb[0] : GET: "/v1beta1/{name=rooms/*/blurbs/*}": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+  .google.showcase.v1beta1.Messaging.GetBlurb[1] : GET: "/v1beta1/{name=users/*/profile/blurbs/*}": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "profile"} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+  .google.showcase.v1beta1.Messaging.UpdateBlurb[0] : PATCH: "/v1beta1/{blurb.name=rooms/*/blurbs/*}": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "blurb.name" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+  .google.showcase.v1beta1.Messaging.UpdateBlurb[1] : PATCH: "/v1beta1/{blurb.name=users/*/profile/blurbs/*}": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "blurb.name" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "profile"} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+  .google.showcase.v1beta1.Messaging.DeleteBlurb[0] : DELETE: "/v1beta1/{name=rooms/*/blurbs/*}": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+  .google.showcase.v1beta1.Messaging.DeleteBlurb[1] : DELETE: "/v1beta1/{name=users/*/profile/blurbs/*}": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "profile"} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+  .google.showcase.v1beta1.Messaging.ListBlurbs[0] : GET: "/v1beta1/{parent=rooms/*}/blurbs": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "parent" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"}]} {LITERAL "/"} {LITERAL "blurbs"}]
+  .google.showcase.v1beta1.Messaging.ListBlurbs[1] : GET: "/v1beta1/{parent=users/*/profile}/blurbs": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "parent" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "profile"}]} {LITERAL "/"} {LITERAL "blurbs"}]
+  .google.showcase.v1beta1.Messaging.SearchBlurbs[0] : POST: "/v1beta1/{parent=rooms/*}/blurbs:search": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "parent" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"}]} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL ":"} {LITERAL "search"}]
+  .google.showcase.v1beta1.Messaging.SearchBlurbs[1] : POST: "/v1beta1/{parent=users/*/profile}/blurbs:search": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "parent" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "profile"}]} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL ":"} {LITERAL "search"}]
+  .google.showcase.v1beta1.Messaging.StreamBlurbs[0] : POST: "/v1beta1/{name=rooms/*}/blurbs:stream": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"}]} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL ":"} {LITERAL "stream"}]
+  .google.showcase.v1beta1.Messaging.StreamBlurbs[1] : POST: "/v1beta1/{name=users/*/profile}/blurbs:stream": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "profile"}]} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL ":"} {LITERAL "stream"}]
+  .google.showcase.v1beta1.Messaging.SendBlurbs[0] : POST: "/v1beta1/{parent=rooms/*}/blurbs:send": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "parent" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"}]} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL ":"} {LITERAL "send"}]
+  .google.showcase.v1beta1.Messaging.SendBlurbs[1] : POST: "/v1beta1/{parent=users/*/profile}/blurbs:send": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "parent" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "profile"}]} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL ":"} {LITERAL "send"}]
 
 SequenceService (.google.showcase.v1beta1.SequenceService):
-  .google.showcase.v1beta1.SequenceService.CreateSequence[0] : POST: "/v1beta1/sequences"
-  .google.showcase.v1beta1.SequenceService.GetSequenceReport[0] : GET: "/v1beta1/{name=sequences/*/sequenceReport}"
-  .google.showcase.v1beta1.SequenceService.AttemptSequence[0] : POST: "/v1beta1/{name=sequences/*}"
+  .google.showcase.v1beta1.SequenceService.CreateSequence[0] : POST: "/v1beta1/sequences": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "sequences"}]
+  .google.showcase.v1beta1.SequenceService.GetSequenceReport[0] : GET: "/v1beta1/{name=sequences/*/sequenceReport}": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "sequences"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "sequenceReport"}]}]
+  .google.showcase.v1beta1.SequenceService.AttemptSequence[0] : POST: "/v1beta1/{name=sequences/*}": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "sequences"} {LITERAL "/"} {SINGLEVAL "*"}]}]
 
 Testing (.google.showcase.v1beta1.Testing):
-  .google.showcase.v1beta1.Testing.CreateSession[0] : POST: "/v1beta1/sessions"
-  .google.showcase.v1beta1.Testing.GetSession[0] : GET: "/v1beta1/{name=sessions/*}"
-  .google.showcase.v1beta1.Testing.ListSessions[0] : GET: "/v1beta1/sessions"
-  .google.showcase.v1beta1.Testing.DeleteSession[0] : DELETE: "/v1beta1/{name=sessions/*}"
-  .google.showcase.v1beta1.Testing.ReportSession[0] : POST: "/v1beta1/{name=sessions/*}:report"
-  .google.showcase.v1beta1.Testing.ListTests[0] : GET: "/v1beta1/{parent=sessions/*}/tests"
-  .google.showcase.v1beta1.Testing.DeleteTest[0] : DELETE: "/v1beta1/{name=sessions/*/tests/*}"
-  .google.showcase.v1beta1.Testing.VerifyTest[0] : POST: "/v1beta1/{name=sessions/*/tests/*}:check"
+  .google.showcase.v1beta1.Testing.CreateSession[0] : POST: "/v1beta1/sessions": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "sessions"}]
+  .google.showcase.v1beta1.Testing.GetSession[0] : GET: "/v1beta1/{name=sessions/*}": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "sessions"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+  .google.showcase.v1beta1.Testing.ListSessions[0] : GET: "/v1beta1/sessions": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "sessions"}]
+  .google.showcase.v1beta1.Testing.DeleteSession[0] : DELETE: "/v1beta1/{name=sessions/*}": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "sessions"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+  .google.showcase.v1beta1.Testing.ReportSession[0] : POST: "/v1beta1/{name=sessions/*}:report": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "sessions"} {LITERAL "/"} {SINGLEVAL "*"}]} {LITERAL ":"} {LITERAL "report"}]
+  .google.showcase.v1beta1.Testing.ListTests[0] : GET: "/v1beta1/{parent=sessions/*}/tests": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "parent" [{LITERAL "sessions"} {LITERAL "/"} {SINGLEVAL "*"}]} {LITERAL "/"} {LITERAL "tests"}]
+  .google.showcase.v1beta1.Testing.DeleteTest[0] : DELETE: "/v1beta1/{name=sessions/*/tests/*}": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "sessions"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "tests"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+  .google.showcase.v1beta1.Testing.VerifyTest[0] : POST: "/v1beta1/{name=sessions/*/tests/*}:check": [{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "sessions"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "tests"} {LITERAL "/"} {SINGLEVAL "*"}]} {LITERAL ":"} {LITERAL "check"}]
 
 
 
@@ -66,8 +66,8 @@ GoModel
 ----------------------------------------
 Shim "Echo" (.google.showcase.v1beta1.Echo)
   Imports:
-    longrunningpb: "google.golang.org/genproto/googleapis/longrunning" "google.golang.org/genproto/googleapis/longrunning"
     genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
+    longrunningpb: "google.golang.org/genproto/googleapis/longrunning" "google.golang.org/genproto/googleapis/longrunning"
   Handlers:
         POST                                 /v1beta1/echo:echo func Echo(request genprotopb.EchoRequest) (response genprotopb.EchoResponse) {}
         POST                               /v1beta1/echo:expand func Expand(request genprotopb.ExpandRequest) (response genprotopb.EchoResponse) {}

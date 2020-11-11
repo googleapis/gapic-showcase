@@ -133,5 +133,10 @@ func NewRESTRequestPattern(rule *annotations.HttpRule) (*RESTRequestPattern, err
 	default:
 		return nil, fmt.Errorf("unhandled pattern: %#x", pattern)
 	}
+	pathTemplate, err := NewPathTemplate(binding.pattern)
+	if err != nil {
+		return nil, err
+	}
+	binding.pathTemplate = pathTemplate
 	return binding, nil
 }
