@@ -16,6 +16,7 @@ package genrest
 
 import (
 	"log"
+	"path/filepath"
 	"strings"
 
 	"google.golang.org/protobuf/compiler/protogen"
@@ -27,28 +28,37 @@ import (
 func Generate(plugin *protogen.Plugin) error {
 	log.Printf("Generating REST!")
 
-	file := plugin.NewGeneratedFile("showcase-rest-sample-response.txt", "github.com/googleapis/gapic-showcase/server/genrest")
+	info := plugin.NewGeneratedFile("showcase-rest-sample-response.txt", "github.com/googleapis/gapic-showcase/server/genrest")
 
 	// The typecasting below appears to be idiomatic as per
 	// https://github.com/protocolbuffers/protobuf-go/blob/master/cmd/protoc-gen-go/internal_gengo/main.go#L31
 	plugin.SupportedFeatures = uint64(pluginpb.CodeGeneratorResponse_FEATURE_PROTO3_OPTIONAL)
-	file.P("Generated via \"google.golang.org/protobuf/compiler/protogen\" via ProtoModel!")
-	file.P("Files:\n", strings.Join(plugin.Request.GetFileToGenerate(), "\n"))
+	info.P("Generated via \"google.golang.org/protobuf/compiler/protogen\" via ProtoModel!")
+	info.P("Files:\n", strings.Join(plugin.Request.GetFileToGenerate(), "\n"))
 
 	protoModel, err := NewProtoModel(plugin)
 	if err != nil {
 		return err
 	}
 
-	file.P("\nProto Model:")
-	file.P(protoModel.String())
+	info.P("\nProto Model:")
+	info.P(protoModel.String())
 
-	file.P("\n\n")
+	info.P("\n\n")
 	goModel, err := NewGoModel(protoModel)
 	if err != nil {
 		return err
 	}
-	file.P(goModel.String())
+	info.P(goModel.String())
+
+	view, err := NewView(goModel)
+	if err != nil {
+		return err
+	}
+	for _, source := range view.Files {
+		file := plugin.NewGeneratedFile(source.Name, protogen.GoImportPath(filepath.Join("github.com/googleapis/gapic-showcase/server/genrest", source.Directory)))
+		file.P(source.Contents())
+	}
 
 	return nil
 }

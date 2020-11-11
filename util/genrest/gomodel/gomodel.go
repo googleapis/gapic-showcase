@@ -48,9 +48,14 @@ func (gm *Model) String() string {
 // GoServiceShim
 
 type GoServiceShim struct {
-	Path     string
-	Imports  map[string]*pbinfo.ImportSpec
-	Handlers []*RESTHandler
+	ProtoPath string
+	ShortName string
+	Imports   map[string]*pbinfo.ImportSpec
+	Handlers  []*RESTHandler
+}
+
+func (shim *GoServiceShim) FullName() string {
+	return fmt.Sprintf("%q (%s)", shim.ShortName, shim.ProtoPath)
 }
 
 func (shim *GoServiceShim) String() string {
@@ -67,7 +72,7 @@ func (shim *GoServiceShim) String() string {
 	sort.Strings(handlerStrings)
 
 	return fmt.Sprintf("Shim %s\n  Imports:\n    %s\n  Handlers (%d):\n    %s",
-		shim.Path,
+		shim.FullName(),
 		strings.Join(importStrings, "\n    "),
 		len(handlerStrings),
 		strings.Join(handlerStrings, "\n    "))
@@ -94,7 +99,7 @@ func (shim *GoServiceShim) AddImports(imports ...*pbinfo.ImportSpec) {
 
 type RESTHandler struct {
 	HTTPMethod   string
-	URLMatcher   string
+	URIPattern   string
 	PathTemplate PathTemplate
 
 	GoMethod                            string
@@ -109,7 +114,7 @@ type RESTHandler struct {
 }
 
 func (rh *RESTHandler) String() string {
-	return fmt.Sprintf("%8s %50s func %s(%s %s.%s) (%s %s.%s) {}\n%s\n", rh.HTTPMethod, rh.URLMatcher, rh.GoMethod, rh.RequestVariable, rh.RequestTypePackage, rh.RequestType, rh.ResponseVariable, rh.ResponseTypePackage, rh.ResponseType, rh.PathTemplate)
+	return fmt.Sprintf("%8s %50s func %s(%s %s.%s) (%s %s.%s) {}\n%s\n", rh.HTTPMethod, rh.URIPattern, rh.GoMethod, rh.RequestVariable, rh.RequestTypePackage, rh.RequestType, rh.ResponseVariable, rh.ResponseTypePackage, rh.ResponseType, rh.PathTemplate)
 }
 
 ////////////////////////////////////////

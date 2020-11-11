@@ -30,7 +30,7 @@ func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 	protoInfo := protoModel.ProtoInfo
 
 	for _, service := range protoModel.Services {
-		shim := &gomodel.GoServiceShim{Path: fmt.Sprintf("%q (%s)", service.Name, service.TypeName)}
+		shim := &gomodel.GoServiceShim{ProtoPath: service.TypeName, ShortName: service.Name}
 		goModel.Add(shim)
 		for _, binding := range service.RESTBindings {
 			protoMethodType := binding.ProtoMethod
@@ -52,7 +52,7 @@ func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 
 			restHandler := &gomodel.RESTHandler{
 				HTTPMethod:   binding.RESTPattern.HTTPMethod,
-				URLMatcher:   binding.RESTPattern.Pattern,
+				URIPattern:   binding.RESTPattern.Pattern,
 				PathTemplate: pathTemplate,
 
 				GoMethod:           protoMethodDesc.GetName(),

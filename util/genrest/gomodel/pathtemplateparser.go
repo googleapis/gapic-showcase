@@ -104,7 +104,7 @@ func (parser *Parser) parse() (pt PathTemplate, err error) {
 			return pt, fmt.Errorf("could not parse verb")
 		}
 
-		pt = append(pt, &Segment{kind: Literal, value: ":"}, verb)
+		pt = append(pt, &Segment{Kind: Literal, Value: ":"}, verb)
 
 	}
 
@@ -174,7 +174,7 @@ func (parser *Parser) parseToSegment(re *regexp.Regexp, kind SegmentKind) (*Segm
 	if len(match) == 0 {
 		return nil, nil
 	}
-	return &Segment{kind: kind, value: match}, nil
+	return &Segment{Kind: kind, Value: match}, nil
 }
 
 func (parser *Parser) parseFieldPath() string {
@@ -193,21 +193,21 @@ func (parser *Parser) parseVariable() (*Segment, error) {
 	}
 
 	segment := &Segment{
-		kind:  Variable,
-		value: fieldPath,
+		Kind:  Variable,
+		Value: fieldPath,
 	}
 
 	if parser.source.ConsumeIf('=') {
 		var err error
-		segment.subsegments, err = parser.parseSegments()
+		segment.Subsegments, err = parser.parseSegments()
 		if err != nil {
 			return segment, err
 		}
-		if len(segment.subsegments) == 0 {
+		if len(segment.Subsegments) == 0 {
 			return segment, fmt.Errorf("no path segments specified for URI %q", fieldPath)
 		}
 	} else {
-		segment.subsegments = PathTemplate{&Segment{kind: SingleValue}}
+		segment.Subsegments = PathTemplate{&Segment{Kind: SingleValue}}
 	}
 
 	if !parser.source.ConsumeIf('}') {

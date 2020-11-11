@@ -46,30 +46,30 @@ func (sk SegmentKind) String() string {
 // Segment
 
 type Segment struct {
-	kind        SegmentKind
-	value       string // field path if kind==Variable, literal value if kind==Literal, unused otherwise
-	subsegments PathTemplate
+	Kind        SegmentKind
+	Value       string // field path if kind==Variable, literal value if kind==Literal, unused otherwise
+	Subsegments PathTemplate
 }
 
 func (seg *Segment) String() string {
-	switch seg.kind {
+	switch seg.Kind {
 	case Literal:
-		return fmt.Sprintf("%q", seg.value)
+		return fmt.Sprintf("%q", seg.Value)
 	case SingleValue, MultipleValue:
-		return seg.value
+		return seg.Value
 	case Variable:
 		subsegments := "!!ERROR: no subsegments"
-		if len(seg.subsegments) > 0 {
-			subsegments = fmt.Sprintf("%s", seg.subsegments)
+		if len(seg.Subsegments) > 0 {
+			subsegments = fmt.Sprintf("%s", seg.Subsegments)
 		}
-		return fmt.Sprintf("{%s = %s}", seg.value, subsegments)
+		return fmt.Sprintf("{%s = %s}", seg.Value, subsegments)
 	}
 
 	// Out of range: print as much info as possible
-	return fmt.Sprintf("{%s(%d) %q %s}", seg.kind, seg.kind, seg.value, seg.subsegments)
+	return fmt.Sprintf("{%s(%d) %q %s}", seg.Kind, seg.Kind, seg.Value, seg.Subsegments)
 }
 
-var SlashSegment = &Segment{kind: Literal, value: "/"}
+var SlashSegment = &Segment{Kind: Literal, Value: "/"}
 
 ////////////////////////////////////////
 // PathTemplate
