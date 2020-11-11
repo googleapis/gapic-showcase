@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package genrest
+package gomodel
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/googleapis/gapic-showcase/util/genrest/errorhandling"
@@ -25,18 +26,18 @@ import (
 ////////////////////////////////////////
 // GoModel
 
-type GoModel struct {
+type Model struct {
 	errorhandling.Accumulator
-	shim []*GoServiceShim
+	Shim []*GoServiceShim
 }
 
-func (gm *GoModel) Add(shim *GoServiceShim) {
-	gm.shim = append(gm.shim, shim)
+func (gm *Model) Add(shim *GoServiceShim) {
+	gm.Shim = append(gm.Shim, shim)
 }
 
-func (gm *GoModel) String() string {
-	shimStrings := make([]string, len(gm.shim))
-	for idx, shim := range gm.shim {
+func (gm *Model) String() string {
+	shimStrings := make([]string, len(gm.Shim))
+	for idx, shim := range gm.Shim {
 		shimStrings[idx] = shim.String()
 	}
 	sep := "----------------------------------------"
@@ -47,41 +48,44 @@ func (gm *GoModel) String() string {
 // GoServiceShim
 
 type GoServiceShim struct {
-	path     string
-	imports  map[string]*pbinfo.ImportSpec
-	handlers []*RESTHandler
+	Path     string
+	Imports  map[string]*pbinfo.ImportSpec
+	Handlers []*RESTHandler
 }
 
 func (shim *GoServiceShim) String() string {
-	importStrings := make([]string, 0, len(shim.imports))
-	for path, spec := range shim.imports {
+	importStrings := make([]string, 0, len(shim.Imports))
+	for path, spec := range shim.Imports {
 		importStrings = append(importStrings, fmt.Sprintf("%s: %q %q", spec.Name, spec.Path, path))
 	}
+	sort.Strings(importStrings)
 
-	handlerStrings := make([]string, len(shim.handlers))
-	for idx, handler := range shim.handlers {
+	handlerStrings := make([]string, len(shim.Handlers))
+	for idx, handler := range shim.Handlers {
 		handlerStrings[idx] = handler.String()
 	}
+	sort.Strings(handlerStrings)
 
-	return fmt.Sprintf("Shim %s\n  Imports:\n    %s\n  Handlers:\n    %s",
-		shim.path,
+	return fmt.Sprintf("Shim %s\n  Imports:\n    %s\n  Handlers (%d):\n    %s",
+		shim.Path,
 		strings.Join(importStrings, "\n    "),
+		len(handlerStrings),
 		strings.Join(handlerStrings, "\n    "))
 }
 
 func (shim *GoServiceShim) AddHandler(handler *RESTHandler) {
-	if shim.handlers == nil {
-		shim.handlers = []*RESTHandler{}
+	if shim.Handlers == nil {
+		shim.Handlers = []*RESTHandler{}
 	}
-	shim.handlers = append(shim.handlers, handler)
+	shim.Handlers = append(shim.Handlers, handler)
 }
 
 func (shim *GoServiceShim) AddImports(imports ...*pbinfo.ImportSpec) {
-	if shim.imports == nil {
-		shim.imports = make(map[string]*pbinfo.ImportSpec, len(imports))
+	if shim.Imports == nil {
+		shim.Imports = make(map[string]*pbinfo.ImportSpec, len(imports))
 	}
 	for _, importSpec := range imports {
-		shim.imports[importSpec.Path] = importSpec
+		shim.Imports[importSpec.Path] = importSpec
 	}
 }
 
@@ -89,29 +93,29 @@ func (shim *GoServiceShim) AddImports(imports ...*pbinfo.ImportSpec) {
 // RESTHandler
 
 type RESTHandler struct {
-	httpMethod   string
-	urlMatcher   string
-	pathTemplate PathTemplate
+	HTTPMethod   string
+	URLMatcher   string
+	PathTemplate PathTemplate
 
-	goMethod                            string
-	requestType                         string
-	requestTypePackage                  string
-	requestVariable                     string
-	pathFields, queryFields, bodyFields []*RESTFieldMatcher
+	GoMethod                            string
+	RequestType                         string
+	RequestTypePackage                  string
+	RequestVariable                     string
+	PathFields, QueryFields, BodyFields []*RESTFieldMatcher
 
-	responseType        string
-	responseTypePackage string
-	responseVariable    string
+	ResponseType        string
+	ResponseTypePackage string
+	ResponseVariable    string
 }
 
 func (rh *RESTHandler) String() string {
-	return fmt.Sprintf("%8s %50s func %s(%s %s.%s) (%s %s.%s) {}\n%s\n", rh.httpMethod, rh.urlMatcher, rh.goMethod, rh.requestVariable, rh.requestTypePackage, rh.requestType, rh.responseVariable, rh.responseTypePackage, rh.responseType, rh.pathTemplate)
+	return fmt.Sprintf("%8s %50s func %s(%s %s.%s) (%s %s.%s) {}\n%s\n", rh.HTTPMethod, rh.URLMatcher, rh.GoMethod, rh.RequestVariable, rh.RequestTypePackage, rh.RequestType, rh.ResponseVariable, rh.ResponseTypePackage, rh.ResponseType, rh.PathTemplate)
 }
 
 ////////////////////////////////////////
 // RESTFieldMatcher
 
 type RESTFieldMatcher struct {
-	restName   string
-	goAccessor string
+	RESTName   string
+	GoAccessor string
 }

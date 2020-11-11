@@ -17,19 +17,20 @@ package genrest
 import (
 	"fmt"
 
+	"github.com/googleapis/gapic-showcase/util/genrest/gomodel"
 	"github.com/googleapis/gapic-showcase/util/genrest/protomodel"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
 
-func NewGoModel(protoModel *protomodel.Model) (*GoModel, error) {
-	goModel := &GoModel{
-		shim: make([]*GoServiceShim, 0, len(protoModel.Services)),
+func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
+	goModel := &gomodel.Model{
+		Shim: make([]*gomodel.GoServiceShim, 0, len(protoModel.Services)),
 	}
 
 	protoInfo := protoModel.ProtoInfo
 
 	for _, service := range protoModel.Services {
-		shim := &GoServiceShim{path: fmt.Sprintf("%q (%s)", service.Name, service.TypeName)}
+		shim := &gomodel.GoServiceShim{Path: fmt.Sprintf("%q (%s)", service.Name, service.TypeName)}
 		goModel.Add(shim)
 		for _, binding := range service.RESTBindings {
 			protoMethodType := binding.ProtoMethod
@@ -46,29 +47,26 @@ func NewGoModel(protoModel *protomodel.Model) (*GoModel, error) {
 			goModel.AccumulateError(err)
 			outGoType, outImports, err := protoInfo.NameSpec(outProtoType)
 
-			pathTemplate, err := NewPathTemplate(binding.RESTPattern.Pattern)
+			pathTemplate, err := gomodel.NewPathTemplate(binding.RESTPattern.Pattern)
 			goModel.AccumulateError(err)
 
-			restHandler := &RESTHandler{
-				httpMethod:   binding.RESTPattern.HTTPMethod,
-				urlMatcher:   binding.RESTPattern.Pattern,
-				pathTemplate: pathTemplate,
+			restHandler := &gomodel.RESTHandler{
+				HTTPMethod:   binding.RESTPattern.HTTPMethod,
+				URLMatcher:   binding.RESTPattern.Pattern,
+				PathTemplate: pathTemplate,
 
-				goMethod:           protoMethodDesc.GetName(),
-				requestType:        inGoType,
-				requestTypePackage: inImports.Name,
-				requestVariable:    "request",
+				GoMethod:           protoMethodDesc.GetName(),
+				RequestType:        inGoType,
+				RequestTypePackage: inImports.Name,
+				RequestVariable:    "request",
 
-				responseType:        outGoType,
-				responseTypePackage: outImports.Name,
-				responseVariable:    "response",
+				ResponseType:        outGoType,
+				ResponseTypePackage: outImports.Name,
+				ResponseVariable:    "response",
 			}
 
 			shim.AddImports(&inImports, &outImports)
 			shim.AddHandler(restHandler)
-
-			_ = outImports
-
 		}
 	}
 	return goModel, goModel.Error()

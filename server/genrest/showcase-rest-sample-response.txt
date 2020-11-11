@@ -68,158 +68,158 @@ Shim "Echo" (.google.showcase.v1beta1.Echo)
   Imports:
     genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
     longrunningpb: "google.golang.org/genproto/googleapis/longrunning" "google.golang.org/genproto/googleapis/longrunning"
-  Handlers:
+  Handlers (6):
         POST                                 /v1beta1/echo:echo func Echo(request genprotopb.EchoRequest) (response genprotopb.EchoResponse) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "echo"} {LITERAL ":"} {LITERAL "echo"}]
-
-        POST                               /v1beta1/echo:expand func Expand(request genprotopb.ExpandRequest) (response genprotopb.EchoResponse) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "echo"} {LITERAL ":"} {LITERAL "expand"}]
-
-        POST                              /v1beta1/echo:collect func Collect(request genprotopb.EchoRequest) (response genprotopb.EchoResponse) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "echo"} {LITERAL ":"} {LITERAL "collect"}]
-
-        POST                          /v1beta1/echo:pagedExpand func PagedExpand(request genprotopb.PagedExpandRequest) (response genprotopb.PagedExpandResponse) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "echo"} {LITERAL ":"} {LITERAL "pagedExpand"}]
+["/" "v1beta1" "/" "echo" ":" "echo"]
 
         POST                                 /v1beta1/echo:wait func Wait(request genprotopb.WaitRequest) (response longrunningpb.Operation) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "echo"} {LITERAL ":"} {LITERAL "wait"}]
+["/" "v1beta1" "/" "echo" ":" "wait"]
 
         POST                                /v1beta1/echo:block func Block(request genprotopb.BlockRequest) (response genprotopb.BlockResponse) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "echo"} {LITERAL ":"} {LITERAL "block"}]
+["/" "v1beta1" "/" "echo" ":" "block"]
+
+        POST                               /v1beta1/echo:expand func Expand(request genprotopb.ExpandRequest) (response genprotopb.EchoResponse) {}
+["/" "v1beta1" "/" "echo" ":" "expand"]
+
+        POST                              /v1beta1/echo:collect func Collect(request genprotopb.EchoRequest) (response genprotopb.EchoResponse) {}
+["/" "v1beta1" "/" "echo" ":" "collect"]
+
+        POST                          /v1beta1/echo:pagedExpand func PagedExpand(request genprotopb.PagedExpandRequest) (response genprotopb.PagedExpandResponse) {}
+["/" "v1beta1" "/" "echo" ":" "pagedExpand"]
 
 ----------------------------------------
 Shim "Identity" (.google.showcase.v1beta1.Identity)
   Imports:
     emptypb: "github.com/golang/protobuf/ptypes/empty" "github.com/golang/protobuf/ptypes/empty"
     genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
-  Handlers:
-        POST                                     /v1beta1/users func CreateUser(request genprotopb.CreateUserRequest) (response genprotopb.User) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "users"}]
+  Handlers (5):
+         GET                                     /v1beta1/users func ListUsers(request genprotopb.ListUsersRequest) (response genprotopb.ListUsersResponse) {}
+["/" "v1beta1" "/" "users"]
 
          GET                            /v1beta1/{name=users/*} func GetUser(request genprotopb.GetUserRequest) (response genprotopb.User) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+["/" "v1beta1" "/" {name = ["users" "/" *]}]
+
+        POST                                     /v1beta1/users func CreateUser(request genprotopb.CreateUserRequest) (response genprotopb.User) {}
+["/" "v1beta1" "/" "users"]
 
        PATCH                       /v1beta1/{user.name=users/*} func UpdateUser(request genprotopb.UpdateUserRequest) (response genprotopb.User) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "user.name" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+["/" "v1beta1" "/" {user.name = ["users" "/" *]}]
 
       DELETE                            /v1beta1/{name=users/*} func DeleteUser(request genprotopb.DeleteUserRequest) (response emptypb.Empty) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"}]}]
-
-         GET                                     /v1beta1/users func ListUsers(request genprotopb.ListUsersRequest) (response genprotopb.ListUsersResponse) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "users"}]
+["/" "v1beta1" "/" {name = ["users" "/" *]}]
 
 ----------------------------------------
 Shim "Messaging" (.google.showcase.v1beta1.Messaging)
   Imports:
-    genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
     emptypb: "github.com/golang/protobuf/ptypes/empty" "github.com/golang/protobuf/ptypes/empty"
+    genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
     longrunningpb: "google.golang.org/genproto/googleapis/longrunning" "google.golang.org/genproto/googleapis/longrunning"
-  Handlers:
-        POST                                     /v1beta1/rooms func CreateRoom(request genprotopb.CreateRoomRequest) (response genprotopb.Room) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "rooms"}]
+  Handlers (21):
+         GET                                     /v1beta1/rooms func ListRooms(request genprotopb.ListRoomsRequest) (response genprotopb.ListRoomsResponse) {}
+["/" "v1beta1" "/" "rooms"]
 
          GET                            /v1beta1/{name=rooms/*} func GetRoom(request genprotopb.GetRoomRequest) (response genprotopb.Room) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"}]}]
-
-       PATCH                       /v1beta1/{room.name=rooms/*} func UpdateRoom(request genprotopb.UpdateRoomRequest) (response genprotopb.Room) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "room.name" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"}]}]
-
-      DELETE                            /v1beta1/{name=rooms/*} func DeleteRoom(request genprotopb.DeleteRoomRequest) (response emptypb.Empty) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"}]}]
-
-         GET                                     /v1beta1/rooms func ListRooms(request genprotopb.ListRoomsRequest) (response genprotopb.ListRoomsResponse) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "rooms"}]
-
-        POST                   /v1beta1/{parent=rooms/*}/blurbs func CreateBlurb(request genprotopb.CreateBlurbRequest) (response genprotopb.Blurb) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "parent" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"}]} {LITERAL "/"} {LITERAL "blurbs"}]
-
-        POST           /v1beta1/{parent=users/*/profile}/blurbs func CreateBlurb(request genprotopb.CreateBlurbRequest) (response genprotopb.Blurb) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "parent" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "profile"}]} {LITERAL "/"} {LITERAL "blurbs"}]
+["/" "v1beta1" "/" {name = ["rooms" "/" *]}]
 
          GET                   /v1beta1/{name=rooms/*/blurbs/*} func GetBlurb(request genprotopb.GetBlurbRequest) (response genprotopb.Blurb) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL "/"} {SINGLEVAL "*"}]}]
-
-         GET           /v1beta1/{name=users/*/profile/blurbs/*} func GetBlurb(request genprotopb.GetBlurbRequest) (response genprotopb.Blurb) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "profile"} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL "/"} {SINGLEVAL "*"}]}]
-
-       PATCH             /v1beta1/{blurb.name=rooms/*/blurbs/*} func UpdateBlurb(request genprotopb.UpdateBlurbRequest) (response genprotopb.Blurb) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "blurb.name" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL "/"} {SINGLEVAL "*"}]}]
-
-       PATCH     /v1beta1/{blurb.name=users/*/profile/blurbs/*} func UpdateBlurb(request genprotopb.UpdateBlurbRequest) (response genprotopb.Blurb) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "blurb.name" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "profile"} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL "/"} {SINGLEVAL "*"}]}]
-
-      DELETE                   /v1beta1/{name=rooms/*/blurbs/*} func DeleteBlurb(request genprotopb.DeleteBlurbRequest) (response emptypb.Empty) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL "/"} {SINGLEVAL "*"}]}]
-
-      DELETE           /v1beta1/{name=users/*/profile/blurbs/*} func DeleteBlurb(request genprotopb.DeleteBlurbRequest) (response emptypb.Empty) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "profile"} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+["/" "v1beta1" "/" {name = ["rooms" "/" * "/" "blurbs" "/" *]}]
 
          GET                   /v1beta1/{parent=rooms/*}/blurbs func ListBlurbs(request genprotopb.ListBlurbsRequest) (response genprotopb.ListBlurbsResponse) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "parent" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"}]} {LITERAL "/"} {LITERAL "blurbs"}]
+["/" "v1beta1" "/" {parent = ["rooms" "/" *]} "/" "blurbs"]
+
+         GET           /v1beta1/{name=users/*/profile/blurbs/*} func GetBlurb(request genprotopb.GetBlurbRequest) (response genprotopb.Blurb) {}
+["/" "v1beta1" "/" {name = ["users" "/" * "/" "profile" "/" "blurbs" "/" *]}]
 
          GET           /v1beta1/{parent=users/*/profile}/blurbs func ListBlurbs(request genprotopb.ListBlurbsRequest) (response genprotopb.ListBlurbsResponse) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "parent" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "profile"}]} {LITERAL "/"} {LITERAL "blurbs"}]
+["/" "v1beta1" "/" {parent = ["users" "/" * "/" "profile"]} "/" "blurbs"]
 
-        POST            /v1beta1/{parent=rooms/*}/blurbs:search func SearchBlurbs(request genprotopb.SearchBlurbsRequest) (response longrunningpb.Operation) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "parent" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"}]} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL ":"} {LITERAL "search"}]
+        POST                                     /v1beta1/rooms func CreateRoom(request genprotopb.CreateRoomRequest) (response genprotopb.Room) {}
+["/" "v1beta1" "/" "rooms"]
 
-        POST    /v1beta1/{parent=users/*/profile}/blurbs:search func SearchBlurbs(request genprotopb.SearchBlurbsRequest) (response longrunningpb.Operation) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "parent" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "profile"}]} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL ":"} {LITERAL "search"}]
+        POST                   /v1beta1/{parent=rooms/*}/blurbs func CreateBlurb(request genprotopb.CreateBlurbRequest) (response genprotopb.Blurb) {}
+["/" "v1beta1" "/" {parent = ["rooms" "/" *]} "/" "blurbs"]
 
         POST              /v1beta1/{name=rooms/*}/blurbs:stream func StreamBlurbs(request genprotopb.StreamBlurbsRequest) (response genprotopb.StreamBlurbsResponse) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"}]} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL ":"} {LITERAL "stream"}]
-
-        POST      /v1beta1/{name=users/*/profile}/blurbs:stream func StreamBlurbs(request genprotopb.StreamBlurbsRequest) (response genprotopb.StreamBlurbsResponse) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "profile"}]} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL ":"} {LITERAL "stream"}]
+["/" "v1beta1" "/" {name = ["rooms" "/" *]} "/" "blurbs" ":" "stream"]
 
         POST              /v1beta1/{parent=rooms/*}/blurbs:send func SendBlurbs(request genprotopb.CreateBlurbRequest) (response genprotopb.SendBlurbsResponse) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "parent" [{LITERAL "rooms"} {LITERAL "/"} {SINGLEVAL "*"}]} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL ":"} {LITERAL "send"}]
+["/" "v1beta1" "/" {parent = ["rooms" "/" *]} "/" "blurbs" ":" "send"]
+
+        POST            /v1beta1/{parent=rooms/*}/blurbs:search func SearchBlurbs(request genprotopb.SearchBlurbsRequest) (response longrunningpb.Operation) {}
+["/" "v1beta1" "/" {parent = ["rooms" "/" *]} "/" "blurbs" ":" "search"]
+
+        POST           /v1beta1/{parent=users/*/profile}/blurbs func CreateBlurb(request genprotopb.CreateBlurbRequest) (response genprotopb.Blurb) {}
+["/" "v1beta1" "/" {parent = ["users" "/" * "/" "profile"]} "/" "blurbs"]
+
+        POST      /v1beta1/{name=users/*/profile}/blurbs:stream func StreamBlurbs(request genprotopb.StreamBlurbsRequest) (response genprotopb.StreamBlurbsResponse) {}
+["/" "v1beta1" "/" {name = ["users" "/" * "/" "profile"]} "/" "blurbs" ":" "stream"]
 
         POST      /v1beta1/{parent=users/*/profile}/blurbs:send func SendBlurbs(request genprotopb.CreateBlurbRequest) (response genprotopb.SendBlurbsResponse) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "parent" [{LITERAL "users"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "profile"}]} {LITERAL "/"} {LITERAL "blurbs"} {LITERAL ":"} {LITERAL "send"}]
+["/" "v1beta1" "/" {parent = ["users" "/" * "/" "profile"]} "/" "blurbs" ":" "send"]
+
+        POST    /v1beta1/{parent=users/*/profile}/blurbs:search func SearchBlurbs(request genprotopb.SearchBlurbsRequest) (response longrunningpb.Operation) {}
+["/" "v1beta1" "/" {parent = ["users" "/" * "/" "profile"]} "/" "blurbs" ":" "search"]
+
+       PATCH                       /v1beta1/{room.name=rooms/*} func UpdateRoom(request genprotopb.UpdateRoomRequest) (response genprotopb.Room) {}
+["/" "v1beta1" "/" {room.name = ["rooms" "/" *]}]
+
+       PATCH             /v1beta1/{blurb.name=rooms/*/blurbs/*} func UpdateBlurb(request genprotopb.UpdateBlurbRequest) (response genprotopb.Blurb) {}
+["/" "v1beta1" "/" {blurb.name = ["rooms" "/" * "/" "blurbs" "/" *]}]
+
+       PATCH     /v1beta1/{blurb.name=users/*/profile/blurbs/*} func UpdateBlurb(request genprotopb.UpdateBlurbRequest) (response genprotopb.Blurb) {}
+["/" "v1beta1" "/" {blurb.name = ["users" "/" * "/" "profile" "/" "blurbs" "/" *]}]
+
+      DELETE                            /v1beta1/{name=rooms/*} func DeleteRoom(request genprotopb.DeleteRoomRequest) (response emptypb.Empty) {}
+["/" "v1beta1" "/" {name = ["rooms" "/" *]}]
+
+      DELETE                   /v1beta1/{name=rooms/*/blurbs/*} func DeleteBlurb(request genprotopb.DeleteBlurbRequest) (response emptypb.Empty) {}
+["/" "v1beta1" "/" {name = ["rooms" "/" * "/" "blurbs" "/" *]}]
+
+      DELETE           /v1beta1/{name=users/*/profile/blurbs/*} func DeleteBlurb(request genprotopb.DeleteBlurbRequest) (response emptypb.Empty) {}
+["/" "v1beta1" "/" {name = ["users" "/" * "/" "profile" "/" "blurbs" "/" *]}]
 
 ----------------------------------------
 Shim "SequenceService" (.google.showcase.v1beta1.SequenceService)
   Imports:
     emptypb: "github.com/golang/protobuf/ptypes/empty" "github.com/golang/protobuf/ptypes/empty"
     genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
-  Handlers:
-        POST                                 /v1beta1/sequences func CreateSequence(request genprotopb.CreateSequenceRequest) (response genprotopb.Sequence) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "sequences"}]
-
+  Handlers (3):
          GET         /v1beta1/{name=sequences/*/sequenceReport} func GetSequenceReport(request genprotopb.GetSequenceReportRequest) (response genprotopb.SequenceReport) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "sequences"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "sequenceReport"}]}]
+["/" "v1beta1" "/" {name = ["sequences" "/" * "/" "sequenceReport"]}]
+
+        POST                                 /v1beta1/sequences func CreateSequence(request genprotopb.CreateSequenceRequest) (response genprotopb.Sequence) {}
+["/" "v1beta1" "/" "sequences"]
 
         POST                        /v1beta1/{name=sequences/*} func AttemptSequence(request genprotopb.AttemptSequenceRequest) (response emptypb.Empty) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "sequences"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+["/" "v1beta1" "/" {name = ["sequences" "/" *]}]
 
 ----------------------------------------
 Shim "Testing" (.google.showcase.v1beta1.Testing)
   Imports:
-    genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
     emptypb: "github.com/golang/protobuf/ptypes/empty" "github.com/golang/protobuf/ptypes/empty"
-  Handlers:
-        POST                                  /v1beta1/sessions func CreateSession(request genprotopb.CreateSessionRequest) (response genprotopb.Session) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "sessions"}]
+    genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
+  Handlers (8):
+         GET                                  /v1beta1/sessions func ListSessions(request genprotopb.ListSessionsRequest) (response genprotopb.ListSessionsResponse) {}
+["/" "v1beta1" "/" "sessions"]
 
          GET                         /v1beta1/{name=sessions/*} func GetSession(request genprotopb.GetSessionRequest) (response genprotopb.Session) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "sessions"} {LITERAL "/"} {SINGLEVAL "*"}]}]
-
-         GET                                  /v1beta1/sessions func ListSessions(request genprotopb.ListSessionsRequest) (response genprotopb.ListSessionsResponse) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {LITERAL "sessions"}]
-
-      DELETE                         /v1beta1/{name=sessions/*} func DeleteSession(request genprotopb.DeleteSessionRequest) (response emptypb.Empty) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "sessions"} {LITERAL "/"} {SINGLEVAL "*"}]}]
-
-        POST                  /v1beta1/{name=sessions/*}:report func ReportSession(request genprotopb.ReportSessionRequest) (response genprotopb.ReportSessionResponse) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "sessions"} {LITERAL "/"} {SINGLEVAL "*"}]} {LITERAL ":"} {LITERAL "report"}]
+["/" "v1beta1" "/" {name = ["sessions" "/" *]}]
 
          GET                 /v1beta1/{parent=sessions/*}/tests func ListTests(request genprotopb.ListTestsRequest) (response genprotopb.ListTestsResponse) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "parent" [{LITERAL "sessions"} {LITERAL "/"} {SINGLEVAL "*"}]} {LITERAL "/"} {LITERAL "tests"}]
+["/" "v1beta1" "/" {parent = ["sessions" "/" *]} "/" "tests"]
 
-      DELETE                 /v1beta1/{name=sessions/*/tests/*} func DeleteTest(request genprotopb.DeleteTestRequest) (response emptypb.Empty) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "sessions"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "tests"} {LITERAL "/"} {SINGLEVAL "*"}]}]
+        POST                                  /v1beta1/sessions func CreateSession(request genprotopb.CreateSessionRequest) (response genprotopb.Session) {}
+["/" "v1beta1" "/" "sessions"]
+
+        POST                  /v1beta1/{name=sessions/*}:report func ReportSession(request genprotopb.ReportSessionRequest) (response genprotopb.ReportSessionResponse) {}
+["/" "v1beta1" "/" {name = ["sessions" "/" *]} ":" "report"]
 
         POST           /v1beta1/{name=sessions/*/tests/*}:check func VerifyTest(request genprotopb.VerifyTestRequest) (response genprotopb.VerifyTestResponse) {}
-[{LITERAL "/"} {LITERAL "v1beta1"} {LITERAL "/"} {VARIABLE "name" [{LITERAL "sessions"} {LITERAL "/"} {SINGLEVAL "*"} {LITERAL "/"} {LITERAL "tests"} {LITERAL "/"} {SINGLEVAL "*"}]} {LITERAL ":"} {LITERAL "check"}]
+["/" "v1beta1" "/" {name = ["sessions" "/" * "/" "tests" "/" *]} ":" "check"]
+
+      DELETE                         /v1beta1/{name=sessions/*} func DeleteSession(request genprotopb.DeleteSessionRequest) (response emptypb.Empty) {}
+["/" "v1beta1" "/" {name = ["sessions" "/" *]}]
+
+      DELETE                 /v1beta1/{name=sessions/*/tests/*} func DeleteTest(request genprotopb.DeleteTestRequest) (response emptypb.Empty) {}
+["/" "v1beta1" "/" {name = ["sessions" "/" * "/" "tests" "/" *]}]
 
