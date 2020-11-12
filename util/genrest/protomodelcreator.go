@@ -67,7 +67,6 @@ func NewProtoModel(plugin *protogen.Plugin) (*protomodel.Model, error) {
 		}
 	}
 
-	protoModel.CheckConsistency()
 	return protoModel, protoModel.Error()
 }
 

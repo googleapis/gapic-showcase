@@ -44,8 +44,32 @@ func (gm *Model) String() string {
 	return fmt.Sprintf("GoModel\n%s\n%s", sep, strings.Join(shimStrings, "\n"+sep+"\n"))
 }
 
+func (gm *Model) CheckConsistency() {
+	allHandlers := []*RESTHandler{}
+	for _, service := range gm.Shim {
+		allHandlers = append(allHandlers, service.Handlers...)
+	}
+
+	for first, firstHandler := range allHandlers {
+		for _, secondHandler := range allHandlers[first+1:] {
+			if firstHandler.HTTPMethod != secondHandler.HTTPMethod {
+				continue
+			}
+			fullMatch, ambiguousPattern, err := FindValuesMatching(firstHandler.PathTemplate, secondHandler.PathTemplate)
+			if err != nil {
+				gm.AccumulateError(fmt.Errorf("matching patterns %q and %q (constructed %q): %s", firstHandler, secondHandler, ambiguousPattern, err))
+				continue
+			}
+			if !fullMatch {
+				continue
+			}
+			gm.AccumulateError(fmt.Errorf("pattern %q matches both\n   %s and\n   %s\n\n", ambiguousPattern, firstHandler, secondHandler))
+		}
+	}
+}
+
 ////////////////////////////////////////
-// GoServiceShim
+// GoServiceShim  // maybe ServiceModel?
 
 type GoServiceShim struct {
 	ProtoPath string

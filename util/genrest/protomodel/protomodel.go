@@ -48,27 +48,6 @@ func (model *Model) AddService(service *Service) *Service {
 	return service
 }
 
-func (model *Model) CheckConsistency() { // move to gomodel
-	model.CheckBindingsUnique()
-}
-
-func (model *Model) CheckBindingsUnique() { // move to gomodel
-	allBindings := []*RESTBinding{}
-	for _, service := range model.Services {
-		allBindings = append(allBindings, service.RESTBindings...)
-	}
-
-	for first, firstBinding := range allBindings {
-		for _, secondBinding := range allBindings[first:] {
-			ambiguousPattern := firstBinding.FindAmbiguityWith(secondBinding)
-			if len(ambiguousPattern) == 0 {
-				continue
-			}
-			model.AccumulateError(fmt.Errorf("Pattern %q matches both (%s) and (%s)", ambiguousPattern, firstBinding, secondBinding))
-		}
-	}
-}
-
 ////////////////////////////////////////
 // Service
 
@@ -103,11 +82,6 @@ type RESTBinding struct {
 
 func (binding *RESTBinding) String() string {
 	return fmt.Sprintf("%s[%d] : %s", binding.ProtoMethod, binding.Index, binding.RESTPattern)
-}
-
-func (binding *RESTBinding) FindAmbiguityWith(other *RESTBinding) string {
-	// TODO: Fill this in. It's a stub for now.
-	return ""
 }
 
 ////////////////////////////////////////

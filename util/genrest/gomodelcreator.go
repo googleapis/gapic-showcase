@@ -69,5 +69,7 @@ func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 			shim.AddHandler(restHandler)
 		}
 	}
+
+	goModel.CheckConsistency()
 	return goModel, goModel.Error()
 }
