@@ -43,6 +43,7 @@ func TestParseTemplate(t *testing.T) {
 		{"/aa/{bb=cc/}", false, nil},
 		{"/aa/{bb=cc/@}", false, nil},
 
+		// successful cases
 		{
 			stringTemplate: "/aa/{bb}/cc/{dd=ee/*/gg/{hh=ii/jj/*/kk}/**}:ll",
 			expectSuccess:  true,

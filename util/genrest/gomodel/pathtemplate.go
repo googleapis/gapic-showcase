@@ -19,43 +19,48 @@ import (
 	"strings"
 )
 
-type SegmentKind int
+////////////////////////////////////////
+// PathTemplate
 
-const (
-	KindUndefined SegmentKind = iota
-	Literal
-	Variable
-	SingleValue
-	MultipleValue
-	KindEnd
-)
+// PathTemplate contains a sequence of parsed Segment to represent an HTTP binding.
+type PathTemplate []*Segment
 
-func (sk SegmentKind) Valid() bool {
-	return sk > KindUndefined && sk < KindEnd
+// NewPathTemplate parses pattern to return the corresponding PathTemplate.
+func NewPathTemplate(pattern string) (PathTemplate, error) {
+	return ParseTemplate(pattern)
 }
 
-func (sk SegmentKind) String() string {
-	var names = []string{"(UNDEFINED)", "LITERAL", "VARIABLE", "SINGLEVAL", "MULTIVAL", "(END)"}
-	if !sk.Valid() {
-		return "INVALID"
+// Flatten returns a flattened PathTemplate, which contains no recursively nested
+// PathTemplate. Effectively, this removes any Segment with `Kind==Variable`.
+func (pt PathTemplate) Flatten() PathTemplate {
+	flat := PathTemplate{}
+	for _, seg := range pt {
+		flat = append(flat, seg.Flatten()...)
 	}
-	return names[sk]
+	return flat
 }
 
-func (sk SegmentKind) asGoLiteral() string {
-	var names = []string{"KindUndefined", "Literal", "Variable", "SingleValue", "MultipleValue", "KindEnd"}
-	return names[sk]
+// asGoLiteral returns a Go-syntax representation of this PathTemplate. This is useful for
+// constructing and debugging tests.
+func (pt PathTemplate) asGoLiteral() string {
+	parts := make([]string, len(pt))
+	for idx, segment := range pt {
+		parts[idx] = "&" + segment.asGoLiteral()
+	}
+	return fmt.Sprintf("PathTemplate{ %s }", strings.Join(parts, ", "))
 }
 
 ////////////////////////////////////////
 // Segment
 
+// Segment is a single structural element in an HTTPO binding
 type Segment struct {
 	Kind        SegmentKind
-	Value       string // field path if kind==Variable, literal value if kind==Literal, unused otherwise
+	Value       string // field path if Kind==Variable, literal value if Kind==Literal, unused otherwise
 	Subsegments PathTemplate
 }
 
+// String returns a string representation of this Segment.
 func (seg *Segment) String() string {
 	switch seg.Kind {
 	case Literal:
@@ -74,6 +79,8 @@ func (seg *Segment) String() string {
 	return fmt.Sprintf("{%s(%d) %q %s}", seg.Kind, seg.Kind, seg.Value, seg.Subsegments)
 }
 
+// Flatten returns a flattened Segment, which contains no recursively nested
+// PathTemplate. Effectively, this removes any Segment with `Kind==Variable`.
 func (seg *Segment) Flatten() PathTemplate {
 	switch seg.Kind {
 	case Variable:
@@ -83,6 +90,8 @@ func (seg *Segment) Flatten() PathTemplate {
 	}
 }
 
+// asGoLiteral returns a Go-syntax representation of this Segment. This is useful for
+// constructing and debugging tests.
 func (seg *Segment) asGoLiteral() string {
 	subsegments := "nil"
 	if seg.Subsegments != nil {
@@ -92,29 +101,35 @@ func (seg *Segment) asGoLiteral() string {
 	return fmt.Sprintf("Segment{ %s, %q, %s }", seg.Kind.asGoLiteral(), seg.Value, subsegments)
 }
 
-var SlashSegment = &Segment{Kind: Literal, Value: "/"}
+// SegmentKind describes a type of Segment.
+type SegmentKind int
 
-////////////////////////////////////////
-// PathTemplate
+const (
+	KindUndefined SegmentKind = iota
+	Literal
+	Variable
+	SingleValue
+	MultipleValue
+	KindEnd
+)
 
-type PathTemplate []*Segment
-
-func NewPathTemplate(pattern string) (PathTemplate, error) {
-	return ParseTemplate(pattern)
+// Valid returns true iff this SegmentKind value is valid.
+func (sk SegmentKind) Valid() bool {
+	return sk > KindUndefined && sk < KindEnd
 }
 
-func (pt PathTemplate) Flatten() PathTemplate {
-	flat := PathTemplate{}
-	for _, seg := range pt {
-		flat = append(flat, seg.Flatten()...)
+// String returns a string representation of this SegmentKind.
+func (sk SegmentKind) String() string {
+	var names = []string{"(UNDEFINED)", "LITERAL", "VARIABLE", "SINGLEVAL", "MULTIVAL", "(END)"}
+	if !sk.Valid() {
+		return "INVALID"
 	}
-	return flat
+	return names[sk]
 }
 
-func (pt PathTemplate) asGoLiteral() string {
-	parts := make([]string, len(pt))
-	for idx, segment := range pt {
-		parts[idx] = "&" + segment.asGoLiteral()
-	}
-	return fmt.Sprintf("PathTemplate{ %s }", strings.Join(parts, ", "))
+// asGoLiteral returns a Go-syntax representation of this SegmentKind. This is useful for
+// constructing and debugging tests.
+func (sk SegmentKind) asGoLiteral() string {
+	var names = []string{"KindUndefined", "Literal", "Variable", "SingleValue", "MultipleValue", "KindEnd"}
+	return names[sk]
 }

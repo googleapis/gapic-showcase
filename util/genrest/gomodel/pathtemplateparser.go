@@ -68,7 +68,7 @@ func (parser *Parser) parse() (pt PathTemplate, err error) {
 	}
 
 	pt, err = parser.parseSegments()
-	pt = append(PathTemplate{SlashSegment}, pt...)
+	pt = append(PathTemplate{slashSegment}, pt...)
 	if err != nil {
 		return pt, err
 	}
@@ -106,7 +106,7 @@ func (parser *Parser) parseSegments() (PathTemplate, error) {
 		}
 
 		if proceed = parser.source.ConsumeIf('/'); proceed {
-			pt = append(pt, SlashSegment)
+			pt = append(pt, slashSegment)
 		}
 	}
 	return pt, nil
@@ -205,13 +205,15 @@ func (parser *Parser) parseVariable() (*Segment, error) {
 	return segment, nil
 }
 
-// GetRegexp returns the memoized compiled regex corresponding to `expr`. This assumes the same `re` is always paired with the same `expr`.
+// GetRegexp returns the memoized compiled regex corresponding to expr. This assumes the same re is always paired with the same expr.
 func (parser *Parser) GetRegexp(re **regexp.Regexp, expr string) *regexp.Regexp {
 	if *re == nil {
 		*re = regexp.MustCompile(expr)
 	}
 	return *re
 }
+
+var slashSegment = &Segment{Kind: Literal, Value: "/"}
 
 ////////////////////////////////////////
 // Source
@@ -223,7 +225,7 @@ type Source struct {
 	idx int
 }
 
-// Consume advances source by `num` characters.
+// Consume advances source by num characters.
 func (src *Source) Consume(num int) {
 	src.idx += num
 }
@@ -255,7 +257,7 @@ func (src *Source) ConsumeIf(query byte) bool {
 	return matches
 }
 
-// ConsumeMatch consumes and returns characters matching `re`, and returns them.
+// ConsumeMatch consumes and returns characters matching re, and returns them.
 func (src *Source) ConsumeRegex(re *regexp.Regexp) string {
 	match := re.FindString(src.Str())
 	src.Consume(len(match))
