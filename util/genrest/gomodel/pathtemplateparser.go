@@ -20,7 +20,7 @@ import (
 	"strings"
 )
 
-// ParseTemplate parses according to
+// ParseTemplate parses a path template string according to
 // https://cloud.google.com/endpoints/docs/grpc-service-config/reference/rpc/google.api#path-template-syntax
 //
 // Grammar:
@@ -30,7 +30,8 @@ import (
 //    Variable = "{" FieldPath [ "=" Segments ] "}" ;
 //    FieldPath = IDENT { "." IDENT } ;
 //    Verb     = ":" LITERAL ;
-func ParseTemplate(template string) (pt PathTemplate, err error) {
+// with "**" matching the last part of the path template string except for the Verb.
+func ParseTemplate(template string) (parsed PathTemplate, err error) {
 	parser := &Parser{
 		source: &Source{
 			str: template,
@@ -42,16 +43,18 @@ func ParseTemplate(template string) (pt PathTemplate, err error) {
 ////////////////////////////////////////
 // Parser
 
+// Parser contains the context for parsing a path template string.
 type Parser struct {
 	source          *Source
 	haveLastSegment bool
 }
 
+// parse returns the parsed PathTemplate.
 func (parser *Parser) parse() (pt PathTemplate, err error) {
 	defer func() {
 		if err != nil {
 			indent := strings.Repeat(" ", parser.source.idx)
-			err = fmt.Errorf("parsing template, position %d: %s\n  %q\n   %s^\n   -> %s", parser.source.idx, err, parser.source.str, indent, pt)
+			err = fmt.Errorf("parsing template, position %d: %s   haveLastSegment: %v\n  %q\n   %s^\n   -> %s", parser.source.idx, err, parser.haveLastSegment, parser.source.str, indent, pt)
 		}
 	}()
 
@@ -82,6 +85,7 @@ func (parser *Parser) parse() (pt PathTemplate, err error) {
 
 }
 
+// parseSegments parses a sequence of slash-delimited segments.
 func (parser *Parser) parseSegments() (PathTemplate, error) {
 	pt := PathTemplate{}
 	proceed := true
@@ -91,10 +95,11 @@ func (parser *Parser) parseSegments() (PathTemplate, error) {
 			return pt, fmt.Errorf("already encountered last segment")
 		}
 		segment, err := parser.parseOneSegment()
+		pt = append(pt, segment)
 		if err != nil {
 			return pt, err
 		}
-		pt = append(pt, segment)
+
 		if proceed = parser.source.ConsumeIf('/'); proceed {
 			pt = append(pt, SlashSegment)
 		}
@@ -102,27 +107,33 @@ func (parser *Parser) parseSegments() (PathTemplate, error) {
 	return pt, nil
 }
 
+// segmentParser is a function type that parses a specific type of segment. It returns both nil
+// error and nil Segment if the parser does not apply to the next stream of characters in the
+// source. It returns a non-nil Segment if the characters from the point at which called matched the
+// segment type.
 type segmentParser func() (*Segment, error)
 
+// parseOneSegment parses exactly one segment of the recognized types.
 func (parser *Parser) parseOneSegment() (*Segment, error) {
 	orderedParsers := []segmentParser{parser.parseVariable, parser.parseLiteral, parser.parseMultipleValue, parser.parseSingleValue}
-	for _, parser := range orderedParsers {
-		seg, err := parser()
+	for _, parse := range orderedParsers {
+		seg, err := parse()
 		if err != nil || seg != nil {
 			return seg, err
 		}
 	}
 	return nil, fmt.Errorf("could not parse path segment")
-
 }
 
+// parseSingleValue parses a segment with `Kind==SingleValue` (i.e. a single-segment placeholder), returning nil if not possible.
 func (parser *Parser) parseSingleValue() (*Segment, error) {
-	re := regexp.MustCompile(`\*`)
+	re := regexp.MustCompile(`^\*`)
 	return parser.parseToSegment(re, SingleValue)
 }
 
+// parseMultipleValue parses a segment with `Kind==MultipleValue` (i.e. a multiple-segment placeholder), returning nil if not possible.
 func (parser *Parser) parseMultipleValue() (*Segment, error) {
-	re := regexp.MustCompile(`\*\*`)
+	re := regexp.MustCompile(`^\*\*`)
 	seg, err := parser.parseToSegment(re, MultipleValue)
 	if seg != nil {
 		parser.haveLastSegment = true
@@ -130,11 +141,14 @@ func (parser *Parser) parseMultipleValue() (*Segment, error) {
 	return seg, err
 }
 
+// parseLiteral parses a segment with `Kind==Literal`, returning nil if not possible.
 func (parser *Parser) parseLiteral() (*Segment, error) {
 	re := regexp.MustCompile("([a-zA-Z0-9_%]*)")
 	return parser.parseToSegment(re, Literal)
 }
 
+// parseToSegment is a helper functions that creates a segment of the specified kind if the next
+// characters in the parse stream match the expression re.
 func (parser *Parser) parseToSegment(re *regexp.Regexp, kind SegmentKind) (*Segment, error) {
 	match := parser.source.ConsumeRegex(re)
 	if len(match) == 0 {
@@ -143,11 +157,14 @@ func (parser *Parser) parseToSegment(re *regexp.Regexp, kind SegmentKind) (*Segm
 	return &Segment{Kind: kind, Value: match}, nil
 }
 
+// parseFieldPath parses a field path, which is the "field" in a "{field=segments}" declaration.
 func (parser *Parser) parseFieldPath() string {
 	re := regexp.MustCompile("([a-zA-Z0-9_.]*)")
 	return parser.source.ConsumeRegex(re)
 }
 
+// parseVariable parses a variable spec, which is a sequence of field names, segments, and/or
+// placeholders, all enclosed by matching braces "{}".
 func (parser *Parser) parseVariable() (*Segment, error) {
 	if !parser.source.ConsumeIf('{') {
 		return nil, nil
@@ -170,14 +187,14 @@ func (parser *Parser) parseVariable() (*Segment, error) {
 			return segment, err
 		}
 		if len(segment.Subsegments) == 0 {
-			return segment, fmt.Errorf("no path segments specified for URI %q", fieldPath)
+			return segment, fmt.Errorf("no path segments specified for field path %q", fieldPath)
 		}
 	} else {
 		segment.Subsegments = PathTemplate{&Segment{Kind: SingleValue}}
 	}
 
 	if !parser.source.ConsumeIf('}') {
-		return segment, fmt.Errorf("expected end-of-variable '}', got %q %q", parser.source.Str(), parser.source.str[parser.source.idx-1:])
+		return segment, fmt.Errorf("expected end-of-variable '}', got %q", parser.source.Str())
 	}
 
 	return segment, nil
@@ -186,17 +203,19 @@ func (parser *Parser) parseVariable() (*Segment, error) {
 ////////////////////////////////////////
 // Source
 
+// Source contains the context for the source string being parsed. Note that Source and its methods
+// are NOT rune-safe and operate on each individual character, not each rune.
 type Source struct {
-	// not rune-safe
-	str             string
-	idx             int
-	haveLastSegment bool
+	str string
+	idx int
 }
 
+// Consume advances source by `num` characters.
 func (src *Source) Consume(num int) {
 	src.idx += num
 }
 
+// Str returns the unparsed part of the original source string.
 func (src *Source) Str() string {
 	if !src.InRange() {
 		return ""
@@ -204,14 +223,17 @@ func (src *Source) Str() string {
 	return src.str[src.idx:]
 }
 
+// InRange returns true iff there are more characters that can be read from the source string.
 func (src *Source) InRange() bool {
 	return len(src.str) > src.idx
 }
 
+// IsNextByte returns true iff the next character to be read is `query`.
 func (src *Source) IsNextByte(query byte) bool {
 	return src.InRange() && src.str[src.idx] == query
 }
 
+// ConsumeIf advances the source and returns true iff the next character matches `query`.
 func (src *Source) ConsumeIf(query byte) bool {
 	matches := src.IsNextByte(query)
 	if matches {
@@ -220,6 +242,7 @@ func (src *Source) ConsumeIf(query byte) bool {
 	return matches
 }
 
+// ConsumeMatch consumes and returns characters matching `re`, and returns them.
 func (src *Source) ConsumeRegex(re *regexp.Regexp) string {
 	match := re.FindString(src.Str())
 	src.Consume(len(match))

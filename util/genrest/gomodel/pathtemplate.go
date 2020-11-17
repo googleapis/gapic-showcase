@@ -16,6 +16,7 @@ package gomodel
 
 import (
 	"fmt"
+	"strings"
 )
 
 type SegmentKind int
@@ -39,7 +40,11 @@ func (sk SegmentKind) String() string {
 		return "INVALID"
 	}
 	return names[sk]
+}
 
+func (sk SegmentKind) asGoLiteral() string {
+	var names = []string{"KindUndefined", "Literal", "Variable", "SingleValue", "MultipleValue", "KindEnd"}
+	return names[sk]
 }
 
 ////////////////////////////////////////
@@ -78,6 +83,15 @@ func (seg *Segment) Flatten() PathTemplate {
 	}
 }
 
+func (seg *Segment) asGoLiteral() string {
+	subsegments := "nil"
+	if seg.Subsegments != nil {
+		subsegments = seg.Subsegments.asGoLiteral()
+	}
+
+	return fmt.Sprintf("Segment{ %s, %q, %s }", seg.Kind.asGoLiteral(), seg.Value, subsegments)
+}
+
 var SlashSegment = &Segment{Kind: Literal, Value: "/"}
 
 ////////////////////////////////////////
@@ -95,4 +109,12 @@ func (pt PathTemplate) Flatten() PathTemplate {
 		flat = append(flat, seg.Flatten()...)
 	}
 	return flat
+}
+
+func (pt PathTemplate) asGoLiteral() string {
+	parts := make([]string, len(pt))
+	for idx, segment := range pt {
+		parts[idx] = "&" + segment.asGoLiteral()
+	}
+	return fmt.Sprintf("PathTemplate{ %s }", strings.Join(parts, ", "))
 }
