@@ -55,6 +55,7 @@ func (gm *Model) CheckConsistency() {
 			if firstHandler.HTTPMethod != secondHandler.HTTPMethod {
 				continue
 			}
+
 			fullMatch, ambiguousPattern, err := FindValuesMatching(firstHandler.PathTemplate, secondHandler.PathTemplate)
 			if err != nil {
 				gm.AccumulateError(fmt.Errorf("matching patterns %q and %q (constructed %q): %s", firstHandler, secondHandler, ambiguousPattern, err))

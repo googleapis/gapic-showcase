@@ -72,7 +72,7 @@ func (namer *Namer) Get(newName string) string {
 	if numSeen == 0 {
 		return newName
 	}
-	return fmt.Sprintf("%s_%d", numSeen)
+	return fmt.Sprintf("%s_%d", newName, numSeen)
 }
 
 func matchingPath(pt gomodel.PathTemplate) string {

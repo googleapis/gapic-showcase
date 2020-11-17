@@ -20,47 +20,23 @@ import (
 	"strings"
 )
 
-////////////////////////////////////////
-// Source
-
-type Source struct {
-	// not rune-safe
-	str             string
-	idx             int
-	haveLastSegment bool
-}
-
-func (src *Source) Consume(num int) {
-	src.idx += num
-}
-
-func (src *Source) Str() string {
-	if !src.InRange() {
-		return ""
+// ParseTemplate parses according to
+// https://cloud.google.com/endpoints/docs/grpc-service-config/reference/rpc/google.api#path-template-syntax
+//
+// Grammar:
+//    Template = "/" Segments [ Verb ] ;
+//    Segments = Segment { "/" Segment } ;
+//    Segment  = "*" | "**" | LITERAL | Variable ;
+//    Variable = "{" FieldPath [ "=" Segments ] "}" ;
+//    FieldPath = IDENT { "." IDENT } ;
+//    Verb     = ":" LITERAL ;
+func ParseTemplate(template string) (pt PathTemplate, err error) {
+	parser := &Parser{
+		source: &Source{
+			str: template,
+			idx: 0},
 	}
-	return src.str[src.idx:]
-}
-
-func (src *Source) InRange() bool {
-	return len(src.str) > src.idx
-}
-
-func (src *Source) IsNextByte(query byte) bool {
-	return src.InRange() && src.str[src.idx] == query
-}
-
-func (src *Source) ConsumeIf(query byte) bool {
-	matches := src.IsNextByte(query)
-	if matches {
-		src.Consume(1)
-	}
-	return matches
-}
-
-func (src *Source) ConsumeRegex(re *regexp.Regexp) string {
-	match := re.FindString(src.Str())
-	src.Consume(len(match))
-	return match
+	return parser.parse()
 }
 
 ////////////////////////////////////////
@@ -69,15 +45,6 @@ func (src *Source) ConsumeRegex(re *regexp.Regexp) string {
 type Parser struct {
 	source          *Source
 	haveLastSegment bool
-}
-
-func parseTemplate(template string) (pt PathTemplate, err error) {
-	parser := &Parser{
-		source: &Source{
-			str: template,
-			idx: 0},
-	}
-	return parser.parse()
 }
 
 func (parser *Parser) parse() (pt PathTemplate, err error) {
@@ -105,7 +72,6 @@ func (parser *Parser) parse() (pt PathTemplate, err error) {
 		}
 
 		pt = append(pt, &Segment{Kind: Literal, Value: ":"}, verb)
-
 	}
 
 	if parser.source.InRange() {
@@ -215,4 +181,47 @@ func (parser *Parser) parseVariable() (*Segment, error) {
 	}
 
 	return segment, nil
+}
+
+////////////////////////////////////////
+// Source
+
+type Source struct {
+	// not rune-safe
+	str             string
+	idx             int
+	haveLastSegment bool
+}
+
+func (src *Source) Consume(num int) {
+	src.idx += num
+}
+
+func (src *Source) Str() string {
+	if !src.InRange() {
+		return ""
+	}
+	return src.str[src.idx:]
+}
+
+func (src *Source) InRange() bool {
+	return len(src.str) > src.idx
+}
+
+func (src *Source) IsNextByte(query byte) bool {
+	return src.InRange() && src.str[src.idx] == query
+}
+
+func (src *Source) ConsumeIf(query byte) bool {
+	matches := src.IsNextByte(query)
+	if matches {
+		src.Consume(1)
+	}
+	return matches
+}
+
+func (src *Source) ConsumeRegex(re *regexp.Regexp) string {
+	match := re.FindString(src.Str())
+	src.Consume(len(match))
+	return match
 }
