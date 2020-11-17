@@ -45,8 +45,13 @@ func ParseTemplate(template string) (parsed PathTemplate, err error) {
 
 // Parser contains the context for parsing a path template string.
 type Parser struct {
-	source          *Source
+	source *Source
+
+	// whether we've encountered the last "**" segment
 	haveLastSegment bool
+
+	// lazily compiled and memozied regexes
+	reSingleValue, reMultipleValue, reLiteral, reFieldPath *regexp.Regexp
 }
 
 // parse returns the parsed PathTemplate.
@@ -127,13 +132,13 @@ func (parser *Parser) parseOneSegment() (*Segment, error) {
 
 // parseSingleValue parses a segment with `Kind==SingleValue` (i.e. a single-segment placeholder), returning nil if not possible.
 func (parser *Parser) parseSingleValue() (*Segment, error) {
-	re := regexp.MustCompile(`^\*`)
+	re := parser.GetRegexp(&parser.reSingleValue, `^\*`)
 	return parser.parseToSegment(re, SingleValue)
 }
 
 // parseMultipleValue parses a segment with `Kind==MultipleValue` (i.e. a multiple-segment placeholder), returning nil if not possible.
 func (parser *Parser) parseMultipleValue() (*Segment, error) {
-	re := regexp.MustCompile(`^\*\*`)
+	re := parser.GetRegexp(&parser.reMultipleValue, `^\*\*`)
 	seg, err := parser.parseToSegment(re, MultipleValue)
 	if seg != nil {
 		parser.haveLastSegment = true
@@ -143,7 +148,7 @@ func (parser *Parser) parseMultipleValue() (*Segment, error) {
 
 // parseLiteral parses a segment with `Kind==Literal`, returning nil if not possible.
 func (parser *Parser) parseLiteral() (*Segment, error) {
-	re := regexp.MustCompile("([a-zA-Z0-9_%]*)")
+	re := parser.GetRegexp(&parser.reLiteral, "^([a-zA-Z0-9_%]*)")
 	return parser.parseToSegment(re, Literal)
 }
 
@@ -159,7 +164,7 @@ func (parser *Parser) parseToSegment(re *regexp.Regexp, kind SegmentKind) (*Segm
 
 // parseFieldPath parses a field path, which is the "field" in a "{field=segments}" declaration.
 func (parser *Parser) parseFieldPath() string {
-	re := regexp.MustCompile("([a-zA-Z0-9_.]*)")
+	re := parser.GetRegexp(&parser.reFieldPath, "([a-zA-Z0-9_.]*)")
 	return parser.source.ConsumeRegex(re)
 }
 
@@ -198,6 +203,14 @@ func (parser *Parser) parseVariable() (*Segment, error) {
 	}
 
 	return segment, nil
+}
+
+// GetRegexp returns the memoized compiled regex corresponding to `expr`. This assumes the same `re` is always paired with the same `expr`.
+func (parser *Parser) GetRegexp(re **regexp.Regexp, expr string) *regexp.Regexp {
+	if *re == nil {
+		*re = regexp.MustCompile(expr)
+	}
+	return *re
 }
 
 ////////////////////////////////////////
