@@ -80,20 +80,20 @@ func TestFindValuesMatching(t *testing.T) {
 	} {
 		template1, err := NewPathTemplate(testCase.pattern1)
 		if err != nil {
-			t.Errorf("testCase = %d: unexpected error constructing template1: %s:\n   Test case input: %v", idx, err, testCase)
+			t.Errorf("testCase %2d: unexpected error constructing template1: %s:\n   Test case input: %v", idx, err, testCase)
 		}
 
 		template2, err := NewPathTemplate(testCase.pattern2)
 		if err != nil {
-			t.Errorf("testCase = %d: unexpected error constructing template2: %s:\n   Test case input: %v", idx, err, testCase)
+			t.Errorf("testCase %2d: unexpected error constructing template2: %s:\n   Test case input: %v", idx, err, testCase)
 		}
 
 		fullMatch, longestMatch, err := FindValuesMatching(template1, template2)
 		if got, want := longestMatch, testCase.longestMatch; got != want {
-			t.Errorf("testCase = %d: longestMatch failed: got %q   want %q:\n   Test case input: %v\n   err = %v", idx, got, want, testCase, err)
+			t.Errorf("testCase %2d: longestMatch failed: got %q   want %q:\n   Test case input: %v\n   err = %v", idx, got, want, testCase, err)
 		}
 		if got, want := fullMatch, testCase.fullMatch; got != want {
-			t.Errorf("testCase = %d: fullMatch failed: got %v   want %v:\n   Test case input: %v\n   err = %v", idx, got, want, testCase, err)
+			t.Errorf("testCase %2d: fullMatch failed: got %v   want %v:\n   Test case input: %v\n   err = %v", idx, got, want, testCase, err)
 		}
 		_ = err
 

@@ -23,6 +23,7 @@ import (
 	"github.com/googleapis/gapic-showcase/util/genrest/goview"
 )
 
+// NewView creates a a new goview.View (a series of files to be output) from a gomodel.Model.
 func NewView(model *gomodel.Model) (*goview.View, error) {
 	view := goview.New(len(model.Shim))
 
@@ -58,36 +59,17 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	return view, nil
 }
 
-type Namer struct {
-	registered map[string]int
+// matchingPath returns the URL path for a gorilla/mux HTTP handler corresponding to the given `template`.
+func matchingPath(template gomodel.PathTemplate) string {
+	return extractPath(template, false)
 }
 
-func NewNamer() *Namer {
-	return &Namer{registered: make(map[string]int)}
-}
-
-func (namer *Namer) Get(newName string) string {
-	numSeen := namer.registered[newName]
-	namer.registered[newName] = numSeen + 1
-	if numSeen == 0 {
-		return newName
-	}
-	return fmt.Sprintf("%s_%d", newName, numSeen)
-}
-
-func matchingPath(pt gomodel.PathTemplate) string {
-	patterner := &patterner{root: pt}
-	return patterner.Extract(pt)
-}
-
-type patterner struct {
-	root           gomodel.PathTemplate
-	insideVariable bool
-}
-
-func (pt *patterner) Extract(src gomodel.PathTemplate) string {
-	parts := make([]string, len(src))
-	for idx, seg := range src {
+// extractPath is a recursive helper function that does the actual work of
+// matchingPath(). `insideVariable` denotes whether we're processing segments already inside a
+// top-level handler path variable, since nested regexp groups have a different format.
+func extractPath(template gomodel.PathTemplate, insideVariable bool) string {
+	parts := make([]string, len(template))
+	for idx, seg := range template {
 		var part string
 		switch seg.Kind {
 		case gomodel.Literal:
@@ -97,12 +79,10 @@ func (pt *patterner) Extract(src gomodel.PathTemplate) string {
 		case gomodel.MultipleValue:
 			part = `[a-zA-Z_%\-/]+`
 		case gomodel.Variable:
-			if !pt.insideVariable {
-				pt.insideVariable = true
-				part = fmt.Sprintf("{%s:%s}", seg.Value, pt.Extract(seg.Subsegments))
-				pt.insideVariable = false
+			if !insideVariable {
+				part = fmt.Sprintf("{%s:%s}", seg.Value, extractPath(seg.Subsegments, true))
 			} else {
-				part = fmt.Sprintf("(?:%s)", pt.Extract(seg.Subsegments))
+				part = fmt.Sprintf("(?:%s)", extractPath(seg.Subsegments, true))
 			}
 
 		}
@@ -110,4 +90,28 @@ func (pt *patterner) Extract(src gomodel.PathTemplate) string {
 
 	}
 	return strings.Join(parts, "")
+}
+
+////////////////////////////////////////
+// Namer
+
+// Namer keeps track of a series of symbol names being used in order to disambiguate new nsames.
+type Namer struct {
+	registered map[string]int
+}
+
+// NewNamer returns a new Namer.
+func NewNamer() *Namer {
+	return &Namer{registered: make(map[string]int)}
+}
+
+// Get registers and returns a non-previously registered name that is as close to newName as
+// possible. Disambiguation, if needed, is accomplished by adding a numeric suffix.
+func (namer *Namer) Get(newName string) string {
+	numSeen := namer.registered[newName]
+	namer.registered[newName] = numSeen + 1
+	if numSeen == 0 {
+		return newName
+	}
+	return fmt.Sprintf("%s_%d", newName, numSeen)
 }

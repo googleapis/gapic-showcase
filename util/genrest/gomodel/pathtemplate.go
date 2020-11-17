@@ -101,6 +101,9 @@ func (seg *Segment) asGoLiteral() string {
 	return fmt.Sprintf("Segment{ %s, %q, %s }", seg.Kind.asGoLiteral(), seg.Value, subsegments)
 }
 
+////////////////////////////////////////
+// SegmentKind
+
 // SegmentKind describes a type of Segment.
 type SegmentKind int
 
