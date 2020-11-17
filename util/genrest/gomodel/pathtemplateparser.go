@@ -152,7 +152,7 @@ func (parser *Parser) parseLiteral() (*Segment, error) {
 	return parser.parseToSegment(re, Literal)
 }
 
-// parseToSegment is a helper functions that creates a segment of the specified kind if the next
+// parseToSegment is a helper function that creates a Segment of the specified kind if the next
 // characters in the parse stream match the expression re.
 func (parser *Parser) parseToSegment(re *regexp.Regexp, kind SegmentKind) (*Segment, error) {
 	match := parser.source.ConsumeRegex(re)

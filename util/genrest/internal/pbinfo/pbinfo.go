@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
 // Package pbinfo provides convenience types for looking up protobuf elements.
 package pbinfo
 
-// ******************** DO NOT SUBMIT ********************
-// This was copied from gapic-generator-go. Try to reuse that code!
-// ******************** DO NOT SUBMIT *******************
+// This file was copied and adapted from gapic-generator-go:internal/pbinfo/pbinfo.go
+//
+// TODO: Consider making that file non-internal, back-porting the few modifications here, and then
+// depending on that, to prevent code duplication.
 
 import (
 	"fmt"
@@ -97,7 +98,8 @@ func Of(files []*descriptor.FileDescriptorProto) Info {
 		for _, s := range f.Service {
 			fullyQualifiedName := fmt.Sprintf(".%s.%s", f.GetPackage(), s.GetName())
 			info.Serv[fullyQualifiedName] = s
-			for _, m := range s.Method { // NEW!!!!
+			// The following was not in the original file in gapic-generator-go.
+			for _, m := range s.Method {
 				info.Type[fmt.Sprintf("%s.%s", fullyQualifiedName, m.GetName())] = m
 			}
 		}
@@ -224,4 +226,18 @@ func ReduceServName(svc, pkg string) string {
 	}
 
 	return svc
+}
+
+//////////
+// The following was not in the original file in gapic-generator-go.
+
+// fullyQualifiedType constructs a fully-qualified type name suitable for use with pbinfo.Info.
+func FullyQualifiedType(segments ...string) string {
+	// In descriptors, putting the dot in front means the name is fully-qualified.
+	const dot = "."
+	typeName := strings.Join(segments, dot)
+	if !strings.HasPrefix(typeName, dot) {
+		typeName = dot + typeName
+	}
+	return typeName
 }

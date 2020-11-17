@@ -19,10 +19,13 @@ import (
 	"strings"
 )
 
+// Accumulator allows storing a series of errors and then concatenating their string representations
+// into one big error.
 type Accumulator struct {
 	errors []error
 }
 
+// AccumulateError stores an error to be reported later.
 func (ea *Accumulator) AccumulateError(err error) {
 	if err == nil {
 		return
@@ -33,6 +36,8 @@ func (ea *Accumulator) AccumulateError(err error) {
 	ea.errors = append(ea.errors, err)
 }
 
+// Error concatenates the string representations of all stored errors and returns it as a single
+// error.
 func (ea *Accumulator) Error() error {
 	if len(ea.errors) == 0 {
 		return nil

@@ -25,7 +25,7 @@ import (
 // PathTemplate contains a sequence of parsed Segment to represent an HTTP binding.
 type PathTemplate []*Segment
 
-// NewPathTemplate parses pattern to return the corresponding PathTemplate.
+// NewPathTemplate parses `pattern` to return the corresponding PathTemplate.
 func NewPathTemplate(pattern string) (PathTemplate, error) {
 	return ParseTemplate(pattern)
 }
@@ -53,10 +53,17 @@ func (pt PathTemplate) asGoLiteral() string {
 ////////////////////////////////////////
 // Segment
 
-// Segment is a single structural element in an HTTPO binding
+// Segment is a single structural element in an HTTP binding
 type Segment struct {
-	Kind        SegmentKind
-	Value       string // field path if Kind==Variable, literal value if Kind==Literal, unused otherwise
+	Kind SegmentKind
+
+	// the semantics of Value depend on Kind:
+	// Kind==Variable: field path
+	// Kind==Literal: literal value
+	// Kind==SingleValue: "*"
+	// Kind== MultipleValue: "**"
+	Value string
+
 	Subsegments PathTemplate
 }
 

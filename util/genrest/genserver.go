@@ -15,7 +15,6 @@
 package genrest
 
 import (
-	"log"
 	"path/filepath"
 	"strings"
 
@@ -23,11 +22,7 @@ import (
 	"google.golang.org/protobuf/types/pluginpb"
 )
 
-// TODO(vchudnov-g): Continue filling this in. It's a an initial empty
-// stub at the moment.
 func Generate(plugin *protogen.Plugin) error {
-	log.Printf("Generating REST!")
-
 	info := plugin.NewGeneratedFile("showcase-rest-sample-response.txt", "github.com/googleapis/gapic-showcase/server/genrest")
 
 	// The typecasting below appears to be idiomatic as per

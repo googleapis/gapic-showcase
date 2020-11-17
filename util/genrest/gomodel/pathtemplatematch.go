@@ -19,8 +19,8 @@ import (
 	"strings"
 )
 
-// FindValuesMatching returns the the longest string prefix that matches the templates first and
-// second, and a bool indicating whether this prefix if a full match for both expressions.
+// FindValuesMatching returns the the longest string prefix that matches the templates `first` and
+// `second`, and a bool indicating whether this prefix if a full match for both expressions.
 func FindValuesMatching(first, second PathTemplate) (fullMatch bool, longestMatch string, err error) {
 	one := &traverser{template: first.Flatten()}
 	two := &traverser{template: second.Flatten()}
@@ -38,7 +38,7 @@ func FindValuesMatching(first, second PathTemplate) (fullMatch bool, longestMatc
 		values = append(values, matching)
 	}
 
-	// segments of kind MultipleValue can match many others segments, so they don't auto-advance
+	// A Segment of kind MultipleValue can match many other segments, so it doesn't auto-advance
 	// in all scenarios.
 	one.ConsumeIfKind(MultipleValue)
 	two.ConsumeIfKind(MultipleValue)
@@ -55,9 +55,9 @@ func FindValuesMatching(first, second PathTemplate) (fullMatch bool, longestMatc
 }
 
 // segmentsMatch is the main work function for FindValuesMatching. It returns true iff one and two
-// can be matched, as well as the matching string between one and two, which can be a literal, a
+// can be matched, as well as the matching string between `one` and `two`, which can be a literal, a
 // wildcard "*", or be empty (for some matches in progress). This typically advanced the indices of
-// one and/or two.
+// `one` and/or `two`.
 func segmentsMatch(one, two *traverser) (bool, string) {
 	seg1 := one.Segment()
 	seg2 := two.Segment()

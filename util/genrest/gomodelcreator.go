@@ -22,16 +22,18 @@ import (
 	"google.golang.org/protobuf/types/descriptorpb"
 )
 
+// NewGoModel creates a new goModel.Model from the given protomodel.Model. It essentially extracts
+// and organizes the data needed to later generate Go source files.
 func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 	goModel := &gomodel.Model{
-		Shim: make([]*gomodel.GoServiceShim, 0, len(protoModel.Services)),
+		Service: make([]*gomodel.ServiceModel, 0, len(protoModel.Services)),
 	}
 
 	protoInfo := protoModel.ProtoInfo
 
 	for _, service := range protoModel.Services {
-		shim := &gomodel.GoServiceShim{ProtoPath: service.TypeName, ShortName: service.Name}
-		goModel.Add(shim)
+		serviceModel := &gomodel.ServiceModel{ProtoPath: service.TypeName, ShortName: service.Name}
+		goModel.Add(serviceModel)
 		for _, binding := range service.RESTBindings {
 			protoMethodType := binding.ProtoMethod
 			protoMethodDesc, ok := protoInfo.Type[protoMethodType].(*descriptorpb.MethodDescriptorProto)
@@ -65,8 +67,8 @@ func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 				ResponseVariable:    "response",
 			}
 
-			shim.AddImports(&inImports, &outImports)
-			shim.AddHandler(restHandler)
+			serviceModel.AddImports(&inImports, &outImports)
+			serviceModel.AddHandler(restHandler)
 		}
 	}
 

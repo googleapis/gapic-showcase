@@ -16,7 +16,6 @@ package genrest
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
 	"github.com/googleapis/gapic-showcase/util/genrest/internal/pbinfo"
@@ -30,6 +29,7 @@ import (
 ////////////////////////////////////////
 // ProtoModel
 
+// NewProtoModel uses the information in `plugin` to create a new protomodel.Model.
 func NewProtoModel(plugin *protogen.Plugin) (*protomodel.Model, error) {
 	protoFiles := plugin.Request.GetProtoFile()
 	protoModel := &protomodel.Model{
@@ -73,8 +73,21 @@ func NewProtoModel(plugin *protogen.Plugin) (*protomodel.Model, error) {
 ////////////////////////////////////////
 // Service
 
+// NewService creates a protomodel.Service from the given descriptor.
+func NewService(protoPackage string, descriptor *descriptorpb.ServiceDescriptorProto) *protomodel.Service {
+	// might need *descriptor.ProtoReflect().Type() to instantiate Go type and then reflect to get the name?
+	service := &protomodel.Service{
+		Descriptor:   descriptor,
+		Name:         *descriptor.Name,
+		TypeName:     pbinfo.FullyQualifiedType(protoPackage, descriptor.GetName()),
+		RESTBindings: make([]*protomodel.RESTBinding, 0),
+	}
+	return service
+}
+
+// NewServiceBinding adds `rule` (as the `index`th binding for `method`) to the specified `service`.
 func NewServiceBinding(service *protomodel.Service, method *descriptor.MethodDescriptorProto, rule *annotations.HttpRule, index int) error {
-	binding, err := NewRESTBinding(fullyQualifiedType(service.TypeName, method.GetName()), rule, index)
+	binding, err := NewRESTBinding(pbinfo.FullyQualifiedType(service.TypeName, method.GetName()), rule, index)
 	if err != nil {
 		return fmt.Errorf("service %q: %s", service.Name, err)
 	}
@@ -82,20 +95,10 @@ func NewServiceBinding(service *protomodel.Service, method *descriptor.MethodDes
 	return nil
 }
 
-func NewService(protoPackage string, descriptor *descriptorpb.ServiceDescriptorProto) *protomodel.Service {
-	// might need *descriptor.ProtoReflect().Type() to instantiate Go type and then reflect to get the name?
-	service := &protomodel.Service{
-		Descriptor:   descriptor,
-		Name:         *descriptor.Name,
-		TypeName:     fullyQualifiedType(protoPackage, descriptor.GetName()),
-		RESTBindings: make([]*protomodel.RESTBinding, 0),
-	}
-	return service
-}
-
 ////////////////////////////////////////
 // RESTBinding
 
+// NewRESTBinding creates a new protomodel.RESTBinding using the given methodName, rule, and index.
 func NewRESTBinding(methodName string, rule *annotations.HttpRule, index int) (*protomodel.RESTBinding, error) {
 	restPattern, err := NewRESTRequestPattern(rule)
 	if err != nil {
@@ -112,6 +115,7 @@ func NewRESTBinding(methodName string, rule *annotations.HttpRule, index int) (*
 ////////////////////////////////////////
 // RESTRequestPattern
 
+// NewRESTREquestPattern creates a new protomodel.RESTRequestPattern by analyzing the rule provided.
 func NewRESTRequestPattern(rule *annotations.HttpRule) (*protomodel.RESTRequestPattern, error) {
 	binding := &protomodel.RESTRequestPattern{}
 	pattern := rule.GetPattern()
@@ -135,17 +139,4 @@ func NewRESTRequestPattern(rule *annotations.HttpRule) (*protomodel.RESTRequestP
 		return nil, fmt.Errorf("unhandled pattern: %#x", pattern)
 	}
 	return binding, nil
-}
-
-////////////////////////////////////////
-// misc
-
-func fullyQualifiedType(segments ...string) string {
-	// In descriptors, putting the dot in front means the name is fully-qualified.
-	const dot = "."
-	typeName := strings.Join(segments, dot)
-	if !strings.HasPrefix(typeName, dot) {
-		typeName = dot + typeName
-	}
-	return typeName
 }
