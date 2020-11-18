@@ -115,7 +115,7 @@ func NewRESTBinding(methodName string, rule *annotations.HttpRule, index int) (*
 ////////////////////////////////////////
 // RESTRequestPattern
 
-// NewRESTREquestPattern creates a new protomodel.RESTRequestPattern by analyzing the rule provided.
+// NewRESTRequestPattern creates a new protomodel.RESTRequestPattern by analyzing the rule provided.
 func NewRESTRequestPattern(rule *annotations.HttpRule) (*protomodel.RESTRequestPattern, error) {
 	binding := &protomodel.RESTRequestPattern{}
 	pattern := rule.GetPattern()

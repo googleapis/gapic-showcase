@@ -86,8 +86,8 @@ func (seg *Segment) String() string {
 	return fmt.Sprintf("{%s(%d) %q %s}", seg.Kind, seg.Kind, seg.Value, seg.Subsegments)
 }
 
-// Flatten returns a flattened Segment, which contains no recursively nested
-// PathTemplate. Effectively, this removes any Segment with `Kind==Variable`.
+// Flatten returns a flattened PathTemplate containing either this Segment or its flattened
+// sub-segments.  Effectively, this removes any Segment with `Kind==Variable`.
 func (seg *Segment) Flatten() PathTemplate {
 	switch seg.Kind {
 	case Variable:

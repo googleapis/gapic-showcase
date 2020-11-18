@@ -30,9 +30,6 @@ func (ea *Accumulator) AccumulateError(err error) {
 	if err == nil {
 		return
 	}
-	if ea.errors == nil {
-		ea.errors = []error{}
-	}
 	ea.errors = append(ea.errors, err)
 }
 

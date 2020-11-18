@@ -133,33 +133,33 @@ func (parser *Parser) parseOneSegment() (*Segment, error) {
 // parseSingleValue parses a segment with `Kind==SingleValue` (i.e. a single-segment placeholder), returning nil if not possible.
 func (parser *Parser) parseSingleValue() (*Segment, error) {
 	re := parser.GetRegexp(&parser.reSingleValue, `^\*`)
-	return parser.parseToSegment(re, SingleValue)
+	return parser.parseToSegment(re, SingleValue), nil
 }
 
 // parseMultipleValue parses a segment with `Kind==MultipleValue` (i.e. a multiple-segment placeholder), returning nil if not possible.
 func (parser *Parser) parseMultipleValue() (*Segment, error) {
 	re := parser.GetRegexp(&parser.reMultipleValue, `^\*\*`)
-	seg, err := parser.parseToSegment(re, MultipleValue)
+	seg := parser.parseToSegment(re, MultipleValue)
 	if seg != nil {
 		parser.haveLastSegment = true
 	}
-	return seg, err
+	return seg, nil
 }
 
 // parseLiteral parses a segment with `Kind==Literal`, returning nil if not possible.
 func (parser *Parser) parseLiteral() (*Segment, error) {
 	re := parser.GetRegexp(&parser.reLiteral, `^([\-_.~0-9a-zA-Z%]+)`)
-	return parser.parseToSegment(re, Literal)
+	return parser.parseToSegment(re, Literal), nil
 }
 
 // parseToSegment is a helper function that creates a Segment of the specified kind if the next
 // characters in the parse stream match the expression re.
-func (parser *Parser) parseToSegment(re *regexp.Regexp, kind SegmentKind) (*Segment, error) {
+func (parser *Parser) parseToSegment(re *regexp.Regexp, kind SegmentKind) *Segment {
 	match := parser.source.ConsumeRegex(re)
 	if len(match) == 0 {
-		return nil, nil
+		return nil
 	}
-	return &Segment{Kind: kind, Value: match}, nil
+	return &Segment{Kind: kind, Value: match}
 }
 
 // parseFieldPath parses a field path, which is the "field" in a "{field=segments}" declaration.
