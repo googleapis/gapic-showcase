@@ -32,12 +32,7 @@ import (
 //    Verb     = ":" LITERAL ;
 // with "**" matching the last part of the path template string except for the Verb.
 func ParseTemplate(template string) (parsed PathTemplate, err error) {
-	parser := &Parser{
-		source: &Source{
-			str: template,
-			idx: 0},
-	}
-	return parser.parse()
+	return NewParser(template).parse()
 }
 
 ////////////////////////////////////////
@@ -50,8 +45,18 @@ type Parser struct {
 	// whether we've encountered the last "**" segment
 	haveLastSegment bool
 
-	// lazily compiled and memozied regexes
-	reSingleValue, reMultipleValue, reLiteral, reFieldPath *regexp.Regexp
+	// regexes
+	regex map[string]*regexp.Regexp
+}
+
+// NewParser returns a Parser ready to process template.
+func NewParser(template string) *Parser {
+	return &Parser{
+		source: &Source{
+			str: template,
+		},
+		regex: make(map[string]*regexp.Regexp),
+	}
 }
 
 // parse returns the parsed PathTemplate.
@@ -132,13 +137,13 @@ func (parser *Parser) parseOneSegment() (*Segment, error) {
 
 // parseSingleValue parses a segment with `Kind==SingleValue` (i.e. a single-segment placeholder), returning nil if not possible.
 func (parser *Parser) parseSingleValue() (*Segment, error) {
-	re := parser.GetRegexp(&parser.reSingleValue, `^\*`)
+	re := parser.GetRegexp(`^\*`)
 	return parser.parseToSegment(re, SingleValue), nil
 }
 
 // parseMultipleValue parses a segment with `Kind==MultipleValue` (i.e. a multiple-segment placeholder), returning nil if not possible.
 func (parser *Parser) parseMultipleValue() (*Segment, error) {
-	re := parser.GetRegexp(&parser.reMultipleValue, `^\*\*`)
+	re := parser.GetRegexp(`^\*\*`)
 	seg := parser.parseToSegment(re, MultipleValue)
 	if seg != nil {
 		parser.haveLastSegment = true
@@ -148,7 +153,7 @@ func (parser *Parser) parseMultipleValue() (*Segment, error) {
 
 // parseLiteral parses a segment with `Kind==Literal`, returning nil if not possible.
 func (parser *Parser) parseLiteral() (*Segment, error) {
-	re := parser.GetRegexp(&parser.reLiteral, `^([\-_.~0-9a-zA-Z%]+)`)
+	re := parser.GetRegexp(`^([-_.~0-9a-zA-Z%]+)`)
 	return parser.parseToSegment(re, Literal), nil
 }
 
@@ -164,7 +169,7 @@ func (parser *Parser) parseToSegment(re *regexp.Regexp, kind SegmentKind) *Segme
 
 // parseFieldPath parses a field path, which is the "field" in a "{field=segments}" declaration.
 func (parser *Parser) parseFieldPath() string {
-	re := parser.GetRegexp(&parser.reFieldPath, `^([_.\-9a-zA-Z]+)`)
+	re := parser.GetRegexp(`^([-_.9a-zA-Z]+)`)
 	return parser.source.ConsumeRegex(re)
 }
 
@@ -205,12 +210,15 @@ func (parser *Parser) parseVariable() (*Segment, error) {
 	return segment, nil
 }
 
-// GetRegexp returns the memoized compiled regex corresponding to expr. This assumes the same re is always paired with the same expr.
-func (parser *Parser) GetRegexp(re **regexp.Regexp, expr string) *regexp.Regexp {
-	if *re == nil {
-		*re = regexp.MustCompile(expr)
+// GetRegexp returns the memoized compiled regex corresponding to expr. This allows defining regexes
+// where they're used while still compiling them only once.
+func (parser *Parser) GetRegexp(expr string) *regexp.Regexp {
+	compiled := parser.regex[expr]
+	if compiled == nil {
+		compiled = regexp.MustCompile(expr)
+		parser.regex[expr] = compiled
 	}
-	return *re
+	return compiled
 }
 
 var slashSegment = &Segment{Kind: Literal, Value: "/"}
