@@ -27,8 +27,12 @@ func TestParseTemplate(t *testing.T) {
 	}{
 		// general segment parsing errors
 		{"/aa/", false, nil},
+		{"//bb", false, nil},
+		{"/@aa/bb", false, nil},
 		{"/a@/", false, nil},
 		{"/aa/:bb", false, nil},
+		{"/aa/:bb:cc", false, nil},
+		{"/aa/:bb/cc/dd:ee", false, nil},
 
 		// parse() errors
 		{"aa/bb", false, nil},
@@ -42,6 +46,7 @@ func TestParseTemplate(t *testing.T) {
 		{"/aa/{bb=/cc}", false, nil},
 		{"/aa/{bb=cc/}", false, nil},
 		{"/aa/{bb=cc/@}", false, nil},
+		{"/aa/{@bb=cc}", false, nil},
 
 		// successful cases
 		{

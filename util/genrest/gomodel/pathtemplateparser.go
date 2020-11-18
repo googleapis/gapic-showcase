@@ -148,7 +148,7 @@ func (parser *Parser) parseMultipleValue() (*Segment, error) {
 
 // parseLiteral parses a segment with `Kind==Literal`, returning nil if not possible.
 func (parser *Parser) parseLiteral() (*Segment, error) {
-	re := parser.GetRegexp(&parser.reLiteral, "^([a-zA-Z0-9_%]*)")
+	re := parser.GetRegexp(&parser.reLiteral, `^([\-_.~0-9a-zA-Z%]+)`)
 	return parser.parseToSegment(re, Literal)
 }
 
@@ -164,7 +164,7 @@ func (parser *Parser) parseToSegment(re *regexp.Regexp, kind SegmentKind) (*Segm
 
 // parseFieldPath parses a field path, which is the "field" in a "{field=segments}" declaration.
 func (parser *Parser) parseFieldPath() string {
-	re := parser.GetRegexp(&parser.reFieldPath, "([a-zA-Z0-9_.]*)")
+	re := parser.GetRegexp(&parser.reFieldPath, `^([_.\-9a-zA-Z]+)`)
 	return parser.source.ConsumeRegex(re)
 }
 
