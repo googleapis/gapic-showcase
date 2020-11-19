@@ -108,10 +108,14 @@ func NewNamer() *Namer {
 // Get registers and returns a non-previously registered name that is as close to newName as
 // possible. Disambiguation, if needed, is accomplished by adding a numeric suffix.
 func (namer *Namer) Get(newName string) string {
-	numSeen := namer.registered[newName]
-	namer.registered[newName] = numSeen + 1
-	if numSeen == 0 {
-		return newName
+	for {
+		numSeen := namer.registered[newName]
+		namer.registered[newName] = numSeen + 1
+		if numSeen == 0 {
+			return newName
+		}
+
+		newName = fmt.Sprintf("%s_%d", newName, numSeen)
+		// run through the loop again to ensure the new name hasn't been previously registered either.
 	}
-	return fmt.Sprintf("%s_%d", newName, numSeen)
 }
