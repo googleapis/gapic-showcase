@@ -30,6 +30,7 @@ import (
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/server/services"
 	fallback "github.com/googleapis/grpc-fallback-go/server"
+	gmux "github.com/gorilla/mux"
 	"github.com/soheilhy/cmux"
 	"golang.org/x/sync/errgroup"
 	lropb "google.golang.org/genproto/googleapis/longrunning"
@@ -289,13 +290,13 @@ type endpointREST struct {
 }
 
 func newEndpointREST(lis net.Listener) Endpoint {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/hello", func(w http.ResponseWriter, _ *http.Request) {
-		w.Write([]byte("GAPIC Showcase: HTTP/REST endpoint\n"))
+	router := gmux.NewRouter()
+	router.HandleFunc("/hello", func(w http.ResponseWriter, _ *http.Request) {
+		w.Write([]byte("GAPIC Showcase: HTTP/REST endpoint using gorilla/mux\n"))
 	})
 
 	return &endpointREST{
-		server:   &http.Server{Handler: mux},
+		server:   &http.Server{Handler: router},
 		listener: lis,
 	}
 }
