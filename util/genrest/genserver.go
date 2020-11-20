@@ -53,7 +53,6 @@ func Generate(plugin *protogen.Plugin) error {
 		return err
 	}
 	for _, source := range view.Files {
-		// TODO: double-check this isn't done automatically elsewhere by compile_protos or something
 		goSource, err := format.Source([]byte(source.Contents()))
 		if err != nil {
 			return fmt.Errorf("could not apply gofmt to %q: %s", source.Name, err)
