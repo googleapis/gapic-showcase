@@ -29,7 +29,8 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	// TODO: Assert that all services live in the same proto package, which is currently the case and we currently assume.
 	namer := NewNamer()
 
-	view := goview.New(len(model.Service))
+	numServices := len(model.Service)
+	view := goview.New(numServices)
 	registered := []*registeredPath{}
 
 	for idxService, service := range model.Service {
@@ -54,6 +55,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 		file.P(`  "net/http"`)
 		file.P("")
 		file.P("  // %s", strings.Join(importStrings, "\n  // "))
+		file.P(`	 // genprotopb "github.com/googleapis/gapic-showcase/server/genproto"  // MANUALLY ADDED`)
 		file.P(")")
 		file.P("")
 
@@ -66,11 +68,13 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			file.P("// %s translates REST requests/responses on the wire to internal proto messages for %s", handlerName, handler.GoMethod)
 			file.P("//    Generated for HTTP binding pattern: %s", handler.URIPattern)
 			file.P("//             This matches URIs of form: %s", pathMatch)
-			file.P("func %s(w http.ResponseWriter, r *http.Request) {", handlerName)
+			file.P("func (backend *RESTBackend) %s(w http.ResponseWriter, r *http.Request) {", handlerName)
 			file.P("  // serialize from r to: var %s %s.%s", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
-			file.P("  // %s := %s(%s)", handler.ResponseVariable, handler.GoMethod, handler.RequestVariable)
+			file.P("  //var %s %s.%s", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
+			file.P("  // %s := %s.%s(%s)", handler.ResponseVariable, handler.RequestTypePackage, handler.GoMethod, handler.RequestVariable)
+			file.P("  // _ = %s", handler.ResponseVariable)
 			file.P("  // serialize back to w")
-			file.P(`  stdLog.Printf("Received request matching '%s': %%q", r.URL)`, handler.URIPattern)
+			file.P(`  backend.StdLog.Printf("Received request matching '%s': %%q", r.URL)`, handler.URIPattern)
 			file.P("}\n")
 		}
 	}
@@ -83,21 +87,25 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	file.P("package genrest")
 	file.P("")
 	file.P("import (")
-	file.P(`  "log"`)
+	file.P(`  // "log"`)
+	file.P(`	 // genprotopb "github.com/googleapis/gapic-showcase/server/genproto"  // MANUALLY ADDED`)
+	file.P(`   "github.com/googleapis/gapic-showcase/server/services"`)
 	file.P("")
 	file.P(`  gmux "github.com/gorilla/mux"`)
 	file.P(")")
 	file.P("")
 	file.P("")
-	file.P(`func RegisterHandlers(router *gmux.Router, stdLogger, errLogger *log.Logger) {`)
-	file.P("  stdLog, errLog = stdLogger, errLogger")
+	file.P("type RESTBackend services.Backend")
 	file.P("")
+	file.P("")
+	file.P(`func RegisterHandlers(router *gmux.Router, backend *services.Backend) {`)
+	file.P("")
+	file.P(" loc := (*RESTBackend)(backend)")
 	for _, handler := range registered {
-		file.P(`  router.HandleFunc(%q, %s)`, handler.pattern, handler.function)
+		file.P(`  router.HandleFunc(%q, loc.%s)`, handler.pattern, handler.function)
 	}
 	file.P(`}`)
 	file.P("")
-	file.P("var stdLog, errLog *log.Logger")
 
 	return view, nil
 }

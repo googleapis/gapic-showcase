@@ -86,8 +86,9 @@ func CreateAllEndpoints(config RuntimeConfig) Endpoint {
 	grpcListener := m.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
 	httpListener := m.Match(cmux.HTTP1Fast())
 
-	gRPCServer := newEndpointGRPC(grpcListener, config)
-	restServer := newEndpointREST(httpListener)
+	backend := createBackends()
+	gRPCServer := newEndpointGRPC(grpcListener, config, backend)
+	restServer := newEndpointREST(httpListener, backend)
 	cmuxServer := newEndpointMux(m, gRPCServer, restServer)
 	return cmuxServer
 }
@@ -183,17 +184,33 @@ type endpointGRPC struct {
 	mux            sync.Mutex
 }
 
-func newEndpointGRPC(lis net.Listener, config RuntimeConfig) Endpoint {
-	// Set up server.
+// createBackends creates services used by both the gRPC and REST servers.
+func createBackends() *services.Backend {
 	logger := &loggerObserver{}
 	observerRegistry := server.ShowcaseObserverRegistry()
 	observerRegistry.RegisterUnaryObserver(logger)
 	observerRegistry.RegisterStreamRequestObserver(logger)
 	observerRegistry.RegisterStreamResponseObserver(logger)
 
+	identityServer := services.NewIdentityServer()
+	messagingServer := services.NewMessagingServer(identityServer)
+	return &services.Backend{
+		EchoServer:            services.NewEchoServer(),
+		SequenceServiceServer: services.NewSequenceServer(),
+		IdentityServer:        identityServer,
+		MessagingServer:       messagingServer,
+		TestingServer:         services.NewTestingServer(observerRegistry),
+		OperationsServer:      services.NewOperationsServer(messagingServer),
+		StdLog:                stdLog,
+		ErrLog:                errLog,
+		ObserverRegistry:      observerRegistry,
+	}
+}
+
+func newEndpointGRPC(lis net.Listener, config RuntimeConfig, backend *services.Backend) Endpoint {
 	opts := []grpc.ServerOption{
-		grpc.StreamInterceptor(observerRegistry.StreamInterceptor),
-		grpc.UnaryInterceptor(observerRegistry.UnaryInterceptor),
+		grpc.StreamInterceptor(backend.ObserverRegistry.StreamInterceptor),
+		grpc.UnaryInterceptor(backend.ObserverRegistry.UnaryInterceptor),
 	}
 
 	// load mutual TLS cert/key and root CA cert
@@ -221,24 +238,19 @@ func newEndpointGRPC(lis net.Listener, config RuntimeConfig) Endpoint {
 	}
 	s := grpc.NewServer(opts...)
 
-	// Creates services used by both the gRPC and REST servers
-	echoServer := services.NewEchoServer()
-
 	// Register Services to the server.
-	pb.RegisterEchoServer(s, echoServer)
-	pb.RegisterSequenceServiceServer(s, services.NewSequenceServer())
-	identityServer := services.NewIdentityServer()
-	pb.RegisterIdentityServer(s, identityServer)
-	messagingServer := services.NewMessagingServer(identityServer)
-	pb.RegisterMessagingServer(s, messagingServer)
-	operationsServer := services.NewOperationsServer(messagingServer)
-	pb.RegisterTestingServer(s, services.NewTestingServer(observerRegistry))
-	lropb.RegisterOperationsServer(s, operationsServer)
+	pb.RegisterEchoServer(s, backend.EchoServer)
+	pb.RegisterSequenceServiceServer(s, backend.SequenceServiceServer)
+	pb.RegisterIdentityServer(s, backend.IdentityServer)
+	pb.RegisterMessagingServer(s, backend.MessagingServer)
+	lropb.RegisterOperationsServer(s, backend.OperationsServer)
+	pb.RegisterTestingServer(s, backend.TestingServer)
 
 	fb := fallback.NewServer(config.fallbackPort, "localhost"+config.port)
 
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
+
 	return &endpointGRPC{
 		server:         s,
 		fallbackServer: fb,
@@ -290,12 +302,12 @@ type endpointREST struct {
 	mux      sync.Mutex
 }
 
-func newEndpointREST(lis net.Listener) Endpoint {
+func newEndpointREST(lis net.Listener, backend *services.Backend) Endpoint {
 	router := gmux.NewRouter()
 	router.HandleFunc("/hello", func(w http.ResponseWriter, _ *http.Request) {
 		w.Write([]byte("GAPIC Showcase: HTTP/REST endpoint using gorilla/mux\n"))
 	})
-	genrest.RegisterHandlers(router, stdLog, errLog)
+	genrest.RegisterHandlers(router, backend)
 	return &endpointREST{
 		server:   &http.Server{Handler: router},
 		listener: lis,
