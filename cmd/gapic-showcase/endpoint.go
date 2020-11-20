@@ -295,7 +295,7 @@ func newEndpointREST(lis net.Listener) Endpoint {
 	router.HandleFunc("/hello", func(w http.ResponseWriter, _ *http.Request) {
 		w.Write([]byte("GAPIC Showcase: HTTP/REST endpoint using gorilla/mux\n"))
 	})
-	genrest.RegisterHandlers(router)
+	genrest.RegisterHandlers(router, stdLog, errLog)
 	return &endpointREST{
 		server:   &http.Server{Handler: router},
 		listener: lis,
