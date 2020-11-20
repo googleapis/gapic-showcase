@@ -51,7 +51,6 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 		sort.Strings(importStrings)
 
 		file.P("import (")
-		file.P(`  "fmt"`)
 		file.P(`  "net/http"`)
 		file.P("")
 		file.P("  // %s", strings.Join(importStrings, "\n  // "))
@@ -71,7 +70,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			file.P("  // serialize from r to: var %s %s.%s", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
 			file.P("  // %s := %s(%s)", handler.ResponseVariable, handler.GoMethod, handler.RequestVariable)
 			file.P("  // serialize back to w")
-			file.P(`  fmt.Fprintf(w, "Received request matching '%s': %%q", r.URL)`, handler.URIPattern)
+			file.P(`  stdLog.Printf("Received request matching '%s': %%q", r.URL)`, handler.URIPattern)
 			file.P("}\n")
 		}
 	}
@@ -84,15 +83,21 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	file.P("package genrest")
 	file.P("")
 	file.P("import (")
+	file.P(`  "log"`)
+	file.P("")
 	file.P(`  gmux "github.com/gorilla/mux"`)
 	file.P(")")
 	file.P("")
 	file.P("")
-	file.P(`func RegisterHandlers(router *gmux.Router) {`)
+	file.P(`func RegisterHandlers(router *gmux.Router, stdLogger, errLogger *log.Logger) {`)
+	file.P("  stdLog, errLog = stdLogger, errLogger")
+	file.P("")
 	for _, handler := range registered {
 		file.P(`  router.HandleFunc(%q, %s)`, handler.pattern, handler.function)
 	}
 	file.P(`}`)
+	file.P("")
+	file.P("var stdLog, errLog *log.Logger")
 
 	return view, nil
 }
