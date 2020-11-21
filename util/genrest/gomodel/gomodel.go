@@ -152,6 +152,8 @@ type RESTHandler struct {
 	PathTemplate PathTemplate // parsed version of URIPattern
 
 	GoMethod           string
+	StreamingServer    bool
+	StreamingClient    bool
 	RequestType        string
 	RequestTypePackage string
 	RequestVariable    string
