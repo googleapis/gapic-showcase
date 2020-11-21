@@ -52,10 +52,12 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 		sort.Strings(importStrings)
 
 		file.P("import (")
+		file.P(`  "context"`)
 		file.P(`  "net/http"`)
 		file.P("")
 		file.P("  // %s", strings.Join(importStrings, "\n  // "))
-		file.P(`	 // genprotopb "github.com/googleapis/gapic-showcase/server/genproto"  // MANUALLY ADDED`)
+		file.P(`	  genprotopb "github.com/googleapis/gapic-showcase/server/genproto"  // MANUALLY ADDED`)
+		file.P(`  "github.com/golang/protobuf/jsonpb" // TODO: Why doesn't "google.golang.org/protobuf" work?`)
 		file.P(")")
 		file.P("")
 
@@ -69,12 +71,33 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			file.P("//    Generated for HTTP binding pattern: %s", handler.URIPattern)
 			file.P("//             This matches URIs of form: %s", pathMatch)
 			file.P("func (backend *RESTBackend) %s(w http.ResponseWriter, r *http.Request) {", handlerName)
-			file.P("  // serialize from r to: var %s %s.%s", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
-			file.P("  //var %s %s.%s", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
-			file.P("  // %s := %s.%s(%s)", handler.ResponseVariable, handler.RequestTypePackage, handler.GoMethod, handler.RequestVariable)
-			file.P("  // _ = %s", handler.ResponseVariable)
-			file.P("  // serialize back to w")
 			file.P(`  backend.StdLog.Printf("Received request matching '%s': %%q", r.URL)`, handler.URIPattern)
+			if handler.StreamingClient || handler.StreamingServer {
+				file.P(`  w.Write([]byte("ERROR: not implementing streaming methods yet"))`)
+				file.P("}")
+				continue
+			}
+
+			file.P("")
+			file.P("  var %s *%s.%s", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
+			file.P("  // TODO: Populate %s with parameters from HTTP request", handler.RequestVariable)
+			file.P("")
+			file.P("  %s, err := backend.%sServer.%s(context.Background(), %s)", handler.ResponseVariable, service.ShortName, handler.GoMethod, handler.RequestVariable)
+			file.P("  if err != nil {")
+			file.P("    // TODO: Properly handle error")
+			file.P("    w.Write([]byte(err.Error()))")
+			file.P("    return")
+			file.P("  }")
+			file.P("")
+			file.P("  marshaler := &jsonpb.Marshaler{}")
+			file.P("  json, err := marshaler.MarshalToString(%s)", handler.ResponseVariable)
+			file.P("  if err != nil {")
+			file.P("    // TODO: Properly handle error")
+			file.P("    w.Write([]byte(err.Error()))")
+			file.P("    return")
+			file.P("  }")
+			file.P("")
+			file.P("  w.Write([]byte(json))")
 			file.P("}\n")
 		}
 	}

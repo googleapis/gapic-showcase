@@ -58,6 +58,8 @@ func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 				PathTemplate: pathTemplate,
 
 				GoMethod:           protoMethodDesc.GetName(),
+				StreamingServer:    protoMethodDesc.GetClientStreaming(),
+				StreamingClient:    protoMethodDesc.GetServerStreaming(),
 				RequestType:        inGoType,
 				RequestTypePackage: inImports.Name,
 				RequestVariable:    "request",
