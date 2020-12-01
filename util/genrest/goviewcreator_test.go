@@ -53,6 +53,7 @@ func TestNamer(t *testing.T) {
 		requested string
 		expected  string
 	}{
+		// Order matters, since we're testing disambiguation with previously seen items.
 		{"rainbow", "rainbow"},
 		{"rainbow", "rainbow_1"},
 		{"rainbow", "rainbow_2"},

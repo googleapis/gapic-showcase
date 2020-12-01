@@ -24,23 +24,23 @@ import (
 	"github.com/googleapis/gapic-showcase/util/genrest/goview"
 )
 
-// NewView creates a a new goview.View (a series of files to be output) from a gomodel.Model.
+// NewView creates a a new goview.View (a series of files to be output) from a gomodel.Model. The
+// current approach is to generate one file per service, with that file containing all the service's
+// RPCs. An additional file `genrest.go` is also created to register all these handlers with a
+// gorilla/mux dispatcher.
 func NewView(model *gomodel.Model) (*goview.View, error) {
 	// TODO: Assert that all services live in the same proto package, which is currently the case and we currently assume.
 	namer := NewNamer()
 
 	numServices := len(model.Service)
 	view := goview.New(numServices)
-	registered := []*registeredPath{}
+	registered := []*registeredHandler{}
 
 	for idxService, service := range model.Service {
 		file := view.Append(goview.NewFile("", strings.ToLower(service.ShortName)+".go"))
 		file.P(license)
 		file.P("// DO NOT EDIT. This is an auto-generated file containing the REST handlers")
 		file.P("// for service #%d: %s.\n", idxService, service.FullName())
-
-		// TODO: add license to the top of the files
-
 		file.P("")
 		file.P("package genrest")
 		file.P("")
@@ -55,21 +55,26 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 		file.P(`  "context"`)
 		file.P(`  "net/http"`)
 		file.P("")
-		file.P("  // %s", strings.Join(importStrings, "\n  // "))
-		file.P(`	  genprotopb "github.com/googleapis/gapic-showcase/server/genproto"  // MANUALLY ADDED`)
-		file.P(`  "github.com/golang/protobuf/jsonpb" // TODO: Why doesn't "google.golang.org/protobuf" work?`)
+		// TODO: Properly deal with imports once we actually use them in the code.
+		// file.P("  // %s", strings.Join(importStrings, "\n  // "))
+
+		// TODO: Get the following import from the data model, rather than hard-coding, once we deal with all imports.
+		file.P(`	  genprotopb "github.com/googleapis/gapic-showcase/server/genproto"`)
+
+		// TODO: Investigate why "google.golang.org/protobuf" doesn't work below
+		file.P(`  "github.com/golang/protobuf/jsonpb"`)
 		file.P(")")
 		file.P("")
 
 		for _, handler := range service.Handlers {
 			handlerName := namer.Get("Handle" + handler.GoMethod)
 			pathMatch := matchingPath(handler.PathTemplate)
-			registered = append(registered, &registeredPath{pathMatch, handlerName})
+			registered = append(registered, &registeredHandler{pathMatch, handlerName})
 
 			file.P("")
 			file.P("// %s translates REST requests/responses on the wire to internal proto messages for %s", handlerName, handler.GoMethod)
 			file.P("//    Generated for HTTP binding pattern: %s", handler.URIPattern)
-			file.P("//             This matches URIs of form: %s", pathMatch)
+			file.P("//         This matches URIs of the form: %s", pathMatch)
 			file.P("func (backend *RESTBackend) %s(w http.ResponseWriter, r *http.Request) {", handlerName)
 			file.P(`  backend.StdLog.Printf("Received request matching '%s': %%q", r.URL)`, handler.URIPattern)
 			if handler.StreamingClient || handler.StreamingServer {
@@ -82,6 +87,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			file.P("  var %s *%s.%s", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
 			file.P("  // TODO: Populate %s with parameters from HTTP request", handler.RequestVariable)
 			file.P("")
+			// TODO: In the future, we may want to redirect all REST-endpoint requests to the gRPC endpoint so that the gRPC-registered observers get invoked.
 			file.P("  %s, err := backend.%sServer.%s(context.Background(), %s)", handler.ResponseVariable, service.ShortName, handler.GoMethod, handler.RequestVariable)
 			file.P("  if err != nil {")
 			file.P("    // TODO: Properly handle error")
@@ -110,8 +116,6 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	file.P("package genrest")
 	file.P("")
 	file.P("import (")
-	file.P(`  // "log"`)
-	file.P(`	 // genprotopb "github.com/googleapis/gapic-showcase/server/genproto"  // MANUALLY ADDED`)
 	file.P(`   "github.com/googleapis/gapic-showcase/server/services"`)
 	file.P("")
 	file.P(`  gmux "github.com/gorilla/mux"`)
@@ -123,9 +127,9 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	file.P("")
 	file.P(`func RegisterHandlers(router *gmux.Router, backend *services.Backend) {`)
 	file.P("")
-	file.P(" loc := (*RESTBackend)(backend)")
+	file.P(" rest := (*RESTBackend)(backend)")
 	for _, handler := range registered {
-		file.P(`  router.HandleFunc(%q, loc.%s)`, handler.pattern, handler.function)
+		file.P(`  router.HandleFunc(%q, rest.%s)`, handler.pattern, handler.function)
 	}
 	file.P(`}`)
 	file.P("")
@@ -133,7 +137,8 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	return view, nil
 }
 
-type registeredPath struct {
+// registeredHandler pairs a URL path pattern with the name of the associated handler
+type registeredHandler struct {
 	pattern, function string
 }
 
