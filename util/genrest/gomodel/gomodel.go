@@ -147,21 +147,24 @@ func (service *ServiceModel) AddImports(imports ...*pbinfo.ImportSpec) {
 
 // RESTHandler contains the information needed to generate a single HTTP handler.
 type RESTHandler struct {
-	HTTPMethod   string
-	URIPattern   string
-	PathTemplate PathTemplate // parsed version of URIPattern
+	//// Transcoding information
 
-	GoMethod           string
-	StreamingServer    bool
-	StreamingClient    bool
-	RequestType        string
-	RequestTypePackage string
-	RequestVariable    string
+	HTTPMethod      string
+	URIPattern      string       // as it appears in the HTTP annotation
+	PathTemplate    PathTemplate // parsed version of URIPattern
+	StreamingServer bool         // whether this method uses server-side streaming
+	StreamingClient bool         // whether this method uses client-side streaming
 
 	// TODO: Fill in with actual information needed to access each field. These are placeholders
 	// for now.
 	PathFields, QueryFields, BodyFields []*interface{}
 
+	//// Go types
+
+	GoMethod            string
+	RequestType         string
+	RequestTypePackage  string
+	RequestVariable     string
 	ResponseType        string
 	ResponseTypePackage string
 	ResponseVariable    string
