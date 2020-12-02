@@ -1,7 +1,225 @@
-Generated via "google.golang.org/protobuf/compiler/protogen"
+Generated via "google.golang.org/protobuf/compiler/protogen" via ProtoModel!
 Files:
 google/showcase/v1beta1/echo.proto
 google/showcase/v1beta1/identity.proto
 google/showcase/v1beta1/messaging.proto
 google/showcase/v1beta1/sequence.proto
 google/showcase/v1beta1/testing.proto
+
+Proto Model:
+Echo (.google.showcase.v1beta1.Echo):
+  .google.showcase.v1beta1.Echo.Echo[0] : POST: "/v1beta1/echo:echo"
+  .google.showcase.v1beta1.Echo.Expand[0] : POST: "/v1beta1/echo:expand"
+  .google.showcase.v1beta1.Echo.Collect[0] : POST: "/v1beta1/echo:collect"
+  .google.showcase.v1beta1.Echo.PagedExpand[0] : POST: "/v1beta1/echo:pagedExpand"
+  .google.showcase.v1beta1.Echo.Wait[0] : POST: "/v1beta1/echo:wait"
+  .google.showcase.v1beta1.Echo.Block[0] : POST: "/v1beta1/echo:block"
+
+Identity (.google.showcase.v1beta1.Identity):
+  .google.showcase.v1beta1.Identity.CreateUser[0] : POST: "/v1beta1/users"
+  .google.showcase.v1beta1.Identity.GetUser[0] : GET: "/v1beta1/{name=users/*}"
+  .google.showcase.v1beta1.Identity.UpdateUser[0] : PATCH: "/v1beta1/{user.name=users/*}"
+  .google.showcase.v1beta1.Identity.DeleteUser[0] : DELETE: "/v1beta1/{name=users/*}"
+  .google.showcase.v1beta1.Identity.ListUsers[0] : GET: "/v1beta1/users"
+
+Messaging (.google.showcase.v1beta1.Messaging):
+  .google.showcase.v1beta1.Messaging.CreateRoom[0] : POST: "/v1beta1/rooms"
+  .google.showcase.v1beta1.Messaging.GetRoom[0] : GET: "/v1beta1/{name=rooms/*}"
+  .google.showcase.v1beta1.Messaging.UpdateRoom[0] : PATCH: "/v1beta1/{room.name=rooms/*}"
+  .google.showcase.v1beta1.Messaging.DeleteRoom[0] : DELETE: "/v1beta1/{name=rooms/*}"
+  .google.showcase.v1beta1.Messaging.ListRooms[0] : GET: "/v1beta1/rooms"
+  .google.showcase.v1beta1.Messaging.CreateBlurb[0] : POST: "/v1beta1/{parent=rooms/*}/blurbs"
+  .google.showcase.v1beta1.Messaging.CreateBlurb[1] : POST: "/v1beta1/{parent=users/*/profile}/blurbs"
+  .google.showcase.v1beta1.Messaging.GetBlurb[0] : GET: "/v1beta1/{name=rooms/*/blurbs/*}"
+  .google.showcase.v1beta1.Messaging.GetBlurb[1] : GET: "/v1beta1/{name=users/*/profile/blurbs/*}"
+  .google.showcase.v1beta1.Messaging.UpdateBlurb[0] : PATCH: "/v1beta1/{blurb.name=rooms/*/blurbs/*}"
+  .google.showcase.v1beta1.Messaging.UpdateBlurb[1] : PATCH: "/v1beta1/{blurb.name=users/*/profile/blurbs/*}"
+  .google.showcase.v1beta1.Messaging.DeleteBlurb[0] : DELETE: "/v1beta1/{name=rooms/*/blurbs/*}"
+  .google.showcase.v1beta1.Messaging.DeleteBlurb[1] : DELETE: "/v1beta1/{name=users/*/profile/blurbs/*}"
+  .google.showcase.v1beta1.Messaging.ListBlurbs[0] : GET: "/v1beta1/{parent=rooms/*}/blurbs"
+  .google.showcase.v1beta1.Messaging.ListBlurbs[1] : GET: "/v1beta1/{parent=users/*/profile}/blurbs"
+  .google.showcase.v1beta1.Messaging.SearchBlurbs[0] : POST: "/v1beta1/{parent=rooms/*}/blurbs:search"
+  .google.showcase.v1beta1.Messaging.SearchBlurbs[1] : POST: "/v1beta1/{parent=users/*/profile}/blurbs:search"
+  .google.showcase.v1beta1.Messaging.StreamBlurbs[0] : POST: "/v1beta1/{name=rooms/*}/blurbs:stream"
+  .google.showcase.v1beta1.Messaging.StreamBlurbs[1] : POST: "/v1beta1/{name=users/*/profile}/blurbs:stream"
+  .google.showcase.v1beta1.Messaging.SendBlurbs[0] : POST: "/v1beta1/{parent=rooms/*}/blurbs:send"
+  .google.showcase.v1beta1.Messaging.SendBlurbs[1] : POST: "/v1beta1/{parent=users/*/profile}/blurbs:send"
+
+SequenceService (.google.showcase.v1beta1.SequenceService):
+  .google.showcase.v1beta1.SequenceService.CreateSequence[0] : POST: "/v1beta1/sequences"
+  .google.showcase.v1beta1.SequenceService.GetSequenceReport[0] : GET: "/v1beta1/{name=sequences/*/sequenceReport}"
+  .google.showcase.v1beta1.SequenceService.AttemptSequence[0] : POST: "/v1beta1/{name=sequences/*}"
+
+Testing (.google.showcase.v1beta1.Testing):
+  .google.showcase.v1beta1.Testing.CreateSession[0] : POST: "/v1beta1/sessions"
+  .google.showcase.v1beta1.Testing.GetSession[0] : GET: "/v1beta1/{name=sessions/*}"
+  .google.showcase.v1beta1.Testing.ListSessions[0] : GET: "/v1beta1/sessions"
+  .google.showcase.v1beta1.Testing.DeleteSession[0] : DELETE: "/v1beta1/{name=sessions/*}"
+  .google.showcase.v1beta1.Testing.ReportSession[0] : POST: "/v1beta1/{name=sessions/*}:report"
+  .google.showcase.v1beta1.Testing.ListTests[0] : GET: "/v1beta1/{parent=sessions/*}/tests"
+  .google.showcase.v1beta1.Testing.DeleteTest[0] : DELETE: "/v1beta1/{name=sessions/*/tests/*}"
+  .google.showcase.v1beta1.Testing.VerifyTest[0] : POST: "/v1beta1/{name=sessions/*/tests/*}:check"
+
+
+
+GoModel
+----------------------------------------
+Shim "Echo" (.google.showcase.v1beta1.Echo)
+  Imports:
+    genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
+    longrunningpb: "google.golang.org/genproto/googleapis/longrunning" "google.golang.org/genproto/googleapis/longrunning"
+  Handlers (6):
+        POST                                 /v1beta1/echo:echo func Echo(request genprotopb.EchoRequest) (response genprotopb.EchoResponse) {}
+["/" "v1beta1" "/" "echo" ":" "echo"]
+
+        POST                                 /v1beta1/echo:wait func Wait(request genprotopb.WaitRequest) (response longrunningpb.Operation) {}
+["/" "v1beta1" "/" "echo" ":" "wait"]
+
+        POST                                /v1beta1/echo:block func Block(request genprotopb.BlockRequest) (response genprotopb.BlockResponse) {}
+["/" "v1beta1" "/" "echo" ":" "block"]
+
+        POST                               /v1beta1/echo:expand func Expand(request genprotopb.ExpandRequest) (response genprotopb.EchoResponse) {}
+["/" "v1beta1" "/" "echo" ":" "expand"]
+
+        POST                              /v1beta1/echo:collect func Collect(request genprotopb.EchoRequest) (response genprotopb.EchoResponse) {}
+["/" "v1beta1" "/" "echo" ":" "collect"]
+
+        POST                          /v1beta1/echo:pagedExpand func PagedExpand(request genprotopb.PagedExpandRequest) (response genprotopb.PagedExpandResponse) {}
+["/" "v1beta1" "/" "echo" ":" "pagedExpand"]
+
+----------------------------------------
+Shim "Identity" (.google.showcase.v1beta1.Identity)
+  Imports:
+    emptypb: "github.com/golang/protobuf/ptypes/empty" "github.com/golang/protobuf/ptypes/empty"
+    genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
+  Handlers (5):
+         GET                                     /v1beta1/users func ListUsers(request genprotopb.ListUsersRequest) (response genprotopb.ListUsersResponse) {}
+["/" "v1beta1" "/" "users"]
+
+         GET                            /v1beta1/{name=users/*} func GetUser(request genprotopb.GetUserRequest) (response genprotopb.User) {}
+["/" "v1beta1" "/" {name = ["users" "/" *]}]
+
+        POST                                     /v1beta1/users func CreateUser(request genprotopb.CreateUserRequest) (response genprotopb.User) {}
+["/" "v1beta1" "/" "users"]
+
+       PATCH                       /v1beta1/{user.name=users/*} func UpdateUser(request genprotopb.UpdateUserRequest) (response genprotopb.User) {}
+["/" "v1beta1" "/" {user.name = ["users" "/" *]}]
+
+      DELETE                            /v1beta1/{name=users/*} func DeleteUser(request genprotopb.DeleteUserRequest) (response emptypb.Empty) {}
+["/" "v1beta1" "/" {name = ["users" "/" *]}]
+
+----------------------------------------
+Shim "Messaging" (.google.showcase.v1beta1.Messaging)
+  Imports:
+    emptypb: "github.com/golang/protobuf/ptypes/empty" "github.com/golang/protobuf/ptypes/empty"
+    genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
+    longrunningpb: "google.golang.org/genproto/googleapis/longrunning" "google.golang.org/genproto/googleapis/longrunning"
+  Handlers (21):
+         GET                                     /v1beta1/rooms func ListRooms(request genprotopb.ListRoomsRequest) (response genprotopb.ListRoomsResponse) {}
+["/" "v1beta1" "/" "rooms"]
+
+         GET                            /v1beta1/{name=rooms/*} func GetRoom(request genprotopb.GetRoomRequest) (response genprotopb.Room) {}
+["/" "v1beta1" "/" {name = ["rooms" "/" *]}]
+
+         GET                   /v1beta1/{name=rooms/*/blurbs/*} func GetBlurb(request genprotopb.GetBlurbRequest) (response genprotopb.Blurb) {}
+["/" "v1beta1" "/" {name = ["rooms" "/" * "/" "blurbs" "/" *]}]
+
+         GET                   /v1beta1/{parent=rooms/*}/blurbs func ListBlurbs(request genprotopb.ListBlurbsRequest) (response genprotopb.ListBlurbsResponse) {}
+["/" "v1beta1" "/" {parent = ["rooms" "/" *]} "/" "blurbs"]
+
+         GET           /v1beta1/{name=users/*/profile/blurbs/*} func GetBlurb(request genprotopb.GetBlurbRequest) (response genprotopb.Blurb) {}
+["/" "v1beta1" "/" {name = ["users" "/" * "/" "profile" "/" "blurbs" "/" *]}]
+
+         GET           /v1beta1/{parent=users/*/profile}/blurbs func ListBlurbs(request genprotopb.ListBlurbsRequest) (response genprotopb.ListBlurbsResponse) {}
+["/" "v1beta1" "/" {parent = ["users" "/" * "/" "profile"]} "/" "blurbs"]
+
+        POST                                     /v1beta1/rooms func CreateRoom(request genprotopb.CreateRoomRequest) (response genprotopb.Room) {}
+["/" "v1beta1" "/" "rooms"]
+
+        POST                   /v1beta1/{parent=rooms/*}/blurbs func CreateBlurb(request genprotopb.CreateBlurbRequest) (response genprotopb.Blurb) {}
+["/" "v1beta1" "/" {parent = ["rooms" "/" *]} "/" "blurbs"]
+
+        POST              /v1beta1/{name=rooms/*}/blurbs:stream func StreamBlurbs(request genprotopb.StreamBlurbsRequest) (response genprotopb.StreamBlurbsResponse) {}
+["/" "v1beta1" "/" {name = ["rooms" "/" *]} "/" "blurbs" ":" "stream"]
+
+        POST              /v1beta1/{parent=rooms/*}/blurbs:send func SendBlurbs(request genprotopb.CreateBlurbRequest) (response genprotopb.SendBlurbsResponse) {}
+["/" "v1beta1" "/" {parent = ["rooms" "/" *]} "/" "blurbs" ":" "send"]
+
+        POST            /v1beta1/{parent=rooms/*}/blurbs:search func SearchBlurbs(request genprotopb.SearchBlurbsRequest) (response longrunningpb.Operation) {}
+["/" "v1beta1" "/" {parent = ["rooms" "/" *]} "/" "blurbs" ":" "search"]
+
+        POST           /v1beta1/{parent=users/*/profile}/blurbs func CreateBlurb(request genprotopb.CreateBlurbRequest) (response genprotopb.Blurb) {}
+["/" "v1beta1" "/" {parent = ["users" "/" * "/" "profile"]} "/" "blurbs"]
+
+        POST      /v1beta1/{name=users/*/profile}/blurbs:stream func StreamBlurbs(request genprotopb.StreamBlurbsRequest) (response genprotopb.StreamBlurbsResponse) {}
+["/" "v1beta1" "/" {name = ["users" "/" * "/" "profile"]} "/" "blurbs" ":" "stream"]
+
+        POST      /v1beta1/{parent=users/*/profile}/blurbs:send func SendBlurbs(request genprotopb.CreateBlurbRequest) (response genprotopb.SendBlurbsResponse) {}
+["/" "v1beta1" "/" {parent = ["users" "/" * "/" "profile"]} "/" "blurbs" ":" "send"]
+
+        POST    /v1beta1/{parent=users/*/profile}/blurbs:search func SearchBlurbs(request genprotopb.SearchBlurbsRequest) (response longrunningpb.Operation) {}
+["/" "v1beta1" "/" {parent = ["users" "/" * "/" "profile"]} "/" "blurbs" ":" "search"]
+
+       PATCH                       /v1beta1/{room.name=rooms/*} func UpdateRoom(request genprotopb.UpdateRoomRequest) (response genprotopb.Room) {}
+["/" "v1beta1" "/" {room.name = ["rooms" "/" *]}]
+
+       PATCH             /v1beta1/{blurb.name=rooms/*/blurbs/*} func UpdateBlurb(request genprotopb.UpdateBlurbRequest) (response genprotopb.Blurb) {}
+["/" "v1beta1" "/" {blurb.name = ["rooms" "/" * "/" "blurbs" "/" *]}]
+
+       PATCH     /v1beta1/{blurb.name=users/*/profile/blurbs/*} func UpdateBlurb(request genprotopb.UpdateBlurbRequest) (response genprotopb.Blurb) {}
+["/" "v1beta1" "/" {blurb.name = ["users" "/" * "/" "profile" "/" "blurbs" "/" *]}]
+
+      DELETE                            /v1beta1/{name=rooms/*} func DeleteRoom(request genprotopb.DeleteRoomRequest) (response emptypb.Empty) {}
+["/" "v1beta1" "/" {name = ["rooms" "/" *]}]
+
+      DELETE                   /v1beta1/{name=rooms/*/blurbs/*} func DeleteBlurb(request genprotopb.DeleteBlurbRequest) (response emptypb.Empty) {}
+["/" "v1beta1" "/" {name = ["rooms" "/" * "/" "blurbs" "/" *]}]
+
+      DELETE           /v1beta1/{name=users/*/profile/blurbs/*} func DeleteBlurb(request genprotopb.DeleteBlurbRequest) (response emptypb.Empty) {}
+["/" "v1beta1" "/" {name = ["users" "/" * "/" "profile" "/" "blurbs" "/" *]}]
+
+----------------------------------------
+Shim "SequenceService" (.google.showcase.v1beta1.SequenceService)
+  Imports:
+    emptypb: "github.com/golang/protobuf/ptypes/empty" "github.com/golang/protobuf/ptypes/empty"
+    genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
+  Handlers (3):
+         GET         /v1beta1/{name=sequences/*/sequenceReport} func GetSequenceReport(request genprotopb.GetSequenceReportRequest) (response genprotopb.SequenceReport) {}
+["/" "v1beta1" "/" {name = ["sequences" "/" * "/" "sequenceReport"]}]
+
+        POST                                 /v1beta1/sequences func CreateSequence(request genprotopb.CreateSequenceRequest) (response genprotopb.Sequence) {}
+["/" "v1beta1" "/" "sequences"]
+
+        POST                        /v1beta1/{name=sequences/*} func AttemptSequence(request genprotopb.AttemptSequenceRequest) (response emptypb.Empty) {}
+["/" "v1beta1" "/" {name = ["sequences" "/" *]}]
+
+----------------------------------------
+Shim "Testing" (.google.showcase.v1beta1.Testing)
+  Imports:
+    emptypb: "github.com/golang/protobuf/ptypes/empty" "github.com/golang/protobuf/ptypes/empty"
+    genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
+  Handlers (8):
+         GET                                  /v1beta1/sessions func ListSessions(request genprotopb.ListSessionsRequest) (response genprotopb.ListSessionsResponse) {}
+["/" "v1beta1" "/" "sessions"]
+
+         GET                         /v1beta1/{name=sessions/*} func GetSession(request genprotopb.GetSessionRequest) (response genprotopb.Session) {}
+["/" "v1beta1" "/" {name = ["sessions" "/" *]}]
+
+         GET                 /v1beta1/{parent=sessions/*}/tests func ListTests(request genprotopb.ListTestsRequest) (response genprotopb.ListTestsResponse) {}
+["/" "v1beta1" "/" {parent = ["sessions" "/" *]} "/" "tests"]
+
+        POST                                  /v1beta1/sessions func CreateSession(request genprotopb.CreateSessionRequest) (response genprotopb.Session) {}
+["/" "v1beta1" "/" "sessions"]
+
+        POST                  /v1beta1/{name=sessions/*}:report func ReportSession(request genprotopb.ReportSessionRequest) (response genprotopb.ReportSessionResponse) {}
+["/" "v1beta1" "/" {name = ["sessions" "/" *]} ":" "report"]
+
+        POST           /v1beta1/{name=sessions/*/tests/*}:check func VerifyTest(request genprotopb.VerifyTestRequest) (response genprotopb.VerifyTestResponse) {}
+["/" "v1beta1" "/" {name = ["sessions" "/" * "/" "tests" "/" *]} ":" "check"]
+
+      DELETE                         /v1beta1/{name=sessions/*} func DeleteSession(request genprotopb.DeleteSessionRequest) (response emptypb.Empty) {}
+["/" "v1beta1" "/" {name = ["sessions" "/" *]}]
+
+      DELETE                 /v1beta1/{name=sessions/*/tests/*} func DeleteTest(request genprotopb.DeleteTestRequest) (response emptypb.Empty) {}
+["/" "v1beta1" "/" {name = ["sessions" "/" * "/" "tests" "/" *]}]
+
