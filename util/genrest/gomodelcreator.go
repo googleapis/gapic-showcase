@@ -56,8 +56,8 @@ func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 				HTTPMethod:      binding.RESTPattern.HTTPMethod,
 				URIPattern:      binding.RESTPattern.Pattern,
 				PathTemplate:    pathTemplate,
-				StreamingServer: protoMethodDesc.GetClientStreaming(),
-				StreamingClient: protoMethodDesc.GetServerStreaming(),
+				StreamingServer: protoMethodDesc.GetServerStreaming(),
+				StreamingClient: protoMethodDesc.GetClientStreaming(),
 
 				GoMethod:           protoMethodDesc.GetName(),
 				RequestType:        inGoType,
