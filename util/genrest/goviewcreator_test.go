@@ -15,6 +15,7 @@
 package genrest
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/googleapis/gapic-showcase/util/genrest/gomodel"
@@ -23,15 +24,18 @@ import (
 func TestMatchingPath(t *testing.T) {
 	for idx, testCase := range []struct {
 		template    string
+		expectError bool
 		expectMatch string
+		expectVars  []string
 	}{
 		{
-			"/aa/{bb}/cc/{dd=ee/*/gg/{hh=ii/jj/*/kk}/**}:ll",
-			"/aa/{bb:[a-zA-Z_%\\-]+}/cc/{dd:ee/[a-zA-Z_%\\-]+/gg/(?:ii/jj/[a-zA-Z_%\\-]+/kk)/[a-zA-Z_%\\-/]+}:ll",
+			template:    "/aa/{bb}/cc/{dd=ee/*/gg/{hh=ii/jj/*/kk}/**}:ll",
+			expectError: true,
 		},
 		{
-			"/aa/{bb}/cc/{dd=ee/*/gg/{hh=ii/jj/*/kk}/**}",
-			"/aa/{bb:[a-zA-Z_%\\-]+}/cc/{dd:ee/[a-zA-Z_%\\-]+/gg/(?:ii/jj/[a-zA-Z_%\\-]+/kk)/[a-zA-Z_%\\-/]+}",
+			template:    "/aa/{bb}/cc/{dd=ee/*/gg}/{hh=ii/jj/*/kk/**}",
+			expectMatch: "/aa/{bb:[a-zA-Z_%\\-]+}/cc/{dd:ee/[a-zA-Z_%\\-]+/gg}/{hh:ii/jj/[a-zA-Z_%\\-]+/kk/[a-zA-Z_%\\-/]+}",
+			expectVars:  []string{"bb", "dd", "hh"},
 		},
 	} {
 		pathTemplate, err := gomodel.ParseTemplate(testCase.template)
@@ -40,8 +44,19 @@ func TestMatchingPath(t *testing.T) {
 			continue
 		}
 
-		if got, want := matchingPath(pathTemplate), testCase.expectMatch; got != want {
-			t.Errorf("testCase %2d: matchingPath error:\n    got: %q\n   want: %q", idx, got, want)
+		path, allVars, err := matchingPath(pathTemplate)
+
+		if got, want := (err != nil), testCase.expectError; got != want {
+			t.Errorf("testCase %2d: matchingPath error:\n    got: %q\n   want: %v", idx, err, want)
+		}
+		if err != nil {
+			continue
+		}
+		if got, want := path, testCase.expectMatch; got != want {
+			t.Errorf("testCase %2d: matchingPath path:\n    got: %q\n   want: %q", idx, got, want)
+		}
+		if got, want := allVars, testCase.expectVars; !reflect.DeepEqual(got, want) {
+			t.Errorf("testCase %2d: matchingPath path:\n    got: %#v\n   want: %#v", idx, got, want)
 		}
 
 	}
