@@ -5,6 +5,7 @@ require (
 	github.com/golang/protobuf v1.4.3
 	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/googleapis/grpc-fallback-go v0.1.4
+	github.com/gorilla/mux v1.8.0
 	github.com/soheilhy/cmux v0.1.4
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/viper v1.7.1

@@ -46,3 +46,26 @@ func TestMatchingPath(t *testing.T) {
 
 	}
 }
+
+func TestNamer(t *testing.T) {
+	namer := NewNamer()
+	for idx, testCase := range []struct {
+		requested string
+		expected  string
+	}{
+		// Order matters, since we're testing disambiguation with previously seen items.
+		{"rainbow", "rainbow"},
+		{"rainbow", "rainbow_1"},
+		{"rainbow", "rainbow_2"},
+		{"rainbow_1", "rainbow_1_1"},
+		{"rainbow_1", "rainbow_1_2"},
+		{"rainbow_1", "rainbow_1_3"},
+		{"rainbow_2", "rainbow_2_1"},
+		{"sun_1", "sun_1"},
+		{"sun_1", "sun_1_1"},
+	} {
+		if got, want := namer.Get(testCase.requested), testCase.expected; got != want {
+			t.Errorf("testCase %2d: got %q, want %q", idx, got, want)
+		}
+	}
+}

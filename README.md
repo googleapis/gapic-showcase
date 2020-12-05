@@ -117,11 +117,12 @@ is the minimum supported version of `protoc`.
 If there are any changes to the protobuf files, the generated support code must
 be regenerated. This can be done by executing the following command:
 
-    go run ./util/cmd/compile_protos
+    go install ./util/cmd/... && go run ./util/cmd/compile_protos
 
 If successful, you may see changes in the following directories:
 
 * `server/genproto`
+* `server/genrest`
 * `client/`
 * `cmd/gapic-showcase`
 

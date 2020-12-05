@@ -53,9 +53,11 @@ func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 			goModel.AccumulateError(err)
 
 			restHandler := &gomodel.RESTHandler{
-				HTTPMethod:   binding.RESTPattern.HTTPMethod,
-				URIPattern:   binding.RESTPattern.Pattern,
-				PathTemplate: pathTemplate,
+				HTTPMethod:      binding.RESTPattern.HTTPMethod,
+				URIPattern:      binding.RESTPattern.Pattern,
+				PathTemplate:    pathTemplate,
+				StreamingServer: protoMethodDesc.GetServerStreaming(),
+				StreamingClient: protoMethodDesc.GetClientStreaming(),
 
 				GoMethod:           protoMethodDesc.GetName(),
 				RequestType:        inGoType,
