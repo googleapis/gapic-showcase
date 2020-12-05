@@ -15,8 +15,6 @@
 package genrest
 
 import (
-	"fmt"
-	"go/format"
 	"path/filepath"
 	"strings"
 
@@ -53,12 +51,8 @@ func Generate(plugin *protogen.Plugin) error {
 		return err
 	}
 	for _, source := range view.Files {
-		goSource, err := format.Source([]byte(source.Contents()))
-		if err != nil {
-			return fmt.Errorf("could not apply gofmt to %q: %s", source.Name, err)
-		}
 		file := plugin.NewGeneratedFile(source.Name, protogen.GoImportPath(filepath.Join("github.com/googleapis/gapic-showcase/server/genrest", source.Directory)))
-		file.P(string(goSource))
+		file.P(source.Contents())
 	}
 
 	return nil
