@@ -73,7 +73,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			if err != nil {
 				return nil, fmt.Errorf("processing %q: %s", handler.PathTemplate, err)
 			}
-			registered = append(registered, &registeredHandler{pathMatch, handlerName})
+			registered = append(registered, &registeredHandler{pathMatch, handlerName, handler.HTTPMethod})
 
 			file.P("")
 			file.P("// %s translates REST requests/responses on the wire to internal proto messages for %s", handlerName, handler.GoMethod)
@@ -141,10 +141,9 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	file.P("")
 	file.P("")
 	file.P(`func RegisterHandlers(router *gmux.Router, backend *services.Backend) {`)
-	file.P("")
 	file.P(" rest := (*RESTBackend)(backend)")
 	for _, handler := range registered {
-		file.P(`  router.HandleFunc(%q, rest.%s)`, handler.pattern, handler.function)
+		file.P(`  router.HandleFunc(%q, rest.%s).Methods(%q)`, handler.pattern, handler.function, handler.verb)
 	}
 	file.P(`}`)
 	file.P("")
@@ -154,7 +153,9 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 // registeredHandler pairs a URL path pattern with the name of the associated handler
 type registeredHandler struct {
-	pattern, function string
+	pattern  string // URL pattern
+	function string // handler function
+	verb     string // HTTP verb
 }
 
 // matchingPath returns the URL path for a gorilla/mux HTTP handler corresponding to the given
