@@ -19,17 +19,28 @@ package genrest
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/golang/protobuf/jsonpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
+	gmux "github.com/gorilla/mux"
 )
 
 // HandleCreateUser translates REST requests/responses on the wire to internal proto messages for CreateUser
 //    Generated for HTTP binding pattern: /v1beta1/users
 //         This matches URIs of the form: /v1beta1/users
 func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/users': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 0 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.CreateUserRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -56,7 +67,16 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 //    Generated for HTTP binding pattern: /v1beta1/{name=users/*}
 //         This matches URIs of the form: /v1beta1/{name:users/[a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{name=users/*}': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.GetUserRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -83,7 +103,16 @@ func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request
 //    Generated for HTTP binding pattern: /v1beta1/{user.name=users/*}
 //         This matches URIs of the form: /v1beta1/{user.name:users/[a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{user.name=users/*}': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.UpdateUserRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -110,7 +139,16 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 //    Generated for HTTP binding pattern: /v1beta1/{name=users/*}
 //         This matches URIs of the form: /v1beta1/{name:users/[a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{name=users/*}': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.DeleteUserRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -137,7 +175,16 @@ func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Requ
 //    Generated for HTTP binding pattern: /v1beta1/users
 //         This matches URIs of the form: /v1beta1/users
 func (backend *RESTBackend) HandleListUsers(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/users': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 0 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.ListUsersRequest
 	// TODO: Populate request with parameters from HTTP request

@@ -19,17 +19,28 @@ package genrest
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/golang/protobuf/jsonpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
+	gmux "github.com/gorilla/mux"
 )
 
 // HandleCreateSequence translates REST requests/responses on the wire to internal proto messages for CreateSequence
 //    Generated for HTTP binding pattern: /v1beta1/sequences
 //         This matches URIs of the form: /v1beta1/sequences
 func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/sequences': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 0 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.CreateSequenceRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -56,7 +67,16 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 //    Generated for HTTP binding pattern: /v1beta1/{name=sequences/*/sequenceReport}
 //         This matches URIs of the form: /v1beta1/{name:sequences/[a-zA-Z_%\-]+/sequenceReport}
 func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{name=sequences/*/sequenceReport}': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.GetSequenceReportRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -83,7 +103,16 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 //    Generated for HTTP binding pattern: /v1beta1/{name=sequences/*}
 //         This matches URIs of the form: /v1beta1/{name:sequences/[a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{name=sequences/*}': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.AttemptSequenceRequest
 	// TODO: Populate request with parameters from HTTP request

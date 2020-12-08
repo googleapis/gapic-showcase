@@ -19,17 +19,28 @@ package genrest
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/golang/protobuf/jsonpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
+	gmux "github.com/gorilla/mux"
 )
 
 // HandleEcho translates REST requests/responses on the wire to internal proto messages for Echo
 //    Generated for HTTP binding pattern: /v1beta1/echo:echo
 //         This matches URIs of the form: /v1beta1/echo:echo
 func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/echo:echo': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 0 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.EchoRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -72,7 +83,16 @@ func (backend *RESTBackend) HandleCollect(w http.ResponseWriter, r *http.Request
 //    Generated for HTTP binding pattern: /v1beta1/echo:pagedExpand
 //         This matches URIs of the form: /v1beta1/echo:pagedExpand
 func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/echo:pagedExpand': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 0 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.PagedExpandRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -99,7 +119,16 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 //    Generated for HTTP binding pattern: /v1beta1/echo:wait
 //         This matches URIs of the form: /v1beta1/echo:wait
 func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/echo:wait': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 0 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.WaitRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -126,7 +155,16 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 //    Generated for HTTP binding pattern: /v1beta1/echo:block
 //         This matches URIs of the form: /v1beta1/echo:block
 func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/echo:block': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 0 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.BlockRequest
 	// TODO: Populate request with parameters from HTTP request

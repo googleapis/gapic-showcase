@@ -19,17 +19,28 @@ package genrest
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/golang/protobuf/jsonpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
+	gmux "github.com/gorilla/mux"
 )
 
 // HandleCreateSession translates REST requests/responses on the wire to internal proto messages for CreateSession
 //    Generated for HTTP binding pattern: /v1beta1/sessions
 //         This matches URIs of the form: /v1beta1/sessions
 func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/sessions': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 0 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.CreateSessionRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -56,7 +67,16 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 //    Generated for HTTP binding pattern: /v1beta1/{name=sessions/*}
 //         This matches URIs of the form: /v1beta1/{name:sessions/[a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{name=sessions/*}': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.GetSessionRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -83,7 +103,16 @@ func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Requ
 //    Generated for HTTP binding pattern: /v1beta1/sessions
 //         This matches URIs of the form: /v1beta1/sessions
 func (backend *RESTBackend) HandleListSessions(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/sessions': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 0 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.ListSessionsRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -110,7 +139,16 @@ func (backend *RESTBackend) HandleListSessions(w http.ResponseWriter, r *http.Re
 //    Generated for HTTP binding pattern: /v1beta1/{name=sessions/*}
 //         This matches URIs of the form: /v1beta1/{name:sessions/[a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{name=sessions/*}': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.DeleteSessionRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -137,7 +175,16 @@ func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.R
 //    Generated for HTTP binding pattern: /v1beta1/{name=sessions/*}:report
 //         This matches URIs of the form: /v1beta1/{name:sessions/[a-zA-Z_%\-]+}:report
 func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{name=sessions/*}:report': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.ReportSessionRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -164,7 +211,16 @@ func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.R
 //    Generated for HTTP binding pattern: /v1beta1/{parent=sessions/*}/tests
 //         This matches URIs of the form: /v1beta1/{parent:sessions/[a-zA-Z_%\-]+}/tests
 func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{parent=sessions/*}/tests': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.ListTestsRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -191,7 +247,16 @@ func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Reque
 //    Generated for HTTP binding pattern: /v1beta1/{name=sessions/*/tests/*}
 //         This matches URIs of the form: /v1beta1/{name:sessions/[a-zA-Z_%\-]+/tests/[a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{name=sessions/*/tests/*}': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.DeleteTestRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -218,7 +283,16 @@ func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Requ
 //    Generated for HTTP binding pattern: /v1beta1/{name=sessions/*/tests/*}:check
 //         This matches URIs of the form: /v1beta1/{name:sessions/[a-zA-Z_%\-]+/tests/[a-zA-Z_%\-]+}:check
 func (backend *RESTBackend) HandleVerifyTest(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{name=sessions/*/tests/*}:check': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.VerifyTestRequest
 	// TODO: Populate request with parameters from HTTP request
