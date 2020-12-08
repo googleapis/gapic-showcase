@@ -59,6 +59,9 @@ func (gm *Model) CheckConsistency() {
 	}
 
 	for first, firstHandler := range allHandlers {
+		if _, nestedVariables := firstHandler.PathTemplate.HasVariables(); nestedVariables {
+			gm.AccumulateError(fmt.Errorf("pattern %q specifies nested variables, which are not allowed as per https://cloud.google.com/endpoints/docs/grpc-service-config/reference/rpc/google.api#path-template-syntax", firstHandler.URIPattern))
+		}
 		for _, secondHandler := range allHandlers[first+1:] {
 			if firstHandler.HTTPMethod != secondHandler.HTTPMethod {
 				continue
