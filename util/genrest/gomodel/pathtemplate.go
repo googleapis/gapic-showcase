@@ -72,7 +72,7 @@ type Segment struct {
 
 	// the semantics of Value depend on Kind:
 	// Kind==Variable: field path
-	// Kind==Literal: literal valueed
+	// Kind==Literal: literal value
 	// Kind==SingleValue: "*"
 	// Kind== MultipleValue: "**"
 	Value string
