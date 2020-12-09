@@ -65,6 +65,8 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 		// TODO: Investigate why "google.golang.org/protobuf" doesn't work below
 		file.P(`  "github.com/golang/protobuf/jsonpb"`)
 		file.P(`  gmux "github.com/gorilla/mux"`)
+		file.P("")
+		file.P(`  "github.com/googleapis/gapic-showcase/util/genrest/resttools"`)
 		file.P(")")
 		file.P("")
 		for _, handler := range service.Handlers {
@@ -93,7 +95,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			// TODO: Consider factoring out code shared among handlers into a single
 			// place, so that handlers only provide the relevant values (eg,, expected
 			// number of path variables, etc.)
-			file.P(`  backend.StdLog.Printf("Received request matching '%s': %%q", r.URL)`, handler.URIPattern)
+			file.P(`  backend.StdLog.Printf("Received %%s request matching '%s': %%q", r.Method, r.URL)`, handler.URIPattern)
 			file.P(`  backend.StdLog.Printf("  urlPathParams (expect %d, have %%d): %%q", numUrlPathParams, urlPathParams)`, len(allURLVariables))
 			file.P("")
 			file.P("  if numUrlPathParams!=%d {", len(allURLVariables))
@@ -102,12 +104,20 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			file.P("  }")
 
 			file.P("")
-			file.P("  var %s %s.%s", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
+			file.P("  %s := &%s.%s{}", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
 			file.P("  // TODO: Populate %s with parameters from HTTP request", handler.RequestVariable)
-			file.P(`  backend.StdLog.Printf("  request: %%s", &%s)`, handler.RequestVariable)
+			file.P("  if err := resttools.PopulateFields(%s, urlPathParams); err != nil {", handler.RequestVariable)
+			file.P(`    backend.StdLog.Printf("  error: %%s", err)`)
+			file.P("    // TODO: Properly handle error")
+			file.P("    w.Write([]byte(err.Error()))")
+			file.P("    return")
+			file.P("  }")
+			file.P("  requestMarshaler := &jsonpb.Marshaler{}")
+			file.P("  requestJSON, err := requestMarshaler.MarshalToString(%s)", handler.RequestVariable)
+			file.P(`  backend.StdLog.Printf("  request: %%s", requestJSON)`)
 			file.P("")
 			// TODO: In the future, we may want to redirect all REST-endpoint requests to the gRPC endpoint so that the gRPC-registered observers get invoked.
-			file.P("  %s, err := backend.%sServer.%s(context.Background(), &%s)", handler.ResponseVariable, service.ShortName, handler.GoMethod, handler.RequestVariable)
+			file.P("  %s, err := backend.%sServer.%s(context.Background(), %s)", handler.ResponseVariable, service.ShortName, handler.GoMethod, handler.RequestVariable)
 			file.P("  if err != nil {")
 			file.P("    // TODO: Properly handle error")
 			file.P("    w.Write([]byte(err.Error()))")
@@ -146,6 +156,12 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	file.P("")
 	file.P(`func RegisterHandlers(router *gmux.Router, backend *services.Backend) {`)
 	file.P(" rest := (*RESTBackend)(backend)")
+	// TODO: Fix PATCH requests, like
+	//  `curl -X PATCH http://localhost:7469/v1beta1/users/Victor`
+	// which don't seem to make it through to the handler. (It doesn't seem to be an issue with
+	// them being shadowed by other HTTP verb handlers, since the problem persists even when not
+	// registering other handlers with the same URL pattern.) Consider using gorilla/mux
+	// subroutes, selecting by HTTP verb before the URL path.
 	for _, handler := range registered {
 		file.P(`  router.HandleFunc(%q, rest.%s).Methods(%q)`, handler.pattern, handler.function, handler.verb)
 	}

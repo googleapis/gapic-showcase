@@ -18,12 +18,12 @@ import (
 	"fmt"
 	"strings"
 
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-func PopulateField(message protoreflect.Message, fieldPath string, value string) (out string, err error) {
-
-	out += fmt.Sprintf("BEFORE %q  %q %#v\n", fieldPath, string(message.Descriptor().FullName()), message)
+func PopulateOneField(protoMessage proto.Message, fieldPath string, value string) error {
+	message := protoMessage.ProtoReflect()
 
 	// TODO: check for proto3
 
@@ -31,20 +31,20 @@ func PopulateField(message protoreflect.Message, fieldPath string, value string)
 	lastLevel := len(levels) - 1
 	for idx, fieldName := range levels {
 		if len(fieldName) == 0 {
-			return out, fmt.Errorf("segment %d of path field %q is empty", idx, fieldPath)
+			return fmt.Errorf("segment %d of path field %q is empty", idx, fieldPath)
 		}
 
 		subFields := message.Descriptor().Fields()
 		fieldDescriptor := subFields.ByName(protoreflect.Name(fieldName))
 		if fieldDescriptor == nil {
-			return out, fmt.Errorf("could not find %dth field (%q) in field path %q in message %q", idx, fieldName, fieldPath, message.Descriptor().FullName())
+			return fmt.Errorf("could not find %dth field (%q) in field path %q in message %q", idx, fieldName, fieldPath, message.Descriptor().FullName())
 		}
 
 		if idx != lastLevel {
 			// non-terminal field: go to the next level
 
 			if kind := fieldDescriptor.Kind(); kind != protoreflect.MessageKind {
-				return out, fmt.Errorf("%dth field (%q) in field path %q in message %q is not itself a message but a %q",
+				return fmt.Errorf("%dth field (%q) in field path %q in message %q is not itself a message but a %q",
 					idx, fieldName, fieldPath, message.Descriptor().FullName(), kind)
 			}
 			message = message.Mutable(fieldDescriptor).Message()
@@ -54,16 +54,25 @@ func PopulateField(message protoreflect.Message, fieldPath string, value string)
 		// terminal field
 		switch kind := fieldDescriptor.Kind(); kind {
 		case protoreflect.MessageKind:
-			return out, fmt.Errorf("terminal field %q of field path %q in message %q is a message type", fieldName, fieldPath, message.Descriptor().FullName())
+			return fmt.Errorf("terminal field %q of field path %q in message %q is a message type", fieldName, fieldPath, message.Descriptor().FullName())
 		case protoreflect.StringKind:
 			message.Set(fieldDescriptor, protoreflect.ValueOfString(value))
 		default:
 			// TODO: Handle additional kinds
 			// TODO: Handle lists
-			return out, fmt.Errorf("terminal field %q of field path %q is of type %q, which is not handled yet", fieldName, fieldPath, kind)
+			return fmt.Errorf("terminal field %q of field path %q is of type %q, which is not handled yet", fieldName, fieldPath, kind)
 		}
 	}
 
-	out += fmt.Sprintf("\nAFTER %q  %#v\n", fieldPath, message)
-	return out, nil
+	return nil
+}
+
+func PopulateFields(protoMessage proto.Message, fieldValues map[string]string) error {
+	for name, value := range fieldValues {
+		if err := PopulateOneField(protoMessage, name, value); err != nil {
+			// TODO: accumulate error
+			return err
+		}
+	}
+	return nil
 }

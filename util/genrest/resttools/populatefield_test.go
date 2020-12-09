@@ -20,15 +20,14 @@ import (
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 )
 
-func TestPopulateField(t *testing.T) {
+func TestPopulateOneField(t *testing.T) {
 	request := &genprotopb.GetUserRequest{}
 	t.Logf("BEFORE request: %s", request)
 
-	out, err := PopulateField(request.ProtoReflect(), "name", "John")
-	t.Logf("out: %s", out)
+	err := PopulateOneField(request, "name", "John")
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
 
-	t.Logf("AFTER request: %sv", request)
+	t.Logf("AFTER request: %s", request)
 }
