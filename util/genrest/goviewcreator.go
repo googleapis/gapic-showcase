@@ -102,11 +102,12 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			file.P("  }")
 
 			file.P("")
-			file.P("  var %s *%s.%s", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
+			file.P("  var %s %s.%s", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
 			file.P("  // TODO: Populate %s with parameters from HTTP request", handler.RequestVariable)
+			file.P(`  backend.StdLog.Printf("  request: %%s", &%s)`, handler.RequestVariable)
 			file.P("")
 			// TODO: In the future, we may want to redirect all REST-endpoint requests to the gRPC endpoint so that the gRPC-registered observers get invoked.
-			file.P("  %s, err := backend.%sServer.%s(context.Background(), %s)", handler.ResponseVariable, service.ShortName, handler.GoMethod, handler.RequestVariable)
+			file.P("  %s, err := backend.%sServer.%s(context.Background(), &%s)", handler.ResponseVariable, service.ShortName, handler.GoMethod, handler.RequestVariable)
 			file.P("  if err != nil {")
 			file.P("    // TODO: Properly handle error")
 			file.P("    w.Write([]byte(err.Error()))")
