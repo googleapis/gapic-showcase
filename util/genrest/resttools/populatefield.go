@@ -23,22 +23,48 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
+// PopulateFields sets the fields within protoMessage to the values provided in fieldValues. The
+// fields and values are provided as a map of field paths to the string representation of their
+// values. The fields paths can refer to fields nested arbitrarily deep within protoMessage. This
+// returns an error if any field path is not valid or if any value can't be parsed into the correct
+// data type for the field.
+func PopulateFields(protoMessage proto.Message, fieldValues map[string]string) error {
+	for name, value := range fieldValues {
+		if err := PopulateOneField(protoMessage, name, value); err != nil {
+			// TODO: accumulate errors so we report them all at once
+			return err
+		}
+	}
+	return nil
+}
+
+// PopulateOneField finds in protoMessage the field identified by fieldPath (which could refer to an
+// arbitrarily nested field using dotted notation) and sets it to `value`. It returns an error if
+// the fieldPath does not properly reference a field, or if `value` could not be parsed into the
+// data type expected for the field.
 func PopulateOneField(protoMessage proto.Message, fieldPath string, value string) error {
 	message := protoMessage.ProtoReflect()
-
-	// TODO: check for proto3
 
 	levels := strings.Split(fieldPath, ".")
 	lastLevel := len(levels) - 1
 	for idx, fieldName := range levels {
+		messageDescriptor := message.Descriptor()
+		messageFullName := messageDescriptor.FullName()
+
+		if messageDescriptor.Syntax() != protoreflect.Proto3 {
+			return fmt.Errorf("cannot process %q as it does not use proto3 syntax", messageFullName)
+		}
+
 		if len(fieldName) == 0 {
 			return fmt.Errorf("segment %d of path field %q is empty", idx, fieldPath)
 		}
 
-		subFields := message.Descriptor().Fields()
+		// find field
+		subFields := messageDescriptor.Fields()
 		fieldDescriptor := subFields.ByName(protoreflect.Name(fieldName))
 		if fieldDescriptor == nil {
-			return fmt.Errorf("could not find %dth field (%q) in field path %q in message %q", idx, fieldName, fieldPath, message.Descriptor().FullName())
+			return fmt.Errorf("could not find %dth field (%q) in field path %q in message %q",
+				idx, fieldName, fieldPath, messageFullName)
 		}
 
 		if idx != lastLevel {
@@ -46,7 +72,7 @@ func PopulateOneField(protoMessage proto.Message, fieldPath string, value string
 
 			if kind := fieldDescriptor.Kind(); kind != protoreflect.MessageKind {
 				return fmt.Errorf("%dth field (%q) in field path %q in message %q is not itself a message but a %q",
-					idx, fieldName, fieldPath, message.Descriptor().FullName(), kind)
+					idx, fieldName, fieldPath, messageFullName, kind)
 			}
 			message = message.Mutable(fieldDescriptor).Message()
 			continue
@@ -60,12 +86,16 @@ func PopulateOneField(protoMessage proto.Message, fieldPath string, value string
 		kind := fieldDescriptor.Kind()
 		switch kind {
 		case protoreflect.MessageKind:
-			parseError = fmt.Errorf("terminal field %q of field path %q in message %q is a message type", fieldName, fieldPath, message.Descriptor().FullName())
+			parseError = fmt.Errorf("terminal field %q of field path %q in message %q is a message type",
+				fieldName, fieldPath, messageFullName)
 
-			// reference for proto scalar types: https://developers.google.com/protocol-buffers/docs/proto3#scalar
+		// reference for proto scalar types:
+		// https://developers.google.com/protocol-buffers/docs/proto3#scalar
 
 		case protoreflect.StringKind:
 			protoValue = protoreflect.ValueOfString(value)
+		case protoreflect.BytesKind:
+			protoValue = protoreflect.ValueOfBytes([]byte(value))
 
 		case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind:
 			v64, err := strconv.ParseInt(value, 10, 32)
@@ -94,9 +124,6 @@ func PopulateOneField(protoMessage proto.Message, fieldPath string, value string
 			vBool, err := strconv.ParseBool(value)
 			parseError, protoValue = err, protoreflect.ValueOfBool(vBool)
 
-		case protoreflect.BytesKind:
-			protoValue = protoreflect.ValueOfBytes([]byte(value))
-
 		default:
 			// TODO: Handle lists
 			// TODO: Handle oneofs
@@ -107,18 +134,7 @@ func PopulateOneField(protoMessage proto.Message, fieldPath string, value string
 				fieldName, fieldPath, kind, value, parseError)
 		}
 		message.Set(fieldDescriptor, protoValue)
-
 	}
 
-	return nil
-}
-
-func PopulateFields(protoMessage proto.Message, fieldValues map[string]string) error {
-	for name, value := range fieldValues {
-		if err := PopulateOneField(protoMessage, name, value); err != nil {
-			// TODO: accumulate error
-			return err
-		}
-	}
 	return nil
 }
