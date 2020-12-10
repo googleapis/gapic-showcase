@@ -25,6 +25,8 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	gmux "github.com/gorilla/mux"
+
+	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 )
 
 // HandleCreateUser translates REST requests/responses on the wire to internal proto messages for CreateUser
@@ -34,7 +36,7 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/users': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/users': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 0 {
@@ -42,8 +44,18 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	var request *genprotopb.CreateUserRequest
+	request := &genprotopb.CreateUserRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.IdentityServer.CreateUser(context.Background(), request)
 	if err != nil {
@@ -52,7 +64,6 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -70,7 +81,7 @@ func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/{name=users/*}': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=users/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -78,8 +89,18 @@ func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	var request *genprotopb.GetUserRequest
+	request := &genprotopb.GetUserRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.IdentityServer.GetUser(context.Background(), request)
 	if err != nil {
@@ -88,7 +109,6 @@ func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -106,7 +126,7 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/{user.name=users/*}': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{user.name=users/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -114,8 +134,18 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	var request *genprotopb.UpdateUserRequest
+	request := &genprotopb.UpdateUserRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.IdentityServer.UpdateUser(context.Background(), request)
 	if err != nil {
@@ -124,7 +154,6 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -142,7 +171,7 @@ func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Requ
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/{name=users/*}': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=users/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -150,8 +179,18 @@ func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	var request *genprotopb.DeleteUserRequest
+	request := &genprotopb.DeleteUserRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.IdentityServer.DeleteUser(context.Background(), request)
 	if err != nil {
@@ -160,7 +199,6 @@ func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -178,7 +216,7 @@ func (backend *RESTBackend) HandleListUsers(w http.ResponseWriter, r *http.Reque
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/users': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/users': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 0 {
@@ -186,8 +224,18 @@ func (backend *RESTBackend) HandleListUsers(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	var request *genprotopb.ListUsersRequest
+	request := &genprotopb.ListUsersRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.IdentityServer.ListUsers(context.Background(), request)
 	if err != nil {
@@ -196,7 +244,6 @@ func (backend *RESTBackend) HandleListUsers(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error

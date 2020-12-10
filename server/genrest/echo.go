@@ -25,6 +25,8 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	gmux "github.com/gorilla/mux"
+
+	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 )
 
 // HandleEcho translates REST requests/responses on the wire to internal proto messages for Echo
@@ -34,7 +36,7 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/echo:echo': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/echo:echo': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 0 {
@@ -42,8 +44,18 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var request *genprotopb.EchoRequest
+	request := &genprotopb.EchoRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.EchoServer.Echo(context.Background(), request)
 	if err != nil {
@@ -52,7 +64,6 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -86,7 +97,7 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/echo:pagedExpand': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/echo:pagedExpand': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 0 {
@@ -94,8 +105,18 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	var request *genprotopb.PagedExpandRequest
+	request := &genprotopb.PagedExpandRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.EchoServer.PagedExpand(context.Background(), request)
 	if err != nil {
@@ -104,7 +125,6 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -122,7 +142,7 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/echo:wait': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/echo:wait': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 0 {
@@ -130,8 +150,18 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var request *genprotopb.WaitRequest
+	request := &genprotopb.WaitRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.EchoServer.Wait(context.Background(), request)
 	if err != nil {
@@ -140,7 +170,6 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -158,7 +187,7 @@ func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) 
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/echo:block': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/echo:block': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 0 {
@@ -166,8 +195,18 @@ func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	var request *genprotopb.BlockRequest
+	request := &genprotopb.BlockRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.EchoServer.Block(context.Background(), request)
 	if err != nil {
@@ -176,7 +215,6 @@ func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error

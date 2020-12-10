@@ -25,6 +25,8 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	gmux "github.com/gorilla/mux"
+
+	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 )
 
 // HandleCreateRoom translates REST requests/responses on the wire to internal proto messages for CreateRoom
@@ -34,7 +36,7 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/rooms': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/rooms': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 0 {
@@ -42,8 +44,18 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	var request *genprotopb.CreateRoomRequest
+	request := &genprotopb.CreateRoomRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.CreateRoom(context.Background(), request)
 	if err != nil {
@@ -52,7 +64,6 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -70,7 +81,7 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/{name=rooms/*}': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=rooms/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -78,8 +89,18 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	var request *genprotopb.GetRoomRequest
+	request := &genprotopb.GetRoomRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.GetRoom(context.Background(), request)
 	if err != nil {
@@ -88,7 +109,6 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -106,7 +126,7 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/{room.name=rooms/*}': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{room.name=rooms/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -114,8 +134,18 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	var request *genprotopb.UpdateRoomRequest
+	request := &genprotopb.UpdateRoomRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.UpdateRoom(context.Background(), request)
 	if err != nil {
@@ -124,7 +154,6 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -142,7 +171,7 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/{name=rooms/*}': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=rooms/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -150,8 +179,18 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	var request *genprotopb.DeleteRoomRequest
+	request := &genprotopb.DeleteRoomRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.DeleteRoom(context.Background(), request)
 	if err != nil {
@@ -160,7 +199,6 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -178,7 +216,7 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/rooms': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/rooms': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 0 {
@@ -186,8 +224,18 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	var request *genprotopb.ListRoomsRequest
+	request := &genprotopb.ListRoomsRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.ListRooms(context.Background(), request)
 	if err != nil {
@@ -196,7 +244,6 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -214,7 +261,7 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/{parent=rooms/*}/blurbs': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{parent=rooms/*}/blurbs': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -222,8 +269,18 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	var request *genprotopb.CreateBlurbRequest
+	request := &genprotopb.CreateBlurbRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.CreateBlurb(context.Background(), request)
 	if err != nil {
@@ -232,7 +289,6 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -250,7 +306,7 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/{parent=users/*/profile}/blurbs': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{parent=users/*/profile}/blurbs': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -258,8 +314,18 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	var request *genprotopb.CreateBlurbRequest
+	request := &genprotopb.CreateBlurbRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.CreateBlurb(context.Background(), request)
 	if err != nil {
@@ -268,7 +334,6 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -286,7 +351,7 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/{name=rooms/*/blurbs/*}': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=rooms/*/blurbs/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -294,8 +359,18 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	var request *genprotopb.GetBlurbRequest
+	request := &genprotopb.GetBlurbRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.GetBlurb(context.Background(), request)
 	if err != nil {
@@ -304,7 +379,6 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -322,7 +396,7 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/{name=users/*/profile/blurbs/*}': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=users/*/profile/blurbs/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -330,8 +404,18 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	var request *genprotopb.GetBlurbRequest
+	request := &genprotopb.GetBlurbRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.GetBlurb(context.Background(), request)
 	if err != nil {
@@ -340,7 +424,6 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -358,7 +441,7 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/{blurb.name=rooms/*/blurbs/*}': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{blurb.name=rooms/*/blurbs/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -366,8 +449,18 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	var request *genprotopb.UpdateBlurbRequest
+	request := &genprotopb.UpdateBlurbRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.UpdateBlurb(context.Background(), request)
 	if err != nil {
@@ -376,7 +469,6 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -394,7 +486,7 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/{blurb.name=users/*/profile/blurbs/*}': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{blurb.name=users/*/profile/blurbs/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -402,8 +494,18 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	var request *genprotopb.UpdateBlurbRequest
+	request := &genprotopb.UpdateBlurbRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.UpdateBlurb(context.Background(), request)
 	if err != nil {
@@ -412,7 +514,6 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -430,7 +531,7 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/{name=rooms/*/blurbs/*}': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=rooms/*/blurbs/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -438,8 +539,18 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	var request *genprotopb.DeleteBlurbRequest
+	request := &genprotopb.DeleteBlurbRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.DeleteBlurb(context.Background(), request)
 	if err != nil {
@@ -448,7 +559,6 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -466,7 +576,7 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/{name=users/*/profile/blurbs/*}': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=users/*/profile/blurbs/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -474,8 +584,18 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	var request *genprotopb.DeleteBlurbRequest
+	request := &genprotopb.DeleteBlurbRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.DeleteBlurb(context.Background(), request)
 	if err != nil {
@@ -484,7 +604,6 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -502,7 +621,7 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/{parent=rooms/*}/blurbs': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{parent=rooms/*}/blurbs': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -510,8 +629,18 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	var request *genprotopb.ListBlurbsRequest
+	request := &genprotopb.ListBlurbsRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.ListBlurbs(context.Background(), request)
 	if err != nil {
@@ -520,7 +649,6 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -538,7 +666,7 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/{parent=users/*/profile}/blurbs': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{parent=users/*/profile}/blurbs': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -546,8 +674,18 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	var request *genprotopb.ListBlurbsRequest
+	request := &genprotopb.ListBlurbsRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.ListBlurbs(context.Background(), request)
 	if err != nil {
@@ -556,7 +694,6 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -574,7 +711,7 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/{parent=rooms/*}/blurbs:search': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{parent=rooms/*}/blurbs:search': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -582,8 +719,18 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	var request *genprotopb.SearchBlurbsRequest
+	request := &genprotopb.SearchBlurbsRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.SearchBlurbs(context.Background(), request)
 	if err != nil {
@@ -592,7 +739,6 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
@@ -610,7 +756,7 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received request matching '/v1beta1/{parent=users/*/profile}/blurbs:search': %q", r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{parent=users/*/profile}/blurbs:search': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -618,8 +764,18 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 		return
 	}
 
-	var request *genprotopb.SearchBlurbsRequest
+	request := &genprotopb.SearchBlurbsRequest{}
 	// TODO: Populate request with parameters from HTTP request
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	marshaler := &jsonpb.Marshaler{}
+	requestJSON, _ := marshaler.MarshalToString(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.SearchBlurbs(context.Background(), request)
 	if err != nil {
@@ -628,7 +784,6 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
 		// TODO: Properly handle error
