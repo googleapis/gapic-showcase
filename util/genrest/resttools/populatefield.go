@@ -16,6 +16,7 @@ package resttools
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"google.golang.org/protobuf/proto"
@@ -52,16 +53,61 @@ func PopulateOneField(protoMessage proto.Message, fieldPath string, value string
 		}
 
 		// terminal field
-		switch kind := fieldDescriptor.Kind(); kind {
+		var (
+			protoValue protoreflect.Value
+			parseError error
+		)
+		kind := fieldDescriptor.Kind()
+		switch kind {
 		case protoreflect.MessageKind:
-			return fmt.Errorf("terminal field %q of field path %q in message %q is a message type", fieldName, fieldPath, message.Descriptor().FullName())
+			parseError = fmt.Errorf("terminal field %q of field path %q in message %q is a message type", fieldName, fieldPath, message.Descriptor().FullName())
+
+			// reference for proto scalar types: https://developers.google.com/protocol-buffers/docs/proto3#scalar
+
 		case protoreflect.StringKind:
-			message.Set(fieldDescriptor, protoreflect.ValueOfString(value))
+			protoValue = protoreflect.ValueOfString(value)
+
+		case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind:
+			v64, err := strconv.ParseInt(value, 10, 32)
+			parseError, protoValue = err, protoreflect.ValueOfInt32(int32(v64))
+		case protoreflect.Uint32Kind, protoreflect.Fixed32Kind:
+			v64, err := strconv.ParseUint(value, 10, 32)
+			parseError, protoValue = err, protoreflect.ValueOfUint32(uint32(v64))
+
+		case protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind:
+			v64, err := strconv.ParseInt(value, 10, 64)
+			parseError, protoValue = err, protoreflect.ValueOfInt64(v64)
+		case protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
+			v64, err := strconv.ParseUint(value, 10, 64)
+			parseError, protoValue = err, protoreflect.ValueOfUint64(v64)
+
+		case protoreflect.FloatKind:
+			v64, err := strconv.ParseFloat(value, 32)
+			parseError, protoValue = err, protoreflect.ValueOfFloat32(float32(v64))
+		case protoreflect.DoubleKind:
+			v64, err := strconv.ParseFloat(value, 64)
+			parseError, protoValue = err, protoreflect.ValueOfFloat64(v64)
+
+		case protoreflect.BoolKind:
+			// TODO: should we be stricter in what we accept? ParseBool accepts various
+			// representations of "true" and "false" (https://golang.org/pkg/strconv/#ParseBool)
+			vBool, err := strconv.ParseBool(value)
+			parseError, protoValue = err, protoreflect.ValueOfBool(vBool)
+
+		case protoreflect.BytesKind:
+			protoValue = protoreflect.ValueOfBytes([]byte(value))
+
 		default:
-			// TODO: Handle additional kinds
 			// TODO: Handle lists
+			// TODO: Handle oneofs
 			return fmt.Errorf("terminal field %q of field path %q is of type %q, which is not handled yet", fieldName, fieldPath, kind)
 		}
+		if parseError != nil {
+			return fmt.Errorf("terminal field %q of field path %q is of type %q with value string %q, which could not be parsed: %s",
+				fieldName, fieldPath, kind, value, parseError)
+		}
+		message.Set(fieldDescriptor, protoValue)
+
 	}
 
 	return nil

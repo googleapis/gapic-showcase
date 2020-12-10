@@ -15,19 +15,187 @@
 package resttools
 
 import (
+	"reflect"
 	"testing"
 
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
+	"google.golang.org/protobuf/encoding/prototext"
 )
 
-func TestPopulateOneField(t *testing.T) {
-	request := &genprotopb.GetUserRequest{}
-	t.Logf("BEFORE request: %s", request)
+func TestPopulateOneFieldError(t *testing.T) {
+	for idx, testCase := range []struct {
+		field string
+		value string
+	}{
+		// field path errors
 
-	err := PopulateOneField(request, "name", "John")
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
+		{".f_string", "hi"},
+		{"subpack..f_string", "hi"},
+		{"subpack.", "hi"},
+		{"subpack.x", "hi"},
+		{"subpack.x.f_string", "hi"},
+		{"subpack.f_string.subpack", "hi"},
+		{"subpack.subpack", "hi"},
+
+		// parsing errors
+
+		{"f_int32", "hello"},
+		{"f_sint32", "hello"},
+		{"f_sfixed32", "hello"},
+		{"f_int32", "2147483648"},    // max int32 + 1
+		{"f_sint32", "2147483648"},   // max int32 + 1
+		{"f_sfixed32", "2147483648"}, // max int32 + 1
+		{"f_int32", "1.1"},
+		{"f_sint32", "1.1"},
+		{"f_sfixed32", "1.1"},
+
+		{"f_uint32", "hello"},
+		{"f_fixed32", "hello"},
+		{"f_uint32", "4294967296"},  // max uint32 + 1
+		{"f_fixed32", "4294967296"}, // max uint32 + 1
+		{"f_uint32", "1.1"},
+		{"f_fixed32", "1.1"},
+		{"f_uint32", "-1"},
+		{"f_fixed32", "-1"},
+
+		{"f_int64", "hello"},
+		{"f_sint64", "hello"},
+		{"f_sfixed64", "hello"},
+		{"f_int64", "9223372036854775808"},    // max int64 + 1
+		{"f_sint64", "9223372036854775808"},   // max int64 + 1
+		{"f_sfixed64", "9223372036854775808"}, // max int64 + 1
+		{"f_int64", "1.1"},
+		{"f_sint64", "1.1"},
+		{"f_sfixed64", "1.1"},
+
+		{"f_uint64", "hello"},
+		{"f_fixed64", "hello"},
+		{"f_uint64", "18446744073709551616"},  // max uint64 + 1
+		{"f_fixed64", "18446744073709551616"}, // max uint64 + 1
+		{"f_uint64", "1.1"},
+		{"f_fixed64", "1.1"},
+		{"f_uint64", "-1"},
+		{"f_fixed64", "-1"},
+
+		{"f_float", "hello"},
+		{"f_double", "hello"},
+		{"f_float", "1e+39"},   // exponent too large
+		{"f_double", "1e+309"}, // exponent too large
+
+		{"f_bool", "hello"},
+		{"f_bool", "13"},
+	} {
+		dataPack := &genprotopb.DataPack{}
+		err := PopulateOneField(dataPack, testCase.field, testCase.value)
+		if err == nil {
+			t.Errorf("test case %d: did not get expected error for %q: %q", idx, testCase.field, testCase.value)
+		}
 	}
+}
 
-	t.Logf("AFTER request: %s", request)
+func TestPopulateFields(t *testing.T) {
+
+	for idx, testCase := range []struct {
+		label           string
+		fields          map[string]string
+		expectError     bool
+		expectProtoText string
+	}{
+		{
+			label: "scalar datatypes",
+			fields: map[string]string{
+				"f_string": "alphabet",
+
+				"f_int32":    "2147483647", // max int32
+				"f_sint32":   "2147483647", // max int32
+				"f_sfixed32": "2147483647", // max int32
+
+				"f_uint32":  "4294967295", // max uint32
+				"f_fixed32": "4294967295", // max uint32
+
+				"f_int64":    "9223372036854775807", // max int64
+				"f_sint64":   "9223372036854775807", // max int64
+				"f_sfixed64": "9223372036854775807", // max int64
+
+				"f_uint64":  "18446744073709551615", // max uint64
+				"f_fixed64": "18446744073709551615", // max uint64
+
+				"f_float":  "3.40282346638528859811704183484516925440e+38",   // max float32 (https://golang.org/pkg/math/#pkg-constants)
+				"f_double": "1.797693134862315708145274237317043567981e+308", // max float64
+
+				"f_bool": "true",
+
+				"f_bytes": "greetings",
+			},
+			expectProtoText: "f_string:\"alphabet\" f_int32:2147483647 f_sint32:2147483647 f_sfixed32:2147483647 f_uint32:4294967295 f_fixed32:4294967295 f_int64:9223372036854775807 f_sint64:9223372036854775807 f_sfixed64:9223372036854775807 f_uint64:18446744073709551615 f_fixed64:18446744073709551615 f_double:1.7976931348623157e+308 f_float:3.4028235e+38 f_bool:true f_bytes:\"greetings\"",
+		},
+		{
+			label: "nested messages",
+			fields: map[string]string{
+				"f_string":                 "alphabet",
+				"subpack.subpack.f_string": "lexicon",
+				"f_int32":                  "5",
+				"subpack.subpack.f_double": "53.47",
+				"subpack.subpack.f_int32":  "-6",
+				"subpack.f_bool":           "1", // NOTE: this gets parsed as "true"
+			},
+			expectProtoText: "subpack:{subpack:{f_string:\"lexicon\" f_int32:-6 f_double:53.47} f_bool:true} f_string:\"alphabet\" f_int32:5",
+		},
+		{
+			label: "presence/zero values",
+			fields: map[string]string{
+				"f_string": "",
+
+				"f_int32":    "0",
+				"f_sint32":   "0",
+				"f_sfixed32": "0",
+
+				"f_uint32":  "0",
+				"f_fixed32": "0",
+
+				"f_int64":    "0",
+				"f_sint64":   "0",
+				"f_sfixed64": "0",
+
+				"f_uint64":  "0",
+				"f_fixed64": "0",
+
+				"f_float":  "0",
+				"f_double": "0",
+
+				"f_bool": "false",
+
+				"f_bytes": "",
+
+				"p_string": "0",
+				"p_int32":  "0",
+				"p_double": "0",
+				"p_bool":   "0", // NOTE: this gets parsed as "false"
+			},
+			expectProtoText: "p_string:\"0\"  p_int32:0  p_double:0  p_bool:false",
+		},
+	} {
+		dataPack := &genprotopb.DataPack{}
+		err := PopulateFields(dataPack, testCase.fields)
+		if got, want := (err != nil), testCase.expectError; got != want {
+			t.Errorf("test case %d[%q] error: got %v, want %v", idx, testCase.label, err, want)
+			continue
+		}
+
+		var expectProto genprotopb.DataPack
+		err = prototext.Unmarshal([]byte(testCase.expectProtoText), &expectProto)
+		if err != nil {
+			t.Errorf("test case %d[%q] unexpected error unmarshaling expected proto: %s", idx, testCase.label, err)
+			continue
+		}
+
+		if got, want := dataPack, &expectProto; !reflect.DeepEqual(got, want) {
+			gotText, err := prototext.Marshal(got)
+			if err != nil {
+				gotText = []byte("<error marshalling in test>")
+			}
+			t.Errorf("test case %d[%q] proto:\n    got: %q\n   want: %q", idx, testCase.label, gotText, testCase.expectProtoText)
+		}
+
+	}
 }
