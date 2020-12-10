@@ -90,6 +90,9 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			file.P(`  urlPathParams := gmux.Vars(r)`)
 			file.P("  numUrlPathParams := len(urlPathParams)")
 			file.P("")
+			// TODO: Consider factoring out code shared among handlers into a single
+			// place, so that handlers only provide the relevant values (eg,, expected
+			// number of path variables, etc.)
 			file.P(`  backend.StdLog.Printf("Received request matching '%s': %%q", r.URL)`, handler.URIPattern)
 			file.P(`  backend.StdLog.Printf("  urlPathParams (expect %d, have %%d): %%q", numUrlPathParams, urlPathParams)`, len(allURLVariables))
 			file.P("")
