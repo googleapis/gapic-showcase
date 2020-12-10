@@ -167,12 +167,12 @@ func TestPopulateFields(t *testing.T) {
 
 				"f_bytes": "",
 
-				"p_string": "0",
+				"p_string": "",
 				"p_int32":  "0",
 				"p_double": "0",
 				"p_bool":   "0", // NOTE: this gets parsed as "false"
 			},
-			expectProtoText: "p_string:\"0\"  p_int32:0  p_double:0  p_bool:false",
+			expectProtoText: "p_string:\"\"  p_int32:0  p_double:0  p_bool:false",
 		},
 	} {
 		dataPack := &genprotopb.DataPack{}
