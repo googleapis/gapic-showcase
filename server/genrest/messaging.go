@@ -19,17 +19,28 @@ package genrest
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/golang/protobuf/jsonpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
+	gmux "github.com/gorilla/mux"
 )
 
 // HandleCreateRoom translates REST requests/responses on the wire to internal proto messages for CreateRoom
 //    Generated for HTTP binding pattern: /v1beta1/rooms
 //         This matches URIs of the form: /v1beta1/rooms
 func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/rooms': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 0 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.CreateRoomRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -56,7 +67,16 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 //    Generated for HTTP binding pattern: /v1beta1/{name=rooms/*}
 //         This matches URIs of the form: /v1beta1/{name:rooms/[a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{name=rooms/*}': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.GetRoomRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -83,7 +103,16 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 //    Generated for HTTP binding pattern: /v1beta1/{room.name=rooms/*}
 //         This matches URIs of the form: /v1beta1/{room.name:rooms/[a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{room.name=rooms/*}': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.UpdateRoomRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -110,7 +139,16 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 //    Generated for HTTP binding pattern: /v1beta1/{name=rooms/*}
 //         This matches URIs of the form: /v1beta1/{name:rooms/[a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{name=rooms/*}': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.DeleteRoomRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -137,7 +175,16 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 //    Generated for HTTP binding pattern: /v1beta1/rooms
 //         This matches URIs of the form: /v1beta1/rooms
 func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/rooms': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 0 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.ListRoomsRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -164,7 +211,16 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 //    Generated for HTTP binding pattern: /v1beta1/{parent=rooms/*}/blurbs
 //         This matches URIs of the form: /v1beta1/{parent:rooms/[a-zA-Z_%\-]+}/blurbs
 func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{parent=rooms/*}/blurbs': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.CreateBlurbRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -191,7 +247,16 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 //    Generated for HTTP binding pattern: /v1beta1/{parent=users/*/profile}/blurbs
 //         This matches URIs of the form: /v1beta1/{parent:users/[a-zA-Z_%\-]+/profile}/blurbs
 func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{parent=users/*/profile}/blurbs': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.CreateBlurbRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -218,7 +283,16 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 //    Generated for HTTP binding pattern: /v1beta1/{name=rooms/*/blurbs/*}
 //         This matches URIs of the form: /v1beta1/{name:rooms/[a-zA-Z_%\-]+/blurbs/[a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{name=rooms/*/blurbs/*}': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.GetBlurbRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -245,7 +319,16 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 //    Generated for HTTP binding pattern: /v1beta1/{name=users/*/profile/blurbs/*}
 //         This matches URIs of the form: /v1beta1/{name:users/[a-zA-Z_%\-]+/profile/blurbs/[a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{name=users/*/profile/blurbs/*}': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.GetBlurbRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -272,7 +355,16 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 //    Generated for HTTP binding pattern: /v1beta1/{blurb.name=rooms/*/blurbs/*}
 //         This matches URIs of the form: /v1beta1/{blurb.name:rooms/[a-zA-Z_%\-]+/blurbs/[a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{blurb.name=rooms/*/blurbs/*}': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.UpdateBlurbRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -299,7 +391,16 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 //    Generated for HTTP binding pattern: /v1beta1/{blurb.name=users/*/profile/blurbs/*}
 //         This matches URIs of the form: /v1beta1/{blurb.name:users/[a-zA-Z_%\-]+/profile/blurbs/[a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{blurb.name=users/*/profile/blurbs/*}': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.UpdateBlurbRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -326,7 +427,16 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 //    Generated for HTTP binding pattern: /v1beta1/{name=rooms/*/blurbs/*}
 //         This matches URIs of the form: /v1beta1/{name:rooms/[a-zA-Z_%\-]+/blurbs/[a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{name=rooms/*/blurbs/*}': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.DeleteBlurbRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -353,7 +463,16 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 //    Generated for HTTP binding pattern: /v1beta1/{name=users/*/profile/blurbs/*}
 //         This matches URIs of the form: /v1beta1/{name:users/[a-zA-Z_%\-]+/profile/blurbs/[a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{name=users/*/profile/blurbs/*}': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.DeleteBlurbRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -380,7 +499,16 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 //    Generated for HTTP binding pattern: /v1beta1/{parent=rooms/*}/blurbs
 //         This matches URIs of the form: /v1beta1/{parent:rooms/[a-zA-Z_%\-]+}/blurbs
 func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{parent=rooms/*}/blurbs': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.ListBlurbsRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -407,7 +535,16 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 //    Generated for HTTP binding pattern: /v1beta1/{parent=users/*/profile}/blurbs
 //         This matches URIs of the form: /v1beta1/{parent:users/[a-zA-Z_%\-]+/profile}/blurbs
 func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{parent=users/*/profile}/blurbs': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.ListBlurbsRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -434,7 +571,16 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 //    Generated for HTTP binding pattern: /v1beta1/{parent=rooms/*}/blurbs:search
 //         This matches URIs of the form: /v1beta1/{parent:rooms/[a-zA-Z_%\-]+}/blurbs:search
 func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{parent=rooms/*}/blurbs:search': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.SearchBlurbsRequest
 	// TODO: Populate request with parameters from HTTP request
@@ -461,7 +607,16 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 //    Generated for HTTP binding pattern: /v1beta1/{parent=users/*/profile}/blurbs:search
 //         This matches URIs of the form: /v1beta1/{parent:users/[a-zA-Z_%\-]+/profile}/blurbs:search
 func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
 	backend.StdLog.Printf("Received request matching '/v1beta1/{parent=users/*/profile}/blurbs:search': %q", r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		return
+	}
 
 	var request *genprotopb.SearchBlurbsRequest
 	// TODO: Populate request with parameters from HTTP request

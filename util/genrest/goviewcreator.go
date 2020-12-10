@@ -53,6 +53,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 		file.P("import (")
 		file.P(`  "context"`)
+		file.P(`  "fmt"`)
 		file.P(`  "net/http"`)
 		file.P("")
 		// TODO: Properly deal with imports once we actually use them in the code.
@@ -63,25 +64,42 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 		// TODO: Investigate why "google.golang.org/protobuf" doesn't work below
 		file.P(`  "github.com/golang/protobuf/jsonpb"`)
+		file.P(`  gmux "github.com/gorilla/mux"`)
 		file.P(")")
 		file.P("")
-
 		for _, handler := range service.Handlers {
 			handlerName := namer.Get("Handle" + handler.GoMethod)
-			pathMatch := matchingPath(handler.PathTemplate)
-			registered = append(registered, &registeredHandler{pathMatch, handlerName})
+			pathMatch, allURLVariables, err := matchingPath(handler.PathTemplate)
+			if err != nil {
+				return nil, fmt.Errorf("processing %q: %s", handler.PathTemplate, err)
+			}
+			registered = append(registered, &registeredHandler{pathMatch, handlerName, handler.HTTPMethod})
 
 			file.P("")
 			file.P("// %s translates REST requests/responses on the wire to internal proto messages for %s", handlerName, handler.GoMethod)
 			file.P("//    Generated for HTTP binding pattern: %s", handler.URIPattern)
 			file.P("//         This matches URIs of the form: %s", pathMatch)
 			file.P("func (backend *RESTBackend) %s(w http.ResponseWriter, r *http.Request) {", handlerName)
-			file.P(`  backend.StdLog.Printf("Received request matching '%s': %%q", r.URL)`, handler.URIPattern)
 			if handler.StreamingClient || handler.StreamingServer {
+				file.P(`  backend.StdLog.Printf("Received request matching '%s': %%q", r.URL)`, handler.URIPattern)
 				file.P(`  w.Write([]byte("ERROR: not implementing streaming methods yet"))`)
 				file.P("}")
 				continue
 			}
+
+			file.P(`  urlPathParams := gmux.Vars(r)`)
+			file.P("  numUrlPathParams := len(urlPathParams)")
+			file.P("")
+			// TODO: Consider factoring out code shared among handlers into a single
+			// place, so that handlers only provide the relevant values (eg,, expected
+			// number of path variables, etc.)
+			file.P(`  backend.StdLog.Printf("Received request matching '%s': %%q", r.URL)`, handler.URIPattern)
+			file.P(`  backend.StdLog.Printf("  urlPathParams (expect %d, have %%d): %%q", numUrlPathParams, urlPathParams)`, len(allURLVariables))
+			file.P("")
+			file.P("  if numUrlPathParams!=%d {", len(allURLVariables))
+			file.P(`    w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected %d, have %%d: %%#v", numUrlPathParams, urlPathParams)))`, len(allURLVariables))
+			file.P("    return")
+			file.P("  }")
 
 			file.P("")
 			file.P("  var %s *%s.%s", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
@@ -126,10 +144,9 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	file.P("")
 	file.P("")
 	file.P(`func RegisterHandlers(router *gmux.Router, backend *services.Backend) {`)
-	file.P("")
 	file.P(" rest := (*RESTBackend)(backend)")
 	for _, handler := range registered {
-		file.P(`  router.HandleFunc(%q, rest.%s)`, handler.pattern, handler.function)
+		file.P(`  router.HandleFunc(%q, rest.%s).Methods(%q)`, handler.pattern, handler.function, handler.verb)
 	}
 	file.P(`}`)
 	file.P("")
@@ -139,18 +156,25 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 // registeredHandler pairs a URL path pattern with the name of the associated handler
 type registeredHandler struct {
-	pattern, function string
+	pattern  string // URL pattern
+	function string // handler function
+	verb     string // HTTP verb
 }
 
-// matchingPath returns the URL path for a gorilla/mux HTTP handler corresponding to the given `template`.
-func matchingPath(template gomodel.PathTemplate) string {
+// matchingPath returns the URL path for a gorilla/mux HTTP handler corresponding to the given
+// `template`, as well as a list of all the template variables (identified by their proto field
+// path, which are also their key values in the variable map that will be returned by gorilla/mux.Vars()).
+func matchingPath(template gomodel.PathTemplate) (string, []string, error) {
 	return extractPath(template, false)
 }
 
-// extractPath is a recursive helper function that does the actual work of
+// extractPath is a one-level recursive helper function that does the actual work of
 // matchingPath(). `insideVariable` denotes whether we're processing segments already inside a
-// top-level handler path variable, since nested regexp groups have a different format.
-func extractPath(template gomodel.PathTemplate, insideVariable bool) string {
+// top-level handler path variable, since nested variables are not allowed. The list of variable
+// keys (which will be provided by gorilla/mux, and which also match their proto field path in the
+// request object) is returned together with the actual gorilla/mux matching path.
+func extractPath(template gomodel.PathTemplate, insideVariable bool) (string, []string, error) {
+	var allVariables []string
 	parts := make([]string, len(template))
 	for idx, seg := range template {
 		var part string
@@ -162,17 +186,21 @@ func extractPath(template gomodel.PathTemplate, insideVariable bool) string {
 		case gomodel.MultipleValue:
 			part = `[a-zA-Z_%\-/]+`
 		case gomodel.Variable:
-			if !insideVariable {
-				part = fmt.Sprintf("{%s:%s}", seg.Value, extractPath(seg.Subsegments, true))
-			} else {
-				part = fmt.Sprintf("(?:%s)", extractPath(seg.Subsegments, true))
+			if insideVariable {
+				return "", nil, fmt.Errorf("nested variables are disallowed: https://cloud.google.com/endpoints/docs/grpc-service-config/reference/rpc/google.api#path-template-syntax")
 			}
+			subParts, _, err := extractPath(seg.Subsegments, true)
+			if err != nil {
+				return "", nil, err
 
+			}
+			part = fmt.Sprintf("{%s:%s}", seg.Value, subParts)
+			allVariables = append(allVariables, seg.Value)
 		}
 		parts[idx] = part
 
 	}
-	return strings.Join(parts, "")
+	return strings.Join(parts, ""), allVariables, nil
 }
 
 ////////////////////////////////////////
