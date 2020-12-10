@@ -127,7 +127,7 @@ func TestPopulateFields(t *testing.T) {
 
 				"f_bytes": "greetings",
 			},
-			expectProtoText: "f_string:\"alphabet\" f_int32:2147483647 f_sint32:2147483647 f_sfixed32:2147483647 f_uint32:4294967295 f_fixed32:4294967295 f_int64:9223372036854775807 f_sint64:9223372036854775807 f_sfixed64:9223372036854775807 f_uint64:18446744073709551615 f_fixed64:18446744073709551615 f_double:1.7976931348623157e+308 f_float:3.4028235e+38 f_bool:true f_bytes:\"greetings\"",
+			expectProtoText: `f_string:"alphabet" f_int32:2147483647 f_sint32:2147483647 f_sfixed32:2147483647 f_uint32:4294967295 f_fixed32:4294967295 f_int64:9223372036854775807 f_sint64:9223372036854775807 f_sfixed64:9223372036854775807 f_uint64:18446744073709551615 f_fixed64:18446744073709551615 f_double:1.7976931348623157e+308 f_float:3.4028235e+38 f_bool:true f_bytes:"greetings"`,
 		},
 		{
 			label: "nested messages",
@@ -139,7 +139,7 @@ func TestPopulateFields(t *testing.T) {
 				"subpack.subpack.f_int32":  "-6",
 				"subpack.f_bool":           "1", // NOTE: this gets parsed as "true"
 			},
-			expectProtoText: "subpack:{subpack:{f_string:\"lexicon\" f_int32:-6 f_double:53.47} f_bool:true} f_string:\"alphabet\" f_int32:5",
+			expectProtoText: `subpack:{subpack:{f_string:"lexicon" f_int32:-6 f_double:53.47} f_bool:true} f_string:"alphabet" f_int32:5`,
 		},
 		{
 			label: "presence/zero values",
@@ -172,7 +172,7 @@ func TestPopulateFields(t *testing.T) {
 				"p_double": "0",
 				"p_bool":   "0", // NOTE: this gets parsed as "false"
 			},
-			expectProtoText: "p_string:\"\"  p_int32:0  p_double:0  p_bool:false",
+			expectProtoText: `p_string:""  p_int32:0  p_double:0  p_bool:false`,
 		},
 	} {
 		dataPack := &genprotopb.DataPack{}
@@ -194,7 +194,7 @@ func TestPopulateFields(t *testing.T) {
 			if err != nil {
 				gotText = []byte("<error marshalling in test>")
 			}
-			t.Errorf("test case %d[%q] proto:\n    got: %q\n   want: %q", idx, testCase.label, gotText, testCase.expectProtoText)
+			t.Errorf("test case %d[%q] proto:\n    got: %s\n   want: %s", idx, testCase.label, gotText, testCase.expectProtoText)
 		}
 
 	}
