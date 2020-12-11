@@ -98,31 +98,31 @@ func PopulateOneField(protoMessage proto.Message, fieldPath string, value string
 			protoValue = protoreflect.ValueOfBytes([]byte(value))
 
 		case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind:
-			v64, err := strconv.ParseInt(value, 10, 32)
-			parseError, protoValue = err, protoreflect.ValueOfInt32(int32(v64))
+			parsedValue, err := strconv.ParseInt(value, 10, 32)
+			parseError, protoValue = err, protoreflect.ValueOfInt32(int32(parsedValue))
 		case protoreflect.Uint32Kind, protoreflect.Fixed32Kind:
-			v64, err := strconv.ParseUint(value, 10, 32)
-			parseError, protoValue = err, protoreflect.ValueOfUint32(uint32(v64))
+			parsedValue, err := strconv.ParseUint(value, 10, 32)
+			parseError, protoValue = err, protoreflect.ValueOfUint32(uint32(parsedValue))
 
 		case protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind:
-			v64, err := strconv.ParseInt(value, 10, 64)
-			parseError, protoValue = err, protoreflect.ValueOfInt64(v64)
+			parsedValue, err := strconv.ParseInt(value, 10, 64)
+			parseError, protoValue = err, protoreflect.ValueOfInt64(parsedValue)
 		case protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
-			v64, err := strconv.ParseUint(value, 10, 64)
-			parseError, protoValue = err, protoreflect.ValueOfUint64(v64)
+			parsedValue, err := strconv.ParseUint(value, 10, 64)
+			parseError, protoValue = err, protoreflect.ValueOfUint64(parsedValue)
 
 		case protoreflect.FloatKind:
-			v64, err := strconv.ParseFloat(value, 32)
-			parseError, protoValue = err, protoreflect.ValueOfFloat32(float32(v64))
+			parsedValue, err := strconv.ParseFloat(value, 32)
+			parseError, protoValue = err, protoreflect.ValueOfFloat32(float32(parsedValue))
 		case protoreflect.DoubleKind:
-			v64, err := strconv.ParseFloat(value, 64)
-			parseError, protoValue = err, protoreflect.ValueOfFloat64(v64)
+			parsedValue, err := strconv.ParseFloat(value, 64)
+			parseError, protoValue = err, protoreflect.ValueOfFloat64(parsedValue)
 
 		case protoreflect.BoolKind:
 			// TODO: should we be stricter in what we accept? ParseBool accepts various
 			// representations of "true" and "false" (https://golang.org/pkg/strconv/#ParseBool)
-			vBool, err := strconv.ParseBool(value)
-			parseError, protoValue = err, protoreflect.ValueOfBool(vBool)
+			parsedValue, err := strconv.ParseBool(value)
+			parseError, protoValue = err, protoreflect.ValueOfBool(parsedValue)
 
 		default:
 			// TODO: Handle lists
