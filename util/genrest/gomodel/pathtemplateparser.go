@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 )
 
 // ParseTemplate parses a path template string according to
@@ -153,7 +155,7 @@ func (parser *Parser) parseMultipleValue() (*Segment, error) {
 
 // parseLiteral parses a segment with `Kind==Literal`, returning nil if not possible.
 func (parser *Parser) parseLiteral() (*Segment, error) {
-	re := parser.GetRegexp(`^([-_.~0-9a-zA-Z%]+)`)
+	re := parser.GetRegexp(resttools.RegexLiteral)
 	return parser.parseToSegment(re, Literal), nil
 }
 
@@ -169,7 +171,7 @@ func (parser *Parser) parseToSegment(re *regexp.Regexp, kind SegmentKind) *Segme
 
 // parseFieldPath parses a field path, which is the "field" in a "{field=segments}" declaration.
 func (parser *Parser) parseFieldPath() string {
-	re := parser.GetRegexp(`^([-_.9a-zA-Z]+)`)
+	re := parser.GetRegexp(resttools.RegexField)
 	return parser.source.ConsumeRegex(re)
 }
 
