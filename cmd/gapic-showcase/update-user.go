@@ -41,7 +41,7 @@ func init() {
 
 	UpdateUserCmd.Flags().StringVar(&UpdateUserInput.User.Email, "user.email", "", "Required. The email address of the user.")
 
-	UpdateUserCmd.Flags().Int32Var(&updateUserInputUserAge, "user.age", 0, "The age of the use in years.")
+	UpdateUserCmd.Flags().Int32Var(&updateUserInputUserAge, "user.age", 0, "The age of the user in years.")
 
 	UpdateUserCmd.Flags().Float64Var(&updateUserInputUserHeightFeet, "user.height_feet", 0.0, "The height of the user in feet.")
 

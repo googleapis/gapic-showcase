@@ -63,7 +63,7 @@ type User struct {
 	CreateTime *timestamp.Timestamp `protobuf:"bytes,4,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
 	// The latest timestamp at which the user was updated.
 	UpdateTime *timestamp.Timestamp `protobuf:"bytes,5,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
-	// The age of the use in years.
+	// The age of the user in years.
 	Age *int32 `protobuf:"varint,6,opt,name=age,proto3,oneof" json:"age,omitempty"`
 	// The height of the user in feet.
 	HeightFeet *float64 `protobuf:"fixed64,7,opt,name=height_feet,json=heightFeet,proto3,oneof" json:"height_feet,omitempty"`
