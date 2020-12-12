@@ -77,6 +77,11 @@ func (gm *Model) CheckConsistency() {
 			}
 			gm.AccumulateError(fmt.Errorf("pattern %q matches both\n   %s and\n   %s\n\n", ambiguousPattern, firstHandler, secondHandler))
 		}
+
+		// TODO: Check that each field path in the handler path template refers to an actual
+		// field in the request. We can use the functionality in
+		// resttools.PopulateOneField() (after some refactoring) to do this. This will allow
+		// us to error at build time rather than at server run time.
 	}
 }
 

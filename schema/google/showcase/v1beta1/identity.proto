@@ -102,7 +102,7 @@ message User {
     (google.api.field_behavior) = OUTPUT_ONLY
   ];
 
-  // The age of the use in years.
+  // The age of the user in years.
   optional int32 age = 6;
 
   // The height of the user in feet.
