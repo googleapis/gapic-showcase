@@ -62,7 +62,7 @@ func init() {
 var BlockCmd = &cobra.Command{
 	Use:   "block",
 	Short: "This method will block (wait) for the requested...",
-	Long:  "This method will block (wait) for the requested amount of time   and then return the response or error.  This method showcases how a client handles...",
+	Long:  "This method will block (wait) for the requested amount of time  and then return the response or error.  This method showcases how a client handles...",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if BlockFromFile == "" {

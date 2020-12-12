@@ -37,7 +37,7 @@ func init() {
 
 	CreateUserCmd.Flags().StringVar(&CreateUserInput.User.Email, "user.email", "", "Required. The email address of the user.")
 
-	CreateUserCmd.Flags().Int32Var(&createUserInputUserAge, "user.age", 0, "The age of the use in years.")
+	CreateUserCmd.Flags().Int32Var(&createUserInputUserAge, "user.age", 0, "The age of the user in years.")
 
 	CreateUserCmd.Flags().Float64Var(&createUserInputUserHeightFeet, "user.height_feet", 0.0, "The height of the user in feet.")
 
