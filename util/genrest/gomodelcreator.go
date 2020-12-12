@@ -52,9 +52,27 @@ func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 			pathTemplate, err := gomodel.NewPathTemplate(binding.RESTPattern.Pattern)
 			goModel.AccumulateError(err)
 
+			// TODO: Check that each field path in the handler path template refers to an actual
+			// field in the request. We can use the functionality in
+			// resttools.PopulateOneField() (after some refactoring) to do this. This will allow
+			// us to error at build time rather than at server run time.
+			// Actually, use analogous functionality that only uses descriptors rather than reflect:
+			//   FileDescriptor.Messages().ByName().Fields().ByName().Message().Fields().ByName()
+			// Do this in creation so that gomodel doesn't need protos
+			//
+			// Generators should test succh malformed HTTP annotations as well.
+
 			restHandler := &gomodel.RESTHandler{
-				HTTPMethod:      binding.RESTPattern.HTTPMethod,
-				URIPattern:      binding.RESTPattern.Pattern,
+				HTTPMethod: binding.RESTPattern.HTTPMethod,
+				URIPattern: binding.RESTPattern.Pattern,
+
+				// TODO: check that no dotted notation if single field  [old:  will need regex for field identifier to share with query param checker]
+				// TODO: Store Go name of the field, and Go name of the message type
+				// TODO: Similarly to the TODO above, check that the field name refers to an
+				// actual field in the request. Do this in creation so that gomodel doesn't need protos
+				//
+				// Generators should test succh malformed HTTP annotations as well.
+				BodyField:       binding.BodyField,
 				PathTemplate:    pathTemplate,
 				StreamingServer: protoMethodDesc.GetServerStreaming(),
 				StreamingClient: protoMethodDesc.GetClientStreaming(),

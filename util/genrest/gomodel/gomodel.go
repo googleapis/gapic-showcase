@@ -16,11 +16,13 @@ package gomodel
 
 import (
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 
 	"github.com/googleapis/gapic-showcase/util/genrest/errorhandling"
 	"github.com/googleapis/gapic-showcase/util/genrest/internal/pbinfo"
+	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 )
 
 ////////////////////////////////////////
@@ -52,13 +54,26 @@ func (gm *Model) String() string {
 // CheckConsistency checks this Model for consistency, accumulating
 // any errors found. This means checking that all the HTTP annotations
 // across all services resolve to distinct paths.
-func (gm *Model) CheckConsistency() {
+func (gm *Model) CheckConsistency() { // TODO: CheckCorrectness? Or move the checks to the creation part
+	reBodyField := regexp.MustCompile(resttools.RegexField)
 	allHandlers := []*RESTHandler{}
+
 	for _, service := range gm.Service {
 		allHandlers = append(allHandlers, service.Handlers...)
 	}
 
 	for first, firstHandler := range allHandlers {
+		if len(firstHandler.BodyField) > 0 && firstHandler.BodyField != "*" {
+
+			// The body field name refers to a top-level field.
+			if reBodyField.FindStringIndex(firstHandler.BodyField) == nil {
+				gm.AccumulateError(fmt.Errorf("bad syntax in body field spec %q", firstHandler.BodyField))
+			}
+
+		}
+
+		// Generators should test that  if `foo` is specified as the `body`, it doesn't appear in the path parameters
+
 		if _, nestedVariables := firstHandler.PathTemplate.HasVariables(); nestedVariables {
 			gm.AccumulateError(fmt.Errorf("pattern %q specifies nested variables, which are not allowed as per https://cloud.google.com/endpoints/docs/grpc-service-config/reference/rpc/google.api#path-template-syntax", firstHandler.URIPattern))
 		}
@@ -78,10 +93,6 @@ func (gm *Model) CheckConsistency() {
 			gm.AccumulateError(fmt.Errorf("pattern %q matches both\n   %s and\n   %s\n\n", ambiguousPattern, firstHandler, secondHandler))
 		}
 
-		// TODO: Check that each field path in the handler path template refers to an actual
-		// field in the request. We can use the functionality in
-		// resttools.PopulateOneField() (after some refactoring) to do this. This will allow
-		// us to error at build time rather than at server run time.
 	}
 }
 
@@ -159,6 +170,7 @@ type RESTHandler struct {
 
 	HTTPMethod      string
 	URIPattern      string       // as it appears in the HTTP annotation
+	BodyField       string       // single field path, or "*" (all fields), or "" (no field)
 	PathTemplate    PathTemplate // parsed version of URIPattern
 	StreamingServer bool         // whether this method uses server-side streaming
 	StreamingClient bool         // whether this method uses client-side streaming

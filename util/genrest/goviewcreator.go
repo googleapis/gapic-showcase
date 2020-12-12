@@ -105,13 +105,35 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 			file.P("")
 			file.P("  %s := &%s.%s{}", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
-			file.P("  // TODO: Populate %s with parameters from HTTP request", handler.RequestVariable)
+			if handler.BodyField == "*" {
+				file.P("  // Intentional: Field values in the URL path override those set in the body.")
+				file.P("  if err := jsonpb.Unmarshal(r.Body, %s); err != nil {", handler.RequestVariable)
+				file.P("    backend.StdLog.Printf(`  error reading body params \"*\": %%s`, err)")
+				file.P("    // TODO: Properly handle error")
+				file.P("    w.Write([]byte(err.Error()))")
+				file.P("    return")
+				file.P("  }")
+
+			} else {
+				// TODO: handle when body has unspecified fields
+				// Steps:
+				// if field is message:
+				// bodyField := &<handler.BodyFieldType>{}
+				// bodyField.Unmarshal(*r.body); deal with errors
+				// request.<handler.BodyFieldName>.Set(bodyField)
+				// if field is scalar
+				// use populatefields
+			}
+			file.P("  // TODO: Ensure we handle URL-encoded values in path variables")
 			file.P("  if err := resttools.PopulateFields(%s, urlPathParams); err != nil {", handler.RequestVariable)
-			file.P(`    backend.StdLog.Printf("  error: %%s", err)`)
+			file.P(`    backend.StdLog.Printf("  error reading URL path params: %%s", err)`)
 			file.P("    // TODO: Properly handle error")
 			file.P("    w.Write([]byte(err.Error()))")
 			file.P("    return")
 			file.P("  }")
+			file.P("")
+			file.P("  // TODO: Populate %s with query parameters too", handler.RequestVariable)
+			file.P("  // TODO: Ensure we handle URL-encoded values in query parameters")
 			file.P("")
 			file.P("  marshaler := &jsonpb.Marshaler{}")
 			file.P("  requestJSON, _ := marshaler.MarshalToString(%s)", handler.RequestVariable)
