@@ -125,7 +125,11 @@ func addMessage(typMap map[string]ProtoType, parentMap map[ProtoType]ProtoType, 
 	}
 
 	for _, field := range msg.GetField() {
-		parentMap[field] = msg
+		// parentMap[field] = msg
+		// Added the following
+		//fullFieldName := fullName + "." + field.GetName()
+		//typMap[fullFieldName] = field
+		_ = field
 	}
 }
 

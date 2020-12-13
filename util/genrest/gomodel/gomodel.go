@@ -171,6 +171,7 @@ type RESTHandler struct {
 	HTTPMethod      string
 	URIPattern      string       // as it appears in the HTTP annotation
 	BodyField       string       // single field path, or "*" (all fields), or "" (no field)
+	BodyFieldType   string       // single field path, or "*" (all fields), or "" (no field)
 	PathTemplate    PathTemplate // parsed version of URIPattern
 	StreamingServer bool         // whether this method uses server-side streaming
 	StreamingClient bool         // whether this method uses client-side streaming
@@ -181,13 +182,16 @@ type RESTHandler struct {
 
 	//// Go types
 
-	GoMethod            string
-	RequestType         string
-	RequestTypePackage  string
-	RequestVariable     string
-	ResponseType        string
-	ResponseTypePackage string
-	ResponseVariable    string
+	GoMethod                string
+	RequestType             string
+	RequestTypePackage      string
+	RequestVariable         string
+	RequestBodyFieldName    string
+	RequestBodyFieldType    string
+	RequestBodyFieldPackage string
+	ResponseType            string
+	ResponseTypePackage     string
+	ResponseVariable        string
 }
 
 // String returns a string representation of this RESTHandler.

@@ -16,8 +16,11 @@ package genrest
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/golang/protobuf/protoc-gen-go/descriptor"
 	"github.com/googleapis/gapic-showcase/util/genrest/gomodel"
+	"github.com/googleapis/gapic-showcase/util/genrest/internal/pbinfo"
 	"github.com/googleapis/gapic-showcase/util/genrest/protomodel"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
@@ -45,9 +48,58 @@ func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 			inGoType, inImports, err := protoInfo.NameSpec(inProtoType)
 			goModel.AccumulateError(err)
 
+			bodyFieldType := binding.BodyField
+			requestBodyFieldType := binding.BodyField
+			var bodyFieldImports pbinfo.ImportSpec
+			var requestBodyFieldName string
+
+			if len(binding.BodyField) > 0 && binding.BodyField != "*" {
+
+				if false {
+					bodyFieldType = pbinfo.FullyQualifiedType(service.TypeName, inProtoType.GetName(), binding.BodyField)
+					bodyFieldProtoType, found := protoInfo.Type[bodyFieldType]
+					if !found {
+						goModel.AccumulateError(fmt.Errorf("bodyFieldType %q not found in protoInfo", bodyFieldType))
+					}
+					requestBodyFieldType, bodyFieldImports, err = protoInfo.NameSpec(bodyFieldProtoType)
+					goModel.AccumulateError(err)
+				}
+				var bodyFieldDesc *descriptorpb.FieldDescriptorProto
+				inProtoTypeDescriptor, ok := inProtoType.(*descriptor.DescriptorProto)
+				if !ok {
+					goModel.AccumulateError(fmt.Errorf("could not type assert inProtoType %v to *descriptor.DescriptorProto", inProtoType))
+				}
+				for _, fd := range inProtoTypeDescriptor.GetField() {
+					if fd.GetName() == binding.BodyField {
+						bodyFieldDesc = fd
+						break
+					}
+				}
+				if bodyFieldDesc == nil {
+					goModel.AccumulateError(fmt.Errorf("could not find body field %q in %q", binding.BodyField, inProtoType.GetName()))
+				}
+				if false {
+					bodyFieldDescTypeName := bodyFieldDesc.TypeName
+					requestBodyFieldType = *bodyFieldDescTypeName
+					requestBodyFieldType, bodyFieldImports, err = protoInfo.NameSpec(bodyFieldDesc)
+					goModel.AccumulateError(err)
+				}
+				bodyFieldTypeDesc, ok := protoInfo.Type[*bodyFieldDesc.TypeName]
+				if !ok {
+					goModel.AccumulateError(fmt.Errorf("could not read protoInfo[%q]", inProtoType))
+				}
+				requestBodyFieldType, bodyFieldImports, err = protoInfo.NameSpec(bodyFieldTypeDesc)
+				// TODO: test for HTTP body encoding a single field whose names is different than its type
+				// TODO: Test for HTTP body encoding a single field that is a scalar, not a message
+				requestBodyFieldName = strings.Title(bodyFieldDesc.GetName())
+				goModel.AccumulateError(err)
+
+			}
+			_ = bodyFieldType
+
 			outProtoType := protoInfo.Type[*protoMethodDesc.OutputType]
-			goModel.AccumulateError(err)
 			outGoType, outImports, err := protoInfo.NameSpec(outProtoType)
+			goModel.AccumulateError(err)
 
 			pathTemplate, err := gomodel.NewPathTemplate(binding.RESTPattern.Pattern)
 			goModel.AccumulateError(err)
@@ -60,7 +112,7 @@ func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 			//   FileDescriptor.Messages().ByName().Fields().ByName().Message().Fields().ByName()
 			// Do this in creation so that gomodel doesn't need protos
 			//
-			// Generators should test succh malformed HTTP annotations as well.
+			// Generators should test such malformed HTTP annotations as well.
 
 			restHandler := &gomodel.RESTHandler{
 				HTTPMethod: binding.RESTPattern.HTTPMethod,
@@ -71,16 +123,20 @@ func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 				// TODO: Similarly to the TODO above, check that the field name refers to an
 				// actual field in the request. Do this in creation so that gomodel doesn't need protos
 				//
-				// Generators should test succh malformed HTTP annotations as well.
+				// Generators should test such malformed HTTP annotations as well.
 				BodyField:       binding.BodyField,
+				BodyFieldType:   bodyFieldType,
 				PathTemplate:    pathTemplate,
 				StreamingServer: protoMethodDesc.GetServerStreaming(),
 				StreamingClient: protoMethodDesc.GetClientStreaming(),
 
-				GoMethod:           protoMethodDesc.GetName(),
-				RequestType:        inGoType,
-				RequestTypePackage: inImports.Name,
-				RequestVariable:    "request",
+				GoMethod:                protoMethodDesc.GetName(),
+				RequestType:             inGoType,
+				RequestTypePackage:      inImports.Name,
+				RequestVariable:         "request",
+				RequestBodyFieldName:    requestBodyFieldName,
+				RequestBodyFieldType:    requestBodyFieldType,
+				RequestBodyFieldPackage: bodyFieldImports.Name,
 
 				ResponseType:        outGoType,
 				ResponseTypePackage: outImports.Name,

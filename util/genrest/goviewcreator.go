@@ -114,7 +114,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				file.P("    return")
 				file.P("  }")
 
-			} else {
+			} else if len(handler.BodyField) > 0 {
 				// TODO: handle when body has unspecified fields
 				// Steps:
 				// if field is message:
@@ -123,6 +123,17 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				// request.<handler.BodyFieldName>.Set(bodyField)
 				// if field is scalar
 				// use populatefields
+				file.P("  // TODO vchudnov testing: bodyFieldName %q,  bodyFieldType: %q RequestBodyFieldType: %q  imports %q", handler.RequestBodyFieldName, handler.BodyFieldType, handler.RequestBodyFieldType, handler.RequestBodyFieldPackage)
+				file.P("  var bodyField %s.%s", handler.RequestBodyFieldPackage, handler.RequestBodyFieldType)
+				file.P("  if err := jsonpb.Unmarshal(r.Body, &bodyField); err != nil {")
+				file.P("    backend.StdLog.Printf(`  error reading body into request field \"%s\": %%s`, err)", handler.BodyField)
+				file.P("    // TODO: Properly handle error")
+				file.P("    w.Write([]byte(err.Error()))")
+				file.P("    return")
+				file.P("  }")
+				file.P("  request.%s = &bodyField", handler.RequestBodyFieldName)
+				file.P("")
+
 			}
 			file.P("  // TODO: Ensure we handle URL-encoded values in path variables")
 			file.P("  if err := resttools.PopulateFields(%s, urlPathParams); err != nil {", handler.RequestVariable)
