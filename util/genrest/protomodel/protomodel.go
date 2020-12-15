@@ -94,8 +94,8 @@ type RESTBinding struct {
 	// The URL pattern of the binding.
 	RESTPattern *RESTRequestPattern
 
-	// The fields in the request body: either none (empty string), a single field (dotted field
-	// path), or all not captured in the URL ("*").
+	// The fields in the request body: either none (empty string), a single field (top-level
+	// request field, non-dotted), or all not captured in the URL ("*").
 	BodyField string
 }
 

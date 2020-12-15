@@ -54,7 +54,7 @@ func (gm *Model) String() string {
 // CheckConsistency checks this Model for consistency, accumulating
 // any errors found. This means checking that all the HTTP annotations
 // across all services resolve to distinct paths.
-func (gm *Model) CheckConsistency() { // TODO: CheckCorrectness? Or move the checks to the creation part
+func (gm *Model) CheckConsistency() {
 	reBodyField := regexp.MustCompile(resttools.RegexField)
 	allHandlers := []*RESTHandler{}
 
@@ -63,16 +63,13 @@ func (gm *Model) CheckConsistency() { // TODO: CheckCorrectness? Or move the che
 	}
 
 	for first, firstHandler := range allHandlers {
-		if len(firstHandler.BodyField) > 0 && firstHandler.BodyField != "*" {
+		if len(firstHandler.RequestBodyFieldProtoName) > 0 && firstHandler.RequestBodyFieldProtoName != "*" {
 
 			// The body field name refers to a top-level field.
-			if reBodyField.FindStringIndex(firstHandler.BodyField) == nil {
-				gm.AccumulateError(fmt.Errorf("bad syntax in body field spec %q", firstHandler.BodyField))
+			if reBodyField.FindStringIndex(firstHandler.RequestBodyFieldProtoName) == nil {
+				gm.AccumulateError(fmt.Errorf("bad syntax in body field spec %q", firstHandler.RequestBodyFieldProtoName))
 			}
-
 		}
-
-		// Generators should test that  if `foo` is specified as the `body`, it doesn't appear in the path parameters
 
 		if _, nestedVariables := firstHandler.PathTemplate.HasVariables(); nestedVariables {
 			gm.AccumulateError(fmt.Errorf("pattern %q specifies nested variables, which are not allowed as per https://cloud.google.com/endpoints/docs/grpc-service-config/reference/rpc/google.api#path-template-syntax", firstHandler.URIPattern))
@@ -92,7 +89,6 @@ func (gm *Model) CheckConsistency() { // TODO: CheckCorrectness? Or move the che
 			}
 			gm.AccumulateError(fmt.Errorf("pattern %q matches both\n   %s and\n   %s\n\n", ambiguousPattern, firstHandler, secondHandler))
 		}
-
 	}
 }
 
@@ -170,8 +166,6 @@ type RESTHandler struct {
 
 	HTTPMethod      string
 	URIPattern      string       // as it appears in the HTTP annotation
-	BodyField       string       // single field path, or "*" (all fields), or "" (no field)
-	BodyFieldType   string       // single field path, or "*" (all fields), or "" (no field)
 	PathTemplate    PathTemplate // parsed version of URIPattern
 	StreamingServer bool         // whether this method uses server-side streaming
 	StreamingClient bool         // whether this method uses client-side streaming
@@ -182,19 +176,31 @@ type RESTHandler struct {
 
 	//// Go types
 
-	GoMethod                string
-	RequestType             string
-	RequestTypePackage      string
-	RequestVariable         string
-	RequestBodyFieldName    string
-	RequestBodyFieldType    string
-	RequestBodyFieldPackage string
-	ResponseType            string
-	ResponseTypePackage     string
-	ResponseVariable        string
+	GoMethod                  string
+	RequestType               string
+	RequestTypePackage        string
+	RequestVariable           string
+	RequestBodyFieldSpec      BodyFieldSpec
+	RequestBodyFieldProtoName string
+	RequestBodyFieldName      string
+	RequestBodyFieldType      string
+	RequestBodyFieldVariable  string
+	RequestBodyFieldPackage   string
+	ResponseType              string
+	ResponseTypePackage       string
+	ResponseVariable          string
 }
 
 // String returns a string representation of this RESTHandler.
 func (rh *RESTHandler) String() string {
 	return fmt.Sprintf("%8s %50s func %s(%s %s.%s) (%s %s.%s) {}\n%s\n", rh.HTTPMethod, rh.URIPattern, rh.GoMethod, rh.RequestVariable, rh.RequestTypePackage, rh.RequestType, rh.ResponseVariable, rh.ResponseTypePackage, rh.ResponseType, rh.PathTemplate)
 }
+
+// BodyFieldSpec encodes what request field was annotated as the REST request body.
+type BodyFieldSpec int
+
+const (
+	BodyFieldNone   BodyFieldSpec = iota // no RPC field specified in the REST body
+	BodyFieldSingle                      // a single top-level RPC request field was specified in the REST body
+	BodyFieldAll                         // the whole RPC request message is encoded in the REST body
+)

@@ -48,27 +48,26 @@ func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 			inGoType, inImports, err := protoInfo.NameSpec(inProtoType)
 			goModel.AccumulateError(err)
 
-			bodyFieldType := binding.BodyField
-			requestBodyFieldType := binding.BodyField
-			var bodyFieldImports pbinfo.ImportSpec
-			var requestBodyFieldName string
+			var (
+				requestBodyFieldType string
+				requestBodyFieldName string
+				bodyFieldImports     pbinfo.ImportSpec
+				bodyFieldSpec        gomodel.BodyFieldSpec
+			)
 
-			if len(binding.BodyField) > 0 && binding.BodyField != "*" {
-
-				if false {
-					bodyFieldType = pbinfo.FullyQualifiedType(service.TypeName, inProtoType.GetName(), binding.BodyField)
-					bodyFieldProtoType, found := protoInfo.Type[bodyFieldType]
-					if !found {
-						goModel.AccumulateError(fmt.Errorf("bodyFieldType %q not found in protoInfo", bodyFieldType))
-					}
-					requestBodyFieldType, bodyFieldImports, err = protoInfo.NameSpec(bodyFieldProtoType)
-					goModel.AccumulateError(err)
-				}
+			if binding.BodyField == "*" {
+				bodyFieldSpec = gomodel.BodyFieldAll
+			} else if len(binding.BodyField) > 0 {
+				bodyFieldSpec = gomodel.BodyFieldSingle
 				var bodyFieldDesc *descriptorpb.FieldDescriptorProto
 				inProtoTypeDescriptor, ok := inProtoType.(*descriptor.DescriptorProto)
 				if !ok {
 					goModel.AccumulateError(fmt.Errorf("could not type assert inProtoType %v to *descriptor.DescriptorProto", inProtoType))
 				}
+
+				// Intentional: the following indirectly enforces that the field
+				// specified is top-level (is not a dotted path), as periods are not
+				// allowed in field names.
 				for _, fd := range inProtoTypeDescriptor.GetField() {
 					if fd.GetName() == binding.BodyField {
 						bodyFieldDesc = fd
@@ -77,12 +76,6 @@ func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 				}
 				if bodyFieldDesc == nil {
 					goModel.AccumulateError(fmt.Errorf("could not find body field %q in %q", binding.BodyField, inProtoType.GetName()))
-				}
-				if false {
-					bodyFieldDescTypeName := bodyFieldDesc.TypeName
-					requestBodyFieldType = *bodyFieldDescTypeName
-					requestBodyFieldType, bodyFieldImports, err = protoInfo.NameSpec(bodyFieldDesc)
-					goModel.AccumulateError(err)
 				}
 				bodyFieldTypeDesc, ok := protoInfo.Type[*bodyFieldDesc.TypeName]
 				if !ok {
@@ -93,9 +86,7 @@ func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 				// TODO: Test for HTTP body encoding a single field that is a scalar, not a message
 				requestBodyFieldName = strings.Title(bodyFieldDesc.GetName())
 				goModel.AccumulateError(err)
-
 			}
-			_ = bodyFieldType
 
 			outProtoType := protoInfo.Type[*protoMethodDesc.OutputType]
 			outGoType, outImports, err := protoInfo.NameSpec(outProtoType)
@@ -104,39 +95,30 @@ func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 			pathTemplate, err := gomodel.NewPathTemplate(binding.RESTPattern.Pattern)
 			goModel.AccumulateError(err)
 
-			// TODO: Check that each field path in the handler path template refers to an actual
-			// field in the request. We can use the functionality in
-			// resttools.PopulateOneField() (after some refactoring) to do this. This will allow
-			// us to error at build time rather than at server run time.
-			// Actually, use analogous functionality that only uses descriptors rather than reflect:
-			//   FileDescriptor.Messages().ByName().Fields().ByName().Message().Fields().ByName()
-			// Do this in creation so that gomodel doesn't need protos
-			//
-			// Generators should test such malformed HTTP annotations as well.
+			// TODO: Check that each field path in the handler path template refers to
+			// an actual field in the request. We can use the functionality in
+			// resttools.PopulateOneField() (after some refactoring) to do this,
+			// starting from FieldDescriptor.ProtoReflect(). This will allow us to error
+			// at build time rather than at server run time.
 
 			restHandler := &gomodel.RESTHandler{
 				HTTPMethod: binding.RESTPattern.HTTPMethod,
 				URIPattern: binding.RESTPattern.Pattern,
 
-				// TODO: check that no dotted notation if single field  [old:  will need regex for field identifier to share with query param checker]
-				// TODO: Store Go name of the field, and Go name of the message type
-				// TODO: Similarly to the TODO above, check that the field name refers to an
-				// actual field in the request. Do this in creation so that gomodel doesn't need protos
-				//
-				// Generators should test such malformed HTTP annotations as well.
-				BodyField:       binding.BodyField,
-				BodyFieldType:   bodyFieldType,
 				PathTemplate:    pathTemplate,
 				StreamingServer: protoMethodDesc.GetServerStreaming(),
 				StreamingClient: protoMethodDesc.GetClientStreaming(),
 
-				GoMethod:                protoMethodDesc.GetName(),
-				RequestType:             inGoType,
-				RequestTypePackage:      inImports.Name,
-				RequestVariable:         "request",
-				RequestBodyFieldName:    requestBodyFieldName,
-				RequestBodyFieldType:    requestBodyFieldType,
-				RequestBodyFieldPackage: bodyFieldImports.Name,
+				GoMethod:                  protoMethodDesc.GetName(),
+				RequestType:               inGoType,
+				RequestTypePackage:        inImports.Name,
+				RequestVariable:           "request",
+				RequestBodyFieldSpec:      bodyFieldSpec,
+				RequestBodyFieldProtoName: binding.BodyField,
+				RequestBodyFieldName:      requestBodyFieldName,
+				RequestBodyFieldType:      requestBodyFieldType,
+				RequestBodyFieldVariable:  "bodyField",
+				RequestBodyFieldPackage:   bodyFieldImports.Name,
 
 				ResponseType:        outGoType,
 				ResponseTypePackage: outImports.Name,

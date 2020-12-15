@@ -22,6 +22,7 @@ import (
 
 	"github.com/googleapis/gapic-showcase/util/genrest/gomodel"
 	"github.com/googleapis/gapic-showcase/util/genrest/goview"
+	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 )
 
 // NewView creates a a new goview.View (a series of files to be output) from a gomodel.Model. The
@@ -105,7 +106,8 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 			file.P("")
 			file.P("  %s := &%s.%s{}", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
-			if handler.BodyField == "*" {
+			switch handler.RequestBodyFieldSpec {
+			case gomodel.BodyFieldAll:
 				file.P("  // Intentional: Field values in the URL path override those set in the body.")
 				file.P("  if err := jsonpb.Unmarshal(r.Body, %s); err != nil {", handler.RequestVariable)
 				file.P("    backend.StdLog.Printf(`  error reading body params \"*\": %%s`, err)")
@@ -114,24 +116,19 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				file.P("    return")
 				file.P("  }")
 
-			} else if len(handler.BodyField) > 0 {
-				// TODO: handle when body has unspecified fields
-				// Steps:
-				// if field is message:
-				// bodyField := &<handler.BodyFieldType>{}
-				// bodyField.Unmarshal(*r.body); deal with errors
-				// request.<handler.BodyFieldName>.Set(bodyField)
-				// if field is scalar
-				// use populatefields
-				file.P("  // TODO vchudnov testing: bodyFieldName %q,  bodyFieldType: %q RequestBodyFieldType: %q  imports %q", handler.RequestBodyFieldName, handler.BodyFieldType, handler.RequestBodyFieldType, handler.RequestBodyFieldPackage)
-				file.P("  var bodyField %s.%s", handler.RequestBodyFieldPackage, handler.RequestBodyFieldType)
-				file.P("  if err := jsonpb.Unmarshal(r.Body, &bodyField); err != nil {")
-				file.P("    backend.StdLog.Printf(`  error reading body into request field \"%s\": %%s`, err)", handler.BodyField)
+			case gomodel.BodyFieldSingle:
+				// TODO: Ensure this works when the specified field is a scalar. We
+				// may need to use PopulateFields from the generated code in that
+				// case.
+				file.P("  // Intentional: Field values in the URL path override those set in the body.")
+				file.P("  var %s %s.%s", handler.RequestBodyFieldVariable, handler.RequestBodyFieldPackage, handler.RequestBodyFieldType)
+				file.P("  if err := jsonpb.Unmarshal(r.Body, &%s); err != nil {", handler.RequestBodyFieldVariable)
+				file.P("    backend.StdLog.Printf(`  error reading body into request field \"%s\": %%s`, err)", handler.RequestBodyFieldProtoName)
 				file.P("    // TODO: Properly handle error")
 				file.P("    w.Write([]byte(err.Error()))")
 				file.P("    return")
 				file.P("  }")
-				file.P("  request.%s = &bodyField", handler.RequestBodyFieldName)
+				file.P("  %s.%s = &%s", handler.RequestVariable, handler.RequestBodyFieldName, handler.RequestBodyFieldVariable)
 				file.P("")
 
 			}
@@ -232,9 +229,9 @@ func extractPath(template gomodel.PathTemplate, insideVariable bool) (string, []
 		case gomodel.Literal:
 			part = seg.Value
 		case gomodel.SingleValue:
-			part = `[a-zA-Z_%\-]+`
+			part = resttools.RegexURLPathSingleSegmentValue
 		case gomodel.MultipleValue:
-			part = `[a-zA-Z_%\-/]+`
+			part = resttools.RegexURLPathMultipleSegmentValue
 		case gomodel.Variable:
 			if insideVariable {
 				return "", nil, fmt.Errorf("nested variables are disallowed: https://cloud.google.com/endpoints/docs/grpc-service-config/reference/rpc/google.api#path-template-syntax")
