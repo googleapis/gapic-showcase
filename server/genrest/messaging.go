@@ -45,13 +45,23 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.CreateRoomRequest{}
-	// TODO: Populate request with parameters from HTTP request
-	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+	// Intentional: Field values in the URL path override those set in the body.
+	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
+		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+	// TODO: Ensure we handle URL-encoded values in path variables
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -76,7 +86,7 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 
 // HandleGetRoom translates REST requests/responses on the wire to internal proto messages for GetRoom
 //    Generated for HTTP binding pattern: /v1beta1/{name=rooms/*}
-//         This matches URIs of the form: /v1beta1/{name:rooms/[a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{name:rooms/[0-9a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -90,13 +100,16 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 	}
 
 	request := &genprotopb.GetRoomRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -121,7 +134,7 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 
 // HandleUpdateRoom translates REST requests/responses on the wire to internal proto messages for UpdateRoom
 //    Generated for HTTP binding pattern: /v1beta1/{room.name=rooms/*}
-//         This matches URIs of the form: /v1beta1/{room.name:rooms/[a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{room.name:rooms/[0-9a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -135,13 +148,23 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.UpdateRoomRequest{}
-	// TODO: Populate request with parameters from HTTP request
-	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+	// Intentional: Field values in the URL path override those set in the body.
+	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
+		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+	// TODO: Ensure we handle URL-encoded values in path variables
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -166,7 +189,7 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 
 // HandleDeleteRoom translates REST requests/responses on the wire to internal proto messages for DeleteRoom
 //    Generated for HTTP binding pattern: /v1beta1/{name=rooms/*}
-//         This matches URIs of the form: /v1beta1/{name:rooms/[a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{name:rooms/[0-9a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -180,13 +203,16 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.DeleteRoomRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -225,13 +251,16 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 	}
 
 	request := &genprotopb.ListRoomsRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -256,7 +285,7 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 
 // HandleCreateBlurb translates REST requests/responses on the wire to internal proto messages for CreateBlurb
 //    Generated for HTTP binding pattern: /v1beta1/{parent=rooms/*}/blurbs
-//         This matches URIs of the form: /v1beta1/{parent:rooms/[a-zA-Z_%\-]+}/blurbs
+//         This matches URIs of the form: /v1beta1/{parent:rooms/[0-9a-zA-Z_%\-]+}/blurbs
 func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -270,13 +299,23 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 	}
 
 	request := &genprotopb.CreateBlurbRequest{}
-	// TODO: Populate request with parameters from HTTP request
-	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+	// Intentional: Field values in the URL path override those set in the body.
+	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
+		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+	// TODO: Ensure we handle URL-encoded values in path variables
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -301,7 +340,7 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 
 // HandleCreateBlurb_1 translates REST requests/responses on the wire to internal proto messages for CreateBlurb
 //    Generated for HTTP binding pattern: /v1beta1/{parent=users/*/profile}/blurbs
-//         This matches URIs of the form: /v1beta1/{parent:users/[a-zA-Z_%\-]+/profile}/blurbs
+//         This matches URIs of the form: /v1beta1/{parent:users/[0-9a-zA-Z_%\-]+/profile}/blurbs
 func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -315,13 +354,23 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 	}
 
 	request := &genprotopb.CreateBlurbRequest{}
-	// TODO: Populate request with parameters from HTTP request
-	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+	// Intentional: Field values in the URL path override those set in the body.
+	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
+		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+	// TODO: Ensure we handle URL-encoded values in path variables
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -346,7 +395,7 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 
 // HandleGetBlurb translates REST requests/responses on the wire to internal proto messages for GetBlurb
 //    Generated for HTTP binding pattern: /v1beta1/{name=rooms/*/blurbs/*}
-//         This matches URIs of the form: /v1beta1/{name:rooms/[a-zA-Z_%\-]+/blurbs/[a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{name:rooms/[0-9a-zA-Z_%\-]+/blurbs/[0-9a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -360,13 +409,16 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 	}
 
 	request := &genprotopb.GetBlurbRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -391,7 +443,7 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 
 // HandleGetBlurb_1 translates REST requests/responses on the wire to internal proto messages for GetBlurb
 //    Generated for HTTP binding pattern: /v1beta1/{name=users/*/profile/blurbs/*}
-//         This matches URIs of the form: /v1beta1/{name:users/[a-zA-Z_%\-]+/profile/blurbs/[a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{name:users/[0-9a-zA-Z_%\-]+/profile/blurbs/[0-9a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -405,13 +457,16 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.GetBlurbRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -436,7 +491,7 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 
 // HandleUpdateBlurb translates REST requests/responses on the wire to internal proto messages for UpdateBlurb
 //    Generated for HTTP binding pattern: /v1beta1/{blurb.name=rooms/*/blurbs/*}
-//         This matches URIs of the form: /v1beta1/{blurb.name:rooms/[a-zA-Z_%\-]+/blurbs/[a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{blurb.name:rooms/[0-9a-zA-Z_%\-]+/blurbs/[0-9a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -450,13 +505,23 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 	}
 
 	request := &genprotopb.UpdateBlurbRequest{}
-	// TODO: Populate request with parameters from HTTP request
-	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+	// Intentional: Field values in the URL path override those set in the body.
+	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
+		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+	// TODO: Ensure we handle URL-encoded values in path variables
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -481,7 +546,7 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 
 // HandleUpdateBlurb_1 translates REST requests/responses on the wire to internal proto messages for UpdateBlurb
 //    Generated for HTTP binding pattern: /v1beta1/{blurb.name=users/*/profile/blurbs/*}
-//         This matches URIs of the form: /v1beta1/{blurb.name:users/[a-zA-Z_%\-]+/profile/blurbs/[a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{blurb.name:users/[0-9a-zA-Z_%\-]+/profile/blurbs/[0-9a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -495,13 +560,23 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 	}
 
 	request := &genprotopb.UpdateBlurbRequest{}
-	// TODO: Populate request with parameters from HTTP request
-	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+	// Intentional: Field values in the URL path override those set in the body.
+	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
+		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+	// TODO: Ensure we handle URL-encoded values in path variables
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -526,7 +601,7 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 
 // HandleDeleteBlurb translates REST requests/responses on the wire to internal proto messages for DeleteBlurb
 //    Generated for HTTP binding pattern: /v1beta1/{name=rooms/*/blurbs/*}
-//         This matches URIs of the form: /v1beta1/{name:rooms/[a-zA-Z_%\-]+/blurbs/[a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{name:rooms/[0-9a-zA-Z_%\-]+/blurbs/[0-9a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -540,13 +615,16 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 	}
 
 	request := &genprotopb.DeleteBlurbRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -571,7 +649,7 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 
 // HandleDeleteBlurb_1 translates REST requests/responses on the wire to internal proto messages for DeleteBlurb
 //    Generated for HTTP binding pattern: /v1beta1/{name=users/*/profile/blurbs/*}
-//         This matches URIs of the form: /v1beta1/{name:users/[a-zA-Z_%\-]+/profile/blurbs/[a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{name:users/[0-9a-zA-Z_%\-]+/profile/blurbs/[0-9a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -585,13 +663,16 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 	}
 
 	request := &genprotopb.DeleteBlurbRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -616,7 +697,7 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 
 // HandleListBlurbs translates REST requests/responses on the wire to internal proto messages for ListBlurbs
 //    Generated for HTTP binding pattern: /v1beta1/{parent=rooms/*}/blurbs
-//         This matches URIs of the form: /v1beta1/{parent:rooms/[a-zA-Z_%\-]+}/blurbs
+//         This matches URIs of the form: /v1beta1/{parent:rooms/[0-9a-zA-Z_%\-]+}/blurbs
 func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -630,13 +711,16 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.ListBlurbsRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -661,7 +745,7 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 
 // HandleListBlurbs_1 translates REST requests/responses on the wire to internal proto messages for ListBlurbs
 //    Generated for HTTP binding pattern: /v1beta1/{parent=users/*/profile}/blurbs
-//         This matches URIs of the form: /v1beta1/{parent:users/[a-zA-Z_%\-]+/profile}/blurbs
+//         This matches URIs of the form: /v1beta1/{parent:users/[0-9a-zA-Z_%\-]+/profile}/blurbs
 func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -675,13 +759,16 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 	}
 
 	request := &genprotopb.ListBlurbsRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -706,7 +793,7 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 
 // HandleSearchBlurbs translates REST requests/responses on the wire to internal proto messages for SearchBlurbs
 //    Generated for HTTP binding pattern: /v1beta1/{parent=rooms/*}/blurbs:search
-//         This matches URIs of the form: /v1beta1/{parent:rooms/[a-zA-Z_%\-]+}/blurbs:search
+//         This matches URIs of the form: /v1beta1/{parent:rooms/[0-9a-zA-Z_%\-]+}/blurbs:search
 func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -720,13 +807,23 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 	}
 
 	request := &genprotopb.SearchBlurbsRequest{}
-	// TODO: Populate request with parameters from HTTP request
-	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+	// Intentional: Field values in the URL path override those set in the body.
+	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
+		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+	// TODO: Ensure we handle URL-encoded values in path variables
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -751,7 +848,7 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 
 // HandleSearchBlurbs_1 translates REST requests/responses on the wire to internal proto messages for SearchBlurbs
 //    Generated for HTTP binding pattern: /v1beta1/{parent=users/*/profile}/blurbs:search
-//         This matches URIs of the form: /v1beta1/{parent:users/[a-zA-Z_%\-]+/profile}/blurbs:search
+//         This matches URIs of the form: /v1beta1/{parent:users/[0-9a-zA-Z_%\-]+/profile}/blurbs:search
 func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -765,13 +862,16 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 	}
 
 	request := &genprotopb.SearchBlurbsRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -796,7 +896,7 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 
 // HandleStreamBlurbs translates REST requests/responses on the wire to internal proto messages for StreamBlurbs
 //    Generated for HTTP binding pattern: /v1beta1/{name=rooms/*}/blurbs:stream
-//         This matches URIs of the form: /v1beta1/{name:rooms/[a-zA-Z_%\-]+}/blurbs:stream
+//         This matches URIs of the form: /v1beta1/{name:rooms/[0-9a-zA-Z_%\-]+}/blurbs:stream
 func (backend *RESTBackend) HandleStreamBlurbs(w http.ResponseWriter, r *http.Request) {
 	backend.StdLog.Printf("Received request matching '/v1beta1/{name=rooms/*}/blurbs:stream': %q", r.URL)
 	w.Write([]byte("ERROR: not implementing streaming methods yet"))
@@ -804,7 +904,7 @@ func (backend *RESTBackend) HandleStreamBlurbs(w http.ResponseWriter, r *http.Re
 
 // HandleStreamBlurbs_1 translates REST requests/responses on the wire to internal proto messages for StreamBlurbs
 //    Generated for HTTP binding pattern: /v1beta1/{name=users/*/profile}/blurbs:stream
-//         This matches URIs of the form: /v1beta1/{name:users/[a-zA-Z_%\-]+/profile}/blurbs:stream
+//         This matches URIs of the form: /v1beta1/{name:users/[0-9a-zA-Z_%\-]+/profile}/blurbs:stream
 func (backend *RESTBackend) HandleStreamBlurbs_1(w http.ResponseWriter, r *http.Request) {
 	backend.StdLog.Printf("Received request matching '/v1beta1/{name=users/*/profile}/blurbs:stream': %q", r.URL)
 	w.Write([]byte("ERROR: not implementing streaming methods yet"))
@@ -812,7 +912,7 @@ func (backend *RESTBackend) HandleStreamBlurbs_1(w http.ResponseWriter, r *http.
 
 // HandleSendBlurbs translates REST requests/responses on the wire to internal proto messages for SendBlurbs
 //    Generated for HTTP binding pattern: /v1beta1/{parent=rooms/*}/blurbs:send
-//         This matches URIs of the form: /v1beta1/{parent:rooms/[a-zA-Z_%\-]+}/blurbs:send
+//         This matches URIs of the form: /v1beta1/{parent:rooms/[0-9a-zA-Z_%\-]+}/blurbs:send
 func (backend *RESTBackend) HandleSendBlurbs(w http.ResponseWriter, r *http.Request) {
 	backend.StdLog.Printf("Received request matching '/v1beta1/{parent=rooms/*}/blurbs:send': %q", r.URL)
 	w.Write([]byte("ERROR: not implementing streaming methods yet"))
@@ -820,7 +920,7 @@ func (backend *RESTBackend) HandleSendBlurbs(w http.ResponseWriter, r *http.Requ
 
 // HandleSendBlurbs_1 translates REST requests/responses on the wire to internal proto messages for SendBlurbs
 //    Generated for HTTP binding pattern: /v1beta1/{parent=users/*/profile}/blurbs:send
-//         This matches URIs of the form: /v1beta1/{parent:users/[a-zA-Z_%\-]+/profile}/blurbs:send
+//         This matches URIs of the form: /v1beta1/{parent:users/[0-9a-zA-Z_%\-]+/profile}/blurbs:send
 func (backend *RESTBackend) HandleSendBlurbs_1(w http.ResponseWriter, r *http.Request) {
 	backend.StdLog.Printf("Received request matching '/v1beta1/{parent=users/*/profile}/blurbs:send': %q", r.URL)
 	w.Write([]byte("ERROR: not implementing streaming methods yet"))
