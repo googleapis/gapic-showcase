@@ -40,7 +40,7 @@ func PopulateSingularFields(protoMessage proto.Message, fieldValues map[string]s
 
 // PopulateFields sets the fields within protoMessage to the values provided in fieldValues. The
 // fields and values are provided as a map of field paths to lists of string representations of
-// their values. The fields paths can refer to fields nested arbitrarily deep within
+// their values. The field paths can refer to fields nested arbitrarily deep within
 // protoMessage. `fieldValues` contains the list of values applicable to the field: a single value of
 // singular fields, or ordered values for a repeated field. This returns an error if any field path
 // is not valid or if any value can't be parsed into the correct data type for the field.
