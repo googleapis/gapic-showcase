@@ -86,14 +86,14 @@ func TestPopulateOneFieldError(t *testing.T) {
 		{"f_bool", "13"},
 	} {
 		dataPack := &genprotopb.DataPack{}
-		err := PopulateOneField(dataPack, testCase.field, testCase.value)
+		err := PopulateOneField(dataPack, testCase.field, []string{testCase.value})
 		if err == nil {
 			t.Errorf("test case %d: did not get expected error for %q: %q", idx, testCase.field, testCase.value)
 		}
 	}
 }
 
-func TestPopulateFields(t *testing.T) {
+func TestPopulateSingularFields(t *testing.T) {
 
 	for idx, testCase := range []struct {
 		label           string
@@ -176,7 +176,7 @@ func TestPopulateFields(t *testing.T) {
 		},
 	} {
 		dataPack := &genprotopb.DataPack{}
-		err := PopulateFields(dataPack, testCase.fields)
+		err := PopulateSingularFields(dataPack, testCase.fields)
 		if got, want := (err != nil), testCase.expectError; got != want {
 			t.Errorf("test case %d[%q] error: got %v, want %v", idx, testCase.label, err, want)
 			continue

@@ -133,7 +133,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 			}
 			file.P("  // TODO: Ensure we handle URL-encoded values in path variables")
-			file.P("  if err := resttools.PopulateFields(%s, urlPathParams); err != nil {", handler.RequestVariable)
+			file.P("  if err := resttools.PopulateSingularFields(%s, urlPathParams); err != nil {", handler.RequestVariable)
 			file.P(`    backend.StdLog.Printf("  error reading URL path params: %%s", err)`)
 			file.P("    // TODO: Properly handle error")
 			file.P("    w.Write([]byte(err.Error()))")

@@ -23,12 +23,28 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-// PopulateFields sets the fields within protoMessage to the values provided in fieldValues. The
+// PopulateSingularFields sets the fields within protoMessage to the values provided in fieldValues. The
 // fields and values are provided as a map of field paths to the string representation of their
 // values. The fields paths can refer to fields nested arbitrarily deep within protoMessage. This
 // returns an error if any field path is not valid or if any value can't be parsed into the correct
 // data type for the field.
-func PopulateFields(protoMessage proto.Message, fieldValues map[string]string) error {
+func PopulateSingularFields(protoMessage proto.Message, fieldValues map[string]string) error {
+	for name, value := range fieldValues {
+		if err := PopulateOneField(protoMessage, name, []string{value}); err != nil {
+			// TODO: accumulate errors so we report them all at once
+			return err
+		}
+	}
+	return nil
+}
+
+// PopulateFields sets the fields within protoMessage to the values provided in fieldValues. The
+// fields and values are provided as a map of field paths to lists of string representations of
+// their values. The fields paths can refer to fields nested arbitrarily deep within
+// protoMessage. `fieldValues` contains the list of values applicable to the field: a single value of
+// singular fields, or ordered values for a repeated field. This returns an error if any field path
+// is not valid or if any value can't be parsed into the correct data type for the field.
+func PopulateFields(protoMessage proto.Message, fieldValues map[string][]string) error {
 	for name, value := range fieldValues {
 		if err := PopulateOneField(protoMessage, name, value); err != nil {
 			// TODO: accumulate errors so we report them all at once
@@ -40,10 +56,17 @@ func PopulateFields(protoMessage proto.Message, fieldValues map[string]string) e
 
 // PopulateOneField finds in protoMessage the field identified by fieldPath (which could refer to an
 // arbitrarily nested field using dotted notation) and sets it to `value`. It returns an error if
-// the fieldPath does not properly reference a field, or if `value` could not be parsed into the
-// data type expected for the field.
-func PopulateOneField(protoMessage proto.Message, fieldPath string, value string) error {
+// the fieldPath does not properly reference a field, or if `fieldValues` could not be parsed into a
+// list of the data type expected for the field. `fieldValues` is a slice to allow passing a series
+// of repeated field entries.
+func PopulateOneField(protoMessage proto.Message, fieldPath string, fieldValues []string) error {
 	message := protoMessage.ProtoReflect()
+
+	// TODO: Support repeated fields.
+	if len(fieldValues) > 1 {
+		return fmt.Errorf("repeated field values are not supported yet (culprit: %q: %v)", fieldPath, fieldValues)
+	}
+	value := fieldValues[0]
 
 	levels := strings.Split(fieldPath, ".")
 	lastLevel := len(levels) - 1
