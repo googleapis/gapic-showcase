@@ -16,11 +16,13 @@ package gomodel
 
 import (
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 
 	"github.com/googleapis/gapic-showcase/util/genrest/errorhandling"
 	"github.com/googleapis/gapic-showcase/util/genrest/internal/pbinfo"
+	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 )
 
 ////////////////////////////////////////
@@ -53,12 +55,22 @@ func (gm *Model) String() string {
 // any errors found. This means checking that all the HTTP annotations
 // across all services resolve to distinct paths.
 func (gm *Model) CheckConsistency() {
+	reBodyField := regexp.MustCompile(resttools.RegexField)
 	allHandlers := []*RESTHandler{}
+
 	for _, service := range gm.Service {
 		allHandlers = append(allHandlers, service.Handlers...)
 	}
 
 	for first, firstHandler := range allHandlers {
+		if len(firstHandler.RequestBodyFieldProtoName) > 0 && firstHandler.RequestBodyFieldProtoName != "*" {
+
+			// The body field name refers to a top-level field.
+			if reBodyField.FindStringIndex(firstHandler.RequestBodyFieldProtoName) == nil {
+				gm.AccumulateError(fmt.Errorf("bad syntax in body field spec %q", firstHandler.RequestBodyFieldProtoName))
+			}
+		}
+
 		if _, nestedVariables := firstHandler.PathTemplate.HasVariables(); nestedVariables {
 			gm.AccumulateError(fmt.Errorf("pattern %q specifies nested variables, which are not allowed as per https://cloud.google.com/endpoints/docs/grpc-service-config/reference/rpc/google.api#path-template-syntax", firstHandler.URIPattern))
 		}
@@ -77,11 +89,6 @@ func (gm *Model) CheckConsistency() {
 			}
 			gm.AccumulateError(fmt.Errorf("pattern %q matches both\n   %s and\n   %s\n\n", ambiguousPattern, firstHandler, secondHandler))
 		}
-
-		// TODO: Check that each field path in the handler path template refers to an actual
-		// field in the request. We can use the functionality in
-		// resttools.PopulateOneField() (after some refactoring) to do this. This will allow
-		// us to error at build time rather than at server run time.
 	}
 }
 
@@ -169,16 +176,31 @@ type RESTHandler struct {
 
 	//// Go types
 
-	GoMethod            string
-	RequestType         string
-	RequestTypePackage  string
-	RequestVariable     string
-	ResponseType        string
-	ResponseTypePackage string
-	ResponseVariable    string
+	GoMethod                  string
+	RequestType               string
+	RequestTypePackage        string
+	RequestVariable           string
+	RequestBodyFieldSpec      BodyFieldSpec
+	RequestBodyFieldProtoName string
+	RequestBodyFieldName      string
+	RequestBodyFieldType      string
+	RequestBodyFieldVariable  string
+	RequestBodyFieldPackage   string
+	ResponseType              string
+	ResponseTypePackage       string
+	ResponseVariable          string
 }
 
 // String returns a string representation of this RESTHandler.
 func (rh *RESTHandler) String() string {
 	return fmt.Sprintf("%8s %50s func %s(%s %s.%s) (%s %s.%s) {}\n%s\n", rh.HTTPMethod, rh.URIPattern, rh.GoMethod, rh.RequestVariable, rh.RequestTypePackage, rh.RequestType, rh.ResponseVariable, rh.ResponseTypePackage, rh.ResponseType, rh.PathTemplate)
 }
+
+// BodyFieldSpec encodes what request field was annotated as the REST request body.
+type BodyFieldSpec int
+
+const (
+	BodyFieldNone   BodyFieldSpec = iota // no RPC field specified in the REST body
+	BodyFieldSingle                      // a single top-level RPC request field was specified in the REST body
+	BodyFieldAll                         // the whole RPC request message is encoded in the REST body
+)

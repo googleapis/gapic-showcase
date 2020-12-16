@@ -108,6 +108,7 @@ func NewRESTBinding(methodName string, rule *annotations.HttpRule, index int) (*
 		Index:       index,
 		ProtoMethod: methodName,
 		RESTPattern: restPattern,
+		BodyField:   rule.GetBody(),
 	}
 	return binding, nil
 }

@@ -84,7 +84,8 @@ func (service *Service) AddBinding(binding *RESTBinding) {
 
 // RESTBinding encapsulates the information contained in a protocol buffer HTTP annotation.
 type RESTBinding struct {
-	// Index of the binding for this method. Since methods could contain multiple bindings, we will need a way to identify each binding uniquely.
+	// Index of the binding for this method. Since methods could contain multiple bindings, we
+	// will need a way to identify each binding uniquely.
 	Index int
 
 	// The name of the method for which this is a binding.
@@ -92,6 +93,10 @@ type RESTBinding struct {
 
 	// The URL pattern of the binding.
 	RESTPattern *RESTRequestPattern
+
+	// The fields in the request body: either none (empty string), a single field (top-level
+	// request field, non-dotted), or all not captured in the URL ("*").
+	BodyField string
 }
 
 // String returns a string representation of this RESTBinding.
@@ -106,8 +111,6 @@ func (binding *RESTBinding) String() string {
 type RESTRequestPattern struct {
 	HTTPMethod string // HTTP verb
 	Pattern    string // the URL pattern
-
-	// TODO: Add body info.
 }
 
 // String returns a string representation of this RESTRequestPattern.

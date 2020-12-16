@@ -45,13 +45,26 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 	}
 
 	request := &genprotopb.CreateSequenceRequest{}
-	// TODO: Populate request with parameters from HTTP request
-	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+	// Intentional: Field values in the URL path override those set in the body.
+	var bodyField genprotopb.Sequence
+	if err := jsonpb.Unmarshal(r.Body, &bodyField); err != nil {
+		backend.StdLog.Printf(`  error reading body into request field "sequence": %s`, err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+	request.Sequence = &bodyField
+
+	// TODO: Ensure we handle URL-encoded values in path variables
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -76,7 +89,7 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 
 // HandleGetSequenceReport translates REST requests/responses on the wire to internal proto messages for GetSequenceReport
 //    Generated for HTTP binding pattern: /v1beta1/{name=sequences/*/sequenceReport}
-//         This matches URIs of the form: /v1beta1/{name:sequences/[a-zA-Z_%\-]+/sequenceReport}
+//         This matches URIs of the form: /v1beta1/{name:sequences/[0-9a-zA-Z_%\-]+/sequenceReport}
 func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -90,13 +103,16 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 	}
 
 	request := &genprotopb.GetSequenceReportRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -121,7 +137,7 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 
 // HandleAttemptSequence translates REST requests/responses on the wire to internal proto messages for AttemptSequence
 //    Generated for HTTP binding pattern: /v1beta1/{name=sequences/*}
-//         This matches URIs of the form: /v1beta1/{name:sequences/[a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{name:sequences/[0-9a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -135,13 +151,23 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 	}
 
 	request := &genprotopb.AttemptSequenceRequest{}
-	// TODO: Populate request with parameters from HTTP request
-	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+	// Intentional: Field values in the URL path override those set in the body.
+	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
+		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+	// TODO: Ensure we handle URL-encoded values in path variables
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)

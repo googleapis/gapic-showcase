@@ -45,13 +45,26 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 	}
 
 	request := &genprotopb.CreateSessionRequest{}
-	// TODO: Populate request with parameters from HTTP request
-	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+	// Intentional: Field values in the URL path override those set in the body.
+	var bodyField genprotopb.Session
+	if err := jsonpb.Unmarshal(r.Body, &bodyField); err != nil {
+		backend.StdLog.Printf(`  error reading body into request field "session": %s`, err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+	request.Session = &bodyField
+
+	// TODO: Ensure we handle URL-encoded values in path variables
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -76,7 +89,7 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 
 // HandleGetSession translates REST requests/responses on the wire to internal proto messages for GetSession
 //    Generated for HTTP binding pattern: /v1beta1/{name=sessions/*}
-//         This matches URIs of the form: /v1beta1/{name:sessions/[a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{name:sessions/[0-9a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -90,13 +103,16 @@ func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.GetSessionRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -135,13 +151,16 @@ func (backend *RESTBackend) HandleListSessions(w http.ResponseWriter, r *http.Re
 	}
 
 	request := &genprotopb.ListSessionsRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -166,7 +185,7 @@ func (backend *RESTBackend) HandleListSessions(w http.ResponseWriter, r *http.Re
 
 // HandleDeleteSession translates REST requests/responses on the wire to internal proto messages for DeleteSession
 //    Generated for HTTP binding pattern: /v1beta1/{name=sessions/*}
-//         This matches URIs of the form: /v1beta1/{name:sessions/[a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{name:sessions/[0-9a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -180,13 +199,16 @@ func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.R
 	}
 
 	request := &genprotopb.DeleteSessionRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -211,7 +233,7 @@ func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.R
 
 // HandleReportSession translates REST requests/responses on the wire to internal proto messages for ReportSession
 //    Generated for HTTP binding pattern: /v1beta1/{name=sessions/*}:report
-//         This matches URIs of the form: /v1beta1/{name:sessions/[a-zA-Z_%\-]+}:report
+//         This matches URIs of the form: /v1beta1/{name:sessions/[0-9a-zA-Z_%\-]+}:report
 func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -225,13 +247,16 @@ func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.R
 	}
 
 	request := &genprotopb.ReportSessionRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -256,7 +281,7 @@ func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.R
 
 // HandleListTests translates REST requests/responses on the wire to internal proto messages for ListTests
 //    Generated for HTTP binding pattern: /v1beta1/{parent=sessions/*}/tests
-//         This matches URIs of the form: /v1beta1/{parent:sessions/[a-zA-Z_%\-]+}/tests
+//         This matches URIs of the form: /v1beta1/{parent:sessions/[0-9a-zA-Z_%\-]+}/tests
 func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -270,13 +295,16 @@ func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Reque
 	}
 
 	request := &genprotopb.ListTestsRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -301,7 +329,7 @@ func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Reque
 
 // HandleDeleteTest translates REST requests/responses on the wire to internal proto messages for DeleteTest
 //    Generated for HTTP binding pattern: /v1beta1/{name=sessions/*/tests/*}
-//         This matches URIs of the form: /v1beta1/{name:sessions/[a-zA-Z_%\-]+/tests/[a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{name:sessions/[0-9a-zA-Z_%\-]+/tests/[0-9a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -315,13 +343,16 @@ func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.DeleteTestRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -346,7 +377,7 @@ func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Requ
 
 // HandleVerifyTest translates REST requests/responses on the wire to internal proto messages for VerifyTest
 //    Generated for HTTP binding pattern: /v1beta1/{name=sessions/*/tests/*}:check
-//         This matches URIs of the form: /v1beta1/{name:sessions/[a-zA-Z_%\-]+/tests/[a-zA-Z_%\-]+}:check
+//         This matches URIs of the form: /v1beta1/{name:sessions/[0-9a-zA-Z_%\-]+/tests/[0-9a-zA-Z_%\-]+}:check
 func (backend *RESTBackend) HandleVerifyTest(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -360,13 +391,16 @@ func (backend *RESTBackend) HandleVerifyTest(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.VerifyTestRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)

@@ -45,13 +45,23 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.CreateUserRequest{}
-	// TODO: Populate request with parameters from HTTP request
-	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+	// Intentional: Field values in the URL path override those set in the body.
+	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
+		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+	// TODO: Ensure we handle URL-encoded values in path variables
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -76,7 +86,7 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 
 // HandleGetUser translates REST requests/responses on the wire to internal proto messages for GetUser
 //    Generated for HTTP binding pattern: /v1beta1/{name=users/*}
-//         This matches URIs of the form: /v1beta1/{name:users/[a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{name:users/[0-9a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -90,13 +100,16 @@ func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request
 	}
 
 	request := &genprotopb.GetUserRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -121,7 +134,7 @@ func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request
 
 // HandleUpdateUser translates REST requests/responses on the wire to internal proto messages for UpdateUser
 //    Generated for HTTP binding pattern: /v1beta1/{user.name=users/*}
-//         This matches URIs of the form: /v1beta1/{user.name:users/[a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{user.name:users/[0-9a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -135,13 +148,23 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.UpdateUserRequest{}
-	// TODO: Populate request with parameters from HTTP request
-	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+	// Intentional: Field values in the URL path override those set in the body.
+	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
+		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+	// TODO: Ensure we handle URL-encoded values in path variables
+	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -166,7 +189,7 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 
 // HandleDeleteUser translates REST requests/responses on the wire to internal proto messages for DeleteUser
 //    Generated for HTTP binding pattern: /v1beta1/{name=users/*}
-//         This matches URIs of the form: /v1beta1/{name:users/[a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{name:users/[0-9a-zA-Z_%\-]+}
 func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -180,13 +203,16 @@ func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.DeleteUserRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -225,13 +251,16 @@ func (backend *RESTBackend) HandleListUsers(w http.ResponseWriter, r *http.Reque
 	}
 
 	request := &genprotopb.ListUsersRequest{}
-	// TODO: Populate request with parameters from HTTP request
+	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error: %s", err)
+		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	// TODO: Populate request with query parameters too
+	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
