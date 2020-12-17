@@ -56,15 +56,22 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 	request.Sequence = &bodyField
 
 	// TODO: Ensure we handle URL-encoded values in path variables
-	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
 
-	// TODO: Populate request with query parameters too
+	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	// TODO: Ensure we handle URL-encoded values in query parameters
+	queryParams := map[string][]string(r.URL.Query())
+	if err := resttools.PopulateFields(request, queryParams); err != nil {
+		backend.StdLog.Printf("  error reading query params: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -104,15 +111,22 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 
 	request := &genprotopb.GetSequenceReportRequest{}
 	// TODO: Ensure we handle URL-encoded values in path variables
-	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
 
-	// TODO: Populate request with query parameters too
+	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	// TODO: Ensure we handle URL-encoded values in query parameters
+	queryParams := map[string][]string(r.URL.Query())
+	if err := resttools.PopulateFields(request, queryParams); err != nil {
+		backend.StdLog.Printf("  error reading query params: %s", err)
+		// TODO: Properly handle error
+		w.Write([]byte(err.Error()))
+		return
+	}
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)
@@ -159,15 +173,12 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 		return
 	}
 	// TODO: Ensure we handle URL-encoded values in path variables
-	if err := resttools.PopulateFields(request, urlPathParams); err != nil {
+	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
 		w.Write([]byte(err.Error()))
 		return
 	}
-
-	// TODO: Populate request with query parameters too
-	// TODO: Ensure we handle URL-encoded values in query parameters
 
 	marshaler := &jsonpb.Marshaler{}
 	requestJSON, _ := marshaler.MarshalToString(request)

@@ -86,14 +86,14 @@ func TestPopulateOneFieldError(t *testing.T) {
 		{"f_bool", "13"},
 	} {
 		dataPack := &genprotopb.DataPack{}
-		err := PopulateOneField(dataPack, testCase.field, testCase.value)
+		err := PopulateOneField(dataPack, testCase.field, []string{testCase.value})
 		if err == nil {
 			t.Errorf("test case %d: did not get expected error for %q: %q", idx, testCase.field, testCase.value)
 		}
 	}
 }
 
-func TestPopulateFields(t *testing.T) {
+func TestPopulateSingularFields(t *testing.T) {
 
 	for idx, testCase := range []struct {
 		label           string
@@ -176,9 +176,63 @@ func TestPopulateFields(t *testing.T) {
 		},
 	} {
 		dataPack := &genprotopb.DataPack{}
+		err := PopulateSingularFields(dataPack, testCase.fields)
+		if got, want := (err != nil), testCase.expectError; got != want {
+			t.Errorf("test case %d[%q] error: got %v, want %v", idx, testCase.label, err, want)
+			continue
+		}
+		if testCase.expectError {
+			continue
+		}
+
+		var expectProto genprotopb.DataPack
+		err = prototext.Unmarshal([]byte(testCase.expectProtoText), &expectProto)
+		if err != nil {
+			t.Errorf("test case %d[%q] unexpected error unmarshaling expected proto: %s", idx, testCase.label, err)
+			continue
+		}
+
+		if got, want := dataPack, &expectProto; !reflect.DeepEqual(got, want) {
+			gotText, err := prototext.Marshal(got)
+			if err != nil {
+				gotText = []byte("<error marshalling in test>")
+			}
+			t.Errorf("test case %d[%q] proto:\n    got: %s\n   want: %s", idx, testCase.label, gotText, testCase.expectProtoText)
+		}
+
+	}
+}
+
+func TestPopulateFields(t *testing.T) {
+	for idx, testCase := range []struct {
+		label           string
+		fields          map[string][]string
+		expectError     bool
+		expectProtoText string
+	}{
+		{
+			label: "non-repeated fields",
+			fields: map[string][]string{
+				"f_string": []string{"alphabet"},
+			},
+			expectProtoText: `f_string:"alphabet"`,
+		},
+		{
+			label: "repeated fields",
+			fields: map[string][]string{
+				"f_string": []string{"alphabet", "lexicon"},
+			},
+			// TODO: Make Populate*Field*() work with repeated fields.
+			expectError: true,
+		},
+	} {
+		dataPack := &genprotopb.DataPack{}
 		err := PopulateFields(dataPack, testCase.fields)
 		if got, want := (err != nil), testCase.expectError; got != want {
 			t.Errorf("test case %d[%q] error: got %v, want %v", idx, testCase.label, err, want)
+			continue
+		}
+		if testCase.expectError {
 			continue
 		}
 
