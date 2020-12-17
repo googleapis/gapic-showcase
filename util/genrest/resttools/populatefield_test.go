@@ -253,3 +253,27 @@ func TestPopulateFields(t *testing.T) {
 
 	}
 }
+
+func TestParseBool(t *testing.T) {
+	for idx, testCase := range []struct {
+		asString    string
+		expectValue bool
+		expectError bool
+	}{
+		{"true", true, false},
+		{"false", false, false},
+		{"True", false, true},
+		{"False", false, true},
+		{"0", false, true},
+		{"1", false, true},
+	} {
+		val, err := parseBool(testCase.asString)
+		if got, want := (err != nil), testCase.expectError; got != want {
+			t.Errorf("test case %d[%q] error: got %v, want %v", idx, testCase.asString, err, want)
+			continue
+		}
+		if got, want := val, testCase.expectValue; got != want {
+			t.Errorf("test case %d[%q] got: %v,   want: %v", idx, testCase.asString, got, want)
+		}
+	}
+}
