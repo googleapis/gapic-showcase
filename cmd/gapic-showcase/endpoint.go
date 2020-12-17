@@ -199,6 +199,7 @@ func createBackends() *services.Backend {
 		SequenceServiceServer: services.NewSequenceServer(),
 		IdentityServer:        identityServer,
 		MessagingServer:       messagingServer,
+		ComplianceServer:      services.NewComplianceServer(),
 		TestingServer:         services.NewTestingServer(observerRegistry),
 		OperationsServer:      services.NewOperationsServer(messagingServer),
 		StdLog:                stdLog,
@@ -243,6 +244,7 @@ func newEndpointGRPC(lis net.Listener, config RuntimeConfig, backend *services.B
 	pb.RegisterSequenceServiceServer(s, backend.SequenceServiceServer)
 	pb.RegisterIdentityServer(s, backend.IdentityServer)
 	pb.RegisterMessagingServer(s, backend.MessagingServer)
+	pb.RegisterComplianceServer(s, backend.ComplianceServer)
 	lropb.RegisterOperationsServer(s, backend.OperationsServer)
 	pb.RegisterTestingServer(s, backend.TestingServer)
 
