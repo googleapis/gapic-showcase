@@ -137,7 +137,7 @@ func TestPopulateSingularFields(t *testing.T) {
 				"f_int32":                  "5",
 				"subpack.subpack.f_double": "53.47",
 				"subpack.subpack.f_int32":  "-6",
-				"subpack.f_bool":           "1", // NOTE: this gets parsed as "true"
+				"subpack.f_bool":           "true",
 			},
 			expectProtoText: `subpack:{subpack:{f_string:"lexicon" f_int32:-6 f_double:53.47} f_bool:true} f_string:"alphabet" f_int32:5`,
 		},
@@ -170,7 +170,7 @@ func TestPopulateSingularFields(t *testing.T) {
 				"p_string": "",
 				"p_int32":  "0",
 				"p_double": "0",
-				"p_bool":   "0", // NOTE: this gets parsed as "false"
+				"p_bool":   "false",
 			},
 			expectProtoText: `p_string:""  p_int32:0  p_double:0  p_bool:false`,
 		},
@@ -251,5 +251,29 @@ func TestPopulateFields(t *testing.T) {
 			t.Errorf("test case %d[%q] proto:\n    got: %s\n   want: %s", idx, testCase.label, gotText, testCase.expectProtoText)
 		}
 
+	}
+}
+
+func TestParseBool(t *testing.T) {
+	for idx, testCase := range []struct {
+		asString    string
+		expectValue bool
+		expectError bool
+	}{
+		{"true", true, false},
+		{"false", false, false},
+		{"True", false, true},
+		{"False", false, true},
+		{"0", false, true},
+		{"1", false, true},
+	} {
+		val, err := parseBool(testCase.asString)
+		if got, want := (err != nil), testCase.expectError; got != want {
+			t.Errorf("test case %d[%q] error: got %v, want %v", idx, testCase.asString, err, want)
+			continue
+		}
+		if got, want := val, testCase.expectValue; got != want {
+			t.Errorf("test case %d[%q] got: %v,   want: %v", idx, testCase.asString, got, want)
+		}
 	}
 }

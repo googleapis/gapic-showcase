@@ -142,9 +142,7 @@ func PopulateOneField(protoMessage proto.Message, fieldPath string, fieldValues 
 			parseError, protoValue = err, protoreflect.ValueOfFloat64(parsedValue)
 
 		case protoreflect.BoolKind:
-			// TODO: should we be stricter in what we accept? ParseBool accepts various
-			// representations of "true" and "false" (https://golang.org/pkg/strconv/#ParseBool)
-			parsedValue, err := strconv.ParseBool(value)
+			parsedValue, err := parseBool(value)
 			parseError, protoValue = err, protoreflect.ValueOfBool(parsedValue)
 
 		default:
@@ -160,4 +158,18 @@ func PopulateOneField(protoMessage proto.Message, fieldPath string, fieldValues 
 	}
 
 	return nil
+}
+
+// parseBool parses a proper JSON representation of a bool value (either of the strings "true" or
+// "false") into a bool data type. Other values cause an error. These are stricter parsing semantics
+// than those of strconv.ParseBool and adhere to the JSON standard.
+func parseBool(asString string) (bool, error) {
+	switch asString {
+	case "true":
+		return true, nil
+	case "false":
+		return false, nil
+	default:
+		return false, fmt.Errorf("could not parse %q as a bool", asString)
+	}
 }

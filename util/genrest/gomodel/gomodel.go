@@ -170,10 +170,6 @@ type RESTHandler struct {
 	StreamingServer bool         // whether this method uses server-side streaming
 	StreamingClient bool         // whether this method uses client-side streaming
 
-	// TODO: Fill in with actual information needed to access each field. These are placeholders
-	// for now.
-	PathFields, QueryFields, BodyFields []*interface{}
-
 	//// Go types
 
 	GoMethod                  string
