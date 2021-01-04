@@ -304,7 +304,7 @@ type endpointREST struct {
 	mux      sync.Mutex
 }
 
-func newEndpointREST(lis net.Listener, backend *services.Backend) Endpoint {
+func newEndpointREST(lis net.Listener, backend *services.Backend) *endpointREST {
 	router := gmux.NewRouter()
 	router.HandleFunc("/hello", func(w http.ResponseWriter, _ *http.Request) {
 		w.Write([]byte("GAPIC Showcase: HTTP/REST endpoint using gorilla/mux\n"))
