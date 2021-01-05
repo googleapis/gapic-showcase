@@ -1,0 +1,5 @@
+# To make proto_library rules to include source info in the descriptor
+build --protocopt=--include_source_info
+
+# Required because showcase protos include proto3_optional fields
+build --protocopt=--experimental_allow_proto3_optional

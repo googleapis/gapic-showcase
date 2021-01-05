@@ -1,0 +1,68 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""
+A workspace for gapic-showcase
+"""
+workspace(name = "gapic_showcase")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+##
+# required by googleapis
+#
+http_archive(
+  name = "com_google_api_codegen",
+  strip_prefix = "gapic-generator-2.4.0",
+  urls = ["https://github.com/googleapis/gapic-generator/archive/v2.4.0.zip"],
+)
+
+##
+# googleapis for the common protos
+#
+http_archive(
+  name = "com_google_googleapis",
+  strip_prefix = "googleapis-cf41866c6f14f10a07aa1e2a1260fc0a2727d889",
+  urls = ["https://github.com/googleapis/googleapis/archive/cf41866c6f14f10a07aa1e2a1260fc0a2727d889.zip"],
+  sha256 = "943602b1e91621f282c1e790eb46d9a70e202fe65091b7d41415a43973cebec4"
+)
+load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
+switched_rules_by_language(name = "com_google_googleapis_imports", gapic = True)
+
+##
+# protobuf for the protobuf protos
+#
+http_archive(
+  name = "com_google_protobuf",
+  sha256 = "e5265d552e12c1f39c72842fa91d84941726026fa056d914ea6a25cd58d7bbf8",
+  urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.12.3.zip"],
+  strip_prefix = "protobuf-3.12.3",
+)
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+protobuf_deps()
+
+##
+# rules_proto for the proto_library rule
+#
+http_archive(
+  name = "rules_proto",
+  sha256 = "602e7161d9195e50246177e7c55b2f39950a9cf7366f74ed5f22fd45750cd208",
+  strip_prefix = "rules_proto-97d8af4dc474595af3900dd85cb3a29ad28cc313",
+  urls = [
+    "https://mirror.bazel.build/github.com/bazelbuild/rules_proto/archive/97d8af4dc474595af3900dd85cb3a29ad28cc313.tar.gz",
+    "https://github.com/bazelbuild/rules_proto/archive/97d8af4dc474595af3900dd85cb3a29ad28cc313.tar.gz",
+  ],
+)
+load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
+rules_proto_dependencies()
+rules_proto_toolchains()
