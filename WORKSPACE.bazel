@@ -19,15 +19,6 @@ workspace(name = "gapic_showcase")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 ##
-# required by googleapis
-#
-http_archive(
-  name = "com_google_api_codegen",
-  strip_prefix = "gapic-generator-2.4.0",
-  urls = ["https://github.com/googleapis/gapic-generator/archive/v2.4.0.zip"],
-)
-
-##
 # googleapis for the common protos
 #
 http_archive(
@@ -37,7 +28,7 @@ http_archive(
   sha256 = "943602b1e91621f282c1e790eb46d9a70e202fe65091b7d41415a43973cebec4"
 )
 load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
-switched_rules_by_language(name = "com_google_googleapis_imports", gapic = True)
+switched_rules_by_language(name = "com_google_googleapis_imports", grpc = True)
 
 ##
 # protobuf for the protobuf protos
