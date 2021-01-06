@@ -15,7 +15,7 @@
   "labels": ["automerge"],
   "packageRules": [
     {
-      "packageNames": ["google.golang.org/genproto"],
+      "packageNames": ["google.golang.org/genproto", "com_google_googleapis"],
       "schedule": "after 12pm on monday"
     }
   ],
