@@ -19,6 +19,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -36,7 +37,7 @@ func TestRESTCalls(t *testing.T) {
 		path       string
 		body       string
 		want       string
-		statusCode int // 0 taken to mean 200 for simplicty
+		statusCode int // 0 taken to mean 200 for simplicity
 	}{
 		{
 			verb: "GET",
@@ -44,16 +45,32 @@ func TestRESTCalls(t *testing.T) {
 			want: "GAPIC Showcase: HTTP/REST endpoint using gorilla/mux\n",
 		},
 		{
+			verb: "POST",
+			path: "/v1beta1/repeat:body",
+			body: `{"info":{"fString":"jonas^ mila"}}`,
+			want: `{"info":{"fString":"jonas^ mila"}}`,
+		},
+		{
+			verb: "GET",
+			path: "/v1beta1/repeat:query?info.f_string=jonas+mila",
+			want: `{"info":{"fString":"jonas mila"}}`,
+		},
+		{
 			verb: "GET",
 			path: "/v1beta1/repeat:query?info.f_string=jonas^mila",
 
-			// TODO: This should return an error because `^` is not URL-escaped
-			want:       `{"info":{"fString":"jonas^mila"}}`,
+			// TODO: Fix so that this returns an error, because `^` is not URL-escaped
 			statusCode: 200,
+			want:       `{"info":{"fString":"jonas^mila"}}`,
+		},
+		{
+			verb:       "GET",
+			path:       "/v1beta1/repeat:query?info.f_string=jonas mila",
+			statusCode: 400, // unescaped space in query param
 		},
 	} {
 
-		request, err := http.NewRequest(testCase.verb, server.URL+testCase.path, nil)
+		request, err := http.NewRequest(testCase.verb, server.URL+testCase.path, strings.NewReader(testCase.body))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -70,6 +87,11 @@ func TestRESTCalls(t *testing.T) {
 		if got := response.StatusCode; got != want {
 			t.Errorf("testcase %2d: status code: got %d, want %d", idx, got, want)
 			t.Errorf("  request: %v", request)
+		} else {
+			if want != 200 {
+				// we got the expected error
+				continue
+			}
 		}
 
 		body, err := ioutil.ReadAll(response.Body)
