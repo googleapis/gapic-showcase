@@ -23,6 +23,8 @@ import (
 	"testing"
 )
 
+// TestRESTCalls tests that arbitrary rest calls received by the Showcase REST server are handled
+// correctly.
 func TestRESTCalls(t *testing.T) {
 	server := httptest.NewUnstartedServer(nil)
 	backend := createBackends()

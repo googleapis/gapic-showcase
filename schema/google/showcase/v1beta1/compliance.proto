@@ -48,18 +48,18 @@ service Compliance {
 }
 
 message RepeatRequest {
-  FlatData info = 1;
+  string name = 1;
+  ComplianceData info = 2;
 }
 
 message RepeatResponse {
-  FlatData info = 1;
+  ComplianceData info = 1;
 }
 
 
-// DataPack is a message used for testing REST transcoding of
-// different data types. In the future, it may be part of an Echo
-// service RPC that also tests JSON responses.
-message FlatData {
+// ComplianceData is a message used for testing REST transcoding of
+// different data types.
+message ComplianceData {
 
   // scalar types
 
@@ -93,6 +93,14 @@ message FlatData {
   optional double p_double = 19;
   optional bool p_bool = 20;
 }
+
+
+message ComplianceSuite {
+  string name = 1;
+  repeated string rpcs = 2;
+  repeated RepeatRequest cases = 3;
+}
+
 
 
 // DataPack is a message used for testing REST transcoding of

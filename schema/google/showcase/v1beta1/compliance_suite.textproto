@@ -1,0 +1,8 @@
+name: "Basic data types"
+rpcs: ["Compliance.RepeatDataBody"]
+cases: [{
+  name: "Basic data types",
+  info: {
+    f_string: "Hello there"
+  }
+}]
