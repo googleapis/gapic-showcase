@@ -94,11 +94,15 @@ message ComplianceData {
   optional bool p_bool = 20;
 }
 
-
-message ComplianceSuite {
+message ComplianceGroup {
   string name = 1;
   repeated string rpcs = 2;
   repeated RepeatRequest cases = 3;
+
+}
+
+message ComplianceSuite {
+  repeated ComplianceGroup group = 1;
 }
 
 

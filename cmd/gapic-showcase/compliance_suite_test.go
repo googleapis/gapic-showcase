@@ -55,69 +55,73 @@ func TestComplianceSuite(t *testing.T) {
 
 	// Set handlers for each test case. When GAPIC generator tests do this, they should have
 	// each of their handlers invoking the correct GAPIC library method for the Showcase API.
-	restRPCs := [](func(*genproto.RepeatRequest) (string, string, string, string, error)){
-		prepRepeatDataBodyTest,
+	restRPCs := map[string]prepRepeatDataTestFunc{
+		"Compliance.RepeatDataBody":  prepRepeatDataBodyTest,
+		"Compliance.RepeatDataQuery": prepRepeatDataQueryTest,
 	}
 
-	suiteRPCs := suite.GetRpcs()
-	numRPCsToTest := len(suiteRPCs)
-	if got, want := numRPCsToTest, len(restRPCs); got != want {
-		t.Fatalf("number of rpcs to test: proto suite specifies %d, test implements %d", got, want)
-	}
+	for _, group := range suite.GetGroup() {
+		rpcsToTest := group.GetRpcs()
+		for caseIdx, requestProto := range group.GetCases() {
+			for rpcIdx, rpcName := range rpcsToTest {
+				errorPrefix := fmt.Sprintf("[case %d/%q: rpc %q/%d/%q]",
+					caseIdx, requestProto.GetName(), group.Name, rpcIdx, rpcName)
 
-	for caseIdx, requestProto := range suite.GetCases() {
-		for rpcIdx, rpcPrep := range restRPCs {
-			// Ensure that we issue only the RPCs the test suite is expecting. GAPIC
-			// generator tests should do this, though possibly in combination with the
-			// RPC call below.
-			rpcName, verb, path, requestBody, err := rpcPrep(requestProto)
-			errorPrefix := fmt.Sprintf("[case %d/%q: rpc %d/%q]", caseIdx, requestProto.GetName(), rpcIdx, rpcName)
-			if err != nil {
-				t.Errorf("%s error: %s", errorPrefix, err)
-			}
-			if got, want := rpcName, suiteRPCs[rpcIdx]; got != want {
-				t.Errorf("%s unexpected RPC prepped: got %q, want %q", errorPrefix, got, want)
-			}
+				// Ensure that we issue only the RPCs the test suite is expecting.
+				rpcPrep, ok := restRPCs[rpcName]
+				if !ok {
+					t.Errorf("%s could not find prep function for this RPC", errorPrefix)
+					continue
+				}
 
-			// Issue the request. When GAPIC generator tests do this, they should simply
-			// invoke the correct GAPIC library method for the Showcase API.
-			httpRequest, err := http.NewRequest(verb, server.URL+path, strings.NewReader(requestBody))
-			if err != nil {
-				t.Errorf("%s error creating request: %s", errorPrefix, err)
-				continue
-			}
-			httpResponse, err := http.DefaultClient.Do(httpRequest)
-			if err != nil {
-				t.Errorf("%s error issuing call: %s", errorPrefix, err)
-				continue
-			}
+				prepName, verb, path, requestBody, err := rpcPrep(requestProto)
+				if err != nil {
+					t.Errorf("%s error: %s", errorPrefix, err)
+				}
+				if got, want := prepName, rpcName; got != want {
+					t.Errorf("%s retrieved mismatched prep function: got %q, want %q", errorPrefix, got, want)
+				}
 
-			// Check for successful response.
-			if got, want := httpResponse.StatusCode, 200; got != want {
-				t.Errorf("%s exit code: got %d, want %d", errorPrefix, got, want)
-			}
+				// Issue the request. When GAPIC generator tests do this, they should simply
+				// invoke the correct GAPIC library method for the Showcase API.
+				httpRequest, err := http.NewRequest(verb, server.URL+path, strings.NewReader(requestBody))
+				if err != nil {
+					t.Errorf("%s error creating request: %s", errorPrefix, err)
+					continue
+				}
+				httpResponse, err := http.DefaultClient.Do(httpRequest)
+				if err != nil {
+					t.Errorf("%s error issuing call: %s", errorPrefix, err)
+					continue
+				}
 
-			// Unmarshal httpResponse body, interpreted as JSON.
-			// should do this.
-			responseBody, err := ioutil.ReadAll(httpResponse.Body)
-			httpResponse.Body.Close()
-			if err != nil {
-				t.Errorf("%s could not read httpResponse body: %s", errorPrefix, err)
-				continue
-			}
-			var response genproto.RepeatResponse
-			if err := jsonpb.UnmarshalString(string(responseBody), &response); err != nil {
-				t.Errorf("%s could not unmarshal httpResponse body: %s\n   response body: %s",
-					errorPrefix, err, string(responseBody))
-				continue
-			}
+				// Check for successful response.
+				if got, want := httpResponse.StatusCode, 200; got != want {
+					t.Errorf("%s exit code: got %d, want %d", errorPrefix, got, want)
+				}
 
-			// Check for expected response.
-			if got, want := response.GetInfo(), requestProto.GetInfo(); !proto.Equal(got, want) {
-				gotString, _ := prototext.Marshal(got)
-				wantString, _ := prototext.Marshal(want)
-				t.Errorf("%s unexpected response:\n   -->got:\n`%s`\n   -->want:\n`%s`\n",
-					errorPrefix, gotString, wantString)
+				// Unmarshal httpResponse body, interpreted as JSON.
+				// should do this.
+				responseBody, err := ioutil.ReadAll(httpResponse.Body)
+				httpResponse.Body.Close()
+				if err != nil {
+					t.Errorf("%s could not read httpResponse body: %s", errorPrefix, err)
+					continue
+				}
+				var response genproto.RepeatResponse
+				if err := jsonpb.UnmarshalString(string(responseBody), &response); err != nil {
+					t.Errorf("%s could not unmarshal httpResponse body: %s\n   response body: %s",
+						errorPrefix, err, string(responseBody))
+					continue
+				}
+
+				// Check for expected response.
+				if got, want := response.GetInfo(), requestProto.GetInfo(); !proto.Equal(got, want) {
+					gotString, _ := prototext.Marshal(got)
+					wantString, _ := prototext.Marshal(want)
+					t.Errorf("%s unexpected response:\n   -->got:\n`%s`\n   -->want:\n`%s`\n",
+						errorPrefix, gotString, wantString)
+				}
 			}
 		}
 	}
@@ -126,10 +130,31 @@ func TestComplianceSuite(t *testing.T) {
 // The following are helpers for TestComplianceSuite, since Showcase doesn't intrinsically define a
 // REST client. Each GAPIC generators should instead use the GAPIC it generated for the Showcase
 // API.
+type prepRepeatDataTestFunc func(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error)
 
 func prepRepeatDataBodyTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
 	name = "Compliance.RepeatDataBody"
 	marshaler := &jsonpb.Marshaler{}
 	body, err = marshaler.MarshalToString(request)
 	return name, "POST", "/v1beta1/repeat:body", body, err
+}
+
+func prepRepeatDataQueryTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
+	name = "Compliance.RepeatDataQuery"
+	info := request.GetInfo()
+	queryParams := []string{}
+	addParam := func(condition bool, key, value string) {
+		if !condition {
+			return
+		}
+		queryParams = append(queryParams, fmt.Sprintf("info.%s=%s", key, value))
+	}
+
+	addParam(len(info.FString) > 0, "f_string", strings.ReplaceAll(info.FString, " ", "+"))
+
+	var queryString string
+	if len(queryParams) > 0 {
+		queryString = fmt.Sprintf("?%s", strings.Join(queryParams, "&"))
+	}
+	return name, "GET", "/v1beta1/repeat:query" + queryString, body, err
 }

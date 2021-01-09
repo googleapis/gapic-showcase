@@ -1,8 +1,32 @@
-name: "Basic data types"
-rpcs: ["Compliance.RepeatDataBody"]
-cases: [{
-  name: "Basic data types",
-  info: {
-    f_string: "Hello there"
-  }
-}]
+group: [
+  {name: "Fully working conversions"
+   rpcs: ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery"]
+   cases: [
+     {name: "Basic data types",
+      info: {
+        f_string: "Hello"
+      }
+     },
+     {name: "Strings with spaces",
+      info: {
+        f_string: "Hello there"
+      }
+     },
+     {name: "Strings with quotes",
+      info: {
+        f_string: "Hello \"You\""
+      }
+     }          
+   ]
+  },
+  {name: "Conversions not yet working for query params"
+   rpcs: ["Compliance.RepeatDataBody"]
+   cases: [
+     {name: "Strings with percents",
+      info: {
+        f_string: "Hello 100%"
+      }
+     }     
+   ]
+  }  
+]
