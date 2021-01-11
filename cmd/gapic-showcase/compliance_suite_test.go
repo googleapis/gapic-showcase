@@ -31,7 +31,10 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// TestComplianceSuite ensures the REST test suite that we require GAPIC generators to pass works correctly. GAPIC generators should generate GAPICs for the Showcase API and issue the unary calls defined in the test suite using the GAPIC surface. The generators' test should follow the high-level logic below, as delineated by the comments below.
+// TestComplianceSuite ensures the REST test suite that we require GAPIC generators to pass works
+// correctly. GAPIC generators should generate GAPICs for the Showcase API and issue the unary calls
+// defined in the test suite using the GAPIC surface. The generators' test should follow the
+// high-level logic below, as described in the comments.
 func TestComplianceSuite(t *testing.T) {
 	// Run the Showcase REST server locally.
 	server := httptest.NewUnstartedServer(nil)
@@ -150,7 +153,7 @@ func prepRepeatDataQueryTest(request *genproto.RepeatRequest) (verb string, name
 		queryParams = append(queryParams, fmt.Sprintf("info.%s=%s", key, value))
 	}
 
-	addParam(len(info.FString) > 0, "f_string", strings.ReplaceAll(info.FString, " ", "+"))
+	addParam(len(info.FString) > 0, "f_string", strings.ReplaceAll(strings.ReplaceAll(info.FString, " ", "+"), "%", "%%"))
 
 	var queryString string
 	if len(queryParams) > 0 {
