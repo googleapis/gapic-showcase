@@ -97,7 +97,7 @@ message ComplianceData {
 message ComplianceGroup {
   string name = 1;
   repeated string rpcs = 2;
-  repeated RepeatRequest cases = 3;
+  repeated RepeatRequest requests = 3;
 
 }
 

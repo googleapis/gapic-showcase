@@ -89,11 +89,9 @@ func TestRESTCalls(t *testing.T) {
 		if got := response.StatusCode; got != want {
 			t.Errorf("testcase %2d: status code: got %d, want %d", idx, got, want)
 			t.Errorf("  request: %v", request)
-		} else {
-			if want != 200 {
-				// we got the expected error
-				continue
-			}
+		} else if want != 200 {
+			// we got the expected error
+			continue
 		}
 
 		body, err := ioutil.ReadAll(response.Body)

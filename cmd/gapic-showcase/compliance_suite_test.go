@@ -65,10 +65,10 @@ func TestComplianceSuite(t *testing.T) {
 
 	for _, group := range suite.GetGroup() {
 		rpcsToTest := group.GetRpcs()
-		for caseIdx, requestProto := range group.GetCases() {
+		for requestIdx, requestProto := range group.GetRequests() {
 			for rpcIdx, rpcName := range rpcsToTest {
-				errorPrefix := fmt.Sprintf("[case %d/%q: rpc %q/%d/%q]",
-					caseIdx, requestProto.GetName(), group.Name, rpcIdx, rpcName)
+				errorPrefix := fmt.Sprintf("[request %d/%q: rpc %q/%d/%q]",
+					requestIdx, requestProto.GetName(), group.Name, rpcIdx, rpcName)
 
 				// Ensure that we issue only the RPCs the test suite is expecting.
 				rpcPrep, ok := restRPCs[rpcName]
@@ -131,7 +131,7 @@ func TestComplianceSuite(t *testing.T) {
 }
 
 // The following are helpers for TestComplianceSuite, since Showcase doesn't intrinsically define a
-// REST client. Each GAPIC generators should instead use the GAPIC it generated for the Showcase
+// REST client. Each GAPIC generator should instead use the GAPIC it generated for the Showcase
 // API.
 type prepRepeatDataTestFunc func(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error)
 

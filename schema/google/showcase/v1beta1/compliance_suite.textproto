@@ -1,7 +1,7 @@
 group: [
   {name: "Fully working conversions"
    rpcs: ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery"]
-   cases: [
+   requests: [
      {name: "Basic data types",
       info: {
         f_string: "Hello"
@@ -21,7 +21,7 @@ group: [
   },
   {name: "Conversions not yet working for query params"
    rpcs: ["Compliance.RepeatDataBody"]
-   cases: [
+   requests: [
      {name: "Strings with percents",
       info: {
         f_string: "Hello 100%"
