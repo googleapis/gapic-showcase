@@ -42,3 +42,7 @@ func (s *complianceServerImpl) RepeatDataBody(ctx context.Context, in *pb.Repeat
 func (s *complianceServerImpl) RepeatDataQuery(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
 	return s.Repeat(ctx, in)
 }
+
+func (s *complianceServerImpl) RepeatDataSimplePath(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
+	return s.Repeat(ctx, in)
+}

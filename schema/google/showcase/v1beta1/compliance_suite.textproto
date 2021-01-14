@@ -1,6 +1,6 @@
 group: [
   {name: "Fully working conversions"
-   rpcs: ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery"]
+   rpcs: ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery", "Compliance.RepeatDataSimplePath"]
    requests: [
      {name: "Basic data types",
       info: {

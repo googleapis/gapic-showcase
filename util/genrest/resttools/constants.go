@@ -24,8 +24,12 @@ const (
 	CharsLiteral = `-_.~0-9a-zA-Z%`
 
 	// CharsURLPathValue contains the characters allowed in an actual URL path segment encoding
-	// user-supplied values.;
-	CharsURLPathValue = `0-9a-zA-Z_%\-`
+	// user-supplied values.
+	//
+	// TODO: Gorilla/mux seems to already un-encode these characters, so maybe the right rexep
+	// here is [[:ascii:]] or [[:graph:]] or [[:print:]], minus slashes. See
+	// https://golang.org/pkg/regexp/syntax/
+	CharsURLPathValue = `0-9a-zA-Z_% "\-`
 )
 
 var (

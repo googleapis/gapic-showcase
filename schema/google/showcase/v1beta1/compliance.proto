@@ -30,19 +30,29 @@ service Compliance {
   // for "show").
   option (google.api.default_host) = "localhost:7469";
 
-  // This method echoes the datapack request. This method exercises all
-  // parameters in the body
+  // This method echoes the ComplianceData request. This method exercises sending the
+  // entire request object in the REST body.
   rpc RepeatDataBody(RepeatRequest) returns (RepeatResponse) {
     option (google.api.http) = {
       post: "/v1beta1/repeat:body"
       body: "*"
     };
   }
-  // This method echoes the datapack request. This method exercises all
-  // parameters in query params
+
+  // This method echoes the ComplianceData request. This method exercises
+  // sending all request fields as query parameters.
   rpc RepeatDataQuery(RepeatRequest) returns (RepeatResponse) {
     option (google.api.http) = {
       get: "/v1beta1/repeat:query"
+    };
+  }
+
+  // This method echoes the ComplianceData request. This method exercises
+  // sending some parameters as "simple" path variables (i.e., of the form
+  // "/bar/{foo}" rather than "/{foo=bar/*}"), and the rest as query parameters.
+  rpc RepeatDataSimplePath(RepeatRequest) returns (RepeatResponse) {
+    option (google.api.http) = {
+      get: "/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}:simplepath"
     };
   }
 }

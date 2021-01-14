@@ -19,6 +19,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -59,8 +60,9 @@ func TestComplianceSuite(t *testing.T) {
 	// Set handlers for each test case. When GAPIC generator tests do this, they should have
 	// each of their handlers invoking the correct GAPIC library method for the Showcase API.
 	restRPCs := map[string]prepRepeatDataTestFunc{
-		"Compliance.RepeatDataBody":  prepRepeatDataBodyTest,
-		"Compliance.RepeatDataQuery": prepRepeatDataQueryTest,
+		"Compliance.RepeatDataBody":       prepRepeatDataBodyTest,
+		"Compliance.RepeatDataQuery":      prepRepeatDataQueryTest,
+		"Compliance.RepeatDataSimplePath": prepRepeatDataSimplePathTest,
 	}
 
 	for _, group := range suite.GetGroup() {
@@ -100,7 +102,8 @@ func TestComplianceSuite(t *testing.T) {
 
 				// Check for successful response.
 				if got, want := httpResponse.StatusCode, 200; got != want {
-					t.Errorf("%s exit code: got %d, want %d", errorPrefix, got, want)
+					t.Errorf("%s response code: got %d, want %d\n   %s %s",
+						errorPrefix, got, want, verb, server.URL+path)
 				}
 
 				// Unmarshal httpResponse body, interpreted as JSON.
@@ -144,6 +147,36 @@ func prepRepeatDataBodyTest(request *genproto.RepeatRequest) (verb string, name 
 
 func prepRepeatDataQueryTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
 	name = "Compliance.RepeatDataQuery"
+	queryString := prepRepeatDataTestsQueryString(request, nil)
+	return name, "GET", "/v1beta1/repeat:query" + queryString, body, err
+}
+
+func prepRepeatDataSimplePathTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
+	name = "Compliance.RepeatDataSimplePath"
+	info := request.GetInfo()
+
+	// TODO: Determine behavior for a string field path param whose value is empty. This should be
+	// a failure, probably, in which case we need to augment the ComplianceGroup to allow
+	// specifying expected errors.
+	// TODO: Add to compliance_suite cases with near-maximal values.
+	path = fmt.Sprintf("/v1beta1/repeat/%s/%d/%.20g/%t:simplepath",
+		url.PathEscape(info.GetFString()), info.GetFInt32(), info.GetFDouble(), info.GetFBool())
+
+	// exclude the path fields from the query params
+	exclude := map[string]bool{
+		"f_string": true,
+		"f_int32":  true,
+		"f_double": true,
+		"f_bool":   true,
+	}
+	queryString := prepRepeatDataTestsQueryString(request, exclude)
+	return name, "GET", path + queryString, body, err
+}
+
+// prepRepeatDataTestsQueryString returns the query string containing all fields in `request.info`
+// except for those whose proto name (relative to request.info) are present in the `exclude` map
+// with a value of `true`.
+func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map[string]bool) string {
 	info := request.GetInfo()
 	queryParams := []string{}
 	addParam := func(condition bool, key, value string) {
@@ -153,11 +186,15 @@ func prepRepeatDataQueryTest(request *genproto.RepeatRequest) (verb string, name
 		queryParams = append(queryParams, fmt.Sprintf("info.%s=%s", key, value))
 	}
 
-	addParam(len(info.FString) > 0, "f_string", strings.ReplaceAll(strings.ReplaceAll(info.FString, " ", "+"), "%", "%%"))
+	if !exclude["f_string"] {
+		addParam(len(info.FString) > 0, "f_string", strings.ReplaceAll(strings.ReplaceAll(info.FString, " ", "+"), "%", "%%"))
+	}
+	// TODO: Add additional data fields
 
 	var queryString string
 	if len(queryParams) > 0 {
 		queryString = fmt.Sprintf("?%s", strings.Join(queryParams, "&"))
 	}
-	return name, "GET", "/v1beta1/repeat:query" + queryString, body, err
+
+	return queryString
 }
