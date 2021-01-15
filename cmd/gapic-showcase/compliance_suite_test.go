@@ -25,6 +25,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/gapic-showcase/server/genproto"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -56,8 +57,6 @@ func TestComplianceSuite(t *testing.T) {
 	if err := protojson.Unmarshal(jsonProto, &suite); err != nil {
 		t.Fatalf("error unmarshalling from json %s:\n   file: %s\n   input was: %s", err, suiteFile, jsonProto)
 	}
-
-	jsonMarshaller := protojson.MarshalOptions{UseProtoNames: true}
 
 	// Set handlers for each test case. When GAPIC generator tests do this, they should have
 	// each of their handlers invoking the correct GAPIC library method for the Showcase API.
@@ -124,11 +123,8 @@ func TestComplianceSuite(t *testing.T) {
 				}
 
 				// Check for expected response.
-				if got, want := response.GetInfo(), requestProto.GetInfo(); !proto.Equal(got, want) {
-					gotString := jsonMarshaller.Format(got)
-					wantString := jsonMarshaller.Format(want)
-					t.Errorf("%s unexpected response:\n   -->got:\n`%s`\n   -->want:\n`%s`\n",
-						errorPrefix, gotString, wantString)
+				if diff := cmp.Diff(response.GetInfo(), requestProto.GetInfo(), cmp.Comparer(proto.Equal)); diff != "" {
+					t.Errorf("%s unexpected response: got=-, want=+:%s", errorPrefix, diff)
 				}
 			}
 		}
@@ -188,7 +184,7 @@ func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map
 	}
 
 	if !exclude["f_string"] {
-		addParam(len(info.GetFString()) > 0, "f_string", strings.ReplaceAll(strings.ReplaceAll(info.FString, " ", "+"), "%", "%%"))
+		addParam(len(info.GetFString()) > 0, "f_string", strings.ReplaceAll(strings.ReplaceAll(info.GetFString(), " ", "+"), "%", "%%"))
 	}
 	// TODO: Add additional data fields
 

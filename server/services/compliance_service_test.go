@@ -57,7 +57,7 @@ func TestComplianceRepeats(t *testing.T) {
 			t.Errorf("call %d: error: %s", idx, err)
 		}
 		if diff := cmp.Diff(response.GetInfo(), request.GetInfo(), cmp.Comparer(proto.Equal)); diff != "" {
-			t.Errorf("ListUsers() got=-, want=+:%s", diff)
+			t.Errorf("call %d: got=-, want=+:%s", idx, diff)
 		}
 	}
 }
