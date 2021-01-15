@@ -28,7 +28,7 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/googleapis/gapic-showcase/server/genproto"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
-	"google.golang.org/protobuf/encoding/prototext"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -47,15 +47,18 @@ func TestComplianceSuite(t *testing.T) {
 
 	// Locate, load, and unmarshal the compliance suite.
 	_, thisFile, _, _ := runtime.Caller(0)
-	suiteFile := filepath.Join(filepath.Dir(thisFile), "../../schema/google/showcase/v1beta1/compliance_suite.textproto")
-	textProto, err := ioutil.ReadFile(suiteFile)
+	suiteFile := filepath.Join(filepath.Dir(thisFile), "../../schema/google/showcase/v1beta1/compliance_suite.json")
+	jsonProto, err := ioutil.ReadFile(suiteFile)
 	if err != nil {
 		t.Fatalf("could not open suite file %q", suiteFile)
 	}
 	var suite pb.ComplianceSuite
-	if err := prototext.Unmarshal(textProto, &suite); err != nil {
-		t.Fatalf("error unmarshalling from text %s:\n   file: %s\n   input was: %s", err, suiteFile, textProto)
+
+	if err := protojson.Unmarshal(jsonProto, &suite); err != nil {
+		t.Fatalf("error unmarshalling from json %s:\n   file: %s\n   input was: %s", err, suiteFile, jsonProto)
 	}
+
+	jsonMarshaller := protojson.MarshalOptions{UseProtoNames: true}
 
 	// Set handlers for each test case. When GAPIC generator tests do this, they should have
 	// each of their handlers invoking the correct GAPIC library method for the Showcase API.
@@ -123,8 +126,8 @@ func TestComplianceSuite(t *testing.T) {
 
 				// Check for expected response.
 				if got, want := response.GetInfo(), requestProto.GetInfo(); !proto.Equal(got, want) {
-					gotString, _ := prototext.Marshal(got)
-					wantString, _ := prototext.Marshal(want)
+					gotString := jsonMarshaller.Format(got)
+					wantString := jsonMarshaller.Format(want)
 					t.Errorf("%s unexpected response:\n   -->got:\n`%s`\n   -->want:\n`%s`\n",
 						errorPrefix, gotString, wantString)
 				}
