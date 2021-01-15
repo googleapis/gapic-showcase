@@ -127,13 +127,13 @@ message ComplianceData {
 message ComplianceDataChild {
   string f_string = 1;
   float f_float = 2;
-  float f_double = 3;
+  double f_double = 3;
   bool f_bool = 4;
   ComplianceDataGrandchild f_child = 5;
 
   optional string p_string = 6;
   optional float p_float = 7;
-  optional float p_double = 8;
+  optional double p_double = 8;
   optional bool p_bool = 9;
   optional ComplianceDataGrandchild p_child = 10;
 }
