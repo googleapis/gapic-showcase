@@ -18,8 +18,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
-	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -47,8 +47,6 @@ func TestComplianceRepeats(t *testing.T) {
 	}
 	request := &pb.RepeatRequest{Info: info}
 
-	jsonMarshaller := protojson.MarshalOptions{UseProtoNames: true}
-
 	for idx, rpc := range [](func(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error)){
 		server.RepeatDataBody,
 		server.RepeatDataQuery,
@@ -58,11 +56,8 @@ func TestComplianceRepeats(t *testing.T) {
 		if err != nil {
 			t.Errorf("call %d: error: %s", idx, err)
 		}
-		if got, want := response.GetInfo(), request.GetInfo(); !proto.Equal(got, want) {
-			gotString := jsonMarshaller.Format(got)
-			wantString := jsonMarshaller.Format(want)
-			t.Errorf("call %d: unexpected response:\n   -->got:\n`%s`\n   -->want:\n`%s`\n",
-				idx, gotString, wantString)
+		if diff := cmp.Diff(response.GetInfo(), request.GetInfo(), cmp.Comparer(proto.Equal)); diff != "" {
+			t.Errorf("ListUsers() got=-, want=+:%s", diff)
 		}
 	}
 }

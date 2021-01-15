@@ -25,7 +25,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/golang/protobuf/jsonpb"
 	"github.com/googleapis/gapic-showcase/server/genproto"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -104,7 +103,7 @@ func TestComplianceSuite(t *testing.T) {
 				}
 
 				// Check for successful response.
-				if got, want := httpResponse.StatusCode, 200; got != want {
+				if got, want := httpResponse.StatusCode, http.StatusOK; got != want {
 					t.Errorf("%s response code: got %d, want %d\n   %s %s",
 						errorPrefix, got, want, verb, server.URL+path)
 				}
@@ -118,7 +117,7 @@ func TestComplianceSuite(t *testing.T) {
 					continue
 				}
 				var response genproto.RepeatResponse
-				if err := jsonpb.UnmarshalString(string(responseBody), &response); err != nil {
+				if err := protojson.Unmarshal(responseBody, &response); err != nil {
 					t.Errorf("%s could not unmarshal httpResponse body: %s\n   response body: %s",
 						errorPrefix, err, string(responseBody))
 					continue
@@ -143,9 +142,8 @@ type prepRepeatDataTestFunc func(request *genproto.RepeatRequest) (verb string, 
 
 func prepRepeatDataBodyTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
 	name = "Compliance.RepeatDataBody"
-	marshaler := &jsonpb.Marshaler{}
-	body, err = marshaler.MarshalToString(request)
-	return name, "POST", "/v1beta1/repeat:body", body, err
+	bodyBytes, err := protojson.Marshal(request)
+	return name, "POST", "/v1beta1/repeat:body", string(bodyBytes), err
 }
 
 func prepRepeatDataQueryTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
@@ -190,7 +188,7 @@ func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map
 	}
 
 	if !exclude["f_string"] {
-		addParam(len(info.FString) > 0, "f_string", strings.ReplaceAll(strings.ReplaceAll(info.FString, " ", "+"), "%", "%%"))
+		addParam(len(info.GetFString()) > 0, "f_string", strings.ReplaceAll(strings.ReplaceAll(info.FString, " ", "+"), "%", "%%"))
 	}
 	// TODO: Add additional data fields
 
