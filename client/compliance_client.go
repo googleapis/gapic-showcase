@@ -177,7 +177,7 @@ func (c *ComplianceClient) RepeatDataQuery(ctx context.Context, req *genprotopb.
 // “/bar/{foo}” rather than “/{foo=bar/*}”), and the rest as query parameters.
 func (c *ComplianceClient) RepeatDataSimplePath(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	// Pending https://github.com/googleapis/gapic-generator-go/issues/514
-	// md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v&%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_int", url.QueryEscape(req.GetInfo().GetFInt()), "info.f_double", url.QueryEscape(req.GetInfo().GetFDouble()), "info.f_bool", url.QueryEscape(req.GetInfo().GetFBool())))
+	// md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v&%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_int32", url.QueryEscape(req.GetInfo().GetFInt32()), "info.f_double", url.QueryEscape(req.GetInfo().GetFDouble()), "info.f_bool", url.QueryEscape(req.GetInfo().GetFBool())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata /*, md*/)
 	opts = append(c.CallOptions.RepeatDataSimplePath[0:len(c.CallOptions.RepeatDataSimplePath):len(c.CallOptions.RepeatDataSimplePath)], opts...)
 	var resp *genprotopb.RepeatResponse
