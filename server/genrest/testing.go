@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // DO NOT EDIT. This is an auto-generated file containing the REST handlers
-// for service #4: "Testing" (.google.showcase.v1beta1.Testing).
+// for service #5: "Testing" (.google.showcase.v1beta1.Testing).
 
 package genrest
 
@@ -96,7 +96,7 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 
 // HandleGetSession translates REST requests/responses on the wire to internal proto messages for GetSession
 //    Generated for HTTP binding pattern: /v1beta1/{name=sessions/*}
-//         This matches URIs of the form: /v1beta1/{name:sessions/[0-9a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{name:sessions/[0-9a-zA-Z_% "\-]+}
 func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -206,7 +206,7 @@ func (backend *RESTBackend) HandleListSessions(w http.ResponseWriter, r *http.Re
 
 // HandleDeleteSession translates REST requests/responses on the wire to internal proto messages for DeleteSession
 //    Generated for HTTP binding pattern: /v1beta1/{name=sessions/*}
-//         This matches URIs of the form: /v1beta1/{name:sessions/[0-9a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{name:sessions/[0-9a-zA-Z_% "\-]+}
 func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -261,7 +261,7 @@ func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.R
 
 // HandleReportSession translates REST requests/responses on the wire to internal proto messages for ReportSession
 //    Generated for HTTP binding pattern: /v1beta1/{name=sessions/*}:report
-//         This matches URIs of the form: /v1beta1/{name:sessions/[0-9a-zA-Z_%\-]+}:report
+//         This matches URIs of the form: /v1beta1/{name:sessions/[0-9a-zA-Z_% "\-]+}:report
 func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -316,7 +316,7 @@ func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.R
 
 // HandleListTests translates REST requests/responses on the wire to internal proto messages for ListTests
 //    Generated for HTTP binding pattern: /v1beta1/{parent=sessions/*}/tests
-//         This matches URIs of the form: /v1beta1/{parent:sessions/[0-9a-zA-Z_%\-]+}/tests
+//         This matches URIs of the form: /v1beta1/{parent:sessions/[0-9a-zA-Z_% "\-]+}/tests
 func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -371,7 +371,7 @@ func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Reque
 
 // HandleDeleteTest translates REST requests/responses on the wire to internal proto messages for DeleteTest
 //    Generated for HTTP binding pattern: /v1beta1/{name=sessions/*/tests/*}
-//         This matches URIs of the form: /v1beta1/{name:sessions/[0-9a-zA-Z_%\-]+/tests/[0-9a-zA-Z_%\-]+}
+//         This matches URIs of the form: /v1beta1/{name:sessions/[0-9a-zA-Z_% "\-]+/tests/[0-9a-zA-Z_% "\-]+}
 func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -426,7 +426,7 @@ func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Requ
 
 // HandleVerifyTest translates REST requests/responses on the wire to internal proto messages for VerifyTest
 //    Generated for HTTP binding pattern: /v1beta1/{name=sessions/*/tests/*}:check
-//         This matches URIs of the form: /v1beta1/{name:sessions/[0-9a-zA-Z_%\-]+/tests/[0-9a-zA-Z_%\-]+}:check
+//         This matches URIs of the form: /v1beta1/{name:sessions/[0-9a-zA-Z_% "\-]+/tests/[0-9a-zA-Z_% "\-]+}:check
 func (backend *RESTBackend) HandleVerifyTest(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)

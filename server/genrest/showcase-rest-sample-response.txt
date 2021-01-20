@@ -1,5 +1,6 @@
 Generated via "google.golang.org/protobuf/compiler/protogen" via ProtoModel!
 Files:
+google/showcase/v1beta1/compliance.proto
 google/showcase/v1beta1/echo.proto
 google/showcase/v1beta1/identity.proto
 google/showcase/v1beta1/messaging.proto
@@ -7,6 +8,11 @@ google/showcase/v1beta1/sequence.proto
 google/showcase/v1beta1/testing.proto
 
 Proto Model:
+Compliance (.google.showcase.v1beta1.Compliance):
+  .google.showcase.v1beta1.Compliance.RepeatDataBody[0] : POST: "/v1beta1/repeat:body"
+  .google.showcase.v1beta1.Compliance.RepeatDataQuery[0] : GET: "/v1beta1/repeat:query"
+  .google.showcase.v1beta1.Compliance.RepeatDataSimplePath[0] : GET: "/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}:simplepath"
+
 Echo (.google.showcase.v1beta1.Echo):
   .google.showcase.v1beta1.Echo.Echo[0] : POST: "/v1beta1/echo:echo"
   .google.showcase.v1beta1.Echo.Expand[0] : POST: "/v1beta1/echo:expand"
@@ -63,6 +69,20 @@ Testing (.google.showcase.v1beta1.Testing):
 
 
 GoModel
+----------------------------------------
+Shim "Compliance" (.google.showcase.v1beta1.Compliance)
+  Imports:
+    genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
+  Handlers (3):
+         GET                              /v1beta1/repeat:query func RepeatDataQuery(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
+["/" "v1beta1" "/" "repeat" ":" "query"]
+
+         GET /v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}:simplepath func RepeatDataSimplePath(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
+["/" "v1beta1" "/" "repeat" "/" {info.f_string = []} "/" {info.f_int32 = []} "/" {info.f_double = []} "/" {info.f_bool = []} ":" "simplepath"]
+
+        POST                               /v1beta1/repeat:body func RepeatDataBody(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
+["/" "v1beta1" "/" "repeat" ":" "body"]
+
 ----------------------------------------
 Shim "Echo" (.google.showcase.v1beta1.Echo)
   Imports:
