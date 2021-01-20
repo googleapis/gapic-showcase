@@ -20,7 +20,36 @@
 	    "f_fixed64":23,
 	    "f_double": -29e4,
 	    "f_float": -31,
-	    "f_bool": true
+	    "f_bool": true,
+
+	    "p_string": "Goodbye",
+	    "p_int32": -37,
+	    "p_double": -41.43,
+	    "p_bool": true
+	  }
+	},
+	{
+	  "name": "Zero values for non-string fields",
+	  "info": {
+            "f_string": "Hello",
+	    "f_int32": 0,
+	    "f_sint32" : 0,
+	    "f_sfixed32": 0,
+	    "f_uint32": 0,
+	    "f_fixed32": 0,
+	    "f_int64": 0,
+	    "f_sint64": 0,
+	    "f_sfixed64": 0,
+	    "f_uint64": 0,
+	    "f_fixed64":20,
+	    "f_double": 0,
+	    "f_float": 0,
+	    "f_bool": false,
+
+	    "p_string": "Goodbye",
+	    "p_int32": 0,
+	    "p_double": 0,
+	    "p_bool": false
 	  }
 	},
 	{
@@ -34,20 +63,49 @@
 	  "info": {
             "f_string": "Hello \"You\""
 	  }
-	}          
-      ]
-    },
-    {
-      "name": "Conversions not yet working for query params",
-      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataSimplePath"],
-      "requests": [
+	},
 	{
 	  "name": "Strings with percents",
 	  "info": {
             "f_string": "Hello 100%"
 	  }
-	}     
+	}	
       ]
-    }  
+    },
+    {
+      "name": "Cases that apply to non-path requests",
+      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery"],
+      "requests": [
+	{
+	  "name": "Zero values for all fields",
+	  "info": {
+            "f_string": "",
+	    "f_int32": 0,
+	    "f_sint32" : 0,
+	    "f_sfixed32": 0,
+	    "f_uint32": 0,
+	    "f_fixed32": 0,
+	    "f_int64": 0,
+	    "f_sint64": 0,
+	    "f_sfixed64": 0,
+	    "f_uint64": 0,
+	    "f_fixed64":20,
+	    "f_double": 0,
+	    "f_float": 0,
+	    "f_bool": false,
+
+	    "p_string": "",
+	    "p_int32": 0,
+	    "p_double": 0,
+	    "p_bool": false
+	  }
+	}
+      ]
+    },
+    {
+      "name": "Conversions not yet working for query params",
+      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataSimplePath"],
+      "requests": []
+    }
   ]
 }

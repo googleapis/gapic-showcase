@@ -211,11 +211,10 @@ func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map
 	addParam("f_bool", info.GetFBool(), "true")
 	addParam("f_bytes", len(info.GetFBytes()) > 0, url.QueryEscape(string(info.GetFBytes()))) // TODO: Check this is correct, given runes in strings
 
-	// TODO: Check for field presence
-	// addParam("f_string", len(info.GetFString()) > 0, url.QueryEscape(info.GetFString()))
-	// addParam("f_int32", info.GetFInt32() != 0, fmt.Sprintf("%d", info.GetFInt32()))
-	// addParam("f_double", info.GetFDouble() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFDouble())))
-	// addParam("f_bool", info.GetFBool(), "true")
+	addParam("p_string", info.PString != nil, url.QueryEscape(info.GetPString()))
+	addParam("p_int32", info.PInt32 != nil, fmt.Sprintf("%d", info.GetPInt32()))
+	addParam("p_double", info.PDouble != nil, url.QueryEscape(fmt.Sprintf("%g", info.GetPDouble())))
+	addParam("p_bool", info.PBool != nil, fmt.Sprintf("%t", info.GetPBool()))
 
 	// TODO: Add nested message fields
 

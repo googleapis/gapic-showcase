@@ -21,7 +21,6 @@ import (
 	"github.com/googleapis/gapic-showcase/util/genrest/gomodel"
 )
 
-
 func TestMatchingPath(t *testing.T) {
 	for idx, testCase := range []struct {
 		template    string
