@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // DO NOT EDIT. This is an auto-generated file containing the REST handlers
-// for service #0: "Echo" (.google.showcase.v1beta1.Echo).
+// for service #1: "Echo" (.google.showcase.v1beta1.Echo).
 
 package genrest
 

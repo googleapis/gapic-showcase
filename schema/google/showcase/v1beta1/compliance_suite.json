@@ -1,0 +1,40 @@
+{
+  "group": [
+    {
+      "name": "Fully working conversions",
+      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery", "Compliance.RepeatDataSimplePath"],
+      "requests": [
+	{
+	  "name": "Basic data types",
+	  "info": {
+            "f_string": "Hello"
+	  }
+	},
+	{
+	  "name": "Strings with spaces",
+	  "info": {
+            "f_string": "Hello there"
+	  }
+	},
+	{
+	  "name": "Strings with quotes",
+	  "info": {
+            "f_string": "Hello \"You\""
+	  }
+	}          
+      ]
+    },
+    {
+      "name": "Conversions not yet working for query params",
+      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataSimplePath"],
+      "requests": [
+	{
+	  "name": "Strings with percents",
+	  "info": {
+            "f_string": "Hello 100%"
+	  }
+	}     
+      ]
+    }  
+  ]
+}

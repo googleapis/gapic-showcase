@@ -30,12 +30,12 @@ func TestPopulateOneFieldError(t *testing.T) {
 		// field path errors
 
 		{".f_string", "hi"},
-		{"subpack..f_string", "hi"},
-		{"subpack.", "hi"},
-		{"subpack.x", "hi"},
-		{"subpack.x.f_string", "hi"},
-		{"subpack.f_string.subpack", "hi"},
-		{"subpack.subpack", "hi"},
+		{"f_child..f_string", "hi"},
+		{"f_child.", "hi"},
+		{"f_child.x", "hi"},
+		{"f_child.x.f_string", "hi"},
+		{"f_child.f_string.f_child", "hi"},
+		{"f_child.f_child", "hi"},
 
 		// parsing errors
 
@@ -85,8 +85,8 @@ func TestPopulateOneFieldError(t *testing.T) {
 		{"f_bool", "hello"},
 		{"f_bool", "13"},
 	} {
-		dataPack := &genprotopb.DataPack{}
-		err := PopulateOneField(dataPack, testCase.field, []string{testCase.value})
+		complianceData := &genprotopb.ComplianceData{}
+		err := PopulateOneField(complianceData, testCase.field, []string{testCase.value})
 		if err == nil {
 			t.Errorf("test case %d: did not get expected error for %q: %q", idx, testCase.field, testCase.value)
 		}
@@ -133,13 +133,13 @@ func TestPopulateSingularFields(t *testing.T) {
 			label: "nested messages",
 			fields: map[string]string{
 				"f_string":                 "alphabet",
-				"subpack.subpack.f_string": "lexicon",
+				"f_child.f_child.f_string": "lexicon",
 				"f_int32":                  "5",
-				"subpack.subpack.f_double": "53.47",
-				"subpack.subpack.f_int32":  "-6",
-				"subpack.f_bool":           "true",
+				"f_child.f_child.f_double": "53.47",
+				"f_child.f_child.f_bool":   "true",
+				"f_child.f_bool":           "true",
 			},
-			expectProtoText: `subpack:{subpack:{f_string:"lexicon" f_int32:-6 f_double:53.47} f_bool:true} f_string:"alphabet" f_int32:5`,
+			expectProtoText: `f_child:{f_child:{f_string:"lexicon" f_bool:true f_double:53.47} f_bool:true} f_string:"alphabet" f_int32:5`,
 		},
 		{
 			label: "presence/zero values",
@@ -174,9 +174,64 @@ func TestPopulateSingularFields(t *testing.T) {
 			},
 			expectProtoText: `p_string:""  p_int32:0  p_double:0  p_bool:false`,
 		},
+		{
+			label: "presence/zero values in nested messages",
+			fields: map[string]string{
+				"f_child.f_string": "",
+				"f_child.f_float":  "0",
+				"f_child.f_double": "0",
+				"f_child.f_bool":   "false",
+
+				"f_child.p_string": "",
+				"f_child.p_float":  "0",
+				"f_child.p_double": "0",
+				"f_child.p_bool":   "false",
+
+				"p_child.f_string": "",
+				"p_child.f_float":  "0",
+				"p_child.f_double": "0",
+				"p_child.f_bool":   "false",
+
+				"p_child.p_string": "",
+				"p_child.p_float":  "0",
+				"p_child.p_double": "0",
+				"p_child.p_bool":   "false",
+
+				"f_child.f_child.f_string": "",
+				"f_child.f_child.f_double": "0",
+				"f_child.f_child.f_bool":   "false",
+
+				"f_child.p_child.f_string": "",
+				"f_child.p_child.f_double": "0",
+				"f_child.p_child.f_bool":   "false",
+
+				"p_child.f_child.f_string": "",
+				"p_child.f_child.f_double": "0",
+				"p_child.f_child.f_bool":   "false",
+
+				"p_child.p_child.f_string": "",
+				"p_child.p_child.f_double": "0",
+				"p_child.p_child.f_bool":   "false",
+			},
+			expectProtoText: `f_child:{f_child:{}  p_string:""  p_float:0  p_double:0  p_bool:false  p_child:{}}  p_child:{f_child:{}  p_string:""  p_float:0  p_double:0  p_bool:false  p_child:{}}`,
+		},
+		{
+			label: "default value only in nested message",
+			fields: map[string]string{
+				"f_child.f_string": "",
+			},
+			expectProtoText: `f_child:{}`,
+		},
+		{
+			label: "default value only in optional nested message",
+			fields: map[string]string{
+				"p_child.f_string": "",
+			},
+			expectProtoText: `p_child:{}`,
+		},
 	} {
-		dataPack := &genprotopb.DataPack{}
-		err := PopulateSingularFields(dataPack, testCase.fields)
+		complianceData := &genprotopb.ComplianceData{}
+		err := PopulateSingularFields(complianceData, testCase.fields)
 		if got, want := (err != nil), testCase.expectError; got != want {
 			t.Errorf("test case %d[%q] error: got %v, want %v", idx, testCase.label, err, want)
 			continue
@@ -185,14 +240,14 @@ func TestPopulateSingularFields(t *testing.T) {
 			continue
 		}
 
-		var expectProto genprotopb.DataPack
+		var expectProto genprotopb.ComplianceData
 		err = prototext.Unmarshal([]byte(testCase.expectProtoText), &expectProto)
 		if err != nil {
 			t.Errorf("test case %d[%q] unexpected error unmarshaling expected proto: %s", idx, testCase.label, err)
 			continue
 		}
 
-		if got, want := dataPack, &expectProto; !reflect.DeepEqual(got, want) {
+		if got, want := complianceData, &expectProto; !reflect.DeepEqual(got, want) {
 			gotText, err := prototext.Marshal(got)
 			if err != nil {
 				gotText = []byte("<error marshalling in test>")
@@ -226,8 +281,8 @@ func TestPopulateFields(t *testing.T) {
 			expectError: true,
 		},
 	} {
-		dataPack := &genprotopb.DataPack{}
-		err := PopulateFields(dataPack, testCase.fields)
+		complianceData := &genprotopb.ComplianceData{}
+		err := PopulateFields(complianceData, testCase.fields)
 		if got, want := (err != nil), testCase.expectError; got != want {
 			t.Errorf("test case %d[%q] error: got %v, want %v", idx, testCase.label, err, want)
 			continue
@@ -236,14 +291,14 @@ func TestPopulateFields(t *testing.T) {
 			continue
 		}
 
-		var expectProto genprotopb.DataPack
+		var expectProto genprotopb.ComplianceData
 		err = prototext.Unmarshal([]byte(testCase.expectProtoText), &expectProto)
 		if err != nil {
 			t.Errorf("test case %d[%q] unexpected error unmarshaling expected proto: %s", idx, testCase.label, err)
 			continue
 		}
 
-		if got, want := dataPack, &expectProto; !reflect.DeepEqual(got, want) {
+		if got, want := complianceData, &expectProto; !reflect.DeepEqual(got, want) {
 			gotText, err := prototext.Marshal(got)
 			if err != nil {
 				gotText = []byte("<error marshalling in test>")

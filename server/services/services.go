@@ -31,6 +31,7 @@ type Backend struct {
 	IdentityServer        pb.IdentityServer
 	MessagingServer       pb.MessagingServer
 	SequenceServiceServer pb.SequenceServiceServer
+	ComplianceServer      pb.ComplianceServer
 	TestingServer         pb.TestingServer
 
 	// Supporting protos

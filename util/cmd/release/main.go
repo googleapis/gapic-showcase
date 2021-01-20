@@ -73,9 +73,13 @@ func main() {
 	util.Execute("cp", filepath.Join(rpcPath, "status.proto"), tmpRPCPath)
 	util.Execute("cp", filepath.Join(rpcPath, "error_details.proto"), tmpRPCPath)
 
-	// Copy gRPC ServiceConfig as the source of retry config
+	// Copy gRPC ServiceConfig as the source of retry config.
 	retrySrc := filepath.Join("schema", "google", "showcase", "v1beta1", "showcase_grpc_service_config.json")
 	util.Execute("cp", retrySrc, "dist")
+
+	// Copy compliance suite for easy access by generators.
+	complianceSrc := filepath.Join("schema", "google", "showcase", "v1beta1", "compliance_suite.json")
+	util.Execute("cp", complianceSrc, "dist")
 
 	// Find gapic-showcase version
 	version, err := exec.Command("go", "run", "./cmd/gapic-showcase", "--version").Output()
