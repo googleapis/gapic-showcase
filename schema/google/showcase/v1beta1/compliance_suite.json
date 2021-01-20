@@ -7,7 +7,20 @@
 	{
 	  "name": "Basic data types",
 	  "info": {
-            "f_string": "Hello"
+            "f_string": "Hello",
+	    "f_int32": -1,
+	    "f_sint32" : -2,
+	    "f_sfixed32": -3,
+	    "f_uint32": 5,
+	    "f_fixed32": 7,
+	    "f_int64": -11,
+	    "f_sint64": -13,
+	    "f_sfixed64": -17,
+	    "f_uint64": 19,
+	    "f_fixed64":23,
+	    "f_double": -29e4,
+	    "f_float": -31,
+	    "f_bool": true
 	  }
 	},
 	{

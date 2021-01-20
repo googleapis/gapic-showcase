@@ -124,7 +124,8 @@ func TestComplianceSuite(t *testing.T) {
 
 				// Check for expected response.
 				if diff := cmp.Diff(response.GetInfo(), requestProto.GetInfo(), cmp.Comparer(proto.Equal)); diff != "" {
-					t.Errorf("%s unexpected response: got=-, want=+:%s", errorPrefix, diff)
+					t.Errorf("%s unexpected response: got=-, want=+:%s\n   %s %s",
+						errorPrefix, diff, verb, server.URL+path)
 				}
 			}
 		}
@@ -155,18 +156,28 @@ func prepRepeatDataSimplePathTest(request *genproto.RepeatRequest) (verb string,
 	// TODO: Determine behavior for a string field path param whose value is empty. This should be
 	// a failure, probably, in which case we need to augment the ComplianceGroup to allow
 	// specifying expected errors.
-	// TODO: Add to compliance_suite cases with near-maximal values.
-	path = fmt.Sprintf("/v1beta1/repeat/%s/%d/%.20g/%t:simplepath",
-		url.PathEscape(info.GetFString()), info.GetFInt32(), info.GetFDouble(), info.GetFBool())
 
-	// exclude the path fields from the query params
-	exclude := map[string]bool{
-		"f_string": true,
-		"f_int32":  true,
-		"f_double": true,
-		"f_bool":   true,
+	// TODO: Add to compliance_suite cases with near-maximal values.
+
+	pathParamValues := []string{}
+	nonQueryParamNames := map[string]bool{}
+
+	for _, param := range []struct {
+		name   string
+		format string
+		value  interface{}
+	}{
+		{"f_string", "%s", info.GetFString()},
+		{"f_int32", "%d", info.GetFInt32()},
+		{"f_double", "%g", info.GetFDouble()},
+		{"f_bool", "%t", info.GetFBool()},
+	} {
+		pathParamValues = append(pathParamValues, url.PathEscape(fmt.Sprintf(param.format, param.value)))
+		nonQueryParamNames[param.name] = true
 	}
-	queryString := prepRepeatDataTestsQueryString(request, exclude)
+	path = fmt.Sprintf("/v1beta1/repeat/%s:simplepath", strings.Join(pathParamValues, "/"))
+
+	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
 	return name, "GET", path + queryString, body, err
 }
 
@@ -176,17 +187,37 @@ func prepRepeatDataSimplePathTest(request *genproto.RepeatRequest) (verb string,
 func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map[string]bool) string {
 	info := request.GetInfo()
 	queryParams := []string{}
-	addParam := func(condition bool, key, value string) {
-		if !condition {
+	addParam := func(key string, condition bool, value string) {
+		if exclude[key] || !condition {
 			return
 		}
 		queryParams = append(queryParams, fmt.Sprintf("info.%s=%s", key, value))
 	}
 
-	if !exclude["f_string"] {
-		addParam(len(info.GetFString()) > 0, "f_string", strings.ReplaceAll(strings.ReplaceAll(info.GetFString(), " ", "+"), "%", "%%"))
-	}
-	// TODO: Add additional data fields
+	addParam("f_string", len(info.GetFString()) > 0, url.QueryEscape(info.GetFString()))
+	addParam("f_int32", info.GetFInt32() != 0, fmt.Sprintf("%d", info.GetFInt32()))
+	addParam("f_sint32", info.GetFSint32() != 0, fmt.Sprintf("%d", info.GetFSint32()))
+	addParam("f_sfixed32", info.GetFSfixed32() != 0, fmt.Sprintf("%d", info.GetFSfixed32()))
+	addParam("f_uint32", info.GetFUint32() != 0, fmt.Sprintf("%d", info.GetFUint32()))
+	addParam("f_fixed32", info.GetFFixed32() != 0, fmt.Sprintf("%d", info.GetFFixed32()))
+	addParam("f_int64", info.GetFInt64() != 0, fmt.Sprintf("%d", info.GetFInt64()))
+	addParam("f_sint64", info.GetFSint64() != 0, fmt.Sprintf("%d", info.GetFSint64()))
+	addParam("f_sfixed64", info.GetFSfixed64() != 0, fmt.Sprintf("%d", info.GetFSfixed64()))
+	addParam("f_uint64", info.GetFUint64() != 0, fmt.Sprintf("%d", info.GetFUint64()))
+	addParam("f_fixed64", info.GetFFixed64() != 0, fmt.Sprintf("%d", info.GetFFixed64()))
+
+	addParam("f_double", info.GetFDouble() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFDouble())))
+	addParam("f_float", info.GetFFloat() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFFloat())))
+	addParam("f_bool", info.GetFBool(), "true")
+	addParam("f_bytes", len(info.GetFBytes()) > 0, url.QueryEscape(string(info.GetFBytes()))) // TODO: Check this is correct, given runes in strings
+
+	// TODO: Check for field presence
+	// addParam("f_string", len(info.GetFString()) > 0, url.QueryEscape(info.GetFString()))
+	// addParam("f_int32", info.GetFInt32() != 0, fmt.Sprintf("%d", info.GetFInt32()))
+	// addParam("f_double", info.GetFDouble() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFDouble())))
+	// addParam("f_bool", info.GetFBool(), "true")
+
+	// TODO: Add nested message fields
 
 	var queryString string
 	if len(queryParams) > 0 {
