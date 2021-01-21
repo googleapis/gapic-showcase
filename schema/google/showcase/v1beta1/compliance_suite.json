@@ -102,13 +102,13 @@
     },
     {
       "name": "Fully working conversions, resources",
-      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery", "Compliance.RepeatDataSimplePath", "Compliance.RepeatDataPathResource"],
+      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery", "Compliance.RepeatDataSimplePath", "Compliance.RepeatDataPathResource", "Compliance.RepeatDataPathTrailingResource"],
       "requests": [
 	{
 	  "name": "Basic data types",
 	  "info": {
             "f_string": "first/hello/second/greetings",
-	    "p_bool": false,
+	    "p_bool": true,
 
             "f_child": {
 	      "f_string": "second/zzz/bool/true"

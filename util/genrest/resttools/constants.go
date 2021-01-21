@@ -23,13 +23,15 @@ const (
 	// CharsLiteral contains the the characters allowed in a URL path literal segment.
 	CharsLiteral = `-_.~0-9a-zA-Z%`
 
-	// CharsURLPathValue contains the characters allowed in an actual URL path segment encoding
-	// user-supplied values.
-	//
-	// TODO: Gorilla/mux seems to already un-encode these characters, so maybe the right rexep
-	// here is [[:ascii:]] or [[:graph:]] or [[:print:]], minus slashes. See
-	// https://golang.org/pkg/regexp/syntax/
-	CharsURLPathValue = `.`
+	// RegexURLPathSingleSegmentValue contains the regex expression for matching a single URL
+	// path segment (i.e. `/` is not allowed). Since gorilla/mux hands uses the decoded paths to
+	// match, we can just accept any characters.
+	RegexURLPathSingleSegmentValue = ".+"
+
+	// RegexURLPathSingleSegmentValue contains the regex expression for matching multiple URL
+	// path segments (i.e. `/` is allowed). Since gorilla/mux hands uses the decoded paths to
+	// match, we can just accept any characters.
+	RegexURLPathMultipleSegmentValue = ".+"
 )
 
 var (
@@ -44,14 +46,6 @@ var (
 
 	// RegexLiteral contains the regex expression for matching a URL path literal segment.
 	RegexLiteral string
-
-	// RegexURLPathSingleSegmentValue contains the regex expression for matching a single URL
-	// path segment (i.e. `/` is not allowed)
-	RegexURLPathSingleSegmentValue string
-
-	// RegexURLPathSingleSegmentValue contains the regex expression for matching multiple URL
-	// path segments (i.e. `/` is allowed)
-	RegexURLPathMultipleSegmentValue string
 )
 
 func init() {
@@ -61,7 +55,4 @@ func init() {
 	RegexFieldPath = fmt.Sprintf(`^[%s]+`, CharsFieldPath)
 
 	RegexLiteral = fmt.Sprintf(`^[%s]+`, CharsLiteral)
-
-	RegexURLPathSingleSegmentValue = ".+" //fmt.Sprintf("[%s]+", CharsURLPathValue)
-	RegexURLPathMultipleSegmentValue = fmt.Sprintf("[%s/]+", CharsURLPathValue)
 }
