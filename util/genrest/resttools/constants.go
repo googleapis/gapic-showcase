@@ -29,7 +29,7 @@ const (
 	// TODO: Gorilla/mux seems to already un-encode these characters, so maybe the right rexep
 	// here is [[:ascii:]] or [[:graph:]] or [[:print:]], minus slashes. See
 	// https://golang.org/pkg/regexp/syntax/
-	CharsURLPathValue = `0-9a-zA-Z_% "\+\-`
+	CharsURLPathValue = `0-9a-zA-Z_% "\+\-\.`
 )
 
 var (

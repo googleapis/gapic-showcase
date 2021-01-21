@@ -41,7 +41,7 @@
 	    "f_sint64": 0,
 	    "f_sfixed64": 0,
 	    "f_uint64": 0,
-	    "f_fixed64":20,
+	    "f_fixed64": 0,
 	    "f_double": 0,
 	    "f_float": 0,
 	    "f_bool": false,
@@ -49,6 +49,30 @@
 	    "p_string": "Goodbye",
 	    "p_int32": 0,
 	    "p_double": 0,
+	    "p_bool": false
+	  }
+	},
+	{
+	  "name": "Extreme values",
+	  "info": {
+            "f_string": "TODO- replace with non-ASCII",
+	    "f_int32": 2147483647,
+	    "f_sint32" : 2147483647,
+	    "f_sfixed32": 2147483647,
+	    "f_uint32": 4294967295,
+	    "f_fixed32": 4294967295,
+	    "f_int64": 9223372036854775807,
+	    "f_sint64": 9223372036854775807,
+	    "f_sfixed64": 9223372036854775807,
+	    "f_uint64": 18446744073709551615,
+	    "f_fixed64": 18446744073709551615,
+	    "f_double": 1.797693134862315708145274237317043567981e+308,
+	    "f_float": 3.40282346638528859811704183484516925440e+38,
+	    "f_bool": false,
+
+	    "p_string": "Goodbye",
+	    "p_int32": 2147483647,
+	    "p_double": 1.797693134862315708145274237317043567981e+308,
 	    "p_bool": false
 	  }
 	},
