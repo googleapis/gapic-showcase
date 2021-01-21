@@ -59,7 +59,7 @@
 	{
 	  "name": "Extreme values",
 	  "info": {
-            "f_string": "TODO- replace with non-ASCII",
+            "f_string": "non-ASCII+non-printable string ☺ → ← \"\\\/\b\f\r\t\u1234 works, not newlines yet",
 	    "f_int32": 2147483647,
 	    "f_sint32" : 2147483647,
 	    "f_sfixed32": 2147483647,
@@ -105,7 +105,7 @@
       "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery", "Compliance.RepeatDataSimplePath", "Compliance.RepeatDataPathResource", "Compliance.RepeatDataPathTrailingResource"],
       "requests": [
 	{
-	  "name": "Basic data types",
+	  "name": "Strings with slashes and values that resemble subsequent resource templates",
 	  "info": {
             "f_string": "first/hello/second/greetings",
 	    "p_bool": true,
@@ -146,11 +146,6 @@
 	  }
 	}
       ]
-    },
-    {
-      "name": "Conversions not yet working for query params",
-      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataSimplePath"],
-      "requests": []
     }
   ]
 }

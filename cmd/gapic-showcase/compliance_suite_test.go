@@ -61,9 +61,11 @@ func TestComplianceSuite(t *testing.T) {
 	// Set handlers for each test case. When GAPIC generator tests do this, they should have
 	// each of their handlers invoking the correct GAPIC library method for the Showcase API.
 	restRPCs := map[string]prepRepeatDataTestFunc{
-		"Compliance.RepeatDataBody":       prepRepeatDataBodyTest,
-		"Compliance.RepeatDataQuery":      prepRepeatDataQueryTest,
-		"Compliance.RepeatDataSimplePath": prepRepeatDataSimplePathTest,
+		"Compliance.RepeatDataBody":                 prepRepeatDataBodyTest,
+		"Compliance.RepeatDataQuery":                prepRepeatDataQueryTest,
+		"Compliance.RepeatDataSimplePath":           prepRepeatDataSimplePathTest,
+		"Compliance.RepeatDataPathResource":         prepRepeatDataPathResourceTest,
+		"Compliance.RepeatDataPathTrailingResource": prepRepeatDataPathTrailingResourceTest,
 	}
 
 	for _, group := range suite.GetGroup() {
@@ -103,7 +105,7 @@ func TestComplianceSuite(t *testing.T) {
 
 				// Check for successful response.
 				if got, want := httpResponse.StatusCode, http.StatusOK; got != want {
-					t.Errorf("%s response code: got %d, want %d\n   %s %s",
+					t.Errorf("%s response code: got %d, want %d\n   %s %s\n\n",
 						errorPrefix, got, want, verb, server.URL+path)
 				}
 
@@ -124,7 +126,7 @@ func TestComplianceSuite(t *testing.T) {
 
 				// Check for expected response.
 				if diff := cmp.Diff(response.GetInfo(), requestProto.GetInfo(), cmp.Comparer(proto.Equal)); diff != "" {
-					t.Errorf("%s unexpected response: got=-, want=+:%s\n   %s %s",
+					t.Errorf("%s unexpected response: got=-, want=+:%s\n   %s %s\n------------------------------\n",
 						errorPrefix, diff, verb, server.URL+path)
 				}
 			}
@@ -157,12 +159,10 @@ func prepRepeatDataSimplePathTest(request *genproto.RepeatRequest) (verb string,
 	// a failure, probably, in which case we need to augment the ComplianceGroup to allow
 	// specifying expected errors.
 
-	// TODO: Add to compliance_suite cases with near-maximal values.
-
-	pathParamValues := []string{}
+	pathParts := []string{}
 	nonQueryParamNames := map[string]bool{}
 
-	for _, param := range []struct {
+	for _, part := range []struct {
 		name   string
 		format string
 		value  interface{}
@@ -172,10 +172,69 @@ func prepRepeatDataSimplePathTest(request *genproto.RepeatRequest) (verb string,
 		{"f_double", "%g", info.GetFDouble()},
 		{"f_bool", "%t", info.GetFBool()},
 	} {
-		pathParamValues = append(pathParamValues, url.PathEscape(fmt.Sprintf(param.format, param.value)))
-		nonQueryParamNames[param.name] = true
+		pathParts = append(pathParts, url.PathEscape(fmt.Sprintf(part.format, part.value)))
+		nonQueryParamNames[part.name] = true
 	}
-	path = fmt.Sprintf("/v1beta1/repeat/%s:simplepath", strings.Join(pathParamValues, "/"))
+	path = fmt.Sprintf("/v1beta1/repeat/%s:simplepath", strings.Join(pathParts, "/"))
+
+	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
+	return name, "GET", path + queryString, body, err
+}
+
+func prepRepeatDataPathResourceTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
+	name = "Compliance.RepeatDataPathResource"
+	info := request.GetInfo()
+
+	pathParts := []string{}
+	nonQueryParamNames := map[string]bool{}
+
+	for _, part := range []struct {
+		name           string
+		format         string
+		value          interface{}
+		requiredPrefix string
+	}{
+		{"f_string", "%s", info.GetFString(), "first/"},
+		{"f_child.f_string", "%s", info.GetFChild().GetFString(), "second/"},
+		{"f_bool", "bool/%t", info.GetFBool(), ""},
+	} {
+		if len(part.requiredPrefix) > 0 && !strings.HasPrefix(part.value.(string), part.requiredPrefix) {
+			err = fmt.Errorf("expected value of %q to begin with %q; got %q", part.name, part.requiredPrefix, part.value)
+			return
+		}
+		pathParts = append(pathParts, url.PathEscape(fmt.Sprintf(part.format, part.value)))
+		nonQueryParamNames[part.name] = true
+	}
+	path = fmt.Sprintf("/v1beta1/repeat/%s:pathresource", strings.Join(pathParts, "/"))
+
+	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
+	return name, "GET", path + queryString, body, err
+}
+
+func prepRepeatDataPathTrailingResourceTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
+	name = "Compliance.RepeatDataPathTrailingResource"
+	info := request.GetInfo()
+
+	pathParts := []string{}
+	nonQueryParamNames := map[string]bool{}
+
+	for _, part := range []struct {
+		name           string
+		format         string
+		value          interface{}
+		requiredPrefix string
+	}{
+		{"f_string", "%s", info.GetFString(), "first/"},
+		{"f_child.f_string", "%s", info.GetFChild().GetFString(), "second/"},
+	} {
+		if len(part.requiredPrefix) > 0 && !strings.HasPrefix(part.value.(string), part.requiredPrefix) {
+			err = fmt.Errorf("expected value of %q to begin with %q; got %q", part.name, part.requiredPrefix, part.value)
+			return
+		}
+		pathParts = append(pathParts, url.PathEscape(fmt.Sprintf(part.format, part.value)))
+		nonQueryParamNames[part.name] = true
+	}
+	path = fmt.Sprintf("/v1beta1/repeat/%s:pathtrailingresource", strings.Join(pathParts, "/"))
 
 	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
 	return name, "GET", path + queryString, body, err
@@ -216,7 +275,12 @@ func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map
 	addParam("p_double", info.PDouble != nil, url.QueryEscape(fmt.Sprintf("%g", info.GetPDouble())))
 	addParam("p_bool", info.PBool != nil, fmt.Sprintf("%t", info.GetPBool()))
 
-	// TODO: Add nested message fields
+	addParam("f_child.f_string", len(info.GetFChild().GetFString()) > 0, url.QueryEscape(info.GetFChild().GetFString()))
+	addParam("f_child.f_float", info.GetFChild().GetFFloat() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFChild().GetFFloat())))
+	addParam("f_child.f_double", info.GetFChild().GetFDouble() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFChild().GetFDouble())))
+	addParam("f_child.f_bool", info.GetFChild().GetFBool(), "true")
+
+	// If needed for test cases, we'll have to add remaining nested message fields.
 
 	var queryString string
 	if len(queryParams) > 0 {
