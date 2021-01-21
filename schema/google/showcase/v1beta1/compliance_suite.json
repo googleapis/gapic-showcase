@@ -1,7 +1,7 @@
 {
   "group": [
     {
-      "name": "Fully working conversions",
+      "name": "Fully working conversions, no resources",
       "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery", "Compliance.RepeatDataSimplePath"],
       "requests": [
 	{
@@ -25,7 +25,11 @@
 	    "p_string": "Goodbye",
 	    "p_int32": -37,
 	    "p_double": -41.43,
-	    "p_bool": true
+	    "p_bool": true,
+
+            "f_child": {
+	      "f_string": "second/bool/salutation"
+	    }
 	  }
 	},
 	{
@@ -94,6 +98,23 @@
             "f_string": "Hello 100%"
 	  }
 	}	
+      ]
+    },
+    {
+      "name": "Fully working conversions, resources",
+      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery", "Compliance.RepeatDataSimplePath", "Compliance.RepeatDataPathResource"],
+      "requests": [
+	{
+	  "name": "Basic data types",
+	  "info": {
+            "f_string": "first/hello/second/greetings",
+	    "p_bool": false,
+
+            "f_child": {
+	      "f_string": "second/zzz/bool/true"
+	    }
+	  }
+	}
       ]
     },
     {
