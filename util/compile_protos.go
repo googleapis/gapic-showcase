@@ -94,15 +94,6 @@ func CompileProtos(version string) {
 			"cmd/gapic-showcase/wait.go",
 			"s/EndEnd_time/EndEndTime/g",
 		},
-
-		{
-			// TODO: remove when https://github.com/googleapis/gapic-generator-go/issues/514 is fixed
-			"client/compliance_client.go",
-			`s|md := metadata.Pairs|// Pending https://github.com/googleapis/gapic-generator-go/issues/514\n// md := metadata.Pairs|g
-                         s|, md| /*, md*/|g
-                         s|"fmt"|// "fmt"      // Pending https://github.com/googleapis/gapic-generator-go/issues/514|g      # import
-                         s|"net/url"|// "net/url"  // Pending https://github.com/googleapis/gapic-generator-go/issues/514|g  # import`,
-		},
 	}
 	command = []string{
 		"sed",
