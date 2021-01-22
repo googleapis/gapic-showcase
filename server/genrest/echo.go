@@ -30,8 +30,8 @@ import (
 )
 
 // HandleEcho translates REST requests/responses on the wire to internal proto messages for Echo
-//    Generated for HTTP binding pattern: /v1beta1/echo:echo
-//         This matches URIs of the form: /v1beta1/echo:echo
+//    Generated for HTTP binding pattern: "/v1beta1/echo:echo"
+//         This matches URIs of the form: "/v1beta1/echo:echo"
 func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -52,7 +52,6 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
@@ -82,24 +81,24 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleExpand translates REST requests/responses on the wire to internal proto messages for Expand
-//    Generated for HTTP binding pattern: /v1beta1/echo:expand
-//         This matches URIs of the form: /v1beta1/echo:expand
+//    Generated for HTTP binding pattern: "/v1beta1/echo:expand"
+//         This matches URIs of the form: "/v1beta1/echo:expand"
 func (backend *RESTBackend) HandleExpand(w http.ResponseWriter, r *http.Request) {
 	backend.StdLog.Printf("Received request matching '/v1beta1/echo:expand': %q", r.URL)
 	w.Write([]byte("ERROR: not implementing streaming methods yet"))
 }
 
 // HandleCollect translates REST requests/responses on the wire to internal proto messages for Collect
-//    Generated for HTTP binding pattern: /v1beta1/echo:collect
-//         This matches URIs of the form: /v1beta1/echo:collect
+//    Generated for HTTP binding pattern: "/v1beta1/echo:collect"
+//         This matches URIs of the form: "/v1beta1/echo:collect"
 func (backend *RESTBackend) HandleCollect(w http.ResponseWriter, r *http.Request) {
 	backend.StdLog.Printf("Received request matching '/v1beta1/echo:collect': %q", r.URL)
 	w.Write([]byte("ERROR: not implementing streaming methods yet"))
 }
 
 // HandlePagedExpand translates REST requests/responses on the wire to internal proto messages for PagedExpand
-//    Generated for HTTP binding pattern: /v1beta1/echo:pagedExpand
-//         This matches URIs of the form: /v1beta1/echo:pagedExpand
+//    Generated for HTTP binding pattern: "/v1beta1/echo:pagedExpand"
+//         This matches URIs of the form: "/v1beta1/echo:pagedExpand"
 func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -120,7 +119,6 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 		w.Write([]byte(err.Error()))
 		return
 	}
-	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
@@ -150,8 +148,8 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 }
 
 // HandleWait translates REST requests/responses on the wire to internal proto messages for Wait
-//    Generated for HTTP binding pattern: /v1beta1/echo:wait
-//         This matches URIs of the form: /v1beta1/echo:wait
+//    Generated for HTTP binding pattern: "/v1beta1/echo:wait"
+//         This matches URIs of the form: "/v1beta1/echo:wait"
 func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -172,7 +170,6 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
@@ -202,8 +199,8 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleBlock translates REST requests/responses on the wire to internal proto messages for Block
-//    Generated for HTTP binding pattern: /v1beta1/echo:block
-//         This matches URIs of the form: /v1beta1/echo:block
+//    Generated for HTTP binding pattern: "/v1beta1/echo:block"
+//         This matches URIs of the form: "/v1beta1/echo:block"
 func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -224,7 +221,6 @@ func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) 
 		w.Write([]byte(err.Error()))
 		return
 	}
-	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error

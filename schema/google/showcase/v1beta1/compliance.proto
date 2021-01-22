@@ -55,6 +55,18 @@ service Compliance {
       get: "/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}:simplepath"
     };
   }
+
+  rpc RepeatDataPathResource(RepeatRequest) returns (RepeatResponse) {
+    option (google.api.http) = {
+      get: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/*}/bool/{info.f_bool}:pathresource"
+    };
+  }
+
+  rpc RepeatDataPathTrailingResource(RepeatRequest) returns (RepeatResponse) {
+    option (google.api.http) = {
+      get: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/**}:pathtrailingresource"
+    };
+  }
 }
 
 message RepeatRequest {

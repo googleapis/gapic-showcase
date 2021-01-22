@@ -30,8 +30,8 @@ import (
 )
 
 // HandleCreateUser translates REST requests/responses on the wire to internal proto messages for CreateUser
-//    Generated for HTTP binding pattern: /v1beta1/users
-//         This matches URIs of the form: /v1beta1/users
+//    Generated for HTTP binding pattern: "/v1beta1/users"
+//         This matches URIs of the form: "/v1beta1/users"
 func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -52,7 +52,6 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 		w.Write([]byte(err.Error()))
 		return
 	}
-	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
@@ -82,8 +81,8 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 }
 
 // HandleGetUser translates REST requests/responses on the wire to internal proto messages for GetUser
-//    Generated for HTTP binding pattern: /v1beta1/{name=users/*}
-//         This matches URIs of the form: /v1beta1/{name:users/[0-9a-zA-Z_% "\-]+}
+//    Generated for HTTP binding pattern: "/v1beta1/{name=users/*}"
+//         This matches URIs of the form: "/v1beta1/{name:users/.+}"
 func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -97,7 +96,6 @@ func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request
 	}
 
 	request := &genprotopb.GetUserRequest{}
-	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
@@ -106,7 +104,6 @@ func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	// TODO: Ensure we handle URL-encoded values in query parameters
 	queryParams := map[string][]string(r.URL.Query())
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
 		backend.StdLog.Printf("  error reading query params: %s", err)
@@ -137,8 +134,8 @@ func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request
 }
 
 // HandleUpdateUser translates REST requests/responses on the wire to internal proto messages for UpdateUser
-//    Generated for HTTP binding pattern: /v1beta1/{user.name=users/*}
-//         This matches URIs of the form: /v1beta1/{user.name:users/[0-9a-zA-Z_% "\-]+}
+//    Generated for HTTP binding pattern: "/v1beta1/{user.name=users/*}"
+//         This matches URIs of the form: "/v1beta1/{user.name:users/.+}"
 func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -159,7 +156,6 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 		w.Write([]byte(err.Error()))
 		return
 	}
-	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
@@ -189,8 +185,8 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 }
 
 // HandleDeleteUser translates REST requests/responses on the wire to internal proto messages for DeleteUser
-//    Generated for HTTP binding pattern: /v1beta1/{name=users/*}
-//         This matches URIs of the form: /v1beta1/{name:users/[0-9a-zA-Z_% "\-]+}
+//    Generated for HTTP binding pattern: "/v1beta1/{name=users/*}"
+//         This matches URIs of the form: "/v1beta1/{name:users/.+}"
 func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -204,7 +200,6 @@ func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.DeleteUserRequest{}
-	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
@@ -213,7 +208,6 @@ func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Requ
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	// TODO: Ensure we handle URL-encoded values in query parameters
 	queryParams := map[string][]string(r.URL.Query())
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
 		backend.StdLog.Printf("  error reading query params: %s", err)
@@ -244,8 +238,8 @@ func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Requ
 }
 
 // HandleListUsers translates REST requests/responses on the wire to internal proto messages for ListUsers
-//    Generated for HTTP binding pattern: /v1beta1/users
-//         This matches URIs of the form: /v1beta1/users
+//    Generated for HTTP binding pattern: "/v1beta1/users"
+//         This matches URIs of the form: "/v1beta1/users"
 func (backend *RESTBackend) HandleListUsers(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -259,7 +253,6 @@ func (backend *RESTBackend) HandleListUsers(w http.ResponseWriter, r *http.Reque
 	}
 
 	request := &genprotopb.ListUsersRequest{}
-	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
@@ -268,7 +261,6 @@ func (backend *RESTBackend) HandleListUsers(w http.ResponseWriter, r *http.Reque
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	// TODO: Ensure we handle URL-encoded values in query parameters
 	queryParams := map[string][]string(r.URL.Query())
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
 		backend.StdLog.Printf("  error reading query params: %s", err)
