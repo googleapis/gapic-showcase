@@ -92,3 +92,43 @@ func ExampleComplianceClient_RepeatDataSimplePath() {
 	// TODO: Use resp.
 	_ = resp
 }
+
+func ExampleComplianceClient_RepeatDataPathResource() {
+	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
+
+	ctx := context.Background()
+	c, err := client.NewComplianceClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &genprotopb.RepeatRequest{
+		// TODO: Fill request struct fields.
+	}
+	resp, err := c.RepeatDataPathResource(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
+func ExampleComplianceClient_RepeatDataPathTrailingResource() {
+	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
+
+	ctx := context.Background()
+	c, err := client.NewComplianceClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &genprotopb.RepeatRequest{
+		// TODO: Fill request struct fields.
+	}
+	resp, err := c.RepeatDataPathTrailingResource(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}

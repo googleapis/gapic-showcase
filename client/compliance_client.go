@@ -35,9 +35,11 @@ var newComplianceClientHook clientHook
 
 // ComplianceCallOptions contains the retry settings for each method of ComplianceClient.
 type ComplianceCallOptions struct {
-	RepeatDataBody       []gax.CallOption
-	RepeatDataQuery      []gax.CallOption
-	RepeatDataSimplePath []gax.CallOption
+	RepeatDataBody                 []gax.CallOption
+	RepeatDataQuery                []gax.CallOption
+	RepeatDataSimplePath           []gax.CallOption
+	RepeatDataPathResource         []gax.CallOption
+	RepeatDataPathTrailingResource []gax.CallOption
 }
 
 func defaultComplianceClientOptions() []option.ClientOption {
@@ -54,9 +56,11 @@ func defaultComplianceClientOptions() []option.ClientOption {
 
 func defaultComplianceCallOptions() *ComplianceCallOptions {
 	return &ComplianceCallOptions{
-		RepeatDataBody:       []gax.CallOption{},
-		RepeatDataQuery:      []gax.CallOption{},
-		RepeatDataSimplePath: []gax.CallOption{},
+		RepeatDataBody:                 []gax.CallOption{},
+		RepeatDataQuery:                []gax.CallOption{},
+		RepeatDataSimplePath:           []gax.CallOption{},
+		RepeatDataPathResource:         []gax.CallOption{},
+		RepeatDataPathTrailingResource: []gax.CallOption{},
 	}
 }
 
@@ -177,13 +181,47 @@ func (c *ComplianceClient) RepeatDataQuery(ctx context.Context, req *genprotopb.
 // “/bar/{foo}” rather than “/{foo=bar/*}”), and the rest as query parameters.
 func (c *ComplianceClient) RepeatDataSimplePath(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	// Pending https://github.com/googleapis/gapic-generator-go/issues/514
-	// md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v&%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_int32", url.QueryEscape(req.GetInfo().GetFInt32()), "info.f_double", url.QueryEscape(req.GetInfo().GetFDouble()), "info.f_bool", url.QueryEscape(req.GetInfo().GetFBool())))
+	// md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v&%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_int", url.QueryEscape(req.GetInfo().GetFInt()), "info.f_double", url.QueryEscape(req.GetInfo().GetFDouble()), "info.f_bool", url.QueryEscape(req.GetInfo().GetFBool())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata /*, md*/)
 	opts = append(c.CallOptions.RepeatDataSimplePath[0:len(c.CallOptions.RepeatDataSimplePath):len(c.CallOptions.RepeatDataSimplePath)], opts...)
 	var resp *genprotopb.RepeatResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		resp, err = c.complianceClient.RepeatDataSimplePath(ctx, req, settings.GRPC...)
+		return err
+	}, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (c *ComplianceClient) RepeatDataPathResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	// Pending https://github.com/googleapis/gapic-generator-go/issues/514
+	// md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_child.f_string", url.QueryEscape(req.GetInfo().GetFChild().GetFString()), "info.f_bool", url.QueryEscape(req.GetInfo().GetFBool())))
+	ctx = insertMetadata(ctx, c.xGoogMetadata /*, md*/)
+	opts = append(c.CallOptions.RepeatDataPathResource[0:len(c.CallOptions.RepeatDataPathResource):len(c.CallOptions.RepeatDataPathResource)], opts...)
+	var resp *genprotopb.RepeatResponse
+	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		var err error
+		resp, err = c.complianceClient.RepeatDataPathResource(ctx, req, settings.GRPC...)
+		return err
+	}, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (c *ComplianceClient) RepeatDataPathTrailingResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	// Pending https://github.com/googleapis/gapic-generator-go/issues/514
+	// md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_child.f_string", url.QueryEscape(req.GetInfo().GetFChild().GetFString())))
+	ctx = insertMetadata(ctx, c.xGoogMetadata /*, md*/)
+	opts = append(c.CallOptions.RepeatDataPathTrailingResource[0:len(c.CallOptions.RepeatDataPathTrailingResource):len(c.CallOptions.RepeatDataPathTrailingResource)], opts...)
+	var resp *genprotopb.RepeatResponse
+	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		var err error
+		resp, err = c.complianceClient.RepeatDataPathTrailingResource(ctx, req, settings.GRPC...)
 		return err
 	}, opts...)
 	if err != nil {
