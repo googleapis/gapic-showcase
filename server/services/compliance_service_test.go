@@ -51,6 +51,8 @@ func TestComplianceRepeats(t *testing.T) {
 		server.RepeatDataBody,
 		server.RepeatDataQuery,
 		server.RepeatDataSimplePath,
+		server.RepeatDataPathResource,
+		server.RepeatDataPathTrailingResource,
 	} {
 		response, err := rpc(context.Background(), request)
 		if err != nil {

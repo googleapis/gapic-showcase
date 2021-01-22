@@ -80,8 +80,8 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 			file.P("")
 			file.P("// %s translates REST requests/responses on the wire to internal proto messages for %s", handlerName, handler.GoMethod)
-			file.P("//    Generated for HTTP binding pattern: %s", handler.URIPattern)
-			file.P("//         This matches URIs of the form: %s", pathMatch)
+			file.P("//    Generated for HTTP binding pattern: %q", handler.URIPattern)
+			file.P("//         This matches URIs of the form: %q", pathMatch)
 			file.P("func (backend *RESTBackend) %s(w http.ResponseWriter, r *http.Request) {", handlerName)
 			if handler.StreamingClient || handler.StreamingServer {
 				file.P(`  backend.StdLog.Printf("Received request matching '%s': %%q", r.URL)`, handler.URIPattern)
@@ -132,7 +132,6 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				file.P("")
 
 			}
-			file.P("  // TODO: Ensure we handle URL-encoded values in path variables")
 			file.P("  if err := resttools.PopulateSingularFields(%s, urlPathParams); err != nil {", handler.RequestVariable)
 			file.P(`    backend.StdLog.Printf("  error reading URL path params: %%s", err)`)
 			file.P("    // TODO: Properly handle error")
@@ -142,7 +141,6 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			file.P("")
 			if handler.RequestBodyFieldSpec != gomodel.BodyFieldAll {
 				file.P("  // TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both")
-				file.P("  // TODO: Ensure we handle URL-encoded values in query parameters")
 				file.P("  queryParams := map[string][]string(r.URL.Query())")
 				file.P("  if err := resttools.PopulateFields(%s, queryParams); err != nil {", handler.RequestVariable)
 				file.P(`    backend.StdLog.Printf("  error reading query params: %%s", err)`)
@@ -196,6 +194,12 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	file.P("")
 	file.P(`func RegisterHandlers(router *gmux.Router, backend *services.Backend) {`)
 	file.P(" rest := (*RESTBackend)(backend)")
+
+	// TODO: Support path-encoded '\n' in strings (%0A), which currently don't work. Probably the way to do this is to add
+	//   file.P(" router.UseEncodedPath()")
+	// here, and to explicitly path decode in resttools.PopulateSingularFields. We should also
+	// add '\n' to the "ExtremeValues" ComplianceGroup in compliance_suite.json.
+
 	// TODO: Fix PATCH requests, like
 	//  `curl -X PATCH http://localhost:7469/v1beta1/users/Victor`
 	// which don't seem to make it through to the handler. (It doesn't seem to be an issue with

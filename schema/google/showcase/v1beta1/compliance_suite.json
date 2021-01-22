@@ -1,13 +1,83 @@
 {
   "group": [
     {
-      "name": "Fully working conversions",
+      "name": "Fully working conversions, no resources",
       "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery", "Compliance.RepeatDataSimplePath"],
       "requests": [
 	{
 	  "name": "Basic data types",
 	  "info": {
-            "f_string": "Hello"
+            "f_string": "Hello",
+	    "f_int32": -1,
+	    "f_sint32" : -2,
+	    "f_sfixed32": -3,
+	    "f_uint32": 5,
+	    "f_fixed32": 7,
+	    "f_int64": -11,
+	    "f_sint64": -13,
+	    "f_sfixed64": -17,
+	    "f_uint64": 19,
+	    "f_fixed64":23,
+	    "f_double": -29e4,
+	    "f_float": -31,
+	    "f_bool": true,
+
+	    "p_string": "Goodbye",
+	    "p_int32": -37,
+	    "p_double": -41.43,
+	    "p_bool": true,
+
+            "f_child": {
+	      "f_string": "second/bool/salutation"
+	    }
+	  }
+	},
+	{
+	  "name": "Zero values for non-string fields",
+	  "info": {
+            "f_string": "Hello",
+	    "f_int32": 0,
+	    "f_sint32" : 0,
+	    "f_sfixed32": 0,
+	    "f_uint32": 0,
+	    "f_fixed32": 0,
+	    "f_int64": 0,
+	    "f_sint64": 0,
+	    "f_sfixed64": 0,
+	    "f_uint64": 0,
+	    "f_fixed64": 0,
+	    "f_double": 0,
+	    "f_float": 0,
+	    "f_bool": false,
+
+	    "p_string": "Goodbye",
+	    "p_int32": 0,
+	    "p_double": 0,
+	    "p_bool": false
+	  }
+	},
+	{
+	  "name": "Extreme values",
+	  "info": {
+            "f_string": "non-ASCII+non-printable string ☺ → ← \"\\\/\b\f\r\t\u1234 works, not newlines yet",
+	    "f_int32": 2147483647,
+	    "f_sint32" : 2147483647,
+	    "f_sfixed32": 2147483647,
+	    "f_uint32": 4294967295,
+	    "f_fixed32": 4294967295,
+	    "f_int64": 9223372036854775807,
+	    "f_sint64": 9223372036854775807,
+	    "f_sfixed64": 9223372036854775807,
+	    "f_uint64": 18446744073709551615,
+	    "f_fixed64": 18446744073709551615,
+	    "f_double": 1.797693134862315708145274237317043567981e+308,
+	    "f_float": 3.40282346638528859811704183484516925440e+38,
+	    "f_bool": false,
+
+	    "p_string": "Goodbye",
+	    "p_int32": 2147483647,
+	    "p_double": 1.797693134862315708145274237317043567981e+308,
+	    "p_bool": false
 	  }
 	},
 	{
@@ -21,20 +91,61 @@
 	  "info": {
             "f_string": "Hello \"You\""
 	  }
-	}          
-      ]
-    },
-    {
-      "name": "Conversions not yet working for query params",
-      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataSimplePath"],
-      "requests": [
+	},
 	{
 	  "name": "Strings with percents",
 	  "info": {
             "f_string": "Hello 100%"
 	  }
-	}     
+	}	
       ]
-    }  
+    },
+    {
+      "name": "Fully working conversions, resources",
+      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery", "Compliance.RepeatDataSimplePath", "Compliance.RepeatDataPathResource", "Compliance.RepeatDataPathTrailingResource"],
+      "requests": [
+	{
+	  "name": "Strings with slashes and values that resemble subsequent resource templates",
+	  "info": {
+            "f_string": "first/hello/second/greetings",
+	    "p_bool": true,
+
+            "f_child": {
+	      "f_string": "second/zzz/bool/true"
+	    }
+	  }
+	}
+      ]
+    },
+    {
+      "name": "Cases that apply to non-path requests",
+      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery"],
+      "requests": [
+	{
+	  "name": "Zero values for all fields",
+	  "info": {
+            "f_string": "",
+	    "f_int32": 0,
+	    "f_sint32" : 0,
+	    "f_sfixed32": 0,
+	    "f_uint32": 0,
+	    "f_fixed32": 0,
+	    "f_int64": 0,
+	    "f_sint64": 0,
+	    "f_sfixed64": 0,
+	    "f_uint64": 0,
+	    "f_fixed64":20,
+	    "f_double": 0,
+	    "f_float": 0,
+	    "f_bool": false,
+
+	    "p_string": "",
+	    "p_int32": 0,
+	    "p_double": 0,
+	    "p_bool": false
+	  }
+	}
+      ]
+    }
   ]
 }

@@ -30,8 +30,8 @@ import (
 )
 
 // HandleCreateSequence translates REST requests/responses on the wire to internal proto messages for CreateSequence
-//    Generated for HTTP binding pattern: /v1beta1/sequences
-//         This matches URIs of the form: /v1beta1/sequences
+//    Generated for HTTP binding pattern: "/v1beta1/sequences"
+//         This matches URIs of the form: "/v1beta1/sequences"
 func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -55,7 +55,6 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 	}
 	request.Sequence = &bodyField
 
-	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
@@ -64,7 +63,6 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	// TODO: Ensure we handle URL-encoded values in query parameters
 	queryParams := map[string][]string(r.URL.Query())
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
 		backend.StdLog.Printf("  error reading query params: %s", err)
@@ -95,8 +93,8 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 }
 
 // HandleGetSequenceReport translates REST requests/responses on the wire to internal proto messages for GetSequenceReport
-//    Generated for HTTP binding pattern: /v1beta1/{name=sequences/*/sequenceReport}
-//         This matches URIs of the form: /v1beta1/{name:sequences/[0-9a-zA-Z_% "\-]+/sequenceReport}
+//    Generated for HTTP binding pattern: "/v1beta1/{name=sequences/*/sequenceReport}"
+//         This matches URIs of the form: "/v1beta1/{name:sequences/.+/sequenceReport}"
 func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -110,7 +108,6 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 	}
 
 	request := &genprotopb.GetSequenceReportRequest{}
-	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
@@ -119,7 +116,6 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	// TODO: Ensure we handle URL-encoded values in query parameters
 	queryParams := map[string][]string(r.URL.Query())
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
 		backend.StdLog.Printf("  error reading query params: %s", err)
@@ -150,8 +146,8 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 }
 
 // HandleAttemptSequence translates REST requests/responses on the wire to internal proto messages for AttemptSequence
-//    Generated for HTTP binding pattern: /v1beta1/{name=sequences/*}
-//         This matches URIs of the form: /v1beta1/{name:sequences/[0-9a-zA-Z_% "\-]+}
+//    Generated for HTTP binding pattern: "/v1beta1/{name=sequences/*}"
+//         This matches URIs of the form: "/v1beta1/{name:sequences/.+}"
 func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -172,7 +168,6 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 		w.Write([]byte(err.Error()))
 		return
 	}
-	// TODO: Ensure we handle URL-encoded values in path variables
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.StdLog.Printf("  error reading URL path params: %s", err)
 		// TODO: Properly handle error
