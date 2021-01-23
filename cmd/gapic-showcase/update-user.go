@@ -5,7 +5,7 @@ package main
 import (
 	"github.com/spf13/cobra"
 
-	field_maskpb "google.golang.org/genproto/protobuf/field_mask"
+	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
 
 	"fmt"
 
@@ -33,7 +33,7 @@ func init() {
 
 	UpdateUserInput.User = new(genprotopb.User)
 
-	UpdateUserInput.UpdateMask = new(field_maskpb.FieldMask)
+	UpdateUserInput.UpdateMask = new(fieldmaskpb.FieldMask)
 
 	UpdateUserCmd.Flags().StringVar(&UpdateUserInput.User.Name, "user.name", "", "The resource name of the user.")
 

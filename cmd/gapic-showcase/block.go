@@ -5,9 +5,9 @@ package main
 import (
 	"github.com/spf13/cobra"
 
-	anypb "github.com/golang/protobuf/ptypes/any"
+	anypb "google.golang.org/protobuf/types/known/anypb"
 
-	durationpb "github.com/golang/protobuf/ptypes/duration"
+	durationpb "google.golang.org/protobuf/types/known/durationpb"
 
 	"fmt"
 

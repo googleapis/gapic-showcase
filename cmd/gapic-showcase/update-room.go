@@ -5,7 +5,7 @@ package main
 import (
 	"github.com/spf13/cobra"
 
-	field_maskpb "google.golang.org/genproto/protobuf/field_mask"
+	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
 
 	"fmt"
 
@@ -25,7 +25,7 @@ func init() {
 
 	UpdateRoomInput.Room = new(genprotopb.Room)
 
-	UpdateRoomInput.UpdateMask = new(field_maskpb.FieldMask)
+	UpdateRoomInput.UpdateMask = new(fieldmaskpb.FieldMask)
 
 	UpdateRoomCmd.Flags().StringVar(&UpdateRoomInput.Room.Name, "room.name", "", "The resource name of the chat room.")
 
