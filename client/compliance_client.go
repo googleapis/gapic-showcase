@@ -18,9 +18,9 @@ package client
 
 import (
 	"context"
-	// "fmt"      // Pending https://github.com/googleapis/gapic-generator-go/issues/514
+	"fmt"
 	"math"
-	// "net/url"  // Pending https://github.com/googleapis/gapic-generator-go/issues/514
+	"net/url"
 
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	gax "github.com/googleapis/gax-go/v2"
@@ -180,9 +180,8 @@ func (c *ComplianceClient) RepeatDataQuery(ctx context.Context, req *genprotopb.
 // sending some parameters as “simple” path variables (i.e., of the form
 // “/bar/{foo}” rather than “/{foo=bar/*}”), and the rest as query parameters.
 func (c *ComplianceClient) RepeatDataSimplePath(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	// Pending https://github.com/googleapis/gapic-generator-go/issues/514
-	// md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v&%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_int", url.QueryEscape(req.GetInfo().GetFInt()), "info.f_double", url.QueryEscape(req.GetInfo().GetFDouble()), "info.f_bool", url.QueryEscape(req.GetInfo().GetFBool())))
-	ctx = insertMetadata(ctx, c.xGoogMetadata /*, md*/)
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v&%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_int32", req.GetInfo().GetFInt32(), "info.f_double", url.QueryEscape(fmt.Sprintf("%g", req.GetInfo().GetFDouble())), "info.f_bool", req.GetInfo().GetFBool()))
+	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.RepeatDataSimplePath[0:len(c.CallOptions.RepeatDataSimplePath):len(c.CallOptions.RepeatDataSimplePath)], opts...)
 	var resp *genprotopb.RepeatResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -197,9 +196,8 @@ func (c *ComplianceClient) RepeatDataSimplePath(ctx context.Context, req *genpro
 }
 
 func (c *ComplianceClient) RepeatDataPathResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	// Pending https://github.com/googleapis/gapic-generator-go/issues/514
-	// md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_child.f_string", url.QueryEscape(req.GetInfo().GetFChild().GetFString()), "info.f_bool", url.QueryEscape(req.GetInfo().GetFBool())))
-	ctx = insertMetadata(ctx, c.xGoogMetadata /*, md*/)
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_child.f_string", url.QueryEscape(req.GetInfo().GetFChild().GetFString()), "info.f_bool", req.GetInfo().GetFBool()))
+	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.RepeatDataPathResource[0:len(c.CallOptions.RepeatDataPathResource):len(c.CallOptions.RepeatDataPathResource)], opts...)
 	var resp *genprotopb.RepeatResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -214,9 +212,8 @@ func (c *ComplianceClient) RepeatDataPathResource(ctx context.Context, req *genp
 }
 
 func (c *ComplianceClient) RepeatDataPathTrailingResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	// Pending https://github.com/googleapis/gapic-generator-go/issues/514
-	// md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_child.f_string", url.QueryEscape(req.GetInfo().GetFChild().GetFString())))
-	ctx = insertMetadata(ctx, c.xGoogMetadata /*, md*/)
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_child.f_string", url.QueryEscape(req.GetInfo().GetFChild().GetFString())))
+	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append(c.CallOptions.RepeatDataPathTrailingResource[0:len(c.CallOptions.RepeatDataPathTrailingResource):len(c.CallOptions.RepeatDataPathTrailingResource)], opts...)
 	var resp *genprotopb.RepeatResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
