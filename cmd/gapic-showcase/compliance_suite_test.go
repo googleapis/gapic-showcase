@@ -62,6 +62,7 @@ func TestComplianceSuite(t *testing.T) {
 	// each of their handlers invoking the correct GAPIC library method for the Showcase API.
 	restRPCs := map[string]prepRepeatDataTestFunc{
 		"Compliance.RepeatDataBody":                 prepRepeatDataBodyTest,
+		"Compliance.RepeatDataBodyInfo":             prepRepeatDataBodyInfoTest,
 		"Compliance.RepeatDataQuery":                prepRepeatDataQueryTest,
 		"Compliance.RepeatDataSimplePath":           prepRepeatDataSimplePathTest,
 		"Compliance.RepeatDataPathResource":         prepRepeatDataPathResourceTest,
@@ -119,8 +120,8 @@ func TestComplianceSuite(t *testing.T) {
 				}
 				var response genproto.RepeatResponse
 				if err := protojson.Unmarshal(responseBody, &response); err != nil {
-					t.Errorf("%s could not unmarshal httpResponse body: %s\n   response body: %s",
-						errorPrefix, err, string(responseBody))
+					t.Errorf("%s could not unmarshal httpResponse body: %s\n   response body: %s\n   request: %s\n",
+						errorPrefix, err, string(responseBody), requestBody)
 					continue
 				}
 
@@ -144,6 +145,15 @@ func prepRepeatDataBodyTest(request *genproto.RepeatRequest) (verb string, name 
 	bodyBytes, err := protojson.Marshal(request)
 	return name, "POST", "/v1beta1/repeat:body", string(bodyBytes), err
 }
+
+func prepRepeatDataBodyInfoTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
+	name = "Compliance.RepeatDataBodyInfo"
+	bodyBytes, err := protojson.Marshal(request.Info)
+	queryString := prepRepeatDataTestsQueryString(request, map[string]bool{"info": true})
+	_ = bodyBytes
+	return name, "POST", "/v1beta1/repeat:bodyinfo" + queryString, string(bodyBytes), err
+}
+
 
 func prepRepeatDataQueryTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
 	name = "Compliance.RepeatDataQuery"
@@ -173,7 +183,7 @@ func prepRepeatDataSimplePathTest(request *genproto.RepeatRequest) (verb string,
 		{"f_bool", "%t", info.GetFBool()},
 	} {
 		pathParts = append(pathParts, url.PathEscape(fmt.Sprintf(part.format, part.value)))
-		nonQueryParamNames[part.name] = true
+		nonQueryParamNames["info."+part.name] = true
 	}
 	path = fmt.Sprintf("/v1beta1/repeat/%s:simplepath", strings.Join(pathParts, "/"))
 
@@ -203,7 +213,7 @@ func prepRepeatDataPathResourceTest(request *genproto.RepeatRequest) (verb strin
 			return
 		}
 		pathParts = append(pathParts, url.PathEscape(fmt.Sprintf(part.format, part.value)))
-		nonQueryParamNames[part.name] = true
+		nonQueryParamNames["info."+part.name] = true
 	}
 	path = fmt.Sprintf("/v1beta1/repeat/%s:pathresource", strings.Join(pathParts, "/"))
 
@@ -232,7 +242,7 @@ func prepRepeatDataPathTrailingResourceTest(request *genproto.RepeatRequest) (ve
 			return
 		}
 		pathParts = append(pathParts, url.PathEscape(fmt.Sprintf(part.format, part.value)))
-		nonQueryParamNames[part.name] = true
+		nonQueryParamNames["info."+part.name] = true
 	}
 	path = fmt.Sprintf("/v1beta1/repeat/%s:pathtrailingresource", strings.Join(pathParts, "/"))
 
@@ -247,12 +257,13 @@ func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map
 	info := request.GetInfo()
 	queryParams := []string{}
 	addParam := func(key string, condition bool, value string) {
-		if exclude[key] || !condition {
+		if exclude["info"] || exclude["info."+key] || !condition {
 			return
 		}
 		queryParams = append(queryParams, fmt.Sprintf("info.%s=%s", key, value))
 	}
 
+	// TODO: qualify all the entries below with `info.` Then in addParam, split `key` on`.` and see whether any [0]..[i] prefix is excluded (ie `info`, or `info._fchild`, or `info.f_child.f_double`)
 	addParam("f_string", len(info.GetFString()) > 0, url.QueryEscape(info.GetFString()))
 	addParam("f_int32", info.GetFInt32() != 0, fmt.Sprintf("%d", info.GetFInt32()))
 	addParam("f_sint32", info.GetFSint32() != 0, fmt.Sprintf("%d", info.GetFSint32()))

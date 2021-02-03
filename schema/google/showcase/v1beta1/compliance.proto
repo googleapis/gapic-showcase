@@ -39,6 +39,16 @@ service Compliance {
     };
   }
 
+  // This method echoes the ComplianceData request. This method exercises sending the a
+  // message-type field in the REST body. Per AIP-127, only top-level, non-repeated fields can be
+  // sent this way.
+  rpc RepeatDataBodyInfo(RepeatRequest) returns (RepeatResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/repeat:bodyinfo"
+      body: "info"
+    };
+  }
+
   // This method echoes the ComplianceData request. This method exercises
   // sending all request fields as query parameters.
   rpc RepeatDataQuery(RepeatRequest) returns (RepeatResponse) {
