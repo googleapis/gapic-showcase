@@ -81,6 +81,10 @@ func main() {
 	complianceSrc := filepath.Join("schema", "google", "showcase", "v1beta1", "compliance_suite.json")
 	util.Execute("cp", complianceSrc, "dist")
 
+	// Copy the API Service config for easy access by generators.
+	serviceYamlSrc := filepath.Join("schema", "google", "showcase", "v1beta1", "showcase_v1beta1.yaml")
+	util.Execute("cp", serviceYamlSrc, "dist")
+
 	// Find gapic-showcase version
 	version, err := exec.Command("go", "run", "./cmd/gapic-showcase", "--version").Output()
 	if err != nil {
