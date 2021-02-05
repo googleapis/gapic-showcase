@@ -40,7 +40,7 @@ func (l *locationsServerImpl) GetLocation(ctx context.Context, in *locpb.GetLoca
 	}
 
 	name := in.GetName()
-	display := name[strings.LastIndex(name, "/"):+1]
+	display := name[strings.LastIndex(name, "/")+1:]
 
 	return &locpb.Location{
 		Name:        name,
