@@ -71,6 +71,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 		file.P(")")
 		file.P("")
 		for _, handler := range service.Handlers {
+			excludedQueryParams := []string{}
 			handlerName := namer.Get("Handle" + handler.GoMethod)
 			pathMatch, allURLVariables, err := matchingPath(handler.PathTemplate)
 			if err != nil {
@@ -84,8 +85,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			file.P("//         This matches URIs of the form: %q", pathMatch)
 			file.P("func (backend *RESTBackend) %s(w http.ResponseWriter, r *http.Request) {", handlerName)
 			if handler.StreamingClient || handler.StreamingServer {
-				file.P(`  backend.StdLog.Printf("Received request matching '%s': %%q", r.URL)`, handler.URIPattern)
-				file.P(`  w.Write([]byte("ERROR: not implementing streaming methods yet"))`)
+				file.P(`  backend.Error(w, http.StatusNotImplemented, fmt.Sprintf("streaming methods not implemented yet (request matched '%s': %%q)", r.URL))`, handler.URIPattern)
 				file.P("}")
 				continue
 			}
@@ -115,6 +115,13 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				file.P("    w.Write([]byte(err.Error()))")
 				file.P("    return")
 				file.P("  }")
+				file.P("")
+				file.P("  if queryParams := r.URL.Query(); len(queryParams) > 0 {")
+				file.P(`    backend.StdLog.Printf("  unexpected query params: %%v", queryParams)`)
+				file.P("    // TODO: Properly handle error")
+				file.P(`    w.Write([]byte(fmt.Sprintf("  unexpected query params: %%v", queryParams)))`)
+				file.P("    return")
+				file.P("  }")
 
 			case gomodel.BodyFieldSingle:
 				// TODO: Ensure this works when the specified field is a scalar. We
@@ -130,8 +137,9 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				file.P("  }")
 				file.P("  %s.%s = &%s", handler.RequestVariable, handler.RequestBodyFieldName, handler.RequestBodyFieldVariable)
 				file.P("")
-
+				excludedQueryParams = append(excludedQueryParams, handler.RequestBodyFieldProtoName)
 			}
+
 			file.P("  if err := resttools.PopulateSingularFields(%s, urlPathParams); err != nil {", handler.RequestVariable)
 			file.P(`    backend.StdLog.Printf("  error reading URL path params: %%s", err)`)
 			file.P("    // TODO: Properly handle error")
@@ -139,9 +147,18 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			file.P("    return")
 			file.P("  }")
 			file.P("")
+			excludedQueryParams = append(excludedQueryParams, handler.PathTemplate.ListVariables()...)
+
 			if handler.RequestBodyFieldSpec != gomodel.BodyFieldAll {
 				file.P("  // TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both")
 				file.P("  queryParams := map[string][]string(r.URL.Query())")
+				if len(excludedQueryParams) > 0 {
+					file.P("  excludedQueryParams := %#v", excludedQueryParams)
+					file.P("  if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {")
+					file.P(`    backend.Error(w, http.StatusBadRequest, fmt.Sprintf("  these keys should not appear in query params: %%v", duplicates))`)
+					file.P("    return")
+					file.P("  }")
+				}
 				file.P("  if err := resttools.PopulateFields(%s, queryParams); err != nil {", handler.RequestVariable)
 				file.P(`    backend.StdLog.Printf("  error reading query params: %%s", err)`)
 				file.P("    // TODO: Properly handle error")
@@ -183,6 +200,8 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	file.P("package genrest")
 	file.P("")
 	file.P("import (")
+	file.P(`   "net/http"`)
+	file.P("")
 	file.P(`   "github.com/googleapis/gapic-showcase/server/services"`)
 	file.P("")
 	file.P(`  gmux "github.com/gorilla/mux"`)
@@ -211,6 +230,12 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	}
 	file.P(`}`)
 	file.P("")
+
+	file.P("func (backend *RESTBackend) Error(w http.ResponseWriter, status int, message string) {")
+	file.P("  backend.StdLog.Print(message)")
+	file.P("  w.WriteHeader(status)")
+	file.P(`  w.Write([]byte("showcase: " + message))`)
+	file.P("}")
 
 	return view, nil
 }

@@ -53,6 +53,19 @@ func (pt PathTemplate) HasVariables() (topVar, nestedVar bool) {
 	return topVar, nestedVar
 }
 
+// ListVariables returns two booleans depending on whether `pt` has top-level and nested
+// (lower-level) variables.
+func (pt PathTemplate) ListVariables() []string {
+	varNames := []string{}
+	for _, segment := range pt {
+		if segment.Kind == Variable {
+			varNames = append(varNames, segment.Value)
+			varNames = append(varNames, segment.Subsegments.ListVariables()...)
+		}
+	}
+	return varNames
+}
+
 // asGoLiteral returns a Go-syntax representation of this PathTemplate. This is useful for
 // constructing and debugging tests.
 func (pt PathTemplate) asGoLiteral() string {
