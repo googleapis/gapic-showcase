@@ -48,8 +48,9 @@ func TestComplianceRepeats(t *testing.T) {
 	request := &pb.RepeatRequest{Info: info}
 
 	for idx, rpc := range [](func(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error)){
-		server.RepeatDataBody,
 		server.RepeatDataQuery,
+		server.RepeatDataBody,
+		server.RepeatDataBodyInfo,
 		server.RepeatDataSimplePath,
 		server.RepeatDataPathResource,
 		server.RepeatDataPathTrailingResource,
