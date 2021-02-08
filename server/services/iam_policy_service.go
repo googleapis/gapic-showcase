@@ -26,7 +26,7 @@ import (
 
 var missingResource error = status.Error(codes.InvalidArgument, "Missing required argument: resource")
 var missingPolicy error = status.Error(codes.InvalidArgument, "Missing required argument: policy")
-var resourceDNE error = status.Error(codes.NotFound, "Requested resource has no Policy")
+var resourceDoesNotExist error = status.Error(codes.NotFound, "Requested resource has no Policy")
 
 // NewIAMPolicyServer returns a new LocationsServer for the Showcase API.
 func NewIAMPolicyServer() iampb.IAMPolicyServer {
@@ -36,7 +36,9 @@ func NewIAMPolicyServer() iampb.IAMPolicyServer {
 }
 
 type iamPolicyServerImpl struct {
-	mu       sync.Mutex
+	mu sync.Mutex
+	// The key is the resource name.
+	// The value is the IAM Policy assigned to the resource.
 	policies map[string]*iampb.Policy
 }
 
@@ -51,7 +53,7 @@ func (i *iamPolicyServerImpl) GetIamPolicy(ctx context.Context, in *iampb.GetIam
 
 	p, ok := i.policies[in.GetResource()]
 	if !ok {
-		return nil, resourceDNE
+		return nil, resourceDoesNotExist
 	}
 	res := proto.Clone(p)
 
@@ -77,7 +79,7 @@ func (i *iamPolicyServerImpl) SetIamPolicy(ctx context.Context, in *iampb.SetIam
 	return in.GetPolicy(), nil
 }
 
-// TestIamPermissions verifies that the requested resource has been Set at one point, and echos the back permissions to be tested.
+// TestIamPermissions verifies that the requested resource has been Set at one point, and echoes the back permissions to be tested.
 func (i *iamPolicyServerImpl) TestIamPermissions(ctx context.Context, in *iampb.TestIamPermissionsRequest) (*iampb.TestIamPermissionsResponse, error) {
 	if in.GetResource() == "" {
 		return nil, missingResource
@@ -87,7 +89,7 @@ func (i *iamPolicyServerImpl) TestIamPermissions(ctx context.Context, in *iampb.
 	defer i.mu.Unlock()
 
 	if _, ok := i.policies[in.GetResource()]; !ok {
-		return nil, resourceDNE
+		return nil, resourceDoesNotExist
 	}
 
 	return &iampb.TestIamPermissionsResponse{

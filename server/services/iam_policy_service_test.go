@@ -81,16 +81,16 @@ func TestGetIamPolicy_errors(t *testing.T) {
 		{
 			name:     "resource does not exist",
 			resource: "foo/bar",
-			err:      resourceDNE,
+			err:      resourceDoesNotExist,
 		},
 	} {
 		res, err := s.GetIamPolicy(context.Background(), &iampb.GetIamPolicyRequest{Resource: tst.resource})
-		if err != nil {
-			if diff := cmp.Diff(err, tst.err, cmpopts.EquateErrors()); diff != "" {
-				t.Errorf("GetIamPolicy_errors(%s): got(-),want(+):\n%s", tst.name, diff)
-			}
-		} else {
+		if err == nil {
 			t.Errorf("GetIamPolicy_errors(%s): expected an error but got response: %v", tst.name, res)
+		}
+
+		if diff := cmp.Diff(err, tst.err, cmpopts.EquateErrors()); diff != "" {
+			t.Errorf("GetIamPolicy_errors(%s): got(-),want(+):\n%s", tst.name, diff)
 		}
 	}
 }
@@ -113,12 +113,12 @@ func TestSetIamPolicy_errors(t *testing.T) {
 		},
 	} {
 		res, err := s.SetIamPolicy(context.Background(), &iampb.SetIamPolicyRequest{Resource: tst.resource})
-		if err != nil {
-			if diff := cmp.Diff(err, tst.err, cmpopts.EquateErrors()); diff != "" {
-				t.Errorf("SetIamPolicy_errors(%s): got(-),want(+):\n%s", tst.name, diff)
-			}
-		} else {
+		if err == nil {
 			t.Errorf("SetIamPolicy_errors(%s): expected an error but got response: %v", tst.name, res)
+		}
+
+		if diff := cmp.Diff(err, tst.err, cmpopts.EquateErrors()); diff != "" {
+			t.Errorf("SetIamPolicy_errors(%s): got(-),want(+):\n%s", tst.name, diff)
 		}
 	}
 }
@@ -137,16 +137,16 @@ func TestTestIamPermissions_errors(t *testing.T) {
 		{
 			name:     "resource does not exist",
 			resource: "foo/bar",
-			err:      resourceDNE,
+			err:      resourceDoesNotExist,
 		},
 	} {
 		res, err := s.TestIamPermissions(context.Background(), &iampb.TestIamPermissionsRequest{Resource: tst.resource})
-		if err != nil {
-			if diff := cmp.Diff(err, tst.err, cmpopts.EquateErrors()); diff != "" {
-				t.Errorf("TestIamPermissions_errors(%s): got(-),want(+):\n%s", tst.name, diff)
-			}
-		} else {
+		if err == nil {
 			t.Errorf("TestIamPermissions_errors(%s): expected an error but got response: %v", tst.name, res)
+		}
+
+		if diff := cmp.Diff(err, tst.err, cmpopts.EquateErrors()); diff != "" {
+			t.Errorf("TestIamPermissions_errors(%s): got(-),want(+):\n%s", tst.name, diff)
 		}
 	}
 }

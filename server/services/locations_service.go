@@ -32,8 +32,8 @@ func NewLocationsServer() locpb.LocationsServer {
 
 type locationsServerImpl struct{}
 
-// GetLocation echos back a Location with the same name as
-// GetLocationRequest.name and has the last segment of name as the display_name.
+// GetLocation echoes back a Location with the same name as
+// in.name and has the last segment of name as the display_name.
 func (l *locationsServerImpl) GetLocation(ctx context.Context, in *locpb.GetLocationRequest) (*locpb.Location, error) {
 	if in.GetName() == "" {
 		return nil, missingName
@@ -49,7 +49,7 @@ func (l *locationsServerImpl) GetLocation(ctx context.Context, in *locpb.GetLoca
 }
 
 // ListLocations returns a fixed list of Locations prefixed with the
-// ListLocationsRequest.name value.
+// in.name value.
 func (l *locationsServerImpl) ListLocations(ctx context.Context, in *locpb.ListLocationsRequest) (*locpb.ListLocationsResponse, error) {
 	if in.GetName() == "" {
 		return nil, missingName
