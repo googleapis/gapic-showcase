@@ -20,6 +20,8 @@ import (
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 
+	locpb "google.golang.org/genproto/googleapis/cloud/location"
+	iampb "google.golang.org/genproto/googleapis/iam/v1"
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 )
 
@@ -36,6 +38,8 @@ type Backend struct {
 
 	// Supporting protos
 	OperationsServer lropb.OperationsServer
+	LocationsServer  locpb.LocationsServer
+	IAMPolicyServer  iampb.IAMPolicyServer
 
 	// Other supporting data structures
 	StdLog, ErrLog   *log.Logger

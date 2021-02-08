@@ -34,6 +34,8 @@ import (
 	gmux "github.com/gorilla/mux"
 	"github.com/soheilhy/cmux"
 	"golang.org/x/sync/errgroup"
+	locpb "google.golang.org/genproto/googleapis/cloud/location"
+	iampb "google.golang.org/genproto/googleapis/iam/v1"
 	lropb "google.golang.org/genproto/googleapis/longrunning"
 
 	"google.golang.org/grpc"
@@ -202,6 +204,8 @@ func createBackends() *services.Backend {
 		ComplianceServer:      services.NewComplianceServer(),
 		TestingServer:         services.NewTestingServer(observerRegistry),
 		OperationsServer:      services.NewOperationsServer(messagingServer),
+		LocationsServer:       services.NewLocationsServer(),
+		IAMPolicyServer:       services.NewIAMPolicyServer(),
 		StdLog:                stdLog,
 		ErrLog:                errLog,
 		ObserverRegistry:      observerRegistry,
@@ -245,8 +249,10 @@ func newEndpointGRPC(lis net.Listener, config RuntimeConfig, backend *services.B
 	pb.RegisterIdentityServer(s, backend.IdentityServer)
 	pb.RegisterMessagingServer(s, backend.MessagingServer)
 	pb.RegisterComplianceServer(s, backend.ComplianceServer)
-	lropb.RegisterOperationsServer(s, backend.OperationsServer)
 	pb.RegisterTestingServer(s, backend.TestingServer)
+	lropb.RegisterOperationsServer(s, backend.OperationsServer)
+	locpb.RegisterLocationsServer(s, backend.LocationsServer)
+	iampb.RegisterIAMPolicyServer(s, backend.IAMPolicyServer)
 
 	fb := fallback.NewServer(config.fallbackPort, "localhost"+config.port)
 
