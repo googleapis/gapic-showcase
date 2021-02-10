@@ -10,7 +10,7 @@ require (
 	github.com/soheilhy/cmux v0.1.4
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/viper v1.7.1
-	golang.org/x/oauth2 v0.0.0-20210201163806-010130855d6c
+	golang.org/x/oauth2 v0.0.0-20210210192628-66670185b0cd
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
 	google.golang.org/api v0.39.0
 	google.golang.org/genproto v0.0.0-20210207032614-bba0dbe2a9ea
