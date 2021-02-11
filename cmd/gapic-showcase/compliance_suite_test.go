@@ -154,7 +154,6 @@ func prepRepeatDataBodyInfoTest(request *genproto.RepeatRequest) (verb string, n
 	return name, "POST", "/v1beta1/repeat:bodyinfo" + queryString, string(bodyBytes), err
 }
 
-
 func prepRepeatDataQueryTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
 	name = "Compliance.RepeatDataQuery"
 	queryString := prepRepeatDataTestsQueryString(request, nil)
@@ -263,7 +262,6 @@ func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map
 		queryParams = append(queryParams, fmt.Sprintf("info.%s=%s", key, value))
 	}
 
-	// TODO: qualify all the entries below with `info.` Then in addParam, split `key` on`.` and see whether any [0]..[i] prefix is excluded (ie `info`, or `info._fchild`, or `info.f_child.f_double`)
 	addParam("f_string", len(info.GetFString()) > 0, url.QueryEscape(info.GetFString()))
 	addParam("f_int32", info.GetFInt32() != 0, fmt.Sprintf("%d", info.GetFInt32()))
 	addParam("f_sint32", info.GetFSint32() != 0, fmt.Sprintf("%d", info.GetFSint32()))

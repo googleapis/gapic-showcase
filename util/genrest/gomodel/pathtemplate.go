@@ -53,8 +53,7 @@ func (pt PathTemplate) HasVariables() (topVar, nestedVar bool) {
 	return topVar, nestedVar
 }
 
-// ListVariables returns two booleans depending on whether `pt` has top-level and nested
-// (lower-level) variables.
+// ListVariables returns a list of all the variables (proto field names) found in `pt`,
 func (pt PathTemplate) ListVariables() []string {
 	varNames := []string{}
 	for _, segment := range pt {

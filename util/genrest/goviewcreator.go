@@ -221,7 +221,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 	file.P("func (backend *RESTBackend) Error(w http.ResponseWriter, status int, format string, args ...interface{}) {")
 	file.P("  message := fmt.Sprintf(format, args...)")
-	file.P("  backend.StdLog.Print(message)")
+	file.P("  backend.ErrLog.Print(message)")
 	file.P("  w.WriteHeader(status)")
 	file.P(`  w.Write([]byte("showcase " + message))`)
 	file.P("}")
