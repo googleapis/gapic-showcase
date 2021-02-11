@@ -22,7 +22,7 @@ func TestKeysMatchPath(t *testing.T) {
 	for idx, testCase := range []struct {
 		examine     map[string][]string
 		lookFor     []string
-		wantMatches []string
+		wantMatches map[string]bool
 	}{
 		{
 			examine: map[string][]string{
@@ -33,7 +33,7 @@ func TestKeysMatchPath(t *testing.T) {
 				"location.lat":  nil,
 			},
 			lookFor:     []string{"loc"},
-			wantMatches: []string{"loc", "loc.lat"},
+			wantMatches: map[string]bool{"loc": true, "loc.lat": true},
 		},
 		{
 			examine: map[string][]string{
@@ -44,7 +44,7 @@ func TestKeysMatchPath(t *testing.T) {
 				"location.lat":  nil,
 			},
 			lookFor:     []string{"location", "loc"},
-			wantMatches: []string{"loc", "location", "loc.lat", "location.lat"},
+			wantMatches: map[string]bool{"loc": true, "location": true, "loc.lat": true, "location.lat": true},
 		},
 	} {
 		matches := KeysMatchPath(testCase.examine, testCase.lookFor)
@@ -54,8 +54,8 @@ func TestKeysMatchPath(t *testing.T) {
 			continue
 		}
 		for matchIdx, got := range matches {
-			if want := testCase.wantMatches[matchIdx]; got != want {
-				t.Errorf("testCase = %d: variable %d unexpected: got %v, want %v", idx, matchIdx, got, want)
+			if !testCase.wantMatches[got] {
+				t.Errorf("testCase = %d: got unexpected match #%d %q; expected matches: %v", idx, matchIdx, got, matches)
 			}
 		}
 
