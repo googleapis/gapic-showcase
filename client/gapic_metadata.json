@@ -1,0 +1,273 @@
+{
+  "schema":  "1.0",
+  "comment":  "This file maps proto services/RPCs to the corresponding library clients/methods.",
+  "language":  "go",
+  "protoPackage":  "google.showcase.v1beta1",
+  "libraryPackage":  "github.com/googleapis/gapic-showcase/client",
+  "services":  {
+    "Compliance":  {
+      "clients":  {
+        "grpc":  {
+          "libraryClient":  "Compliance",
+          "rpcs":  {
+            "RepeatDataBody":  {
+              "methods":  [
+                "RepeatDataBody"
+              ]
+            },
+            "RepeatDataPathResource":  {
+              "methods":  [
+                "RepeatDataPathResource"
+              ]
+            },
+            "RepeatDataPathTrailingResource":  {
+              "methods":  [
+                "RepeatDataPathTrailingResource"
+              ]
+            },
+            "RepeatDataQuery":  {
+              "methods":  [
+                "RepeatDataQuery"
+              ]
+            },
+            "RepeatDataSimplePath":  {
+              "methods":  [
+                "RepeatDataSimplePath"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "Echo":  {
+      "clients":  {
+        "grpc":  {
+          "libraryClient":  "Echo",
+          "rpcs":  {
+            "Block":  {
+              "methods":  [
+                "Block"
+              ]
+            },
+            "Chat":  {
+              "methods":  [
+                "Chat"
+              ]
+            },
+            "Collect":  {
+              "methods":  [
+                "Collect"
+              ]
+            },
+            "Echo":  {
+              "methods":  [
+                "Echo"
+              ]
+            },
+            "Expand":  {
+              "methods":  [
+                "Expand"
+              ]
+            },
+            "PagedExpand":  {
+              "methods":  [
+                "PagedExpand"
+              ]
+            },
+            "Wait":  {
+              "methods":  [
+                "Wait"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "Identity":  {
+      "clients":  {
+        "grpc":  {
+          "libraryClient":  "Identity",
+          "rpcs":  {
+            "CreateUser":  {
+              "methods":  [
+                "CreateUser"
+              ]
+            },
+            "DeleteUser":  {
+              "methods":  [
+                "DeleteUser"
+              ]
+            },
+            "GetUser":  {
+              "methods":  [
+                "GetUser"
+              ]
+            },
+            "ListUsers":  {
+              "methods":  [
+                "ListUsers"
+              ]
+            },
+            "UpdateUser":  {
+              "methods":  [
+                "UpdateUser"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "Messaging":  {
+      "clients":  {
+        "grpc":  {
+          "libraryClient":  "Messaging",
+          "rpcs":  {
+            "Connect":  {
+              "methods":  [
+                "Connect"
+              ]
+            },
+            "CreateBlurb":  {
+              "methods":  [
+                "CreateBlurb"
+              ]
+            },
+            "CreateRoom":  {
+              "methods":  [
+                "CreateRoom"
+              ]
+            },
+            "DeleteBlurb":  {
+              "methods":  [
+                "DeleteBlurb"
+              ]
+            },
+            "DeleteRoom":  {
+              "methods":  [
+                "DeleteRoom"
+              ]
+            },
+            "GetBlurb":  {
+              "methods":  [
+                "GetBlurb"
+              ]
+            },
+            "GetRoom":  {
+              "methods":  [
+                "GetRoom"
+              ]
+            },
+            "ListBlurbs":  {
+              "methods":  [
+                "ListBlurbs"
+              ]
+            },
+            "ListRooms":  {
+              "methods":  [
+                "ListRooms"
+              ]
+            },
+            "SearchBlurbs":  {
+              "methods":  [
+                "SearchBlurbs"
+              ]
+            },
+            "SendBlurbs":  {
+              "methods":  [
+                "SendBlurbs"
+              ]
+            },
+            "StreamBlurbs":  {
+              "methods":  [
+                "StreamBlurbs"
+              ]
+            },
+            "UpdateBlurb":  {
+              "methods":  [
+                "UpdateBlurb"
+              ]
+            },
+            "UpdateRoom":  {
+              "methods":  [
+                "UpdateRoom"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "SequenceService":  {
+      "clients":  {
+        "grpc":  {
+          "libraryClient":  "Sequence",
+          "rpcs":  {
+            "AttemptSequence":  {
+              "methods":  [
+                "AttemptSequence"
+              ]
+            },
+            "CreateSequence":  {
+              "methods":  [
+                "CreateSequence"
+              ]
+            },
+            "GetSequenceReport":  {
+              "methods":  [
+                "GetSequenceReport"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "Testing":  {
+      "clients":  {
+        "grpc":  {
+          "libraryClient":  "Testing",
+          "rpcs":  {
+            "CreateSession":  {
+              "methods":  [
+                "CreateSession"
+              ]
+            },
+            "DeleteSession":  {
+              "methods":  [
+                "DeleteSession"
+              ]
+            },
+            "DeleteTest":  {
+              "methods":  [
+                "DeleteTest"
+              ]
+            },
+            "GetSession":  {
+              "methods":  [
+                "GetSession"
+              ]
+            },
+            "ListSessions":  {
+              "methods":  [
+                "ListSessions"
+              ]
+            },
+            "ListTests":  {
+              "methods":  [
+                "ListTests"
+              ]
+            },
+            "ReportSession":  {
+              "methods":  [
+                "ReportSession"
+              ]
+            },
+            "VerifyTest":  {
+              "methods":  [
+                "VerifyTest"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
