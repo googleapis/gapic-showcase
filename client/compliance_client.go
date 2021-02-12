@@ -64,7 +64,7 @@ func defaultComplianceCallOptions() *ComplianceCallOptions {
 	}
 }
 
-// ComplianceClient is a client for interacting with .
+// ComplianceClient is a client for interacting with Client Libraries Showcase API.
 //
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 type ComplianceClient struct {

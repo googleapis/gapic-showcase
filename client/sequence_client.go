@@ -73,7 +73,7 @@ func defaultSequenceCallOptions() *SequenceCallOptions {
 	}
 }
 
-// SequenceClient is a client for interacting with .
+// SequenceClient is a client for interacting with Client Libraries Showcase API.
 //
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 type SequenceClient struct {
