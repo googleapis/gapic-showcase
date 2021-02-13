@@ -770,7 +770,7 @@ var file_google_showcase_v1beta1_compliance_proto_rawDesc = []byte{
 	0x07, 0x66, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x12, 0x19, 0x0a, 0x08, 0x66, 0x5f, 0x64, 0x6f,
 	0x75, 0x62, 0x6c, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x01, 0x52, 0x07, 0x66, 0x44, 0x6f, 0x75,
 	0x62, 0x6c, 0x65, 0x12, 0x15, 0x0a, 0x06, 0x66, 0x5f, 0x62, 0x6f, 0x6f, 0x6c, 0x18, 0x03, 0x20,
-	0x01, 0x28, 0x08, 0x52, 0x05, 0x66, 0x42, 0x6f, 0x6f, 0x6c, 0x32, 0xad, 0x07, 0x0a, 0x0a, 0x43,
+	0x01, 0x28, 0x08, 0x52, 0x05, 0x66, 0x42, 0x6f, 0x6f, 0x6c, 0x32, 0xbd, 0x08, 0x0a, 0x0a, 0x43,
 	0x6f, 0x6d, 0x70, 0x6c, 0x69, 0x61, 0x6e, 0x63, 0x65, 0x12, 0x82, 0x01, 0x0a, 0x0e, 0x52, 0x65,
 	0x70, 0x65, 0x61, 0x74, 0x44, 0x61, 0x74, 0x61, 0x42, 0x6f, 0x64, 0x79, 0x12, 0x26, 0x2e, 0x67,
 	0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x73, 0x68, 0x6f, 0x77, 0x63, 0x61, 0x73, 0x65, 0x2e, 0x76,
@@ -779,7 +779,16 @@ var file_google_showcase_v1beta1_compliance_proto_rawDesc = []byte{
 	0x6f, 0x77, 0x63, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x52,
 	0x65, 0x70, 0x65, 0x61, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x1f, 0x82,
 	0xd3, 0xe4, 0x93, 0x02, 0x19, 0x22, 0x14, 0x2f, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2f,
-	0x72, 0x65, 0x70, 0x65, 0x61, 0x74, 0x3a, 0x62, 0x6f, 0x64, 0x79, 0x3a, 0x01, 0x2a, 0x12, 0x81,
+	0x72, 0x65, 0x70, 0x65, 0x61, 0x74, 0x3a, 0x62, 0x6f, 0x64, 0x79, 0x3a, 0x01, 0x2a, 0x12, 0x8d,
+	0x01, 0x0a, 0x12, 0x52, 0x65, 0x70, 0x65, 0x61, 0x74, 0x44, 0x61, 0x74, 0x61, 0x42, 0x6f, 0x64,
+	0x79, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x26, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x73,
+	0x68, 0x6f, 0x77, 0x63, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e,
+	0x52, 0x65, 0x70, 0x65, 0x61, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x27, 0x2e,
+	0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x73, 0x68, 0x6f, 0x77, 0x63, 0x61, 0x73, 0x65, 0x2e,
+	0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x52, 0x65, 0x70, 0x65, 0x61, 0x74, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x26, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x20, 0x22, 0x18,
+	0x2f, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2f, 0x72, 0x65, 0x70, 0x65, 0x61, 0x74, 0x3a,
+	0x62, 0x6f, 0x64, 0x79, 0x69, 0x6e, 0x66, 0x6f, 0x3a, 0x04, 0x69, 0x6e, 0x66, 0x6f, 0x12, 0x81,
 	0x01, 0x0a, 0x0f, 0x52, 0x65, 0x70, 0x65, 0x61, 0x74, 0x44, 0x61, 0x74, 0x61, 0x51, 0x75, 0x65,
 	0x72, 0x79, 0x12, 0x26, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x73, 0x68, 0x6f, 0x77,
 	0x63, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x52, 0x65, 0x70,
@@ -870,17 +879,19 @@ var file_google_showcase_v1beta1_compliance_proto_depIdxs = []int32{
 	6,  // 6: google.showcase.v1beta1.ComplianceDataChild.f_child:type_name -> google.showcase.v1beta1.ComplianceDataGrandchild
 	6,  // 7: google.showcase.v1beta1.ComplianceDataChild.p_child:type_name -> google.showcase.v1beta1.ComplianceDataGrandchild
 	0,  // 8: google.showcase.v1beta1.Compliance.RepeatDataBody:input_type -> google.showcase.v1beta1.RepeatRequest
-	0,  // 9: google.showcase.v1beta1.Compliance.RepeatDataQuery:input_type -> google.showcase.v1beta1.RepeatRequest
-	0,  // 10: google.showcase.v1beta1.Compliance.RepeatDataSimplePath:input_type -> google.showcase.v1beta1.RepeatRequest
-	0,  // 11: google.showcase.v1beta1.Compliance.RepeatDataPathResource:input_type -> google.showcase.v1beta1.RepeatRequest
-	0,  // 12: google.showcase.v1beta1.Compliance.RepeatDataPathTrailingResource:input_type -> google.showcase.v1beta1.RepeatRequest
-	1,  // 13: google.showcase.v1beta1.Compliance.RepeatDataBody:output_type -> google.showcase.v1beta1.RepeatResponse
-	1,  // 14: google.showcase.v1beta1.Compliance.RepeatDataQuery:output_type -> google.showcase.v1beta1.RepeatResponse
-	1,  // 15: google.showcase.v1beta1.Compliance.RepeatDataSimplePath:output_type -> google.showcase.v1beta1.RepeatResponse
-	1,  // 16: google.showcase.v1beta1.Compliance.RepeatDataPathResource:output_type -> google.showcase.v1beta1.RepeatResponse
-	1,  // 17: google.showcase.v1beta1.Compliance.RepeatDataPathTrailingResource:output_type -> google.showcase.v1beta1.RepeatResponse
-	13, // [13:18] is the sub-list for method output_type
-	8,  // [8:13] is the sub-list for method input_type
+	0,  // 9: google.showcase.v1beta1.Compliance.RepeatDataBodyInfo:input_type -> google.showcase.v1beta1.RepeatRequest
+	0,  // 10: google.showcase.v1beta1.Compliance.RepeatDataQuery:input_type -> google.showcase.v1beta1.RepeatRequest
+	0,  // 11: google.showcase.v1beta1.Compliance.RepeatDataSimplePath:input_type -> google.showcase.v1beta1.RepeatRequest
+	0,  // 12: google.showcase.v1beta1.Compliance.RepeatDataPathResource:input_type -> google.showcase.v1beta1.RepeatRequest
+	0,  // 13: google.showcase.v1beta1.Compliance.RepeatDataPathTrailingResource:input_type -> google.showcase.v1beta1.RepeatRequest
+	1,  // 14: google.showcase.v1beta1.Compliance.RepeatDataBody:output_type -> google.showcase.v1beta1.RepeatResponse
+	1,  // 15: google.showcase.v1beta1.Compliance.RepeatDataBodyInfo:output_type -> google.showcase.v1beta1.RepeatResponse
+	1,  // 16: google.showcase.v1beta1.Compliance.RepeatDataQuery:output_type -> google.showcase.v1beta1.RepeatResponse
+	1,  // 17: google.showcase.v1beta1.Compliance.RepeatDataSimplePath:output_type -> google.showcase.v1beta1.RepeatResponse
+	1,  // 18: google.showcase.v1beta1.Compliance.RepeatDataPathResource:output_type -> google.showcase.v1beta1.RepeatResponse
+	1,  // 19: google.showcase.v1beta1.Compliance.RepeatDataPathTrailingResource:output_type -> google.showcase.v1beta1.RepeatResponse
+	14, // [14:20] is the sub-list for method output_type
+	8,  // [8:14] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name
 	8,  // [8:8] is the sub-list for extension extendee
 	0,  // [0:8] is the sub-list for field type_name
@@ -1014,6 +1025,10 @@ type ComplianceClient interface {
 	// This method echoes the ComplianceData request. This method exercises sending the
 	// entire request object in the REST body.
 	RepeatDataBody(ctx context.Context, in *RepeatRequest, opts ...grpc.CallOption) (*RepeatResponse, error)
+	// This method echoes the ComplianceData request. This method exercises sending the a
+	// message-type field in the REST body. Per AIP-127, only top-level, non-repeated fields can be
+	// sent this way.
+	RepeatDataBodyInfo(ctx context.Context, in *RepeatRequest, opts ...grpc.CallOption) (*RepeatResponse, error)
 	// This method echoes the ComplianceData request. This method exercises
 	// sending all request fields as query parameters.
 	RepeatDataQuery(ctx context.Context, in *RepeatRequest, opts ...grpc.CallOption) (*RepeatResponse, error)
@@ -1036,6 +1051,15 @@ func NewComplianceClient(cc grpc.ClientConnInterface) ComplianceClient {
 func (c *complianceClient) RepeatDataBody(ctx context.Context, in *RepeatRequest, opts ...grpc.CallOption) (*RepeatResponse, error) {
 	out := new(RepeatResponse)
 	err := c.cc.Invoke(ctx, "/google.showcase.v1beta1.Compliance/RepeatDataBody", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *complianceClient) RepeatDataBodyInfo(ctx context.Context, in *RepeatRequest, opts ...grpc.CallOption) (*RepeatResponse, error) {
+	out := new(RepeatResponse)
+	err := c.cc.Invoke(ctx, "/google.showcase.v1beta1.Compliance/RepeatDataBodyInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1083,6 +1107,10 @@ type ComplianceServer interface {
 	// This method echoes the ComplianceData request. This method exercises sending the
 	// entire request object in the REST body.
 	RepeatDataBody(context.Context, *RepeatRequest) (*RepeatResponse, error)
+	// This method echoes the ComplianceData request. This method exercises sending the a
+	// message-type field in the REST body. Per AIP-127, only top-level, non-repeated fields can be
+	// sent this way.
+	RepeatDataBodyInfo(context.Context, *RepeatRequest) (*RepeatResponse, error)
 	// This method echoes the ComplianceData request. This method exercises
 	// sending all request fields as query parameters.
 	RepeatDataQuery(context.Context, *RepeatRequest) (*RepeatResponse, error)
@@ -1100,6 +1128,9 @@ type UnimplementedComplianceServer struct {
 
 func (*UnimplementedComplianceServer) RepeatDataBody(context.Context, *RepeatRequest) (*RepeatResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RepeatDataBody not implemented")
+}
+func (*UnimplementedComplianceServer) RepeatDataBodyInfo(context.Context, *RepeatRequest) (*RepeatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RepeatDataBodyInfo not implemented")
 }
 func (*UnimplementedComplianceServer) RepeatDataQuery(context.Context, *RepeatRequest) (*RepeatResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RepeatDataQuery not implemented")
@@ -1132,6 +1163,24 @@ func _Compliance_RepeatDataBody_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ComplianceServer).RepeatDataBody(ctx, req.(*RepeatRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Compliance_RepeatDataBodyInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RepeatRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ComplianceServer).RepeatDataBodyInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/google.showcase.v1beta1.Compliance/RepeatDataBodyInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ComplianceServer).RepeatDataBodyInfo(ctx, req.(*RepeatRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1215,6 +1264,10 @@ var _Compliance_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RepeatDataBody",
 			Handler:    _Compliance_RepeatDataBody_Handler,
+		},
+		{
+			MethodName: "RepeatDataBodyInfo",
+			Handler:    _Compliance_RepeatDataBodyInfo_Handler,
 		},
 		{
 			MethodName: "RepeatDataQuery",

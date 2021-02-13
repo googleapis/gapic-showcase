@@ -15,6 +15,11 @@
                 "RepeatDataBody"
               ]
             },
+            "RepeatDataBodyInfo":  {
+              "methods":  [
+                "RepeatDataBodyInfo"
+              ]
+            },
             "RepeatDataPathResource":  {
               "methods":  [
                 "RepeatDataPathResource"
