@@ -115,6 +115,8 @@ func PopulateOneField(protoMessage proto.Message, fieldPath string, fieldValues 
 		// reference for proto scalar types:
 		// https://developers.google.com/protocol-buffers/docs/proto3#scalar
 
+		// TODO: see https://pkg.go.dev/google.golang.org/protobuf@v1.25.0/reflect/protoreflect#Kind
+
 		case protoreflect.StringKind:
 			protoValue = protoreflect.ValueOfString(value)
 		case protoreflect.BytesKind:
@@ -144,6 +146,13 @@ func PopulateOneField(protoMessage proto.Message, fieldPath string, fieldValues 
 		case protoreflect.BoolKind:
 			parsedValue, err := parseBool(value)
 			parseError, protoValue = err, protoreflect.ValueOfBool(parsedValue)
+
+		case protoreflect.EnumKind:
+			if _, parseError = strconv.ParseFloat(value, 32); parseError == nil {
+				return fmt.Errorf("enum value %q for field path %q appears to be a number rather than an identifier", fieldName, fieldPath)
+			}
+			parsedValue := fieldDescriptor.Enum().Values().ByName(protoreflect.Name(value)).Number()
+			parseError, protoValue = nil, protoreflect.ValueOfEnum(parsedValue)
 
 		default:
 			// TODO: Handle lists

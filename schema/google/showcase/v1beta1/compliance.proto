@@ -79,6 +79,10 @@ service Compliance {
       get: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/**}:pathtrailingresource"
     };
   }
+
+// TODO: Add method with enum in URL address
+
+// TODO: Add method with body=enum
 }
 
 message RepeatRequest {
@@ -109,6 +113,15 @@ message ComplianceGroup {
 // ComplianceData is a message used for testing REST transcoding of
 // different data types.
 message ComplianceData {
+  enum LifeKingdom {
+    UNASSIGNED = 0;
+    ARCHAEBACTERIA = 1;
+    EUBACTERIA = 2;
+    PROTISTA = 3;
+    FUNGI = 4;
+    PLANTAE = 5;
+    ANIMALIA = 6;
+}
   // scalar types
 
   string f_string = 1;
@@ -133,6 +146,8 @@ message ComplianceData {
   bool f_bool = 14;
 
   bytes f_bytes = 15;
+
+  LifeKingdom f_kingdom = 22;
 
   ComplianceDataChild f_child = 16;
 
