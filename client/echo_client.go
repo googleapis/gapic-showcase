@@ -106,7 +106,7 @@ func defaultEchoCallOptions() *EchoCallOptions {
 	}
 }
 
-// EchoClient is a client for interacting with .
+// EchoClient is a client for interacting with Client Libraries Showcase API.
 //
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 type EchoClient struct {
