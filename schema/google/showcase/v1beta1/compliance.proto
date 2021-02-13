@@ -62,7 +62,7 @@ service Compliance {
   // "/bar/{foo}" rather than "/{foo=bar/*}"), and the rest as query parameters.
   rpc RepeatDataSimplePath(RepeatRequest) returns (RepeatResponse) {
     option (google.api.http) = {
-      get: "/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}:simplepath"
+      get: "/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}/{info.f_kingdom}:simplepath"
     };
   }
 
@@ -79,10 +79,6 @@ service Compliance {
       get: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/**}:pathtrailingresource"
     };
   }
-
-// TODO: Add method with enum in URL address
-
-// TODO: Add method with body=enum
 }
 
 message RepeatRequest {

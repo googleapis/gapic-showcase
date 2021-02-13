@@ -190,6 +190,7 @@ func prepRepeatDataSimplePathTest(request *genproto.RepeatRequest) (verb string,
 		{"f_int32", "%d", info.GetFInt32()},
 		{"f_double", "%g", info.GetFDouble()},
 		{"f_bool", "%t", info.GetFBool()},
+		{"f_kingdom", "%s", info.GetFKingdom()},
 	} {
 		pathParts = append(pathParts, url.PathEscape(fmt.Sprintf(part.format, part.value)))
 		nonQueryParamNames["info."+part.name] = true
@@ -291,13 +292,13 @@ func prepRepeatDataTestsQueryParams(request *genproto.RepeatRequest, exclude map
 	addParam("f_float", info.GetFFloat() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFFloat())))
 	addParam("f_bool", info.GetFBool(), "true")
 	addParam("f_bytes", len(info.GetFBytes()) > 0, url.QueryEscape(string(info.GetFBytes()))) // TODO: Check this is correct, given runes in strings
-	addParam("f_kingdom", info.GetFKingdom() != pb.ComplianceData_UNASSIGNED, pb.ComplianceData_LifeKingdom_name[int32(info.GetFKingdom())])
+	addParam("f_kingdom", info.GetFKingdom() != pb.ComplianceData_UNASSIGNED, info.GetFKingdom().String())
 
 	addParam("p_string", info.PString != nil, url.QueryEscape(info.GetPString()))
 	addParam("p_int32", info.PInt32 != nil, fmt.Sprintf("%d", info.GetPInt32()))
 	addParam("p_double", info.PDouble != nil, url.QueryEscape(fmt.Sprintf("%g", info.GetPDouble())))
 	addParam("p_bool", info.PBool != nil, fmt.Sprintf("%t", info.GetPBool()))
-	addParam("p_kingdom", info.PKingdom != nil, pb.ComplianceData_LifeKingdom_name[int32(info.GetPKingdom())])
+	addParam("p_kingdom", info.PKingdom != nil, info.GetPKingdom().String())
 
 	addParam("f_child.f_string", len(info.GetFChild().GetFString()) > 0, url.QueryEscape(info.GetFChild().GetFString()))
 	addParam("f_child.f_float", info.GetFChild().GetFFloat() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFChild().GetFFloat())))

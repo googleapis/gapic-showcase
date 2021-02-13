@@ -17,6 +17,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -38,8 +39,9 @@ func TestComplianceSuiteErrors(t *testing.T) {
 	defer server.Close()
 
 	restRPCs := map[string][]prepRepeatDataTestFunc{
-		"Compliance.RepeatDataBodyInfo": {prepRepeatDataBodyInfoNegativeTestRepeatedFields},
-		"Compliance.RepeatDataQuery":    {prepRepeatDataQueryNegativeTestNumericEnums, prepRepeatDataQueryNegativeTestNumericOptionalEnums},
+		"Compliance.RepeatDataBodyInfo":   {prepRepeatDataBodyInfoNegativeTestRepeatedFields},
+		"Compliance.RepeatDataQuery":      {prepRepeatDataQueryNegativeTestNumericEnums, prepRepeatDataQueryNegativeTestNumericOptionalEnums},
+		"Compliance.RepeatDataSimplePath": {prepRepeatDataSimplePathNegativeTestEnum},
 	}
 
 	for _, group := range suite.GetGroup() {
@@ -125,4 +127,31 @@ func prepRepeatDataQueryNegativeTestNumericOptionalEnums(request *genproto.Repea
 
 	queryString := prepQueryString(queryParams)
 	return name, "GET", "/v1beta1/repeat:query" + queryString, body, err
+}
+
+func prepRepeatDataSimplePathNegativeTestEnum(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
+	name = "Compliance.RepeatDataSimplePath"
+	info := request.GetInfo()
+
+	pathParts := []string{}
+	nonQueryParamNames := map[string]bool{}
+
+	for _, part := range []struct {
+		name   string
+		format string
+		value  interface{}
+	}{
+		{"f_string", "%s", info.GetFString()},
+		{"f_int32", "%d", info.GetFInt32()},
+		{"f_double", "%g", info.GetFDouble()},
+		{"f_bool", "%t", info.GetFBool()},
+		{"f_kingdom", "%d", info.GetFKingdom()}, // purposefully use a number, which should cause an error
+	} {
+		pathParts = append(pathParts, url.PathEscape(fmt.Sprintf(part.format, part.value)))
+		nonQueryParamNames["info."+part.name] = true
+	}
+	path = fmt.Sprintf("/v1beta1/repeat/%s:simplepath", strings.Join(pathParts, "/"))
+
+	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
+	return name, "GET", path + queryString, body, err
 }
