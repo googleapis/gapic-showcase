@@ -263,6 +263,9 @@ func prepRepeatDataPathTrailingResourceTest(request *genproto.RepeatRequest) (ve
 // except for those whose proto name (relative to request.info) are present in the `exclude` map
 // with a value of `true`.
 func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map[string]bool) string {
+	return prepQueryString(prepRepeatDataTestsQueryParams(request, exclude))
+}
+func prepRepeatDataTestsQueryParams(request *genproto.RepeatRequest, exclude map[string]bool) []string {
 	info := request.GetInfo()
 	queryParams := []string{}
 	addParam := func(key string, condition bool, value string) {
@@ -288,6 +291,7 @@ func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map
 	addParam("f_float", info.GetFFloat() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFFloat())))
 	addParam("f_bool", info.GetFBool(), "true")
 	addParam("f_bytes", len(info.GetFBytes()) > 0, url.QueryEscape(string(info.GetFBytes()))) // TODO: Check this is correct, given runes in strings
+	addParam("f_kingdom", info.GetFKingdom() != pb.ComplianceData_UNASSIGNED, pb.ComplianceData_LifeKingdom_name[int32(info.GetFKingdom())])
 
 	addParam("p_string", info.PString != nil, url.QueryEscape(info.GetPString()))
 	addParam("p_int32", info.PInt32 != nil, fmt.Sprintf("%d", info.GetPInt32()))
@@ -301,6 +305,10 @@ func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map
 
 	// If needed for test cases, we'll have to add remaining nested message fields.
 
+	return queryParams
+}
+
+func prepQueryString(queryParams []string) string {
 	var queryString string
 	if len(queryParams) > 0 {
 		queryString = fmt.Sprintf("?%s", strings.Join(queryParams, "&"))

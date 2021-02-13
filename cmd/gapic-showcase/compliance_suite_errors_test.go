@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/googleapis/gapic-showcase/server/genproto"
+	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -38,6 +39,7 @@ func TestComplianceSuiteErrors(t *testing.T) {
 
 	restRPCs := map[string][]prepRepeatDataTestFunc{
 		"Compliance.RepeatDataBodyInfo": {prepRepeatDataBodyInfoNegativeTestRepeatedFields},
+		"Compliance.RepeatDataQuery":    {prepRepeatDataQueryNegativeTestNumericEnums},
 	}
 
 	for _, group := range suite.GetGroup() {
@@ -93,4 +95,20 @@ func prepRepeatDataBodyInfoNegativeTestRepeatedFields(request *genproto.RepeatRe
 	queryString := prepRepeatDataTestsQueryString(request, nil) // purposefully repeats query params, which should cause an error
 	_ = bodyBytes
 	return name, "POST", "/v1beta1/repeat:bodyinfo" + queryString, string(bodyBytes), err
+}
+
+func prepRepeatDataQueryNegativeTestNumericEnums(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
+	name = "Compliance.RepeatDataQuery"
+	var badQueryParam string
+	info := request.GetInfo()
+	badQueryParam = fmt.Sprintf("f_kingdom=%d", info.GetFKingdom()) // purposefully use a number, which should cause an error
+
+	// We clear the field so we don't set the same query param correctly below. This change
+	// modifies the request, but since these tests only check that calls fail, we never need to
+	// refer back to the request proto after constructing the REST query.
+	info.FKingdom = pb.ComplianceData_UNASSIGNED
+	queryParams := append(prepRepeatDataTestsQueryParams(request, nil), badQueryParam)
+
+	queryString := prepQueryString(queryParams)
+	return name, "GET", "/v1beta1/repeat:query" + queryString, body, err
 }
