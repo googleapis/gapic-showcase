@@ -16,16 +16,11 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"net/http/httptest"
-	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
 
 	"github.com/googleapis/gapic-showcase/server/genproto"
-	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -34,27 +29,12 @@ import (
 // ill-defined. We want Showcase to require the generators be strict in the transcoding format they
 // use.
 func TestComplianceSuiteErrors(t *testing.T) {
-	// return
-	// Run the Showcase REST server locally.
-	server := httptest.NewUnstartedServer(nil)
-	backend := createBackends()
-	restServer := newEndpointREST(nil, backend)
-	server.Config = restServer.server
+	suite, server, err := complianceSuiteTestSetup()
+	if err != nil {
+		t.Fatal(err)
+	}
 	server.Start()
 	defer server.Close()
-
-	// Locate, load, and unmarshal the compliance suite.
-	_, thisFile, _, _ := runtime.Caller(0)
-	suiteFile := filepath.Join(filepath.Dir(thisFile), "../../schema/google/showcase/v1beta1/compliance_suite.json")
-	jsonProto, err := ioutil.ReadFile(suiteFile)
-	if err != nil {
-		t.Fatalf("could not open suite file %q", suiteFile)
-	}
-	var suite pb.ComplianceSuite
-
-	if err := protojson.Unmarshal(jsonProto, &suite); err != nil {
-		t.Fatalf("error unmarshalling from json %s:\n   file: %s\n   input was: %s", err, suiteFile, jsonProto)
-	}
 
 	restRPCs := map[string][]prepRepeatDataTestFunc{
 		"Compliance.RepeatDataBodyInfo": {prepRepeatDataBodyInfoNegativeTestRepeatedFields},

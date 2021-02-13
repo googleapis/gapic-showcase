@@ -37,26 +37,12 @@ import (
 // defined in the test suite using the GAPIC surface. The generators' test should follow the
 // high-level logic below, as described in the comments.
 func TestComplianceSuite(t *testing.T) {
-	// Run the Showcase REST server locally.
-	server := httptest.NewUnstartedServer(nil)
-	backend := createBackends()
-	restServer := newEndpointREST(nil, backend)
-	server.Config = restServer.server
+	suite, server, err := complianceSuiteTestSetup()
+	if err != nil {
+		t.Fatal(err)
+	}
 	server.Start()
 	defer server.Close()
-
-	// Locate, load, and unmarshal the compliance suite.
-	_, thisFile, _, _ := runtime.Caller(0)
-	suiteFile := filepath.Join(filepath.Dir(thisFile), "../../schema/google/showcase/v1beta1/compliance_suite.json")
-	jsonProto, err := ioutil.ReadFile(suiteFile)
-	if err != nil {
-		t.Fatalf("could not open suite file %q", suiteFile)
-	}
-	var suite pb.ComplianceSuite
-
-	if err := protojson.Unmarshal(jsonProto, &suite); err != nil {
-		t.Fatalf("error unmarshalling from json %s:\n   file: %s\n   input was: %s", err, suiteFile, jsonProto)
-	}
 
 	// Set handlers for each test case. When GAPIC generator tests do this, they should have
 	// each of their handlers invoking the correct GAPIC library method for the Showcase API.
@@ -135,9 +121,33 @@ func TestComplianceSuite(t *testing.T) {
 	}
 }
 
+func complianceSuiteTestSetup() (suite *pb.ComplianceSuite, server *httptest.Server, err error) {
+	// Run the Showcase REST server locally.
+	server = httptest.NewUnstartedServer(nil)
+	backend := createBackends()
+	restServer := newEndpointREST(nil, backend)
+	server.Config = restServer.server
+
+	// Locate, load, and unmarshal the compliance suite.
+	_, thisFile, _, _ := runtime.Caller(0)
+	suiteFile := filepath.Join(filepath.Dir(thisFile), "../../schema/google/showcase/v1beta1/compliance_suite.json")
+	jsonProto, err := ioutil.ReadFile(suiteFile)
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not open suite file %q", suiteFile)
+	}
+
+	suite = &pb.ComplianceSuite{}
+	if err := protojson.Unmarshal(jsonProto, suite); err != nil {
+		return nil, nil, fmt.Errorf("error unmarshalling from json %s:\n   file: %s\n   input was: %s", err, suiteFile, jsonProto)
+	}
+
+	return suite, server, nil
+}
+
 // The following are helpers for TestComplianceSuite, since Showcase doesn't intrinsically define a
 // REST client. Each GAPIC generator should instead use the GAPIC it generated for the Showcase
 // API.
+
 type prepRepeatDataTestFunc func(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error)
 
 func prepRepeatDataBodyTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
