@@ -19,7 +19,6 @@ package genrest
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/golang/protobuf/jsonpb"
@@ -31,7 +30,6 @@ import (
 
 // HandleCreateSession translates REST requests/responses on the wire to internal proto messages for CreateSession
 //    Generated for HTTP binding pattern: "/v1beta1/sessions"
-//         This matches URIs of the form: "/v1beta1/sessions"
 func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -40,7 +38,7 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 0 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
@@ -48,26 +46,25 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 	// Intentional: Field values in the URL path override those set in the body.
 	var bodyField genprotopb.Session
 	if err := jsonpb.Unmarshal(r.Body, &bodyField); err != nil {
-		backend.StdLog.Printf(`  error reading body into request field "session": %s`, err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading body into request field 'session': %s", err)
 		return
 	}
 	request.Session = &bodyField
 
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
+	excludedQueryParams := []string{"session"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		return
+	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
-		backend.StdLog.Printf("  error reading query params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -77,15 +74,14 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 
 	response, err := backend.TestingServer.CreateSession(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -94,7 +90,6 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 
 // HandleGetSession translates REST requests/responses on the wire to internal proto messages for GetSession
 //    Generated for HTTP binding pattern: "/v1beta1/{name=sessions/*}"
-//         This matches URIs of the form: "/v1beta1/{name:sessions/.+}"
 func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -103,24 +98,25 @@ func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Requ
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.GetSessionRequest{}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
+	excludedQueryParams := []string{"name"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		return
+	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
-		backend.StdLog.Printf("  error reading query params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -130,15 +126,14 @@ func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Requ
 
 	response, err := backend.TestingServer.GetSession(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -147,7 +142,6 @@ func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Requ
 
 // HandleListSessions translates REST requests/responses on the wire to internal proto messages for ListSessions
 //    Generated for HTTP binding pattern: "/v1beta1/sessions"
-//         This matches URIs of the form: "/v1beta1/sessions"
 func (backend *RESTBackend) HandleListSessions(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -156,24 +150,20 @@ func (backend *RESTBackend) HandleListSessions(w http.ResponseWriter, r *http.Re
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 0 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.ListSessionsRequest{}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
-		backend.StdLog.Printf("  error reading query params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -183,15 +173,14 @@ func (backend *RESTBackend) HandleListSessions(w http.ResponseWriter, r *http.Re
 
 	response, err := backend.TestingServer.ListSessions(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -200,7 +189,6 @@ func (backend *RESTBackend) HandleListSessions(w http.ResponseWriter, r *http.Re
 
 // HandleDeleteSession translates REST requests/responses on the wire to internal proto messages for DeleteSession
 //    Generated for HTTP binding pattern: "/v1beta1/{name=sessions/*}"
-//         This matches URIs of the form: "/v1beta1/{name:sessions/.+}"
 func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -209,24 +197,25 @@ func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.R
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.DeleteSessionRequest{}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
+	excludedQueryParams := []string{"name"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		return
+	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
-		backend.StdLog.Printf("  error reading query params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -236,15 +225,14 @@ func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.R
 
 	response, err := backend.TestingServer.DeleteSession(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -253,7 +241,6 @@ func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.R
 
 // HandleReportSession translates REST requests/responses on the wire to internal proto messages for ReportSession
 //    Generated for HTTP binding pattern: "/v1beta1/{name=sessions/*}:report"
-//         This matches URIs of the form: "/v1beta1/{name:sessions/.+}:report"
 func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -262,24 +249,25 @@ func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.R
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.ReportSessionRequest{}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
+	excludedQueryParams := []string{"name"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		return
+	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
-		backend.StdLog.Printf("  error reading query params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -289,15 +277,14 @@ func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.R
 
 	response, err := backend.TestingServer.ReportSession(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -306,7 +293,6 @@ func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.R
 
 // HandleListTests translates REST requests/responses on the wire to internal proto messages for ListTests
 //    Generated for HTTP binding pattern: "/v1beta1/{parent=sessions/*}/tests"
-//         This matches URIs of the form: "/v1beta1/{parent:sessions/.+}/tests"
 func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -315,24 +301,25 @@ func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Reque
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.ListTestsRequest{}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
+	excludedQueryParams := []string{"parent"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		return
+	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
-		backend.StdLog.Printf("  error reading query params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -342,15 +329,14 @@ func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Reque
 
 	response, err := backend.TestingServer.ListTests(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -359,7 +345,6 @@ func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Reque
 
 // HandleDeleteTest translates REST requests/responses on the wire to internal proto messages for DeleteTest
 //    Generated for HTTP binding pattern: "/v1beta1/{name=sessions/*/tests/*}"
-//         This matches URIs of the form: "/v1beta1/{name:sessions/.+/tests/.+}"
 func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -368,24 +353,25 @@ func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Requ
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.DeleteTestRequest{}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
+	excludedQueryParams := []string{"name"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		return
+	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
-		backend.StdLog.Printf("  error reading query params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -395,15 +381,14 @@ func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Requ
 
 	response, err := backend.TestingServer.DeleteTest(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -412,7 +397,6 @@ func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Requ
 
 // HandleVerifyTest translates REST requests/responses on the wire to internal proto messages for VerifyTest
 //    Generated for HTTP binding pattern: "/v1beta1/{name=sessions/*/tests/*}:check"
-//         This matches URIs of the form: "/v1beta1/{name:sessions/.+/tests/.+}:check"
 func (backend *RESTBackend) HandleVerifyTest(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -421,24 +405,25 @@ func (backend *RESTBackend) HandleVerifyTest(w http.ResponseWriter, r *http.Requ
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.VerifyTestRequest{}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
+	excludedQueryParams := []string{"name"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		return
+	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
-		backend.StdLog.Printf("  error reading query params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -448,15 +433,14 @@ func (backend *RESTBackend) HandleVerifyTest(w http.ResponseWriter, r *http.Requ
 
 	response, err := backend.TestingServer.VerifyTest(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 

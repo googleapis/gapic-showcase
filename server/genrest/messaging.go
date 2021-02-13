@@ -19,7 +19,6 @@ package genrest
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/golang/protobuf/jsonpb"
@@ -31,7 +30,6 @@ import (
 
 // HandleCreateRoom translates REST requests/responses on the wire to internal proto messages for CreateRoom
 //    Generated for HTTP binding pattern: "/v1beta1/rooms"
-//         This matches URIs of the form: "/v1beta1/rooms"
 func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -40,22 +38,23 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 0 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.CreateRoomRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
-		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
@@ -65,15 +64,14 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 
 	response, err := backend.MessagingServer.CreateRoom(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -82,7 +80,6 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 
 // HandleGetRoom translates REST requests/responses on the wire to internal proto messages for GetRoom
 //    Generated for HTTP binding pattern: "/v1beta1/{name=rooms/*}"
-//         This matches URIs of the form: "/v1beta1/{name:rooms/.+}"
 func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -91,24 +88,25 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.GetRoomRequest{}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
+	excludedQueryParams := []string{"name"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		return
+	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
-		backend.StdLog.Printf("  error reading query params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -118,15 +116,14 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 
 	response, err := backend.MessagingServer.GetRoom(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -135,7 +132,6 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 
 // HandleUpdateRoom translates REST requests/responses on the wire to internal proto messages for UpdateRoom
 //    Generated for HTTP binding pattern: "/v1beta1/{room.name=rooms/*}"
-//         This matches URIs of the form: "/v1beta1/{room.name:rooms/.+}"
 func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -144,22 +140,23 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.UpdateRoomRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
-		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
@@ -169,15 +166,14 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 
 	response, err := backend.MessagingServer.UpdateRoom(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -186,7 +182,6 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 
 // HandleDeleteRoom translates REST requests/responses on the wire to internal proto messages for DeleteRoom
 //    Generated for HTTP binding pattern: "/v1beta1/{name=rooms/*}"
-//         This matches URIs of the form: "/v1beta1/{name:rooms/.+}"
 func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -195,24 +190,25 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.DeleteRoomRequest{}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
+	excludedQueryParams := []string{"name"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		return
+	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
-		backend.StdLog.Printf("  error reading query params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -222,15 +218,14 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 
 	response, err := backend.MessagingServer.DeleteRoom(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -239,7 +234,6 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 
 // HandleListRooms translates REST requests/responses on the wire to internal proto messages for ListRooms
 //    Generated for HTTP binding pattern: "/v1beta1/rooms"
-//         This matches URIs of the form: "/v1beta1/rooms"
 func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -248,24 +242,20 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 0 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.ListRoomsRequest{}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
-		backend.StdLog.Printf("  error reading query params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -275,15 +265,14 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 
 	response, err := backend.MessagingServer.ListRooms(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -292,7 +281,6 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 
 // HandleCreateBlurb translates REST requests/responses on the wire to internal proto messages for CreateBlurb
 //    Generated for HTTP binding pattern: "/v1beta1/{parent=rooms/*}/blurbs"
-//         This matches URIs of the form: "/v1beta1/{parent:rooms/.+}/blurbs"
 func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -301,22 +289,23 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.CreateBlurbRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
-		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
@@ -326,15 +315,14 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 
 	response, err := backend.MessagingServer.CreateBlurb(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -343,7 +331,6 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 
 // HandleCreateBlurb_1 translates REST requests/responses on the wire to internal proto messages for CreateBlurb
 //    Generated for HTTP binding pattern: "/v1beta1/{parent=users/*/profile}/blurbs"
-//         This matches URIs of the form: "/v1beta1/{parent:users/.+/profile}/blurbs"
 func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -352,22 +339,23 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.CreateBlurbRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
-		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
@@ -377,15 +365,14 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 
 	response, err := backend.MessagingServer.CreateBlurb(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -394,7 +381,6 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 
 // HandleGetBlurb translates REST requests/responses on the wire to internal proto messages for GetBlurb
 //    Generated for HTTP binding pattern: "/v1beta1/{name=rooms/*/blurbs/*}"
-//         This matches URIs of the form: "/v1beta1/{name:rooms/.+/blurbs/.+}"
 func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -403,24 +389,25 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.GetBlurbRequest{}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
+	excludedQueryParams := []string{"name"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		return
+	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
-		backend.StdLog.Printf("  error reading query params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -430,15 +417,14 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 
 	response, err := backend.MessagingServer.GetBlurb(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -447,7 +433,6 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 
 // HandleGetBlurb_1 translates REST requests/responses on the wire to internal proto messages for GetBlurb
 //    Generated for HTTP binding pattern: "/v1beta1/{name=users/*/profile/blurbs/*}"
-//         This matches URIs of the form: "/v1beta1/{name:users/.+/profile/blurbs/.+}"
 func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -456,24 +441,25 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.GetBlurbRequest{}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
+	excludedQueryParams := []string{"name"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		return
+	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
-		backend.StdLog.Printf("  error reading query params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -483,15 +469,14 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 
 	response, err := backend.MessagingServer.GetBlurb(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -500,7 +485,6 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 
 // HandleUpdateBlurb translates REST requests/responses on the wire to internal proto messages for UpdateBlurb
 //    Generated for HTTP binding pattern: "/v1beta1/{blurb.name=rooms/*/blurbs/*}"
-//         This matches URIs of the form: "/v1beta1/{blurb.name:rooms/.+/blurbs/.+}"
 func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -509,22 +493,23 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.UpdateBlurbRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
-		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
@@ -534,15 +519,14 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 
 	response, err := backend.MessagingServer.UpdateBlurb(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -551,7 +535,6 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 
 // HandleUpdateBlurb_1 translates REST requests/responses on the wire to internal proto messages for UpdateBlurb
 //    Generated for HTTP binding pattern: "/v1beta1/{blurb.name=users/*/profile/blurbs/*}"
-//         This matches URIs of the form: "/v1beta1/{blurb.name:users/.+/profile/blurbs/.+}"
 func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -560,22 +543,23 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.UpdateBlurbRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
-		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
@@ -585,15 +569,14 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 
 	response, err := backend.MessagingServer.UpdateBlurb(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -602,7 +585,6 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 
 // HandleDeleteBlurb translates REST requests/responses on the wire to internal proto messages for DeleteBlurb
 //    Generated for HTTP binding pattern: "/v1beta1/{name=rooms/*/blurbs/*}"
-//         This matches URIs of the form: "/v1beta1/{name:rooms/.+/blurbs/.+}"
 func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -611,24 +593,25 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.DeleteBlurbRequest{}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
+	excludedQueryParams := []string{"name"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		return
+	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
-		backend.StdLog.Printf("  error reading query params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -638,15 +621,14 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 
 	response, err := backend.MessagingServer.DeleteBlurb(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -655,7 +637,6 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 
 // HandleDeleteBlurb_1 translates REST requests/responses on the wire to internal proto messages for DeleteBlurb
 //    Generated for HTTP binding pattern: "/v1beta1/{name=users/*/profile/blurbs/*}"
-//         This matches URIs of the form: "/v1beta1/{name:users/.+/profile/blurbs/.+}"
 func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -664,24 +645,25 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.DeleteBlurbRequest{}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
+	excludedQueryParams := []string{"name"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		return
+	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
-		backend.StdLog.Printf("  error reading query params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -691,15 +673,14 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 
 	response, err := backend.MessagingServer.DeleteBlurb(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -708,7 +689,6 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 
 // HandleListBlurbs translates REST requests/responses on the wire to internal proto messages for ListBlurbs
 //    Generated for HTTP binding pattern: "/v1beta1/{parent=rooms/*}/blurbs"
-//         This matches URIs of the form: "/v1beta1/{parent:rooms/.+}/blurbs"
 func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -717,24 +697,25 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.ListBlurbsRequest{}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
+	excludedQueryParams := []string{"parent"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		return
+	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
-		backend.StdLog.Printf("  error reading query params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -744,15 +725,14 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 
 	response, err := backend.MessagingServer.ListBlurbs(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -761,7 +741,6 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 
 // HandleListBlurbs_1 translates REST requests/responses on the wire to internal proto messages for ListBlurbs
 //    Generated for HTTP binding pattern: "/v1beta1/{parent=users/*/profile}/blurbs"
-//         This matches URIs of the form: "/v1beta1/{parent:users/.+/profile}/blurbs"
 func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -770,24 +749,25 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.ListBlurbsRequest{}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
+	excludedQueryParams := []string{"parent"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		return
+	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
-		backend.StdLog.Printf("  error reading query params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -797,15 +777,14 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 
 	response, err := backend.MessagingServer.ListBlurbs(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -814,7 +793,6 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 
 // HandleSearchBlurbs translates REST requests/responses on the wire to internal proto messages for SearchBlurbs
 //    Generated for HTTP binding pattern: "/v1beta1/{parent=rooms/*}/blurbs:search"
-//         This matches URIs of the form: "/v1beta1/{parent:rooms/.+}/blurbs:search"
 func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -823,22 +801,23 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.SearchBlurbsRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
-		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
@@ -848,15 +827,14 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 
 	response, err := backend.MessagingServer.SearchBlurbs(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -865,7 +843,6 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 
 // HandleSearchBlurbs_1 translates REST requests/responses on the wire to internal proto messages for SearchBlurbs
 //    Generated for HTTP binding pattern: "/v1beta1/{parent=users/*/profile}/blurbs:search"
-//         This matches URIs of the form: "/v1beta1/{parent:users/.+/profile}/blurbs:search"
 func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -874,24 +851,25 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.SearchBlurbsRequest{}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
+	excludedQueryParams := []string{"parent"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		return
+	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
-		backend.StdLog.Printf("  error reading query params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -901,15 +879,14 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 
 	response, err := backend.MessagingServer.SearchBlurbs(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -918,32 +895,24 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 
 // HandleStreamBlurbs translates REST requests/responses on the wire to internal proto messages for StreamBlurbs
 //    Generated for HTTP binding pattern: "/v1beta1/{name=rooms/*}/blurbs:stream"
-//         This matches URIs of the form: "/v1beta1/{name:rooms/.+}/blurbs:stream"
 func (backend *RESTBackend) HandleStreamBlurbs(w http.ResponseWriter, r *http.Request) {
-	backend.StdLog.Printf("Received request matching '/v1beta1/{name=rooms/*}/blurbs:stream': %q", r.URL)
-	w.Write([]byte("ERROR: not implementing streaming methods yet"))
+	backend.Error(w, http.StatusNotImplemented, "streaming methods not implemented yet (request matched '/v1beta1/{name=rooms/*}/blurbs:stream': %q)", r.URL)
 }
 
 // HandleStreamBlurbs_1 translates REST requests/responses on the wire to internal proto messages for StreamBlurbs
 //    Generated for HTTP binding pattern: "/v1beta1/{name=users/*/profile}/blurbs:stream"
-//         This matches URIs of the form: "/v1beta1/{name:users/.+/profile}/blurbs:stream"
 func (backend *RESTBackend) HandleStreamBlurbs_1(w http.ResponseWriter, r *http.Request) {
-	backend.StdLog.Printf("Received request matching '/v1beta1/{name=users/*/profile}/blurbs:stream': %q", r.URL)
-	w.Write([]byte("ERROR: not implementing streaming methods yet"))
+	backend.Error(w, http.StatusNotImplemented, "streaming methods not implemented yet (request matched '/v1beta1/{name=users/*/profile}/blurbs:stream': %q)", r.URL)
 }
 
 // HandleSendBlurbs translates REST requests/responses on the wire to internal proto messages for SendBlurbs
 //    Generated for HTTP binding pattern: "/v1beta1/{parent=rooms/*}/blurbs:send"
-//         This matches URIs of the form: "/v1beta1/{parent:rooms/.+}/blurbs:send"
 func (backend *RESTBackend) HandleSendBlurbs(w http.ResponseWriter, r *http.Request) {
-	backend.StdLog.Printf("Received request matching '/v1beta1/{parent=rooms/*}/blurbs:send': %q", r.URL)
-	w.Write([]byte("ERROR: not implementing streaming methods yet"))
+	backend.Error(w, http.StatusNotImplemented, "streaming methods not implemented yet (request matched '/v1beta1/{parent=rooms/*}/blurbs:send': %q)", r.URL)
 }
 
 // HandleSendBlurbs_1 translates REST requests/responses on the wire to internal proto messages for SendBlurbs
 //    Generated for HTTP binding pattern: "/v1beta1/{parent=users/*/profile}/blurbs:send"
-//         This matches URIs of the form: "/v1beta1/{parent:users/.+/profile}/blurbs:send"
 func (backend *RESTBackend) HandleSendBlurbs_1(w http.ResponseWriter, r *http.Request) {
-	backend.StdLog.Printf("Received request matching '/v1beta1/{parent=users/*/profile}/blurbs:send': %q", r.URL)
-	w.Write([]byte("ERROR: not implementing streaming methods yet"))
+	backend.Error(w, http.StatusNotImplemented, "streaming methods not implemented yet (request matched '/v1beta1/{parent=users/*/profile}/blurbs:send': %q)", r.URL)
 }

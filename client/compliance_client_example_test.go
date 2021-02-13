@@ -53,6 +53,26 @@ func ExampleComplianceClient_RepeatDataBody() {
 	_ = resp
 }
 
+func ExampleComplianceClient_RepeatDataBodyInfo() {
+	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
+
+	ctx := context.Background()
+	c, err := client.NewComplianceClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &genprotopb.RepeatRequest{
+		// TODO: Fill request struct fields.
+	}
+	resp, err := c.RepeatDataBodyInfo(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
 func ExampleComplianceClient_RepeatDataQuery() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 

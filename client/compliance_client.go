@@ -36,6 +36,7 @@ var newComplianceClientHook clientHook
 // ComplianceCallOptions contains the retry settings for each method of ComplianceClient.
 type ComplianceCallOptions struct {
 	RepeatDataBody                 []gax.CallOption
+	RepeatDataBodyInfo             []gax.CallOption
 	RepeatDataQuery                []gax.CallOption
 	RepeatDataSimplePath           []gax.CallOption
 	RepeatDataPathResource         []gax.CallOption
@@ -57,6 +58,7 @@ func defaultComplianceClientOptions() []option.ClientOption {
 func defaultComplianceCallOptions() *ComplianceCallOptions {
 	return &ComplianceCallOptions{
 		RepeatDataBody:                 []gax.CallOption{},
+		RepeatDataBodyInfo:             []gax.CallOption{},
 		RepeatDataQuery:                []gax.CallOption{},
 		RepeatDataSimplePath:           []gax.CallOption{},
 		RepeatDataPathResource:         []gax.CallOption{},
@@ -151,6 +153,24 @@ func (c *ComplianceClient) RepeatDataBody(ctx context.Context, req *genprotopb.R
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		resp, err = c.complianceClient.RepeatDataBody(ctx, req, settings.GRPC...)
+		return err
+	}, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// RepeatDataBodyInfo this method echoes the ComplianceData request. This method exercises sending the a
+// message-type field in the REST body. Per AIP-127, only top-level, non-repeated fields can be
+// sent this way.
+func (c *ComplianceClient) RepeatDataBodyInfo(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append(c.CallOptions.RepeatDataBodyInfo[0:len(c.CallOptions.RepeatDataBodyInfo):len(c.CallOptions.RepeatDataBodyInfo)], opts...)
+	var resp *genprotopb.RepeatResponse
+	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		var err error
+		resp, err = c.complianceClient.RepeatDataBodyInfo(ctx, req, settings.GRPC...)
 		return err
 	}, opts...)
 	if err != nil {

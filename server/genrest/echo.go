@@ -19,7 +19,6 @@ package genrest
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/golang/protobuf/jsonpb"
@@ -31,7 +30,6 @@ import (
 
 // HandleEcho translates REST requests/responses on the wire to internal proto messages for Echo
 //    Generated for HTTP binding pattern: "/v1beta1/echo:echo"
-//         This matches URIs of the form: "/v1beta1/echo:echo"
 func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -40,22 +38,23 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 0 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.EchoRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
-		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
@@ -65,15 +64,14 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 
 	response, err := backend.EchoServer.Echo(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -82,23 +80,18 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 
 // HandleExpand translates REST requests/responses on the wire to internal proto messages for Expand
 //    Generated for HTTP binding pattern: "/v1beta1/echo:expand"
-//         This matches URIs of the form: "/v1beta1/echo:expand"
 func (backend *RESTBackend) HandleExpand(w http.ResponseWriter, r *http.Request) {
-	backend.StdLog.Printf("Received request matching '/v1beta1/echo:expand': %q", r.URL)
-	w.Write([]byte("ERROR: not implementing streaming methods yet"))
+	backend.Error(w, http.StatusNotImplemented, "streaming methods not implemented yet (request matched '/v1beta1/echo:expand': %q)", r.URL)
 }
 
 // HandleCollect translates REST requests/responses on the wire to internal proto messages for Collect
 //    Generated for HTTP binding pattern: "/v1beta1/echo:collect"
-//         This matches URIs of the form: "/v1beta1/echo:collect"
 func (backend *RESTBackend) HandleCollect(w http.ResponseWriter, r *http.Request) {
-	backend.StdLog.Printf("Received request matching '/v1beta1/echo:collect': %q", r.URL)
-	w.Write([]byte("ERROR: not implementing streaming methods yet"))
+	backend.Error(w, http.StatusNotImplemented, "streaming methods not implemented yet (request matched '/v1beta1/echo:collect': %q)", r.URL)
 }
 
 // HandlePagedExpand translates REST requests/responses on the wire to internal proto messages for PagedExpand
 //    Generated for HTTP binding pattern: "/v1beta1/echo:pagedExpand"
-//         This matches URIs of the form: "/v1beta1/echo:pagedExpand"
 func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -107,22 +100,23 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 0 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.PagedExpandRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
-		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
@@ -132,15 +126,14 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 
 	response, err := backend.EchoServer.PagedExpand(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -149,7 +142,6 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 
 // HandleWait translates REST requests/responses on the wire to internal proto messages for Wait
 //    Generated for HTTP binding pattern: "/v1beta1/echo:wait"
-//         This matches URIs of the form: "/v1beta1/echo:wait"
 func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -158,22 +150,23 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 0 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.WaitRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
-		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
@@ -183,15 +176,14 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 
 	response, err := backend.EchoServer.Wait(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
@@ -200,7 +192,6 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 
 // HandleBlock translates REST requests/responses on the wire to internal proto messages for Block
 //    Generated for HTTP binding pattern: "/v1beta1/echo:block"
-//         This matches URIs of the form: "/v1beta1/echo:block"
 func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -209,22 +200,23 @@ func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) 
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 0 {
-		w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)))
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
 	request := &genprotopb.BlockRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
-		backend.StdLog.Printf(`  error reading body params "*": %s`, err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
-		backend.StdLog.Printf("  error reading URL path params: %s", err)
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
 	}
 
@@ -234,15 +226,14 @@ func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) 
 
 	response, err := backend.EchoServer.Block(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 		return
 	}
 
 	json, err := marshaler.MarshalToString(response)
 	if err != nil {
-		// TODO: Properly handle error
-		w.Write([]byte(err.Error()))
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 

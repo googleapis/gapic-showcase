@@ -10,6 +10,7 @@ google/showcase/v1beta1/testing.proto
 Proto Model:
 Compliance (.google.showcase.v1beta1.Compliance):
   .google.showcase.v1beta1.Compliance.RepeatDataBody[0] : POST: "/v1beta1/repeat:body"
+  .google.showcase.v1beta1.Compliance.RepeatDataBodyInfo[0] : POST: "/v1beta1/repeat:bodyinfo"
   .google.showcase.v1beta1.Compliance.RepeatDataQuery[0] : GET: "/v1beta1/repeat:query"
   .google.showcase.v1beta1.Compliance.RepeatDataSimplePath[0] : GET: "/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}:simplepath"
   .google.showcase.v1beta1.Compliance.RepeatDataPathResource[0] : GET: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/*}/bool/{info.f_bool}:pathresource"
@@ -75,7 +76,7 @@ GoModel
 Shim "Compliance" (.google.showcase.v1beta1.Compliance)
   Imports:
     genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
-  Handlers (5):
+  Handlers (6):
          GET                              /v1beta1/repeat:query func RepeatDataQuery(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
 ["/" "v1beta1" "/" "repeat" ":" "query"]
 
@@ -90,6 +91,9 @@ Shim "Compliance" (.google.showcase.v1beta1.Compliance)
 
         POST                               /v1beta1/repeat:body func RepeatDataBody(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
 ["/" "v1beta1" "/" "repeat" ":" "body"]
+
+        POST                           /v1beta1/repeat:bodyinfo func RepeatDataBodyInfo(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
+["/" "v1beta1" "/" "repeat" ":" "bodyinfo"]
 
 ----------------------------------------
 Shim "Echo" (.google.showcase.v1beta1.Echo)

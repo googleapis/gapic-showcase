@@ -18,6 +18,7 @@ var ComplianceConfig *viper.Viper
 var ComplianceClient *gapic.ComplianceClient
 var ComplianceSubCommands []string = []string{
 	"repeat-data-body",
+	"repeat-data-body-info",
 	"repeat-data-query",
 	"repeat-data-simple-path",
 	"repeat-data-path-resource",

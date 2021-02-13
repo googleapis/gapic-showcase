@@ -18,6 +18,9 @@
 package genrest
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/googleapis/gapic-showcase/server/services"
 
 	gmux "github.com/gorilla/mux"
@@ -28,6 +31,7 @@ type RESTBackend services.Backend
 func RegisterHandlers(router *gmux.Router, backend *services.Backend) {
 	rest := (*RESTBackend)(backend)
 	router.HandleFunc("/v1beta1/repeat:body", rest.HandleRepeatDataBody).Methods("POST")
+	router.HandleFunc("/v1beta1/repeat:bodyinfo", rest.HandleRepeatDataBodyInfo).Methods("POST")
 	router.HandleFunc("/v1beta1/repeat:query", rest.HandleRepeatDataQuery).Methods("GET")
 	router.HandleFunc("/v1beta1/repeat/{info.f_string:.+}/{info.f_int32:.+}/{info.f_double:.+}/{info.f_bool:.+}:simplepath", rest.HandleRepeatDataSimplePath).Methods("GET")
 	router.HandleFunc("/v1beta1/repeat/{info.f_string:first/.+}/{info.f_child.f_string:second/.+}/bool/{info.f_bool:.+}:pathresource", rest.HandleRepeatDataPathResource).Methods("GET")
@@ -75,4 +79,11 @@ func RegisterHandlers(router *gmux.Router, backend *services.Backend) {
 	router.HandleFunc("/v1beta1/{parent:sessions/.+}/tests", rest.HandleListTests).Methods("GET")
 	router.HandleFunc("/v1beta1/{name:sessions/.+/tests/.+}", rest.HandleDeleteTest).Methods("DELETE")
 	router.HandleFunc("/v1beta1/{name:sessions/.+/tests/.+}:check", rest.HandleVerifyTest).Methods("POST")
+}
+
+func (backend *RESTBackend) Error(w http.ResponseWriter, status int, format string, args ...interface{}) {
+	message := fmt.Sprintf(format, args...)
+	backend.ErrLog.Print(message)
+	w.WriteHeader(status)
+	w.Write([]byte("showcase " + message))
 }
