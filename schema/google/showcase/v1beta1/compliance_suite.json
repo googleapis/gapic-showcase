@@ -23,10 +23,11 @@
 	    "f_bool": true,
 	    "f_kingdom": "ANIMALIA", 
 
-      "p_string": "Goodbye",
-      "p_int32": -37,
-      "p_double": -41.43,
-      "p_bool": true,
+	    "p_string": "Goodbye",
+	    "p_int32": -37,
+	    "p_double": -41.43,
+	    "p_bool": true,
+	    "p_kingdom": "PLANTAE",
 
             "f_child": {
         "f_string": "second/bool/salutation"
@@ -52,15 +53,16 @@
 	    "f_bool": false,
 	    "f_kingdom": "UNASSIGNED",
 
-      "p_string": "Goodbye",
-      "p_int32": 0,
-      "p_double": 0,
-      "p_bool": false
-    }
-  },
-  {
-    "name": "Extreme values",
-    "info": {
+	    "p_string": "Goodbye",
+	    "p_int32": 0,
+	    "p_double": 0,
+	    "p_bool": false,
+	    "p_kingdom": "UNASSIGNED"
+	  }
+	},
+	{
+	  "name": "Extreme values",
+	  "info": {
             "f_string": "non-ASCII+non-printable string ☺ → ← \"\\\/\b\f\r\t\u1234 works, not newlines yet",
       "f_int32": 2147483647,
       "f_sint32" : 2147483647,

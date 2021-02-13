@@ -39,7 +39,7 @@ func TestComplianceSuiteErrors(t *testing.T) {
 
 	restRPCs := map[string][]prepRepeatDataTestFunc{
 		"Compliance.RepeatDataBodyInfo": {prepRepeatDataBodyInfoNegativeTestRepeatedFields},
-		"Compliance.RepeatDataQuery":    {prepRepeatDataQueryNegativeTestNumericEnums},
+		"Compliance.RepeatDataQuery":    {prepRepeatDataQueryNegativeTestNumericEnums, prepRepeatDataQueryNegativeTestNumericOptionalEnums},
 	}
 
 	for _, group := range suite.GetGroup() {
@@ -99,14 +99,28 @@ func prepRepeatDataBodyInfoNegativeTestRepeatedFields(request *genproto.RepeatRe
 
 func prepRepeatDataQueryNegativeTestNumericEnums(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
 	name = "Compliance.RepeatDataQuery"
-	var badQueryParam string
 	info := request.GetInfo()
-	badQueryParam = fmt.Sprintf("f_kingdom=%d", info.GetFKingdom()) // purposefully use a number, which should cause an error
+	badQueryParam := fmt.Sprintf("f_kingdom=%d", info.GetFKingdom()) // purposefully use a number, which should cause an error
 
 	// We clear the field so we don't set the same query param correctly below. This change
 	// modifies the request, but since these tests only check that calls fail, we never need to
 	// refer back to the request proto after constructing the REST query.
 	info.FKingdom = pb.ComplianceData_UNASSIGNED
+	queryParams := append(prepRepeatDataTestsQueryParams(request, nil), badQueryParam)
+
+	queryString := prepQueryString(queryParams)
+	return name, "GET", "/v1beta1/repeat:query" + queryString, body, err
+}
+
+func prepRepeatDataQueryNegativeTestNumericOptionalEnums(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
+	name = "Compliance.RepeatDataQuery"
+	info := request.GetInfo()
+	badQueryParam := fmt.Sprintf("p_kingdom=%d", info.GetPKingdom()) // purposefully use a number, which should cause an error
+
+	// We clear the field so we don't set the same query param correctly below. This change
+	// modifies the request, but since these tests only check that calls fail, we never need to
+	// refer back to the request proto after constructing the REST query.
+	info.PKingdom = nil
 	queryParams := append(prepRepeatDataTestsQueryParams(request, nil), badQueryParam)
 
 	queryString := prepQueryString(queryParams)

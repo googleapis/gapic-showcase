@@ -297,6 +297,7 @@ func prepRepeatDataTestsQueryParams(request *genproto.RepeatRequest, exclude map
 	addParam("p_int32", info.PInt32 != nil, fmt.Sprintf("%d", info.GetPInt32()))
 	addParam("p_double", info.PDouble != nil, url.QueryEscape(fmt.Sprintf("%g", info.GetPDouble())))
 	addParam("p_bool", info.PBool != nil, fmt.Sprintf("%t", info.GetPBool()))
+	addParam("p_kingdom", info.PKingdom != nil, pb.ComplianceData_LifeKingdom_name[int32(info.GetPKingdom())])
 
 	addParam("f_child.f_string", len(info.GetFChild().GetFString()) > 0, url.QueryEscape(info.GetFChild().GetFString()))
 	addParam("f_child.f_float", info.GetFChild().GetFFloat() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFChild().GetFFloat())))

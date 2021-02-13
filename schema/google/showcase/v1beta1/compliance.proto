@@ -157,6 +157,7 @@ message ComplianceData {
   optional int32 p_int32 = 18;
   optional double p_double = 19;
   optional bool p_bool = 20;
+  optional LifeKingdom p_kingdom = 23;
   optional ComplianceDataChild p_child = 21;
 }
 
