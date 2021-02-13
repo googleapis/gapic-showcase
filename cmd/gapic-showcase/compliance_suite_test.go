@@ -37,31 +37,18 @@ import (
 // defined in the test suite using the GAPIC surface. The generators' test should follow the
 // high-level logic below, as described in the comments.
 func TestComplianceSuite(t *testing.T) {
-	// Run the Showcase REST server locally.
-	server := httptest.NewUnstartedServer(nil)
-	backend := createBackends()
-	restServer := newEndpointREST(nil, backend)
-	server.Config = restServer.server
+	suite, server, err := complianceSuiteTestSetup()
+	if err != nil {
+		t.Fatal(err)
+	}
 	server.Start()
 	defer server.Close()
-
-	// Locate, load, and unmarshal the compliance suite.
-	_, thisFile, _, _ := runtime.Caller(0)
-	suiteFile := filepath.Join(filepath.Dir(thisFile), "../../schema/google/showcase/v1beta1/compliance_suite.json")
-	jsonProto, err := ioutil.ReadFile(suiteFile)
-	if err != nil {
-		t.Fatalf("could not open suite file %q", suiteFile)
-	}
-	var suite pb.ComplianceSuite
-
-	if err := protojson.Unmarshal(jsonProto, &suite); err != nil {
-		t.Fatalf("error unmarshalling from json %s:\n   file: %s\n   input was: %s", err, suiteFile, jsonProto)
-	}
 
 	// Set handlers for each test case. When GAPIC generator tests do this, they should have
 	// each of their handlers invoking the correct GAPIC library method for the Showcase API.
 	restRPCs := map[string]prepRepeatDataTestFunc{
 		"Compliance.RepeatDataBody":                 prepRepeatDataBodyTest,
+		"Compliance.RepeatDataBodyInfo":             prepRepeatDataBodyInfoTest,
 		"Compliance.RepeatDataQuery":                prepRepeatDataQueryTest,
 		"Compliance.RepeatDataSimplePath":           prepRepeatDataSimplePathTest,
 		"Compliance.RepeatDataPathResource":         prepRepeatDataPathResourceTest,
@@ -119,8 +106,8 @@ func TestComplianceSuite(t *testing.T) {
 				}
 				var response genproto.RepeatResponse
 				if err := protojson.Unmarshal(responseBody, &response); err != nil {
-					t.Errorf("%s could not unmarshal httpResponse body: %s\n   response body: %s",
-						errorPrefix, err, string(responseBody))
+					t.Errorf("%s could not unmarshal httpResponse body: %s\n   response body: %s\n   request: %s\n",
+						errorPrefix, err, string(responseBody), requestBody)
 					continue
 				}
 
@@ -134,15 +121,47 @@ func TestComplianceSuite(t *testing.T) {
 	}
 }
 
+func complianceSuiteTestSetup() (suite *pb.ComplianceSuite, server *httptest.Server, err error) {
+	// Run the Showcase REST server locally.
+	server = httptest.NewUnstartedServer(nil)
+	backend := createBackends()
+	restServer := newEndpointREST(nil, backend)
+	server.Config = restServer.server
+
+	// Locate, load, and unmarshal the compliance suite.
+	_, thisFile, _, _ := runtime.Caller(0)
+	suiteFile := filepath.Join(filepath.Dir(thisFile), "../../schema/google/showcase/v1beta1/compliance_suite.json")
+	jsonProto, err := ioutil.ReadFile(suiteFile)
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not open suite file %q", suiteFile)
+	}
+
+	suite = &pb.ComplianceSuite{}
+	if err := protojson.Unmarshal(jsonProto, suite); err != nil {
+		return nil, nil, fmt.Errorf("error unmarshalling from json %s:\n   file: %s\n   input was: %s", err, suiteFile, jsonProto)
+	}
+
+	return suite, server, nil
+}
+
 // The following are helpers for TestComplianceSuite, since Showcase doesn't intrinsically define a
 // REST client. Each GAPIC generator should instead use the GAPIC it generated for the Showcase
 // API.
+
 type prepRepeatDataTestFunc func(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error)
 
 func prepRepeatDataBodyTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
 	name = "Compliance.RepeatDataBody"
 	bodyBytes, err := protojson.Marshal(request)
 	return name, "POST", "/v1beta1/repeat:body", string(bodyBytes), err
+}
+
+func prepRepeatDataBodyInfoTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
+	name = "Compliance.RepeatDataBodyInfo"
+	bodyBytes, err := protojson.Marshal(request.Info)
+	queryString := prepRepeatDataTestsQueryString(request, map[string]bool{"info": true})
+	_ = bodyBytes
+	return name, "POST", "/v1beta1/repeat:bodyinfo" + queryString, string(bodyBytes), err
 }
 
 func prepRepeatDataQueryTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
@@ -173,7 +192,7 @@ func prepRepeatDataSimplePathTest(request *genproto.RepeatRequest) (verb string,
 		{"f_bool", "%t", info.GetFBool()},
 	} {
 		pathParts = append(pathParts, url.PathEscape(fmt.Sprintf(part.format, part.value)))
-		nonQueryParamNames[part.name] = true
+		nonQueryParamNames["info."+part.name] = true
 	}
 	path = fmt.Sprintf("/v1beta1/repeat/%s:simplepath", strings.Join(pathParts, "/"))
 
@@ -203,7 +222,7 @@ func prepRepeatDataPathResourceTest(request *genproto.RepeatRequest) (verb strin
 			return
 		}
 		pathParts = append(pathParts, url.PathEscape(fmt.Sprintf(part.format, part.value)))
-		nonQueryParamNames[part.name] = true
+		nonQueryParamNames["info."+part.name] = true
 	}
 	path = fmt.Sprintf("/v1beta1/repeat/%s:pathresource", strings.Join(pathParts, "/"))
 
@@ -232,7 +251,7 @@ func prepRepeatDataPathTrailingResourceTest(request *genproto.RepeatRequest) (ve
 			return
 		}
 		pathParts = append(pathParts, url.PathEscape(fmt.Sprintf(part.format, part.value)))
-		nonQueryParamNames[part.name] = true
+		nonQueryParamNames["info."+part.name] = true
 	}
 	path = fmt.Sprintf("/v1beta1/repeat/%s:pathtrailingresource", strings.Join(pathParts, "/"))
 
@@ -247,7 +266,7 @@ func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map
 	info := request.GetInfo()
 	queryParams := []string{}
 	addParam := func(key string, condition bool, value string) {
-		if exclude[key] || !condition {
+		if exclude["info"] || exclude["info."+key] || !condition {
 			return
 		}
 		queryParams = append(queryParams, fmt.Sprintf("info.%s=%s", key, value))

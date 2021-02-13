@@ -54,7 +54,6 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 		file.P("import (")
 		file.P(`  "context"`)
-		file.P(`  "fmt"`)
 		file.P(`  "net/http"`)
 		file.P("")
 		// TODO: Properly deal with imports once we actually use them in the code.
@@ -71,6 +70,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 		file.P(")")
 		file.P("")
 		for _, handler := range service.Handlers {
+			excludedQueryParams := []string{}
 			handlerName := namer.Get("Handle" + handler.GoMethod)
 			pathMatch, allURLVariables, err := matchingPath(handler.PathTemplate)
 			if err != nil {
@@ -81,11 +81,9 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			file.P("")
 			file.P("// %s translates REST requests/responses on the wire to internal proto messages for %s", handlerName, handler.GoMethod)
 			file.P("//    Generated for HTTP binding pattern: %q", handler.URIPattern)
-			file.P("//         This matches URIs of the form: %q", pathMatch)
 			file.P("func (backend *RESTBackend) %s(w http.ResponseWriter, r *http.Request) {", handlerName)
 			if handler.StreamingClient || handler.StreamingServer {
-				file.P(`  backend.StdLog.Printf("Received request matching '%s': %%q", r.URL)`, handler.URIPattern)
-				file.P(`  w.Write([]byte("ERROR: not implementing streaming methods yet"))`)
+				file.P(`  backend.Error(w, http.StatusNotImplemented, "streaming methods not implemented yet (request matched '%s': %%q)", r.URL)`, handler.URIPattern)
 				file.P("}")
 				continue
 			}
@@ -100,7 +98,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			file.P(`  backend.StdLog.Printf("  urlPathParams (expect %d, have %%d): %%q", numUrlPathParams, urlPathParams)`, len(allURLVariables))
 			file.P("")
 			file.P("  if numUrlPathParams!=%d {", len(allURLVariables))
-			file.P(`    w.Write([]byte(fmt.Sprintf("unexpected number of URL variables: expected %d, have %%d: %%#v", numUrlPathParams, urlPathParams)))`, len(allURLVariables))
+			file.P(`    backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected %d, have %%d: %%#v", numUrlPathParams, urlPathParams)`, len(allURLVariables))
 			file.P("    return")
 			file.P("  }")
 
@@ -110,9 +108,12 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			case gomodel.BodyFieldAll:
 				file.P("  // Intentional: Field values in the URL path override those set in the body.")
 				file.P("  if err := jsonpb.Unmarshal(r.Body, %s); err != nil {", handler.RequestVariable)
-				file.P("    backend.StdLog.Printf(`  error reading body params \"*\": %%s`, err)")
-				file.P("    // TODO: Properly handle error")
-				file.P("    w.Write([]byte(err.Error()))")
+				file.P(`    backend.Error(w, http.StatusBadRequest, "error reading body params '*': %%s", err)`)
+				file.P("    return")
+				file.P("  }")
+				file.P("")
+				file.P("  if queryParams := r.URL.Query(); len(queryParams) > 0 {")
+				file.P(`    backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %%v", queryParams)`)
 				file.P("    return")
 				file.P("  }")
 
@@ -123,29 +124,33 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				file.P("  // Intentional: Field values in the URL path override those set in the body.")
 				file.P("  var %s %s.%s", handler.RequestBodyFieldVariable, handler.RequestBodyFieldPackage, handler.RequestBodyFieldType)
 				file.P("  if err := jsonpb.Unmarshal(r.Body, &%s); err != nil {", handler.RequestBodyFieldVariable)
-				file.P("    backend.StdLog.Printf(`  error reading body into request field \"%s\": %%s`, err)", handler.RequestBodyFieldProtoName)
-				file.P("    // TODO: Properly handle error")
-				file.P("    w.Write([]byte(err.Error()))")
+				file.P(`    backend.Error(w, http.StatusBadRequest, "error reading body into request field '%s': %%s", err)`, handler.RequestBodyFieldProtoName)
 				file.P("    return")
 				file.P("  }")
 				file.P("  %s.%s = &%s", handler.RequestVariable, handler.RequestBodyFieldName, handler.RequestBodyFieldVariable)
 				file.P("")
-
+				excludedQueryParams = append(excludedQueryParams, handler.RequestBodyFieldProtoName)
 			}
+
 			file.P("  if err := resttools.PopulateSingularFields(%s, urlPathParams); err != nil {", handler.RequestVariable)
-			file.P(`    backend.StdLog.Printf("  error reading URL path params: %%s", err)`)
-			file.P("    // TODO: Properly handle error")
-			file.P("    w.Write([]byte(err.Error()))")
+			file.P(`    backend.Error(w, http.StatusBadRequest, "error reading URL path params: %%s", err)`)
 			file.P("    return")
 			file.P("  }")
 			file.P("")
+			excludedQueryParams = append(excludedQueryParams, handler.PathTemplate.ListVariables()...)
+
 			if handler.RequestBodyFieldSpec != gomodel.BodyFieldAll {
 				file.P("  // TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both")
 				file.P("  queryParams := map[string][]string(r.URL.Query())")
+				if len(excludedQueryParams) > 0 {
+					file.P("  excludedQueryParams := %#v", excludedQueryParams)
+					file.P("  if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {")
+					file.P(`    backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %%v", duplicates)`)
+					file.P("    return")
+					file.P("  }")
+				}
 				file.P("  if err := resttools.PopulateFields(%s, queryParams); err != nil {", handler.RequestVariable)
-				file.P(`    backend.StdLog.Printf("  error reading query params: %%s", err)`)
-				file.P("    // TODO: Properly handle error")
-				file.P("    w.Write([]byte(err.Error()))")
+				file.P(`    backend.Error(w, http.StatusBadRequest, "error reading query params: %%s", err)`)
 				file.P("    return")
 				file.P("  }")
 				file.P("")
@@ -158,15 +163,14 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			// TODO: In the future, we may want to redirect all REST-endpoint requests to the gRPC endpoint so that the gRPC-registered observers get invoked.
 			file.P("  %s, err := backend.%sServer.%s(context.Background(), %s)", handler.ResponseVariable, service.ShortName, handler.GoMethod, handler.RequestVariable)
 			file.P("  if err != nil {")
-			file.P("    // TODO: Properly handle error")
-			file.P("    w.Write([]byte(err.Error()))")
+			file.P("    // TODO: Properly handle error. Is StatusInternalServerError (500) the right response?")
+			file.P(`    backend.Error(w, http.StatusInternalServerError, "server error: %%s", err.Error())`)
 			file.P("    return")
 			file.P("  }")
 			file.P("")
 			file.P("  json, err := marshaler.MarshalToString(%s)", handler.ResponseVariable)
 			file.P("  if err != nil {")
-			file.P("    // TODO: Properly handle error")
-			file.P("    w.Write([]byte(err.Error()))")
+			file.P(`    backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %%s", err.Error())`)
 			file.P("    return")
 			file.P("  }")
 			file.P("")
@@ -183,6 +187,9 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	file.P("package genrest")
 	file.P("")
 	file.P("import (")
+	file.P(`  "fmt"`)
+	file.P(`   "net/http"`)
+	file.P("")
 	file.P(`   "github.com/googleapis/gapic-showcase/server/services"`)
 	file.P("")
 	file.P(`  gmux "github.com/gorilla/mux"`)
@@ -211,6 +218,13 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	}
 	file.P(`}`)
 	file.P("")
+
+	file.P("func (backend *RESTBackend) Error(w http.ResponseWriter, status int, format string, args ...interface{}) {")
+	file.P("  message := fmt.Sprintf(format, args...)")
+	file.P("  backend.ErrLog.Print(message)")
+	file.P("  w.WriteHeader(status)")
+	file.P(`  w.Write([]byte("showcase " + message))`)
+	file.P("}")
 
 	return view, nil
 }

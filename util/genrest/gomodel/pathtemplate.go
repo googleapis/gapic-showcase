@@ -53,6 +53,18 @@ func (pt PathTemplate) HasVariables() (topVar, nestedVar bool) {
 	return topVar, nestedVar
 }
 
+// ListVariables returns a list of all the variables (proto field names) found in `pt`,
+func (pt PathTemplate) ListVariables() []string {
+	varNames := []string{}
+	for _, segment := range pt {
+		if segment.Kind == Variable {
+			varNames = append(varNames, segment.Value)
+			varNames = append(varNames, segment.Subsegments.ListVariables()...)
+		}
+	}
+	return varNames
+}
+
 // asGoLiteral returns a Go-syntax representation of this PathTemplate. This is useful for
 // constructing and debugging tests.
 func (pt PathTemplate) asGoLiteral() string {
