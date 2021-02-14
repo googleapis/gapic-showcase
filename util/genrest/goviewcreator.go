@@ -100,21 +100,22 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			source.P("  %s := &%s.%s{}", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
 			switch handler.RequestBodyFieldSpec {
 			case gomodel.BodyFieldAll:
+				fileImports["bytes"] = ""
+				fileImports["io"] = ""
+				fileImports["io/ioutil"] = ""
 				source.P("  // Intentional: Field values in the URL path override those set in the body.")
 				// TODO: explicitly check that all enums are strings: JSON encoding in resttools, check for the explicit enum fields. See eg https://michaelheap.com/golang-encodedecode-arbitrary-json/
-				// source.P("  var jsonReader bytes.Buffer")
-				// source.P("  bodyReader := io.TeeReader(r.Body, &jsonReader)")
+				source.P("  var jsonReader bytes.Buffer")
+				source.P("  bodyReader := io.TeeReader(r.Body, &jsonReader)")
 				source.P("  if err := jsonpb.Unmarshal(r.Body /*bodyReader*/, %s); err != nil {", handler.RequestVariable)
 				source.P(`    backend.Error(w, http.StatusBadRequest, "error reading body params '*': %%s", err)`)
 				source.P("    return")
 				source.P("  }")
-				/*
-					 				        source.P("ioutil.ReadAll(bodyReader)")
-										source.P("  if err := resttools.CheckRestBody(&jsonReader, %s.ProtoReflect()); err != nil {", handler.RequestVariable)
-										source.P(`    backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check:: %%s", err)`)
-										source.P("    return")
-										source.P("  }")
-				*/
+				source.P("ioutil.ReadAll(bodyReader)")
+				source.P("  if err := resttools.CheckRestBody(&jsonReader, %s.ProtoReflect()); err != nil {", handler.RequestVariable)
+				source.P(`    backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %%s", err)`)
+				source.P("    return")
+				source.P("  }")
 				source.P("")
 				source.P("  if queryParams := r.URL.Query(); len(queryParams) > 0 {")
 				source.P(`    backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %%v", queryParams)`)
