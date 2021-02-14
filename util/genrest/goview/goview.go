@@ -27,8 +27,8 @@ type View struct {
 // SourceFile contains a single file to be output, including both its content and location.
 type SourceFile struct {
 	Directory string
-	Name      string   // without any directory components
-	contents  []string // a list of lines
+	Name      string // without any directory components
+	source    *Source
 }
 
 // New returns a new, empty View.
@@ -47,18 +47,40 @@ func NewFile(directory, name string) *SourceFile {
 	return &SourceFile{
 		Directory: directory,
 		Name:      name,
-		contents:  []string{},
+		source:    NewSource(),
 	}
+}
+
+type Source struct {
+	lines []string // a list of lines
+}
+
+func NewSource() *Source {
+	return &Source{lines: []string{}}
 }
 
 // Contents returns the stringified contents this SourceFile.
 func (sf *SourceFile) Contents() string {
-	return strings.Join(sf.contents, "\n") + "\n"
+	return sf.source.Contents()
+
+}
+
+func (sf *SourceFile) Append(source *Source) {
+	sf.source.lines = append(sf.source.lines, source.lines...)
+}
+
+func (sf *SourceFile) P(format string, args ...interface{}) {
+	sf.source.P(format, args...)
+}
+
+// Contents returns the stringified contents this SourceFile.
+func (source *Source) Contents() string {
+	return strings.Join(source.lines, "\n") + "\n"
 }
 
 // P writes a new line of content to this SourceFile. The arguments are treated exactly as in
 // fmt.Printf. Note that there is an implicit in the SourceFile contents "\n" after each call to
 // P().
-func (sf *SourceFile) P(format string, args ...interface{}) {
-	sf.contents = append(sf.contents, fmt.Sprintf(format, args...))
+func (source *Source) P(format string, args ...interface{}) {
+	source.lines = append(source.lines, fmt.Sprintf(format, args...))
 }

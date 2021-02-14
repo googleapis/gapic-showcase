@@ -16,7 +16,6 @@ package genrest
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 	"time"
 
@@ -46,30 +45,25 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 		file.P("package genrest")
 		file.P("")
 
-		importStrings := make([]string, 0, len(service.Imports))
-		for _, spec := range service.Imports {
-			importStrings = append(importStrings, fmt.Sprintf("%s %q", spec.Name, spec.Path))
+		fileImports := map[string]string{
+			"context":                           "",
+			"net/http":                          "",
+			"github.com/golang/protobuf/jsonpb": "",
+			"github.com/googleapis/gapic-showcase/util/genrest/resttools": "",
+			"github.com/gorilla/mux":                               "gmux",
+			"github.com/googleapis/gapic-showcase/server/genproto": "genprotopb",
 		}
-		sort.Strings(importStrings)
 
-		file.P("import (")
-		file.P(`  "context"`)
-		file.P(`  "net/http"`)
-		file.P("")
-		// TODO: Properly deal with imports once we actually use them in the code.
-		// file.P("  // %s", strings.Join(importStrings, "\n  // "))
+		// TODO: Properly deal with import strings. They may need to be taken out of the gomodel
+		// for _, spec := range service.Imports {
+		// 	fileImports[spec.Path] = spec.Name
+		// }
 
-		// TODO: Get the following import from the data model, rather than hard-coding, once we deal with all imports.
-		file.P(`	  genprotopb "github.com/googleapis/gapic-showcase/server/genproto"`)
-
-		// TODO: Investigate why "google.golang.org/protobuf" doesn't work below
-		file.P(`  "github.com/golang/protobuf/jsonpb"`)
-		file.P(`  gmux "github.com/gorilla/mux"`)
-		file.P("")
-		file.P(`  "github.com/googleapis/gapic-showcase/util/genrest/resttools"`)
-		file.P(")")
-		file.P("")
+		methodSources := []*goview.Source{}
 		for _, handler := range service.Handlers {
+			source := goview.NewSource()
+			methodSources = append(methodSources, source)
+
 			excludedQueryParams := []string{}
 			handlerName := namer.Get("Handle" + handler.GoMethod)
 			pathMatch, allURLVariables, err := matchingPath(handler.PathTemplate)
@@ -78,104 +72,124 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			}
 			registered = append(registered, &registeredHandler{pathMatch, handlerName, handler.HTTPMethod})
 
-			file.P("")
-			file.P("// %s translates REST requests/responses on the wire to internal proto messages for %s", handlerName, handler.GoMethod)
-			file.P("//    Generated for HTTP binding pattern: %q", handler.URIPattern)
-			file.P("func (backend *RESTBackend) %s(w http.ResponseWriter, r *http.Request) {", handlerName)
+			source.P("")
+			source.P("// %s translates REST requests/responses on the wire to internal proto messages for %s", handlerName, handler.GoMethod)
+			source.P("//    Generated for HTTP binding pattern: %q", handler.URIPattern)
+			source.P("func (backend *RESTBackend) %s(w http.ResponseWriter, r *http.Request) {", handlerName)
 			if handler.StreamingClient || handler.StreamingServer {
-				file.P(`  backend.Error(w, http.StatusNotImplemented, "streaming methods not implemented yet (request matched '%s': %%q)", r.URL)`, handler.URIPattern)
-				file.P("}")
+				source.P(`  backend.Error(w, http.StatusNotImplemented, "streaming methods not implemented yet (request matched '%s': %%q)", r.URL)`, handler.URIPattern)
+				source.P("}")
 				continue
 			}
 
-			file.P(`  urlPathParams := gmux.Vars(r)`)
-			file.P("  numUrlPathParams := len(urlPathParams)")
-			file.P("")
+			source.P(`  urlPathParams := gmux.Vars(r)`)
+			source.P("  numUrlPathParams := len(urlPathParams)")
+			source.P("")
 			// TODO: Consider factoring out code shared among handlers into a single
-			// place, so that handlers only provide the relevant values (eg,, expected
+			// place, so that handlers only provide the relevant values (eg., expected
 			// number of path variables, etc.)
-			file.P(`  backend.StdLog.Printf("Received %%s request matching '%s': %%q", r.Method, r.URL)`, handler.URIPattern)
-			file.P(`  backend.StdLog.Printf("  urlPathParams (expect %d, have %%d): %%q", numUrlPathParams, urlPathParams)`, len(allURLVariables))
-			file.P("")
-			file.P("  if numUrlPathParams!=%d {", len(allURLVariables))
-			file.P(`    backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected %d, have %%d: %%#v", numUrlPathParams, urlPathParams)`, len(allURLVariables))
-			file.P("    return")
-			file.P("  }")
+			source.P(`  backend.StdLog.Printf("Received %%s request matching '%s': %%q", r.Method, r.URL)`, handler.URIPattern)
+			source.P(`  backend.StdLog.Printf("  urlPathParams (expect %d, have %%d): %%q", numUrlPathParams, urlPathParams)`, len(allURLVariables))
+			source.P("")
+			source.P("  if numUrlPathParams!=%d {", len(allURLVariables))
+			source.P(`    backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected %d, have %%d: %%#v", numUrlPathParams, urlPathParams)`, len(allURLVariables))
+			source.P("    return")
+			source.P("  }")
 
-			file.P("")
-			file.P("  %s := &%s.%s{}", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
+			source.P("")
+			source.P("  %s := &%s.%s{}", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
 			switch handler.RequestBodyFieldSpec {
 			case gomodel.BodyFieldAll:
-				file.P("  // Intentional: Field values in the URL path override those set in the body.")
-				file.P("  if err := jsonpb.Unmarshal(r.Body, %s); err != nil {", handler.RequestVariable)
-				file.P(`    backend.Error(w, http.StatusBadRequest, "error reading body params '*': %%s", err)`)
-				file.P("    return")
-				file.P("  }")
-				file.P("")
-				file.P("  if queryParams := r.URL.Query(); len(queryParams) > 0 {")
-				file.P(`    backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %%v", queryParams)`)
-				file.P("    return")
-				file.P("  }")
+				source.P("  // Intentional: Field values in the URL path override those set in the body.")
+				// TODO: explicitly check that all enums are strings: JSON encoding in resttools, check for the explicit enum fields. See eg https://michaelheap.com/golang-encodedecode-arbitrary-json/
+				// source.P("  var jsonReader bytes.Buffer")
+				// source.P("  bodyReader := io.TeeReader(r.Body, &jsonReader)")
+				source.P("  if err := jsonpb.Unmarshal(r.Body /*bodyReader*/, %s); err != nil {", handler.RequestVariable)
+				source.P(`    backend.Error(w, http.StatusBadRequest, "error reading body params '*': %%s", err)`)
+				source.P("    return")
+				source.P("  }")
+				/*
+					 				        source.P("ioutil.ReadAll(bodyReader)")
+										source.P("  if err := resttools.CheckRestBody(&jsonReader, %s.ProtoReflect()); err != nil {", handler.RequestVariable)
+										source.P(`    backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check:: %%s", err)`)
+										source.P("    return")
+										source.P("  }")
+				*/
+				source.P("")
+				source.P("  if queryParams := r.URL.Query(); len(queryParams) > 0 {")
+				source.P(`    backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %%v", queryParams)`)
+				source.P("    return")
+				source.P("  }")
 
 			case gomodel.BodyFieldSingle:
 				// TODO: Ensure this works when the specified field is a scalar. We
 				// may need to use PopulateFields from the generated code in that
 				// case.
-				file.P("  // Intentional: Field values in the URL path override those set in the body.")
-				file.P("  var %s %s.%s", handler.RequestBodyFieldVariable, handler.RequestBodyFieldPackage, handler.RequestBodyFieldType)
-				file.P("  if err := jsonpb.Unmarshal(r.Body, &%s); err != nil {", handler.RequestBodyFieldVariable)
-				file.P(`    backend.Error(w, http.StatusBadRequest, "error reading body into request field '%s': %%s", err)`, handler.RequestBodyFieldProtoName)
-				file.P("    return")
-				file.P("  }")
-				file.P("  %s.%s = &%s", handler.RequestVariable, handler.RequestBodyFieldName, handler.RequestBodyFieldVariable)
-				file.P("")
+				source.P("  // Intentional: Field values in the URL path override those set in the body.")
+				source.P("  var %s %s.%s", handler.RequestBodyFieldVariable, handler.RequestBodyFieldPackage, handler.RequestBodyFieldType)
+				source.P("  if err := jsonpb.Unmarshal(r.Body, &%s); err != nil {", handler.RequestBodyFieldVariable)
+				source.P(`    backend.Error(w, http.StatusBadRequest, "error reading body into request field '%s': %%s", err)`, handler.RequestBodyFieldProtoName)
+				source.P("    return")
+				source.P("  }")
+				source.P("  %s.%s = &%s", handler.RequestVariable, handler.RequestBodyFieldName, handler.RequestBodyFieldVariable)
+				source.P("")
 				excludedQueryParams = append(excludedQueryParams, handler.RequestBodyFieldProtoName)
 			}
 
-			file.P("  if err := resttools.PopulateSingularFields(%s, urlPathParams); err != nil {", handler.RequestVariable)
-			file.P(`    backend.Error(w, http.StatusBadRequest, "error reading URL path params: %%s", err)`)
-			file.P("    return")
-			file.P("  }")
-			file.P("")
+			source.P("  if err := resttools.PopulateSingularFields(%s, urlPathParams); err != nil {", handler.RequestVariable)
+			source.P(`    backend.Error(w, http.StatusBadRequest, "error reading URL path params: %%s", err)`)
+			source.P("    return")
+			source.P("  }")
+			source.P("")
 			excludedQueryParams = append(excludedQueryParams, handler.PathTemplate.ListVariables()...)
 
 			if handler.RequestBodyFieldSpec != gomodel.BodyFieldAll {
-				file.P("  // TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both")
-				file.P("  queryParams := map[string][]string(r.URL.Query())")
+				source.P("  // TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both")
+				source.P("  queryParams := map[string][]string(r.URL.Query())")
 				if len(excludedQueryParams) > 0 {
-					file.P("  excludedQueryParams := %#v", excludedQueryParams)
-					file.P("  if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {")
-					file.P(`    backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %%v", duplicates)`)
-					file.P("    return")
-					file.P("  }")
+					source.P("  excludedQueryParams := %#v", excludedQueryParams)
+					source.P("  if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {")
+					source.P(`    backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %%v", duplicates)`)
+					source.P("    return")
+					source.P("  }")
 				}
-				file.P("  if err := resttools.PopulateFields(%s, queryParams); err != nil {", handler.RequestVariable)
-				file.P(`    backend.Error(w, http.StatusBadRequest, "error reading query params: %%s", err)`)
-				file.P("    return")
-				file.P("  }")
-				file.P("")
+				source.P("  if err := resttools.PopulateFields(%s, queryParams); err != nil {", handler.RequestVariable)
+				source.P(`    backend.Error(w, http.StatusBadRequest, "error reading query params: %%s", err)`)
+				source.P("    return")
+				source.P("  }")
+				source.P("")
 			}
-			file.P("")
-			file.P("  marshaler := &jsonpb.Marshaler{}")
-			file.P("  requestJSON, _ := marshaler.MarshalToString(%s)", handler.RequestVariable)
-			file.P(`  backend.StdLog.Printf("  request: %%s", requestJSON)`)
-			file.P("")
+			source.P("")
+			source.P("  marshaler := &jsonpb.Marshaler{}")
+			source.P("  requestJSON, _ := marshaler.MarshalToString(%s)", handler.RequestVariable)
+			source.P(`  backend.StdLog.Printf("  request: %%s", requestJSON)`)
+			source.P("")
 			// TODO: In the future, we may want to redirect all REST-endpoint requests to the gRPC endpoint so that the gRPC-registered observers get invoked.
-			file.P("  %s, err := backend.%sServer.%s(context.Background(), %s)", handler.ResponseVariable, service.ShortName, handler.GoMethod, handler.RequestVariable)
-			file.P("  if err != nil {")
-			file.P("    // TODO: Properly handle error. Is StatusInternalServerError (500) the right response?")
-			file.P(`    backend.Error(w, http.StatusInternalServerError, "server error: %%s", err.Error())`)
-			file.P("    return")
-			file.P("  }")
-			file.P("")
-			file.P("  json, err := marshaler.MarshalToString(%s)", handler.ResponseVariable)
-			file.P("  if err != nil {")
-			file.P(`    backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %%s", err.Error())`)
-			file.P("    return")
-			file.P("  }")
-			file.P("")
-			file.P("  w.Write([]byte(json))")
-			file.P("}\n")
+			source.P("  %s, err := backend.%sServer.%s(context.Background(), %s)", handler.ResponseVariable, service.ShortName, handler.GoMethod, handler.RequestVariable)
+			source.P("  if err != nil {")
+			source.P("    // TODO: Properly handle error. Is StatusInternalServerError (500) the right response?")
+			source.P(`    backend.Error(w, http.StatusInternalServerError, "server error: %%s", err.Error())`)
+			source.P("    return")
+			source.P("  }")
+			source.P("")
+			source.P("  json, err := marshaler.MarshalToString(%s)", handler.ResponseVariable)
+			source.P("  if err != nil {")
+			source.P(`    backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %%s", err.Error())`)
+			source.P("    return")
+			source.P("  }")
+			source.P("")
+			source.P("  w.Write([]byte(json))")
+			source.P("}\n")
+		}
+
+		file.P("import (")
+		for path, name := range fileImports {
+			file.P("  %s %q", name, path)
+		}
+		file.P(")")
+		file.P("")
+		for _, method := range methodSources {
+			file.Append(method)
 		}
 	}
 
