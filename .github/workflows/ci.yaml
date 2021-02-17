@@ -1,5 +1,5 @@
 ---
-name: Generator tests
+name: Showcase tests
 on:
   push:
     branches:
