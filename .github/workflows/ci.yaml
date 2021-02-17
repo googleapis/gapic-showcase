@@ -48,4 +48,7 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: regenerated-sources
-    - run: go test ./...
+    - name: Check for regenerated sources diff
+      run: git ls-files --deleted --modified --other --directory --exclude-standard cmd client server/genproto server/genrest | grep / && echo "DIFF FOUND!"  || echo "No new generated files"
+    - name: Run unit tests
+      run: go test ./...
