@@ -19,7 +19,7 @@ jobs:
     - name: Install protoc
       run: |
         mkdir protobuf
-        curl -sSL https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/protoc-3.14.0-linux-x86_64.zip > protobuf/protoc.zip
+        curl -sSL https://github.com/protocolbuffers/protobuf/releases/download/v3.15.0/protoc-3.15.0-linux-x86_64.zip > protobuf/protoc.zip
         unzip -d protobuf protobuf/protoc.zip
         echo "./protobuf/bin" >> $GITHUB_PATH
     - name: Install external generators
@@ -34,17 +34,15 @@ jobs:
       run: go run ./util/cmd/compile_protos
     - name: Capture modified files
       id: mod
-      run: |
-        files=$(git ls-files --deleted --modified --other --directory --exclude-standard cmd client server/genproto server/genrest)
-        files="${files//$'\n'/'%0A'}"
-        echo "::set-output name=modified_files::$files" 
-    - name: Echo modified files
-      run: echo "${{ steps.mod.outputs.modified_files }}"
+      run: echo "::set-output name=modified_files::$(git ls-files --deleted --modified --other --directory --exclude-standard cmd client server/genproto server/genrest)"
+    - name: Prepare regenerated sources
+      if: steps.mod.outputs.modified_files != ""
+      run: tar cfz regen.tgz ${{ steps.mod.outputs.modified_files }}
     - uses: actions/upload-artifact@v2
+      if: steps.mod.outputs.modified_files != ""
       with:
         name: regenerated-sources
-        path: |
-          ${{ steps.mod.outputs.modified_files }}
+        path: regen.tgz
   lint:
     needs: regenerate
     runs-on: ubuntu-latest
@@ -56,6 +54,10 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: regenerated-sources
+    - name: Expand regen archive
+      run: |
+        tar xzf regen.tgz
+        rm regen.tgz
     - name: Check formatting
       run: gofmt -l ./ > gofmt.txt && ! [ -s gofmt.txt ]
     # TODO(noahdietz): Enable these once all issues are resolved.
@@ -91,6 +93,10 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: regenerated-sources
+    - name: Expand regen archive
+      run: |
+        tar xzf regen.tgz
+        rm regen.tgz
     - name: Run unit tests
       run: go test ./...
     - name: Run server coverage
@@ -110,6 +116,10 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: regenerated-sources
+    - name: Expand regen archive
+      run: |
+        tar xzf regen.tgz
+        rm regen.tgz
     - name: Install gapic-showcase CLI
       run: go install ./cmd/gapic-showcase
     - name: Probe gRPC and REST servers
@@ -128,17 +138,22 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        go-version: '^1.13.1'
+        ref: master
     - uses: actions/download-artifact@v2
       with:
         name: regenerated-sources
+    - name: Expand regen archive
+      run: |
+        tar xzf regen.tgz
+        rm regen.tgz
     - name: Create pull request
       uses: peter-evans/create-pull-request@v3
       with:
         title: 'chore: regenerate sources'
         body: |
           Regenerated sources as a result of the following change:
-          https://github.com/googleapis/gapic-showcase/commit/${GITHUB_SHA}
+          https://github.com/googleapis/gapic-showcase/commit/${{ GITHUB_SHA }}
+        committer: googleapis-publisher <googleapis-publisher@google.com>
         branch: regen
         base: master
         labels: automerge
