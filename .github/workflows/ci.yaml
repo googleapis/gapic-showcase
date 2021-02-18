@@ -87,3 +87,25 @@ jobs:
       run: go test ./...
     - name: Run server coverage
       run: go test ./server/... -coverprofile=coverage.txt -covermode=atomic
+  probe:
+    needs: regenerate
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: '^1.13.1'
+    - uses: actions/download-artifact@v2
+      with:
+        name: regenerated-sources
+    - name: Install gapic-showcase CLI
+      run: go install ./cmd/gapic-showcase
+    - name: Probe gRPC and REST servers
+      run: |
+        gapic-showcase run &
+        gapic-showcase echo echo --response content --response.content "hello!"
+        GRPC_EXIT_CODE=$?
+        STATUSCODE=$(curl --silent --output /dev/null --write-out "%{http_code}" http://localhost:7469/hello)
+        echo 'gRPC exit code: $GRPC_EXIT_CODE'
+        echo 'REST status code: $STATUSCODE'
+        [ $STATUSCODE = "200" ]  && [ GRPC_EXIT_CODE != 0 ]
