@@ -128,9 +128,8 @@ jobs:
     - name: Check for modified files
       id: git-check
       run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD server/ client/ cmd/; then echo "false"; else echo "true"; fi)
-    - name: Open pull request
-      if: steps.git-check.outputs.modified == 'true'
     - name: Create Pull Request
+      if: steps.git-check.outputs.modified == 'true'
       uses: peter-evans/create-pull-request@v3
       with:
         title: 'chore: regenerate sources'
