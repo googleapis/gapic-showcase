@@ -40,7 +40,8 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: regenerated-sources
-        path: ${{ steps.mod.outputs.modified_files }}
+        path: |
+          ${{ steps.mod.outputs.modified_files }}
   lint:
     needs: regenerate
     runs-on: ubuntu-latest
