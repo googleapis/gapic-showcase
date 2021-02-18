@@ -57,7 +57,7 @@ jobs:
       run: golint ./... > golint.txt && ! [ -s golint.txt ]
       if: ${{ always() }}
     - name: Vet code
-      run: go vet ./... > govet.txt && ! [ -s govet.txt ]
+      run: go vet ./... 2> govet.txt && ! [ -s govet.txt ]
       if: ${{ always() }}
     - uses: actions/upload-artifact@v2
       if: ${{ always() }}
