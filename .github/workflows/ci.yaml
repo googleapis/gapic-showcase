@@ -130,4 +130,15 @@ jobs:
       run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD server/ client/ cmd/; then echo "false"; else echo "true"; fi)
     - name: Open pull request
       if: steps.git-check.outputs.modified == 'true'
-      run: echo "There was a diff in the regenerated sources!"
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        title: 'chore: regenerate sources'
+        body: |
+          Regenerated sources as a result of the following change:
+          https://github.com/googleapis/gapic-showcase/commit/${GITHUB_SHA}
+        branch: regen
+        labels: automerge
+        reviewers: |
+          noahdietz
+          vchudnov-g
