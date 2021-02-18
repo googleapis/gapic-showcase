@@ -106,6 +106,6 @@ jobs:
         gapic-showcase echo echo --response content --response.content "hello!"
         GRPC_EXIT_CODE=$?
         STATUSCODE=$(curl --silent --output /dev/null --write-out "%{http_code}" http://localhost:7469/hello)
-        echo 'gRPC exit code: $GRPC_EXIT_CODE'
-        echo 'REST status code: $STATUSCODE'
+        echo "gRPC exit code: $GRPC_EXIT_CODE"
+        echo "REST status code: $STATUSCODE"
         [ $STATUSCODE = "200" ]  && [ GRPC_EXIT_CODE != 0 ]
