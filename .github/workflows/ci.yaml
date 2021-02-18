@@ -1,5 +1,5 @@
 ---
-name: Showcase tests
+name: Showcase CI
 on:
   push:
     branches:
@@ -113,3 +113,21 @@ jobs:
         echo "gRPC exit code: $GRPC_EXIT_CODE"
         echo "REST status code: $STATUSCODE"
         [ $STATUSCODE = "200" ]  && [ GRPC_EXIT_CODE != 0 ]
+  push-generated-sources:
+    needs: [regenerate, lint, tests, probes]
+    runs-on: ubuntu-latest
+    # if: github.ref == 'refs/heads/master'
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: '^1.13.1'
+    - uses: actions/download-artifact@v2
+      with:
+        name: regenerated-sources
+    - name: Check for modified files
+      id: git-check
+      run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD server/ client/ cmd/; then echo "false"; else echo "true"; fi)
+    - name: Open pull request
+      if: steps.git-check.outputs.modified == 'true'
+      run: echo "There was a diff in the regenerated sources!"
