@@ -34,9 +34,12 @@ jobs:
       run: go run ./util/cmd/compile_protos
     - name: Capture modified files
       id: mod
-      run: echo ::set-output name=modified_files::$(git diff-index --name-only HEAD server/ client/ cmd/) 
+      run: |
+        files=$(git ls-files --deleted --modified --other --directory --exclude-standard cmd client server/genproto server/genrest)
+        files="${files//$'\n'/'%0A'}"
+        echo "::set-output name=modified_files::$files" 
     - name: Echo modified files
-      run: echo ${{ steps.mod.outputs.modified_files }}
+      run: echo "${{ steps.mod.outputs.modified_files }}"
     - uses: actions/upload-artifact@v2
       with:
         name: regenerated-sources
@@ -125,20 +128,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: master
-    - uses: actions/setup-go@v2
-      with:
         go-version: '^1.13.1'
     - uses: actions/download-artifact@v2
       with:
         name: regenerated-sources
-    - name: Check for modified files
-      id: git-check
-      run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD server/ client/ cmd/; then echo "false"; else echo "true"; fi)
-    - name: Emit modified files
-      run: git diff-index --name-only HEAD server/ client/ cmd/
     - name: Create pull request
-      if: steps.git-check.outputs.modified == 'true'
       uses: peter-evans/create-pull-request@v3
       with:
         title: 'chore: regenerate sources'
