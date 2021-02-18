@@ -32,11 +32,15 @@ jobs:
       run: go install ./util/cmd/protoc-gen-go_rest_server
     - name: Regenerate sources
       run: go run ./util/cmd/compile_protos
+    - name: Capture modified files
+      id: mod
+      run: echo ::set-output name=modified_files::$(git diff-index --name-only HEAD server/ client/ cmd/) 
+    - name: Echo modified files
+      run: echo ${{ steps.mod.outputs.modified_files }}
     - uses: actions/upload-artifact@v2
       with:
         name: regenerated-sources
-        path: |
-          ./**/*.go
+        path: ${{ steps.mod.outputs.modified_files }}
   lint:
     needs: regenerate
     runs-on: ubuntu-latest
