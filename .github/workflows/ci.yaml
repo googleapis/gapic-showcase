@@ -9,6 +9,8 @@ on:
 jobs:
   regenerate:
     runs-on: ubuntu-latest
+    outputs:
+      modified_files: ${{ steps.mod.outputs.modified_files }}
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-go@v2
@@ -54,9 +56,11 @@ jobs:
       with:
         go-version: '^1.13.1'
     - uses: actions/download-artifact@v2
+      if: needs.regenerate.outputs.modified_files != ''
       with:
         name: regenerated-sources
     - name: Expand regen archive
+      if: needs.regenerate.outputs.modified_files != ''
       run: |
         tar xvzf regen.tgz
         rm regen.tgz
@@ -93,9 +97,11 @@ jobs:
       with:
         go-version: '^1.13.1'
     - uses: actions/download-artifact@v2
+      if: needs.regenerate.outputs.modified_files != ''
       with:
         name: regenerated-sources
     - name: Expand regen archive
+      if: needs.regenerate.outputs.modified_files != ''
       run: |
         tar xvzf regen.tgz
         rm regen.tgz
@@ -116,9 +122,11 @@ jobs:
       with:
         go-version: '^1.13.1'
     - uses: actions/download-artifact@v2
+      if: needs.regenerate.outputs.modified_files != ''
       with:
         name: regenerated-sources
     - name: Expand regen archive
+      if: needs.regenerate.outputs.modified_files != ''
       run: |
         tar xvzf regen.tgz
         rm regen.tgz
@@ -137,6 +145,7 @@ jobs:
     needs: [regenerate, lint, tests, probes]
     runs-on: ubuntu-latest
     # if: github.ref == 'refs/heads/master'
+    if: needs.regenerate.outputs.modified_files != ''
     steps:
     - uses: actions/checkout@v2
       with:
@@ -151,8 +160,9 @@ jobs:
     - name: Create pull request
       uses: peter-evans/create-pull-request@v3
       with:
+        commit-message: 'chore: regenerate sources'
         title: 'chore: regenerate sources'
-        body: 'Regenerated sources as a result of the following change: https://github.com/googleapis/gapic-showcase/commit/$GITHUB_SHA'
+        body: 'Regenerated sources resulting from most recent commit to master'
         branch: regen
         base: master
         labels: automerge
