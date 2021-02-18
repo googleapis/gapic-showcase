@@ -152,7 +152,7 @@ jobs:
         title: 'chore: regenerate sources'
         body: |
           Regenerated sources as a result of the following change:
-          https://github.com/googleapis/gapic-showcase/commit/"${{ GITHUB_SHA }}"
+          https://github.com/googleapis/gapic-showcase/commit/$GITHUB_SHA
         committer: googleapis-publisher <googleapis-publisher@google.com>
         branch: regen
         base: master
