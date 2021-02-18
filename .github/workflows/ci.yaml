@@ -119,6 +119,8 @@ jobs:
     # if: github.ref == 'refs/heads/master'
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: master
     - uses: actions/setup-go@v2
       with:
         go-version: '^1.13.1'
@@ -128,7 +130,9 @@ jobs:
     - name: Check for modified files
       id: git-check
       run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD server/ client/ cmd/; then echo "false"; else echo "true"; fi)
-    - name: Create Pull Request
+    - name: Emit modified files
+      run: git diff-index --name-only HEAD server/ client/ cmd/
+    - name: Create pull request
       if: steps.git-check.outputs.modified == 'true'
       uses: peter-evans/create-pull-request@v3
       with:
