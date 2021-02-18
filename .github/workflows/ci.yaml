@@ -50,6 +50,8 @@ jobs:
         name: regenerated-sources
     - name: Check formatting
       run: gofmt -l ./ > gofmt.txt && ! [ -s gofmt.txt ]
+    - name: Install golint
+      run: go get -u golang.org/x/lint/golint
     - name: Lint code
       run: golint ./... > golint.txt && ! [ -s golint.txt ]
     - name: Vet code
