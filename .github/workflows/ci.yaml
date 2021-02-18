@@ -34,10 +34,12 @@ jobs:
       run: go run ./util/cmd/compile_protos
     - name: Capture modified files
       id: mod
-      run: echo "::set-output name=modified_files::$(git ls-files --deleted --modified --other --directory --exclude-standard cmd client server/genproto server/genrest)"
+      run: |
+        files=$(git ls-files --deleted --modified --other --directory --exclude-standard cmd client server/genproto server/genrest)
+        echo ::set-output name=modified_files::$files
     - name: Prepare regenerated sources
       if: steps.mod.outputs.modified_files != ''
-      run: tar cfz regen.tgz ${{ steps.mod.outputs.modified_files }}
+      run: tar czf regen.tgz ${{ steps.mod.outputs.modified_files }}
     - uses: actions/upload-artifact@v2
       if: steps.mod.outputs.modified_files != ''
       with:
@@ -150,10 +152,9 @@ jobs:
       uses: peter-evans/create-pull-request@v3
       with:
         title: 'chore: regenerate sources'
-        body: |
-          Regenerated sources as a result of the following change:
-          https://github.com/googleapis/gapic-showcase/commit/$GITHUB_SHA
+        body: 'Regenerated sources as a result of the following change: https://github.com/googleapis/gapic-showcase/commit/$GITHUB_SHA'
         committer: googleapis-publisher <googleapis-publisher@google.com>
+        author: googleapis-publisher
         branch: regen
         base: master
         labels: automerge
