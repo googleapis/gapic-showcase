@@ -36,10 +36,10 @@ jobs:
       id: mod
       run: echo "::set-output name=modified_files::$(git ls-files --deleted --modified --other --directory --exclude-standard cmd client server/genproto server/genrest)"
     - name: Prepare regenerated sources
-      if: steps.mod.outputs.modified_files != ""
+      if: steps.mod.outputs.modified_files != ''
       run: tar cfz regen.tgz ${{ steps.mod.outputs.modified_files }}
     - uses: actions/upload-artifact@v2
-      if: steps.mod.outputs.modified_files != ""
+      if: steps.mod.outputs.modified_files != ''
       with:
         name: regenerated-sources
         path: regen.tgz
