@@ -58,7 +58,7 @@ jobs:
         name: regenerated-sources
     - name: Expand regen archive
       run: |
-        tar xzf regen.tgz
+        tar xvzf regen.tgz
         rm regen.tgz
     - name: Check formatting
       run: gofmt -l ./ > gofmt.txt && ! [ -s gofmt.txt ]
@@ -97,7 +97,7 @@ jobs:
         name: regenerated-sources
     - name: Expand regen archive
       run: |
-        tar xzf regen.tgz
+        tar xvzf regen.tgz
         rm regen.tgz
     - name: Run unit tests
       run: go test ./...
@@ -120,7 +120,7 @@ jobs:
         name: regenerated-sources
     - name: Expand regen archive
       run: |
-        tar xzf regen.tgz
+        tar xvzf regen.tgz
         rm regen.tgz
     - name: Install gapic-showcase CLI
       run: go install ./cmd/gapic-showcase
@@ -146,15 +146,13 @@ jobs:
         name: regenerated-sources
     - name: Expand regen archive
       run: |
-        tar xzf regen.tgz
+        tar xvzf regen.tgz
         rm regen.tgz
     - name: Create pull request
       uses: peter-evans/create-pull-request@v3
       with:
         title: 'chore: regenerate sources'
         body: 'Regenerated sources as a result of the following change: https://github.com/googleapis/gapic-showcase/commit/$GITHUB_SHA'
-        committer: googleapis-publisher <googleapis-publisher@google.com>
-        author: googleapis-publisher
         branch: regen
         base: master
         labels: automerge
