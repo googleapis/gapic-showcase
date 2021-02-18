@@ -49,11 +49,18 @@ jobs:
       with:
         name: regenerated-sources
     - name: Check formatting
-      run: "! gofmt -l ./ 2>&1 | read"
+      run: gofmt -l ./ > gofmt.txt && ! [ -s gofmt.txt ]
     - name: Lint code
-      run: "! go lint ./... 2>&1 | read"
-    - name: Examine and report suspicious constructs
-      run: "! go tool vet ./ 2>&1 | read"
+      run: golint ./... > golint.txt && ! [ -s golint.txt ]
+    - name: Vet code
+      run: go vet ./... > govet.txt && ! [ -s govet.txt ]
+    - uses: actions/upload-artifact@v2
+      with:
+        name: linting-results
+        path: |
+          gofmt.txt
+          golint.txt
+          govet.txt
   tests:
     needs: regenerate
     runs-on: ubuntu-latest
