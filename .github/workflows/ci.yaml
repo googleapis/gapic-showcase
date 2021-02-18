@@ -137,6 +137,7 @@ jobs:
           Regenerated sources as a result of the following change:
           https://github.com/googleapis/gapic-showcase/commit/${GITHUB_SHA}
         branch: regen
+        base: master
         labels: automerge
         reviewers: |
           noahdietz
