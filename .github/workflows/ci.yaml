@@ -157,18 +157,30 @@ jobs:
       run: |
         tar xvzf regen.tgz
         rm regen.tgz
-    - name: Create pull request
-      uses: peter-evans/create-pull-request@v3
+    - uses: googleapis/code-suggester@v1
+      env:
+        ACCESS_TOKEN: ${{ secrets.YOSHI_CODE_BOT_TOKEN }}  
       with:
-        commit-message: 'chore: regenerate sources'
+        command: pr
+        upstream_owner: googleapis
+        upstream_repo: gapic-showcase
+        description: 'Regenerated sources resulting from most recent commit to master'
         title: 'chore: regenerate sources'
-        body: 'Regenerated sources resulting from most recent commit to master'
-        author: yoshi-code-bot
-        committer: Yoshi Code Bot <yoshi-code-bot@google.com>
-        token: ${{ secrets.YOSHI_CODE_BOT_TOKEN }}
+        message: 'chore: regenerate sources'
         branch: regen
-        base: master
-        labels: automerge
-        reviewers: |
-          noahdietz
-          vchudnov-g
+        git_dir: '.'
+    # - name: Create pull request
+    #   uses: peter-evans/create-pull-request@v3
+    #   with:
+    #     commit-message: 'chore: regenerate sources'
+    #     title: 'chore: regenerate sources'
+    #     body: 'Regenerated sources resulting from most recent commit to master'
+    #     author: yoshi-code-bot
+    #     committer: Yoshi Code Bot <yoshi-code-bot@google.com>
+    #     token: ${{ secrets.YOSHI_CODE_BOT_TOKEN }}
+    #     branch: regen
+    #     base: master
+    #     labels: automerge
+    #     reviewers: |
+    #       noahdietz
+    #       vchudnov-g
