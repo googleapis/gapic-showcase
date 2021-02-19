@@ -121,40 +121,4 @@ func main() {
 		filepath.Join("dist", fmt.Sprintf("gapic-showcase-%s.desc", version)),
 	}
 	util.Execute(append(command, files...)...)
-
-	// Get cross compiler
-	// Mousetrap is a windows dependency that is not implicitly got since
-	// we only get the linux dependencies.
-	util.Execute("go", "get", "github.com/mitchellh/gox", "github.com/inconshreveable/mousetrap")
-
-	// Compile binaries
-	stagingDir := filepath.Join("tmp", "binaries")
-	osArchs := []string{
-		"windows/amd64",
-		"linux/amd64",
-		"darwin/amd64",
-		"linux/arm",
-	}
-	for _, osArch := range osArchs {
-		util.Execute(
-			"gox",
-			fmt.Sprintf("-osarch=%s", osArch),
-			"-output",
-			filepath.Join(stagingDir, fmt.Sprintf("gapic-showcase-%s-{{.OS}}-{{.Arch}}", version), "gapic-showcase"),
-			"github.com/googleapis/gapic-showcase/cmd/gapic-showcase")
-	}
-
-	dirs, _ := filepath.Glob(filepath.Join(stagingDir, "*"))
-	for _, dir := range dirs {
-		// The windows binaries are suffixed with '.exe'. This allows us to create
-		// tarballs of the executables whether or not they contain a suffix.
-		files, _ := filepath.Glob(filepath.Join(dir, "gapic-showcase*"))
-		util.Execute(
-			"tar",
-			"-zcf",
-			filepath.Join("dist", filepath.Base(dir)+".tar.gz"),
-			"-C",
-			filepath.Dir(files[0]),
-			filepath.Base(files[0]))
-	}
 }
