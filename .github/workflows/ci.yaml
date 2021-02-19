@@ -161,6 +161,23 @@ jobs:
         npm install
         npm test
         npm run system-test
+  protobufjs-load-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '12'
+    - name: Install protobuf loader
+      run: npm install google-proto-files
+    - name: Verify protos can be loaded by protobufjs
+      run: |
+        node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/echo.proto');"
+        node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/identity.proto');"
+        node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/messaging.proto');"
+        node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/testing.proto');"
+        node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/compliance.proto');"
+        node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/sequence.proto');"
   push-generated-sources:
     needs: [regenerate, lint, tests, probes]
     runs-on: ubuntu-latest
