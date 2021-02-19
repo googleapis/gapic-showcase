@@ -152,8 +152,8 @@ jobs:
       run: |
         mkdir tsout
         docker run --rm --user $UID \
-          --mount type=bind,source=./schema,destination=/in/protos/google/showcase/v1beta1,readonly \
-          --mount type=bind,source=./tsout,destination=/out/ \
+          --mount type=bind,source="$(pwd)"/schema,destination=/in/protos/google/showcase/v1beta1,readonly \
+          --mount type=bind,source="$(pwd)"/tsout,destination=/out/ \
           gcr.io/gapic-images/gapic-generator-typescript:latest
     - name: Run auto-generated tests
       run: |
