@@ -748,8 +748,11 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type SequenceServiceClient interface {
+	// Creates a sequence.
 	CreateSequence(ctx context.Context, in *CreateSequenceRequest, opts ...grpc.CallOption) (*Sequence, error)
+	// Retrieves a sequence.
 	GetSequenceReport(ctx context.Context, in *GetSequenceReportRequest, opts ...grpc.CallOption) (*SequenceReport, error)
+	// Attempts a sequence.
 	AttemptSequence(ctx context.Context, in *AttemptSequenceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -790,8 +793,11 @@ func (c *sequenceServiceClient) AttemptSequence(ctx context.Context, in *Attempt
 
 // SequenceServiceServer is the server API for SequenceService service.
 type SequenceServiceServer interface {
+	// Creates a sequence.
 	CreateSequence(context.Context, *CreateSequenceRequest) (*Sequence, error)
+	// Retrieves a sequence.
 	GetSequenceReport(context.Context, *GetSequenceReportRequest) (*SequenceReport, error)
+	// Attempts a sequence.
 	AttemptSequence(context.Context, *AttemptSequenceRequest) (*emptypb.Empty, error)
 }
 

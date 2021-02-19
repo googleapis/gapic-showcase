@@ -160,8 +160,9 @@ func init() {
 }
 
 var RepeatDataPathTrailingResourceCmd = &cobra.Command{
-	Use: "repeat-data-path-trailing-resource",
-
+	Use:   "repeat-data-path-trailing-resource",
+	Short: "Same as RepeatDataSimplePath, but with a trailing...",
+	Long:  "Same as RepeatDataSimplePath, but with a trailing resource.",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if RepeatDataPathTrailingResourceFromFile == "" {

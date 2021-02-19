@@ -283,7 +283,7 @@ type UpdateUserRequest struct {
 
 	// The user to update.
 	User *User `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
-	// The field mask to determine wich fields are to be updated. If empty, the
+	// The field mask to determine which fields are to be updated. If empty, the
 	// server will assume all fields are to be updated.
 	UpdateMask *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
 }

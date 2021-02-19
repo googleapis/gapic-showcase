@@ -1022,12 +1022,12 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ComplianceClient interface {
-	// This method echoes the ComplianceData request. This method exercises sending the
-	// entire request object in the REST body.
+	// This method echoes the ComplianceData request. This method exercises
+	// sending the entire request object in the REST body.
 	RepeatDataBody(ctx context.Context, in *RepeatRequest, opts ...grpc.CallOption) (*RepeatResponse, error)
-	// This method echoes the ComplianceData request. This method exercises sending the a
-	// message-type field in the REST body. Per AIP-127, only top-level, non-repeated fields can be
-	// sent this way.
+	// This method echoes the ComplianceData request. This method exercises
+	// sending the a message-type field in the REST body. Per AIP-127, only
+	// top-level, non-repeated fields can be sent this way.
 	RepeatDataBodyInfo(ctx context.Context, in *RepeatRequest, opts ...grpc.CallOption) (*RepeatResponse, error)
 	// This method echoes the ComplianceData request. This method exercises
 	// sending all request fields as query parameters.
@@ -1036,7 +1036,9 @@ type ComplianceClient interface {
 	// sending some parameters as "simple" path variables (i.e., of the form
 	// "/bar/{foo}" rather than "/{foo=bar/*}"), and the rest as query parameters.
 	RepeatDataSimplePath(ctx context.Context, in *RepeatRequest, opts ...grpc.CallOption) (*RepeatResponse, error)
+	// Same as RepeatDataSimplePath, but with a path resource.
 	RepeatDataPathResource(ctx context.Context, in *RepeatRequest, opts ...grpc.CallOption) (*RepeatResponse, error)
+	// Same as RepeatDataSimplePath, but with a trailing resource.
 	RepeatDataPathTrailingResource(ctx context.Context, in *RepeatRequest, opts ...grpc.CallOption) (*RepeatResponse, error)
 }
 
@@ -1104,12 +1106,12 @@ func (c *complianceClient) RepeatDataPathTrailingResource(ctx context.Context, i
 
 // ComplianceServer is the server API for Compliance service.
 type ComplianceServer interface {
-	// This method echoes the ComplianceData request. This method exercises sending the
-	// entire request object in the REST body.
+	// This method echoes the ComplianceData request. This method exercises
+	// sending the entire request object in the REST body.
 	RepeatDataBody(context.Context, *RepeatRequest) (*RepeatResponse, error)
-	// This method echoes the ComplianceData request. This method exercises sending the a
-	// message-type field in the REST body. Per AIP-127, only top-level, non-repeated fields can be
-	// sent this way.
+	// This method echoes the ComplianceData request. This method exercises
+	// sending the a message-type field in the REST body. Per AIP-127, only
+	// top-level, non-repeated fields can be sent this way.
 	RepeatDataBodyInfo(context.Context, *RepeatRequest) (*RepeatResponse, error)
 	// This method echoes the ComplianceData request. This method exercises
 	// sending all request fields as query parameters.
@@ -1118,7 +1120,9 @@ type ComplianceServer interface {
 	// sending some parameters as "simple" path variables (i.e., of the form
 	// "/bar/{foo}" rather than "/{foo=bar/*}"), and the rest as query parameters.
 	RepeatDataSimplePath(context.Context, *RepeatRequest) (*RepeatResponse, error)
+	// Same as RepeatDataSimplePath, but with a path resource.
 	RepeatDataPathResource(context.Context, *RepeatRequest) (*RepeatResponse, error)
+	// Same as RepeatDataSimplePath, but with a trailing resource.
 	RepeatDataPathTrailingResource(context.Context, *RepeatRequest) (*RepeatResponse, error)
 }
 

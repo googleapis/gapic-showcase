@@ -160,8 +160,9 @@ func init() {
 }
 
 var RepeatDataPathResourceCmd = &cobra.Command{
-	Use: "repeat-data-path-resource",
-
+	Use:   "repeat-data-path-resource",
+	Short: "Same as RepeatDataSimplePath, but with a path...",
+	Long:  "Same as RepeatDataSimplePath, but with a path resource.",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if RepeatDataPathResourceFromFile == "" {
