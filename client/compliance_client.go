@@ -144,8 +144,8 @@ func (c *ComplianceClient) setGoogleClientInfo(keyval ...string) {
 	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
 }
 
-// RepeatDataBody this method echoes the ComplianceData request. This method exercises sending the
-// entire request object in the REST body.
+// RepeatDataBody this method echoes the ComplianceData request. This method exercises
+// sending the entire request object in the REST body.
 func (c *ComplianceClient) RepeatDataBody(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append(c.CallOptions.RepeatDataBody[0:len(c.CallOptions.RepeatDataBody):len(c.CallOptions.RepeatDataBody)], opts...)
@@ -161,9 +161,9 @@ func (c *ComplianceClient) RepeatDataBody(ctx context.Context, req *genprotopb.R
 	return resp, nil
 }
 
-// RepeatDataBodyInfo this method echoes the ComplianceData request. This method exercises sending the a
-// message-type field in the REST body. Per AIP-127, only top-level, non-repeated fields can be
-// sent this way.
+// RepeatDataBodyInfo this method echoes the ComplianceData request. This method exercises
+// sending the a message-type field in the REST body. Per AIP-127, only
+// top-level, non-repeated fields can be sent this way.
 func (c *ComplianceClient) RepeatDataBodyInfo(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append(c.CallOptions.RepeatDataBodyInfo[0:len(c.CallOptions.RepeatDataBodyInfo):len(c.CallOptions.RepeatDataBodyInfo)], opts...)
@@ -215,6 +215,7 @@ func (c *ComplianceClient) RepeatDataSimplePath(ctx context.Context, req *genpro
 	return resp, nil
 }
 
+// RepeatDataPathResource same as RepeatDataSimplePath, but with a path resource.
 func (c *ComplianceClient) RepeatDataPathResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_child.f_string", url.QueryEscape(req.GetInfo().GetFChild().GetFString()), "info.f_bool", req.GetInfo().GetFBool()))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
@@ -231,6 +232,7 @@ func (c *ComplianceClient) RepeatDataPathResource(ctx context.Context, req *genp
 	return resp, nil
 }
 
+// RepeatDataPathTrailingResource same as RepeatDataSimplePath, but with a trailing resource.
 func (c *ComplianceClient) RepeatDataPathTrailingResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_child.f_string", url.QueryEscape(req.GetInfo().GetFChild().GetFString())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
