@@ -144,8 +144,7 @@ jobs:
   push-generated-sources:
     needs: [regenerate, lint, tests, probes]
     runs-on: ubuntu-latest
-    # if: github.ref == 'refs/heads/master'
-    if: needs.regenerate.outputs.modified_files != ''
+    if: github.ref == 'refs/heads/master' && needs.regenerate.outputs.modified_files != ''
     steps:
     - uses: actions/checkout@v2
       with:
@@ -169,18 +168,3 @@ jobs:
         message: 'chore: regenerate sources'
         branch: regen
         git_dir: '.'
-    # - name: Create pull request
-    #   uses: peter-evans/create-pull-request@v3
-    #   with:
-    #     commit-message: 'chore: regenerate sources'
-    #     title: 'chore: regenerate sources'
-    #     body: 'Regenerated sources resulting from most recent commit to master'
-    #     author: yoshi-code-bot
-    #     committer: Yoshi Code Bot <yoshi-code-bot@google.com>
-    #     token: ${{ secrets.YOSHI_CODE_BOT_TOKEN }}
-    #     branch: regen
-    #     base: master
-    #     labels: automerge
-    #     reviewers: |
-    #       noahdietz
-    #       vchudnov-g
