@@ -60,6 +60,10 @@ jobs:
           curl -sSL https://github.com/protocolbuffers/protobuf/releases/download/v3.15.0/protoc-3.15.0-linux-x86_64.zip > protobuf/protoc.zip
           unzip -d protobuf protobuf/protoc.zip
           echo "./protobuf/bin" >> $GITHUB_PATH
+      - name: Install the cross-platform build tool.
+        run: |
+          go get github.com/mitchellh/gox
+          go get github.com/inconshreveable/mousetrap
       - name: Compile release assets
         run: go run ./util/cmd/release -version=${{ needs.inspect.outputs.version }}
       - name: Upload release assets
