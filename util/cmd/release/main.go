@@ -15,6 +15,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -24,6 +25,12 @@ import (
 	"github.com/googleapis/gapic-showcase/util"
 )
 
+var version string
+
+func init() {
+	flag.StringVar(&version, "version", "", "the version tag [required]")
+}
+
 // This script is ran in CI when a new version tag is pushed to master. This script
 // places the compiled proto descriptor set, a tarball of showcase-protos alongside it's
 // dependencies, and the compiled executables of the gapic-showcase cli tool inside the
@@ -31,8 +38,13 @@ import (
 //
 // This script must be ran from the root directory of the gapic-showcase repository.
 //
-// Usage: go run ./util/cmd/release
+// Usage: go run ./util/cmd/release -version
 func main() {
+	flag.Parse()
+	if version == "" {
+		log.Fatalln("Missing required flag: -version")
+	}
+
 	if err := os.RemoveAll("tmp"); err != nil {
 		log.Fatalf("Failed to remove the directory 'tmp': %v", err)
 	}
@@ -84,12 +96,6 @@ func main() {
 	// Copy the API Service config for easy access by generators.
 	serviceYamlSrc := filepath.Join("schema", "google", "showcase", "v1beta1", "showcase_v1beta1.yaml")
 	util.Execute("cp", serviceYamlSrc, "dist")
-
-	// Find gapic-showcase version
-	version, err := exec.Command("go", "run", "./cmd/gapic-showcase", "--version").Output()
-	if err != nil {
-		log.Fatalf("Failed getting showcase version: %+v", err)
-	}
 
 	// Tar Protos
 	output := filepath.Join("dist", fmt.Sprintf("gapic-showcase-%s-protos.tar.gz", version))
