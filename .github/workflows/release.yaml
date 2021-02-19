@@ -64,7 +64,7 @@ jobs:
           echo "./protobuf/bin" >> $GITHUB_PATH
       - name: Compile proto release assets
         run: go run ./util/cmd/release -version=${{ needs.inspect.outputs.version }}
-      - name: Upload release assets
+      - name: Upload proto release assets
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ github.token }}
@@ -92,7 +92,7 @@ jobs:
     steps:
       - uses: actions/setup-go@v2
         with:
-          go-version: '^1.13.1'
+          go-version: '1.13.15'
       - uses: actions/checkout@v2
       # The generator does not use these,  but we need them to build the
       # binaries.
@@ -109,11 +109,10 @@ jobs:
           gox -osarch ${{ matrix.osarch.os }}/${{ matrix.osarch.arch }} -output gapic-showcase ./cmd/gapic-showcase && \
           tar cvfz gapic-showcase.tar.gz gapic-showcase
       - name: Upload the ${{ matrix.osarch.os }}/${{ matrix.osarch.arch }} release.
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+        uses: svenstaro/upload-release-action@v2
         with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: ./gapic-showcase.tar.gz
+          repo_token: ${{ github.token }}
+          file: ./gapic-showcase.tar.gz
           asset_name: gapic-showcase-${{ needs.inspect.outputs.version }}-${{ matrix.osarch.os }}-${{ matrix.osarch.arch }}.tar.gz
-          asset_content_type: application/tar+gzip
+          tag: ${{ needs.inspect.outputs.version }}
+          overwrite: true
