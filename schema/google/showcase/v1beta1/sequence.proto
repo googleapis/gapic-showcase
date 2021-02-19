@@ -34,7 +34,8 @@ service SequenceService {
   // This service is meant to only run locally on the port 7469 (keypad digits
   // for "show").
   option (google.api.default_host) = "localhost:7469";
-  
+
+  // Creates a sequence.
   rpc CreateSequence(CreateSequenceRequest) returns (Sequence) {
     option (google.api.http) = {
       post: "/v1beta1/sequences"
@@ -42,7 +43,8 @@ service SequenceService {
     };
     option (google.api.method_signature) = "sequence";
   };
-  
+
+  // Retrieves a sequence.
   rpc GetSequenceReport(GetSequenceReportRequest) returns (SequenceReport) {
     option (google.api.http) = {
       get: "/v1beta1/{name=sequences/*/sequenceReport}"
@@ -50,6 +52,7 @@ service SequenceService {
     option (google.api.method_signature) = "name";
   };
 
+  // Attempts a sequence.
   rpc AttemptSequence(AttemptSequenceRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       post: "/v1beta1/{name=sequences/*}"
@@ -126,7 +129,8 @@ message AttemptSequenceRequest {
 
 message GetSequenceReportRequest {
   string name = 1 [
-    (google.api.resource_reference).type = "showcase.googleapis.com/SequenceReport",
+    (google.api.resource_reference).type =
+        "showcase.googleapis.com/SequenceReport",
     (google.api.field_behavior) = REQUIRED
   ];
 }

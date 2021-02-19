@@ -30,8 +30,8 @@ service Compliance {
   // for "show").
   option (google.api.default_host) = "localhost:7469";
 
-  // This method echoes the ComplianceData request. This method exercises sending the
-  // entire request object in the REST body.
+  // This method echoes the ComplianceData request. This method exercises
+  // sending the entire request object in the REST body.
   rpc RepeatDataBody(RepeatRequest) returns (RepeatResponse) {
     option (google.api.http) = {
       post: "/v1beta1/repeat:body"
@@ -39,9 +39,9 @@ service Compliance {
     };
   }
 
-  // This method echoes the ComplianceData request. This method exercises sending the a
-  // message-type field in the REST body. Per AIP-127, only top-level, non-repeated fields can be
-  // sent this way.
+  // This method echoes the ComplianceData request. This method exercises
+  // sending the a message-type field in the REST body. Per AIP-127, only
+  // top-level, non-repeated fields can be sent this way.
   rpc RepeatDataBodyInfo(RepeatRequest) returns (RepeatResponse) {
     option (google.api.http) = {
       post: "/v1beta1/repeat:bodyinfo"
@@ -66,12 +66,14 @@ service Compliance {
     };
   }
 
+  // Same as RepeatDataSimplePath, but with a path resource.
   rpc RepeatDataPathResource(RepeatRequest) returns (RepeatResponse) {
     option (google.api.http) = {
       get: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/*}/bool/{info.f_bool}:pathresource"
     };
   }
 
+  // Same as RepeatDataSimplePath, but with a trailing resource.
   rpc RepeatDataPathTrailingResource(RepeatRequest) returns (RepeatResponse) {
     option (google.api.http) = {
       get: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/**}:pathtrailingresource"
@@ -88,7 +90,6 @@ message RepeatResponse {
   ComplianceData info = 1;
 }
 
-
 // ComplianceSuite contains a set of requests that microgenerators should issue
 // over REST to the Compliance service to test their gRPC-to-REST transcoding
 // implementation.
@@ -103,13 +104,11 @@ message ComplianceGroup {
   string name = 1;
   repeated string rpcs = 2;
   repeated RepeatRequest requests = 3;
-
 }
 
 // ComplianceData is a message used for testing REST transcoding of
 // different data types.
 message ComplianceData {
-
   // scalar types
 
   string f_string = 1;
