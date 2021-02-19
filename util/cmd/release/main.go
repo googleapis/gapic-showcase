@@ -38,7 +38,7 @@ func init() {
 //
 // This script must be ran from the root directory of the gapic-showcase repository.
 //
-// Usage: go run ./util/cmd/release -version
+// Usage: go run ./util/cmd/release -version vX.Y.Z
 func main() {
 	flag.Parse()
 	if version == "" {

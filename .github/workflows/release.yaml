@@ -4,8 +4,6 @@ on:
   push:
     tags:
       - '*'
-  # just for testing, remove this
-  pull_request:
 
 jobs:
   inspect:
@@ -19,8 +17,7 @@ jobs:
           fetch-depth: 0
       - name: Parse tag name
         id: tag
-        # TODO change to this when run on only tag push: "${GITHUB_REF#refs/*/}"
-        run: echo ::set-output name=version::"v0.0.1-test"
+        run: echo ::set-output name=version::"${GITHUB_REF#refs/*/}"
       - name: Get release information
         id: changes
         run: echo ::set-output name=release_notes::"$(go run ./util/cmd/print_changes ${{ steps.tag.outputs.version }})"
@@ -87,10 +84,8 @@ jobs:
             arch: arm
           - os: darwin
             arch: amd64
-          # Disable windows build because it is not compiling for some reason:
-          # --> windows/amd64 error: exit status 2
-          # Stderr: # github.com/googleapis/gapic-showcase/cmd/gapic-showcase
-          # cmd/gapic-showcase/run.go:41:80: undefined: syscall.SIGSTOP
+          # Disable windows build because it is not compiling for some reason.
+          # TODO(noahdietz): https://github.com/googleapis/gapic-showcase/issues/603
           #
           # - os: windows
           #   arch: amd64
