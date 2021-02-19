@@ -87,8 +87,13 @@ jobs:
             arch: arm
           - os: darwin
             arch: amd64
-          - os: windows
-            arch: amd64
+          # Disable windows build because it is not compiling for some reason:
+          # --> windows/amd64 error: exit status 2
+          # Stderr: # github.com/googleapis/gapic-showcase/cmd/gapic-showcase
+          # cmd/gapic-showcase/run.go:41:80: undefined: syscall.SIGSTOP
+          #
+          # - os: windows
+          #   arch: amd64
     steps:
       - uses: actions/setup-go@v2
         with:
