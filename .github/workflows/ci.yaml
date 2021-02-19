@@ -163,6 +163,9 @@ jobs:
         commit-message: 'chore: regenerate sources'
         title: 'chore: regenerate sources'
         body: 'Regenerated sources resulting from most recent commit to master'
+        author: yoshi-code-bot
+        committer: Yoshi Code Bot <yoshi-code-bot@google.com>
+        token: ${{ secrets.YOSHI_CODE_BOT_TOKEN }}
         branch: regen
         base: master
         labels: automerge
