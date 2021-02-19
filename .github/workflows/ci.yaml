@@ -151,7 +151,7 @@ jobs:
             docker run --rm --user $UID \
               --mount type=bind,source="$(pwd)"/schema/,destination=/in/google/showcase/v1beta1/,readonly \
               --mount type=bind,source="$(pwd)"/pyout,target=/out \
-              gcr.io/gapic-images/gapic-generator-python:0.40.7
+              gcr.io/gapic-images/gapic-generator-python:v0.40.7
   typescript-smoke-test:
     runs-on: ubuntu-latest
     steps:
