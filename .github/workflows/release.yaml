@@ -21,7 +21,7 @@ jobs:
         # "${GITHUB_REF#refs/*/}"
         run: echo ::set-output name=version::"v0.0.1-test"
       - name: Set raw version
-        id: tag
+        id: raw_tag
         # "${GITHUB_REF#refs/*/v}"
         run: echo ::set-output name=raw_version::"0.0.1-test"
       - name: Get release information
@@ -29,7 +29,7 @@ jobs:
         run: echo ::set-output name=release_notes::"$(go run ./util/cmd/print_changes ${{ steps.tag.outputs.version }})"
     outputs:
       version: ${{ steps.tag.outputs.version }}
-      raw_version: ${{ steps.tag.outputs.raw_version }}
+      raw_version: ${{ steps.raw_tag.outputs.raw_version }}
       release_notes: ${{ steps.changes.outputs.release_notes }}
   release:
     runs-on: ubuntu-latest
