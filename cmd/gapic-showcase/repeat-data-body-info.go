@@ -162,7 +162,7 @@ func init() {
 var RepeatDataBodyInfoCmd = &cobra.Command{
 	Use:   "repeat-data-body-info",
 	Short: "This method echoes the ComplianceData request....",
-	Long:  "This method echoes the ComplianceData request. This method exercises sending the a  message-type field in the REST body. Per AIP-127, only top-level,...",
+	Long:  "This method echoes the ComplianceData request. This method exercises  sending the a message-type field in the REST body. Per AIP-127, only ...",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if RepeatDataBodyInfoFromFile == "" {

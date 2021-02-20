@@ -299,7 +299,7 @@ type UpdateRoomRequest struct {
 
 	// The room to update.
 	Room *Room `protobuf:"bytes,1,opt,name=room,proto3" json:"room,omitempty"`
-	// The field mask to determine wich fields are to be updated. If empty, the
+	// The field mask to determine which fields are to be updated. If empty, the
 	// server will assume all fields are to be updated.
 	UpdateMask *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
 }
@@ -473,8 +473,8 @@ type ListRoomsResponse struct {
 	Rooms []*Room `protobuf:"bytes,1,rep,name=rooms,proto3" json:"rooms,omitempty"`
 	// A token to retrieve next page of results.
 	// Pass this value in ListRoomsRequest.page_token field in the subsequent
-	// call to `google.showcase.v1beta1.Messaging\ListRooms` method to retrieve the
-	// next page of results.
+	// call to `google.showcase.v1beta1.Messaging\ListRooms` method to retrieve
+	// the next page of results.
 	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 }
 
@@ -544,7 +544,8 @@ type Blurb struct {
 	// The latest timestamp at which the blurb was updated.
 	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
 	// (-- aip.dev/not-precedent: This is designed for testing non-slash
-	//     resource patterns. Ordinarily, non-slash separators are discouraged. --)
+	//     resource patterns. Ordinarily, non-slash separators are discouraged.
+	//     --)
 	//
 	// Types that are assignable to LegacyId:
 	//	*Blurb_LegacyRoomId
@@ -678,13 +679,15 @@ type isBlurb_LegacyId interface {
 
 type Blurb_LegacyRoomId struct {
 	// The legacy id of the room. This field is used to signal
-	// the use of the compound resource pattern `rooms/{room}/blurbs/legacy/{legacy_room}.{blurb}`
+	// the use of the compound resource pattern
+	// `rooms/{room}/blurbs/legacy/{legacy_room}.{blurb}`
 	LegacyRoomId string `protobuf:"bytes,7,opt,name=legacy_room_id,json=legacyRoomId,proto3,oneof"`
 }
 
 type Blurb_LegacyUserId struct {
 	// The legacy id of the user. This field is used to signal
-	// the use of the compound resource pattern `users/{user}/profile/blurbs/legacy/{legacy_user}~{blurb}`
+	// the use of the compound resource pattern
+	// `users/{user}/profile/blurbs/legacy/{legacy_user}~{blurb}`
 	LegacyUserId string `protobuf:"bytes,8,opt,name=legacy_user_id,json=legacyUserId,proto3,oneof"`
 }
 

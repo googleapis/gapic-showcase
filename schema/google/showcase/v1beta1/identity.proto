@@ -42,7 +42,8 @@ service Identity {
       body: "*"
     };
     option (google.api.method_signature) = "user.display_name,user.email";
-    option (google.api.method_signature) = "user.display_name,user.email,user.age,user.nickname,user.enable_notifications,user.height_feet";
+    option (google.api.method_signature) =
+        "user.display_name,user.email,user.age,user.nickname,user.enable_notifications,user.height_feet";
   }
 
   // Retrieves the User with the given uri.
@@ -94,14 +95,12 @@ message User {
   string email = 3 [(google.api.field_behavior) = REQUIRED];
 
   // The timestamp at which the user was created.
-  google.protobuf.Timestamp create_time = 4 [
-    (google.api.field_behavior) = OUTPUT_ONLY
-  ];
+  google.protobuf.Timestamp create_time = 4
+      [(google.api.field_behavior) = OUTPUT_ONLY];
 
   // The latest timestamp at which the user was updated.
-  google.protobuf.Timestamp update_time = 5 [
-    (google.api.field_behavior) = OUTPUT_ONLY
-  ];
+  google.protobuf.Timestamp update_time = 5
+      [(google.api.field_behavior) = OUTPUT_ONLY];
 
   // The age of the user in years.
   optional int32 age = 6;
@@ -145,7 +144,7 @@ message UpdateUserRequest {
   // The user to update.
   User user = 1;
 
-  // The field mask to determine wich fields are to be updated. If empty, the
+  // The field mask to determine which fields are to be updated. If empty, the
   // server will assume all fields are to be updated.
   google.protobuf.FieldMask update_mask = 2;
 }

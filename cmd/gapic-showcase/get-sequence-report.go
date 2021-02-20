@@ -28,8 +28,9 @@ func init() {
 }
 
 var GetSequenceReportCmd = &cobra.Command{
-	Use: "get-sequence-report",
-
+	Use:   "get-sequence-report",
+	Short: "Retrieves a sequence.",
+	Long:  "Retrieves a sequence.",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if GetSequenceReportFromFile == "" {
