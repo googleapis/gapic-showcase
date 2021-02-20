@@ -135,8 +135,8 @@ jobs:
       - name: Push to GCR
         uses: docker/build-push-action@v2
         with:
-          registry: gcr.io
-          repository: gapic-images/gapic-showcase
-          tags: ${{ needs.inspect.outputs.version }},latest
+          tags:
+            - gcr.io/gapic-images/gapic-showcase:${{ needs.inspect.outputs.version }}
+            - gcr.io/gapic-images/gapic-showcase:latest
           push: true
           context: .
