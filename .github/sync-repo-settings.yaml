@@ -5,10 +5,12 @@ branchProtectionRules:
 - pattern: master
   isAdminEnforced: true
   requiredStatusCheckContexts:
-    - 'ci/circleci: build'
-    - 'ci/circleci: protobufjs-load-test'
-    - 'ci/circleci: test'
-    - 'ci/circleci: typescript-smoke-test'
+    - 'regenerate'
+    - 'lint'
+    - 'tests'
+    - 'probes'
+    - 'protobufjs-load-test'
+    - 'typescript-smoke-test'
     - 'cla/google'
   requiredApprovingReviewCount: 1
   requiresCodeOwnerReviews: true

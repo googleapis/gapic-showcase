@@ -1,0 +1,207 @@
+---
+name: Showcase CI
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    outputs:
+      modified_files: ${{ steps.mod.outputs.modified_files }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: '^1.13.1'
+    - name: Checkout common protos
+      run: git submodule init && git submodule update
+    - name: Install protoc
+      run: |
+        mkdir protobuf
+        curl -sSL https://github.com/protocolbuffers/protobuf/releases/download/v3.15.0/protoc-3.15.0-linux-x86_64.zip > protobuf/protoc.zip
+        unzip -d protobuf protobuf/protoc.zip
+        echo "./protobuf/bin" >> $GITHUB_PATH
+    - name: Install external generators
+      run: |
+        go mod download
+        go install github.com/golang/protobuf/protoc-gen-go
+        go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli
+        go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic
+    - name: Install REST server generator
+      run: go install ./util/cmd/protoc-gen-go_rest_server
+    - name: Regenerate sources
+      run: go run ./util/cmd/compile_protos
+    - name: Capture modified files
+      id: mod
+      run: |
+        files=$(git ls-files --deleted --modified --other --directory --exclude-standard cmd client server/genproto server/genrest)
+        echo ::set-output name=modified_files::$files
+    - name: Prepare regenerated sources
+      if: steps.mod.outputs.modified_files
+      run: tar czf regen.tgz ${{ steps.mod.outputs.modified_files }}
+    - uses: actions/upload-artifact@v2
+      if: steps.mod.outputs.modified_files
+      with:
+        name: regenerated-sources
+        path: regen.tgz
+  lint:
+    needs: regenerate
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: '^1.13.1'
+    - uses: actions/download-artifact@v2
+      if: needs.regenerate.outputs.modified_files
+      with:
+        name: regenerated-sources
+    - name: Expand regen archive
+      if: needs.regenerate.outputs.modified_files
+      run: |
+        tar xvzf regen.tgz
+        rm regen.tgz
+    - name: Check formatting
+      run: gofmt -l ./ > gofmt.txt && ! [ -s gofmt.txt ]
+    # TODO(noahdietz): Enable these once all issues are resolved.
+    # https://github.com/googleapis/gapic-showcase/issues/591
+    #
+    # - name: Install golint
+    #   run: go get -u golang.org/x/lint/golint
+    #   if: ${{ always() }}
+    # - name: Lint service implementations
+    #   run: golint ./server/services >> golint.txt && ! [ -s golint.txt ]
+    #   if: ${{ always() }}
+    # - name: Vet service implementations
+    #   run: go vet ./server/services 2> govet.txt && ! [ -s govet.txt ]
+    #   if: ${{ always() }}
+    - uses: actions/upload-artifact@v2
+      if: ${{ always() }}
+      with:
+        name: linting-results
+        path: gofmt.txt
+          # TODO(noahdietz): Enable these once all issues are resolved.
+          # https://github.com/googleapis/gapic-showcase/issues/591
+          # 
+          # golint.txt
+          # govet.txt
+  tests:
+    needs: regenerate
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: '^1.13.1'
+    - uses: actions/download-artifact@v2
+      if: needs.regenerate.outputs.modified_files
+      with:
+        name: regenerated-sources
+    - name: Expand regen archive
+      if: needs.regenerate.outputs.modified_files
+      run: |
+        tar xvzf regen.tgz
+        rm regen.tgz
+    - name: Run unit tests
+      run: go test ./...
+    - name: Run server coverage
+      run: go test ./server/... -coverprofile=coverage.txt -covermode=atomic
+    - uses: codecov/codecov-action@v1
+      with:
+        files: ./coverage.txt
+        flags: unittests
+  probes:
+    needs: regenerate
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: '^1.13.1'
+    - uses: actions/download-artifact@v2
+      if: needs.regenerate.outputs.modified_files
+      with:
+        name: regenerated-sources
+    - name: Expand regen archive
+      if: needs.regenerate.outputs.modified_files
+      run: |
+        tar xvzf regen.tgz
+        rm regen.tgz
+    - name: Install gapic-showcase CLI
+      run: go install ./cmd/gapic-showcase
+    - name: Probe gRPC and REST servers
+      run: |
+        gapic-showcase run &
+        gapic-showcase echo echo --response content --response.content "hello!"
+        GRPC_EXIT_CODE=$?
+        STATUSCODE=$(curl --silent --output /dev/null --write-out "%{http_code}" http://localhost:7469/hello)
+        echo "gRPC exit code: $GRPC_EXIT_CODE"
+        echo "REST status code: $STATUSCODE"
+        [ $STATUSCODE = "200" ]  && [ GRPC_EXIT_CODE != 0 ]
+  typescript-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '12'
+    - name: Run gapic-generator-typescript
+      run: |
+        mkdir tsout
+        docker run --rm --user $UID \
+          --mount type=bind,source="$(pwd)"/schema,destination=/in/protos/google/showcase/v1beta1,readonly \
+          --mount type=bind,source="$(pwd)"/tsout,destination=/out/ \
+          gcr.io/gapic-images/gapic-generator-typescript:latest
+    - name: Run auto-generated tests
+      run: |
+        cd tsout
+        npm install
+        npm test
+        npm run system-test
+  protobufjs-load-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '12'
+    - name: Install protobuf loader
+      run: npm install google-proto-files
+    - name: Verify protos can be loaded by protobufjs
+      run: |
+        node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/echo.proto');"
+        node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/identity.proto');"
+        node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/messaging.proto');"
+        node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/testing.proto');"
+        node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/compliance.proto');"
+        node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/sequence.proto');"
+  push-generated-sources:
+    needs: [regenerate, lint, tests, probes]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' && needs.regenerate.outputs.modified_files
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: master
+    - uses: actions/download-artifact@v2
+      with:
+        name: regenerated-sources
+    - name: Expand regen archive
+      run: |
+        tar xvzf regen.tgz
+        rm regen.tgz
+    - uses: googleapis/code-suggester@v1
+      env:
+        ACCESS_TOKEN: ${{ secrets.YOSHI_CODE_BOT_TOKEN }}  
+      with:
+        command: pr
+        upstream_owner: googleapis
+        upstream_repo: gapic-showcase
+        description: 'Regenerated sources resulting from most recent commit to master'
+        title: 'chore: regenerate sources'
+        message: 'chore: regenerate sources'
+        branch: regen
+        git_dir: '.'

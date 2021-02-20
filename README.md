@@ -1,7 +1,6 @@
 # GAPIC Showcase
 
 [![Release Level][releaselevelimg]][releaselevel]
-[![CircleCI][circleimg]][circle]
 [![Code Coverage][codecovimg]][codecov]
 [![GoDoc][godocimg]][godoc]
 
@@ -203,8 +202,6 @@ This API is not publicly served.
 
 This is not an official Google product.
 
-[circle]: https://circleci.com/gh/googleapis/gapic-showcase
-[circleimg]: https://circleci.com/gh/googleapis/gapic-showcase.svg?style=shield
 [codecovimg]: https://codecov.io/github/googleapis/gapic-showcase/coverage.svg?branch=master
 [codecov]: https://codecov.io/github/googleapis/gapic-showcase?branch=master
 [godoc]: https://godoc.org/github.com/googleapis/gapic-showcase/server

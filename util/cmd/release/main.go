@@ -15,6 +15,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -24,6 +25,12 @@ import (
 	"github.com/googleapis/gapic-showcase/util"
 )
 
+var version string
+
+func init() {
+	flag.StringVar(&version, "version", "", "the version tag [required]")
+}
+
 // This script is ran in CI when a new version tag is pushed to master. This script
 // places the compiled proto descriptor set, a tarball of showcase-protos alongside it's
 // dependencies, and the compiled executables of the gapic-showcase cli tool inside the
@@ -31,8 +38,13 @@ import (
 //
 // This script must be ran from the root directory of the gapic-showcase repository.
 //
-// Usage: go run ./util/cmd/release
+// Usage: go run ./util/cmd/release -version vX.Y.Z
 func main() {
+	flag.Parse()
+	if version == "" {
+		log.Fatalln("Missing required flag: -version")
+	}
+
 	if err := os.RemoveAll("tmp"); err != nil {
 		log.Fatalf("Failed to remove the directory 'tmp': %v", err)
 	}
@@ -85,12 +97,6 @@ func main() {
 	serviceYamlSrc := filepath.Join("schema", "google", "showcase", "v1beta1", "showcase_v1beta1.yaml")
 	util.Execute("cp", serviceYamlSrc, "dist")
 
-	// Find gapic-showcase version
-	version, err := exec.Command("go", "run", "./cmd/gapic-showcase", "--version").Output()
-	if err != nil {
-		log.Fatalf("Failed getting showcase version: %+v", err)
-	}
-
 	// Tar Protos
 	output := filepath.Join("dist", fmt.Sprintf("gapic-showcase-%s-protos.tar.gz", version))
 	util.Execute("tar", "-zcf", output, "-C", tmpProtoPath, "google")
@@ -115,40 +121,4 @@ func main() {
 		filepath.Join("dist", fmt.Sprintf("gapic-showcase-%s.desc", version)),
 	}
 	util.Execute(append(command, files...)...)
-
-	// Get cross compiler
-	// Mousetrap is a windows dependency that is not implicitly got since
-	// we only get the linux dependencies.
-	util.Execute("go", "get", "github.com/mitchellh/gox", "github.com/inconshreveable/mousetrap")
-
-	// Compile binaries
-	stagingDir := filepath.Join("tmp", "binaries")
-	osArchs := []string{
-		"windows/amd64",
-		"linux/amd64",
-		"darwin/amd64",
-		"linux/arm",
-	}
-	for _, osArch := range osArchs {
-		util.Execute(
-			"gox",
-			fmt.Sprintf("-osarch=%s", osArch),
-			"-output",
-			filepath.Join(stagingDir, fmt.Sprintf("gapic-showcase-%s-{{.OS}}-{{.Arch}}", version), "gapic-showcase"),
-			"github.com/googleapis/gapic-showcase/cmd/gapic-showcase")
-	}
-
-	dirs, _ := filepath.Glob(filepath.Join(stagingDir, "*"))
-	for _, dir := range dirs {
-		// The windows binaries are suffixed with '.exe'. This allows us to create
-		// tarballs of the executables whether or not they contain a suffix.
-		files, _ := filepath.Glob(filepath.Join(dir, "gapic-showcase*"))
-		util.Execute(
-			"tar",
-			"-zcf",
-			filepath.Join("dist", filepath.Base(dir)+".tar.gz"),
-			"-C",
-			filepath.Dir(files[0]),
-			filepath.Base(files[0]))
-	}
 }
