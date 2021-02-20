@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - '*'
-  pull_request:
 
 jobs:
   inspect:
@@ -18,12 +17,11 @@ jobs:
           fetch-depth: 0
       - name: Parse tag name
         id: tag
-        # "${GITHUB_REF#refs/*/}"
-        run: echo ::set-output name=version::"v0.0.1-test"
+        run: echo ::set-output name=version::"${GITHUB_REF#refs/*/}"
       - name: Set raw version
         id: raw_tag
-        # "${GITHUB_REF#refs/*/v}"
-        run: echo ::set-output name=raw_version::"0.0.1-test"
+        # Strips the 'v' from the actual semver version.
+        run: echo ::set-output name=raw_version::"${GITHUB_REF#refs/*/v}"
       - name: Get release information
         id: changes
         run: echo ::set-output name=release_notes::"$(go run ./util/cmd/print_changes ${{ steps.tag.outputs.version }})"
