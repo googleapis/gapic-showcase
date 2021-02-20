@@ -136,6 +136,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           repository: gapic-images/gapic-showcase
-          tags: ${{needs.inspect.outputs.version#v}},latest
+          tags: ${{ needs.inspect.outputs.version#v }},latest
           push: true
           context: .
