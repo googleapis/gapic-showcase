@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - '*'
+  pull_request:
 
 jobs:
   inspect:
@@ -17,7 +18,8 @@ jobs:
           fetch-depth: 0
       - name: Parse tag name
         id: tag
-        run: echo ::set-output name=version::"${GITHUB_REF#refs/*/}"
+        # "${GITHUB_REF#refs/*/}"
+        run: echo ::set-output name=version::"v0.0.1-test"
       - name: Get release information
         id: changes
         run: echo ::set-output name=release_notes::"$(go run ./util/cmd/print_changes ${{ steps.tag.outputs.version }})"
