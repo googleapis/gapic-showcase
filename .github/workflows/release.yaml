@@ -20,11 +20,16 @@ jobs:
         id: tag
         # "${GITHUB_REF#refs/*/}"
         run: echo ::set-output name=version::"v0.0.1-test"
+      - name: Set raw version
+        id: tag
+        # "${GITHUB_REF#refs/*/v}"
+        run: echo ::set-output name=raw_version::"0.0.1-test"
       - name: Get release information
         id: changes
         run: echo ::set-output name=release_notes::"$(go run ./util/cmd/print_changes ${{ steps.tag.outputs.version }})"
     outputs:
       version: ${{ steps.tag.outputs.version }}
+      raw_version: ${{ steps.tag.outputs.raw_version }}
       release_notes: ${{ steps.changes.outputs.release_notes }}
   release:
     runs-on: ubuntu-latest
@@ -135,6 +140,6 @@ jobs:
       - name: Push to GCR
         uses: docker/build-push-action@v2
         with:
-          tags: gcr.io/gapic-images/gapic-showcase:${{ needs.inspect.outputs.version }},gcr.io/gapic-images/gapic-showcase:latest
+          tags: gcr.io/gapic-images/gapic-showcase:${{ needs.inspect.outputs.raw_version }},gcr.io/gapic-images/gapic-showcase:latest
           push: true
           context: .
