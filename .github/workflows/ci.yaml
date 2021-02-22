@@ -72,7 +72,7 @@ jobs:
     - name: Lint service implementations
       run: golint ./server/services >> golint.txt && ! [ -s golint.txt ]
       if: ${{ always() }}
-    # TODO(noahdietz): Enable these once all issues are resolved.
+    # TODO(noahdietz): Enable this once all issues are resolved.
     # https://github.com/googleapis/gapic-showcase/issues/591
     #
     # - name: Vet service implementations
@@ -82,12 +82,13 @@ jobs:
       if: ${{ always() }}
       with:
         name: linting-results
-        path: gofmt.txt
-          # TODO(noahdietz): Enable these once all issues are resolved.
-          # https://github.com/googleapis/gapic-showcase/issues/591
-          # 
-          # golint.txt
-          # govet.txt
+        # TODO(noahdietz): Enable this once all issues are resolved.
+        # https://github.com/googleapis/gapic-showcase/issues/591
+        #
+        # govet.txt
+        path: |
+          gofmt.txt
+          golint.txt
   tests:
     needs: regenerate
     runs-on: ubuntu-latest
