@@ -38,7 +38,7 @@ func init() {
 			cmuxServer := CreateAllEndpoints(config)
 
 			done := make(chan os.Signal, 2)
-			signal.Notify(done, os.Interrupt, os.Kill, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGSTOP)
+			signal.Notify(done, os.Interrupt, os.Kill, syscall.SIGTERM, syscall.SIGHUP)
 			go func() {
 				sig := <-done
 				stdLog.Printf("Got signal %q", sig)
