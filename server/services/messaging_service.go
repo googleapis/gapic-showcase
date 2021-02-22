@@ -704,7 +704,7 @@ func (o *streamBlurbsObserver) OnDelete(b *pb.Blurb) {
 			}))
 }
 
-func (s messagingServerImpl) registerObserver(parent string, o blurbObserver) string {
+func (s *messagingServerImpl) registerObserver(parent string, o blurbObserver) string {
 	s.obsMu.Lock()
 	defer s.obsMu.Unlock()
 	name := strconv.FormatInt(s.obsUID.Next(), 10)
@@ -715,7 +715,7 @@ func (s messagingServerImpl) registerObserver(parent string, o blurbObserver) st
 	return name
 }
 
-func (s messagingServerImpl) hasObservers(parent string) bool {
+func (s *messagingServerImpl) hasObservers(parent string) bool {
 	s.obsMu.Lock()
 	defer s.obsMu.Unlock()
 	if os, ok := s.observers[parent]; ok && len(os) > 0 {
@@ -724,7 +724,7 @@ func (s messagingServerImpl) hasObservers(parent string) bool {
 	return false
 }
 
-func (s messagingServerImpl) removeObserver(parent string, name string) {
+func (s *messagingServerImpl) removeObserver(parent string, name string) {
 	s.obsMu.Lock()
 	defer s.obsMu.Unlock()
 	delete(s.observers[parent], name)
