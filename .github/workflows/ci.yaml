@@ -66,15 +66,15 @@ jobs:
         rm regen.tgz
     - name: Check formatting
       run: gofmt -l ./ > gofmt.txt && ! [ -s gofmt.txt ]
+    - name: Install golint
+      run: go get -u golang.org/x/lint/golint
+      if: ${{ always() }}
+    - name: Lint service implementations
+      run: golint ./server/services >> golint.txt && ! [ -s golint.txt ]
+      if: ${{ always() }}
     # TODO(noahdietz): Enable these once all issues are resolved.
     # https://github.com/googleapis/gapic-showcase/issues/591
     #
-    # - name: Install golint
-    #   run: go get -u golang.org/x/lint/golint
-    #   if: ${{ always() }}
-    # - name: Lint service implementations
-    #   run: golint ./server/services >> golint.txt && ! [ -s golint.txt ]
-    #   if: ${{ always() }}
     # - name: Vet service implementations
     #   run: go vet ./server/services 2> govet.txt && ! [ -s govet.txt ]
     #   if: ${{ always() }}
