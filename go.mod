@@ -13,7 +13,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20210220000619-9bb904979d93
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/api v0.40.0
-	google.golang.org/genproto v0.0.0-20210222152913-aa3ee6e6a81c
+	google.golang.org/genproto v0.0.0-20210222212404-3e1e516060db
 	google.golang.org/grpc v1.35.0
 	google.golang.org/grpc/examples v0.0.0-20201022203757-eb7fc22e4562 // indirect
 	google.golang.org/protobuf v1.25.1-0.20200805231151-a709e31e5d12
