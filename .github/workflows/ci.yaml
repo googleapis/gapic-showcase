@@ -205,3 +205,4 @@ jobs:
         message: 'chore: regenerate sources'
         branch: regen
         git_dir: '.'
+        force: true
