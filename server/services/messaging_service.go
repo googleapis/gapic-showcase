@@ -303,11 +303,11 @@ func (s *messagingServerImpl) CreateBlurb(ctx context.Context, in *pb.CreateBlur
 	id := puid.Next()
 	name := fmt.Sprintf("%s/blurbs/%d", parent, id)
 	now := ptypes.TimestampNow()
-	switch legacyId := b.LegacyId.(type) {
+	switch legacyID := b.LegacyId.(type) {
 	case *pb.Blurb_LegacyRoomId:
-		name = fmt.Sprintf("%s/blurbs/legacy/%s.%d", parent, legacyId.LegacyRoomId, id)
+		name = fmt.Sprintf("%s/blurbs/legacy/%s.%d", parent, legacyID.LegacyRoomId, id)
 	case *pb.Blurb_LegacyUserId:
-		name = fmt.Sprintf("%s/blurbs/legacy/%s~%d", parent, legacyId.LegacyUserId, id)
+		name = fmt.Sprintf("%s/blurbs/legacy/%s~%d", parent, legacyID.LegacyUserId, id)
 	}
 	b.Name = name
 	b.CreateTime = now
@@ -704,7 +704,7 @@ func (o *streamBlurbsObserver) OnDelete(b *pb.Blurb) {
 			}))
 }
 
-func (s messagingServerImpl) registerObserver(parent string, o blurbObserver) string {
+func (s *messagingServerImpl) registerObserver(parent string, o blurbObserver) string {
 	s.obsMu.Lock()
 	defer s.obsMu.Unlock()
 	name := strconv.FormatInt(s.obsUID.Next(), 10)
@@ -715,7 +715,7 @@ func (s messagingServerImpl) registerObserver(parent string, o blurbObserver) st
 	return name
 }
 
-func (s messagingServerImpl) hasObservers(parent string) bool {
+func (s *messagingServerImpl) hasObservers(parent string) bool {
 	s.obsMu.Lock()
 	defer s.obsMu.Unlock()
 	if os, ok := s.observers[parent]; ok && len(os) > 0 {
@@ -724,7 +724,7 @@ func (s messagingServerImpl) hasObservers(parent string) bool {
 	return false
 }
 
-func (s messagingServerImpl) removeObserver(parent string, name string) {
+func (s *messagingServerImpl) removeObserver(parent string, name string) {
 	s.obsMu.Lock()
 	defer s.obsMu.Unlock()
 	delete(s.observers[parent], name)

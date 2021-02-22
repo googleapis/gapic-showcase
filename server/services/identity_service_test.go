@@ -83,7 +83,8 @@ func Test_User_lifecycle(t *testing.T) {
 
 	// Make a copy of the User value, then unset proto3_optional fields
 	// to scope the update to DisplayName and Nickname.
-	u := *got
+	clone := proto.Clone(got)
+	u := clone.(*pb.User)
 	u.DisplayName = "musubi"
 	u.Nickname = proto.String("musu")
 	u.Age = nil
@@ -91,7 +92,7 @@ func Test_User_lifecycle(t *testing.T) {
 	u.EnableNotifications = nil
 	updated, err := s.UpdateUser(
 		context.Background(),
-		&pb.UpdateUserRequest{User: &u, UpdateMask: nil})
+		&pb.UpdateUserRequest{User: u, UpdateMask: nil})
 	if err != nil {
 		t.Errorf("Update: unexpected err %+v", err)
 	}

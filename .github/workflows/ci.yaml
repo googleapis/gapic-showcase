@@ -66,28 +66,25 @@ jobs:
         rm regen.tgz
     - name: Check formatting
       run: gofmt -l ./ > gofmt.txt && ! [ -s gofmt.txt ]
-    # TODO(noahdietz): Enable these once all issues are resolved.
-    # https://github.com/googleapis/gapic-showcase/issues/591
-    #
-    # - name: Install golint
-    #   run: go get -u golang.org/x/lint/golint
-    #   if: ${{ always() }}
-    # - name: Lint service implementations
-    #   run: golint ./server/services >> golint.txt && ! [ -s golint.txt ]
-    #   if: ${{ always() }}
-    # - name: Vet service implementations
-    #   run: go vet ./server/services 2> govet.txt && ! [ -s govet.txt ]
-    #   if: ${{ always() }}
+    - name: Install golint
+      run: go get -u golang.org/x/lint/golint
+      if: ${{ always() }}
+    - name: Lint service implementations
+      run: golint ./server/services >> golint.txt && ! [ -s golint.txt ]
+      if: ${{ always() }}
+    - name: Vet service implementations
+      # The mod download is there to prevent go vet from logging mod downloads
+      # which would mess up the empty vetting results check.
+      run: go mod download && go vet ./server/services 2> govet.txt && ! [ -s govet.txt ]
+      if: ${{ always() }}
     - uses: actions/upload-artifact@v2
       if: ${{ always() }}
       with:
         name: linting-results
-        path: gofmt.txt
-          # TODO(noahdietz): Enable these once all issues are resolved.
-          # https://github.com/googleapis/gapic-showcase/issues/591
-          # 
-          # golint.txt
-          # govet.txt
+        path: |
+          gofmt.txt
+          golint.txt
+          govet.txt
   tests:
     needs: regenerate
     runs-on: ubuntu-latest
