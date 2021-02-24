@@ -1,8 +1,9 @@
 # Release History
 
 ### v0.13.0 / 2021-02-24
-- Add Compliance service for REGAPIC testing
-- Add REGAPIC testing support with genrest
+- Auto-generate REST endpoints for Showcase services via `genrest` (partial)
+- Add Compliance service for generators to use to test REST-transcoding their
+  protos and RPCs (partial)
 - Add mix-in service implementations
 - Update API Service config with mix-ins and more
 - Add Bazel proto_library targets for schema/
