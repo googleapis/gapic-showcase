@@ -1,5 +1,16 @@
 # Release History
 
+### v0.13.0 / 2021-02-24
+- Auto-generate REST endpoints for Showcase services via `genrest` (partial)
+- Add Compliance service for generators to use to test REST-transcoding their
+  protos and RPCs (partial)
+- Add mix-in service implementations
+- Update API Service config with mix-ins and more
+- Add Bazel proto_library targets for schema/
+- Migrated to GitHub Actions
+- Regen client & CLI with small updates
+- Update dependencies
+
 ### v0.12.0 / 2020-08-12
 - Add client-side retry/deadline testing surface
 - Regen client & CLI with small updates
