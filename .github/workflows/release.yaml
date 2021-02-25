@@ -65,7 +65,7 @@ jobs:
           unzip -d protobuf protobuf/protoc.zip
           echo "./protobuf/bin" >> $GITHUB_PATH
       - name: Compile proto release assets
-        run: go run ./util/cmd/release -version=${{ needs.inspect.outputs.version }}
+        run: go run ./util/cmd/release -version=${{ needs.inspect.outputs.raw_version }}
       - name: Upload proto release assets
         uses: svenstaro/upload-release-action@v2
         with:
@@ -115,7 +115,7 @@ jobs:
         with:
           repo_token: ${{ github.token }}
           file: ./gapic-showcase.tar.gz
-          asset_name: gapic-showcase-${{ needs.inspect.outputs.version }}-${{ matrix.osarch.os }}-${{ matrix.osarch.arch }}.tar.gz
+          asset_name: gapic-showcase-${{ needs.inspect.outputs.raw_version }}-${{ matrix.osarch.os }}-${{ matrix.osarch.arch }}.tar.gz
           tag: ${{ needs.inspect.outputs.version }}
           overwrite: true
   push_to_registry:
