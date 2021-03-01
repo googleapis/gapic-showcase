@@ -1518,6 +1518,8 @@ func TestConnect(t *testing.T) {
 				t.Fatal(err)
 			}
 		default:
+			// Empty default so that the select statement doesn't block
+			// and the loop can continue.
 		}
 	}
 
