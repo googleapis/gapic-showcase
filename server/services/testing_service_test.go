@@ -135,7 +135,7 @@ func Test_GetSession_deleted(t *testing.T) {
 }
 
 func Test_ListSessions_invalidToken(t *testing.T) {
-	sessions := []sessionEntry{sessionEntry{session: &sessionMock{}}}
+	sessions := []sessionEntry{{session: &sessionMock{}}}
 	keys := map[string]int{"name": len(sessions) - 1}
 
 	s := &testingServerImpl{
@@ -218,7 +218,7 @@ func Test_ReportSession(t *testing.T) {
 	want := &pb.ReportSessionResponse{
 		Result: pb.ReportSessionResponse_PASSED,
 	}
-	sessions := []sessionEntry{sessionEntry{session: &sessionMock{wantReport: want}}}
+	sessions := []sessionEntry{{session: &sessionMock{wantReport: want}}}
 	keys := map[string]int{"name": 0}
 
 	s := &testingServerImpl{
@@ -259,7 +259,7 @@ func Test_ListTests(t *testing.T) {
 	want := &pb.ListTestsResponse{
 		Tests: []*pb.Test{},
 	}
-	sessions := []sessionEntry{sessionEntry{session: &sessionMock{wantList: want}}}
+	sessions := []sessionEntry{{session: &sessionMock{wantList: want}}}
 	keys := map[string]int{"name": 0}
 
 	s := &testingServerImpl{
@@ -299,7 +299,7 @@ func Test_DeleteTest_notFound(t *testing.T) {
 
 func Test_DeleteTests(t *testing.T) {
 	sesh := &sessionMock{}
-	sessions := []sessionEntry{sessionEntry{session: sesh}}
+	sessions := []sessionEntry{{session: sesh}}
 	keys := map[string]int{"name": 0}
 
 	s := &testingServerImpl{

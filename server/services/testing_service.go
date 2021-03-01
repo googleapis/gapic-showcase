@@ -33,7 +33,7 @@ func NewTestingServer(observerRegistry server.GrpcObserverRegistry) pb.TestingSe
 	name := fmt.Sprintf("sessions/-")
 	defaultSession := server.NewSession(name, pb.Session_V1_LATEST, observerRegistry)
 	defaultSession.RegisterTests(spec.ShowcaseTests(name, pb.Session_V1_LATEST))
-	sessions := []sessionEntry{sessionEntry{session: defaultSession}}
+	sessions := []sessionEntry{{session: defaultSession}}
 	keys := map[string]int{name: len(sessions) - 1}
 
 	s := &testingServerImpl{
