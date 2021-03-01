@@ -407,8 +407,8 @@ func TestPagedExpand(t *testing.T) {
 			&pb.PagedExpandRequest{Content: "Hello world!"},
 			&pb.PagedExpandResponse{
 				Responses: []*pb.EchoResponse{
-					&pb.EchoResponse{Content: "Hello"},
-					&pb.EchoResponse{Content: "world!"},
+					{Content: "Hello"},
+					{Content: "world!"},
 				},
 			},
 		},
@@ -416,8 +416,8 @@ func TestPagedExpand(t *testing.T) {
 			&pb.PagedExpandRequest{PageSize: 3, Content: "Hello world!"},
 			&pb.PagedExpandResponse{
 				Responses: []*pb.EchoResponse{
-					&pb.EchoResponse{Content: "Hello"},
-					&pb.EchoResponse{Content: "world!"},
+					{Content: "Hello"},
+					{Content: "world!"},
 				},
 			},
 		},
@@ -428,9 +428,9 @@ func TestPagedExpand(t *testing.T) {
 			},
 			&pb.PagedExpandResponse{
 				Responses: []*pb.EchoResponse{
-					&pb.EchoResponse{Content: "The"},
-					&pb.EchoResponse{Content: "rain"},
-					&pb.EchoResponse{Content: "in"},
+					{Content: "The"},
+					{Content: "rain"},
+					{Content: "in"},
 				},
 				NextPageToken: "3",
 			},
@@ -443,9 +443,9 @@ func TestPagedExpand(t *testing.T) {
 			},
 			&pb.PagedExpandResponse{
 				Responses: []*pb.EchoResponse{
-					&pb.EchoResponse{Content: "Spain"},
-					&pb.EchoResponse{Content: "falls"},
-					&pb.EchoResponse{Content: "mainly"},
+					{Content: "Spain"},
+					{Content: "falls"},
+					{Content: "mainly"},
 				},
 				NextPageToken: "6",
 			},
