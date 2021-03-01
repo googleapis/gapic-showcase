@@ -29,6 +29,7 @@ import (
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -1495,31 +1496,18 @@ func TestConnect(t *testing.T) {
 	}
 	s := NewMessagingServer(&mockIdentityServer{})
 
-	errs := make(chan error, 1)
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go (func() {
-		defer wg.Done()
-		defer close(errs)
-
+	g := new(errgroup.Group)
+	g.Go(func() error {
 		err := s.Connect(m)
 		if err != nil {
-			errs <- fmt.Errorf("Connect: unexpected err %+v", err)
+			return fmt.Errorf("Connect: unexpected err %+v", err)
 		}
-	})()
+		return nil
+	})
 
 	for {
 		if len(m.resps) > 0 {
 			break
-		}
-		select {
-		case err := <-errs:
-			if err != nil {
-				t.Fatal(err)
-			}
-		default:
-			// Empty default so that the select statement doesn't block
-			// and the loop can continue.
 		}
 	}
 
@@ -1625,7 +1613,9 @@ func TestConnect(t *testing.T) {
 	}
 
 	m.stop = true
-	wg.Wait()
+	if err := g.Wait(); err != nil {
+		t.Error(err)
+	}
 }
 
 type errorConnectStream struct {
@@ -1827,26 +1817,21 @@ func TestConnect_parentNotFoundLater(t *testing.T) {
 		nowF:       time.Now,
 	}
 
-	errs := make(chan error, 1)
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go (func() {
-		defer wg.Done()
-		defer close(errs)
-
+	g := new(errgroup.Group)
+	g.Go(func() error {
 		err := s.Connect(m)
 		if err == nil {
-			errs <- fmt.Errorf("Connect: expected err, but did not get one")
-			return
+			return fmt.Errorf("Connect: expected err, but did not get one")
 		}
 		status, _ := status.FromError(err)
 		if status.Code() != codes.NotFound {
-			errs <- fmt.Errorf(
+			return fmt.Errorf(
 				"Connect: Want error code %d got %d",
 				codes.NotFound,
 				status.Code())
 		}
-	})()
+		return nil
+	})
 
 	for {
 		if s.hasObservers(parent) {
@@ -1859,13 +1844,9 @@ func TestConnect_parentNotFoundLater(t *testing.T) {
 		context.Background(),
 		&pb.DeleteUserRequest{Name: first.GetName()})
 
-	err = <-errs
-	if err != nil {
+	if err := g.Wait(); err != nil {
 		t.Error(err)
 	}
-
-	// Wait til the stream closes.
-	wg.Wait()
 }
 
 func Test_Connect_creationFailure(t *testing.T) {
