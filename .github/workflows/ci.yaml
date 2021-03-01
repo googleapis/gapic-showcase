@@ -200,7 +200,8 @@ jobs:
         description: 'Regenerated sources resulting from most recent commit to master'
         title: 'chore: regenerate sources'
         message: 'chore: regenerate sources'
-        labels: ['automerge']
+        labels: |
+          automerge
         branch: regen
         git_dir: '.'
         force: true
