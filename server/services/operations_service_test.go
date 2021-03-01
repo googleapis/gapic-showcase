@@ -61,11 +61,11 @@ func (m *messagingServerWrapper) FilteredListBlurbs(ctx context.Context, r *pb.L
 
 func TestGetOperation_searchBlurbs(t *testing.T) {
 	expected := []*pb.Blurb{
-		&pb.Blurb{
+		{
 			User:    "users/rumble",
 			Content: &pb.Blurb_Text{Text: "woof"},
 		},
-		&pb.Blurb{
+		{
 			User:    "users/ekko",
 			Content: &pb.Blurb_Text{Text: "bark"},
 		},
@@ -77,21 +77,21 @@ func TestGetOperation_searchBlurbs(t *testing.T) {
 			parentUids:     map[string]*server.UniqID{},
 			token:          server.NewTokenGenerator(),
 			blurbKeys: map[string]blurbIndex{
-				"users/rumble/profile/messages/1": blurbIndex{
+				"users/rumble/profile/messages/1": {
 					row: "users/rumble/profile",
 					col: 1},
-				"users/rumble/profile/messages/2": blurbIndex{
+				"users/rumble/profile/messages/2": {
 					row: "users/rumble/profile",
 					col: 2},
-				"users/rumble/profile/messages/3": blurbIndex{
+				"users/rumble/profile/messages/3": {
 					row: "users/rumble/profile",
 					col: 3},
-				"users/rumble/profile/messages/4": blurbIndex{
+				"users/rumble/profile/messages/4": {
 					row: "users/rumble/profile",
 					col: 4},
 			},
 			blurbs: map[string][]blurbEntry{
-				"users/rumble/profile": []blurbEntry{
+				"users/rumble/profile": {
 					blurbEntry{blurb: expected[0]},
 					blurbEntry{
 						blurb: &pb.Blurb{

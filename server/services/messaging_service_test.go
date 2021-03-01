@@ -268,8 +268,8 @@ func Test_UpdateRoom_invalid(t *testing.T) {
 
 func Test_UpdateRoom_alreadyPresent(t *testing.T) {
 	first := []*pb.Room{
-		&pb.Room{DisplayName: "Living Room"},
-		&pb.Room{DisplayName: "Weight Room"},
+		{DisplayName: "Living Room"},
+		{DisplayName: "Weight Room"},
 	}
 	second := &pb.Room{DisplayName: "Weight Room"}
 
@@ -1168,21 +1168,21 @@ func (m *mockSendBlurbsStream) Recv() (*pb.CreateBlurbRequest, error) {
 
 func TestSendBlurbs(t *testing.T) {
 	reqs := []*pb.CreateBlurbRequest{
-		&pb.CreateBlurbRequest{
+		{
 			Parent: "users/rumble/profile",
 			Blurb: &pb.Blurb{
 				User:    "users/rumble",
 				Content: &pb.Blurb_Text{Text: "woof"},
 			},
 		},
-		&pb.CreateBlurbRequest{
+		{
 			Parent: "users/rumble/profile",
 			Blurb: &pb.Blurb{
 				User:    "users/musubi",
 				Content: &pb.Blurb_Text{Text: "meow"},
 			},
 		},
-		&pb.CreateBlurbRequest{
+		{
 			Parent: "users/musubi/profile",
 			Blurb: &pb.Blurb{
 				User:    "users/ekko",
@@ -1245,21 +1245,21 @@ func (m *errorSendBlurbsStream) Recv() (*pb.CreateBlurbRequest, error) {
 
 func TestSendBlurbs_error(t *testing.T) {
 	reqs := []*pb.CreateBlurbRequest{
-		&pb.CreateBlurbRequest{
+		{
 			Parent: "users/rumble/profile",
 			Blurb: &pb.Blurb{
 				User:    "users/rumble",
 				Content: &pb.Blurb_Text{Text: "woof"},
 			},
 		},
-		&pb.CreateBlurbRequest{
+		{
 			Parent: "users/rumble/profile",
 			Blurb: &pb.Blurb{
 				User:    "users/musubi",
 				Content: &pb.Blurb_Text{Text: "meow"},
 			},
 		},
-		&pb.CreateBlurbRequest{
+		{
 			Parent: "users/musubi/profile",
 			Blurb: &pb.Blurb{
 				User:    "users/ekko",
@@ -1318,21 +1318,21 @@ func TestSendBlurbs_invalidParent(t *testing.T) {
 
 	parent := fmt.Sprintf("%s/profile", first.GetName())
 	reqs := []*pb.CreateBlurbRequest{
-		&pb.CreateBlurbRequest{
+		{
 			Parent: parent,
 			Blurb: &pb.Blurb{
 				User:    "users/rumble",
 				Content: &pb.Blurb_Text{Text: "woof"},
 			},
 		},
-		&pb.CreateBlurbRequest{
+		{
 			Parent: parent,
 			Blurb: &pb.Blurb{
 				User:    "users/musubi",
 				Content: &pb.Blurb_Text{Text: "meow"},
 			},
 		},
-		&pb.CreateBlurbRequest{
+		{
 			Parent: "does/not/exist",
 			Blurb: &pb.Blurb{
 				User:    "users/ekko",
@@ -1379,21 +1379,21 @@ func TestSendBlurbs_invalidParent(t *testing.T) {
 
 func TestSendBlurbs_invalidBlurb(t *testing.T) {
 	reqs := []*pb.CreateBlurbRequest{
-		&pb.CreateBlurbRequest{
+		{
 			Parent: "users/rumble/profile",
 			Blurb: &pb.Blurb{
 				User:    "users/rumble",
 				Content: &pb.Blurb_Text{Text: "woof"},
 			},
 		},
-		&pb.CreateBlurbRequest{
+		{
 			Parent: "users/rumble/profile",
 			Blurb: &pb.Blurb{
 				User:    "users/musubi",
 				Content: &pb.Blurb_Text{Text: "meow"},
 			},
 		},
-		&pb.CreateBlurbRequest{
+		{
 			Parent: "users/musubi/profile",
 			Blurb: &pb.Blurb{
 				Content: &pb.Blurb_Text{Text: "bark"},
@@ -1472,14 +1472,14 @@ func (m *mockConnectStream) Send(r *pb.StreamBlurbsResponse) error {
 
 func TestConnect(t *testing.T) {
 	reqs := []*pb.ConnectRequest{
-		&pb.ConnectRequest{
+		{
 			Request: &pb.ConnectRequest_Config{
 				Config: &pb.ConnectRequest_ConnectConfig{
 					Parent: "users/rumble/profile",
 				},
 			},
 		},
-		&pb.ConnectRequest{
+		{
 			Request: &pb.ConnectRequest_Blurb{
 				Blurb: &pb.Blurb{
 					User:    "users/rumble",
@@ -1495,19 +1495,29 @@ func TestConnect(t *testing.T) {
 	}
 	s := NewMessagingServer(&mockIdentityServer{})
 
+	errs := make(chan error, 1)
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go (func() {
+		defer wg.Done()
+		defer close(errs)
+
 		err := s.Connect(m)
 		if err != nil {
-			t.Fatalf("Connect: unexpected err %+v", err)
+			errs <- fmt.Errorf("Connect: unexpected err %+v", err)
 		}
-		wg.Done()
 	})()
 
 	for {
 		if len(m.resps) > 0 {
 			break
+		}
+		select {
+		case err := <-errs:
+			if err != nil {
+				t.Fatal(err)
+			}
+		default:
 		}
 	}
 
@@ -1640,7 +1650,7 @@ func TestConnect_error(t *testing.T) {
 
 func TestConnect_notConfigured(t *testing.T) {
 	reqs := []*pb.ConnectRequest{
-		&pb.ConnectRequest{
+		{
 			Request: &pb.ConnectRequest_Blurb{
 				Blurb: &pb.Blurb{
 					User:    "users/rumble",
@@ -1671,7 +1681,7 @@ func TestConnect_notConfigured(t *testing.T) {
 
 func TestConnect_parentNotFound(t *testing.T) {
 	reqs := []*pb.ConnectRequest{
-		&pb.ConnectRequest{
+		{
 			Request: &pb.ConnectRequest_Config{
 				Config: &pb.ConnectRequest_ConnectConfig{
 					Parent: "users/rumble/profile",
@@ -1731,14 +1741,14 @@ func (m *sendErrorConnectStream) Send(r *pb.StreamBlurbsResponse) error {
 
 func TestConnect_sendError(t *testing.T) {
 	reqs := []*pb.ConnectRequest{
-		&pb.ConnectRequest{
+		{
 			Request: &pb.ConnectRequest_Config{
 				Config: &pb.ConnectRequest_ConnectConfig{
 					Parent: "users/rumble/profile",
 				},
 			},
 		},
-		&pb.ConnectRequest{
+		{
 			Request: &pb.ConnectRequest_Blurb{
 				Blurb: &pb.Blurb{
 					User:    "users/rumble",
@@ -1780,14 +1790,14 @@ func TestConnect_parentNotFoundLater(t *testing.T) {
 	}
 	parent := fmt.Sprintf("%s/profile", first.GetName())
 	reqs := []*pb.ConnectRequest{
-		&pb.ConnectRequest{
+		{
 			Request: &pb.ConnectRequest_Config{
 				Config: &pb.ConnectRequest_ConnectConfig{
 					Parent: parent,
 				},
 			},
 		},
-		&pb.ConnectRequest{
+		{
 			Request: &pb.ConnectRequest_Blurb{
 				Blurb: &pb.Blurb{
 					User:    "users/rumble",
@@ -1814,21 +1824,26 @@ func TestConnect_parentNotFoundLater(t *testing.T) {
 		observers:  map[string]map[string]blurbObserver{},
 		nowF:       time.Now,
 	}
+
+	errs := make(chan error, 1)
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go (func() {
+		defer wg.Done()
+		defer close(errs)
+
 		err := s.Connect(m)
 		if err == nil {
-			t.Fatalf("Connect: expected err")
+			errs <- fmt.Errorf("Connect: expected err, but did not get one")
+			return
 		}
 		status, _ := status.FromError(err)
 		if status.Code() != codes.NotFound {
-			t.Errorf(
+			errs <- fmt.Errorf(
 				"Connect: Want error code %d got %d",
 				codes.NotFound,
 				status.Code())
 		}
-		wg.Done()
 	})()
 
 	for {
@@ -1842,20 +1857,25 @@ func TestConnect_parentNotFoundLater(t *testing.T) {
 		context.Background(),
 		&pb.DeleteUserRequest{Name: first.GetName()})
 
+	err = <-errs
+	if err != nil {
+		t.Error(err)
+	}
+
 	// Wait til the stream closes.
 	wg.Wait()
 }
 
 func Test_Connect_creationFailure(t *testing.T) {
 	reqs := []*pb.ConnectRequest{
-		&pb.ConnectRequest{
+		{
 			Request: &pb.ConnectRequest_Config{
 				Config: &pb.ConnectRequest_ConnectConfig{
 					Parent: "users/rumble/profile",
 				},
 			},
 		},
-		&pb.ConnectRequest{
+		{
 			Request: &pb.ConnectRequest_Blurb{
 				Blurb: &pb.Blurb{
 					Content: &pb.Blurb_Text{Text: "woof"},
