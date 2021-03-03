@@ -1,42 +1,42 @@
 {
-  "schema":  "1.0",
-  "comment":  "This file maps proto services/RPCs to the corresponding library clients/methods.",
-  "language":  "go",
-  "protoPackage":  "google.showcase.v1beta1",
-  "libraryPackage":  "github.com/googleapis/gapic-showcase/client",
-  "services":  {
-    "Compliance":  {
-      "clients":  {
-        "grpc":  {
-          "libraryClient":  "ComplianceClient",
-          "rpcs":  {
-            "RepeatDataBody":  {
-              "methods":  [
+  "schema": "1.0",
+  "comment": "This file maps proto services/RPCs to the corresponding library clients/methods.",
+  "language": "go",
+  "protoPackage": "google.showcase.v1beta1",
+  "libraryPackage": "github.com/googleapis/gapic-showcase/client",
+  "services": {
+    "Compliance": {
+      "clients": {
+        "grpc": {
+          "libraryClient": "ComplianceClient",
+          "rpcs": {
+            "RepeatDataBody": {
+              "methods": [
                 "RepeatDataBody"
               ]
             },
-            "RepeatDataBodyInfo":  {
-              "methods":  [
+            "RepeatDataBodyInfo": {
+              "methods": [
                 "RepeatDataBodyInfo"
               ]
             },
-            "RepeatDataPathResource":  {
-              "methods":  [
+            "RepeatDataPathResource": {
+              "methods": [
                 "RepeatDataPathResource"
               ]
             },
-            "RepeatDataPathTrailingResource":  {
-              "methods":  [
+            "RepeatDataPathTrailingResource": {
+              "methods": [
                 "RepeatDataPathTrailingResource"
               ]
             },
-            "RepeatDataQuery":  {
-              "methods":  [
+            "RepeatDataQuery": {
+              "methods": [
                 "RepeatDataQuery"
               ]
             },
-            "RepeatDataSimplePath":  {
-              "methods":  [
+            "RepeatDataSimplePath": {
+              "methods": [
                 "RepeatDataSimplePath"
               ]
             }
@@ -44,43 +44,43 @@
         }
       }
     },
-    "Echo":  {
-      "clients":  {
-        "grpc":  {
-          "libraryClient":  "EchoClient",
-          "rpcs":  {
-            "Block":  {
-              "methods":  [
+    "Echo": {
+      "clients": {
+        "grpc": {
+          "libraryClient": "EchoClient",
+          "rpcs": {
+            "Block": {
+              "methods": [
                 "Block"
               ]
             },
-            "Chat":  {
-              "methods":  [
+            "Chat": {
+              "methods": [
                 "Chat"
               ]
             },
-            "Collect":  {
-              "methods":  [
+            "Collect": {
+              "methods": [
                 "Collect"
               ]
             },
-            "Echo":  {
-              "methods":  [
+            "Echo": {
+              "methods": [
                 "Echo"
               ]
             },
-            "Expand":  {
-              "methods":  [
+            "Expand": {
+              "methods": [
                 "Expand"
               ]
             },
-            "PagedExpand":  {
-              "methods":  [
+            "PagedExpand": {
+              "methods": [
                 "PagedExpand"
               ]
             },
-            "Wait":  {
-              "methods":  [
+            "Wait": {
+              "methods": [
                 "Wait"
               ]
             }
@@ -88,33 +88,33 @@
         }
       }
     },
-    "Identity":  {
-      "clients":  {
-        "grpc":  {
-          "libraryClient":  "IdentityClient",
-          "rpcs":  {
-            "CreateUser":  {
-              "methods":  [
+    "Identity": {
+      "clients": {
+        "grpc": {
+          "libraryClient": "IdentityClient",
+          "rpcs": {
+            "CreateUser": {
+              "methods": [
                 "CreateUser"
               ]
             },
-            "DeleteUser":  {
-              "methods":  [
+            "DeleteUser": {
+              "methods": [
                 "DeleteUser"
               ]
             },
-            "GetUser":  {
-              "methods":  [
+            "GetUser": {
+              "methods": [
                 "GetUser"
               ]
             },
-            "ListUsers":  {
-              "methods":  [
+            "ListUsers": {
+              "methods": [
                 "ListUsers"
               ]
             },
-            "UpdateUser":  {
-              "methods":  [
+            "UpdateUser": {
+              "methods": [
                 "UpdateUser"
               ]
             }
@@ -122,78 +122,78 @@
         }
       }
     },
-    "Messaging":  {
-      "clients":  {
-        "grpc":  {
-          "libraryClient":  "MessagingClient",
-          "rpcs":  {
-            "Connect":  {
-              "methods":  [
+    "Messaging": {
+      "clients": {
+        "grpc": {
+          "libraryClient": "MessagingClient",
+          "rpcs": {
+            "Connect": {
+              "methods": [
                 "Connect"
               ]
             },
-            "CreateBlurb":  {
-              "methods":  [
+            "CreateBlurb": {
+              "methods": [
                 "CreateBlurb"
               ]
             },
-            "CreateRoom":  {
-              "methods":  [
+            "CreateRoom": {
+              "methods": [
                 "CreateRoom"
               ]
             },
-            "DeleteBlurb":  {
-              "methods":  [
+            "DeleteBlurb": {
+              "methods": [
                 "DeleteBlurb"
               ]
             },
-            "DeleteRoom":  {
-              "methods":  [
+            "DeleteRoom": {
+              "methods": [
                 "DeleteRoom"
               ]
             },
-            "GetBlurb":  {
-              "methods":  [
+            "GetBlurb": {
+              "methods": [
                 "GetBlurb"
               ]
             },
-            "GetRoom":  {
-              "methods":  [
+            "GetRoom": {
+              "methods": [
                 "GetRoom"
               ]
             },
-            "ListBlurbs":  {
-              "methods":  [
+            "ListBlurbs": {
+              "methods": [
                 "ListBlurbs"
               ]
             },
-            "ListRooms":  {
-              "methods":  [
+            "ListRooms": {
+              "methods": [
                 "ListRooms"
               ]
             },
-            "SearchBlurbs":  {
-              "methods":  [
+            "SearchBlurbs": {
+              "methods": [
                 "SearchBlurbs"
               ]
             },
-            "SendBlurbs":  {
-              "methods":  [
+            "SendBlurbs": {
+              "methods": [
                 "SendBlurbs"
               ]
             },
-            "StreamBlurbs":  {
-              "methods":  [
+            "StreamBlurbs": {
+              "methods": [
                 "StreamBlurbs"
               ]
             },
-            "UpdateBlurb":  {
-              "methods":  [
+            "UpdateBlurb": {
+              "methods": [
                 "UpdateBlurb"
               ]
             },
-            "UpdateRoom":  {
-              "methods":  [
+            "UpdateRoom": {
+              "methods": [
                 "UpdateRoom"
               ]
             }
@@ -201,23 +201,23 @@
         }
       }
     },
-    "SequenceService":  {
-      "clients":  {
-        "grpc":  {
-          "libraryClient":  "SequenceClient",
-          "rpcs":  {
-            "AttemptSequence":  {
-              "methods":  [
+    "SequenceService": {
+      "clients": {
+        "grpc": {
+          "libraryClient": "SequenceClient",
+          "rpcs": {
+            "AttemptSequence": {
+              "methods": [
                 "AttemptSequence"
               ]
             },
-            "CreateSequence":  {
-              "methods":  [
+            "CreateSequence": {
+              "methods": [
                 "CreateSequence"
               ]
             },
-            "GetSequenceReport":  {
-              "methods":  [
+            "GetSequenceReport": {
+              "methods": [
                 "GetSequenceReport"
               ]
             }
@@ -225,48 +225,48 @@
         }
       }
     },
-    "Testing":  {
-      "clients":  {
-        "grpc":  {
-          "libraryClient":  "TestingClient",
-          "rpcs":  {
-            "CreateSession":  {
-              "methods":  [
+    "Testing": {
+      "clients": {
+        "grpc": {
+          "libraryClient": "TestingClient",
+          "rpcs": {
+            "CreateSession": {
+              "methods": [
                 "CreateSession"
               ]
             },
-            "DeleteSession":  {
-              "methods":  [
+            "DeleteSession": {
+              "methods": [
                 "DeleteSession"
               ]
             },
-            "DeleteTest":  {
-              "methods":  [
+            "DeleteTest": {
+              "methods": [
                 "DeleteTest"
               ]
             },
-            "GetSession":  {
-              "methods":  [
+            "GetSession": {
+              "methods": [
                 "GetSession"
               ]
             },
-            "ListSessions":  {
-              "methods":  [
+            "ListSessions": {
+              "methods": [
                 "ListSessions"
               ]
             },
-            "ListTests":  {
-              "methods":  [
+            "ListTests": {
+              "methods": [
                 "ListTests"
               ]
             },
-            "ReportSession":  {
-              "methods":  [
+            "ReportSession": {
+              "methods": [
                 "ReportSession"
               ]
             },
-            "VerifyTest":  {
-              "methods":  [
+            "VerifyTest": {
+              "methods": [
                 "VerifyTest"
               ]
             }
