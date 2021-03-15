@@ -23,6 +23,9 @@ import (
 	client "github.com/googleapis/gapic-showcase/client"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/api/iterator"
+	locationpb "google.golang.org/genproto/googleapis/cloud/location"
+	iampb "google.golang.org/genproto/googleapis/iam/v1"
+	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 )
 
 func ExampleNewMessagingClient() {
@@ -300,4 +303,210 @@ func ExampleMessagingClient_Connect() {
 		// TODO: Use resp.
 		_ = resp
 	}
+}
+
+func ExampleMessagingClient_ListLocations() {
+	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
+	// import "google.golang.org/api/iterator"
+
+	ctx := context.Background()
+	c, err := client.NewMessagingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &locationpb.ListLocationsRequest{
+		// TODO: Fill request struct fields.
+	}
+	it := c.ListLocations(ctx, req)
+	for {
+		resp, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			// TODO: Handle error.
+		}
+		// TODO: Use resp.
+		_ = resp
+	}
+}
+
+func ExampleMessagingClient_GetLocation() {
+	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
+
+	ctx := context.Background()
+	c, err := client.NewMessagingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &locationpb.GetLocationRequest{
+		// TODO: Fill request struct fields.
+	}
+	resp, err := c.GetLocation(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
+func ExampleMessagingClient_SetIamPolicy() {
+	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
+
+	ctx := context.Background()
+	c, err := client.NewMessagingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &iampb.SetIamPolicyRequest{
+		// TODO: Fill request struct fields.
+	}
+	resp, err := c.SetIamPolicy(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
+func ExampleMessagingClient_GetIamPolicy() {
+	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
+
+	ctx := context.Background()
+	c, err := client.NewMessagingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &iampb.GetIamPolicyRequest{
+		// TODO: Fill request struct fields.
+	}
+	resp, err := c.GetIamPolicy(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
+func ExampleMessagingClient_TestIamPermissions() {
+	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
+
+	ctx := context.Background()
+	c, err := client.NewMessagingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &iampb.TestIamPermissionsRequest{
+		// TODO: Fill request struct fields.
+	}
+	resp, err := c.TestIamPermissions(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
+func ExampleMessagingClient_ListOperations() {
+	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
+	// import "google.golang.org/api/iterator"
+
+	ctx := context.Background()
+	c, err := client.NewMessagingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &longrunningpb.ListOperationsRequest{
+		// TODO: Fill request struct fields.
+	}
+	it := c.ListOperations(ctx, req)
+	for {
+		resp, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			// TODO: Handle error.
+		}
+		// TODO: Use resp.
+		_ = resp
+	}
+}
+
+func ExampleMessagingClient_GetOperation() {
+	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
+
+	ctx := context.Background()
+	c, err := client.NewMessagingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &longrunningpb.GetOperationRequest{
+		// TODO: Fill request struct fields.
+	}
+	resp, err := c.GetOperation(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
+func ExampleMessagingClient_DeleteOperation() {
+	ctx := context.Background()
+	c, err := client.NewMessagingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &longrunningpb.DeleteOperationRequest{
+		// TODO: Fill request struct fields.
+	}
+	err = c.DeleteOperation(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+}
+
+func ExampleMessagingClient_CancelOperation() {
+	ctx := context.Background()
+	c, err := client.NewMessagingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &longrunningpb.CancelOperationRequest{
+		// TODO: Fill request struct fields.
+	}
+	err = c.CancelOperation(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+}
+
+func ExampleMessagingClient_WaitOperation() {
+	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
+
+	ctx := context.Background()
+	c, err := client.NewMessagingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	req := &longrunningpb.WaitOperationRequest{
+		// TODO: Fill request struct fields.
+	}
+	resp, err := c.WaitOperation(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
 }
