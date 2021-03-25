@@ -63,28 +63,28 @@ func CheckEnum(payload map[string]interface{}, fieldPath []protoreflect.Name) (f
 		// TODO: For repeated fields, will need to recurse. Consider denoting repeated fields by appending a "*" to the pathSegment
 
 		if idx < last {
-			payload, ok = payload[segment].(map[string]interface{})
-			if !ok {
+			payload, found = payload[segment].(map[string]interface{})
+			if !found {
 				// Some elements of the field path are not populated
 				break
 			}
 			continue
 		}
-		value, ok = payload[segment].(string)
-		found = true
+		value, found = payload[segment].(string)
 	}
 	fieldName = strings.Join(nameParts, ".")
 	if !found {
 		return fieldName, true
 	}
 
-	if ok {
+	if found {
 		if _, err := strconv.Atoi(value); err == nil {
 			// A string representation of an enum value should not be parseable as an int
-			ok = false
+			return fieldName, false
 		}
 	}
-	return fieldName, ok
+
+	return fieldName, true
 }
 
 func GetEnumFields(message protoreflect.Message) [][]protoreflect.Name {

@@ -55,10 +55,8 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 		}
 
 		// TODO: Properly deal with import strings. They may need to be taken out of the gomodel
-		// for _, spec := range service.Imports {
-		// 	fileImports[spec.Path] = spec.Name
-		// }
 
+		// Accumulate source code for each method and the imports the code requires.
 		methodSources := []*goview.Source{}
 		for _, handler := range service.Handlers {
 			source := goview.NewSource()
@@ -86,7 +84,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			source.P("  numUrlPathParams := len(urlPathParams)")
 			source.P("")
 			// TODO: Consider factoring out code shared among handlers into a single
-			// place, so that handlers only provide the relevant values (eg., expected
+			// place, so that handlers only provide the relevant values (e.g. expected
 			// number of path variables, etc.)
 			source.P(`  backend.StdLog.Printf("Received %%s request matching '%s': %%q", r.Method, r.URL)`, handler.URIPattern)
 			source.P(`  backend.StdLog.Printf("  urlPathParams (expect %d, have %%d): %%q", numUrlPathParams, urlPathParams)`, len(allURLVariables))
@@ -102,16 +100,15 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			case gomodel.BodyFieldAll:
 				fileImports["bytes"] = ""
 				fileImports["io"] = ""
-				fileImports["io/ioutil"] = ""
 				source.P("  // Intentional: Field values in the URL path override those set in the body.")
 				// TODO: explicitly check that all enums are strings: JSON encoding in resttools, check for the explicit enum fields. See eg https://michaelheap.com/golang-encodedecode-arbitrary-json/
 				source.P("  var jsonReader bytes.Buffer")
 				source.P("  bodyReader := io.TeeReader(r.Body, &jsonReader)")
-				source.P("  if err := jsonpb.Unmarshal(r.Body /*bodyReader*/, %s); err != nil {", handler.RequestVariable)
+				source.P("  if err := jsonpb.Unmarshal(/*r.Body*/ bodyReader, %s); err != nil {", handler.RequestVariable)
 				source.P(`    backend.Error(w, http.StatusBadRequest, "error reading body params '*': %%s", err)`)
 				source.P("    return")
 				source.P("  }")
-				source.P("ioutil.ReadAll(bodyReader)")
+				source.P("  // ioutil.ReadAll(bodyReader)") // TODO: ERASE!!
 				source.P("  if err := resttools.CheckRestBody(&jsonReader, %s.ProtoReflect()); err != nil {", handler.RequestVariable)
 				source.P(`    backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %%s", err)`)
 				source.P("    return")
@@ -182,6 +179,8 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			source.P("  w.Write([]byte(json))")
 			source.P("}\n")
 		}
+
+		// Use the accumulated method source code and import data to write out the actual file.
 
 		file.P("import (")
 		for path, name := range fileImports {
