@@ -109,7 +109,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				source.P("    return")
 				source.P("  }")
 				source.P("  // ioutil.ReadAll(bodyReader)") // TODO: ERASE!!
-				source.P("  if err := resttools.CheckRestBody(&jsonReader, %s.ProtoReflect()); err != nil {", handler.RequestVariable)
+				source.P("  if err := resttools.CheckRESTBody(&jsonReader, %s.ProtoReflect()); err != nil {", handler.RequestVariable)
 				source.P(`    backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %%s", err)`)
 				source.P("    return")
 				source.P("  }")

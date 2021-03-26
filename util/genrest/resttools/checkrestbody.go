@@ -25,9 +25,9 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-// CheckRestBody verifies that any enum fields in message are properly represented in the JSON
+// CheckRESTBody verifies that any enum fields in message are properly represented in the JSON
 // payload carried by jsonReader: the fields must be either absent or have string values.
-func CheckRestBody(jsonReader io.Reader, message protoreflect.Message) error {
+func CheckRESTBody(jsonReader io.Reader, message protoreflect.Message) error {
 	jsonBytes, err := ioutil.ReadAll(jsonReader)
 	if err != nil {
 		return err

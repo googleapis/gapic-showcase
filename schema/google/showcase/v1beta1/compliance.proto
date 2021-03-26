@@ -162,12 +162,14 @@ message ComplianceDataChild {
   float f_float = 2;
   double f_double = 3;
   bool f_bool = 4;
+  Continent f_continent = 11;
   ComplianceDataGrandchild f_child = 5;
 
   optional string p_string = 6;
   optional float p_float = 7;
   optional double p_double = 8;
   optional bool p_bool = 9;
+  Continent p_continent = 12;
   optional ComplianceDataGrandchild p_child = 10;
 }
 
@@ -175,4 +177,13 @@ message ComplianceDataGrandchild {
   string f_string = 1;
   double f_double = 2;
   bool f_bool = 3;
+}
+
+enum Continent {
+  CONTINENT_UNASSIGNED = 0;
+  AFRICA = 1;
+  AMERICA = 2;
+  ANTARTICA = 3;
+  AUSTRALIA = 4;
+  EUROPE = 5;
 }
