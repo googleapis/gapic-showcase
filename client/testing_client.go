@@ -159,7 +159,7 @@ func (c *TestingClient) VerifyTest(ctx context.Context, req *genprotopb.VerifyTe
 }
 
 // testingGrpcClient is a client for interacting with Client Libraries Showcase API over gRPC transport.
-// It satisfies the testingAbstractClient interface.
+// It satisfies the testinginternalClient interface.
 //
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 type testingGrpcClient struct {

@@ -159,7 +159,7 @@ func (c *IdentityClient) ListUsers(ctx context.Context, req *genprotopb.ListUser
 }
 
 // identityGrpcClient is a client for interacting with Client Libraries Showcase API over gRPC transport.
-// It satisfies the identityAbstractClient interface.
+// It satisfies the identityinternalClient interface.
 //
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 type identityGrpcClient struct {

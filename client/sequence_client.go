@@ -133,7 +133,7 @@ func (c *SequenceClient) AttemptSequence(ctx context.Context, req *genprotopb.At
 }
 
 // sequenceGrpcClient is a client for interacting with Client Libraries Showcase API over gRPC transport.
-// It satisfies the sequenceAbstractClient interface.
+// It satisfies the sequenceinternalClient interface.
 //
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 type sequenceGrpcClient struct {

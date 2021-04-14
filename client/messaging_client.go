@@ -278,7 +278,7 @@ func (c *MessagingClient) Connect(ctx context.Context, opts ...gax.CallOption) (
 }
 
 // messagingGrpcClient is a client for interacting with Client Libraries Showcase API over gRPC transport.
-// It satisfies the messagingAbstractClient interface.
+// It satisfies the messaginginternalClient interface.
 //
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 type messagingGrpcClient struct {

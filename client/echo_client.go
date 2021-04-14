@@ -194,7 +194,7 @@ func (c *EchoClient) Block(ctx context.Context, req *genprotopb.BlockRequest, op
 }
 
 // echoGrpcClient is a client for interacting with Client Libraries Showcase API over gRPC transport.
-// It satisfies the echoAbstractClient interface.
+// It satisfies the echointernalClient interface.
 //
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 type echoGrpcClient struct {
