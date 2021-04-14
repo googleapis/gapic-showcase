@@ -18,14 +18,14 @@
 package genrest
 
 import (
+	"bytes"
 	"context"
-	"net/http"
-
 	"github.com/golang/protobuf/jsonpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-	gmux "github.com/gorilla/mux"
-
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
+	gmux "github.com/gorilla/mux"
+	"io"
+	"net/http"
 )
 
 // HandleEcho translates REST requests/responses on the wire to internal proto messages for Echo
@@ -44,8 +44,15 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 
 	request := &genprotopb.EchoRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
-	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
+	var jsonReader bytes.Buffer
+	bodyReader := io.TeeReader(r.Body, &jsonReader)
+	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+	// ioutil.ReadAll(bodyReader)
+	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
 	}
 
@@ -106,8 +113,15 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 
 	request := &genprotopb.PagedExpandRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
-	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
+	var jsonReader bytes.Buffer
+	bodyReader := io.TeeReader(r.Body, &jsonReader)
+	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+	// ioutil.ReadAll(bodyReader)
+	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
 	}
 
@@ -156,8 +170,15 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 
 	request := &genprotopb.WaitRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
-	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
+	var jsonReader bytes.Buffer
+	bodyReader := io.TeeReader(r.Body, &jsonReader)
+	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+	// ioutil.ReadAll(bodyReader)
+	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
 	}
 
@@ -206,8 +227,15 @@ func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) 
 
 	request := &genprotopb.BlockRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
-	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
+	var jsonReader bytes.Buffer
+	bodyReader := io.TeeReader(r.Body, &jsonReader)
+	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+	// ioutil.ReadAll(bodyReader)
+	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
 	}
 

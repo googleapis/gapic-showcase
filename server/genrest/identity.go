@@ -18,14 +18,14 @@
 package genrest
 
 import (
+	"bytes"
 	"context"
-	"net/http"
-
 	"github.com/golang/protobuf/jsonpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-	gmux "github.com/gorilla/mux"
-
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
+	gmux "github.com/gorilla/mux"
+	"io"
+	"net/http"
 )
 
 // HandleCreateUser translates REST requests/responses on the wire to internal proto messages for CreateUser
@@ -44,8 +44,15 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 
 	request := &genprotopb.CreateUserRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
-	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
+	var jsonReader bytes.Buffer
+	bodyReader := io.TeeReader(r.Body, &jsonReader)
+	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+	// ioutil.ReadAll(bodyReader)
+	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
 	}
 
@@ -146,8 +153,15 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 
 	request := &genprotopb.UpdateUserRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
-	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
+	var jsonReader bytes.Buffer
+	bodyReader := io.TeeReader(r.Body, &jsonReader)
+	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+	// ioutil.ReadAll(bodyReader)
+	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
 	}
 

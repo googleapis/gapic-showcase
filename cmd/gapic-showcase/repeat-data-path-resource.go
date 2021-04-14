@@ -12,11 +12,17 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 
 	"os"
+
+	"strings"
 )
 
 var RepeatDataPathResourceInput genprotopb.RepeatRequest
 
 var RepeatDataPathResourceFromFile string
+
+var RepeatDataPathResourceInputInfoFKingdom string
+
+var RepeatDataPathResourceInputInfoFChildFContinent string
 
 var repeatDataPathResourceInputInfoFChildPString string
 
@@ -26,6 +32,8 @@ var repeatDataPathResourceInputInfoFChildPDouble float64
 
 var repeatDataPathResourceInputInfoFChildPBool bool
 
+var RepeatDataPathResourceInputInfoFChildPContinent string
+
 var repeatDataPathResourceInputInfoPString string
 
 var repeatDataPathResourceInputInfoPInt32 int32
@@ -34,6 +42,10 @@ var repeatDataPathResourceInputInfoPDouble float64
 
 var repeatDataPathResourceInputInfoPBool bool
 
+var RepeatDataPathResourceInputInfoPKingdom string
+
+var RepeatDataPathResourceInputInfoPChildFContinent string
+
 var repeatDataPathResourceInputInfoPChildPString string
 
 var repeatDataPathResourceInputInfoPChildPFloat float32
@@ -41,6 +53,8 @@ var repeatDataPathResourceInputInfoPChildPFloat float32
 var repeatDataPathResourceInputInfoPChildPDouble float64
 
 var repeatDataPathResourceInputInfoPChildPBool bool
+
+var RepeatDataPathResourceInputInfoPChildPContinent string
 
 func init() {
 	ComplianceServiceCmd.AddCommand(RepeatDataPathResourceCmd)
@@ -91,6 +105,8 @@ func init() {
 
 	RepeatDataPathResourceCmd.Flags().BytesHexVar(&RepeatDataPathResourceInput.Info.FBytes, "info.f_bytes", []byte{}, "")
 
+	RepeatDataPathResourceCmd.Flags().StringVar(&RepeatDataPathResourceInputInfoFKingdom, "info.f_kingdom", "", "")
+
 	RepeatDataPathResourceCmd.Flags().StringVar(&RepeatDataPathResourceInput.Info.FChild.FString, "info.f_child.f_string", "", "")
 
 	RepeatDataPathResourceCmd.Flags().Float32Var(&RepeatDataPathResourceInput.Info.FChild.FFloat, "info.f_child.f_float", 0.0, "")
@@ -98,6 +114,8 @@ func init() {
 	RepeatDataPathResourceCmd.Flags().Float64Var(&RepeatDataPathResourceInput.Info.FChild.FDouble, "info.f_child.f_double", 0.0, "")
 
 	RepeatDataPathResourceCmd.Flags().BoolVar(&RepeatDataPathResourceInput.Info.FChild.FBool, "info.f_child.f_bool", false, "")
+
+	RepeatDataPathResourceCmd.Flags().StringVar(&RepeatDataPathResourceInputInfoFChildFContinent, "info.f_child.f_continent", "", "")
 
 	RepeatDataPathResourceCmd.Flags().StringVar(&RepeatDataPathResourceInput.Info.FChild.FChild.FString, "info.f_child.f_child.f_string", "", "")
 
@@ -113,6 +131,8 @@ func init() {
 
 	RepeatDataPathResourceCmd.Flags().BoolVar(&repeatDataPathResourceInputInfoFChildPBool, "info.f_child.p_bool", false, "")
 
+	RepeatDataPathResourceCmd.Flags().StringVar(&RepeatDataPathResourceInputInfoFChildPContinent, "info.f_child.p_continent", "", "")
+
 	RepeatDataPathResourceCmd.Flags().StringVar(&RepeatDataPathResourceInput.Info.FChild.PChild.FString, "info.f_child.p_child.f_string", "", "")
 
 	RepeatDataPathResourceCmd.Flags().Float64Var(&RepeatDataPathResourceInput.Info.FChild.PChild.FDouble, "info.f_child.p_child.f_double", 0.0, "")
@@ -127,6 +147,8 @@ func init() {
 
 	RepeatDataPathResourceCmd.Flags().BoolVar(&repeatDataPathResourceInputInfoPBool, "info.p_bool", false, "")
 
+	RepeatDataPathResourceCmd.Flags().StringVar(&RepeatDataPathResourceInputInfoPKingdom, "info.p_kingdom", "", "")
+
 	RepeatDataPathResourceCmd.Flags().StringVar(&RepeatDataPathResourceInput.Info.PChild.FString, "info.p_child.f_string", "", "")
 
 	RepeatDataPathResourceCmd.Flags().Float32Var(&RepeatDataPathResourceInput.Info.PChild.FFloat, "info.p_child.f_float", 0.0, "")
@@ -134,6 +156,8 @@ func init() {
 	RepeatDataPathResourceCmd.Flags().Float64Var(&RepeatDataPathResourceInput.Info.PChild.FDouble, "info.p_child.f_double", 0.0, "")
 
 	RepeatDataPathResourceCmd.Flags().BoolVar(&RepeatDataPathResourceInput.Info.PChild.FBool, "info.p_child.f_bool", false, "")
+
+	RepeatDataPathResourceCmd.Flags().StringVar(&RepeatDataPathResourceInputInfoPChildFContinent, "info.p_child.f_continent", "", "")
 
 	RepeatDataPathResourceCmd.Flags().StringVar(&RepeatDataPathResourceInput.Info.PChild.FChild.FString, "info.p_child.f_child.f_string", "", "")
 
@@ -148,6 +172,8 @@ func init() {
 	RepeatDataPathResourceCmd.Flags().Float64Var(&repeatDataPathResourceInputInfoPChildPDouble, "info.p_child.p_double", 0.0, "")
 
 	RepeatDataPathResourceCmd.Flags().BoolVar(&repeatDataPathResourceInputInfoPChildPBool, "info.p_child.p_bool", false, "")
+
+	RepeatDataPathResourceCmd.Flags().StringVar(&RepeatDataPathResourceInputInfoPChildPContinent, "info.p_child.p_continent", "", "")
 
 	RepeatDataPathResourceCmd.Flags().StringVar(&RepeatDataPathResourceInput.Info.PChild.PChild.FString, "info.p_child.p_child.f_string", "", "")
 
@@ -186,6 +212,21 @@ var RepeatDataPathResourceCmd = &cobra.Command{
 			}
 
 		} else {
+
+			RepeatDataPathResourceInput.Info.FKingdom = genprotopb.ComplianceData_LifeKingdom(genprotopb.ComplianceData_LifeKingdom_value[strings.ToUpper(RepeatDataPathResourceInputInfoFKingdom)])
+
+			RepeatDataPathResourceInput.Info.FChild.FContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataPathResourceInputInfoFChildFContinent)])
+
+			RepeatDataPathResourceInput.Info.FChild.PContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataPathResourceInputInfoFChildPContinent)])
+
+			if cmd.Flags().Changed("info.p_kingdom") {
+				e := genprotopb.ComplianceData_LifeKingdom(genprotopb.ComplianceData_LifeKingdom_value[strings.ToUpper(RepeatDataPathResourceInputInfoPKingdom)])
+				RepeatDataPathResourceInput.Info.PKingdom = &e
+			}
+
+			RepeatDataPathResourceInput.Info.PChild.FContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataPathResourceInputInfoPChildFContinent)])
+
+			RepeatDataPathResourceInput.Info.PChild.PContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataPathResourceInputInfoPChildPContinent)])
 
 			if cmd.Flags().Changed("info.f_child.p_string") {
 				RepeatDataPathResourceInput.Info.FChild.PString = &repeatDataPathResourceInputInfoFChildPString

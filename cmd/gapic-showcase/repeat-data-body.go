@@ -12,11 +12,17 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 
 	"os"
+
+	"strings"
 )
 
 var RepeatDataBodyInput genprotopb.RepeatRequest
 
 var RepeatDataBodyFromFile string
+
+var RepeatDataBodyInputInfoFKingdom string
+
+var RepeatDataBodyInputInfoFChildFContinent string
 
 var repeatDataBodyInputInfoFChildPString string
 
@@ -26,6 +32,8 @@ var repeatDataBodyInputInfoFChildPDouble float64
 
 var repeatDataBodyInputInfoFChildPBool bool
 
+var RepeatDataBodyInputInfoFChildPContinent string
+
 var repeatDataBodyInputInfoPString string
 
 var repeatDataBodyInputInfoPInt32 int32
@@ -34,6 +42,10 @@ var repeatDataBodyInputInfoPDouble float64
 
 var repeatDataBodyInputInfoPBool bool
 
+var RepeatDataBodyInputInfoPKingdom string
+
+var RepeatDataBodyInputInfoPChildFContinent string
+
 var repeatDataBodyInputInfoPChildPString string
 
 var repeatDataBodyInputInfoPChildPFloat float32
@@ -41,6 +53,8 @@ var repeatDataBodyInputInfoPChildPFloat float32
 var repeatDataBodyInputInfoPChildPDouble float64
 
 var repeatDataBodyInputInfoPChildPBool bool
+
+var RepeatDataBodyInputInfoPChildPContinent string
 
 func init() {
 	ComplianceServiceCmd.AddCommand(RepeatDataBodyCmd)
@@ -91,6 +105,8 @@ func init() {
 
 	RepeatDataBodyCmd.Flags().BytesHexVar(&RepeatDataBodyInput.Info.FBytes, "info.f_bytes", []byte{}, "")
 
+	RepeatDataBodyCmd.Flags().StringVar(&RepeatDataBodyInputInfoFKingdom, "info.f_kingdom", "", "")
+
 	RepeatDataBodyCmd.Flags().StringVar(&RepeatDataBodyInput.Info.FChild.FString, "info.f_child.f_string", "", "")
 
 	RepeatDataBodyCmd.Flags().Float32Var(&RepeatDataBodyInput.Info.FChild.FFloat, "info.f_child.f_float", 0.0, "")
@@ -98,6 +114,8 @@ func init() {
 	RepeatDataBodyCmd.Flags().Float64Var(&RepeatDataBodyInput.Info.FChild.FDouble, "info.f_child.f_double", 0.0, "")
 
 	RepeatDataBodyCmd.Flags().BoolVar(&RepeatDataBodyInput.Info.FChild.FBool, "info.f_child.f_bool", false, "")
+
+	RepeatDataBodyCmd.Flags().StringVar(&RepeatDataBodyInputInfoFChildFContinent, "info.f_child.f_continent", "", "")
 
 	RepeatDataBodyCmd.Flags().StringVar(&RepeatDataBodyInput.Info.FChild.FChild.FString, "info.f_child.f_child.f_string", "", "")
 
@@ -113,6 +131,8 @@ func init() {
 
 	RepeatDataBodyCmd.Flags().BoolVar(&repeatDataBodyInputInfoFChildPBool, "info.f_child.p_bool", false, "")
 
+	RepeatDataBodyCmd.Flags().StringVar(&RepeatDataBodyInputInfoFChildPContinent, "info.f_child.p_continent", "", "")
+
 	RepeatDataBodyCmd.Flags().StringVar(&RepeatDataBodyInput.Info.FChild.PChild.FString, "info.f_child.p_child.f_string", "", "")
 
 	RepeatDataBodyCmd.Flags().Float64Var(&RepeatDataBodyInput.Info.FChild.PChild.FDouble, "info.f_child.p_child.f_double", 0.0, "")
@@ -127,6 +147,8 @@ func init() {
 
 	RepeatDataBodyCmd.Flags().BoolVar(&repeatDataBodyInputInfoPBool, "info.p_bool", false, "")
 
+	RepeatDataBodyCmd.Flags().StringVar(&RepeatDataBodyInputInfoPKingdom, "info.p_kingdom", "", "")
+
 	RepeatDataBodyCmd.Flags().StringVar(&RepeatDataBodyInput.Info.PChild.FString, "info.p_child.f_string", "", "")
 
 	RepeatDataBodyCmd.Flags().Float32Var(&RepeatDataBodyInput.Info.PChild.FFloat, "info.p_child.f_float", 0.0, "")
@@ -134,6 +156,8 @@ func init() {
 	RepeatDataBodyCmd.Flags().Float64Var(&RepeatDataBodyInput.Info.PChild.FDouble, "info.p_child.f_double", 0.0, "")
 
 	RepeatDataBodyCmd.Flags().BoolVar(&RepeatDataBodyInput.Info.PChild.FBool, "info.p_child.f_bool", false, "")
+
+	RepeatDataBodyCmd.Flags().StringVar(&RepeatDataBodyInputInfoPChildFContinent, "info.p_child.f_continent", "", "")
 
 	RepeatDataBodyCmd.Flags().StringVar(&RepeatDataBodyInput.Info.PChild.FChild.FString, "info.p_child.f_child.f_string", "", "")
 
@@ -148,6 +172,8 @@ func init() {
 	RepeatDataBodyCmd.Flags().Float64Var(&repeatDataBodyInputInfoPChildPDouble, "info.p_child.p_double", 0.0, "")
 
 	RepeatDataBodyCmd.Flags().BoolVar(&repeatDataBodyInputInfoPChildPBool, "info.p_child.p_bool", false, "")
+
+	RepeatDataBodyCmd.Flags().StringVar(&RepeatDataBodyInputInfoPChildPContinent, "info.p_child.p_continent", "", "")
 
 	RepeatDataBodyCmd.Flags().StringVar(&RepeatDataBodyInput.Info.PChild.PChild.FString, "info.p_child.p_child.f_string", "", "")
 
@@ -186,6 +212,21 @@ var RepeatDataBodyCmd = &cobra.Command{
 			}
 
 		} else {
+
+			RepeatDataBodyInput.Info.FKingdom = genprotopb.ComplianceData_LifeKingdom(genprotopb.ComplianceData_LifeKingdom_value[strings.ToUpper(RepeatDataBodyInputInfoFKingdom)])
+
+			RepeatDataBodyInput.Info.FChild.FContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataBodyInputInfoFChildFContinent)])
+
+			RepeatDataBodyInput.Info.FChild.PContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataBodyInputInfoFChildPContinent)])
+
+			if cmd.Flags().Changed("info.p_kingdom") {
+				e := genprotopb.ComplianceData_LifeKingdom(genprotopb.ComplianceData_LifeKingdom_value[strings.ToUpper(RepeatDataBodyInputInfoPKingdom)])
+				RepeatDataBodyInput.Info.PKingdom = &e
+			}
+
+			RepeatDataBodyInput.Info.PChild.FContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataBodyInputInfoPChildFContinent)])
+
+			RepeatDataBodyInput.Info.PChild.PContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataBodyInputInfoPChildPContinent)])
 
 			if cmd.Flags().Changed("info.f_child.p_string") {
 				RepeatDataBodyInput.Info.FChild.PString = &repeatDataBodyInputInfoFChildPString
