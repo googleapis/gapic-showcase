@@ -107,7 +107,7 @@ func prepRepeatDataQueryNegativeTestNumericEnums(request *genproto.RepeatRequest
 	// We clear the field so we don't set the same query param correctly below. This change
 	// modifies the request, but since these tests only check that calls fail, we never need to
 	// refer back to the request proto after constructing the REST query.
-	info.FKingdom = pb.ComplianceData_UNASSIGNED
+	info.FKingdom = pb.ComplianceData_LIFE_KINGDOM_UNSPECIFIED
 	queryParams := append(prepRepeatDataTestsQueryParams(request, nil), badQueryParam)
 
 	queryString := prepQueryString(queryParams)

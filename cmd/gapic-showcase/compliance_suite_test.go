@@ -292,7 +292,7 @@ func prepRepeatDataTestsQueryParams(request *genproto.RepeatRequest, exclude map
 	addParam("f_float", info.GetFFloat() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFFloat())))
 	addParam("f_bool", info.GetFBool(), "true")
 	addParam("f_bytes", len(info.GetFBytes()) > 0, url.QueryEscape(string(info.GetFBytes()))) // TODO: Check this is correct, given runes in strings
-	addParam("f_kingdom", info.GetFKingdom() != pb.ComplianceData_UNASSIGNED, info.GetFKingdom().String())
+	addParam("f_kingdom", info.GetFKingdom() != pb.ComplianceData_LIFE_KINGDOM_UNSPECIFIED, info.GetFKingdom().String())
 
 	addParam("p_string", info.PString != nil, url.QueryEscape(info.GetPString()))
 	addParam("p_int32", info.PInt32 != nil, fmt.Sprintf("%d", info.GetPInt32()))
