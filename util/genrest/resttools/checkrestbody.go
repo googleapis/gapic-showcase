@@ -41,7 +41,7 @@ func CheckRESTBody(jsonReader io.Reader, message protoreflect.Message) error {
 // its value is a string. Each element of fieldsToCheck is a qualified proto field name represented
 // as a sequence of simple protoreflect.Name.
 func CheckJSONEnumFields(jsonBytes []byte, fieldsToCheck [][]protoreflect.Name) error {
-	// See See eg https://michaelheap.com/golang-encodedecode-arbitrary-json/
+	// Ref: https://michaelheap.com/golang-encodedecode-arbitrary-json/
 
 	var payload map[string]interface{}
 	json.Unmarshal(jsonBytes, &payload)
@@ -61,8 +61,8 @@ func CheckJSONEnumFields(jsonBytes []byte, fieldsToCheck [][]protoreflect.Name) 
 // fieldPath has a string value, if it exists, in the JSON representation captured by payload. This
 // returns the qualified field name (as present as it is in payload) as a single string, and a
 // boolean that is true only if either fieldPath is not present or if its value is a string. This
-// means that if fieldPath is a path to en enum field, the boolean will be false if the enum is
-// encoded in payloadusing a non-string representation.
+// means that if fieldPath is a path to an enum field, the boolean will be false if the enum is
+// encoded in the payload using a non-string representation.
 func CheckEnum(payload map[string]interface{}, fieldPath []protoreflect.Name) (fieldName string, ok bool) {
 	nameParts := []string{}
 	last := len(fieldPath) - 1
@@ -84,21 +84,29 @@ func CheckEnum(payload map[string]interface{}, fieldPath []protoreflect.Name) (f
 		}
 
 		if _, found = payload[segment]; found {
+			// We found the field specified by fieldPath.
 			value, isString = payload[segment].(string)
 		}
 	}
-
 	fieldName = strings.Join(nameParts, ".")
+
 	if !found {
+		// We did not find the field denoted by fieldPath, so there is no error.
 		return fieldName, true
 	}
 
 	if !isString {
+		// We found the enum field denoted by fieldPath, but its value is not a string. This
+		// is an error: we require all enum values to be REST-encoded via their string
+		// representations for REST transport.
 		return fieldName, false
 	}
 
 	if _, err := strconv.Atoi(value); err == nil {
-		// A string representation of an enum value should not be parseable as an int
+		// We found the enum field denoted by fieldPath, and its JSON value is of string
+		// type, but the value of the string merely represents a number. This is an error: a
+		// string representation of an enum value should not be parseable as an int, as it
+		// must contain letters, typically forming words.
 		return fieldName, false
 	}
 

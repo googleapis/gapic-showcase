@@ -24,13 +24,6 @@ type View struct {
 	Files []*SourceFile
 }
 
-// SourceFile contains a single file to be output, including both its content and location.
-type SourceFile struct {
-	Directory string
-	Name      string // without any directory components
-	source    *Source
-}
-
 // New returns a new, empty View.
 func New(capacity int) *View {
 	return &View{Files: make([]*SourceFile, 0, capacity)}
@@ -42,6 +35,13 @@ func (view *View) Append(file *SourceFile) *SourceFile {
 	return file
 }
 
+// SourceFile contains a single file to be output, including both its content and location.
+type SourceFile struct {
+	Directory string
+	Name      string // without any directory components
+	source    *Source
+}
+
 // NewFile creates an empty SourceFile with the specified Directory and Name.
 func NewFile(directory, name string) *SourceFile {
 	return &SourceFile{
@@ -49,14 +49,6 @@ func NewFile(directory, name string) *SourceFile {
 		Name:      name,
 		source:    NewSource(),
 	}
-}
-
-type Source struct {
-	lines []string // a list of lines
-}
-
-func NewSource() *Source {
-	return &Source{lines: []string{}}
 }
 
 // Contents returns the stringified contents this SourceFile.
@@ -73,6 +65,17 @@ func (sf *SourceFile) Append(source *Source) {
 // P appends a printf-formatted line to SourcerFile.
 func (sf *SourceFile) P(format string, args ...interface{}) {
 	sf.source.P(format, args...)
+}
+
+// Source stores a list of lines, typically a continuous section of source code that forms a part of
+// (or the entirety of) a whole source file.
+type Source struct {
+	lines []string // a list of lines
+}
+
+// NewSource returns a new Source
+func NewSource() *Source {
+	return &Source{lines: []string{}}
 }
 
 // Contents returns the stringified contents this SourceFile.
