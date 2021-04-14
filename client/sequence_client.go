@@ -120,17 +120,14 @@ func (c *SequenceClient) Close() error {
 }
 
 func (c *SequenceClient) CreateSequence(ctx context.Context, req *genprotopb.CreateSequenceRequest, opts ...gax.CallOption) (*genprotopb.Sequence, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.CreateSequence[0:len(c.CallOptions.CreateSequence):len(c.CallOptions.CreateSequence)], opts...)
 	return c.internalClient.CreateSequence(ctx, req, opts)
 }
 func (c *SequenceClient) GetSequenceReport(ctx context.Context, req *genprotopb.GetSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.SequenceReport, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.GetSequenceReport[0:len(c.CallOptions.GetSequenceReport):len(c.CallOptions.GetSequenceReport)], opts...)
 	return c.internalClient.GetSequenceReport(ctx, req, opts)
 }
 func (c *SequenceClient) AttemptSequence(ctx context.Context, req *genprotopb.AttemptSequenceRequest, opts ...gax.CallOption) error {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.AttemptSequence[0:len(c.CallOptions.AttemptSequence):len(c.CallOptions.AttemptSequence)], opts...)
 	c.internalClient.AttemptSequence(ctx, req, opts)
 }
@@ -162,7 +159,7 @@ type sequenceGrpcClient struct {
 // NewSequenceClient creates a new sequence service client based on gRPC.
 //
 func NewSequenceClient(ctx context.Context, opts ...option.ClientOption) (*SequenceClient, error) {
-	clientOpts := defaultSequenceGrpcCallOptions()
+	clientOpts := defaultSequenceGrpcClientOptions()
 	if newSequenceGrpcClientHook != nil {
 		hookOpts, err := newSequenceGrpcClientHook(ctx, clientHookParams{})
 		if err != nil {
@@ -193,7 +190,7 @@ func NewSequenceClient(ctx context.Context, opts ...option.ClientOption) (*Seque
 
 	c.locationsClient = locationpb.NewLocationsClient(connPool)
 
-	return &SequenceClient{internalSequenceClient: c, CallOptions: clientOpts}, nil
+	return &SequenceClient{internalSequenceClient: c, CallOptions: defaultSequenceCallOptions()}, nil
 }
 
 // Connection returns a connection to the API service.

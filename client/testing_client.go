@@ -122,46 +122,38 @@ func (c *TestingClient) Close() error {
 }
 
 func (c *TestingClient) CreateSession(ctx context.Context, req *genprotopb.CreateSessionRequest, opts ...gax.CallOption) (*genprotopb.Session, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.CreateSession[0:len(c.CallOptions.CreateSession):len(c.CallOptions.CreateSession)], opts...)
 	return c.internalClient.CreateSession(ctx, req, opts)
 }
 func (c *TestingClient) GetSession(ctx context.Context, req *genprotopb.GetSessionRequest, opts ...gax.CallOption) (*genprotopb.Session, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.GetSession[0:len(c.CallOptions.GetSession):len(c.CallOptions.GetSession)], opts...)
 	return c.internalClient.GetSession(ctx, req, opts)
 }
 func (c *TestingClient) ListSessions(ctx context.Context, req *genprotopb.ListSessionsRequest, opts ...gax.CallOption) *SessionIterator {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.ListSessions[0:len(c.CallOptions.ListSessions):len(c.CallOptions.ListSessions)], opts...)
 	return c.internalClient.ListSessions(ctx, req, opts)
 }
 
 func (c *TestingClient) DeleteSession(ctx context.Context, req *genprotopb.DeleteSessionRequest, opts ...gax.CallOption) error {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.DeleteSession[0:len(c.CallOptions.DeleteSession):len(c.CallOptions.DeleteSession)], opts...)
 	c.internalClient.DeleteSession(ctx, req, opts)
 }
 
 func (c *TestingClient) ReportSession(ctx context.Context, req *genprotopb.ReportSessionRequest, opts ...gax.CallOption) (*genprotopb.ReportSessionResponse, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.ReportSession[0:len(c.CallOptions.ReportSession):len(c.CallOptions.ReportSession)], opts...)
 	return c.internalClient.ReportSession(ctx, req, opts)
 }
 func (c *TestingClient) ListTests(ctx context.Context, req *genprotopb.ListTestsRequest, opts ...gax.CallOption) *TestIterator {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.ListTests[0:len(c.CallOptions.ListTests):len(c.CallOptions.ListTests)], opts...)
 	return c.internalClient.ListTests(ctx, req, opts)
 }
 
 func (c *TestingClient) DeleteTest(ctx context.Context, req *genprotopb.DeleteTestRequest, opts ...gax.CallOption) error {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.DeleteTest[0:len(c.CallOptions.DeleteTest):len(c.CallOptions.DeleteTest)], opts...)
 	c.internalClient.DeleteTest(ctx, req, opts)
 }
 
 func (c *TestingClient) VerifyTest(ctx context.Context, req *genprotopb.VerifyTestRequest, opts ...gax.CallOption) (*genprotopb.VerifyTestResponse, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.VerifyTest[0:len(c.CallOptions.VerifyTest):len(c.CallOptions.VerifyTest)], opts...)
 	return c.internalClient.VerifyTest(ctx, req, opts)
 }
@@ -195,7 +187,7 @@ type testingGrpcClient struct {
 // A service to facilitate running discrete sets of tests
 // against Showcase.
 func NewTestingClient(ctx context.Context, opts ...option.ClientOption) (*TestingClient, error) {
-	clientOpts := defaultTestingGrpcCallOptions()
+	clientOpts := defaultTestingGrpcClientOptions()
 	if newTestingGrpcClientHook != nil {
 		hookOpts, err := newTestingGrpcClientHook(ctx, clientHookParams{})
 		if err != nil {
@@ -226,7 +218,7 @@ func NewTestingClient(ctx context.Context, opts ...option.ClientOption) (*Testin
 
 	c.locationsClient = locationpb.NewLocationsClient(connPool)
 
-	return &TestingClient{internalTestingClient: c, CallOptions: clientOpts}, nil
+	return &TestingClient{internalTestingClient: c, CallOptions: defaultTestingCallOptions()}, nil
 }
 
 // Connection returns a connection to the API service.

@@ -116,32 +116,26 @@ func (c *ComplianceClient) Close() error {
 }
 
 func (c *ComplianceClient) RepeatDataBody(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.RepeatDataBody[0:len(c.CallOptions.RepeatDataBody):len(c.CallOptions.RepeatDataBody)], opts...)
 	return c.internalClient.RepeatDataBody(ctx, req, opts)
 }
 func (c *ComplianceClient) RepeatDataBodyInfo(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.RepeatDataBodyInfo[0:len(c.CallOptions.RepeatDataBodyInfo):len(c.CallOptions.RepeatDataBodyInfo)], opts...)
 	return c.internalClient.RepeatDataBodyInfo(ctx, req, opts)
 }
 func (c *ComplianceClient) RepeatDataQuery(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.RepeatDataQuery[0:len(c.CallOptions.RepeatDataQuery):len(c.CallOptions.RepeatDataQuery)], opts...)
 	return c.internalClient.RepeatDataQuery(ctx, req, opts)
 }
 func (c *ComplianceClient) RepeatDataSimplePath(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.RepeatDataSimplePath[0:len(c.CallOptions.RepeatDataSimplePath):len(c.CallOptions.RepeatDataSimplePath)], opts...)
 	return c.internalClient.RepeatDataSimplePath(ctx, req, opts)
 }
 func (c *ComplianceClient) RepeatDataPathResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.RepeatDataPathResource[0:len(c.CallOptions.RepeatDataPathResource):len(c.CallOptions.RepeatDataPathResource)], opts...)
 	return c.internalClient.RepeatDataPathResource(ctx, req, opts)
 }
 func (c *ComplianceClient) RepeatDataPathTrailingResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.RepeatDataPathTrailingResource[0:len(c.CallOptions.RepeatDataPathTrailingResource):len(c.CallOptions.RepeatDataPathTrailingResource)], opts...)
 	return c.internalClient.RepeatDataPathTrailingResource(ctx, req, opts)
 }
@@ -175,7 +169,7 @@ type complianceGrpcClient struct {
 // This service is used to test that GAPICs can transcode proto3 requests to
 // REST format correctly for various types of HTTP annotations.
 func NewComplianceClient(ctx context.Context, opts ...option.ClientOption) (*ComplianceClient, error) {
-	clientOpts := defaultComplianceGrpcCallOptions()
+	clientOpts := defaultComplianceGrpcClientOptions()
 	if newComplianceGrpcClientHook != nil {
 		hookOpts, err := newComplianceGrpcClientHook(ctx, clientHookParams{})
 		if err != nil {
@@ -206,7 +200,7 @@ func NewComplianceClient(ctx context.Context, opts ...option.ClientOption) (*Com
 
 	c.locationsClient = locationpb.NewLocationsClient(connPool)
 
-	return &ComplianceClient{internalComplianceClient: c, CallOptions: clientOpts}, nil
+	return &ComplianceClient{internalComplianceClient: c, CallOptions: defaultComplianceCallOptions()}, nil
 }
 
 // Connection returns a connection to the API service.

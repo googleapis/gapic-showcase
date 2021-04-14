@@ -137,28 +137,23 @@ func (c *IdentityClient) Close() error {
 }
 
 func (c *IdentityClient) CreateUser(ctx context.Context, req *genprotopb.CreateUserRequest, opts ...gax.CallOption) (*genprotopb.User, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.CreateUser[0:len(c.CallOptions.CreateUser):len(c.CallOptions.CreateUser)], opts...)
 	return c.internalClient.CreateUser(ctx, req, opts)
 }
 func (c *IdentityClient) GetUser(ctx context.Context, req *genprotopb.GetUserRequest, opts ...gax.CallOption) (*genprotopb.User, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.GetUser[0:len(c.CallOptions.GetUser):len(c.CallOptions.GetUser)], opts...)
 	return c.internalClient.GetUser(ctx, req, opts)
 }
 func (c *IdentityClient) UpdateUser(ctx context.Context, req *genprotopb.UpdateUserRequest, opts ...gax.CallOption) (*genprotopb.User, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.UpdateUser[0:len(c.CallOptions.UpdateUser):len(c.CallOptions.UpdateUser)], opts...)
 	return c.internalClient.UpdateUser(ctx, req, opts)
 }
 func (c *IdentityClient) DeleteUser(ctx context.Context, req *genprotopb.DeleteUserRequest, opts ...gax.CallOption) error {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.DeleteUser[0:len(c.CallOptions.DeleteUser):len(c.CallOptions.DeleteUser)], opts...)
 	c.internalClient.DeleteUser(ctx, req, opts)
 }
 
 func (c *IdentityClient) ListUsers(ctx context.Context, req *genprotopb.ListUsersRequest, opts ...gax.CallOption) *UserIterator {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.ListUsers[0:len(c.CallOptions.ListUsers):len(c.CallOptions.ListUsers)], opts...)
 	return c.internalClient.ListUsers(ctx, req, opts)
 }
@@ -191,7 +186,7 @@ type identityGrpcClient struct {
 //
 // A simple identity service.
 func NewIdentityClient(ctx context.Context, opts ...option.ClientOption) (*IdentityClient, error) {
-	clientOpts := defaultIdentityGrpcCallOptions()
+	clientOpts := defaultIdentityGrpcClientOptions()
 	if newIdentityGrpcClientHook != nil {
 		hookOpts, err := newIdentityGrpcClientHook(ctx, clientHookParams{})
 		if err != nil {
@@ -222,7 +217,7 @@ func NewIdentityClient(ctx context.Context, opts ...option.ClientOption) (*Ident
 
 	c.locationsClient = locationpb.NewLocationsClient(connPool)
 
-	return &IdentityClient{internalIdentityClient: c, CallOptions: clientOpts}, nil
+	return &IdentityClient{internalIdentityClient: c, CallOptions: defaultIdentityCallOptions()}, nil
 }
 
 // Connection returns a connection to the API service.

@@ -161,41 +161,34 @@ func (c *EchoClient) Close() error {
 }
 
 func (c *EchoClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, opts ...gax.CallOption) (*genprotopb.EchoResponse, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.Echo[0:len(c.CallOptions.Echo):len(c.CallOptions.Echo)], opts...)
 	return c.internalClient.Echo(ctx, req, opts)
 }
 func (c *EchoClient) Expand(ctx context.Context, req *genprotopb.ExpandRequest, opts ...gax.CallOption) (genprotopb.Echo_ExpandGrpcClient, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.Expand[0:len(c.CallOptions.Expand):len(c.CallOptions.Expand)], opts...)
 	return c.internalClient.Expand(ctx, req, opts)
 }
 func (c *EchoClient) Collect(ctx context.Context, opts ...gax.CallOption) (genprotopb.Echo_CollectGrpcClient, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.Collect[0:len(c.CallOptions.Collect):len(c.CallOptions.Collect)], opts...)
 	return c.internalClient.Collect(ctx, opts)
 }
 
 func (c *EchoClient) Chat(ctx context.Context, opts ...gax.CallOption) (genprotopb.Echo_ChatGrpcClient, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.Chat[0:len(c.CallOptions.Chat):len(c.CallOptions.Chat)], opts...)
 	return c.internalClient.Chat(ctx, opts)
 }
 
 func (c *EchoClient) PagedExpand(ctx context.Context, req *genprotopb.PagedExpandRequest, opts ...gax.CallOption) *EchoResponseIterator {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.PagedExpand[0:len(c.CallOptions.PagedExpand):len(c.CallOptions.PagedExpand)], opts...)
 	return c.internalClient.PagedExpand(ctx, req, opts)
 }
 
 func (c *EchoClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, opts ...gax.CallOption) (*WaitOperation, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.Wait[0:len(c.CallOptions.Wait):len(c.CallOptions.Wait)], opts...)
 	return c.internalClient.Wait(ctx, req, opts)
 }
 
 func (c *EchoClient) Block(ctx context.Context, req *genprotopb.BlockRequest, opts ...gax.CallOption) (*genprotopb.BlockResponse, error) {
-	var opts gax.CallOption
 	opts = append(c.CallOptions.Block[0:len(c.CallOptions.Block):len(c.CallOptions.Block)], opts...)
 	return c.internalClient.Block(ctx, req, opts)
 }
@@ -237,7 +230,7 @@ type echoGrpcClient struct {
 // paginated calls. Set the ‘showcase-trailer’ metadata key on any method
 // to have the values echoed in the response trailers.
 func NewEchoClient(ctx context.Context, opts ...option.ClientOption) (*EchoClient, error) {
-	clientOpts := defaultEchoGrpcCallOptions()
+	clientOpts := defaultEchoGrpcClientOptions()
 	if newEchoGrpcClientHook != nil {
 		hookOpts, err := newEchoGrpcClientHook(ctx, clientHookParams{})
 		if err != nil {
@@ -278,7 +271,7 @@ func NewEchoClient(ctx context.Context, opts ...option.ClientOption) (*EchoClien
 
 	c.locationsClient = locationpb.NewLocationsClient(connPool)
 
-	return &EchoClient{internalEchoClient: c, CallOptions: clientOpts}, nil
+	return &EchoClient{internalEchoClient: c, CallOptions: defaultEchoCallOptions()}, nil
 }
 
 // Connection returns a connection to the API service.
