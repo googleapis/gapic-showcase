@@ -28,7 +28,7 @@ import (
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 )
 
-func ExampleNewEchoClient() {
+func ExampleNewEchoGrpcClient() {
 	ctx := context.Background()
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
@@ -38,7 +38,7 @@ func ExampleNewEchoClient() {
 	_ = c
 }
 
-func ExampleEchoClient_Echo() {
+func ExampleEchoGrpcClient_Echo() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -58,7 +58,7 @@ func ExampleEchoClient_Echo() {
 	_ = resp
 }
 
-func ExampleEchoClient_Chat() {
+func ExampleEchoGrpcClient_Chat() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -94,7 +94,7 @@ func ExampleEchoClient_Chat() {
 	}
 }
 
-func ExampleEchoClient_PagedExpand() {
+func ExampleEchoGrpcClient_PagedExpand() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	// import "google.golang.org/api/iterator"
 
@@ -121,7 +121,7 @@ func ExampleEchoClient_PagedExpand() {
 	}
 }
 
-func ExampleEchoClient_Wait() {
+func ExampleEchoGrpcClient_Wait() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -146,7 +146,7 @@ func ExampleEchoClient_Wait() {
 	_ = resp
 }
 
-func ExampleEchoClient_Block() {
+func ExampleEchoGrpcClient_Block() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -166,7 +166,7 @@ func ExampleEchoClient_Block() {
 	_ = resp
 }
 
-func ExampleEchoClient_ListLocations() {
+func ExampleEchoGrpcClient_ListLocations() {
 	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
 	// import "google.golang.org/api/iterator"
 
@@ -193,7 +193,7 @@ func ExampleEchoClient_ListLocations() {
 	}
 }
 
-func ExampleEchoClient_GetLocation() {
+func ExampleEchoGrpcClient_GetLocation() {
 	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
 
 	ctx := context.Background()
@@ -213,7 +213,7 @@ func ExampleEchoClient_GetLocation() {
 	_ = resp
 }
 
-func ExampleEchoClient_SetIamPolicy() {
+func ExampleEchoGrpcClient_SetIamPolicy() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -233,7 +233,7 @@ func ExampleEchoClient_SetIamPolicy() {
 	_ = resp
 }
 
-func ExampleEchoClient_GetIamPolicy() {
+func ExampleEchoGrpcClient_GetIamPolicy() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -253,7 +253,7 @@ func ExampleEchoClient_GetIamPolicy() {
 	_ = resp
 }
 
-func ExampleEchoClient_TestIamPermissions() {
+func ExampleEchoGrpcClient_TestIamPermissions() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -273,7 +273,7 @@ func ExampleEchoClient_TestIamPermissions() {
 	_ = resp
 }
 
-func ExampleEchoClient_ListOperations() {
+func ExampleEchoGrpcClient_ListOperations() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	// import "google.golang.org/api/iterator"
 
@@ -300,7 +300,7 @@ func ExampleEchoClient_ListOperations() {
 	}
 }
 
-func ExampleEchoClient_GetOperation() {
+func ExampleEchoGrpcClient_GetOperation() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 
 	ctx := context.Background()
@@ -320,7 +320,7 @@ func ExampleEchoClient_GetOperation() {
 	_ = resp
 }
 
-func ExampleEchoClient_DeleteOperation() {
+func ExampleEchoGrpcClient_DeleteOperation() {
 	ctx := context.Background()
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
@@ -336,7 +336,7 @@ func ExampleEchoClient_DeleteOperation() {
 	}
 }
 
-func ExampleEchoClient_CancelOperation() {
+func ExampleEchoGrpcClient_CancelOperation() {
 	ctx := context.Background()
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
@@ -352,7 +352,7 @@ func ExampleEchoClient_CancelOperation() {
 	}
 }
 
-func ExampleEchoClient_WaitOperation() {
+func ExampleEchoGrpcClient_WaitOperation() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 
 	ctx := context.Background()

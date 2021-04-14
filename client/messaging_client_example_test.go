@@ -28,7 +28,7 @@ import (
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 )
 
-func ExampleNewMessagingClient() {
+func ExampleNewMessagingGrpcClient() {
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
@@ -38,7 +38,7 @@ func ExampleNewMessagingClient() {
 	_ = c
 }
 
-func ExampleMessagingClient_CreateRoom() {
+func ExampleMessagingGrpcClient_CreateRoom() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -58,7 +58,7 @@ func ExampleMessagingClient_CreateRoom() {
 	_ = resp
 }
 
-func ExampleMessagingClient_GetRoom() {
+func ExampleMessagingGrpcClient_GetRoom() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -78,7 +78,7 @@ func ExampleMessagingClient_GetRoom() {
 	_ = resp
 }
 
-func ExampleMessagingClient_UpdateRoom() {
+func ExampleMessagingGrpcClient_UpdateRoom() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -98,7 +98,7 @@ func ExampleMessagingClient_UpdateRoom() {
 	_ = resp
 }
 
-func ExampleMessagingClient_DeleteRoom() {
+func ExampleMessagingGrpcClient_DeleteRoom() {
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
@@ -114,7 +114,7 @@ func ExampleMessagingClient_DeleteRoom() {
 	}
 }
 
-func ExampleMessagingClient_ListRooms() {
+func ExampleMessagingGrpcClient_ListRooms() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	// import "google.golang.org/api/iterator"
 
@@ -141,7 +141,7 @@ func ExampleMessagingClient_ListRooms() {
 	}
 }
 
-func ExampleMessagingClient_CreateBlurb() {
+func ExampleMessagingGrpcClient_CreateBlurb() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -161,7 +161,7 @@ func ExampleMessagingClient_CreateBlurb() {
 	_ = resp
 }
 
-func ExampleMessagingClient_GetBlurb() {
+func ExampleMessagingGrpcClient_GetBlurb() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -181,7 +181,7 @@ func ExampleMessagingClient_GetBlurb() {
 	_ = resp
 }
 
-func ExampleMessagingClient_UpdateBlurb() {
+func ExampleMessagingGrpcClient_UpdateBlurb() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -201,7 +201,7 @@ func ExampleMessagingClient_UpdateBlurb() {
 	_ = resp
 }
 
-func ExampleMessagingClient_DeleteBlurb() {
+func ExampleMessagingGrpcClient_DeleteBlurb() {
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
@@ -217,7 +217,7 @@ func ExampleMessagingClient_DeleteBlurb() {
 	}
 }
 
-func ExampleMessagingClient_ListBlurbs() {
+func ExampleMessagingGrpcClient_ListBlurbs() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	// import "google.golang.org/api/iterator"
 
@@ -244,7 +244,7 @@ func ExampleMessagingClient_ListBlurbs() {
 	}
 }
 
-func ExampleMessagingClient_SearchBlurbs() {
+func ExampleMessagingGrpcClient_SearchBlurbs() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -269,7 +269,7 @@ func ExampleMessagingClient_SearchBlurbs() {
 	_ = resp
 }
 
-func ExampleMessagingClient_Connect() {
+func ExampleMessagingGrpcClient_Connect() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -305,7 +305,7 @@ func ExampleMessagingClient_Connect() {
 	}
 }
 
-func ExampleMessagingClient_ListLocations() {
+func ExampleMessagingGrpcClient_ListLocations() {
 	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
 	// import "google.golang.org/api/iterator"
 
@@ -332,7 +332,7 @@ func ExampleMessagingClient_ListLocations() {
 	}
 }
 
-func ExampleMessagingClient_GetLocation() {
+func ExampleMessagingGrpcClient_GetLocation() {
 	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
 
 	ctx := context.Background()
@@ -352,7 +352,7 @@ func ExampleMessagingClient_GetLocation() {
 	_ = resp
 }
 
-func ExampleMessagingClient_SetIamPolicy() {
+func ExampleMessagingGrpcClient_SetIamPolicy() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -372,7 +372,7 @@ func ExampleMessagingClient_SetIamPolicy() {
 	_ = resp
 }
 
-func ExampleMessagingClient_GetIamPolicy() {
+func ExampleMessagingGrpcClient_GetIamPolicy() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -392,7 +392,7 @@ func ExampleMessagingClient_GetIamPolicy() {
 	_ = resp
 }
 
-func ExampleMessagingClient_TestIamPermissions() {
+func ExampleMessagingGrpcClient_TestIamPermissions() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -412,7 +412,7 @@ func ExampleMessagingClient_TestIamPermissions() {
 	_ = resp
 }
 
-func ExampleMessagingClient_ListOperations() {
+func ExampleMessagingGrpcClient_ListOperations() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	// import "google.golang.org/api/iterator"
 
@@ -439,7 +439,7 @@ func ExampleMessagingClient_ListOperations() {
 	}
 }
 
-func ExampleMessagingClient_GetOperation() {
+func ExampleMessagingGrpcClient_GetOperation() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 
 	ctx := context.Background()
@@ -459,7 +459,7 @@ func ExampleMessagingClient_GetOperation() {
 	_ = resp
 }
 
-func ExampleMessagingClient_DeleteOperation() {
+func ExampleMessagingGrpcClient_DeleteOperation() {
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
@@ -475,7 +475,7 @@ func ExampleMessagingClient_DeleteOperation() {
 	}
 }
 
-func ExampleMessagingClient_CancelOperation() {
+func ExampleMessagingGrpcClient_CancelOperation() {
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
@@ -491,7 +491,7 @@ func ExampleMessagingClient_CancelOperation() {
 	}
 }
 
-func ExampleMessagingClient_WaitOperation() {
+func ExampleMessagingGrpcClient_WaitOperation() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 
 	ctx := context.Background()

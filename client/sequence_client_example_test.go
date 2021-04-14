@@ -27,7 +27,7 @@ import (
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 )
 
-func ExampleNewSequenceClient() {
+func ExampleNewSequenceGrpcClient() {
 	ctx := context.Background()
 	c, err := client.NewSequenceClient(ctx)
 	if err != nil {
@@ -37,7 +37,7 @@ func ExampleNewSequenceClient() {
 	_ = c
 }
 
-func ExampleSequenceClient_CreateSequence() {
+func ExampleSequenceGrpcClient_CreateSequence() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -57,7 +57,7 @@ func ExampleSequenceClient_CreateSequence() {
 	_ = resp
 }
 
-func ExampleSequenceClient_GetSequenceReport() {
+func ExampleSequenceGrpcClient_GetSequenceReport() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -77,7 +77,7 @@ func ExampleSequenceClient_GetSequenceReport() {
 	_ = resp
 }
 
-func ExampleSequenceClient_AttemptSequence() {
+func ExampleSequenceGrpcClient_AttemptSequence() {
 	ctx := context.Background()
 	c, err := client.NewSequenceClient(ctx)
 	if err != nil {
@@ -93,7 +93,7 @@ func ExampleSequenceClient_AttemptSequence() {
 	}
 }
 
-func ExampleSequenceClient_ListLocations() {
+func ExampleSequenceGrpcClient_ListLocations() {
 	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
 	// import "google.golang.org/api/iterator"
 
@@ -120,7 +120,7 @@ func ExampleSequenceClient_ListLocations() {
 	}
 }
 
-func ExampleSequenceClient_GetLocation() {
+func ExampleSequenceGrpcClient_GetLocation() {
 	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
 
 	ctx := context.Background()
@@ -140,7 +140,7 @@ func ExampleSequenceClient_GetLocation() {
 	_ = resp
 }
 
-func ExampleSequenceClient_SetIamPolicy() {
+func ExampleSequenceGrpcClient_SetIamPolicy() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -160,7 +160,7 @@ func ExampleSequenceClient_SetIamPolicy() {
 	_ = resp
 }
 
-func ExampleSequenceClient_GetIamPolicy() {
+func ExampleSequenceGrpcClient_GetIamPolicy() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -180,7 +180,7 @@ func ExampleSequenceClient_GetIamPolicy() {
 	_ = resp
 }
 
-func ExampleSequenceClient_TestIamPermissions() {
+func ExampleSequenceGrpcClient_TestIamPermissions() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -200,7 +200,7 @@ func ExampleSequenceClient_TestIamPermissions() {
 	_ = resp
 }
 
-func ExampleSequenceClient_ListOperations() {
+func ExampleSequenceGrpcClient_ListOperations() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	// import "google.golang.org/api/iterator"
 
@@ -227,7 +227,7 @@ func ExampleSequenceClient_ListOperations() {
 	}
 }
 
-func ExampleSequenceClient_GetOperation() {
+func ExampleSequenceGrpcClient_GetOperation() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 
 	ctx := context.Background()
@@ -247,7 +247,7 @@ func ExampleSequenceClient_GetOperation() {
 	_ = resp
 }
 
-func ExampleSequenceClient_DeleteOperation() {
+func ExampleSequenceGrpcClient_DeleteOperation() {
 	ctx := context.Background()
 	c, err := client.NewSequenceClient(ctx)
 	if err != nil {
@@ -263,7 +263,7 @@ func ExampleSequenceClient_DeleteOperation() {
 	}
 }
 
-func ExampleSequenceClient_CancelOperation() {
+func ExampleSequenceGrpcClient_CancelOperation() {
 	ctx := context.Background()
 	c, err := client.NewSequenceClient(ctx)
 	if err != nil {
@@ -279,7 +279,7 @@ func ExampleSequenceClient_CancelOperation() {
 	}
 }
 
-func ExampleSequenceClient_WaitOperation() {
+func ExampleSequenceGrpcClient_WaitOperation() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 
 	ctx := context.Background()

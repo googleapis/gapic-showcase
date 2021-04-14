@@ -27,7 +27,7 @@ import (
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 )
 
-func ExampleNewIdentityClient() {
+func ExampleNewIdentityGrpcClient() {
 	ctx := context.Background()
 	c, err := client.NewIdentityClient(ctx)
 	if err != nil {
@@ -37,7 +37,7 @@ func ExampleNewIdentityClient() {
 	_ = c
 }
 
-func ExampleIdentityClient_CreateUser() {
+func ExampleIdentityGrpcClient_CreateUser() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -57,7 +57,7 @@ func ExampleIdentityClient_CreateUser() {
 	_ = resp
 }
 
-func ExampleIdentityClient_GetUser() {
+func ExampleIdentityGrpcClient_GetUser() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -77,7 +77,7 @@ func ExampleIdentityClient_GetUser() {
 	_ = resp
 }
 
-func ExampleIdentityClient_UpdateUser() {
+func ExampleIdentityGrpcClient_UpdateUser() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -97,7 +97,7 @@ func ExampleIdentityClient_UpdateUser() {
 	_ = resp
 }
 
-func ExampleIdentityClient_DeleteUser() {
+func ExampleIdentityGrpcClient_DeleteUser() {
 	ctx := context.Background()
 	c, err := client.NewIdentityClient(ctx)
 	if err != nil {
@@ -113,7 +113,7 @@ func ExampleIdentityClient_DeleteUser() {
 	}
 }
 
-func ExampleIdentityClient_ListUsers() {
+func ExampleIdentityGrpcClient_ListUsers() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	// import "google.golang.org/api/iterator"
 
@@ -140,7 +140,7 @@ func ExampleIdentityClient_ListUsers() {
 	}
 }
 
-func ExampleIdentityClient_ListLocations() {
+func ExampleIdentityGrpcClient_ListLocations() {
 	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
 	// import "google.golang.org/api/iterator"
 
@@ -167,7 +167,7 @@ func ExampleIdentityClient_ListLocations() {
 	}
 }
 
-func ExampleIdentityClient_GetLocation() {
+func ExampleIdentityGrpcClient_GetLocation() {
 	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
 
 	ctx := context.Background()
@@ -187,7 +187,7 @@ func ExampleIdentityClient_GetLocation() {
 	_ = resp
 }
 
-func ExampleIdentityClient_SetIamPolicy() {
+func ExampleIdentityGrpcClient_SetIamPolicy() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -207,7 +207,7 @@ func ExampleIdentityClient_SetIamPolicy() {
 	_ = resp
 }
 
-func ExampleIdentityClient_GetIamPolicy() {
+func ExampleIdentityGrpcClient_GetIamPolicy() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -227,7 +227,7 @@ func ExampleIdentityClient_GetIamPolicy() {
 	_ = resp
 }
 
-func ExampleIdentityClient_TestIamPermissions() {
+func ExampleIdentityGrpcClient_TestIamPermissions() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -247,7 +247,7 @@ func ExampleIdentityClient_TestIamPermissions() {
 	_ = resp
 }
 
-func ExampleIdentityClient_ListOperations() {
+func ExampleIdentityGrpcClient_ListOperations() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	// import "google.golang.org/api/iterator"
 
@@ -274,7 +274,7 @@ func ExampleIdentityClient_ListOperations() {
 	}
 }
 
-func ExampleIdentityClient_GetOperation() {
+func ExampleIdentityGrpcClient_GetOperation() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 
 	ctx := context.Background()
@@ -294,7 +294,7 @@ func ExampleIdentityClient_GetOperation() {
 	_ = resp
 }
 
-func ExampleIdentityClient_DeleteOperation() {
+func ExampleIdentityGrpcClient_DeleteOperation() {
 	ctx := context.Background()
 	c, err := client.NewIdentityClient(ctx)
 	if err != nil {
@@ -310,7 +310,7 @@ func ExampleIdentityClient_DeleteOperation() {
 	}
 }
 
-func ExampleIdentityClient_CancelOperation() {
+func ExampleIdentityGrpcClient_CancelOperation() {
 	ctx := context.Background()
 	c, err := client.NewIdentityClient(ctx)
 	if err != nil {
@@ -326,7 +326,7 @@ func ExampleIdentityClient_CancelOperation() {
 	}
 }
 
-func ExampleIdentityClient_WaitOperation() {
+func ExampleIdentityGrpcClient_WaitOperation() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 
 	ctx := context.Background()

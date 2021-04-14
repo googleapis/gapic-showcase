@@ -27,7 +27,7 @@ import (
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 )
 
-func ExampleNewComplianceClient() {
+func ExampleNewComplianceGrpcClient() {
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)
 	if err != nil {
@@ -37,7 +37,7 @@ func ExampleNewComplianceClient() {
 	_ = c
 }
 
-func ExampleComplianceClient_RepeatDataBody() {
+func ExampleComplianceGrpcClient_RepeatDataBody() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -57,7 +57,7 @@ func ExampleComplianceClient_RepeatDataBody() {
 	_ = resp
 }
 
-func ExampleComplianceClient_RepeatDataBodyInfo() {
+func ExampleComplianceGrpcClient_RepeatDataBodyInfo() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -77,7 +77,7 @@ func ExampleComplianceClient_RepeatDataBodyInfo() {
 	_ = resp
 }
 
-func ExampleComplianceClient_RepeatDataQuery() {
+func ExampleComplianceGrpcClient_RepeatDataQuery() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -97,7 +97,7 @@ func ExampleComplianceClient_RepeatDataQuery() {
 	_ = resp
 }
 
-func ExampleComplianceClient_RepeatDataSimplePath() {
+func ExampleComplianceGrpcClient_RepeatDataSimplePath() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -117,7 +117,7 @@ func ExampleComplianceClient_RepeatDataSimplePath() {
 	_ = resp
 }
 
-func ExampleComplianceClient_RepeatDataPathResource() {
+func ExampleComplianceGrpcClient_RepeatDataPathResource() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -137,7 +137,7 @@ func ExampleComplianceClient_RepeatDataPathResource() {
 	_ = resp
 }
 
-func ExampleComplianceClient_RepeatDataPathTrailingResource() {
+func ExampleComplianceGrpcClient_RepeatDataPathTrailingResource() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -157,7 +157,7 @@ func ExampleComplianceClient_RepeatDataPathTrailingResource() {
 	_ = resp
 }
 
-func ExampleComplianceClient_ListLocations() {
+func ExampleComplianceGrpcClient_ListLocations() {
 	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
 	// import "google.golang.org/api/iterator"
 
@@ -184,7 +184,7 @@ func ExampleComplianceClient_ListLocations() {
 	}
 }
 
-func ExampleComplianceClient_GetLocation() {
+func ExampleComplianceGrpcClient_GetLocation() {
 	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
 
 	ctx := context.Background()
@@ -204,7 +204,7 @@ func ExampleComplianceClient_GetLocation() {
 	_ = resp
 }
 
-func ExampleComplianceClient_SetIamPolicy() {
+func ExampleComplianceGrpcClient_SetIamPolicy() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -224,7 +224,7 @@ func ExampleComplianceClient_SetIamPolicy() {
 	_ = resp
 }
 
-func ExampleComplianceClient_GetIamPolicy() {
+func ExampleComplianceGrpcClient_GetIamPolicy() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -244,7 +244,7 @@ func ExampleComplianceClient_GetIamPolicy() {
 	_ = resp
 }
 
-func ExampleComplianceClient_TestIamPermissions() {
+func ExampleComplianceGrpcClient_TestIamPermissions() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -264,7 +264,7 @@ func ExampleComplianceClient_TestIamPermissions() {
 	_ = resp
 }
 
-func ExampleComplianceClient_ListOperations() {
+func ExampleComplianceGrpcClient_ListOperations() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	// import "google.golang.org/api/iterator"
 
@@ -291,7 +291,7 @@ func ExampleComplianceClient_ListOperations() {
 	}
 }
 
-func ExampleComplianceClient_GetOperation() {
+func ExampleComplianceGrpcClient_GetOperation() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 
 	ctx := context.Background()
@@ -311,7 +311,7 @@ func ExampleComplianceClient_GetOperation() {
 	_ = resp
 }
 
-func ExampleComplianceClient_DeleteOperation() {
+func ExampleComplianceGrpcClient_DeleteOperation() {
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)
 	if err != nil {
@@ -327,7 +327,7 @@ func ExampleComplianceClient_DeleteOperation() {
 	}
 }
 
-func ExampleComplianceClient_CancelOperation() {
+func ExampleComplianceGrpcClient_CancelOperation() {
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)
 	if err != nil {
@@ -343,7 +343,7 @@ func ExampleComplianceClient_CancelOperation() {
 	}
 }
 
-func ExampleComplianceClient_WaitOperation() {
+func ExampleComplianceGrpcClient_WaitOperation() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 
 	ctx := context.Background()

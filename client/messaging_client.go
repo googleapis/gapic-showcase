@@ -40,7 +40,7 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-var newMessagingClientHook clientHook
+var newMessagingGrpcClientHook clientHook
 
 // MessagingCallOptions contains the retry settings for each method of MessagingClient.
 type MessagingCallOptions struct {
@@ -70,7 +70,7 @@ type MessagingCallOptions struct {
 	WaitOperation      []gax.CallOption
 }
 
-func defaultMessagingClientOptions() []option.ClientOption {
+func defaultMessagingGrpcClientOptions() []option.ClientOption {
 	return []option.ClientOption{
 		internaloption.WithDefaultEndpoint("localhost:7469"),
 		internaloption.WithDefaultMTLSEndpoint("localhost:7469"),
@@ -177,10 +177,125 @@ func defaultMessagingCallOptions() *MessagingCallOptions {
 	}
 }
 
+// internalMessagingClient is an interface that defines the methods availaible from Client Libraries Showcase API.
+type internalMessagingClient interface {
+	CreateRoom(context.Context, *genprotopb.CreateRoomRequest, ...gax.CallOption) (*genprotopb.Room, error)
+	GetRoom(context.Context, *genprotopb.GetRoomRequest, ...gax.CallOption) (*genprotopb.Room, error)
+	UpdateRoom(context.Context, *genprotopb.UpdateRoomRequest, ...gax.CallOption) (*genprotopb.Room, error)
+	DeleteRoom(context.Context, *genprotopb.DeleteRoomRequest, ...gax.CallOption) error
+	ListRooms(context.Context, *genprotopb.ListRoomsRequest, ...gax.CallOption) *RoomIterator
+	CreateBlurb(context.Context, *genprotopb.CreateBlurbRequest, ...gax.CallOption) (*genprotopb.Blurb, error)
+	GetBlurb(context.Context, *genprotopb.GetBlurbRequest, ...gax.CallOption) (*genprotopb.Blurb, error)
+	UpdateBlurb(context.Context, *genprotopb.UpdateBlurbRequest, ...gax.CallOption) (*genprotopb.Blurb, error)
+	DeleteBlurb(context.Context, *genprotopb.DeleteBlurbRequest, ...gax.CallOption) error
+	ListBlurbs(context.Context, *genprotopb.ListBlurbsRequest, ...gax.CallOption) *BlurbIterator
+	SearchBlurbs(context.Context, *genprotopb.SearchBlurbsRequest, ...gax.CallOption) (*SearchBlurbsOperation, error)
+	StreamBlurbs(context.Context, *genprotopb.StreamBlurbsRequest, ...gax.CallOption) (genprotopb.Messaging_StreamBlurbsGrpcClient, error)
+	SendBlurbs(context.Context, ...gax.CallOption) (genprotopb.Messaging_SendBlurbsGrpcClient, error)
+	Connect(context.Context, ...gax.CallOption) (genprotopb.Messaging_ConnectGrpcClient, error)
+}
+
 // MessagingClient is a client for interacting with Client Libraries Showcase API.
-//
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 type MessagingClient struct {
+	// The internal transport-dependent client.
+	internalClient internalMessagingClient
+
+	// The call options for this service.
+	CallOptions *MessagingCallOptions
+
+	// LROClient is used internally to handle long-running operations.
+	// It is exposed so that its CallOptions can be modified if required.
+	// Users should not Close this client.
+	LROClient *lroauto.OperationsClient
+}
+
+func (c *MessagingClient) Close() error {
+	return c.internalClient.Close()
+}
+
+func (c *MessagingClient) CreateRoom(ctx context.Context, req *genprotopb.CreateRoomRequest, opts ...gax.CallOption) (*genprotopb.Room, error) {
+	var opts gax.CallOption
+	opts = append(c.CallOptions.CreateRoom[0:len(c.CallOptions.CreateRoom):len(c.CallOptions.CreateRoom)], opts...)
+	return c.internalClient.CreateRoom(ctx, req, opts)
+}
+func (c *MessagingClient) GetRoom(ctx context.Context, req *genprotopb.GetRoomRequest, opts ...gax.CallOption) (*genprotopb.Room, error) {
+	var opts gax.CallOption
+	opts = append(c.CallOptions.GetRoom[0:len(c.CallOptions.GetRoom):len(c.CallOptions.GetRoom)], opts...)
+	return c.internalClient.GetRoom(ctx, req, opts)
+}
+func (c *MessagingClient) UpdateRoom(ctx context.Context, req *genprotopb.UpdateRoomRequest, opts ...gax.CallOption) (*genprotopb.Room, error) {
+	var opts gax.CallOption
+	opts = append(c.CallOptions.UpdateRoom[0:len(c.CallOptions.UpdateRoom):len(c.CallOptions.UpdateRoom)], opts...)
+	return c.internalClient.UpdateRoom(ctx, req, opts)
+}
+func (c *MessagingClient) DeleteRoom(ctx context.Context, req *genprotopb.DeleteRoomRequest, opts ...gax.CallOption) error {
+	var opts gax.CallOption
+	opts = append(c.CallOptions.DeleteRoom[0:len(c.CallOptions.DeleteRoom):len(c.CallOptions.DeleteRoom)], opts...)
+	c.internalClient.DeleteRoom(ctx, req, opts)
+}
+
+func (c *MessagingClient) ListRooms(ctx context.Context, req *genprotopb.ListRoomsRequest, opts ...gax.CallOption) *RoomIterator {
+	var opts gax.CallOption
+	opts = append(c.CallOptions.ListRooms[0:len(c.CallOptions.ListRooms):len(c.CallOptions.ListRooms)], opts...)
+	return c.internalClient.ListRooms(ctx, req, opts)
+}
+
+func (c *MessagingClient) CreateBlurb(ctx context.Context, req *genprotopb.CreateBlurbRequest, opts ...gax.CallOption) (*genprotopb.Blurb, error) {
+	var opts gax.CallOption
+	opts = append(c.CallOptions.CreateBlurb[0:len(c.CallOptions.CreateBlurb):len(c.CallOptions.CreateBlurb)], opts...)
+	return c.internalClient.CreateBlurb(ctx, req, opts)
+}
+func (c *MessagingClient) GetBlurb(ctx context.Context, req *genprotopb.GetBlurbRequest, opts ...gax.CallOption) (*genprotopb.Blurb, error) {
+	var opts gax.CallOption
+	opts = append(c.CallOptions.GetBlurb[0:len(c.CallOptions.GetBlurb):len(c.CallOptions.GetBlurb)], opts...)
+	return c.internalClient.GetBlurb(ctx, req, opts)
+}
+func (c *MessagingClient) UpdateBlurb(ctx context.Context, req *genprotopb.UpdateBlurbRequest, opts ...gax.CallOption) (*genprotopb.Blurb, error) {
+	var opts gax.CallOption
+	opts = append(c.CallOptions.UpdateBlurb[0:len(c.CallOptions.UpdateBlurb):len(c.CallOptions.UpdateBlurb)], opts...)
+	return c.internalClient.UpdateBlurb(ctx, req, opts)
+}
+func (c *MessagingClient) DeleteBlurb(ctx context.Context, req *genprotopb.DeleteBlurbRequest, opts ...gax.CallOption) error {
+	var opts gax.CallOption
+	opts = append(c.CallOptions.DeleteBlurb[0:len(c.CallOptions.DeleteBlurb):len(c.CallOptions.DeleteBlurb)], opts...)
+	c.internalClient.DeleteBlurb(ctx, req, opts)
+}
+
+func (c *MessagingClient) ListBlurbs(ctx context.Context, req *genprotopb.ListBlurbsRequest, opts ...gax.CallOption) *BlurbIterator {
+	var opts gax.CallOption
+	opts = append(c.CallOptions.ListBlurbs[0:len(c.CallOptions.ListBlurbs):len(c.CallOptions.ListBlurbs)], opts...)
+	return c.internalClient.ListBlurbs(ctx, req, opts)
+}
+
+func (c *MessagingClient) SearchBlurbs(ctx context.Context, req *genprotopb.SearchBlurbsRequest, opts ...gax.CallOption) (*SearchBlurbsOperation, error) {
+	var opts gax.CallOption
+	opts = append(c.CallOptions.SearchBlurbs[0:len(c.CallOptions.SearchBlurbs):len(c.CallOptions.SearchBlurbs)], opts...)
+	return c.internalClient.SearchBlurbs(ctx, req, opts)
+}
+
+func (c *MessagingClient) StreamBlurbs(ctx context.Context, req *genprotopb.StreamBlurbsRequest, opts ...gax.CallOption) (genprotopb.Messaging_StreamBlurbsGrpcClient, error) {
+	var opts gax.CallOption
+	opts = append(c.CallOptions.StreamBlurbs[0:len(c.CallOptions.StreamBlurbs):len(c.CallOptions.StreamBlurbs)], opts...)
+	return c.internalClient.StreamBlurbs(ctx, req, opts)
+}
+func (c *MessagingClient) SendBlurbs(ctx context.Context, opts ...gax.CallOption) (genprotopb.Messaging_SendBlurbsGrpcClient, error) {
+	var opts gax.CallOption
+	opts = append(c.CallOptions.SendBlurbs[0:len(c.CallOptions.SendBlurbs):len(c.CallOptions.SendBlurbs)], opts...)
+	return c.internalClient.SendBlurbs(ctx, opts)
+}
+
+func (c *MessagingClient) Connect(ctx context.Context, opts ...gax.CallOption) (genprotopb.Messaging_ConnectGrpcClient, error) {
+	var opts gax.CallOption
+	opts = append(c.CallOptions.Connect[0:len(c.CallOptions.Connect):len(c.CallOptions.Connect)], opts...)
+	return c.internalClient.Connect(ctx, opts)
+}
+
+// messagingGrpcClient is a client for interacting with Client Libraries Showcase API over gRPC transport.
+// It satisfies the messagingAbstractClient interface.
+//
+// Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
+type messagingGrpcClient struct {
 	// Connection pool of gRPC connections to the service.
 	connPool gtransport.ConnPool
 
@@ -190,7 +305,7 @@ type MessagingClient struct {
 	// The gRPC API client.
 	messagingClient genprotopb.MessagingClient
 
-	// LROClient is used internally to handle longrunning operations.
+	// LROClient is used internally to handle long-running operations.
 	// It is exposed so that its CallOptions can be modified if required.
 	// Users should not Close this client.
 	LROClient *lroauto.OperationsClient
@@ -201,24 +316,20 @@ type MessagingClient struct {
 
 	locationsClient locationpb.LocationsClient
 
-	// The call options for this service.
-	CallOptions *MessagingCallOptions
-
 	// The x-goog-* metadata to be sent with each request.
 	xGoogMetadata metadata.MD
 }
 
-// NewMessagingClient creates a new messaging client.
+// NewMessagingClient creates a new messaging client based on gRPC.
 //
 // A simple messaging service that implements chat rooms and profile posts.
 //
 // This messaging service showcases the features that API clients
 // generated by gapic-generators implement.
 func NewMessagingClient(ctx context.Context, opts ...option.ClientOption) (*MessagingClient, error) {
-	clientOpts := defaultMessagingClientOptions()
-
-	if newMessagingClientHook != nil {
-		hookOpts, err := newMessagingClientHook(ctx, clientHookParams{})
+	clientOpts := defaultMessagingGrpcCallOptions()
+	if newMessagingGrpcClientHook != nil {
+		hookOpts, err := newMessagingGrpcClientHook(ctx, clientHookParams{})
 		if err != nil {
 			return nil, err
 		}
@@ -234,12 +345,10 @@ func NewMessagingClient(ctx context.Context, opts ...option.ClientOption) (*Mess
 	if err != nil {
 		return nil, err
 	}
-	c := &MessagingClient{
+	c := &messagingGrpcClient{
 		connPool:         connPool,
 		disableDeadlines: disableDeadlines,
-		CallOptions:      defaultMessagingCallOptions(),
-
-		messagingClient: genprotopb.NewMessagingClient(connPool),
+		messagingClient:  genprotopb.NewMessagingClient(connPool),
 	}
 	c.setGoogleClientInfo()
 
@@ -259,40 +368,39 @@ func NewMessagingClient(ctx context.Context, opts ...option.ClientOption) (*Mess
 
 	c.locationsClient = locationpb.NewLocationsClient(connPool)
 
-	return c, nil
+	return &MessagingClient{internalMessagingClient: c, CallOptions: clientOpts}, nil
 }
 
 // Connection returns a connection to the API service.
 //
 // Deprecated.
-func (c *MessagingClient) Connection() *grpc.ClientConn {
+func (c *messagingGrpcClient) Connection() *grpc.ClientConn {
 	return c.connPool.Conn()
-}
-
-// Close closes the connection to the API service. The user should invoke this when
-// the client is no longer required.
-func (c *MessagingClient) Close() error {
-	return c.connPool.Close()
 }
 
 // setGoogleClientInfo sets the name and version of the application in
 // the `x-goog-api-client` header passed on each request. Intended for
 // use by Google-written clients.
-func (c *MessagingClient) setGoogleClientInfo(keyval ...string) {
+func (c *messagingGrpcClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", versionGo()}, keyval...)
 	kv = append(kv, "gapic", versionClient, "gax", gax.Version, "grpc", grpc.Version)
 	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
 }
 
+// Close closes the connection to the API service. The user should invoke this when
+// the client is no longer required.
+func (c *messagingGrpcClient) Close() error {
+	return c.connPool.Close()
+}
+
 // CreateRoom creates a room.
-func (c *MessagingClient) CreateRoom(ctx context.Context, req *genprotopb.CreateRoomRequest, opts ...gax.CallOption) (*genprotopb.Room, error) {
+func (c *messagingGrpcClient) CreateRoom(ctx context.Context, req *genprotopb.CreateRoomRequest, opts ...gax.CallOption) (*genprotopb.Room, error) {
 	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
 		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
 		defer cancel()
 		ctx = cctx
 	}
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
-	opts = append(c.CallOptions.CreateRoom[0:len(c.CallOptions.CreateRoom):len(c.CallOptions.CreateRoom)], opts...)
 	var resp *genprotopb.Room
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -306,7 +414,7 @@ func (c *MessagingClient) CreateRoom(ctx context.Context, req *genprotopb.Create
 }
 
 // GetRoom retrieves the Room with the given resource name.
-func (c *MessagingClient) GetRoom(ctx context.Context, req *genprotopb.GetRoomRequest, opts ...gax.CallOption) (*genprotopb.Room, error) {
+func (c *messagingGrpcClient) GetRoom(ctx context.Context, req *genprotopb.GetRoomRequest, opts ...gax.CallOption) (*genprotopb.Room, error) {
 	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
 		cctx, cancel := context.WithTimeout(ctx, 10000*time.Millisecond)
 		defer cancel()
@@ -314,7 +422,6 @@ func (c *MessagingClient) GetRoom(ctx context.Context, req *genprotopb.GetRoomRe
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.GetRoom[0:len(c.CallOptions.GetRoom):len(c.CallOptions.GetRoom)], opts...)
 	var resp *genprotopb.Room
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -328,7 +435,7 @@ func (c *MessagingClient) GetRoom(ctx context.Context, req *genprotopb.GetRoomRe
 }
 
 // UpdateRoom updates a room.
-func (c *MessagingClient) UpdateRoom(ctx context.Context, req *genprotopb.UpdateRoomRequest, opts ...gax.CallOption) (*genprotopb.Room, error) {
+func (c *messagingGrpcClient) UpdateRoom(ctx context.Context, req *genprotopb.UpdateRoomRequest, opts ...gax.CallOption) (*genprotopb.Room, error) {
 	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
 		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
 		defer cancel()
@@ -336,7 +443,6 @@ func (c *MessagingClient) UpdateRoom(ctx context.Context, req *genprotopb.Update
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "room.name", url.QueryEscape(req.GetRoom().GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.UpdateRoom[0:len(c.CallOptions.UpdateRoom):len(c.CallOptions.UpdateRoom)], opts...)
 	var resp *genprotopb.Room
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -350,7 +456,7 @@ func (c *MessagingClient) UpdateRoom(ctx context.Context, req *genprotopb.Update
 }
 
 // DeleteRoom deletes a room and all of its blurbs.
-func (c *MessagingClient) DeleteRoom(ctx context.Context, req *genprotopb.DeleteRoomRequest, opts ...gax.CallOption) error {
+func (c *messagingGrpcClient) DeleteRoom(ctx context.Context, req *genprotopb.DeleteRoomRequest, opts ...gax.CallOption) error {
 	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
 		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
 		defer cancel()
@@ -358,7 +464,6 @@ func (c *MessagingClient) DeleteRoom(ctx context.Context, req *genprotopb.Delete
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.DeleteRoom[0:len(c.CallOptions.DeleteRoom):len(c.CallOptions.DeleteRoom)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		_, err = c.messagingClient.DeleteRoom(ctx, req, settings.GRPC...)
@@ -368,9 +473,8 @@ func (c *MessagingClient) DeleteRoom(ctx context.Context, req *genprotopb.Delete
 }
 
 // ListRooms lists all chat rooms.
-func (c *MessagingClient) ListRooms(ctx context.Context, req *genprotopb.ListRoomsRequest, opts ...gax.CallOption) *RoomIterator {
+func (c *messagingGrpcClient) ListRooms(ctx context.Context, req *genprotopb.ListRoomsRequest, opts ...gax.CallOption) *RoomIterator {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
-	opts = append(c.CallOptions.ListRooms[0:len(c.CallOptions.ListRooms):len(c.CallOptions.ListRooms)], opts...)
 	it := &RoomIterator{}
 	req = proto.Clone(req).(*genprotopb.ListRoomsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.Room, string, error) {
@@ -410,7 +514,7 @@ func (c *MessagingClient) ListRooms(ctx context.Context, req *genprotopb.ListRoo
 // CreateBlurb creates a blurb. If the parent is a room, the blurb is understood to be a
 // message in that room. If the parent is a profile, the blurb is understood
 // to be a post on the profile.
-func (c *MessagingClient) CreateBlurb(ctx context.Context, req *genprotopb.CreateBlurbRequest, opts ...gax.CallOption) (*genprotopb.Blurb, error) {
+func (c *messagingGrpcClient) CreateBlurb(ctx context.Context, req *genprotopb.CreateBlurbRequest, opts ...gax.CallOption) (*genprotopb.Blurb, error) {
 	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
 		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
 		defer cancel()
@@ -418,7 +522,6 @@ func (c *MessagingClient) CreateBlurb(ctx context.Context, req *genprotopb.Creat
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.CreateBlurb[0:len(c.CallOptions.CreateBlurb):len(c.CallOptions.CreateBlurb)], opts...)
 	var resp *genprotopb.Blurb
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -432,7 +535,7 @@ func (c *MessagingClient) CreateBlurb(ctx context.Context, req *genprotopb.Creat
 }
 
 // GetBlurb retrieves the Blurb with the given resource name.
-func (c *MessagingClient) GetBlurb(ctx context.Context, req *genprotopb.GetBlurbRequest, opts ...gax.CallOption) (*genprotopb.Blurb, error) {
+func (c *messagingGrpcClient) GetBlurb(ctx context.Context, req *genprotopb.GetBlurbRequest, opts ...gax.CallOption) (*genprotopb.Blurb, error) {
 	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
 		cctx, cancel := context.WithTimeout(ctx, 10000*time.Millisecond)
 		defer cancel()
@@ -440,7 +543,6 @@ func (c *MessagingClient) GetBlurb(ctx context.Context, req *genprotopb.GetBlurb
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.GetBlurb[0:len(c.CallOptions.GetBlurb):len(c.CallOptions.GetBlurb)], opts...)
 	var resp *genprotopb.Blurb
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -454,7 +556,7 @@ func (c *MessagingClient) GetBlurb(ctx context.Context, req *genprotopb.GetBlurb
 }
 
 // UpdateBlurb updates a blurb.
-func (c *MessagingClient) UpdateBlurb(ctx context.Context, req *genprotopb.UpdateBlurbRequest, opts ...gax.CallOption) (*genprotopb.Blurb, error) {
+func (c *messagingGrpcClient) UpdateBlurb(ctx context.Context, req *genprotopb.UpdateBlurbRequest, opts ...gax.CallOption) (*genprotopb.Blurb, error) {
 	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
 		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
 		defer cancel()
@@ -462,7 +564,6 @@ func (c *MessagingClient) UpdateBlurb(ctx context.Context, req *genprotopb.Updat
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "blurb.name", url.QueryEscape(req.GetBlurb().GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.UpdateBlurb[0:len(c.CallOptions.UpdateBlurb):len(c.CallOptions.UpdateBlurb)], opts...)
 	var resp *genprotopb.Blurb
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -476,7 +577,7 @@ func (c *MessagingClient) UpdateBlurb(ctx context.Context, req *genprotopb.Updat
 }
 
 // DeleteBlurb deletes a blurb.
-func (c *MessagingClient) DeleteBlurb(ctx context.Context, req *genprotopb.DeleteBlurbRequest, opts ...gax.CallOption) error {
+func (c *messagingGrpcClient) DeleteBlurb(ctx context.Context, req *genprotopb.DeleteBlurbRequest, opts ...gax.CallOption) error {
 	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
 		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
 		defer cancel()
@@ -484,7 +585,6 @@ func (c *MessagingClient) DeleteBlurb(ctx context.Context, req *genprotopb.Delet
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.DeleteBlurb[0:len(c.CallOptions.DeleteBlurb):len(c.CallOptions.DeleteBlurb)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		_, err = c.messagingClient.DeleteBlurb(ctx, req, settings.GRPC...)
@@ -495,10 +595,9 @@ func (c *MessagingClient) DeleteBlurb(ctx context.Context, req *genprotopb.Delet
 
 // ListBlurbs lists blurbs for a specific chat room or user profile depending on the
 // parent resource name.
-func (c *MessagingClient) ListBlurbs(ctx context.Context, req *genprotopb.ListBlurbsRequest, opts ...gax.CallOption) *BlurbIterator {
+func (c *messagingGrpcClient) ListBlurbs(ctx context.Context, req *genprotopb.ListBlurbsRequest, opts ...gax.CallOption) *BlurbIterator {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.ListBlurbs[0:len(c.CallOptions.ListBlurbs):len(c.CallOptions.ListBlurbs)], opts...)
 	it := &BlurbIterator{}
 	req = proto.Clone(req).(*genprotopb.ListBlurbsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.Blurb, string, error) {
@@ -538,7 +637,7 @@ func (c *MessagingClient) ListBlurbs(ctx context.Context, req *genprotopb.ListBl
 // SearchBlurbs this method searches through all blurbs across all rooms and profiles
 // for blurbs containing to words found in the query. Only posts that
 // contain an exact match of a queried word will be returned.
-func (c *MessagingClient) SearchBlurbs(ctx context.Context, req *genprotopb.SearchBlurbsRequest, opts ...gax.CallOption) (*SearchBlurbsOperation, error) {
+func (c *messagingGrpcClient) SearchBlurbs(ctx context.Context, req *genprotopb.SearchBlurbsRequest, opts ...gax.CallOption) (*SearchBlurbsOperation, error) {
 	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
 		cctx, cancel := context.WithTimeout(ctx, 10000*time.Millisecond)
 		defer cancel()
@@ -546,7 +645,6 @@ func (c *MessagingClient) SearchBlurbs(ctx context.Context, req *genprotopb.Sear
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.SearchBlurbs[0:len(c.CallOptions.SearchBlurbs):len(c.CallOptions.SearchBlurbs)], opts...)
 	var resp *longrunningpb.Operation
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -563,10 +661,9 @@ func (c *MessagingClient) SearchBlurbs(ctx context.Context, req *genprotopb.Sear
 
 // StreamBlurbs this returns a stream that emits the blurbs that are created for a
 // particular chat room or user profile.
-func (c *MessagingClient) StreamBlurbs(ctx context.Context, req *genprotopb.StreamBlurbsRequest, opts ...gax.CallOption) (genprotopb.Messaging_StreamBlurbsClient, error) {
+func (c *messagingGrpcClient) StreamBlurbs(ctx context.Context, req *genprotopb.StreamBlurbsRequest, opts ...gax.CallOption) (genprotopb.Messaging_StreamBlurbsClient, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.StreamBlurbs[0:len(c.CallOptions.StreamBlurbs):len(c.CallOptions.StreamBlurbs)], opts...)
 	var resp genprotopb.Messaging_StreamBlurbsClient
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -581,9 +678,8 @@ func (c *MessagingClient) StreamBlurbs(ctx context.Context, req *genprotopb.Stre
 
 // SendBlurbs this is a stream to create multiple blurbs. If an invalid blurb is
 // requested to be created, the stream will close with an error.
-func (c *MessagingClient) SendBlurbs(ctx context.Context, opts ...gax.CallOption) (genprotopb.Messaging_SendBlurbsClient, error) {
+func (c *messagingGrpcClient) SendBlurbs(ctx context.Context, opts ...gax.CallOption) (genprotopb.Messaging_SendBlurbsClient, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
-	opts = append(c.CallOptions.SendBlurbs[0:len(c.CallOptions.SendBlurbs):len(c.CallOptions.SendBlurbs)], opts...)
 	var resp genprotopb.Messaging_SendBlurbsClient
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -600,9 +696,8 @@ func (c *MessagingClient) SendBlurbs(ctx context.Context, opts ...gax.CallOption
 // are being created after the stream has started and sends requests to create
 // blurbs. If an invalid blurb is requested to be created, the stream will
 // close with an error.
-func (c *MessagingClient) Connect(ctx context.Context, opts ...gax.CallOption) (genprotopb.Messaging_ConnectClient, error) {
+func (c *messagingGrpcClient) Connect(ctx context.Context, opts ...gax.CallOption) (genprotopb.Messaging_ConnectClient, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
-	opts = append(c.CallOptions.Connect[0:len(c.CallOptions.Connect):len(c.CallOptions.Connect)], opts...)
 	var resp genprotopb.Messaging_ConnectClient
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -615,10 +710,9 @@ func (c *MessagingClient) Connect(ctx context.Context, opts ...gax.CallOption) (
 	return resp, nil
 }
 
-func (c *MessagingClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
+func (c *messagingGrpcClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.ListLocations[0:len(c.CallOptions.ListLocations):len(c.CallOptions.ListLocations)], opts...)
 	it := &LocationIterator{}
 	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
@@ -655,10 +749,9 @@ func (c *MessagingClient) ListLocations(ctx context.Context, req *locationpb.Lis
 	return it
 }
 
-func (c *MessagingClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
+func (c *messagingGrpcClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.GetLocation[0:len(c.CallOptions.GetLocation):len(c.CallOptions.GetLocation)], opts...)
 	var resp *locationpb.Location
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -671,10 +764,9 @@ func (c *MessagingClient) GetLocation(ctx context.Context, req *locationpb.GetLo
 	return resp, nil
 }
 
-func (c *MessagingClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
+func (c *messagingGrpcClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.SetIamPolicy[0:len(c.CallOptions.SetIamPolicy):len(c.CallOptions.SetIamPolicy)], opts...)
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -687,10 +779,9 @@ func (c *MessagingClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPol
 	return resp, nil
 }
 
-func (c *MessagingClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
+func (c *messagingGrpcClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.GetIamPolicy[0:len(c.CallOptions.GetIamPolicy):len(c.CallOptions.GetIamPolicy)], opts...)
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -703,10 +794,9 @@ func (c *MessagingClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPol
 	return resp, nil
 }
 
-func (c *MessagingClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
+func (c *messagingGrpcClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.TestIamPermissions[0:len(c.CallOptions.TestIamPermissions):len(c.CallOptions.TestIamPermissions)], opts...)
 	var resp *iampb.TestIamPermissionsResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -719,10 +809,9 @@ func (c *MessagingClient) TestIamPermissions(ctx context.Context, req *iampb.Tes
 	return resp, nil
 }
 
-func (c *MessagingClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
+func (c *messagingGrpcClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.ListOperations[0:len(c.CallOptions.ListOperations):len(c.CallOptions.ListOperations)], opts...)
 	it := &OperationIterator{}
 	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
@@ -759,10 +848,9 @@ func (c *MessagingClient) ListOperations(ctx context.Context, req *longrunningpb
 	return it
 }
 
-func (c *MessagingClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
+func (c *messagingGrpcClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.GetOperation[0:len(c.CallOptions.GetOperation):len(c.CallOptions.GetOperation)], opts...)
 	var resp *longrunningpb.Operation
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -775,10 +863,9 @@ func (c *MessagingClient) GetOperation(ctx context.Context, req *longrunningpb.G
 	return resp, nil
 }
 
-func (c *MessagingClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
+func (c *messagingGrpcClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.DeleteOperation[0:len(c.CallOptions.DeleteOperation):len(c.CallOptions.DeleteOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		_, err = c.operationsClient.DeleteOperation(ctx, req, settings.GRPC...)
@@ -787,10 +874,9 @@ func (c *MessagingClient) DeleteOperation(ctx context.Context, req *longrunningp
 	return err
 }
 
-func (c *MessagingClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
+func (c *messagingGrpcClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.CancelOperation[0:len(c.CallOptions.CancelOperation):len(c.CallOptions.CancelOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		_, err = c.operationsClient.CancelOperation(ctx, req, settings.GRPC...)
@@ -799,9 +885,8 @@ func (c *MessagingClient) CancelOperation(ctx context.Context, req *longrunningp
 	return err
 }
 
-func (c *MessagingClient) WaitOperation(ctx context.Context, req *longrunningpb.WaitOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
+func (c *messagingGrpcClient) WaitOperation(ctx context.Context, req *longrunningpb.WaitOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
-	opts = append(c.CallOptions.WaitOperation[0:len(c.CallOptions.WaitOperation):len(c.CallOptions.WaitOperation)], opts...)
 	var resp *longrunningpb.Operation
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -821,7 +906,7 @@ type SearchBlurbsOperation struct {
 
 // SearchBlurbsOperation returns a new SearchBlurbsOperation from a given name.
 // The name must be that of a previously created SearchBlurbsOperation, possibly from a different process.
-func (c *MessagingClient) SearchBlurbsOperation(name string) *SearchBlurbsOperation {
+func (c *messagingGrpcClient) SearchBlurbsOperation(name string) *SearchBlurbsOperation {
 	return &SearchBlurbsOperation{
 		lro: longrunning.InternalNewOperation(c.LROClient, &longrunningpb.Operation{Name: name}),
 	}

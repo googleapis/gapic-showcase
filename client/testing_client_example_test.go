@@ -27,7 +27,7 @@ import (
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 )
 
-func ExampleNewTestingClient() {
+func ExampleNewTestingGrpcClient() {
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
@@ -37,7 +37,7 @@ func ExampleNewTestingClient() {
 	_ = c
 }
 
-func ExampleTestingClient_CreateSession() {
+func ExampleTestingGrpcClient_CreateSession() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -57,7 +57,7 @@ func ExampleTestingClient_CreateSession() {
 	_ = resp
 }
 
-func ExampleTestingClient_GetSession() {
+func ExampleTestingGrpcClient_GetSession() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -77,7 +77,7 @@ func ExampleTestingClient_GetSession() {
 	_ = resp
 }
 
-func ExampleTestingClient_ListSessions() {
+func ExampleTestingGrpcClient_ListSessions() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	// import "google.golang.org/api/iterator"
 
@@ -104,7 +104,7 @@ func ExampleTestingClient_ListSessions() {
 	}
 }
 
-func ExampleTestingClient_DeleteSession() {
+func ExampleTestingGrpcClient_DeleteSession() {
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
@@ -120,7 +120,7 @@ func ExampleTestingClient_DeleteSession() {
 	}
 }
 
-func ExampleTestingClient_ReportSession() {
+func ExampleTestingGrpcClient_ReportSession() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -140,7 +140,7 @@ func ExampleTestingClient_ReportSession() {
 	_ = resp
 }
 
-func ExampleTestingClient_ListTests() {
+func ExampleTestingGrpcClient_ListTests() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	// import "google.golang.org/api/iterator"
 
@@ -167,7 +167,7 @@ func ExampleTestingClient_ListTests() {
 	}
 }
 
-func ExampleTestingClient_DeleteTest() {
+func ExampleTestingGrpcClient_DeleteTest() {
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
@@ -183,7 +183,7 @@ func ExampleTestingClient_DeleteTest() {
 	}
 }
 
-func ExampleTestingClient_VerifyTest() {
+func ExampleTestingGrpcClient_VerifyTest() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -203,7 +203,7 @@ func ExampleTestingClient_VerifyTest() {
 	_ = resp
 }
 
-func ExampleTestingClient_ListLocations() {
+func ExampleTestingGrpcClient_ListLocations() {
 	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
 	// import "google.golang.org/api/iterator"
 
@@ -230,7 +230,7 @@ func ExampleTestingClient_ListLocations() {
 	}
 }
 
-func ExampleTestingClient_GetLocation() {
+func ExampleTestingGrpcClient_GetLocation() {
 	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
 
 	ctx := context.Background()
@@ -250,7 +250,7 @@ func ExampleTestingClient_GetLocation() {
 	_ = resp
 }
 
-func ExampleTestingClient_SetIamPolicy() {
+func ExampleTestingGrpcClient_SetIamPolicy() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -270,7 +270,7 @@ func ExampleTestingClient_SetIamPolicy() {
 	_ = resp
 }
 
-func ExampleTestingClient_GetIamPolicy() {
+func ExampleTestingGrpcClient_GetIamPolicy() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -290,7 +290,7 @@ func ExampleTestingClient_GetIamPolicy() {
 	_ = resp
 }
 
-func ExampleTestingClient_TestIamPermissions() {
+func ExampleTestingGrpcClient_TestIamPermissions() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -310,7 +310,7 @@ func ExampleTestingClient_TestIamPermissions() {
 	_ = resp
 }
 
-func ExampleTestingClient_ListOperations() {
+func ExampleTestingGrpcClient_ListOperations() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	// import "google.golang.org/api/iterator"
 
@@ -337,7 +337,7 @@ func ExampleTestingClient_ListOperations() {
 	}
 }
 
-func ExampleTestingClient_GetOperation() {
+func ExampleTestingGrpcClient_GetOperation() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 
 	ctx := context.Background()
@@ -357,7 +357,7 @@ func ExampleTestingClient_GetOperation() {
 	_ = resp
 }
 
-func ExampleTestingClient_DeleteOperation() {
+func ExampleTestingGrpcClient_DeleteOperation() {
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
@@ -373,7 +373,7 @@ func ExampleTestingClient_DeleteOperation() {
 	}
 }
 
-func ExampleTestingClient_CancelOperation() {
+func ExampleTestingGrpcClient_CancelOperation() {
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
@@ -389,7 +389,7 @@ func ExampleTestingClient_CancelOperation() {
 	}
 }
 
-func ExampleTestingClient_WaitOperation() {
+func ExampleTestingGrpcClient_WaitOperation() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 
 	ctx := context.Background()
