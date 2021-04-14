@@ -62,7 +62,7 @@ service Compliance {
   // "/bar/{foo}" rather than "/{foo=bar/*}"), and the rest as query parameters.
   rpc RepeatDataSimplePath(RepeatRequest) returns (RepeatResponse) {
     option (google.api.http) = {
-      get: "/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}:simplepath"
+      get: "/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}/{info.f_kingdom}:simplepath"
     };
   }
 
@@ -109,6 +109,15 @@ message ComplianceGroup {
 // ComplianceData is a message used for testing REST transcoding of
 // different data types.
 message ComplianceData {
+  enum LifeKingdom {
+    LIFE_KINGDOM_UNSPECIFIED = 0;
+    ARCHAEBACTERIA = 1;
+    EUBACTERIA = 2;
+    PROTISTA = 3;
+    FUNGI = 4;
+    PLANTAE = 5;
+    ANIMALIA = 6;
+}
   // scalar types
 
   string f_string = 1;
@@ -134,6 +143,8 @@ message ComplianceData {
 
   bytes f_bytes = 15;
 
+  LifeKingdom f_kingdom = 22;
+
   ComplianceDataChild f_child = 16;
 
   // optional fields
@@ -142,6 +153,7 @@ message ComplianceData {
   optional int32 p_int32 = 18;
   optional double p_double = 19;
   optional bool p_bool = 20;
+  optional LifeKingdom p_kingdom = 23;
   optional ComplianceDataChild p_child = 21;
 }
 
@@ -150,12 +162,14 @@ message ComplianceDataChild {
   float f_float = 2;
   double f_double = 3;
   bool f_bool = 4;
+  Continent f_continent = 11;
   ComplianceDataGrandchild f_child = 5;
 
   optional string p_string = 6;
   optional float p_float = 7;
   optional double p_double = 8;
   optional bool p_bool = 9;
+  Continent p_continent = 12;
   optional ComplianceDataGrandchild p_child = 10;
 }
 
@@ -163,4 +177,13 @@ message ComplianceDataGrandchild {
   string f_string = 1;
   double f_double = 2;
   bool f_bool = 3;
+}
+
+enum Continent {
+  CONTINENT_UNSPECIFIED = 0;
+  AFRICA = 1;
+  AMERICA = 2;
+  ANTARTICA = 3;
+  AUSTRALIA = 4;
+  EUROPE = 5;
 }

@@ -17,10 +17,12 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 
 	"github.com/googleapis/gapic-showcase/server/genproto"
+	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -37,7 +39,9 @@ func TestComplianceSuiteErrors(t *testing.T) {
 	defer server.Close()
 
 	restRPCs := map[string][]prepRepeatDataTestFunc{
-		"Compliance.RepeatDataBodyInfo": {prepRepeatDataBodyInfoNegativeTestRepeatedFields},
+		"Compliance.RepeatDataBodyInfo":   {prepRepeatDataBodyInfoNegativeTestRepeatedFields},
+		"Compliance.RepeatDataQuery":      {prepRepeatDataQueryNegativeTestNumericEnums, prepRepeatDataQueryNegativeTestNumericOptionalEnums},
+		"Compliance.RepeatDataSimplePath": {prepRepeatDataSimplePathNegativeTestEnum},
 	}
 
 	for _, group := range suite.GetGroup() {
@@ -93,4 +97,61 @@ func prepRepeatDataBodyInfoNegativeTestRepeatedFields(request *genproto.RepeatRe
 	queryString := prepRepeatDataTestsQueryString(request, nil) // purposefully repeats query params, which should cause an error
 	_ = bodyBytes
 	return name, "POST", "/v1beta1/repeat:bodyinfo" + queryString, string(bodyBytes), err
+}
+
+func prepRepeatDataQueryNegativeTestNumericEnums(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
+	name = "Compliance.RepeatDataQuery"
+	info := request.GetInfo()
+	badQueryParam := fmt.Sprintf("f_kingdom=%d", info.GetFKingdom()) // purposefully use a number, which should cause an error
+
+	// We clear the field so we don't set the same query param correctly below. This change
+	// modifies the request, but since these tests only check that calls fail, we never need to
+	// refer back to the request proto after constructing the REST query.
+	info.FKingdom = pb.ComplianceData_LIFE_KINGDOM_UNSPECIFIED
+	queryParams := append(prepRepeatDataTestsQueryParams(request, nil), badQueryParam)
+
+	queryString := prepQueryString(queryParams)
+	return name, "GET", "/v1beta1/repeat:query" + queryString, body, err
+}
+
+func prepRepeatDataQueryNegativeTestNumericOptionalEnums(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
+	name = "Compliance.RepeatDataQuery"
+	info := request.GetInfo()
+	badQueryParam := fmt.Sprintf("p_kingdom=%d", info.GetPKingdom()) // purposefully use a number, which should cause an error
+
+	// We clear the field so we don't set the same query param correctly below. This change
+	// modifies the request, but since these tests only check that calls fail, we never need to
+	// refer back to the request proto after constructing the REST query.
+	info.PKingdom = nil
+	queryParams := append(prepRepeatDataTestsQueryParams(request, nil), badQueryParam)
+
+	queryString := prepQueryString(queryParams)
+	return name, "GET", "/v1beta1/repeat:query" + queryString, body, err
+}
+
+func prepRepeatDataSimplePathNegativeTestEnum(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
+	name = "Compliance.RepeatDataSimplePath"
+	info := request.GetInfo()
+
+	pathParts := []string{}
+	nonQueryParamNames := map[string]bool{}
+
+	for _, part := range []struct {
+		name   string
+		format string
+		value  interface{}
+	}{
+		{"f_string", "%s", info.GetFString()},
+		{"f_int32", "%d", info.GetFInt32()},
+		{"f_double", "%g", info.GetFDouble()},
+		{"f_bool", "%t", info.GetFBool()},
+		{"f_kingdom", "%d", info.GetFKingdom()}, // purposefully use a number, which should cause an error
+	} {
+		pathParts = append(pathParts, url.PathEscape(fmt.Sprintf(part.format, part.value)))
+		nonQueryParamNames["info."+part.name] = true
+	}
+	path = fmt.Sprintf("/v1beta1/repeat/%s:simplepath", strings.Join(pathParts, "/"))
+
+	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
+	return name, "GET", path + queryString, body, err
 }

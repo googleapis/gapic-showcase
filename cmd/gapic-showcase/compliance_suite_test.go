@@ -190,6 +190,7 @@ func prepRepeatDataSimplePathTest(request *genproto.RepeatRequest) (verb string,
 		{"f_int32", "%d", info.GetFInt32()},
 		{"f_double", "%g", info.GetFDouble()},
 		{"f_bool", "%t", info.GetFBool()},
+		{"f_kingdom", "%s", info.GetFKingdom()},
 	} {
 		pathParts = append(pathParts, url.PathEscape(fmt.Sprintf(part.format, part.value)))
 		nonQueryParamNames["info."+part.name] = true
@@ -263,6 +264,9 @@ func prepRepeatDataPathTrailingResourceTest(request *genproto.RepeatRequest) (ve
 // except for those whose proto name (relative to request.info) are present in the `exclude` map
 // with a value of `true`.
 func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map[string]bool) string {
+	return prepQueryString(prepRepeatDataTestsQueryParams(request, exclude))
+}
+func prepRepeatDataTestsQueryParams(request *genproto.RepeatRequest, exclude map[string]bool) []string {
 	info := request.GetInfo()
 	queryParams := []string{}
 	addParam := func(key string, condition bool, value string) {
@@ -288,11 +292,13 @@ func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map
 	addParam("f_float", info.GetFFloat() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFFloat())))
 	addParam("f_bool", info.GetFBool(), "true")
 	addParam("f_bytes", len(info.GetFBytes()) > 0, url.QueryEscape(string(info.GetFBytes()))) // TODO: Check this is correct, given runes in strings
+	addParam("f_kingdom", info.GetFKingdom() != pb.ComplianceData_LIFE_KINGDOM_UNSPECIFIED, info.GetFKingdom().String())
 
 	addParam("p_string", info.PString != nil, url.QueryEscape(info.GetPString()))
 	addParam("p_int32", info.PInt32 != nil, fmt.Sprintf("%d", info.GetPInt32()))
 	addParam("p_double", info.PDouble != nil, url.QueryEscape(fmt.Sprintf("%g", info.GetPDouble())))
 	addParam("p_bool", info.PBool != nil, fmt.Sprintf("%t", info.GetPBool()))
+	addParam("p_kingdom", info.PKingdom != nil, info.GetPKingdom().String())
 
 	addParam("f_child.f_string", len(info.GetFChild().GetFString()) > 0, url.QueryEscape(info.GetFChild().GetFString()))
 	addParam("f_child.f_float", info.GetFChild().GetFFloat() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFChild().GetFFloat())))
@@ -301,6 +307,10 @@ func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map
 
 	// If needed for test cases, we'll have to add remaining nested message fields.
 
+	return queryParams
+}
+
+func prepQueryString(queryParams []string) string {
 	var queryString string
 	if len(queryParams) > 0 {
 		queryString = fmt.Sprintf("?%s", strings.Join(queryParams, "&"))
