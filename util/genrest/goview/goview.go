@@ -65,10 +65,12 @@ func (sf *SourceFile) Contents() string {
 
 }
 
+// Append appends the lines in Source to the lines in SourceFile.
 func (sf *SourceFile) Append(source *Source) {
 	sf.source.lines = append(sf.source.lines, source.lines...)
 }
 
+// P appends a printf-formatted line to SourcerFile.
 func (sf *SourceFile) P(format string, args ...interface{}) {
 	sf.source.P(format, args...)
 }

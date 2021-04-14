@@ -58,7 +58,7 @@ func CheckJSONEnumFields(jsonBytes []byte, fieldsToCheck [][]protoreflect.Name) 
 }
 
 // CheckEnum verifies whether the field whose qualified name is captured in the elements of
-// fieldPath has a string value, if it exists, in the json representation captured by payload. This
+// fieldPath has a string value, if it exists, in the JSON representation captured by payload. This
 // returns the qualified field name (as present as it is in payload) as a single string, and a
 // boolean that is true only if either fieldPath is not present or if its value is a string. This
 // means that if fieldPath is a path to en enum field, the boolean will be false if the enum is
@@ -67,7 +67,7 @@ func CheckEnum(payload map[string]interface{}, fieldPath []protoreflect.Name) (f
 	nameParts := []string{}
 	last := len(fieldPath) - 1
 	var value string
-	found := false
+	var found, isString bool
 	for idx, pathSegment := range fieldPath {
 		segment := string(pathSegment)
 		nameParts = append(nameParts, segment)
@@ -82,18 +82,24 @@ func CheckEnum(payload map[string]interface{}, fieldPath []protoreflect.Name) (f
 			}
 			continue
 		}
-		value, found = payload[segment].(string)
+
+		if _, found = payload[segment]; found {
+			value, isString = payload[segment].(string)
+		}
 	}
+
 	fieldName = strings.Join(nameParts, ".")
 	if !found {
 		return fieldName, true
 	}
 
-	if found {
-		if _, err := strconv.Atoi(value); err == nil {
-			// A string representation of an enum value should not be parseable as an int
-			return fieldName, false
-		}
+	if !isString {
+		return fieldName, false
+	}
+
+	if _, err := strconv.Atoi(value); err == nil {
+		// A string representation of an enum value should not be parseable as an int
+		return fieldName, false
 	}
 
 	return fieldName, true

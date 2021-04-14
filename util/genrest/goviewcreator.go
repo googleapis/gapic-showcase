@@ -101,7 +101,6 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				fileImports["bytes"] = ""
 				fileImports["io"] = ""
 				source.P("  // Intentional: Field values in the URL path override those set in the body.")
-				// TODO: explicitly check that all enums are strings: JSON encoding in resttools, check for the explicit enum fields. See eg https://michaelheap.com/golang-encodedecode-arbitrary-json/
 				source.P("  var jsonReader bytes.Buffer")
 				source.P("  bodyReader := io.TeeReader(r.Body, &jsonReader)")
 				source.P("  if err := jsonpb.Unmarshal(/*r.Body*/ bodyReader, %s); err != nil {", handler.RequestVariable)

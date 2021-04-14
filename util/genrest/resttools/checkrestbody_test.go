@@ -72,18 +72,33 @@ func TestCheckRESTBody(t *testing.T) {
 		},
 		{
 			label:     "numeric enum",
+			json:      `{"f_string": "hi", "f_kingdom": 56}`,
+			wantError: true,
+		},
+		{
+			label:     "numeric optional enum",
+			json:      `{"f_string": "hi", "p_kingdom": 57}`,
+			wantError: true,
+		},
+		{
+			label:     "stringy numeric enum",
 			json:      `{"f_string": "hi", "f_kingdom": "56"}`,
 			wantError: true,
 		},
 		{
-			label:     "number +letter enum",
+			label:     "stringy optional numeric enum",
+			json:      `{"f_string": "hi", "f_kingdom": "57"}`,
+			wantError: true,
+		},
+		{
+			label:     "stringy number+letter enum",
 			json:      `{"f_string": "hi", "f_kingdom": "56Abacus"}`,
 			wantError: false,
 		},
 	} {
 		complianceData := &genprotopb.ComplianceData{}
 		if err := CheckRESTBody(strings.NewReader(testCase.json), complianceData.ProtoReflect()); (err != nil) != testCase.wantError {
-			t.Errorf("test case %d[%q] text enum encoding: expected error==%v, got %v", idx, testCase.label, testCase.wantError, err)
+			t.Errorf("test case %d[%q] text enum encoding: expected error==%v, got: %v", idx, testCase.label, testCase.wantError, err)
 		}
 	}
 }
