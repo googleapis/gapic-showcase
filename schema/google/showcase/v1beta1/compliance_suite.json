@@ -51,13 +51,13 @@
 	    "f_double": 0,
 	    "f_float": 0,
 	    "f_bool": false,
-	    "f_kingdom": "UNASSIGNED",
+	    "f_kingdom": "LIFE_KINGDOM_UNSPECIFIED",
 
 	    "p_string": "Goodbye",
 	    "p_int32": 0,
 	    "p_double": 0,
 	    "p_bool": false,
-	    "p_kingdom": "UNASSIGNED"
+	    "p_kingdom": "LIFE_KINGDOM_UNSPECIFIED"
 	  }
 	},
 	{

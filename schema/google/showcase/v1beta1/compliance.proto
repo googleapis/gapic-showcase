@@ -110,7 +110,7 @@ message ComplianceGroup {
 // different data types.
 message ComplianceData {
   enum LifeKingdom {
-    UNASSIGNED = 0;
+    LIFE_KINGDOM_UNSPECIFIED = 0;
     ARCHAEBACTERIA = 1;
     EUBACTERIA = 2;
     PROTISTA = 3;
@@ -180,7 +180,7 @@ message ComplianceDataGrandchild {
 }
 
 enum Continent {
-  CONTINENT_UNASSIGNED = 0;
+  CONTINENT_UNSPECIFIED = 0;
   AFRICA = 1;
   AMERICA = 2;
   ANTARTICA = 3;
