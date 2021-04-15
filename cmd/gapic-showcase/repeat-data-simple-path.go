@@ -12,11 +12,17 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 
 	"os"
+
+	"strings"
 )
 
 var RepeatDataSimplePathInput genprotopb.RepeatRequest
 
 var RepeatDataSimplePathFromFile string
+
+var RepeatDataSimplePathInputInfoFKingdom string
+
+var RepeatDataSimplePathInputInfoFChildFContinent string
 
 var repeatDataSimplePathInputInfoFChildPString string
 
@@ -26,6 +32,8 @@ var repeatDataSimplePathInputInfoFChildPDouble float64
 
 var repeatDataSimplePathInputInfoFChildPBool bool
 
+var RepeatDataSimplePathInputInfoFChildPContinent string
+
 var repeatDataSimplePathInputInfoPString string
 
 var repeatDataSimplePathInputInfoPInt32 int32
@@ -34,6 +42,10 @@ var repeatDataSimplePathInputInfoPDouble float64
 
 var repeatDataSimplePathInputInfoPBool bool
 
+var RepeatDataSimplePathInputInfoPKingdom string
+
+var RepeatDataSimplePathInputInfoPChildFContinent string
+
 var repeatDataSimplePathInputInfoPChildPString string
 
 var repeatDataSimplePathInputInfoPChildPFloat float32
@@ -41,6 +53,8 @@ var repeatDataSimplePathInputInfoPChildPFloat float32
 var repeatDataSimplePathInputInfoPChildPDouble float64
 
 var repeatDataSimplePathInputInfoPChildPBool bool
+
+var RepeatDataSimplePathInputInfoPChildPContinent string
 
 func init() {
 	ComplianceServiceCmd.AddCommand(RepeatDataSimplePathCmd)
@@ -91,6 +105,8 @@ func init() {
 
 	RepeatDataSimplePathCmd.Flags().BytesHexVar(&RepeatDataSimplePathInput.Info.FBytes, "info.f_bytes", []byte{}, "")
 
+	RepeatDataSimplePathCmd.Flags().StringVar(&RepeatDataSimplePathInputInfoFKingdom, "info.f_kingdom", "", "")
+
 	RepeatDataSimplePathCmd.Flags().StringVar(&RepeatDataSimplePathInput.Info.FChild.FString, "info.f_child.f_string", "", "")
 
 	RepeatDataSimplePathCmd.Flags().Float32Var(&RepeatDataSimplePathInput.Info.FChild.FFloat, "info.f_child.f_float", 0.0, "")
@@ -98,6 +114,8 @@ func init() {
 	RepeatDataSimplePathCmd.Flags().Float64Var(&RepeatDataSimplePathInput.Info.FChild.FDouble, "info.f_child.f_double", 0.0, "")
 
 	RepeatDataSimplePathCmd.Flags().BoolVar(&RepeatDataSimplePathInput.Info.FChild.FBool, "info.f_child.f_bool", false, "")
+
+	RepeatDataSimplePathCmd.Flags().StringVar(&RepeatDataSimplePathInputInfoFChildFContinent, "info.f_child.f_continent", "", "")
 
 	RepeatDataSimplePathCmd.Flags().StringVar(&RepeatDataSimplePathInput.Info.FChild.FChild.FString, "info.f_child.f_child.f_string", "", "")
 
@@ -113,6 +131,8 @@ func init() {
 
 	RepeatDataSimplePathCmd.Flags().BoolVar(&repeatDataSimplePathInputInfoFChildPBool, "info.f_child.p_bool", false, "")
 
+	RepeatDataSimplePathCmd.Flags().StringVar(&RepeatDataSimplePathInputInfoFChildPContinent, "info.f_child.p_continent", "", "")
+
 	RepeatDataSimplePathCmd.Flags().StringVar(&RepeatDataSimplePathInput.Info.FChild.PChild.FString, "info.f_child.p_child.f_string", "", "")
 
 	RepeatDataSimplePathCmd.Flags().Float64Var(&RepeatDataSimplePathInput.Info.FChild.PChild.FDouble, "info.f_child.p_child.f_double", 0.0, "")
@@ -127,6 +147,8 @@ func init() {
 
 	RepeatDataSimplePathCmd.Flags().BoolVar(&repeatDataSimplePathInputInfoPBool, "info.p_bool", false, "")
 
+	RepeatDataSimplePathCmd.Flags().StringVar(&RepeatDataSimplePathInputInfoPKingdom, "info.p_kingdom", "", "")
+
 	RepeatDataSimplePathCmd.Flags().StringVar(&RepeatDataSimplePathInput.Info.PChild.FString, "info.p_child.f_string", "", "")
 
 	RepeatDataSimplePathCmd.Flags().Float32Var(&RepeatDataSimplePathInput.Info.PChild.FFloat, "info.p_child.f_float", 0.0, "")
@@ -134,6 +156,8 @@ func init() {
 	RepeatDataSimplePathCmd.Flags().Float64Var(&RepeatDataSimplePathInput.Info.PChild.FDouble, "info.p_child.f_double", 0.0, "")
 
 	RepeatDataSimplePathCmd.Flags().BoolVar(&RepeatDataSimplePathInput.Info.PChild.FBool, "info.p_child.f_bool", false, "")
+
+	RepeatDataSimplePathCmd.Flags().StringVar(&RepeatDataSimplePathInputInfoPChildFContinent, "info.p_child.f_continent", "", "")
 
 	RepeatDataSimplePathCmd.Flags().StringVar(&RepeatDataSimplePathInput.Info.PChild.FChild.FString, "info.p_child.f_child.f_string", "", "")
 
@@ -148,6 +172,8 @@ func init() {
 	RepeatDataSimplePathCmd.Flags().Float64Var(&repeatDataSimplePathInputInfoPChildPDouble, "info.p_child.p_double", 0.0, "")
 
 	RepeatDataSimplePathCmd.Flags().BoolVar(&repeatDataSimplePathInputInfoPChildPBool, "info.p_child.p_bool", false, "")
+
+	RepeatDataSimplePathCmd.Flags().StringVar(&RepeatDataSimplePathInputInfoPChildPContinent, "info.p_child.p_continent", "", "")
 
 	RepeatDataSimplePathCmd.Flags().StringVar(&RepeatDataSimplePathInput.Info.PChild.PChild.FString, "info.p_child.p_child.f_string", "", "")
 
@@ -186,6 +212,21 @@ var RepeatDataSimplePathCmd = &cobra.Command{
 			}
 
 		} else {
+
+			RepeatDataSimplePathInput.Info.FKingdom = genprotopb.ComplianceData_LifeKingdom(genprotopb.ComplianceData_LifeKingdom_value[strings.ToUpper(RepeatDataSimplePathInputInfoFKingdom)])
+
+			RepeatDataSimplePathInput.Info.FChild.FContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataSimplePathInputInfoFChildFContinent)])
+
+			RepeatDataSimplePathInput.Info.FChild.PContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataSimplePathInputInfoFChildPContinent)])
+
+			if cmd.Flags().Changed("info.p_kingdom") {
+				e := genprotopb.ComplianceData_LifeKingdom(genprotopb.ComplianceData_LifeKingdom_value[strings.ToUpper(RepeatDataSimplePathInputInfoPKingdom)])
+				RepeatDataSimplePathInput.Info.PKingdom = &e
+			}
+
+			RepeatDataSimplePathInput.Info.PChild.FContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataSimplePathInputInfoPChildFContinent)])
+
+			RepeatDataSimplePathInput.Info.PChild.PContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataSimplePathInputInfoPChildPContinent)])
 
 			if cmd.Flags().Changed("info.f_child.p_string") {
 				RepeatDataSimplePathInput.Info.FChild.PString = &repeatDataSimplePathInputInfoFChildPString

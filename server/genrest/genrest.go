@@ -33,7 +33,7 @@ func RegisterHandlers(router *gmux.Router, backend *services.Backend) {
 	router.HandleFunc("/v1beta1/repeat:body", rest.HandleRepeatDataBody).Methods("POST")
 	router.HandleFunc("/v1beta1/repeat:bodyinfo", rest.HandleRepeatDataBodyInfo).Methods("POST")
 	router.HandleFunc("/v1beta1/repeat:query", rest.HandleRepeatDataQuery).Methods("GET")
-	router.HandleFunc("/v1beta1/repeat/{info.f_string:.+}/{info.f_int32:.+}/{info.f_double:.+}/{info.f_bool:.+}:simplepath", rest.HandleRepeatDataSimplePath).Methods("GET")
+	router.HandleFunc("/v1beta1/repeat/{info.f_string:.+}/{info.f_int32:.+}/{info.f_double:.+}/{info.f_bool:.+}/{info.f_kingdom:.+}:simplepath", rest.HandleRepeatDataSimplePath).Methods("GET")
 	router.HandleFunc("/v1beta1/repeat/{info.f_string:first/.+}/{info.f_child.f_string:second/.+}/bool/{info.f_bool:.+}:pathresource", rest.HandleRepeatDataPathResource).Methods("GET")
 	router.HandleFunc("/v1beta1/repeat/{info.f_string:first/.+}/{info.f_child.f_string:second/.+}:pathtrailingresource", rest.HandleRepeatDataPathTrailingResource).Methods("GET")
 	router.HandleFunc("/v1beta1/echo:echo", rest.HandleEcho).Methods("POST")

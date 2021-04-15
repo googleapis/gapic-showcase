@@ -12,11 +12,17 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 
 	"os"
+
+	"strings"
 )
 
 var RepeatDataPathTrailingResourceInput genprotopb.RepeatRequest
 
 var RepeatDataPathTrailingResourceFromFile string
+
+var RepeatDataPathTrailingResourceInputInfoFKingdom string
+
+var RepeatDataPathTrailingResourceInputInfoFChildFContinent string
 
 var repeatDataPathTrailingResourceInputInfoFChildPString string
 
@@ -26,6 +32,8 @@ var repeatDataPathTrailingResourceInputInfoFChildPDouble float64
 
 var repeatDataPathTrailingResourceInputInfoFChildPBool bool
 
+var RepeatDataPathTrailingResourceInputInfoFChildPContinent string
+
 var repeatDataPathTrailingResourceInputInfoPString string
 
 var repeatDataPathTrailingResourceInputInfoPInt32 int32
@@ -34,6 +42,10 @@ var repeatDataPathTrailingResourceInputInfoPDouble float64
 
 var repeatDataPathTrailingResourceInputInfoPBool bool
 
+var RepeatDataPathTrailingResourceInputInfoPKingdom string
+
+var RepeatDataPathTrailingResourceInputInfoPChildFContinent string
+
 var repeatDataPathTrailingResourceInputInfoPChildPString string
 
 var repeatDataPathTrailingResourceInputInfoPChildPFloat float32
@@ -41,6 +53,8 @@ var repeatDataPathTrailingResourceInputInfoPChildPFloat float32
 var repeatDataPathTrailingResourceInputInfoPChildPDouble float64
 
 var repeatDataPathTrailingResourceInputInfoPChildPBool bool
+
+var RepeatDataPathTrailingResourceInputInfoPChildPContinent string
 
 func init() {
 	ComplianceServiceCmd.AddCommand(RepeatDataPathTrailingResourceCmd)
@@ -91,6 +105,8 @@ func init() {
 
 	RepeatDataPathTrailingResourceCmd.Flags().BytesHexVar(&RepeatDataPathTrailingResourceInput.Info.FBytes, "info.f_bytes", []byte{}, "")
 
+	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&RepeatDataPathTrailingResourceInputInfoFKingdom, "info.f_kingdom", "", "")
+
 	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&RepeatDataPathTrailingResourceInput.Info.FChild.FString, "info.f_child.f_string", "", "")
 
 	RepeatDataPathTrailingResourceCmd.Flags().Float32Var(&RepeatDataPathTrailingResourceInput.Info.FChild.FFloat, "info.f_child.f_float", 0.0, "")
@@ -98,6 +114,8 @@ func init() {
 	RepeatDataPathTrailingResourceCmd.Flags().Float64Var(&RepeatDataPathTrailingResourceInput.Info.FChild.FDouble, "info.f_child.f_double", 0.0, "")
 
 	RepeatDataPathTrailingResourceCmd.Flags().BoolVar(&RepeatDataPathTrailingResourceInput.Info.FChild.FBool, "info.f_child.f_bool", false, "")
+
+	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&RepeatDataPathTrailingResourceInputInfoFChildFContinent, "info.f_child.f_continent", "", "")
 
 	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&RepeatDataPathTrailingResourceInput.Info.FChild.FChild.FString, "info.f_child.f_child.f_string", "", "")
 
@@ -113,6 +131,8 @@ func init() {
 
 	RepeatDataPathTrailingResourceCmd.Flags().BoolVar(&repeatDataPathTrailingResourceInputInfoFChildPBool, "info.f_child.p_bool", false, "")
 
+	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&RepeatDataPathTrailingResourceInputInfoFChildPContinent, "info.f_child.p_continent", "", "")
+
 	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&RepeatDataPathTrailingResourceInput.Info.FChild.PChild.FString, "info.f_child.p_child.f_string", "", "")
 
 	RepeatDataPathTrailingResourceCmd.Flags().Float64Var(&RepeatDataPathTrailingResourceInput.Info.FChild.PChild.FDouble, "info.f_child.p_child.f_double", 0.0, "")
@@ -127,6 +147,8 @@ func init() {
 
 	RepeatDataPathTrailingResourceCmd.Flags().BoolVar(&repeatDataPathTrailingResourceInputInfoPBool, "info.p_bool", false, "")
 
+	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&RepeatDataPathTrailingResourceInputInfoPKingdom, "info.p_kingdom", "", "")
+
 	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&RepeatDataPathTrailingResourceInput.Info.PChild.FString, "info.p_child.f_string", "", "")
 
 	RepeatDataPathTrailingResourceCmd.Flags().Float32Var(&RepeatDataPathTrailingResourceInput.Info.PChild.FFloat, "info.p_child.f_float", 0.0, "")
@@ -134,6 +156,8 @@ func init() {
 	RepeatDataPathTrailingResourceCmd.Flags().Float64Var(&RepeatDataPathTrailingResourceInput.Info.PChild.FDouble, "info.p_child.f_double", 0.0, "")
 
 	RepeatDataPathTrailingResourceCmd.Flags().BoolVar(&RepeatDataPathTrailingResourceInput.Info.PChild.FBool, "info.p_child.f_bool", false, "")
+
+	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&RepeatDataPathTrailingResourceInputInfoPChildFContinent, "info.p_child.f_continent", "", "")
 
 	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&RepeatDataPathTrailingResourceInput.Info.PChild.FChild.FString, "info.p_child.f_child.f_string", "", "")
 
@@ -148,6 +172,8 @@ func init() {
 	RepeatDataPathTrailingResourceCmd.Flags().Float64Var(&repeatDataPathTrailingResourceInputInfoPChildPDouble, "info.p_child.p_double", 0.0, "")
 
 	RepeatDataPathTrailingResourceCmd.Flags().BoolVar(&repeatDataPathTrailingResourceInputInfoPChildPBool, "info.p_child.p_bool", false, "")
+
+	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&RepeatDataPathTrailingResourceInputInfoPChildPContinent, "info.p_child.p_continent", "", "")
 
 	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&RepeatDataPathTrailingResourceInput.Info.PChild.PChild.FString, "info.p_child.p_child.f_string", "", "")
 
@@ -186,6 +212,21 @@ var RepeatDataPathTrailingResourceCmd = &cobra.Command{
 			}
 
 		} else {
+
+			RepeatDataPathTrailingResourceInput.Info.FKingdom = genprotopb.ComplianceData_LifeKingdom(genprotopb.ComplianceData_LifeKingdom_value[strings.ToUpper(RepeatDataPathTrailingResourceInputInfoFKingdom)])
+
+			RepeatDataPathTrailingResourceInput.Info.FChild.FContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataPathTrailingResourceInputInfoFChildFContinent)])
+
+			RepeatDataPathTrailingResourceInput.Info.FChild.PContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataPathTrailingResourceInputInfoFChildPContinent)])
+
+			if cmd.Flags().Changed("info.p_kingdom") {
+				e := genprotopb.ComplianceData_LifeKingdom(genprotopb.ComplianceData_LifeKingdom_value[strings.ToUpper(RepeatDataPathTrailingResourceInputInfoPKingdom)])
+				RepeatDataPathTrailingResourceInput.Info.PKingdom = &e
+			}
+
+			RepeatDataPathTrailingResourceInput.Info.PChild.FContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataPathTrailingResourceInputInfoPChildFContinent)])
+
+			RepeatDataPathTrailingResourceInput.Info.PChild.PContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataPathTrailingResourceInputInfoPChildPContinent)])
 
 			if cmd.Flags().Changed("info.f_child.p_string") {
 				RepeatDataPathTrailingResourceInput.Info.FChild.PString = &repeatDataPathTrailingResourceInputInfoFChildPString

@@ -19,13 +19,11 @@ package genrest
 
 import (
 	"context"
-	"net/http"
-
 	"github.com/golang/protobuf/jsonpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-	gmux "github.com/gorilla/mux"
-
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
+	gmux "github.com/gorilla/mux"
+	"net/http"
 )
 
 // HandleCreateSession translates REST requests/responses on the wire to internal proto messages for CreateSession

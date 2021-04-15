@@ -18,14 +18,14 @@
 package genrest
 
 import (
+	"bytes"
 	"context"
-	"net/http"
-
 	"github.com/golang/protobuf/jsonpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-	gmux "github.com/gorilla/mux"
-
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
+	gmux "github.com/gorilla/mux"
+	"io"
+	"net/http"
 )
 
 // HandleRepeatDataBody translates REST requests/responses on the wire to internal proto messages for RepeatDataBody
@@ -44,8 +44,15 @@ func (backend *RESTBackend) HandleRepeatDataBody(w http.ResponseWriter, r *http.
 
 	request := &genprotopb.RepeatRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
-	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
+	var jsonReader bytes.Buffer
+	bodyReader := io.TeeReader(r.Body, &jsonReader)
+	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+	// ioutil.ReadAll(bodyReader)
+	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
 	}
 
@@ -186,16 +193,16 @@ func (backend *RESTBackend) HandleRepeatDataQuery(w http.ResponseWriter, r *http
 }
 
 // HandleRepeatDataSimplePath translates REST requests/responses on the wire to internal proto messages for RepeatDataSimplePath
-//    Generated for HTTP binding pattern: "/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}:simplepath"
+//    Generated for HTTP binding pattern: "/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}/{info.f_kingdom}:simplepath"
 func (backend *RESTBackend) HandleRepeatDataSimplePath(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received %s request matching '/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}:simplepath': %q", r.Method, r.URL)
-	backend.StdLog.Printf("  urlPathParams (expect 4, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}/{info.f_kingdom}:simplepath': %q", r.Method, r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 5, have %d): %q", numUrlPathParams, urlPathParams)
 
-	if numUrlPathParams != 4 {
-		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 4, have %d: %#v", numUrlPathParams, urlPathParams)
+	if numUrlPathParams != 5 {
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 5, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
@@ -207,7 +214,7 @@ func (backend *RESTBackend) HandleRepeatDataSimplePath(w http.ResponseWriter, r 
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
 	queryParams := map[string][]string(r.URL.Query())
-	excludedQueryParams := []string{"info.f_string", "info.f_int32", "info.f_double", "info.f_bool"}
+	excludedQueryParams := []string{"info.f_string", "info.f_int32", "info.f_double", "info.f_bool", "info.f_kingdom"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
 		return

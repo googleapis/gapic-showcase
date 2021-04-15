@@ -12,11 +12,17 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 
 	"os"
+
+	"strings"
 )
 
 var RepeatDataQueryInput genprotopb.RepeatRequest
 
 var RepeatDataQueryFromFile string
+
+var RepeatDataQueryInputInfoFKingdom string
+
+var RepeatDataQueryInputInfoFChildFContinent string
 
 var repeatDataQueryInputInfoFChildPString string
 
@@ -26,6 +32,8 @@ var repeatDataQueryInputInfoFChildPDouble float64
 
 var repeatDataQueryInputInfoFChildPBool bool
 
+var RepeatDataQueryInputInfoFChildPContinent string
+
 var repeatDataQueryInputInfoPString string
 
 var repeatDataQueryInputInfoPInt32 int32
@@ -34,6 +42,10 @@ var repeatDataQueryInputInfoPDouble float64
 
 var repeatDataQueryInputInfoPBool bool
 
+var RepeatDataQueryInputInfoPKingdom string
+
+var RepeatDataQueryInputInfoPChildFContinent string
+
 var repeatDataQueryInputInfoPChildPString string
 
 var repeatDataQueryInputInfoPChildPFloat float32
@@ -41,6 +53,8 @@ var repeatDataQueryInputInfoPChildPFloat float32
 var repeatDataQueryInputInfoPChildPDouble float64
 
 var repeatDataQueryInputInfoPChildPBool bool
+
+var RepeatDataQueryInputInfoPChildPContinent string
 
 func init() {
 	ComplianceServiceCmd.AddCommand(RepeatDataQueryCmd)
@@ -91,6 +105,8 @@ func init() {
 
 	RepeatDataQueryCmd.Flags().BytesHexVar(&RepeatDataQueryInput.Info.FBytes, "info.f_bytes", []byte{}, "")
 
+	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryInputInfoFKingdom, "info.f_kingdom", "", "")
+
 	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryInput.Info.FChild.FString, "info.f_child.f_string", "", "")
 
 	RepeatDataQueryCmd.Flags().Float32Var(&RepeatDataQueryInput.Info.FChild.FFloat, "info.f_child.f_float", 0.0, "")
@@ -98,6 +114,8 @@ func init() {
 	RepeatDataQueryCmd.Flags().Float64Var(&RepeatDataQueryInput.Info.FChild.FDouble, "info.f_child.f_double", 0.0, "")
 
 	RepeatDataQueryCmd.Flags().BoolVar(&RepeatDataQueryInput.Info.FChild.FBool, "info.f_child.f_bool", false, "")
+
+	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryInputInfoFChildFContinent, "info.f_child.f_continent", "", "")
 
 	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryInput.Info.FChild.FChild.FString, "info.f_child.f_child.f_string", "", "")
 
@@ -113,6 +131,8 @@ func init() {
 
 	RepeatDataQueryCmd.Flags().BoolVar(&repeatDataQueryInputInfoFChildPBool, "info.f_child.p_bool", false, "")
 
+	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryInputInfoFChildPContinent, "info.f_child.p_continent", "", "")
+
 	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryInput.Info.FChild.PChild.FString, "info.f_child.p_child.f_string", "", "")
 
 	RepeatDataQueryCmd.Flags().Float64Var(&RepeatDataQueryInput.Info.FChild.PChild.FDouble, "info.f_child.p_child.f_double", 0.0, "")
@@ -127,6 +147,8 @@ func init() {
 
 	RepeatDataQueryCmd.Flags().BoolVar(&repeatDataQueryInputInfoPBool, "info.p_bool", false, "")
 
+	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryInputInfoPKingdom, "info.p_kingdom", "", "")
+
 	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryInput.Info.PChild.FString, "info.p_child.f_string", "", "")
 
 	RepeatDataQueryCmd.Flags().Float32Var(&RepeatDataQueryInput.Info.PChild.FFloat, "info.p_child.f_float", 0.0, "")
@@ -134,6 +156,8 @@ func init() {
 	RepeatDataQueryCmd.Flags().Float64Var(&RepeatDataQueryInput.Info.PChild.FDouble, "info.p_child.f_double", 0.0, "")
 
 	RepeatDataQueryCmd.Flags().BoolVar(&RepeatDataQueryInput.Info.PChild.FBool, "info.p_child.f_bool", false, "")
+
+	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryInputInfoPChildFContinent, "info.p_child.f_continent", "", "")
 
 	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryInput.Info.PChild.FChild.FString, "info.p_child.f_child.f_string", "", "")
 
@@ -148,6 +172,8 @@ func init() {
 	RepeatDataQueryCmd.Flags().Float64Var(&repeatDataQueryInputInfoPChildPDouble, "info.p_child.p_double", 0.0, "")
 
 	RepeatDataQueryCmd.Flags().BoolVar(&repeatDataQueryInputInfoPChildPBool, "info.p_child.p_bool", false, "")
+
+	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryInputInfoPChildPContinent, "info.p_child.p_continent", "", "")
 
 	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryInput.Info.PChild.PChild.FString, "info.p_child.p_child.f_string", "", "")
 
@@ -186,6 +212,21 @@ var RepeatDataQueryCmd = &cobra.Command{
 			}
 
 		} else {
+
+			RepeatDataQueryInput.Info.FKingdom = genprotopb.ComplianceData_LifeKingdom(genprotopb.ComplianceData_LifeKingdom_value[strings.ToUpper(RepeatDataQueryInputInfoFKingdom)])
+
+			RepeatDataQueryInput.Info.FChild.FContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataQueryInputInfoFChildFContinent)])
+
+			RepeatDataQueryInput.Info.FChild.PContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataQueryInputInfoFChildPContinent)])
+
+			if cmd.Flags().Changed("info.p_kingdom") {
+				e := genprotopb.ComplianceData_LifeKingdom(genprotopb.ComplianceData_LifeKingdom_value[strings.ToUpper(RepeatDataQueryInputInfoPKingdom)])
+				RepeatDataQueryInput.Info.PKingdom = &e
+			}
+
+			RepeatDataQueryInput.Info.PChild.FContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataQueryInputInfoPChildFContinent)])
+
+			RepeatDataQueryInput.Info.PChild.PContinent = genprotopb.Continent(genprotopb.Continent_value[strings.ToUpper(RepeatDataQueryInputInfoPChildPContinent)])
 
 			if cmd.Flags().Changed("info.f_child.p_string") {
 				RepeatDataQueryInput.Info.FChild.PString = &repeatDataQueryInputInfoFChildPString

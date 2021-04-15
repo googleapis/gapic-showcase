@@ -12,7 +12,7 @@ Compliance (.google.showcase.v1beta1.Compliance):
   .google.showcase.v1beta1.Compliance.RepeatDataBody[0] : POST: "/v1beta1/repeat:body"
   .google.showcase.v1beta1.Compliance.RepeatDataBodyInfo[0] : POST: "/v1beta1/repeat:bodyinfo"
   .google.showcase.v1beta1.Compliance.RepeatDataQuery[0] : GET: "/v1beta1/repeat:query"
-  .google.showcase.v1beta1.Compliance.RepeatDataSimplePath[0] : GET: "/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}:simplepath"
+  .google.showcase.v1beta1.Compliance.RepeatDataSimplePath[0] : GET: "/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}/{info.f_kingdom}:simplepath"
   .google.showcase.v1beta1.Compliance.RepeatDataPathResource[0] : GET: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/*}/bool/{info.f_bool}:pathresource"
   .google.showcase.v1beta1.Compliance.RepeatDataPathTrailingResource[0] : GET: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/**}:pathtrailingresource"
 
@@ -86,8 +86,8 @@ Shim "Compliance" (.google.showcase.v1beta1.Compliance)
          GET /v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/*}/bool/{info.f_bool}:pathresource func RepeatDataPathResource(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
 ["/" "v1beta1" "/" "repeat" "/" {info.f_string = ["first" "/" *]} "/" {info.f_child.f_string = ["second" "/" *]} "/" "bool" "/" {info.f_bool = []} ":" "pathresource"]
 
-         GET /v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}:simplepath func RepeatDataSimplePath(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
-["/" "v1beta1" "/" "repeat" "/" {info.f_string = []} "/" {info.f_int32 = []} "/" {info.f_double = []} "/" {info.f_bool = []} ":" "simplepath"]
+         GET /v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}/{info.f_kingdom}:simplepath func RepeatDataSimplePath(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
+["/" "v1beta1" "/" "repeat" "/" {info.f_string = []} "/" {info.f_int32 = []} "/" {info.f_double = []} "/" {info.f_bool = []} "/" {info.f_kingdom = []} ":" "simplepath"]
 
         POST                               /v1beta1/repeat:body func RepeatDataBody(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
 ["/" "v1beta1" "/" "repeat" ":" "body"]

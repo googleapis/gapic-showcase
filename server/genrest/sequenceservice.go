@@ -18,14 +18,14 @@
 package genrest
 
 import (
+	"bytes"
 	"context"
-	"net/http"
-
 	"github.com/golang/protobuf/jsonpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-	gmux "github.com/gorilla/mux"
-
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
+	gmux "github.com/gorilla/mux"
+	"io"
+	"net/http"
 )
 
 // HandleCreateSequence translates REST requests/responses on the wire to internal proto messages for CreateSequence
@@ -156,8 +156,15 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 
 	request := &genprotopb.AttemptSequenceRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
-	if err := jsonpb.Unmarshal(r.Body, request); err != nil {
+	var jsonReader bytes.Buffer
+	bodyReader := io.TeeReader(r.Body, &jsonReader)
+	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+	// ioutil.ReadAll(bodyReader)
+	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
 	}
 
