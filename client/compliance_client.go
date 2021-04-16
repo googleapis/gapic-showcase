@@ -93,6 +93,7 @@ func defaultComplianceCallOptions() *ComplianceCallOptions {
 
 // internalComplianceClient is an interface that defines the methods availaible from Client Libraries Showcase API.
 type internalComplianceClient interface {
+	Close() error
 	RepeatDataBody(context.Context, *genprotopb.RepeatRequest, ...gax.CallOption) (*genprotopb.RepeatResponse, error)
 	RepeatDataBodyInfo(context.Context, *genprotopb.RepeatRequest, ...gax.CallOption) (*genprotopb.RepeatResponse, error)
 	RepeatDataQuery(context.Context, *genprotopb.RepeatRequest, ...gax.CallOption) (*genprotopb.RepeatResponse, error)
@@ -105,43 +106,14 @@ type internalComplianceClient interface {
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 type ComplianceClient struct {
 	// The internal transport-dependent client.
-	internalClient internalComplianceClient
+	internalComplianceClient
 
 	// The call options for this service.
 	CallOptions *ComplianceCallOptions
 }
 
-func (c *ComplianceClient) Close() error {
-	return c.internalClient.Close()
-}
-
-func (c *ComplianceClient) RepeatDataBody(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	opts = append(c.CallOptions.RepeatDataBody[0:len(c.CallOptions.RepeatDataBody):len(c.CallOptions.RepeatDataBody)], opts...)
-	return c.internalClient.RepeatDataBody(ctx, req, opts)
-}
-func (c *ComplianceClient) RepeatDataBodyInfo(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	opts = append(c.CallOptions.RepeatDataBodyInfo[0:len(c.CallOptions.RepeatDataBodyInfo):len(c.CallOptions.RepeatDataBodyInfo)], opts...)
-	return c.internalClient.RepeatDataBodyInfo(ctx, req, opts)
-}
-func (c *ComplianceClient) RepeatDataQuery(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	opts = append(c.CallOptions.RepeatDataQuery[0:len(c.CallOptions.RepeatDataQuery):len(c.CallOptions.RepeatDataQuery)], opts...)
-	return c.internalClient.RepeatDataQuery(ctx, req, opts)
-}
-func (c *ComplianceClient) RepeatDataSimplePath(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	opts = append(c.CallOptions.RepeatDataSimplePath[0:len(c.CallOptions.RepeatDataSimplePath):len(c.CallOptions.RepeatDataSimplePath)], opts...)
-	return c.internalClient.RepeatDataSimplePath(ctx, req, opts)
-}
-func (c *ComplianceClient) RepeatDataPathResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	opts = append(c.CallOptions.RepeatDataPathResource[0:len(c.CallOptions.RepeatDataPathResource):len(c.CallOptions.RepeatDataPathResource)], opts...)
-	return c.internalClient.RepeatDataPathResource(ctx, req, opts)
-}
-func (c *ComplianceClient) RepeatDataPathTrailingResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	opts = append(c.CallOptions.RepeatDataPathTrailingResource[0:len(c.CallOptions.RepeatDataPathTrailingResource):len(c.CallOptions.RepeatDataPathTrailingResource)], opts...)
-	return c.internalClient.RepeatDataPathTrailingResource(ctx, req, opts)
-}
-
 // complianceGrpcClient is a client for interacting with Client Libraries Showcase API over gRPC transport.
-// It satisfies the complianceinternalClient interface.
+// It satisfies the internalComplianceClient interface.
 //
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 type complianceGrpcClient struct {
@@ -150,6 +122,9 @@ type complianceGrpcClient struct {
 
 	// flag to opt out of default deadlines via GOOGLE_API_GO_EXPERIMENTAL_DISABLE_DEFAULT_DEADLINE
 	disableDeadlines bool
+
+	// Points back to the CallOptions field of the containing ComplianceClient
+	CallOptions **ComplianceCallOptions
 
 	// The gRPC API client.
 	complianceClient genprotopb.ComplianceClient
@@ -187,10 +162,12 @@ func NewComplianceClient(ctx context.Context, opts ...option.ClientOption) (*Com
 	if err != nil {
 		return nil, err
 	}
+	callOpts := defaultComplianceCallOptions()
 	c := &complianceGrpcClient{
 		connPool:         connPool,
 		disableDeadlines: disableDeadlines,
 		complianceClient: genprotopb.NewComplianceClient(connPool),
+		CallOptions:      &callOpts,
 	}
 	c.setGoogleClientInfo()
 
@@ -200,7 +177,7 @@ func NewComplianceClient(ctx context.Context, opts ...option.ClientOption) (*Com
 
 	c.locationsClient = locationpb.NewLocationsClient(connPool)
 
-	return &ComplianceClient{internalComplianceClient: c, CallOptions: defaultComplianceCallOptions()}, nil
+	return &ComplianceClient{internalComplianceClient: c, CallOptions: callOpts}, nil
 }
 
 // Connection returns a connection to the API service.
@@ -229,6 +206,7 @@ func (c *complianceGrpcClient) Close() error {
 // sending the entire request object in the REST body.
 func (c *complianceGrpcClient) RepeatDataBody(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append(c.CallOptions.RepeatDataBody[0:len(c.CallOptions.RepeatDataBody):len(c.CallOptions.RepeatDataBody)], opts...)
 	var resp *genprotopb.RepeatResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -246,6 +224,7 @@ func (c *complianceGrpcClient) RepeatDataBody(ctx context.Context, req *genproto
 // top-level, non-repeated fields can be sent this way.
 func (c *complianceGrpcClient) RepeatDataBodyInfo(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append(c.CallOptions.RepeatDataBodyInfo[0:len(c.CallOptions.RepeatDataBodyInfo):len(c.CallOptions.RepeatDataBodyInfo)], opts...)
 	var resp *genprotopb.RepeatResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -262,6 +241,7 @@ func (c *complianceGrpcClient) RepeatDataBodyInfo(ctx context.Context, req *genp
 // sending all request fields as query parameters.
 func (c *complianceGrpcClient) RepeatDataQuery(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append(c.CallOptions.RepeatDataQuery[0:len(c.CallOptions.RepeatDataQuery):len(c.CallOptions.RepeatDataQuery)], opts...)
 	var resp *genprotopb.RepeatResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -280,6 +260,7 @@ func (c *complianceGrpcClient) RepeatDataQuery(ctx context.Context, req *genprot
 func (c *complianceGrpcClient) RepeatDataSimplePath(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v&%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_int32", req.GetInfo().GetFInt32(), "info.f_double", url.QueryEscape(fmt.Sprintf("%g", req.GetInfo().GetFDouble())), "info.f_bool", req.GetInfo().GetFBool()))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.RepeatDataSimplePath[0:len(c.CallOptions.RepeatDataSimplePath):len(c.CallOptions.RepeatDataSimplePath)], opts...)
 	var resp *genprotopb.RepeatResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -296,6 +277,7 @@ func (c *complianceGrpcClient) RepeatDataSimplePath(ctx context.Context, req *ge
 func (c *complianceGrpcClient) RepeatDataPathResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_child.f_string", url.QueryEscape(req.GetInfo().GetFChild().GetFString()), "info.f_bool", req.GetInfo().GetFBool()))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.RepeatDataPathResource[0:len(c.CallOptions.RepeatDataPathResource):len(c.CallOptions.RepeatDataPathResource)], opts...)
 	var resp *genprotopb.RepeatResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -312,6 +294,7 @@ func (c *complianceGrpcClient) RepeatDataPathResource(ctx context.Context, req *
 func (c *complianceGrpcClient) RepeatDataPathTrailingResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_child.f_string", url.QueryEscape(req.GetInfo().GetFChild().GetFString())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.RepeatDataPathTrailingResource[0:len(c.CallOptions.RepeatDataPathTrailingResource):len(c.CallOptions.RepeatDataPathTrailingResource)], opts...)
 	var resp *genprotopb.RepeatResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -327,6 +310,7 @@ func (c *complianceGrpcClient) RepeatDataPathTrailingResource(ctx context.Contex
 func (c *complianceGrpcClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.ListLocations[0:len(c.CallOptions.ListLocations):len(c.CallOptions.ListLocations)], opts...)
 	it := &LocationIterator{}
 	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
@@ -366,6 +350,7 @@ func (c *complianceGrpcClient) ListLocations(ctx context.Context, req *locationp
 func (c *complianceGrpcClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.GetLocation[0:len(c.CallOptions.GetLocation):len(c.CallOptions.GetLocation)], opts...)
 	var resp *locationpb.Location
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -381,6 +366,7 @@ func (c *complianceGrpcClient) GetLocation(ctx context.Context, req *locationpb.
 func (c *complianceGrpcClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.SetIamPolicy[0:len(c.CallOptions.SetIamPolicy):len(c.CallOptions.SetIamPolicy)], opts...)
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -396,6 +382,7 @@ func (c *complianceGrpcClient) SetIamPolicy(ctx context.Context, req *iampb.SetI
 func (c *complianceGrpcClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.GetIamPolicy[0:len(c.CallOptions.GetIamPolicy):len(c.CallOptions.GetIamPolicy)], opts...)
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -411,6 +398,7 @@ func (c *complianceGrpcClient) GetIamPolicy(ctx context.Context, req *iampb.GetI
 func (c *complianceGrpcClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.TestIamPermissions[0:len(c.CallOptions.TestIamPermissions):len(c.CallOptions.TestIamPermissions)], opts...)
 	var resp *iampb.TestIamPermissionsResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -426,6 +414,7 @@ func (c *complianceGrpcClient) TestIamPermissions(ctx context.Context, req *iamp
 func (c *complianceGrpcClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.ListOperations[0:len(c.CallOptions.ListOperations):len(c.CallOptions.ListOperations)], opts...)
 	it := &OperationIterator{}
 	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
@@ -465,6 +454,7 @@ func (c *complianceGrpcClient) ListOperations(ctx context.Context, req *longrunn
 func (c *complianceGrpcClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.GetOperation[0:len(c.CallOptions.GetOperation):len(c.CallOptions.GetOperation)], opts...)
 	var resp *longrunningpb.Operation
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -480,6 +470,7 @@ func (c *complianceGrpcClient) GetOperation(ctx context.Context, req *longrunnin
 func (c *complianceGrpcClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.DeleteOperation[0:len(c.CallOptions.DeleteOperation):len(c.CallOptions.DeleteOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		_, err = c.operationsClient.DeleteOperation(ctx, req, settings.GRPC...)
@@ -491,6 +482,7 @@ func (c *complianceGrpcClient) DeleteOperation(ctx context.Context, req *longrun
 func (c *complianceGrpcClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.CancelOperation[0:len(c.CallOptions.CancelOperation):len(c.CallOptions.CancelOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		_, err = c.operationsClient.CancelOperation(ctx, req, settings.GRPC...)
@@ -501,6 +493,7 @@ func (c *complianceGrpcClient) CancelOperation(ctx context.Context, req *longrun
 
 func (c *complianceGrpcClient) WaitOperation(ctx context.Context, req *longrunningpb.WaitOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append(c.CallOptions.WaitOperation[0:len(c.CallOptions.WaitOperation):len(c.CallOptions.WaitOperation)], opts...)
 	var resp *longrunningpb.Operation
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error

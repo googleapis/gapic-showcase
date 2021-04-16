@@ -97,6 +97,7 @@ func defaultTestingCallOptions() *TestingCallOptions {
 
 // internalTestingClient is an interface that defines the methods availaible from Client Libraries Showcase API.
 type internalTestingClient interface {
+	Close() error
 	CreateSession(context.Context, *genprotopb.CreateSessionRequest, ...gax.CallOption) (*genprotopb.Session, error)
 	GetSession(context.Context, *genprotopb.GetSessionRequest, ...gax.CallOption) (*genprotopb.Session, error)
 	ListSessions(context.Context, *genprotopb.ListSessionsRequest, ...gax.CallOption) *SessionIterator
@@ -111,55 +112,14 @@ type internalTestingClient interface {
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 type TestingClient struct {
 	// The internal transport-dependent client.
-	internalClient internalTestingClient
+	internalTestingClient
 
 	// The call options for this service.
 	CallOptions *TestingCallOptions
 }
 
-func (c *TestingClient) Close() error {
-	return c.internalClient.Close()
-}
-
-func (c *TestingClient) CreateSession(ctx context.Context, req *genprotopb.CreateSessionRequest, opts ...gax.CallOption) (*genprotopb.Session, error) {
-	opts = append(c.CallOptions.CreateSession[0:len(c.CallOptions.CreateSession):len(c.CallOptions.CreateSession)], opts...)
-	return c.internalClient.CreateSession(ctx, req, opts)
-}
-func (c *TestingClient) GetSession(ctx context.Context, req *genprotopb.GetSessionRequest, opts ...gax.CallOption) (*genprotopb.Session, error) {
-	opts = append(c.CallOptions.GetSession[0:len(c.CallOptions.GetSession):len(c.CallOptions.GetSession)], opts...)
-	return c.internalClient.GetSession(ctx, req, opts)
-}
-func (c *TestingClient) ListSessions(ctx context.Context, req *genprotopb.ListSessionsRequest, opts ...gax.CallOption) *SessionIterator {
-	opts = append(c.CallOptions.ListSessions[0:len(c.CallOptions.ListSessions):len(c.CallOptions.ListSessions)], opts...)
-	return c.internalClient.ListSessions(ctx, req, opts)
-}
-
-func (c *TestingClient) DeleteSession(ctx context.Context, req *genprotopb.DeleteSessionRequest, opts ...gax.CallOption) error {
-	opts = append(c.CallOptions.DeleteSession[0:len(c.CallOptions.DeleteSession):len(c.CallOptions.DeleteSession)], opts...)
-	c.internalClient.DeleteSession(ctx, req, opts)
-}
-
-func (c *TestingClient) ReportSession(ctx context.Context, req *genprotopb.ReportSessionRequest, opts ...gax.CallOption) (*genprotopb.ReportSessionResponse, error) {
-	opts = append(c.CallOptions.ReportSession[0:len(c.CallOptions.ReportSession):len(c.CallOptions.ReportSession)], opts...)
-	return c.internalClient.ReportSession(ctx, req, opts)
-}
-func (c *TestingClient) ListTests(ctx context.Context, req *genprotopb.ListTestsRequest, opts ...gax.CallOption) *TestIterator {
-	opts = append(c.CallOptions.ListTests[0:len(c.CallOptions.ListTests):len(c.CallOptions.ListTests)], opts...)
-	return c.internalClient.ListTests(ctx, req, opts)
-}
-
-func (c *TestingClient) DeleteTest(ctx context.Context, req *genprotopb.DeleteTestRequest, opts ...gax.CallOption) error {
-	opts = append(c.CallOptions.DeleteTest[0:len(c.CallOptions.DeleteTest):len(c.CallOptions.DeleteTest)], opts...)
-	c.internalClient.DeleteTest(ctx, req, opts)
-}
-
-func (c *TestingClient) VerifyTest(ctx context.Context, req *genprotopb.VerifyTestRequest, opts ...gax.CallOption) (*genprotopb.VerifyTestResponse, error) {
-	opts = append(c.CallOptions.VerifyTest[0:len(c.CallOptions.VerifyTest):len(c.CallOptions.VerifyTest)], opts...)
-	return c.internalClient.VerifyTest(ctx, req, opts)
-}
-
 // testingGrpcClient is a client for interacting with Client Libraries Showcase API over gRPC transport.
-// It satisfies the testinginternalClient interface.
+// It satisfies the internalTestingClient interface.
 //
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 type testingGrpcClient struct {
@@ -168,6 +128,9 @@ type testingGrpcClient struct {
 
 	// flag to opt out of default deadlines via GOOGLE_API_GO_EXPERIMENTAL_DISABLE_DEFAULT_DEADLINE
 	disableDeadlines bool
+
+	// Points back to the CallOptions field of the containing TestingClient
+	CallOptions **TestingCallOptions
 
 	// The gRPC API client.
 	testingClient genprotopb.TestingClient
@@ -205,10 +168,12 @@ func NewTestingClient(ctx context.Context, opts ...option.ClientOption) (*Testin
 	if err != nil {
 		return nil, err
 	}
+	callOpts := defaultTestingCallOptions()
 	c := &testingGrpcClient{
 		connPool:         connPool,
 		disableDeadlines: disableDeadlines,
 		testingClient:    genprotopb.NewTestingClient(connPool),
+		CallOptions:      &callOpts,
 	}
 	c.setGoogleClientInfo()
 
@@ -218,7 +183,7 @@ func NewTestingClient(ctx context.Context, opts ...option.ClientOption) (*Testin
 
 	c.locationsClient = locationpb.NewLocationsClient(connPool)
 
-	return &TestingClient{internalTestingClient: c, CallOptions: defaultTestingCallOptions()}, nil
+	return &TestingClient{internalTestingClient: c, CallOptions: callOpts}, nil
 }
 
 // Connection returns a connection to the API service.
@@ -246,6 +211,7 @@ func (c *testingGrpcClient) Close() error {
 // CreateSession creates a new testing session.
 func (c *testingGrpcClient) CreateSession(ctx context.Context, req *genprotopb.CreateSessionRequest, opts ...gax.CallOption) (*genprotopb.Session, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append(c.CallOptions.CreateSession[0:len(c.CallOptions.CreateSession):len(c.CallOptions.CreateSession)], opts...)
 	var resp *genprotopb.Session
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -262,6 +228,7 @@ func (c *testingGrpcClient) CreateSession(ctx context.Context, req *genprotopb.C
 func (c *testingGrpcClient) GetSession(ctx context.Context, req *genprotopb.GetSessionRequest, opts ...gax.CallOption) (*genprotopb.Session, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.GetSession[0:len(c.CallOptions.GetSession):len(c.CallOptions.GetSession)], opts...)
 	var resp *genprotopb.Session
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -277,6 +244,7 @@ func (c *testingGrpcClient) GetSession(ctx context.Context, req *genprotopb.GetS
 // ListSessions lists the current test sessions.
 func (c *testingGrpcClient) ListSessions(ctx context.Context, req *genprotopb.ListSessionsRequest, opts ...gax.CallOption) *SessionIterator {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append(c.CallOptions.ListSessions[0:len(c.CallOptions.ListSessions):len(c.CallOptions.ListSessions)], opts...)
 	it := &SessionIterator{}
 	req = proto.Clone(req).(*genprotopb.ListSessionsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.Session, string, error) {
@@ -317,6 +285,7 @@ func (c *testingGrpcClient) ListSessions(ctx context.Context, req *genprotopb.Li
 func (c *testingGrpcClient) DeleteSession(ctx context.Context, req *genprotopb.DeleteSessionRequest, opts ...gax.CallOption) error {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.DeleteSession[0:len(c.CallOptions.DeleteSession):len(c.CallOptions.DeleteSession)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		_, err = c.testingClient.DeleteSession(ctx, req, settings.GRPC...)
@@ -331,6 +300,7 @@ func (c *testingGrpcClient) DeleteSession(ctx context.Context, req *genprotopb.D
 func (c *testingGrpcClient) ReportSession(ctx context.Context, req *genprotopb.ReportSessionRequest, opts ...gax.CallOption) (*genprotopb.ReportSessionResponse, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.ReportSession[0:len(c.CallOptions.ReportSession):len(c.CallOptions.ReportSession)], opts...)
 	var resp *genprotopb.ReportSessionResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -347,6 +317,7 @@ func (c *testingGrpcClient) ReportSession(ctx context.Context, req *genprotopb.R
 func (c *testingGrpcClient) ListTests(ctx context.Context, req *genprotopb.ListTestsRequest, opts ...gax.CallOption) *TestIterator {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.ListTests[0:len(c.CallOptions.ListTests):len(c.CallOptions.ListTests)], opts...)
 	it := &TestIterator{}
 	req = proto.Clone(req).(*genprotopb.ListTestsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.Test, string, error) {
@@ -392,6 +363,7 @@ func (c *testingGrpcClient) ListTests(ctx context.Context, req *genprotopb.ListT
 func (c *testingGrpcClient) DeleteTest(ctx context.Context, req *genprotopb.DeleteTestRequest, opts ...gax.CallOption) error {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.DeleteTest[0:len(c.CallOptions.DeleteTest):len(c.CallOptions.DeleteTest)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		_, err = c.testingClient.DeleteTest(ctx, req, settings.GRPC...)
@@ -407,6 +379,7 @@ func (c *testingGrpcClient) DeleteTest(ctx context.Context, req *genprotopb.Dele
 func (c *testingGrpcClient) VerifyTest(ctx context.Context, req *genprotopb.VerifyTestRequest, opts ...gax.CallOption) (*genprotopb.VerifyTestResponse, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.VerifyTest[0:len(c.CallOptions.VerifyTest):len(c.CallOptions.VerifyTest)], opts...)
 	var resp *genprotopb.VerifyTestResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -422,6 +395,7 @@ func (c *testingGrpcClient) VerifyTest(ctx context.Context, req *genprotopb.Veri
 func (c *testingGrpcClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.ListLocations[0:len(c.CallOptions.ListLocations):len(c.CallOptions.ListLocations)], opts...)
 	it := &LocationIterator{}
 	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
@@ -461,6 +435,7 @@ func (c *testingGrpcClient) ListLocations(ctx context.Context, req *locationpb.L
 func (c *testingGrpcClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.GetLocation[0:len(c.CallOptions.GetLocation):len(c.CallOptions.GetLocation)], opts...)
 	var resp *locationpb.Location
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -476,6 +451,7 @@ func (c *testingGrpcClient) GetLocation(ctx context.Context, req *locationpb.Get
 func (c *testingGrpcClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.SetIamPolicy[0:len(c.CallOptions.SetIamPolicy):len(c.CallOptions.SetIamPolicy)], opts...)
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -491,6 +467,7 @@ func (c *testingGrpcClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamP
 func (c *testingGrpcClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.GetIamPolicy[0:len(c.CallOptions.GetIamPolicy):len(c.CallOptions.GetIamPolicy)], opts...)
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -506,6 +483,7 @@ func (c *testingGrpcClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamP
 func (c *testingGrpcClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.TestIamPermissions[0:len(c.CallOptions.TestIamPermissions):len(c.CallOptions.TestIamPermissions)], opts...)
 	var resp *iampb.TestIamPermissionsResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -521,6 +499,7 @@ func (c *testingGrpcClient) TestIamPermissions(ctx context.Context, req *iampb.T
 func (c *testingGrpcClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.ListOperations[0:len(c.CallOptions.ListOperations):len(c.CallOptions.ListOperations)], opts...)
 	it := &OperationIterator{}
 	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
@@ -560,6 +539,7 @@ func (c *testingGrpcClient) ListOperations(ctx context.Context, req *longrunning
 func (c *testingGrpcClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.GetOperation[0:len(c.CallOptions.GetOperation):len(c.CallOptions.GetOperation)], opts...)
 	var resp *longrunningpb.Operation
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -575,6 +555,7 @@ func (c *testingGrpcClient) GetOperation(ctx context.Context, req *longrunningpb
 func (c *testingGrpcClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.DeleteOperation[0:len(c.CallOptions.DeleteOperation):len(c.CallOptions.DeleteOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		_, err = c.operationsClient.DeleteOperation(ctx, req, settings.GRPC...)
@@ -586,6 +567,7 @@ func (c *testingGrpcClient) DeleteOperation(ctx context.Context, req *longrunnin
 func (c *testingGrpcClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append(c.CallOptions.CancelOperation[0:len(c.CallOptions.CancelOperation):len(c.CallOptions.CancelOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		_, err = c.operationsClient.CancelOperation(ctx, req, settings.GRPC...)
@@ -596,6 +578,7 @@ func (c *testingGrpcClient) CancelOperation(ctx context.Context, req *longrunnin
 
 func (c *testingGrpcClient) WaitOperation(ctx context.Context, req *longrunningpb.WaitOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append(c.CallOptions.WaitOperation[0:len(c.CallOptions.WaitOperation):len(c.CallOptions.WaitOperation)], opts...)
 	var resp *longrunningpb.Operation
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
