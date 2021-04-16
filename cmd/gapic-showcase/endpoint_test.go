@@ -21,11 +21,26 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
+	"google.golang.org/protobuf/encoding/protojson"
 )
+
+func allowCompactJSON() *resttools.JSONMarshalOptions {
+	resttools.JSONMarshaler.Replace(&protojson.MarshalOptions{
+		Multiline:       false,
+		AllowPartial:    false,
+		UseEnumNumbers:  false,
+		EmitUnpopulated: false,
+	})
+	return &resttools.JSONMarshaler
+}
 
 // TestRESTCalls tests that arbitrary rest calls received by the Showcase REST server are handled
 // correctly.
 func TestRESTCalls(t *testing.T) {
+	defer allowCompactJSON().Restore()
+
 	server := httptest.NewUnstartedServer(nil)
 	backend := createBackends()
 	restServer := newEndpointREST(nil, backend)

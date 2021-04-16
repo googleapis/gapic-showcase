@@ -157,8 +157,8 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				source.P("")
 			}
 			source.P("")
-			source.P("  marshaler := &jsonpb.Marshaler{}")
-			source.P("  requestJSON, _ := marshaler.MarshalToString(%s)", handler.RequestVariable)
+			source.P("  marshaler := resttools.ToJSON()")
+			source.P("  requestJSON, _ := marshaler.Marshal(%s)", handler.RequestVariable)
 			source.P(`  backend.StdLog.Printf("  request: %%s", requestJSON)`)
 			source.P("")
 			// TODO: In the future, we may want to redirect all REST-endpoint requests to the gRPC endpoint so that the gRPC-registered observers get invoked.
@@ -169,13 +169,13 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			source.P("    return")
 			source.P("  }")
 			source.P("")
-			source.P("  json, err := marshaler.MarshalToString(%s)", handler.ResponseVariable)
+			source.P("  json, err := marshaler.Marshal(%s)", handler.ResponseVariable)
 			source.P("  if err != nil {")
 			source.P(`    backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %%s", err.Error())`)
 			source.P("    return")
 			source.P("  }")
 			source.P("")
-			source.P("  w.Write([]byte(json))")
+			source.P("  w.Write(json)")
 			source.P("}\n")
 		}
 
