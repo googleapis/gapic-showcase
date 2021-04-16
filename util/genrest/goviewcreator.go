@@ -46,9 +46,8 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 		file.P("")
 
 		fileImports := map[string]string{
-			"context":                           "",
-			"net/http":                          "",
-			"github.com/golang/protobuf/jsonpb": "",
+			"context":  "",
+			"net/http": "",
 			"github.com/googleapis/gapic-showcase/util/genrest/resttools": "",
 			"github.com/gorilla/mux":                               "gmux",
 			"github.com/googleapis/gapic-showcase/server/genproto": "genprotopb",
@@ -100,14 +99,21 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			case gomodel.BodyFieldAll:
 				fileImports["bytes"] = ""
 				fileImports["io"] = ""
+
 				source.P("  // Intentional: Field values in the URL path override those set in the body.")
 				source.P("  var jsonReader bytes.Buffer")
 				source.P("  bodyReader := io.TeeReader(r.Body, &jsonReader)")
-				source.P("  if err := jsonpb.Unmarshal(/*r.Body*/ bodyReader, %s); err != nil {", handler.RequestVariable)
+				source.P("  rBytes := make([]byte, r.ContentLength)")
+				source.P("  if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {")
+				source.P(`    backend.Error(w, http.StatusBadRequest, "error reading body content: %%s", err)`)
+				source.P("    return")
+				source.P("  }")
+				source.P("")
+				source.P("  if err := resttools.FromJSON().Unmarshal(rBytes, %s); err != nil {", handler.RequestVariable)
 				source.P(`    backend.Error(w, http.StatusBadRequest, "error reading body params '*': %%s", err)`)
 				source.P("    return")
 				source.P("  }")
-				source.P("  // ioutil.ReadAll(bodyReader)") // TODO: ERASE!!
+				source.P("")
 				source.P("  if err := resttools.CheckRESTBody(&jsonReader, %s.ProtoReflect()); err != nil {", handler.RequestVariable)
 				source.P(`    backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %%s", err)`)
 				source.P("    return")
@@ -119,12 +125,20 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				source.P("  }")
 
 			case gomodel.BodyFieldSingle:
+				fileImports["io"] = ""
+
 				// TODO: Ensure this works when the specified field is a scalar. We
 				// may need to use PopulateFields from the generated code in that
 				// case.
 				source.P("  // Intentional: Field values in the URL path override those set in the body.")
 				source.P("  var %s %s.%s", handler.RequestBodyFieldVariable, handler.RequestBodyFieldPackage, handler.RequestBodyFieldType)
-				source.P("  if err := jsonpb.Unmarshal(r.Body, &%s); err != nil {", handler.RequestBodyFieldVariable)
+				source.P("  rBytes := make([]byte, r.ContentLength)")
+				source.P("  if _, err := r.Body.Read(rBytes); err != nil && err != io.EOF {")
+				source.P(`    backend.Error(w, http.StatusBadRequest, "error reading body content: %%s", err)`)
+				source.P("    return")
+				source.P("  }")
+				source.P("")
+				source.P("  if err := resttools.FromJSON().Unmarshal(rBytes, &%s); err != nil {", handler.RequestBodyFieldVariable)
 				source.P(`    backend.Error(w, http.StatusBadRequest, "error reading body into request field '%s': %%s", err)`, handler.RequestBodyFieldProtoName)
 				source.P("    return")
 				source.P("  }")

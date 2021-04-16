@@ -29,11 +29,18 @@ func ToJSON() *protojson.MarshalOptions {
 	return &copy
 }
 
+// FromJSON returns a copy of the current global JSON unmarshaling options. Modifications to this copy
+// do not change the values of these options returned in subsequent calls to this function. This is
+// the function Showcase REST endpoints should use to handle JSON unmarshaling.
+func FromJSON() *protojson.UnmarshalOptions {
+	return &protojson.UnmarshalOptions{}
+}
+
 // JSONMarshaler captures the JSON marshaling options. It is intended only for test of Showcase
 // functionality (not for normal Showcase use or tests of generators against Showcase).
 var JSONMarshaler JSONMarshalOptions
 
-// JSONMarshalOptions contains the current JSOJN marshaling options used by REST endpoints, and
+// JSONMarshalOptions contains the current JSON marshaling options used by REST endpoints, and
 // allows for temporarily replacing these global options and then restoring them. This functionality
 // is useful for some tests.
 type JSONMarshalOptions struct {
@@ -43,7 +50,7 @@ type JSONMarshalOptions struct {
 
 // Replace replaces the current JSON marshaling options with those provided by opt. Call Restore()
 // to restore the production options. Only one replacement can be active at a time; subsequent calls
-// for hang waiting for the first call's mutex to release.
+// for hang waiting for the first call's mutex to be released.
 //
 // As a special case, if opt==nil, the replacement is with the production options themselves; this
 // is useful for test that need to lock the production options while they are running against other
