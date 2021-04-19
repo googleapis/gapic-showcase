@@ -19,10 +19,10 @@ package genrest
 
 import (
 	"context"
-	"github.com/golang/protobuf/jsonpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
+	"io"
 	"net/http"
 )
 
@@ -43,7 +43,13 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 	request := &genprotopb.CreateSessionRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var bodyField genprotopb.Session
-	if err := jsonpb.Unmarshal(r.Body, &bodyField); err != nil {
+	rBytes := make([]byte, r.ContentLength)
+	if _, err := r.Body.Read(rBytes); err != nil && err != io.EOF {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, &bodyField); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body into request field 'session': %s", err)
 		return
 	}
@@ -66,8 +72,8 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.TestingServer.CreateSession(context.Background(), request)
@@ -77,13 +83,13 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleGetSession translates REST requests/responses on the wire to internal proto messages for GetSession
@@ -118,8 +124,8 @@ func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.TestingServer.GetSession(context.Background(), request)
@@ -129,13 +135,13 @@ func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleListSessions translates REST requests/responses on the wire to internal proto messages for ListSessions
@@ -165,8 +171,8 @@ func (backend *RESTBackend) HandleListSessions(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.TestingServer.ListSessions(context.Background(), request)
@@ -176,13 +182,13 @@ func (backend *RESTBackend) HandleListSessions(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleDeleteSession translates REST requests/responses on the wire to internal proto messages for DeleteSession
@@ -217,8 +223,8 @@ func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.TestingServer.DeleteSession(context.Background(), request)
@@ -228,13 +234,13 @@ func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleReportSession translates REST requests/responses on the wire to internal proto messages for ReportSession
@@ -269,8 +275,8 @@ func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.TestingServer.ReportSession(context.Background(), request)
@@ -280,13 +286,13 @@ func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleListTests translates REST requests/responses on the wire to internal proto messages for ListTests
@@ -321,8 +327,8 @@ func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.TestingServer.ListTests(context.Background(), request)
@@ -332,13 +338,13 @@ func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleDeleteTest translates REST requests/responses on the wire to internal proto messages for DeleteTest
@@ -373,8 +379,8 @@ func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.TestingServer.DeleteTest(context.Background(), request)
@@ -384,13 +390,13 @@ func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleVerifyTest translates REST requests/responses on the wire to internal proto messages for VerifyTest
@@ -425,8 +431,8 @@ func (backend *RESTBackend) HandleVerifyTest(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.TestingServer.VerifyTest(context.Background(), request)
@@ -436,11 +442,11 @@ func (backend *RESTBackend) HandleVerifyTest(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }

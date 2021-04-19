@@ -20,7 +20,6 @@ package genrest
 import (
 	"bytes"
 	"context"
-	"github.com/golang/protobuf/jsonpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
@@ -46,11 +45,17 @@ func (backend *RESTBackend) HandleRepeatDataBody(w http.ResponseWriter, r *http.
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
+	rBytes := make([]byte, r.ContentLength)
+	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
 		return
 	}
-	// ioutil.ReadAll(bodyReader)
+
 	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
@@ -65,8 +70,8 @@ func (backend *RESTBackend) HandleRepeatDataBody(w http.ResponseWriter, r *http.
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.ComplianceServer.RepeatDataBody(context.Background(), request)
@@ -76,13 +81,13 @@ func (backend *RESTBackend) HandleRepeatDataBody(w http.ResponseWriter, r *http.
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleRepeatDataBodyInfo translates REST requests/responses on the wire to internal proto messages for RepeatDataBodyInfo
@@ -102,7 +107,13 @@ func (backend *RESTBackend) HandleRepeatDataBodyInfo(w http.ResponseWriter, r *h
 	request := &genprotopb.RepeatRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var bodyField genprotopb.ComplianceData
-	if err := jsonpb.Unmarshal(r.Body, &bodyField); err != nil {
+	rBytes := make([]byte, r.ContentLength)
+	if _, err := r.Body.Read(rBytes); err != nil && err != io.EOF {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, &bodyField); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body into request field 'info': %s", err)
 		return
 	}
@@ -125,8 +136,8 @@ func (backend *RESTBackend) HandleRepeatDataBodyInfo(w http.ResponseWriter, r *h
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.ComplianceServer.RepeatDataBodyInfo(context.Background(), request)
@@ -136,13 +147,13 @@ func (backend *RESTBackend) HandleRepeatDataBodyInfo(w http.ResponseWriter, r *h
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleRepeatDataQuery translates REST requests/responses on the wire to internal proto messages for RepeatDataQuery
@@ -172,8 +183,8 @@ func (backend *RESTBackend) HandleRepeatDataQuery(w http.ResponseWriter, r *http
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.ComplianceServer.RepeatDataQuery(context.Background(), request)
@@ -183,13 +194,13 @@ func (backend *RESTBackend) HandleRepeatDataQuery(w http.ResponseWriter, r *http
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleRepeatDataSimplePath translates REST requests/responses on the wire to internal proto messages for RepeatDataSimplePath
@@ -224,8 +235,8 @@ func (backend *RESTBackend) HandleRepeatDataSimplePath(w http.ResponseWriter, r 
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.ComplianceServer.RepeatDataSimplePath(context.Background(), request)
@@ -235,13 +246,13 @@ func (backend *RESTBackend) HandleRepeatDataSimplePath(w http.ResponseWriter, r 
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleRepeatDataPathResource translates REST requests/responses on the wire to internal proto messages for RepeatDataPathResource
@@ -276,8 +287,8 @@ func (backend *RESTBackend) HandleRepeatDataPathResource(w http.ResponseWriter, 
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.ComplianceServer.RepeatDataPathResource(context.Background(), request)
@@ -287,13 +298,13 @@ func (backend *RESTBackend) HandleRepeatDataPathResource(w http.ResponseWriter, 
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleRepeatDataPathTrailingResource translates REST requests/responses on the wire to internal proto messages for RepeatDataPathTrailingResource
@@ -328,8 +339,8 @@ func (backend *RESTBackend) HandleRepeatDataPathTrailingResource(w http.Response
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.ComplianceServer.RepeatDataPathTrailingResource(context.Background(), request)
@@ -339,11 +350,11 @@ func (backend *RESTBackend) HandleRepeatDataPathTrailingResource(w http.Response
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }

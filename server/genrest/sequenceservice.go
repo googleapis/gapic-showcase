@@ -20,7 +20,6 @@ package genrest
 import (
 	"bytes"
 	"context"
-	"github.com/golang/protobuf/jsonpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
@@ -45,7 +44,13 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 	request := &genprotopb.CreateSequenceRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var bodyField genprotopb.Sequence
-	if err := jsonpb.Unmarshal(r.Body, &bodyField); err != nil {
+	rBytes := make([]byte, r.ContentLength)
+	if _, err := r.Body.Read(rBytes); err != nil && err != io.EOF {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, &bodyField); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body into request field 'sequence': %s", err)
 		return
 	}
@@ -68,8 +73,8 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.SequenceServiceServer.CreateSequence(context.Background(), request)
@@ -79,13 +84,13 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleGetSequenceReport translates REST requests/responses on the wire to internal proto messages for GetSequenceReport
@@ -120,8 +125,8 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.SequenceServiceServer.GetSequenceReport(context.Background(), request)
@@ -131,13 +136,13 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleAttemptSequence translates REST requests/responses on the wire to internal proto messages for AttemptSequence
@@ -158,11 +163,17 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
+	rBytes := make([]byte, r.ContentLength)
+	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
 		return
 	}
-	// ioutil.ReadAll(bodyReader)
+
 	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
@@ -177,8 +188,8 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.SequenceServiceServer.AttemptSequence(context.Background(), request)
@@ -188,11 +199,11 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }

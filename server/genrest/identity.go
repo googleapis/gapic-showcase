@@ -20,7 +20,6 @@ package genrest
 import (
 	"bytes"
 	"context"
-	"github.com/golang/protobuf/jsonpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
@@ -46,11 +45,17 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
+	rBytes := make([]byte, r.ContentLength)
+	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
 		return
 	}
-	// ioutil.ReadAll(bodyReader)
+
 	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
@@ -65,8 +70,8 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.IdentityServer.CreateUser(context.Background(), request)
@@ -76,13 +81,13 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleGetUser translates REST requests/responses on the wire to internal proto messages for GetUser
@@ -117,8 +122,8 @@ func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.IdentityServer.GetUser(context.Background(), request)
@@ -128,13 +133,13 @@ func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleUpdateUser translates REST requests/responses on the wire to internal proto messages for UpdateUser
@@ -155,11 +160,17 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
+	rBytes := make([]byte, r.ContentLength)
+	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
 		return
 	}
-	// ioutil.ReadAll(bodyReader)
+
 	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
@@ -174,8 +185,8 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.IdentityServer.UpdateUser(context.Background(), request)
@@ -185,13 +196,13 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleDeleteUser translates REST requests/responses on the wire to internal proto messages for DeleteUser
@@ -226,8 +237,8 @@ func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.IdentityServer.DeleteUser(context.Background(), request)
@@ -237,13 +248,13 @@ func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleListUsers translates REST requests/responses on the wire to internal proto messages for ListUsers
@@ -273,8 +284,8 @@ func (backend *RESTBackend) HandleListUsers(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.IdentityServer.ListUsers(context.Background(), request)
@@ -284,11 +295,11 @@ func (backend *RESTBackend) HandleListUsers(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
