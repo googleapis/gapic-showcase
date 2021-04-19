@@ -21,6 +21,9 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // TestRESTCalls tests that arbitrary rest calls received by the Showcase REST server are handled
@@ -38,6 +41,7 @@ func TestRESTCalls(t *testing.T) {
 		verb       string
 		path       string
 		body       string
+		fullJSON   bool
 		want       string
 		statusCode int // 0 taken to mean 200 for simplicity
 	}{
@@ -70,15 +74,58 @@ func TestRESTCalls(t *testing.T) {
 			path:       "/v1beta1/repeat:query?info.f_string=jonas mila",
 			statusCode: 400, // unescaped space in query param
 		},
+
+		{
+			// Test responses:
+			//   1. unset optional field absent
+			//   2. zero-set optional field present
+			//   3. unset non-optional field present
+			//   4. enum field is symbolic rather than numeric
+			verb:     "POST",
+			path:     "/v1beta1/repeat:body",
+			body:     `{"info":{"fString":"jonas^ mila", "p_double": 0}}`,
+			fullJSON: true,
+			want: `{
+                          "info": {
+                            "fString": "jonas^ mila",
+                            "fInt32": 0,
+                            "fSint32": 0,
+                            "fSfixed32": 0,
+                            "fUint32": 0,
+                            "fFixed32": 0,
+                            "fInt64": "0",
+                            "fSint64": "0",
+                            "fSfixed64": "0",
+                            "fUint64": "0",
+                            "fFixed64": "0",
+                            "fDouble": 0,
+                            "fFloat": 0,
+                            "fBool": false,
+                            "fBytes": "",
+                            "fKingdom": "LIFE_KINGDOM_UNSPECIFIED",
+                            "fChild": null,
+                            "pDouble": 0
+                          }
+                        }`,
+		},
 	} {
+
+		var jsonOptions *resttools.JSONMarshalOptions
+		if testCase.fullJSON {
+			jsonOptions = allowFullJSON()
+		} else {
+			jsonOptions = allowCompactJSON()
+		}
 
 		request, err := http.NewRequest(testCase.verb, server.URL+testCase.path, strings.NewReader(testCase.body))
 		if err != nil {
+			jsonOptions.Restore()
 			t.Fatal(err)
 		}
 
 		response, err := http.DefaultClient.Do(request)
 		if err != nil {
+			jsonOptions.Restore()
 			t.Fatal(err)
 		}
 
@@ -91,18 +138,47 @@ func TestRESTCalls(t *testing.T) {
 			t.Errorf("  request: %v", request)
 		} else if want != 200 {
 			// we got the expected error
+			jsonOptions.Restore()
 			continue
 		}
 
 		body, err := ioutil.ReadAll(response.Body)
 		response.Body.Close()
 		if err != nil {
+			jsonOptions.Restore()
 			log.Fatal(err)
 		}
-		if got, want := string(body), testCase.want; got != want {
-			t.Errorf("testcase %2d: body: got `%s`, want %q", idx, got, want)
+		if got, want := string(body), testCase.want; noSpace(got) != noSpace(want) {
+			t.Errorf("testcase %2d: body: got `%s`, want %s", idx, got, want)
 			t.Errorf("  request: %v", request)
 		}
+		jsonOptions.Restore()
 	}
 
+}
+
+// allowCompactJSON ensures that resttools JSONMarshaler uses the compact representation until
+// explicitly restored; this makes some tests shorter to configure and easier to understand.
+func allowCompactJSON() *resttools.JSONMarshalOptions {
+	resttools.JSONMarshaler.Replace(&protojson.MarshalOptions{
+		Multiline:       false,
+		AllowPartial:    false,
+		UseEnumNumbers:  false,
+		EmitUnpopulated: false,
+	})
+	return &resttools.JSONMarshaler
+}
+
+// allowFullJSON ensures that resttools JSONMarshaler uses the production configuration until
+// explicitly restored.
+func allowFullJSON() *resttools.JSONMarshalOptions {
+	resttools.JSONMarshaler.Replace(nil)
+	return &resttools.JSONMarshaler
+}
+
+// noSpace removes whitespace from src. This is useful for processing formatted responses or
+// expected values without having to worry about whitespace matches.
+func noSpace(src string) string {
+	str := strings.ReplaceAll(src, "\n", "")
+	return strings.ReplaceAll(str, " ", "")
 }
