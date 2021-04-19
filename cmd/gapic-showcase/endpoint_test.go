@@ -157,7 +157,7 @@ func TestRESTCalls(t *testing.T) {
 
 }
 
-// allowFullJSON ensures that resttools JSONMarshaler uses the compact representation until
+// allowCompactJSON ensures that resttools JSONMarshaler uses the compact representation until
 // explicitly restored; this makes some tests shorter to configure and easier to understand.
 func allowCompactJSON() *resttools.JSONMarshalOptions {
 	resttools.JSONMarshaler.Replace(&protojson.MarshalOptions{

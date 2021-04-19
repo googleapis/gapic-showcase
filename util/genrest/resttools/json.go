@@ -36,7 +36,7 @@ func FromJSON() *protojson.UnmarshalOptions {
 	return &protojson.UnmarshalOptions{}
 }
 
-// JSONMarshaler captures the JSON marshaling options. It is intended only for test of Showcase
+// JSONMarshaler captures the JSON marshaling options. It is intended only for tests of Showcase
 // functionality (not for normal Showcase use or tests of generators against Showcase).
 var JSONMarshaler JSONMarshalOptions
 
@@ -50,11 +50,11 @@ type JSONMarshalOptions struct {
 
 // Replace replaces the current JSON marshaling options with those provided by opt. Call Restore()
 // to restore the production options. Only one replacement can be active at a time; subsequent calls
-// for hang waiting for the first call's mutex to be released.
+// hang waiting for the first call's mutex to be released.
 //
 // As a special case, if opt==nil, the replacement is with the production options themselves; this
-// is useful for test that need to lock the production options while they are running against other
-// tests which may need to change them.
+// is useful for tests that need to lock the production options to protect from other tests which
+// may need to change them.
 func (jm *JSONMarshalOptions) Replace(opt *protojson.MarshalOptions) {
 	jm.mu.Lock()
 	if opt == nil {
