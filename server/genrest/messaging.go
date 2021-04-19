@@ -20,7 +20,6 @@ package genrest
 import (
 	"bytes"
 	"context"
-	"github.com/golang/protobuf/jsonpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
@@ -46,11 +45,17 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
+	rBytes := make([]byte, r.ContentLength)
+	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
 		return
 	}
-	// ioutil.ReadAll(bodyReader)
+
 	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
@@ -65,8 +70,8 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.CreateRoom(context.Background(), request)
@@ -76,13 +81,13 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleGetRoom translates REST requests/responses on the wire to internal proto messages for GetRoom
@@ -117,8 +122,8 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.GetRoom(context.Background(), request)
@@ -128,13 +133,13 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleUpdateRoom translates REST requests/responses on the wire to internal proto messages for UpdateRoom
@@ -155,11 +160,17 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
+	rBytes := make([]byte, r.ContentLength)
+	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
 		return
 	}
-	// ioutil.ReadAll(bodyReader)
+
 	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
@@ -174,8 +185,8 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.UpdateRoom(context.Background(), request)
@@ -185,13 +196,13 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleDeleteRoom translates REST requests/responses on the wire to internal proto messages for DeleteRoom
@@ -226,8 +237,8 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.DeleteRoom(context.Background(), request)
@@ -237,13 +248,13 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleListRooms translates REST requests/responses on the wire to internal proto messages for ListRooms
@@ -273,8 +284,8 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.ListRooms(context.Background(), request)
@@ -284,13 +295,13 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleCreateBlurb translates REST requests/responses on the wire to internal proto messages for CreateBlurb
@@ -311,11 +322,17 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
+	rBytes := make([]byte, r.ContentLength)
+	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
 		return
 	}
-	// ioutil.ReadAll(bodyReader)
+
 	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
@@ -330,8 +347,8 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.CreateBlurb(context.Background(), request)
@@ -341,13 +358,13 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleCreateBlurb_1 translates REST requests/responses on the wire to internal proto messages for CreateBlurb
@@ -368,11 +385,17 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
+	rBytes := make([]byte, r.ContentLength)
+	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
 		return
 	}
-	// ioutil.ReadAll(bodyReader)
+
 	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
@@ -387,8 +410,8 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.CreateBlurb(context.Background(), request)
@@ -398,13 +421,13 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleGetBlurb translates REST requests/responses on the wire to internal proto messages for GetBlurb
@@ -439,8 +462,8 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.GetBlurb(context.Background(), request)
@@ -450,13 +473,13 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleGetBlurb_1 translates REST requests/responses on the wire to internal proto messages for GetBlurb
@@ -491,8 +514,8 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.GetBlurb(context.Background(), request)
@@ -502,13 +525,13 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleUpdateBlurb translates REST requests/responses on the wire to internal proto messages for UpdateBlurb
@@ -529,11 +552,17 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
+	rBytes := make([]byte, r.ContentLength)
+	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
 		return
 	}
-	// ioutil.ReadAll(bodyReader)
+
 	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
@@ -548,8 +577,8 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.UpdateBlurb(context.Background(), request)
@@ -559,13 +588,13 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleUpdateBlurb_1 translates REST requests/responses on the wire to internal proto messages for UpdateBlurb
@@ -586,11 +615,17 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
+	rBytes := make([]byte, r.ContentLength)
+	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
 		return
 	}
-	// ioutil.ReadAll(bodyReader)
+
 	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
@@ -605,8 +640,8 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.UpdateBlurb(context.Background(), request)
@@ -616,13 +651,13 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleDeleteBlurb translates REST requests/responses on the wire to internal proto messages for DeleteBlurb
@@ -657,8 +692,8 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.DeleteBlurb(context.Background(), request)
@@ -668,13 +703,13 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleDeleteBlurb_1 translates REST requests/responses on the wire to internal proto messages for DeleteBlurb
@@ -709,8 +744,8 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.DeleteBlurb(context.Background(), request)
@@ -720,13 +755,13 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleListBlurbs translates REST requests/responses on the wire to internal proto messages for ListBlurbs
@@ -761,8 +796,8 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.ListBlurbs(context.Background(), request)
@@ -772,13 +807,13 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleListBlurbs_1 translates REST requests/responses on the wire to internal proto messages for ListBlurbs
@@ -813,8 +848,8 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.ListBlurbs(context.Background(), request)
@@ -824,13 +859,13 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleSearchBlurbs translates REST requests/responses on the wire to internal proto messages for SearchBlurbs
@@ -851,11 +886,17 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	if err := jsonpb.Unmarshal( /*r.Body*/ bodyReader, request); err != nil {
+	rBytes := make([]byte, r.ContentLength)
+	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
 		return
 	}
-	// ioutil.ReadAll(bodyReader)
+
 	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
@@ -870,8 +911,8 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.SearchBlurbs(context.Background(), request)
@@ -881,13 +922,13 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleSearchBlurbs_1 translates REST requests/responses on the wire to internal proto messages for SearchBlurbs
@@ -922,8 +963,8 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 		return
 	}
 
-	marshaler := &jsonpb.Marshaler{}
-	requestJSON, _ := marshaler.MarshalToString(request)
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
 	response, err := backend.MessagingServer.SearchBlurbs(context.Background(), request)
@@ -933,13 +974,13 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 		return
 	}
 
-	json, err := marshaler.MarshalToString(response)
+	json, err := marshaler.Marshal(response)
 	if err != nil {
 		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
 		return
 	}
 
-	w.Write([]byte(json))
+	w.Write(json)
 }
 
 // HandleStreamBlurbs translates REST requests/responses on the wire to internal proto messages for StreamBlurbs
