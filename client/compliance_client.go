@@ -58,7 +58,7 @@ type ComplianceCallOptions struct {
 	WaitOperation                  []gax.CallOption
 }
 
-func defaultComplianceGrpcClientOptions() []option.ClientOption {
+func defaultComplianceGRPCClientOptions() []option.ClientOption {
 	return []option.ClientOption{
 		internaloption.WithDefaultEndpoint("localhost:7469"),
 		internaloption.WithDefaultMTLSEndpoint("localhost:7469"),
@@ -144,7 +144,7 @@ type complianceGrpcClient struct {
 // This service is used to test that GAPICs can transcode proto3 requests to
 // REST format correctly for various types of HTTP annotations.
 func NewComplianceClient(ctx context.Context, opts ...option.ClientOption) (*ComplianceClient, error) {
-	clientOpts := defaultComplianceGrpcClientOptions()
+	clientOpts := defaultComplianceGRPCClientOptions()
 	if newComplianceGrpcClientHook != nil {
 		hookOpts, err := newComplianceGrpcClientHook(ctx, clientHookParams{})
 		if err != nil {
@@ -162,14 +162,17 @@ func NewComplianceClient(ctx context.Context, opts ...option.ClientOption) (*Com
 	if err != nil {
 		return nil, err
 	}
-	callOpts := defaultComplianceCallOptions()
+	client := ComplianceClient{CallOptions: defaultComplianceCallOptions()}
+
 	c := &complianceGrpcClient{
 		connPool:         connPool,
 		disableDeadlines: disableDeadlines,
 		complianceClient: genprotopb.NewComplianceClient(connPool),
-		CallOptions:      &callOpts,
+		CallOptions:      &client.CallOptions,
 	}
 	c.setGoogleClientInfo()
+
+	client.internalComplianceClient = c
 
 	c.operationsClient = longrunningpb.NewOperationsClient(connPool)
 
@@ -177,7 +180,7 @@ func NewComplianceClient(ctx context.Context, opts ...option.ClientOption) (*Com
 
 	c.locationsClient = locationpb.NewLocationsClient(connPool)
 
-	return &ComplianceClient{internalComplianceClient: c, CallOptions: callOpts}, nil
+	return client, nil
 }
 
 // Connection returns a connection to the API service.

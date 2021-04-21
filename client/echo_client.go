@@ -63,7 +63,7 @@ type EchoCallOptions struct {
 	WaitOperation      []gax.CallOption
 }
 
-func defaultEchoGrpcClientOptions() []option.ClientOption {
+func defaultEchoGRPCClientOptions() []option.ClientOption {
 	return []option.ClientOption{
 		internaloption.WithDefaultEndpoint("localhost:7469"),
 		internaloption.WithDefaultMTLSEndpoint("localhost:7469"),
@@ -197,7 +197,7 @@ type echoGrpcClient struct {
 // paginated calls. Set the ‘showcase-trailer’ metadata key on any method
 // to have the values echoed in the response trailers.
 func NewEchoClient(ctx context.Context, opts ...option.ClientOption) (*EchoClient, error) {
-	clientOpts := defaultEchoGrpcClientOptions()
+	clientOpts := defaultEchoGRPCClientOptions()
 	if newEchoGrpcClientHook != nil {
 		hookOpts, err := newEchoGrpcClientHook(ctx, clientHookParams{})
 		if err != nil {
@@ -215,14 +215,17 @@ func NewEchoClient(ctx context.Context, opts ...option.ClientOption) (*EchoClien
 	if err != nil {
 		return nil, err
 	}
-	callOpts := defaultEchoCallOptions()
+	client := EchoClient{CallOptions: defaultEchoCallOptions()}
+
 	c := &echoGrpcClient{
 		connPool:         connPool,
 		disableDeadlines: disableDeadlines,
 		echoClient:       genprotopb.NewEchoClient(connPool),
-		CallOptions:      &callOpts,
+		CallOptions:      &client.CallOptions,
 	}
 	c.setGoogleClientInfo()
+
+	client.internalEchoClient = c
 
 	c.LROClient, err = lroauto.NewOperationsClient(ctx, gtransport.WithConnPool(connPool))
 	if err != nil {
@@ -240,7 +243,7 @@ func NewEchoClient(ctx context.Context, opts ...option.ClientOption) (*EchoClien
 
 	c.locationsClient = locationpb.NewLocationsClient(connPool)
 
-	return &EchoClient{internalEchoClient: c, CallOptions: callOpts}, nil
+	return client, nil
 }
 
 // Connection returns a connection to the API service.

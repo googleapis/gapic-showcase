@@ -57,7 +57,7 @@ type SequenceCallOptions struct {
 	WaitOperation      []gax.CallOption
 }
 
-func defaultSequenceGrpcClientOptions() []option.ClientOption {
+func defaultSequenceGRPCClientOptions() []option.ClientOption {
 	return []option.ClientOption{
 		internaloption.WithDefaultEndpoint("localhost:7469"),
 		internaloption.WithDefaultMTLSEndpoint("localhost:7469"),
@@ -146,7 +146,7 @@ type sequenceGrpcClient struct {
 // NewSequenceClient creates a new sequence service client based on gRPC.
 //
 func NewSequenceClient(ctx context.Context, opts ...option.ClientOption) (*SequenceClient, error) {
-	clientOpts := defaultSequenceGrpcClientOptions()
+	clientOpts := defaultSequenceGRPCClientOptions()
 	if newSequenceGrpcClientHook != nil {
 		hookOpts, err := newSequenceGrpcClientHook(ctx, clientHookParams{})
 		if err != nil {
@@ -164,14 +164,17 @@ func NewSequenceClient(ctx context.Context, opts ...option.ClientOption) (*Seque
 	if err != nil {
 		return nil, err
 	}
-	callOpts := defaultSequenceCallOptions()
+	client := SequenceClient{CallOptions: defaultSequenceCallOptions()}
+
 	c := &sequenceGrpcClient{
 		connPool:         connPool,
 		disableDeadlines: disableDeadlines,
 		sequenceClient:   genprotopb.NewSequenceServiceClient(connPool),
-		CallOptions:      &callOpts,
+		CallOptions:      &client.CallOptions,
 	}
 	c.setGoogleClientInfo()
+
+	client.internalSequenceClient = c
 
 	c.operationsClient = longrunningpb.NewOperationsClient(connPool)
 
@@ -179,7 +182,7 @@ func NewSequenceClient(ctx context.Context, opts ...option.ClientOption) (*Seque
 
 	c.locationsClient = locationpb.NewLocationsClient(connPool)
 
-	return &SequenceClient{internalSequenceClient: c, CallOptions: callOpts}, nil
+	return client, nil
 }
 
 // Connection returns a connection to the API service.

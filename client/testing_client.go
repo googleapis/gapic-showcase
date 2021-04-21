@@ -60,7 +60,7 @@ type TestingCallOptions struct {
 	WaitOperation      []gax.CallOption
 }
 
-func defaultTestingGrpcClientOptions() []option.ClientOption {
+func defaultTestingGRPCClientOptions() []option.ClientOption {
 	return []option.ClientOption{
 		internaloption.WithDefaultEndpoint("localhost:7469"),
 		internaloption.WithDefaultMTLSEndpoint("localhost:7469"),
@@ -150,7 +150,7 @@ type testingGrpcClient struct {
 // A service to facilitate running discrete sets of tests
 // against Showcase.
 func NewTestingClient(ctx context.Context, opts ...option.ClientOption) (*TestingClient, error) {
-	clientOpts := defaultTestingGrpcClientOptions()
+	clientOpts := defaultTestingGRPCClientOptions()
 	if newTestingGrpcClientHook != nil {
 		hookOpts, err := newTestingGrpcClientHook(ctx, clientHookParams{})
 		if err != nil {
@@ -168,14 +168,17 @@ func NewTestingClient(ctx context.Context, opts ...option.ClientOption) (*Testin
 	if err != nil {
 		return nil, err
 	}
-	callOpts := defaultTestingCallOptions()
+	client := TestingClient{CallOptions: defaultTestingCallOptions()}
+
 	c := &testingGrpcClient{
 		connPool:         connPool,
 		disableDeadlines: disableDeadlines,
 		testingClient:    genprotopb.NewTestingClient(connPool),
-		CallOptions:      &callOpts,
+		CallOptions:      &client.CallOptions,
 	}
 	c.setGoogleClientInfo()
+
+	client.internalTestingClient = c
 
 	c.operationsClient = longrunningpb.NewOperationsClient(connPool)
 
@@ -183,7 +186,7 @@ func NewTestingClient(ctx context.Context, opts ...option.ClientOption) (*Testin
 
 	c.locationsClient = locationpb.NewLocationsClient(connPool)
 
-	return &TestingClient{internalTestingClient: c, CallOptions: callOpts}, nil
+	return client, nil
 }
 
 // Connection returns a connection to the API service.

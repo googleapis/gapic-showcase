@@ -59,7 +59,7 @@ type IdentityCallOptions struct {
 	WaitOperation      []gax.CallOption
 }
 
-func defaultIdentityGrpcClientOptions() []option.ClientOption {
+func defaultIdentityGRPCClientOptions() []option.ClientOption {
 	return []option.ClientOption{
 		internaloption.WithDefaultEndpoint("localhost:7469"),
 		internaloption.WithDefaultMTLSEndpoint("localhost:7469"),
@@ -164,7 +164,7 @@ type identityGrpcClient struct {
 //
 // A simple identity service.
 func NewIdentityClient(ctx context.Context, opts ...option.ClientOption) (*IdentityClient, error) {
-	clientOpts := defaultIdentityGrpcClientOptions()
+	clientOpts := defaultIdentityGRPCClientOptions()
 	if newIdentityGrpcClientHook != nil {
 		hookOpts, err := newIdentityGrpcClientHook(ctx, clientHookParams{})
 		if err != nil {
@@ -182,14 +182,17 @@ func NewIdentityClient(ctx context.Context, opts ...option.ClientOption) (*Ident
 	if err != nil {
 		return nil, err
 	}
-	callOpts := defaultIdentityCallOptions()
+	client := IdentityClient{CallOptions: defaultIdentityCallOptions()}
+
 	c := &identityGrpcClient{
 		connPool:         connPool,
 		disableDeadlines: disableDeadlines,
 		identityClient:   genprotopb.NewIdentityClient(connPool),
-		CallOptions:      &callOpts,
+		CallOptions:      &client.CallOptions,
 	}
 	c.setGoogleClientInfo()
+
+	client.internalIdentityClient = c
 
 	c.operationsClient = longrunningpb.NewOperationsClient(connPool)
 
@@ -197,7 +200,7 @@ func NewIdentityClient(ctx context.Context, opts ...option.ClientOption) (*Ident
 
 	c.locationsClient = locationpb.NewLocationsClient(connPool)
 
-	return &IdentityClient{internalIdentityClient: c, CallOptions: callOpts}, nil
+	return client, nil
 }
 
 // Connection returns a connection to the API service.
