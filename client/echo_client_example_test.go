@@ -28,7 +28,7 @@ import (
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 )
 
-func ExampleNewEchoGrpcClient() {
+func ExampleNewEchoClient() {
 	ctx := context.Background()
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
@@ -38,7 +38,7 @@ func ExampleNewEchoGrpcClient() {
 	_ = c
 }
 
-func ExampleEchoGrpcClient_Echo() {
+func ExampleEchoClient_Echo() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -58,7 +58,7 @@ func ExampleEchoGrpcClient_Echo() {
 	_ = resp
 }
 
-func ExampleEchoGrpcClient_Chat() {
+func ExampleEchoClient_Chat() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -94,7 +94,7 @@ func ExampleEchoGrpcClient_Chat() {
 	}
 }
 
-func ExampleEchoGrpcClient_PagedExpand() {
+func ExampleEchoClient_PagedExpand() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	// import "google.golang.org/api/iterator"
 
@@ -121,7 +121,7 @@ func ExampleEchoGrpcClient_PagedExpand() {
 	}
 }
 
-func ExampleEchoGrpcClient_Wait() {
+func ExampleEchoClient_Wait() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -146,7 +146,7 @@ func ExampleEchoGrpcClient_Wait() {
 	_ = resp
 }
 
-func ExampleEchoGrpcClient_Block() {
+func ExampleEchoClient_Block() {
 	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 
 	ctx := context.Background()
@@ -166,7 +166,7 @@ func ExampleEchoGrpcClient_Block() {
 	_ = resp
 }
 
-func ExampleEchoGrpcClient_ListLocations() {
+func ExampleEchoClient_ListLocations() {
 	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
 	// import "google.golang.org/api/iterator"
 
@@ -193,7 +193,7 @@ func ExampleEchoGrpcClient_ListLocations() {
 	}
 }
 
-func ExampleEchoGrpcClient_GetLocation() {
+func ExampleEchoClient_GetLocation() {
 	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
 
 	ctx := context.Background()
@@ -213,7 +213,7 @@ func ExampleEchoGrpcClient_GetLocation() {
 	_ = resp
 }
 
-func ExampleEchoGrpcClient_SetIamPolicy() {
+func ExampleEchoClient_SetIamPolicy() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -233,7 +233,7 @@ func ExampleEchoGrpcClient_SetIamPolicy() {
 	_ = resp
 }
 
-func ExampleEchoGrpcClient_GetIamPolicy() {
+func ExampleEchoClient_GetIamPolicy() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -253,7 +253,7 @@ func ExampleEchoGrpcClient_GetIamPolicy() {
 	_ = resp
 }
 
-func ExampleEchoGrpcClient_TestIamPermissions() {
+func ExampleEchoClient_TestIamPermissions() {
 	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
 
 	ctx := context.Background()
@@ -273,7 +273,7 @@ func ExampleEchoGrpcClient_TestIamPermissions() {
 	_ = resp
 }
 
-func ExampleEchoGrpcClient_ListOperations() {
+func ExampleEchoClient_ListOperations() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	// import "google.golang.org/api/iterator"
 
@@ -300,7 +300,7 @@ func ExampleEchoGrpcClient_ListOperations() {
 	}
 }
 
-func ExampleEchoGrpcClient_GetOperation() {
+func ExampleEchoClient_GetOperation() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 
 	ctx := context.Background()
@@ -320,7 +320,7 @@ func ExampleEchoGrpcClient_GetOperation() {
 	_ = resp
 }
 
-func ExampleEchoGrpcClient_DeleteOperation() {
+func ExampleEchoClient_DeleteOperation() {
 	ctx := context.Background()
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
@@ -336,7 +336,7 @@ func ExampleEchoGrpcClient_DeleteOperation() {
 	}
 }
 
-func ExampleEchoGrpcClient_CancelOperation() {
+func ExampleEchoClient_CancelOperation() {
 	ctx := context.Background()
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
@@ -352,7 +352,7 @@ func ExampleEchoGrpcClient_CancelOperation() {
 	}
 }
 
-func ExampleEchoGrpcClient_WaitOperation() {
+func ExampleEchoClient_WaitOperation() {
 	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 
 	ctx := context.Background()
