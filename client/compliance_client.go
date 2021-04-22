@@ -94,6 +94,7 @@ func defaultComplianceCallOptions() *ComplianceCallOptions {
 // internalComplianceClient is an interface that defines the methods availaible from Client Libraries Showcase API.
 type internalComplianceClient interface {
 	Close() error
+	setGoogleClientInfo(...string)
 	RepeatDataBody(context.Context, *genprotopb.RepeatRequest, ...gax.CallOption) (*genprotopb.RepeatResponse, error)
 	RepeatDataBodyInfo(context.Context, *genprotopb.RepeatRequest, ...gax.CallOption) (*genprotopb.RepeatResponse, error)
 	RepeatDataQuery(context.Context, *genprotopb.RepeatRequest, ...gax.CallOption) (*genprotopb.RepeatResponse, error)

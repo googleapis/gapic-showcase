@@ -180,6 +180,7 @@ func defaultMessagingCallOptions() *MessagingCallOptions {
 // internalMessagingClient is an interface that defines the methods availaible from Client Libraries Showcase API.
 type internalMessagingClient interface {
 	Close() error
+	setGoogleClientInfo(...string)
 	CreateRoom(context.Context, *genprotopb.CreateRoomRequest, ...gax.CallOption) (*genprotopb.Room, error)
 	GetRoom(context.Context, *genprotopb.GetRoomRequest, ...gax.CallOption) (*genprotopb.Room, error)
 	UpdateRoom(context.Context, *genprotopb.UpdateRoomRequest, ...gax.CallOption) (*genprotopb.Room, error)

@@ -133,6 +133,7 @@ func defaultEchoCallOptions() *EchoCallOptions {
 // internalEchoClient is an interface that defines the methods availaible from Client Libraries Showcase API.
 type internalEchoClient interface {
 	Close() error
+	setGoogleClientInfo(...string)
 	Echo(context.Context, *genprotopb.EchoRequest, ...gax.CallOption) (*genprotopb.EchoResponse, error)
 	Expand(context.Context, *genprotopb.ExpandRequest, ...gax.CallOption) (genprotopb.Echo_ExpandClient, error)
 	Collect(context.Context, ...gax.CallOption) (genprotopb.Echo_CollectClient, error)

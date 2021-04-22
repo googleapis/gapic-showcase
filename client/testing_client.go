@@ -98,6 +98,7 @@ func defaultTestingCallOptions() *TestingCallOptions {
 // internalTestingClient is an interface that defines the methods availaible from Client Libraries Showcase API.
 type internalTestingClient interface {
 	Close() error
+	setGoogleClientInfo(...string)
 	CreateSession(context.Context, *genprotopb.CreateSessionRequest, ...gax.CallOption) (*genprotopb.Session, error)
 	GetSession(context.Context, *genprotopb.GetSessionRequest, ...gax.CallOption) (*genprotopb.Session, error)
 	ListSessions(context.Context, *genprotopb.ListSessionsRequest, ...gax.CallOption) *SessionIterator

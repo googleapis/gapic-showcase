@@ -101,6 +101,7 @@ func defaultSequenceCallOptions() *SequenceCallOptions {
 // internalSequenceClient is an interface that defines the methods availaible from Client Libraries Showcase API.
 type internalSequenceClient interface {
 	Close() error
+	setGoogleClientInfo(...string)
 	CreateSequence(context.Context, *genprotopb.CreateSequenceRequest, ...gax.CallOption) (*genprotopb.Sequence, error)
 	GetSequenceReport(context.Context, *genprotopb.GetSequenceReportRequest, ...gax.CallOption) (*genprotopb.SequenceReport, error)
 	AttemptSequence(context.Context, *genprotopb.AttemptSequenceRequest, ...gax.CallOption) error

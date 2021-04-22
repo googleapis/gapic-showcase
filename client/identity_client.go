@@ -116,6 +116,7 @@ func defaultIdentityCallOptions() *IdentityCallOptions {
 // internalIdentityClient is an interface that defines the methods availaible from Client Libraries Showcase API.
 type internalIdentityClient interface {
 	Close() error
+	setGoogleClientInfo(...string)
 	CreateUser(context.Context, *genprotopb.CreateUserRequest, ...gax.CallOption) (*genprotopb.User, error)
 	GetUser(context.Context, *genprotopb.GetUserRequest, ...gax.CallOption) (*genprotopb.User, error)
 	UpdateUser(context.Context, *genprotopb.UpdateUserRequest, ...gax.CallOption) (*genprotopb.User, error)
