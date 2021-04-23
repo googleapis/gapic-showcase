@@ -78,6 +78,7 @@ func init() {
 		AllowPartial:    false,
 		UseEnumNumbers:  false,
 		EmitUnpopulated: true,
+		UseProtoNames:   false, // we want lower-camel-cased field names
 	}
 
 }

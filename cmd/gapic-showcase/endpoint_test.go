@@ -83,7 +83,7 @@ func TestRESTCalls(t *testing.T) {
 			//   4. enum field is symbolic rather than numeric
 			verb:     "POST",
 			path:     "/v1beta1/repeat:body",
-			body:     `{"info":{"fString":"jonas^ mila", "p_double": 0}}`,
+			body:     `{"info":{"fString":"jonas^ mila", "pDouble": 0}}`,
 			fullJSON: true,
 			want: `{
                           "info": {
@@ -165,6 +165,7 @@ func allowCompactJSON() *resttools.JSONMarshalOptions {
 		AllowPartial:    false,
 		UseEnumNumbers:  false,
 		EmitUnpopulated: false,
+		UseProtoNames:   false, // we want lower-camel-cased field names
 	})
 	return &resttools.JSONMarshaler
 }

@@ -28,6 +28,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/gapic-showcase/server/genproto"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
+	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
@@ -43,6 +44,9 @@ func TestComplianceSuite(t *testing.T) {
 	}
 	server.Start()
 	defer server.Close()
+
+	resttools.JSONMarshaler.Replace(nil)
+	defer resttools.JSONMarshaler.Restore()
 
 	// Set handlers for each test case. When GAPIC generator tests do this, they should have
 	// each of their handlers invoking the correct GAPIC library method for the Showcase API.
@@ -152,13 +156,13 @@ type prepRepeatDataTestFunc func(request *genproto.RepeatRequest) (verb string, 
 
 func prepRepeatDataBodyTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
 	name = "Compliance.RepeatDataBody"
-	bodyBytes, err := protojson.Marshal(request)
+	bodyBytes, err := resttools.ToJSON().Marshal(request)
 	return name, "POST", "/v1beta1/repeat:body", string(bodyBytes), err
 }
 
 func prepRepeatDataBodyInfoTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
 	name = "Compliance.RepeatDataBodyInfo"
-	bodyBytes, err := protojson.Marshal(request.Info)
+	bodyBytes, err := resttools.ToJSON().Marshal(request.Info)
 	queryString := prepRepeatDataTestsQueryString(request, map[string]bool{"info": true})
 	_ = bodyBytes
 	return name, "POST", "/v1beta1/repeat:bodyinfo" + queryString, string(bodyBytes), err
