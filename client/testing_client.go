@@ -99,6 +99,7 @@ func defaultTestingCallOptions() *TestingCallOptions {
 type internalTestingClient interface {
 	Close() error
 	setGoogleClientInfo(...string)
+	Connection() *grpc.ClientConn
 	CreateSession(context.Context, *genprotopb.CreateSessionRequest, ...gax.CallOption) (*genprotopb.Session, error)
 	GetSession(context.Context, *genprotopb.GetSessionRequest, ...gax.CallOption) (*genprotopb.Session, error)
 	ListSessions(context.Context, *genprotopb.ListSessionsRequest, ...gax.CallOption) *SessionIterator
@@ -107,6 +108,16 @@ type internalTestingClient interface {
 	ListTests(context.Context, *genprotopb.ListTestsRequest, ...gax.CallOption) *TestIterator
 	DeleteTest(context.Context, *genprotopb.DeleteTestRequest, ...gax.CallOption) error
 	VerifyTest(context.Context, *genprotopb.VerifyTestRequest, ...gax.CallOption) (*genprotopb.VerifyTestResponse, error)
+	ListLocations(context.Context, *locationpb.ListLocationsRequest, ...gax.CallOption) *LocationIterator
+	GetLocation(context.Context, *locationpb.GetLocationRequest, ...gax.CallOption) (*locationpb.Location, error)
+	SetIamPolicy(context.Context, *iampb.SetIamPolicyRequest, ...gax.CallOption) (*iampb.Policy, error)
+	GetIamPolicy(context.Context, *iampb.GetIamPolicyRequest, ...gax.CallOption) (*iampb.Policy, error)
+	TestIamPermissions(context.Context, *iampb.TestIamPermissionsRequest, ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error)
+	ListOperations(context.Context, *longrunningpb.ListOperationsRequest, ...gax.CallOption) *OperationIterator
+	GetOperation(context.Context, *longrunningpb.GetOperationRequest, ...gax.CallOption) (*longrunningpb.Operation, error)
+	DeleteOperation(context.Context, *longrunningpb.DeleteOperationRequest, ...gax.CallOption) error
+	CancelOperation(context.Context, *longrunningpb.CancelOperationRequest, ...gax.CallOption) error
+	WaitOperation(context.Context, *longrunningpb.WaitOperationRequest, ...gax.CallOption) (*longrunningpb.Operation, error)
 }
 
 // TestingClient is a client for interacting with Client Libraries Showcase API.

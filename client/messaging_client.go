@@ -181,6 +181,7 @@ func defaultMessagingCallOptions() *MessagingCallOptions {
 type internalMessagingClient interface {
 	Close() error
 	setGoogleClientInfo(...string)
+	Connection() *grpc.ClientConn
 	CreateRoom(context.Context, *genprotopb.CreateRoomRequest, ...gax.CallOption) (*genprotopb.Room, error)
 	GetRoom(context.Context, *genprotopb.GetRoomRequest, ...gax.CallOption) (*genprotopb.Room, error)
 	UpdateRoom(context.Context, *genprotopb.UpdateRoomRequest, ...gax.CallOption) (*genprotopb.Room, error)
@@ -192,9 +193,20 @@ type internalMessagingClient interface {
 	DeleteBlurb(context.Context, *genprotopb.DeleteBlurbRequest, ...gax.CallOption) error
 	ListBlurbs(context.Context, *genprotopb.ListBlurbsRequest, ...gax.CallOption) *BlurbIterator
 	SearchBlurbs(context.Context, *genprotopb.SearchBlurbsRequest, ...gax.CallOption) (*SearchBlurbsOperation, error)
+	SearchBlurbsOperation(name string) *SearchBlurbsOperation
 	StreamBlurbs(context.Context, *genprotopb.StreamBlurbsRequest, ...gax.CallOption) (genprotopb.Messaging_StreamBlurbsClient, error)
 	SendBlurbs(context.Context, ...gax.CallOption) (genprotopb.Messaging_SendBlurbsClient, error)
 	Connect(context.Context, ...gax.CallOption) (genprotopb.Messaging_ConnectClient, error)
+	ListLocations(context.Context, *locationpb.ListLocationsRequest, ...gax.CallOption) *LocationIterator
+	GetLocation(context.Context, *locationpb.GetLocationRequest, ...gax.CallOption) (*locationpb.Location, error)
+	SetIamPolicy(context.Context, *iampb.SetIamPolicyRequest, ...gax.CallOption) (*iampb.Policy, error)
+	GetIamPolicy(context.Context, *iampb.GetIamPolicyRequest, ...gax.CallOption) (*iampb.Policy, error)
+	TestIamPermissions(context.Context, *iampb.TestIamPermissionsRequest, ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error)
+	ListOperations(context.Context, *longrunningpb.ListOperationsRequest, ...gax.CallOption) *OperationIterator
+	GetOperation(context.Context, *longrunningpb.GetOperationRequest, ...gax.CallOption) (*longrunningpb.Operation, error)
+	DeleteOperation(context.Context, *longrunningpb.DeleteOperationRequest, ...gax.CallOption) error
+	CancelOperation(context.Context, *longrunningpb.CancelOperationRequest, ...gax.CallOption) error
+	WaitOperation(context.Context, *longrunningpb.WaitOperationRequest, ...gax.CallOption) (*longrunningpb.Operation, error)
 }
 
 // MessagingClient is a client for interacting with Client Libraries Showcase API.

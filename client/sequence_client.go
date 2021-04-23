@@ -102,9 +102,20 @@ func defaultSequenceCallOptions() *SequenceCallOptions {
 type internalSequenceClient interface {
 	Close() error
 	setGoogleClientInfo(...string)
+	Connection() *grpc.ClientConn
 	CreateSequence(context.Context, *genprotopb.CreateSequenceRequest, ...gax.CallOption) (*genprotopb.Sequence, error)
 	GetSequenceReport(context.Context, *genprotopb.GetSequenceReportRequest, ...gax.CallOption) (*genprotopb.SequenceReport, error)
 	AttemptSequence(context.Context, *genprotopb.AttemptSequenceRequest, ...gax.CallOption) error
+	ListLocations(context.Context, *locationpb.ListLocationsRequest, ...gax.CallOption) *LocationIterator
+	GetLocation(context.Context, *locationpb.GetLocationRequest, ...gax.CallOption) (*locationpb.Location, error)
+	SetIamPolicy(context.Context, *iampb.SetIamPolicyRequest, ...gax.CallOption) (*iampb.Policy, error)
+	GetIamPolicy(context.Context, *iampb.GetIamPolicyRequest, ...gax.CallOption) (*iampb.Policy, error)
+	TestIamPermissions(context.Context, *iampb.TestIamPermissionsRequest, ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error)
+	ListOperations(context.Context, *longrunningpb.ListOperationsRequest, ...gax.CallOption) *OperationIterator
+	GetOperation(context.Context, *longrunningpb.GetOperationRequest, ...gax.CallOption) (*longrunningpb.Operation, error)
+	DeleteOperation(context.Context, *longrunningpb.DeleteOperationRequest, ...gax.CallOption) error
+	CancelOperation(context.Context, *longrunningpb.CancelOperationRequest, ...gax.CallOption) error
+	WaitOperation(context.Context, *longrunningpb.WaitOperationRequest, ...gax.CallOption) (*longrunningpb.Operation, error)
 }
 
 // SequenceClient is a client for interacting with Client Libraries Showcase API.

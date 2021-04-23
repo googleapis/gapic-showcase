@@ -117,11 +117,22 @@ func defaultIdentityCallOptions() *IdentityCallOptions {
 type internalIdentityClient interface {
 	Close() error
 	setGoogleClientInfo(...string)
+	Connection() *grpc.ClientConn
 	CreateUser(context.Context, *genprotopb.CreateUserRequest, ...gax.CallOption) (*genprotopb.User, error)
 	GetUser(context.Context, *genprotopb.GetUserRequest, ...gax.CallOption) (*genprotopb.User, error)
 	UpdateUser(context.Context, *genprotopb.UpdateUserRequest, ...gax.CallOption) (*genprotopb.User, error)
 	DeleteUser(context.Context, *genprotopb.DeleteUserRequest, ...gax.CallOption) error
 	ListUsers(context.Context, *genprotopb.ListUsersRequest, ...gax.CallOption) *UserIterator
+	ListLocations(context.Context, *locationpb.ListLocationsRequest, ...gax.CallOption) *LocationIterator
+	GetLocation(context.Context, *locationpb.GetLocationRequest, ...gax.CallOption) (*locationpb.Location, error)
+	SetIamPolicy(context.Context, *iampb.SetIamPolicyRequest, ...gax.CallOption) (*iampb.Policy, error)
+	GetIamPolicy(context.Context, *iampb.GetIamPolicyRequest, ...gax.CallOption) (*iampb.Policy, error)
+	TestIamPermissions(context.Context, *iampb.TestIamPermissionsRequest, ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error)
+	ListOperations(context.Context, *longrunningpb.ListOperationsRequest, ...gax.CallOption) *OperationIterator
+	GetOperation(context.Context, *longrunningpb.GetOperationRequest, ...gax.CallOption) (*longrunningpb.Operation, error)
+	DeleteOperation(context.Context, *longrunningpb.DeleteOperationRequest, ...gax.CallOption) error
+	CancelOperation(context.Context, *longrunningpb.CancelOperationRequest, ...gax.CallOption) error
+	WaitOperation(context.Context, *longrunningpb.WaitOperationRequest, ...gax.CallOption) (*longrunningpb.Operation, error)
 }
 
 // IdentityClient is a client for interacting with Client Libraries Showcase API.
