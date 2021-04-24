@@ -304,7 +304,11 @@ func extractPath(template gomodel.PathTemplate, insideVariable bool) (string, []
 				return "", nil, err
 
 			}
-			part = fmt.Sprintf("{%s:%s}", seg.Value, subParts)
+
+			// Here we convert the proto-cased (snake-cased) field path to be JSON-cased
+			// (lower-camel-cased) so that we can keep the resttools.Populate*Field*)_
+			// functions simple, only dealing with JSON-cased field names,
+			part = fmt.Sprintf("{%s:%s}", resttools.ToDottedLowerCamel(seg.Value), subParts)
 			allVariables = append(allVariables, seg.Value)
 		}
 		parts[idx] = part

@@ -15,8 +15,10 @@
 package resttools
 
 import (
+	"strings"
 	"sync"
 
+	"github.com/iancoleman/strcase"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -70,6 +72,15 @@ func (jm *JSONMarshalOptions) Restore() {
 	jm.current = jm.saved
 	jm.saved = nil
 	jm.mu.Unlock()
+}
+
+// ToDottedLowerCamel converts each segment of a dot-delimited field path to be individually lower-camel cased; the dots are preserved.
+func ToDottedLowerCamel(fieldPath string) string {
+	parts := strings.Split(fieldPath, ".")
+	for idx, segment := range parts {
+		parts[idx] = strcase.ToLowerCamel(segment)
+	}
+	return strings.Join(parts, ".")
 }
 
 func init() {

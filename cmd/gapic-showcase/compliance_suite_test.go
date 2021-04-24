@@ -277,7 +277,7 @@ func prepRepeatDataTestsQueryParams(request *genproto.RepeatRequest, exclude map
 		if exclude["info"] || exclude["info."+key] || !condition {
 			return
 		}
-		queryParams = append(queryParams, fmt.Sprintf("info.%s=%s", key, value))
+		queryParams = append(queryParams, fmt.Sprintf("info.%s=%s", resttools.ToDottedLowerCamel(key), value))
 	}
 
 	addParam("f_string", len(info.GetFString()) > 0, url.QueryEscape(info.GetFString()))
