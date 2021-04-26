@@ -25,7 +25,7 @@ import (
 
 // PopulateSingularFields sets the fields within protoMessage to the values provided in
 // fieldValues. The fields and values are provided as a map of field paths to the string
-// representation of their values. The fields paths can refer to fields nested arbitrarily deep
+// representation of their values. The field paths can refer to fields nested arbitrarily deep
 // within protoMessage; each path element must be lower-camel-cased. This returns an error if any
 // field path is not valid or if any value can't be parsed into the correct data type for the field.
 func PopulateSingularFields(protoMessage proto.Message, fieldValues map[string]string) error {
@@ -187,6 +187,11 @@ func parseBool(asString string) (bool, error) {
 	}
 }
 
+// findFieldByProtoName queries `fields` for the unique field whose lower-camel-cased name is given
+// by `fieldName` and returns the corresponding FieldDescriptor or nil if none can be found. This
+// returns an error if more than one entry in `fields` has the same lower-camel-cased field
+// representations (as would occur, for example, for fields with proto names `foo5_bar` and
+// `foo_5_bar`).
 func findProtoFieldByJSONName(fieldName string, fields protoreflect.FieldDescriptors) (result protoreflect.FieldDescriptor, err error) {
 	if ToDottedLowerCamel(fieldName) != fieldName {
 		return nil, fmt.Errorf("field name %q is not lower-camel-cased", fieldName)

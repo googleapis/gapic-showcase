@@ -74,7 +74,7 @@ func (jm *JSONMarshalOptions) Restore() {
 	jm.mu.Unlock()
 }
 
-// ToDottedLowerCamel converts each segment of a dot-delimited field path to be individually lower-camel cased; the dots are preserved.
+// ToDottedLowerCamel converts each segment of a dot-delimited fieldPath to be individually lower-camel-cased; the dots are preserved.
 func ToDottedLowerCamel(fieldPath string) string {
 	parts := strings.Split(fieldPath, ".")
 	for idx, segment := range parts {

@@ -325,6 +325,8 @@ func prepQueryString(queryParams []string) string {
 	return queryString
 }
 
+// queryStringCaser is a convenience function type taking a string and returning its representation
+// under a particular casing scheme.
 type queryStringCaser func(string) string
 
 var queryStringLowerCamelCaser, queryStringSnakeCaser queryStringCaser

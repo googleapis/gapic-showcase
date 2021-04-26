@@ -127,7 +127,7 @@ func prepRepeatDataBodyInfoNegativeTestSnakeCasedFieldNames(request *genproto.Re
 
 func prepRepeatDataQueryNegativeTestSnakeCasedFieldNames(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
 	name = "Compliance.RepeatDataQuery#NegativeTestSnakeCasedFieldNames"
-	queryParams := prepRepeatDataTestsQueryParams(request, nil, queryStringSnakeCaser)
+	queryParams := prepRepeatDataTestsQueryParams(request, nil, queryStringSnakeCaser) // this should cause an error
 	queryString := prepQueryString(queryParams)
 	return name, "GET", "/v1beta1/repeat:query" + queryString, body, err
 }

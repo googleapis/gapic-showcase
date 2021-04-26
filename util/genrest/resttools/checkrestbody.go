@@ -28,10 +28,8 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-type jsonPayload map[string]interface{}
-
 // CheckRESTBody verifies that any enum fields in message are properly represented in the JSON
-// payload carried by jsonReader: the fields must be either absent or have string values.
+// payload carried by jsonReader: the fields must be either absent or have lower-camel-cased names.
 func CheckRESTBody(jsonReader io.Reader, message protoreflect.Message) error {
 	jsonBytes, err := ioutil.ReadAll(jsonReader)
 	if err != nil {
@@ -180,6 +178,9 @@ func computeEnumFields(message protoreflect.MessageDescriptor, currentPath []pro
 	}
 	return results
 }
+
+// jsonPayload is used for unmarshaling arbitrary JSON.
+type jsonPayload map[string]interface{}
 
 // protoEnumFields is a list of fields paths (themselves represented as a list of nested field
 // names) which represent enum fields. This is used to memoize calls to GetEnumFields.
