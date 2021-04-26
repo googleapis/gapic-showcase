@@ -106,10 +106,6 @@ jobs:
       run: go test ./...
     - name: Run server coverage
       run: go test ./server/... -coverprofile=coverage.txt -covermode=atomic
-    - uses: codecov/codecov-action@v1
-      with:
-        files: ./coverage.txt
-        flags: unittests
   probes:
     needs: regenerate
     runs-on: ubuntu-latest
