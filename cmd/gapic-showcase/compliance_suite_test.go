@@ -29,6 +29,7 @@ import (
 	"github.com/googleapis/gapic-showcase/server/genproto"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
+	"github.com/iancoleman/strcase"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
@@ -268,16 +269,17 @@ func prepRepeatDataPathTrailingResourceTest(request *genproto.RepeatRequest) (ve
 // except for those whose proto name (relative to request.info) are present in the `exclude` map
 // with a value of `true`.
 func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map[string]bool) string {
-	return prepQueryString(prepRepeatDataTestsQueryParams(request, exclude))
+	return prepQueryString(prepRepeatDataTestsQueryParams(request, exclude, queryStringLowerCamelCaser))
 }
-func prepRepeatDataTestsQueryParams(request *genproto.RepeatRequest, exclude map[string]bool) []string {
+
+func prepRepeatDataTestsQueryParams(request *genproto.RepeatRequest, exclude map[string]bool, caser queryStringCaser) []string {
 	info := request.GetInfo()
 	queryParams := []string{}
 	addParam := func(key string, condition bool, value string) {
 		if exclude["info"] || exclude["info."+key] || !condition {
 			return
 		}
-		queryParams = append(queryParams, fmt.Sprintf("info.%s=%s", resttools.ToDottedLowerCamel(key), value))
+		queryParams = append(queryParams, fmt.Sprintf("info.%s=%s", caser(key), value))
 	}
 
 	addParam("f_string", len(info.GetFString()) > 0, url.QueryEscape(info.GetFString()))
@@ -321,4 +323,13 @@ func prepQueryString(queryParams []string) string {
 	}
 
 	return queryString
+}
+
+type queryStringCaser func(string) string
+
+var queryStringLowerCamelCaser, queryStringSnakeCaser queryStringCaser
+
+func init() {
+	queryStringLowerCamelCaser = resttools.ToDottedLowerCamel
+	queryStringSnakeCaser = strcase.ToSnake
 }
