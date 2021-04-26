@@ -180,16 +180,13 @@ func NewComplianceClient(ctx context.Context, opts ...option.ClientOption) (*Com
 		disableDeadlines: disableDeadlines,
 		complianceClient: genprotopb.NewComplianceClient(connPool),
 		CallOptions:      &client.CallOptions,
+		operationsClient: longrunningpb.NewOperationsClient(connPool),
+		iamPolicyClient:  iampb.NewIAMPolicyClient(connPool),
+		locationsClient:  locationpb.NewLocationsClient(connPool),
 	}
 	c.setGoogleClientInfo()
 
 	client.internalComplianceClient = c
-
-	c.operationsClient = longrunningpb.NewOperationsClient(connPool)
-
-	c.iamPolicyClient = iampb.NewIAMPolicyClient(connPool)
-
-	c.locationsClient = locationpb.NewLocationsClient(connPool)
 
 	return &client, nil
 }

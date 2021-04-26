@@ -182,16 +182,13 @@ func NewSequenceClient(ctx context.Context, opts ...option.ClientOption) (*Seque
 		disableDeadlines: disableDeadlines,
 		sequenceClient:   genprotopb.NewSequenceServiceClient(connPool),
 		CallOptions:      &client.CallOptions,
+		operationsClient: longrunningpb.NewOperationsClient(connPool),
+		iamPolicyClient:  iampb.NewIAMPolicyClient(connPool),
+		locationsClient:  locationpb.NewLocationsClient(connPool),
 	}
 	c.setGoogleClientInfo()
 
 	client.internalSequenceClient = c
-
-	c.operationsClient = longrunningpb.NewOperationsClient(connPool)
-
-	c.iamPolicyClient = iampb.NewIAMPolicyClient(connPool)
-
-	c.locationsClient = locationpb.NewLocationsClient(connPool)
 
 	return &client, nil
 }

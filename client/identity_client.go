@@ -200,16 +200,13 @@ func NewIdentityClient(ctx context.Context, opts ...option.ClientOption) (*Ident
 		disableDeadlines: disableDeadlines,
 		identityClient:   genprotopb.NewIdentityClient(connPool),
 		CallOptions:      &client.CallOptions,
+		operationsClient: longrunningpb.NewOperationsClient(connPool),
+		iamPolicyClient:  iampb.NewIAMPolicyClient(connPool),
+		locationsClient:  locationpb.NewLocationsClient(connPool),
 	}
 	c.setGoogleClientInfo()
 
 	client.internalIdentityClient = c
-
-	c.operationsClient = longrunningpb.NewOperationsClient(connPool)
-
-	c.iamPolicyClient = iampb.NewIAMPolicyClient(connPool)
-
-	c.locationsClient = locationpb.NewLocationsClient(connPool)
 
 	return &client, nil
 }

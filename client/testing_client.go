@@ -186,16 +186,13 @@ func NewTestingClient(ctx context.Context, opts ...option.ClientOption) (*Testin
 		disableDeadlines: disableDeadlines,
 		testingClient:    genprotopb.NewTestingClient(connPool),
 		CallOptions:      &client.CallOptions,
+		operationsClient: longrunningpb.NewOperationsClient(connPool),
+		iamPolicyClient:  iampb.NewIAMPolicyClient(connPool),
+		locationsClient:  locationpb.NewLocationsClient(connPool),
 	}
 	c.setGoogleClientInfo()
 
 	client.internalTestingClient = c
-
-	c.operationsClient = longrunningpb.NewOperationsClient(connPool)
-
-	c.iamPolicyClient = iampb.NewIAMPolicyClient(connPool)
-
-	c.locationsClient = locationpb.NewLocationsClient(connPool)
 
 	return &client, nil
 }

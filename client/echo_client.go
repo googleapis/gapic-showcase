@@ -234,6 +234,9 @@ func NewEchoClient(ctx context.Context, opts ...option.ClientOption) (*EchoClien
 		disableDeadlines: disableDeadlines,
 		echoClient:       genprotopb.NewEchoClient(connPool),
 		CallOptions:      &client.CallOptions,
+		operationsClient: longrunningpb.NewOperationsClient(connPool),
+		iamPolicyClient:  iampb.NewIAMPolicyClient(connPool),
+		locationsClient:  locationpb.NewLocationsClient(connPool),
 	}
 	c.setGoogleClientInfo()
 
@@ -250,12 +253,6 @@ func NewEchoClient(ctx context.Context, opts ...option.ClientOption) (*EchoClien
 		return nil, err
 	}
 	c.LROClient = &client.LROClient
-	c.operationsClient = longrunningpb.NewOperationsClient(connPool)
-
-	c.iamPolicyClient = iampb.NewIAMPolicyClient(connPool)
-
-	c.locationsClient = locationpb.NewLocationsClient(connPool)
-
 	return &client, nil
 }
 

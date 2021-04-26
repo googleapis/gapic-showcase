@@ -287,6 +287,9 @@ func NewMessagingClient(ctx context.Context, opts ...option.ClientOption) (*Mess
 		disableDeadlines: disableDeadlines,
 		messagingClient:  genprotopb.NewMessagingClient(connPool),
 		CallOptions:      &client.CallOptions,
+		operationsClient: longrunningpb.NewOperationsClient(connPool),
+		iamPolicyClient:  iampb.NewIAMPolicyClient(connPool),
+		locationsClient:  locationpb.NewLocationsClient(connPool),
 	}
 	c.setGoogleClientInfo()
 
@@ -303,12 +306,6 @@ func NewMessagingClient(ctx context.Context, opts ...option.ClientOption) (*Mess
 		return nil, err
 	}
 	c.LROClient = &client.LROClient
-	c.operationsClient = longrunningpb.NewOperationsClient(connPool)
-
-	c.iamPolicyClient = iampb.NewIAMPolicyClient(connPool)
-
-	c.locationsClient = locationpb.NewLocationsClient(connPool)
-
 	return &client, nil
 }
 
