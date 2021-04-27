@@ -18,6 +18,7 @@
 package genrest
 
 import (
+	"bytes"
 	"context"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
@@ -43,14 +44,21 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 	request := &genprotopb.CreateSessionRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var bodyField genprotopb.Session
+	var jsonReader bytes.Buffer
+	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes := make([]byte, r.ContentLength)
-	if _, err := r.Body.Read(rBytes); err != nil && err != io.EOF {
+	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
 
 	if err := resttools.FromJSON().Unmarshal(rBytes, &bodyField); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body into request field 'session': %s", err)
+		return
+	}
+
+	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
 	}
 	request.Session = &bodyField
