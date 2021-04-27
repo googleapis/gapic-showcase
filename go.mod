@@ -7,6 +7,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/googleapis/grpc-fallback-go v0.1.4
 	github.com/gorilla/mux v1.8.0
+	github.com/iancoleman/strcase v0.1.3
 	github.com/soheilhy/cmux v0.1.5
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.7.1
