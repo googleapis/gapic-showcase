@@ -1,5 +1,17 @@
 # Release History
 
+### v0.14.0 / 2021-04-27
+- Fix collision between operation helper for `Echo.Wait` and generated mixin `Operations.WaitOpertation`
+- REST endpoints: ensure enum values are received as string values
+- REST endpoints: ensure full body responses
+- Rest endpoints: enforce lower-camel-cased field names in request bodies and query params
+- fix windows binary upload
+- fix go vet/lint warnings
+- pin Go version in CI
+- fix release asset version
+- add Code of Conduct
+- add `SECURITY.md`
+
 ### v0.13.0 / 2021-02-24
 - Auto-generate REST endpoints for Showcase services via `genrest` (partial)
 - Add Compliance service for generators to use to test REST-transcoding their
