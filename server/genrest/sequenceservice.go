@@ -44,14 +44,21 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 	request := &genprotopb.CreateSequenceRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var bodyField genprotopb.Sequence
+	var jsonReader bytes.Buffer
+	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes := make([]byte, r.ContentLength)
-	if _, err := r.Body.Read(rBytes); err != nil && err != io.EOF {
+	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
 
 	if err := resttools.FromJSON().Unmarshal(rBytes, &bodyField); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body into request field 'sequence': %s", err)
+		return
+	}
+
+	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
 		return
 	}
 	request.Sequence = &bodyField
