@@ -48,51 +48,51 @@ func TestCheckRESTBody(t *testing.T) {
 	}{
 		{
 			label: "normal case",
-			json:  `{"f_string": "hi", "f_kingdom": "FUNGI"}`,
+			json:  `{"fString": "hi", "fKingdom": "FUNGI"}`,
 		},
 		{
 			label: "normal case, optional field",
-			json:  `{"f_string": "hi", "p_kingdom": "FUNGI"}`,
+			json:  `{"fString": "hi", "pKingdom": "FUNGI"}`,
 		},
 		{
 			label: "normal case, nested message, optional field",
-			json:  `{"f_string": "hi", "f_child": {"p_continent": "AFRICA"}}`,
+			json:  `{"fString": "hi", "fChild": {"pContinent": "AFRICA"}}`,
 		},
 		{
 			label: "normal case, nested optional message",
-			json:  `{"f_string": "hi", "p_child": {"f_continent": "AFRICA"}}`,
+			json:  `{"fString": "hi", "pChild": {"fContinent": "AFRICA"}}`,
 		},
 		{
 			label: "normal case, no enum",
-			json:  `{"f_string": "hi"}`,
+			json:  `{"fString": "hi"}`,
 		},
 		{
 			label: "random string does not fail",
-			json:  `{"f_string": "hi", "f_kingdom": "MONACO"}`,
+			json:  `{"fString": "hi", "fKingdom": "MONACO"}`,
 		},
 		{
 			label:     "numeric enum",
-			json:      `{"f_string": "hi", "f_kingdom": 56}`,
+			json:      `{"fString": "hi", "fKingdom": 56}`,
 			wantError: true,
 		},
 		{
 			label:     "numeric optional enum",
-			json:      `{"f_string": "hi", "p_kingdom": 57}`,
+			json:      `{"fString": "hi", "pKingdom": 57}`,
 			wantError: true,
 		},
 		{
 			label:     "stringy numeric enum",
-			json:      `{"f_string": "hi", "f_kingdom": "56"}`,
+			json:      `{"fString": "hi", "fKingdom": "56"}`,
 			wantError: true,
 		},
 		{
 			label:     "stringy optional numeric enum",
-			json:      `{"f_string": "hi", "f_kingdom": "57"}`,
+			json:      `{"fString": "hi", "fKingdom": "57"}`,
 			wantError: true,
 		},
 		{
 			label:     "stringy number+letter enum",
-			json:      `{"f_string": "hi", "f_kingdom": "56Abacus"}`,
+			json:      `{"fString": "hi", "fKingdom": "56Abacus"}`,
 			wantError: false,
 		},
 	} {

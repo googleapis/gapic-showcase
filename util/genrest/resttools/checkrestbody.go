@@ -21,30 +21,54 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
+	"github.com/iancoleman/strcase"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 // CheckRESTBody verifies that any enum fields in message are properly represented in the JSON
-// payload carried by jsonReader: the fields must be either absent or have string values.
+// payload carried by jsonReader: the fields must be either absent or have lower-camel-cased names.
 func CheckRESTBody(jsonReader io.Reader, message protoreflect.Message) error {
 	jsonBytes, err := ioutil.ReadAll(jsonReader)
 	if err != nil {
 		return err
 	}
+
+	var payload jsonPayload
+	json.Unmarshal(jsonBytes, &payload)
+
+	if err := CheckFieldNames(payload); err != nil {
+		return err
+	}
+
 	enumFields := GetEnumFields(message)
-	return CheckJSONEnumFields(jsonBytes, enumFields)
+	return CheckJSONEnumFields(payload, enumFields)
+}
+
+// CheckFieldNames checks that the field names in the JSON request body are properly formatted
+// (lower-camel-cased).
+func CheckFieldNames(payload jsonPayload) error {
+	for fieldName, value := range payload {
+		rune, _ := utf8.DecodeRuneInString(fieldName)
+		if strings.ContainsAny(fieldName, "_- ") || !unicode.IsLower(rune) {
+			return fmt.Errorf("%s field name is not lower-camel-cased; probably want be %q", fieldName, strcase.ToLowerCamel(fieldName))
+		}
+		if nested, ok := value.(map[string]interface{}); ok {
+			if err := CheckFieldNames(nested); err != nil {
+				return fmt.Errorf("%s.%s", fieldName, err)
+			}
+		}
+	}
+	return nil
 }
 
 // CheckJSONEnumFields verifies that each of the fields listed in fieldsToCheck, presumably all
-// referring to enum fields, are encoded correctly in jsonBytes, meaning that the field is absent or
-// its value is a string. Each element of fieldsToCheck is a qualified proto field name represented
-// as a sequence of simple protoreflect.Name.
-func CheckJSONEnumFields(jsonBytes []byte, fieldsToCheck [][]protoreflect.Name) error {
-	// Ref: https://michaelheap.com/golang-encodedecode-arbitrary-json/
-
-	var payload map[string]interface{}
-	json.Unmarshal(jsonBytes, &payload)
+// referring to enum fields, are encoded correctly in the parsed JSON payload, meaning that the
+// field is absent or its value is a string. Each element of fieldsToCheck is a qualified proto
+// field name represented as a sequence of simple protoreflect.Name.
+func CheckJSONEnumFields(payload jsonPayload, fieldsToCheck [][]protoreflect.Name) error {
 	badFields := []string{}
 	for _, fieldPath := range fieldsToCheck {
 		if field, ok := CheckEnum(payload, fieldPath); !ok {
@@ -63,19 +87,19 @@ func CheckJSONEnumFields(jsonBytes []byte, fieldsToCheck [][]protoreflect.Name) 
 // boolean that is true only if either fieldPath is not present or if its value is a string. This
 // means that if fieldPath is a path to an enum field, the boolean will be false if the enum is
 // encoded in the payload using a non-string representation.
-func CheckEnum(payload map[string]interface{}, fieldPath []protoreflect.Name) (fieldName string, ok bool) {
+func CheckEnum(payload jsonPayload, fieldPath []protoreflect.Name) (fieldName string, ok bool) {
 	nameParts := []string{}
 	last := len(fieldPath) - 1
 	var value string
 	var found, isString bool
 	for idx, pathSegment := range fieldPath {
-		segment := string(pathSegment)
+		segment := strcase.ToLowerCamel(string(pathSegment))
 		nameParts = append(nameParts, segment)
 
 		// TODO: For repeated fields, will need to recurse. Consider denoting repeated fields by appending a "*" to the pathSegment
 
 		if idx < last {
-			payload, found = payload[segment].(map[string]interface{})
+			payload, found = payload[segment].(jsonPayload)
 			if !found {
 				// Some elements of the field path are not populated
 				break
@@ -154,6 +178,9 @@ func computeEnumFields(message protoreflect.MessageDescriptor, currentPath []pro
 	}
 	return results
 }
+
+// jsonPayload is used for unmarshaling arbitrary JSON.
+type jsonPayload map[string]interface{}
 
 // protoEnumFields is a list of fields paths (themselves represented as a list of nested field
 // names) which represent enum fields. This is used to memoize calls to GetEnumFields.
