@@ -13,7 +13,7 @@ git checkout -b v{VERSION}
 go run ./util/cmd/bump_version --{TYPE}
 ```
 
-3. Update the CHANGELOG.md file with the changes made since the last release including the version in the heading for the changes. Please note that the version must start with the character `v` in order to match the git tag that will be pushed in a later step.
+3. Update the CHANGELOG.md file with the changes made since the last release including the version in the heading for the changes. Please note that the version must start with the character `v` in order to match the git tag that will be pushed in a later step. You can get the list of PRs from your local git commit history on the `master` branch, or from GitHub by using the the query `is:pr merged:>=YYYY-MM-DD` (where the date refers to the _last_ release date).
 
 4. Create a pull request for this release merging the version branch into master.
 
@@ -26,5 +26,5 @@ git pull origin master
 6. Create a tag for the version and push. The automated release will take over from here. Please note that version tags should start with the character `v`.
 ```sh
 git tag v{VERSION}
-git push --tags
+git push origin v{VERSION}
 ```
