@@ -125,6 +125,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				source.P("  }")
 
 			case gomodel.BodyFieldSingle:
+				fileImports["bytes"] = ""
 				fileImports["io"] = ""
 
 				// TODO: Ensure this works when the specified field is a scalar. We
@@ -132,14 +133,21 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				// case.
 				source.P("  // Intentional: Field values in the URL path override those set in the body.")
 				source.P("  var %s %s.%s", handler.RequestBodyFieldVariable, handler.RequestBodyFieldPackage, handler.RequestBodyFieldType)
+				source.P("  var jsonReader bytes.Buffer")
+				source.P("  bodyReader := io.TeeReader(r.Body, &jsonReader)")
 				source.P("  rBytes := make([]byte, r.ContentLength)")
-				source.P("  if _, err := r.Body.Read(rBytes); err != nil && err != io.EOF {")
+				source.P("  if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {")
 				source.P(`    backend.Error(w, http.StatusBadRequest, "error reading body content: %%s", err)`)
 				source.P("    return")
 				source.P("  }")
 				source.P("")
 				source.P("  if err := resttools.FromJSON().Unmarshal(rBytes, &%s); err != nil {", handler.RequestBodyFieldVariable)
 				source.P(`    backend.Error(w, http.StatusBadRequest, "error reading body into request field '%s': %%s", err)`, handler.RequestBodyFieldProtoName)
+				source.P("    return")
+				source.P("  }")
+				source.P("")
+				source.P("  if err := resttools.CheckRESTBody(&jsonReader, %s.ProtoReflect()); err != nil {", handler.RequestVariable)
+				source.P(`    backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %%s", err)`)
 				source.P("    return")
 				source.P("  }")
 				source.P("  %s.%s = &%s", handler.RequestVariable, handler.RequestBodyFieldName, handler.RequestBodyFieldVariable)
@@ -296,7 +304,11 @@ func extractPath(template gomodel.PathTemplate, insideVariable bool) (string, []
 				return "", nil, err
 
 			}
-			part = fmt.Sprintf("{%s:%s}", seg.Value, subParts)
+
+			// Here we convert the proto-cased (snake-cased) field path to be JSON-cased
+			// (lower-camel-cased) so that we can keep the resttools.Populate*Field*()
+			// functions simple, only dealing with JSON-cased field names,
+			part = fmt.Sprintf("{%s:%s}", resttools.ToDottedLowerCamel(seg.Value), subParts)
 			allVariables = append(allVariables, seg.Value)
 		}
 		parts[idx] = part

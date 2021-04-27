@@ -28,6 +28,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/gapic-showcase/server/genproto"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
+	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
+	"github.com/iancoleman/strcase"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
@@ -43,6 +45,9 @@ func TestComplianceSuite(t *testing.T) {
 	}
 	server.Start()
 	defer server.Close()
+
+	resttools.JSONMarshaler.Replace(nil)
+	defer resttools.JSONMarshaler.Restore()
 
 	// Set handlers for each test case. When GAPIC generator tests do this, they should have
 	// each of their handlers invoking the correct GAPIC library method for the Showcase API.
@@ -152,13 +157,13 @@ type prepRepeatDataTestFunc func(request *genproto.RepeatRequest) (verb string, 
 
 func prepRepeatDataBodyTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
 	name = "Compliance.RepeatDataBody"
-	bodyBytes, err := protojson.Marshal(request)
+	bodyBytes, err := resttools.ToJSON().Marshal(request)
 	return name, "POST", "/v1beta1/repeat:body", string(bodyBytes), err
 }
 
 func prepRepeatDataBodyInfoTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
 	name = "Compliance.RepeatDataBodyInfo"
-	bodyBytes, err := protojson.Marshal(request.Info)
+	bodyBytes, err := resttools.ToJSON().Marshal(request.Info)
 	queryString := prepRepeatDataTestsQueryString(request, map[string]bool{"info": true})
 	_ = bodyBytes
 	return name, "POST", "/v1beta1/repeat:bodyinfo" + queryString, string(bodyBytes), err
@@ -264,16 +269,17 @@ func prepRepeatDataPathTrailingResourceTest(request *genproto.RepeatRequest) (ve
 // except for those whose proto name (relative to request.info) are present in the `exclude` map
 // with a value of `true`.
 func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map[string]bool) string {
-	return prepQueryString(prepRepeatDataTestsQueryParams(request, exclude))
+	return prepQueryString(prepRepeatDataTestsQueryParams(request, exclude, queryStringLowerCamelCaser))
 }
-func prepRepeatDataTestsQueryParams(request *genproto.RepeatRequest, exclude map[string]bool) []string {
+
+func prepRepeatDataTestsQueryParams(request *genproto.RepeatRequest, exclude map[string]bool, caser queryStringCaser) []string {
 	info := request.GetInfo()
 	queryParams := []string{}
 	addParam := func(key string, condition bool, value string) {
 		if exclude["info"] || exclude["info."+key] || !condition {
 			return
 		}
-		queryParams = append(queryParams, fmt.Sprintf("info.%s=%s", key, value))
+		queryParams = append(queryParams, fmt.Sprintf("info.%s=%s", caser(key), value))
 	}
 
 	addParam("f_string", len(info.GetFString()) > 0, url.QueryEscape(info.GetFString()))
@@ -317,4 +323,15 @@ func prepQueryString(queryParams []string) string {
 	}
 
 	return queryString
+}
+
+// queryStringCaser is a convenience function type taking a string and returning its representation
+// under a particular casing scheme.
+type queryStringCaser func(string) string
+
+var queryStringLowerCamelCaser, queryStringSnakeCaser queryStringCaser
+
+func init() {
+	queryStringLowerCamelCaser = resttools.ToDottedLowerCamel
+	queryStringSnakeCaser = strcase.ToSnake
 }
