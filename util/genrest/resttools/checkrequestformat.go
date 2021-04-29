@@ -70,7 +70,7 @@ func CheckFieldNames(payload jsonPayload) error {
 	for fieldName, value := range payload {
 		rune, _ := utf8.DecodeRuneInString(fieldName)
 		if strings.ContainsAny(fieldName, "_- ") || !unicode.IsLower(rune) {
-			return fmt.Errorf("%s field name is not lower-camel-cased; probably want be %q", fieldName, strcase.ToLowerCamel(fieldName))
+			return fmt.Errorf("%s field name is not lower-camel-cased; probably want be %q (BodyFieldNameIncorrectlyCasedError)", fieldName, strcase.ToLowerCamel(fieldName))
 		}
 		if nested, ok := value.(map[string]interface{}); ok {
 			if err := CheckFieldNames(nested); err != nil {

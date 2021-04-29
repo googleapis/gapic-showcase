@@ -16,6 +16,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -41,7 +42,7 @@ func TestComplianceSuiteErrors(t *testing.T) {
 
 	restRPCs := map[string][]prepRepeatDataNegativeTestFunc{
 		"Compliance.RepeatDataBodyInfo": {
-			prepRepeatDataBodyInfoNegativeTestRepeatedFields,
+			prepRepeatDataBodyInfoNegativeTestInvalidFields,
 			prepRepeatDataBodyInfoNegativeTestSnakeCasedFieldNames,
 		},
 		"Compliance.RepeatDataQuery": {
@@ -68,7 +69,7 @@ func TestComplianceSuiteErrors(t *testing.T) {
 
 				for _, rpcPrep := range restTest {
 
-					prepName, verb, path, requestBody, _, err := rpcPrep(requestProto)
+					prepName, verb, path, requestBody, expect, err := rpcPrep(requestProto)
 					if err != nil {
 						t.Errorf("%s error: %s", errorPrefix, err)
 					}
@@ -90,15 +91,19 @@ func TestComplianceSuiteErrors(t *testing.T) {
 					}
 
 					// Check for unsuccessful response.
-					//
-					// TODO: Make error checking more robust, since right now
-					// the error could be due to a different cause. Idea:
-					// include an ErrorName in the http response body and check
-					// for that against the expected value (which can be
-					// returned by rpcPrep)
 					if got, notWant := httpResponse.StatusCode, http.StatusOK; got == notWant {
-						t.Errorf("%s response code: got %d, notWant %d  name:%q\n   %s %s\nbody: %s\n----------------------------------------\n",
+						t.Errorf("%s response code: got %d, notWant %d  name:%q\n   %s %s\nrequest body: %s\n----------------------------------------\n",
 							errorPrefix, got, notWant, prepName, verb, server.URL+path, requestBody)
+						continue
+					}
+
+					body, err := ioutil.ReadAll(httpResponse.Body)
+					if err != nil {
+						t.Fatalf("%s could not read response body: %s", errorPrefix, err)
+					}
+					if got, want := string(body), expect; !strings.Contains(got, want) {
+						t.Errorf("%s response body: wanted response to include %q, but instead got: %q   name:%q\n   %s %s\nrequest body: %s\n----------------------------------------\n",
+							errorPrefix, want, got, prepName, verb, server.URL+path, requestBody)
 					}
 				}
 			}
@@ -108,14 +113,14 @@ func TestComplianceSuiteErrors(t *testing.T) {
 
 type prepRepeatDataNegativeTestFunc func(request *genproto.RepeatRequest) (verb string, name string, path string, body string, expect string, err error)
 
-func prepRepeatDataBodyInfoNegativeTestRepeatedFields(request *genproto.RepeatRequest) (verb string, name string, path string, body string, expect string, err error) {
+func prepRepeatDataBodyInfoNegativeTestInvalidFields(request *genproto.RepeatRequest) (verb string, name string, path string, body string, expect string, err error) {
 	resttools.JSONMarshaler.Replace(nil)
 	defer resttools.JSONMarshaler.Restore()
 
-	name = "Compliance.RepeatDataBodyInfo#NegativeTestRepeatedFields"
+	name = "Compliance.RepeatDataBodyInfo#NegativeTestInvalidFields"
 	bodyBytes, err := resttools.ToJSON().Marshal(request.Info)
 	queryString := prepRepeatDataTestsQueryString(request, nil) // purposefully repeats query params, which should cause an error
-	return name, "POST", "/v1beta1/repeat:bodyinfo" + queryString, string(bodyBytes), "", err
+	return name, "POST", "/v1beta1/repeat:bodyinfo" + queryString, string(bodyBytes), "(QueryParamsInvalidFieldError)", err
 }
 
 func prepRepeatDataBodyInfoNegativeTestSnakeCasedFieldNames(request *genproto.RepeatRequest) (verb string, name string, path string, body string, expect string, err error) {
@@ -131,20 +136,20 @@ func prepRepeatDataBodyInfoNegativeTestSnakeCasedFieldNames(request *genproto.Re
 	name = "Compliance.RepeatDataBodyInfo#NegativeTestSnakeCasedFieldNames"
 	request.Info.FString += name
 	bodyBytes, err := resttools.ToJSON().Marshal(request.Info)
-	return name, "POST", "/v1beta1/repeat:bodyinfo", string(bodyBytes), "", err
+	return name, "POST", "/v1beta1/repeat:bodyinfo", string(bodyBytes), "(BodyFieldNameIncorrectlyCasedError)", err
 }
 
 func prepRepeatDataQueryNegativeTestSnakeCasedFieldNames(request *genproto.RepeatRequest) (verb string, name string, path string, body string, expect string, err error) {
 	name = "Compliance.RepeatDataQuery#NegativeTestSnakeCasedFieldNames"
 	queryParams := prepRepeatDataTestsQueryParams(request, nil, queryStringSnakeCaser) // this should cause an error
 	queryString := prepQueryString(queryParams)
-	return name, "GET", "/v1beta1/repeat:query" + queryString, body, "", err
+	return name, "GET", "/v1beta1/repeat:query" + queryString, body, "(QueryParameterNameIncorrectlyCasedError)", err
 }
 
 func prepRepeatDataQueryNegativeTestNumericEnums(request *genproto.RepeatRequest) (verb string, name string, path string, body string, expect string, err error) {
 	name = "Compliance.RepeatDataQuery#NegativeTestNumericEnums"
 	info := request.GetInfo()
-	badQueryParam := fmt.Sprintf("f_kingdom=%d", info.GetFKingdom()) // purposefully use a number, which should cause an error
+	badQueryParam := fmt.Sprintf("info.fKingdom=%d", info.GetFKingdom()) // purposefully use a number, which should cause an error
 
 	// We clear the field so we don't set the same query param correctly below. This change
 	// modifies the request, but since these tests only check that calls fail, we never need to
@@ -153,13 +158,13 @@ func prepRepeatDataQueryNegativeTestNumericEnums(request *genproto.RepeatRequest
 	queryParams := append(prepRepeatDataTestsQueryParams(request, nil, queryStringLowerCamelCaser), badQueryParam)
 
 	queryString := prepQueryString(queryParams)
-	return name, "GET", "/v1beta1/repeat:query" + queryString, body, "", err
+	return name, "GET", "/v1beta1/repeat:query" + queryString, body, "(EnumValueNotStringError)", err
 }
 
 func prepRepeatDataQueryNegativeTestNumericOptionalEnums(request *genproto.RepeatRequest) (verb string, name string, path string, body string, expect string, err error) {
 	name = "Compliance.RepeatDataQuery#NegativeTestNumericOptionalEnums"
 	info := request.GetInfo()
-	badQueryParam := fmt.Sprintf("p_kingdom=%d", info.GetPKingdom()) // purposefully use a number, which should cause an error
+	badQueryParam := fmt.Sprintf("info.pKingdom=%d", info.GetPKingdom()) // purposefully use a number, which should cause an error
 
 	// We clear the field so we don't set the same query param correctly below. This change
 	// modifies the request, but since these tests only check that calls fail, we never need to
@@ -168,7 +173,7 @@ func prepRepeatDataQueryNegativeTestNumericOptionalEnums(request *genproto.Repea
 	queryParams := append(prepRepeatDataTestsQueryParams(request, nil, queryStringLowerCamelCaser), badQueryParam)
 
 	queryString := prepQueryString(queryParams)
-	return name, "GET", "/v1beta1/repeat:query" + queryString, body, "", err
+	return name, "GET", "/v1beta1/repeat:query" + queryString, body, "(EnumValueNotStringError)", err
 }
 
 func prepRepeatDataSimplePathNegativeTestEnum(request *genproto.RepeatRequest) (verb string, name string, path string, body string, expect string, err error) {
@@ -195,5 +200,5 @@ func prepRepeatDataSimplePathNegativeTestEnum(request *genproto.RepeatRequest) (
 	path = fmt.Sprintf("/v1beta1/repeat/%s:simplepath", strings.Join(pathParts, "/"))
 
 	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
-	return name, "GET", path + queryString, body, "", err
+	return name, "GET", path + queryString, body, "(EnumValueNotStringError)", err
 }
