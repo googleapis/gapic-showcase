@@ -89,6 +89,8 @@ func TestComplianceSuite(t *testing.T) {
 					t.Errorf("%s error creating request: %s", errorPrefix, err)
 					continue
 				}
+				resttools.PopulateRequestHeaders(httpRequest)
+
 				httpResponse, err := http.DefaultClient.Do(httpRequest)
 				if err != nil {
 					t.Errorf("%s error issuing call: %s", errorPrefix, err)

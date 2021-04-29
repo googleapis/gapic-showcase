@@ -82,6 +82,7 @@ func TestComplianceSuiteErrors(t *testing.T) {
 						t.Errorf("%s error creating request: %s", errorPrefix, err)
 						continue
 					}
+					resttools.PopulateRequestHeaders(httpRequest)
 					httpResponse, err := http.DefaultClient.Do(httpRequest)
 					if err != nil {
 						t.Errorf("%s error issuing call: %s", errorPrefix, err)
@@ -89,6 +90,12 @@ func TestComplianceSuiteErrors(t *testing.T) {
 					}
 
 					// Check for unsuccessful response.
+					//
+					// TODO: Make error checking more robust, since right now
+					// the error could be due to a different cause. Idea:
+					// include an ErrorName in the http response body and check
+					// for that against the expected value (which can be
+					// returned by rpcPrep)
 					if got, notWant := httpResponse.StatusCode, http.StatusOK; got == notWant {
 						t.Errorf("%s response code: got %d, notWant %d  name:%q\n   %s %s\nbody: %s\n----------------------------------------\n",
 							errorPrefix, got, notWant, prepName, verb, server.URL+path, requestBody)
