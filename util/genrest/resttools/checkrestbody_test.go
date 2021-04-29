@@ -15,6 +15,7 @@
 package resttools
 
 import (
+	"net/http"
 	"reflect"
 	"strings"
 	"testing"
@@ -44,6 +45,7 @@ func TestCheckRESTBody(t *testing.T) {
 	for idx, testCase := range []struct {
 		label     string
 		json      string
+		header    http.Header // nil means standard headers
 		wantError bool
 	}{
 		{
@@ -97,7 +99,16 @@ func TestCheckRESTBody(t *testing.T) {
 		},
 	} {
 		complianceData := &genprotopb.ComplianceData{}
-		if err := CheckRESTBody(strings.NewReader(testCase.json), complianceData.ProtoReflect()); (err != nil) != testCase.wantError {
+		request, err := http.NewRequest("POST", "showcase.foo.com", strings.NewReader(testCase.json))
+		if err != nil {
+			t.Fatalf("test case %d[%q] could not create request: %s", idx, testCase.label, err)
+
+		}
+		request.Header = testCase.header
+		if request.Header == nil {
+			PopulateRequestHeaders(request)
+		}
+		if err := CheckRESTBody(request.Body, request.Header, complianceData.ProtoReflect()); (err != nil) != testCase.wantError {
 			t.Errorf("test case %d[%q] text enum encoding: expected error==%v, got: %v", idx, testCase.label, testCase.wantError, err)
 		}
 	}

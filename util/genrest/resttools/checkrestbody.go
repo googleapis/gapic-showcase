@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"strconv"
 	"strings"
 	"unicode"
@@ -30,7 +31,11 @@ import (
 
 // CheckRESTBody verifies that any enum fields in message are properly represented in the JSON
 // payload carried by jsonReader: the fields must be either absent or have lower-camel-cased names.
-func CheckRESTBody(jsonReader io.Reader, message protoreflect.Message) error {
+func CheckRESTBody(jsonReader io.Reader, bodyHeader http.Header, message protoreflect.Message) error {
+	if content, ok := bodyHeader[headerNameContentType]; !ok || len(content) != 1 || content[0] != headerValueContentTypeJSON {
+		return fmt.Errorf("did not find expected HTTP header %q: %q", headerNameContentType, headerValueContentTypeJSON)
+	}
+
 	jsonBytes, err := ioutil.ReadAll(jsonReader)
 	if err != nil {
 		return err

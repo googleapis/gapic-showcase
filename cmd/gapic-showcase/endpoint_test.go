@@ -138,6 +138,8 @@ func TestRESTCalls(t *testing.T) {
 			t.Fatal(err)
 		}
 
+		resttools.PopulateRequestHeaders(request)
+
 		response, err := http.DefaultClient.Do(request)
 		if err != nil {
 			jsonOptions.Restore()
