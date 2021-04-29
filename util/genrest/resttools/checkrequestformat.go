@@ -29,11 +29,15 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-// CheckRequestFormat verifies that any enum fields in message are properly represented in the JSON
-// payload carried by jsonReader: the fields must be either absent or have lower-camel-cased names.
-func CheckRequestFormat(jsonReader io.Reader, bodyHeader http.Header, message protoreflect.Message) error {
-	if content, ok := bodyHeader[headerNameContentType]; !ok || len(content) != 1 || content[0] != headerValueContentTypeJSON {
-		return fmt.Errorf("did not find expected HTTP header %q: %q", headerNameContentType, headerValueContentTypeJSON)
+// CheckRequestFormat verifies that the incoming request has the correct format in its body (via jsonReader) and in its HTTP headers.
+func CheckRequestFormat(jsonReader io.Reader, header http.Header, message protoreflect.Message) error {
+	if jsonReader == nil {
+		// TODO: above this if-statement, check for headers needed by all requests, not just those with a body
+		return nil
+	}
+
+	if err := CheckContentType(header); err != nil {
+		return err
 	}
 
 	jsonBytes, err := ioutil.ReadAll(jsonReader)
@@ -50,6 +54,14 @@ func CheckRequestFormat(jsonReader io.Reader, bodyHeader http.Header, message pr
 
 	enumFields := GetEnumFields(message)
 	return CheckJSONEnumFields(payload, enumFields)
+}
+
+// CheckContentType checks header to ensure the expected JSON content type is specified.
+func CheckContentType(header http.Header) error {
+	if content, ok := header[headerNameContentType]; !ok || len(content) != 1 || !strings.HasPrefix(strings.ToLower(strings.TrimSpace(content[0])), headerValueContentTypeJSON) {
+		return fmt.Errorf("(HeaderContentTypeError) did not find expected HTTP header %q: %q", headerNameContentType, headerValueContentTypeJSON)
+	}
+	return nil
 }
 
 // CheckFieldNames checks that the field names in the JSON request body are properly formatted

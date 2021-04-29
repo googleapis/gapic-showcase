@@ -115,7 +115,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				source.P("  }")
 				source.P("")
 				source.P("  if err := resttools.CheckRequestFormat(&jsonReader, r.Header, %s.ProtoReflect()); err != nil {", handler.RequestVariable)
-				source.P(`    backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %%s", err)`)
+				source.P(`    backend.Error(w, http.StatusBadRequest, "REST request failed format check: %%s", err)`)
 				source.P("    return")
 				source.P("  }")
 				source.P("")
@@ -147,12 +147,18 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				source.P("  }")
 				source.P("")
 				source.P("  if err := resttools.CheckRequestFormat(&jsonReader, r.Header, %s.ProtoReflect()); err != nil {", handler.RequestVariable)
-				source.P(`    backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %%s", err)`)
+				source.P(`    backend.Error(w, http.StatusBadRequest, "REST request failed format check: %%s", err)`)
 				source.P("    return")
 				source.P("  }")
 				source.P("  %s.%s = &%s", handler.RequestVariable, handler.RequestBodyFieldName, handler.RequestBodyFieldVariable)
 				source.P("")
 				excludedQueryParams = append(excludedQueryParams, handler.RequestBodyFieldProtoName)
+
+			default:
+				source.P("  if err := resttools.CheckRequestFormat(nil, r.Header, %s.ProtoReflect()); err != nil {", handler.RequestVariable)
+				source.P(`    backend.Error(w, http.StatusBadRequest, "REST request failed format check: %%s", err)`)
+				source.P("    return")
+				source.P("  }")
 			}
 
 			source.P("  if err := resttools.PopulateSingularFields(%s, urlPathParams); err != nil {", handler.RequestVariable)
