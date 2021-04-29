@@ -41,7 +41,7 @@ func TestComputeEnumFields(t *testing.T) {
 	}
 }
 
-func TestCheckRESTBody(t *testing.T) {
+func TestCheckRequestFormat(t *testing.T) {
 	for idx, testCase := range []struct {
 		label     string
 		json      string
@@ -108,7 +108,7 @@ func TestCheckRESTBody(t *testing.T) {
 		if request.Header == nil {
 			PopulateRequestHeaders(request)
 		}
-		if err := CheckRESTBody(request.Body, request.Header, complianceData.ProtoReflect()); (err != nil) != testCase.wantError {
+		if err := CheckRequestFormat(request.Body, request.Header, complianceData.ProtoReflect()); (err != nil) != testCase.wantError {
 			t.Errorf("test case %d[%q] text enum encoding: expected error==%v, got: %v", idx, testCase.label, testCase.wantError, err)
 		}
 	}
