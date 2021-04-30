@@ -83,8 +83,8 @@ service Compliance {
 
 message RepeatRequest {
   string name = 1;
-  optional string data_set = 3;
   ComplianceData info = 2;
+  optional bool server_verify = 3;
 }
 
 message RepeatResponse {

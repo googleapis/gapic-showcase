@@ -19,57 +19,100 @@ import (
 	_ "embed"
 	"fmt"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 //go:embed compliance_suite.json
 var complianceSuiteBytes []byte
 
+// Test method with no name
+// Test method with mismatched name (change name in prep function)
+// Test method with optional field explicit value 0 missing x {query,body}
+// Test method with optional field unset present x {query,body}
+
 // NewComplianceServer returns a new ComplianceServer for the Showcase API.
 func NewComplianceServer() pb.ComplianceServer {
-	// read embedded data set
-	// process into protos?
-	// store data internally (global? see how done in messaging)
-
-	fmt.Printf("loaded compliance suite: size %d, starts with %q\n", len(complianceSuiteBytes), string(complianceSuiteBytes[0:100]))
-
-	return &complianceServerImpl{
-		waiter:               server.GetWaiterInstance(),
-		complianceSuiteBytes: complianceSuiteBytes,
+	server := &complianceServerImpl{
+		waiter: server.GetWaiterInstance(),
 	}
+
+	suite := &pb.ComplianceSuite{}
+	if err := protojson.Unmarshal(complianceSuiteBytes, suite); err != nil {
+		suite = nil
+	}
+	server.indexTestingRequests(suite)
+
+	return server
 }
 
 type complianceServerImpl struct {
-	waiter               server.Waiter
-	complianceSuiteBytes []byte
+	waiter          server.Waiter
+	testingRequests map[string]*pb.RepeatRequest
 }
 
-func (s *complianceServerImpl) Repeat(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
+// indexTestingRequests creates a map by request name of the the requests in the compliance test
+// suite, for eay retrieval later.
+func (csi *complianceServerImpl) indexTestingRequests(suite *pb.ComplianceSuite) {
+	csi.testingRequests = make(map[string]*pb.RepeatRequest)
+	for _, group := range suite.GetGroup() {
+		for _, requestProto := range group.GetRequests() {
+			csi.testingRequests[requestProto.GetName()] = requestProto
+		}
+	}
+}
+
+// requestMatchesExpectations returns an error iff the received request asks for server verification and its
+// contents do not match a known suite testing request with the same name.
+func (csi *complianceServerImpl) requestMatchesExpectation(received *pb.RepeatRequest) error {
+	if !received.GetServerVerify() {
+		return nil
+	}
+
+	name := received.GetName()
+	expectedRequest, ok := csi.testingRequests[name]
+	if !ok {
+		return fmt.Errorf("(ComplianceSuiteRequestNotFoundError) compliance suite does not contain a request %q", name)
+	}
+
+	if diff := cmp.Diff(received.GetInfo(), expectedRequest.GetInfo(), cmp.Comparer(proto.Equal)); diff != "" {
+		return fmt.Errorf("(ComplianceSuiteRequestMismatchError) contents of request %q do not match test suite", name)
+	}
+
+	return nil
+}
+
+func (csi *complianceServerImpl) Repeat(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
 	echoTrailers(ctx)
+	if err := csi.requestMatchesExpectation(in); err != nil {
+		return nil, err
+	}
 	return &pb.RepeatResponse{Info: in.GetInfo()}, nil
 }
 
-func (s *complianceServerImpl) RepeatDataBody(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
-	return s.Repeat(ctx, in)
+func (csi *complianceServerImpl) RepeatDataBody(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
+	return csi.Repeat(ctx, in)
 }
 
-func (s *complianceServerImpl) RepeatDataBodyInfo(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
-	return s.Repeat(ctx, in)
+func (csi *complianceServerImpl) RepeatDataBodyInfo(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
+	return csi.Repeat(ctx, in)
 }
 
-func (s *complianceServerImpl) RepeatDataQuery(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
-	return s.Repeat(ctx, in)
+func (csi *complianceServerImpl) RepeatDataQuery(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
+	return csi.Repeat(ctx, in)
 }
 
-func (s *complianceServerImpl) RepeatDataSimplePath(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
-	return s.Repeat(ctx, in)
+func (csi *complianceServerImpl) RepeatDataSimplePath(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
+	return csi.Repeat(ctx, in)
 }
 
-func (s *complianceServerImpl) RepeatDataPathResource(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
-	return s.Repeat(ctx, in)
+func (csi *complianceServerImpl) RepeatDataPathResource(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
+	return csi.Repeat(ctx, in)
 }
 
-func (s *complianceServerImpl) RepeatDataPathTrailingResource(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
-	return s.Repeat(ctx, in)
+func (csi *complianceServerImpl) RepeatDataPathTrailingResource(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
+	return csi.Repeat(ctx, in)
 }
