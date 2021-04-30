@@ -26,16 +26,13 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-//go:embed compliance_suite.json
-var complianceSuiteBytes []byte
-
 // Test method with no name
 // Test method with mismatched name (change name in prep function)
 // Test method with optional field explicit value 0 missing x {query,body}
 // Test method with optional field unset present x {query,body}
 
 // NewComplianceServer returns a new ComplianceServer for the Showcase API.
-func NewComplianceServer() pb.ComplianceServer {
+func NewComplianceServer() (pb.ComplianceServer, error) {
 	server := &complianceServerImpl{
 		waiter: server.GetWaiterInstance(),
 	}
@@ -45,8 +42,9 @@ func NewComplianceServer() pb.ComplianceServer {
 		suite = nil
 	}
 	server.indexTestingRequests(suite)
+	err := indexTestingRequests(suite)
 
-	return server
+	return server, err
 }
 
 type complianceServerImpl struct {
@@ -115,4 +113,25 @@ func (csi *complianceServerImpl) RepeatDataPathResource(ctx context.Context, in 
 
 func (csi *complianceServerImpl) RepeatDataPathTrailingResource(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
 	return csi.Repeat(ctx, in)
+}
+
+//go:embed compliance_suite.json
+var complianceSuiteBytes []byte
+
+var ComplianceSuiteRequests map[string]*pb.RepeatRequest
+
+// indexTestingRequests creates a map by request name of the the requests in the compliance test
+// suite, for eay retrieval later.
+func indexTestingRequests(suite *pb.ComplianceSuite) error {
+	ComplianceSuiteRequests = make(map[string]*pb.RepeatRequest)
+	for _, group := range suite.GetGroup() {
+		for _, requestProto := range group.GetRequests() {
+			name := requestProto.GetName()
+			if _, exists := ComplianceSuiteRequests[name]; exists {
+				return fmt.Errorf("(ComplianceServiceSetupError) multiple requests in compliance suite have name %q", name)
+			}
+			ComplianceSuiteRequests[name] = requestProto
+		}
+	}
+	return nil
 }
