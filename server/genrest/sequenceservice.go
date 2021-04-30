@@ -72,7 +72,7 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"sequence"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
-		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
 		return
 	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
@@ -128,7 +128,7 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
-		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
 		return
 	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
