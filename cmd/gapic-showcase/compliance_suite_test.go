@@ -28,6 +28,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/gapic-showcase/server/genproto"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
+	"github.com/googleapis/gapic-showcase/server/services"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	"github.com/iancoleman/strcase"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -128,6 +129,21 @@ func TestComplianceSuite(t *testing.T) {
 	}
 }
 
+func TestComplianceSuiteLoadedf(t *testing.T) {
+	if services.ComplianceSuiteStatus != services.ComplianceSuiteLoaded {
+		t.Fatalf("embedded compliance suite was not loaded: status %#v %s", services.ComplianceSuiteStatus, services.ComplianceSuiteStatusMessage)
+	}
+
+	suite, err := getCleanComplianceSuite()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if diff := cmp.Diff(suite, services.ComplianceSuite, cmp.Comparer(proto.Equal)); diff != "" {
+		t.Errorf("embedded compliance suite does not match released suite at %q", complianceSuiteFileName)
+	}
+}
+
 func complianceSuiteTestSetup() (suite *pb.ComplianceSuite, server *httptest.Server, err error) {
 	// Run the Showcase REST server locally.
 	server = httptest.NewUnstartedServer(nil)
@@ -135,20 +151,9 @@ func complianceSuiteTestSetup() (suite *pb.ComplianceSuite, server *httptest.Ser
 	restServer := newEndpointREST(nil, backend)
 	server.Config = restServer.server
 
-	// Locate, load, and unmarshal the compliance suite.
-	_, thisFile, _, _ := runtime.Caller(0)
-	suiteFile := filepath.Join(filepath.Dir(thisFile), "../../schema/google/showcase/v1beta1/compliance_suite.json")
-	jsonProto, err := ioutil.ReadFile(suiteFile)
-	if err != nil {
-		return nil, nil, fmt.Errorf("could not open suite file %q", suiteFile)
-	}
+	suite, err = getCleanComplianceSuite()
 
-	suite = &pb.ComplianceSuite{}
-	if err := protojson.Unmarshal(jsonProto, suite); err != nil {
-		return nil, nil, fmt.Errorf("error unmarshalling from json %s:\n   file: %s\n   input was: %s", err, suiteFile, jsonProto)
-	}
-
-	return suite, server, nil
+	return suite, server, err
 }
 
 // The following are helpers for TestComplianceSuite, since Showcase doesn't intrinsically define a
@@ -327,11 +332,45 @@ func prepQueryString(queryParams []string) string {
 	return queryString
 }
 
+func loadComplianceSuiteFile() (err error) {
+	if len(complianceSuiteJSON) > 0 {
+		// already loaded
+		return nil
+	}
+
+	// Locate, load
+	_, thisFile, _, _ := runtime.Caller(0)
+	complianceSuiteFileName = filepath.Join(filepath.Dir(thisFile), "../../schema/google/showcase/v1beta1/compliance_suite.json")
+	complianceSuiteJSON, err = ioutil.ReadFile(complianceSuiteFileName)
+	if err != nil {
+		return fmt.Errorf("could not open suite file %q", complianceSuiteFileName)
+	}
+	return nil
+}
+
+// getCleanComplianceSuite returns a clean copy of the compliance suite as parsed from the JSON
+// complianceSuiteFileName. This is needed because some negative tests modify requests, so we want to
+// always start with a fresh copy.
+func getCleanComplianceSuite() (*pb.ComplianceSuite, error) {
+	if err := loadComplianceSuiteFile(); err != nil {
+		return nil, err
+	}
+
+	suite := &pb.ComplianceSuite{}
+	if err := protojson.Unmarshal(complianceSuiteJSON, suite); err != nil {
+		return nil, fmt.Errorf("error unmarshalling from json %s:\n   file: %s\n   input was: %s", err, complianceSuiteFileName, complianceSuiteJSON)
+	}
+	return suite, nil
+}
+
 // queryStringCaser is a convenience function type taking a string and returning its representation
 // under a particular casing scheme.
 type queryStringCaser func(string) string
 
 var queryStringLowerCamelCaser, queryStringSnakeCaser queryStringCaser
+
+var complianceSuiteJSON []byte
+var complianceSuiteFileName string
 
 func init() {
 	queryStringLowerCamelCaser = resttools.ToDottedLowerCamel

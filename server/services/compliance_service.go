@@ -114,7 +114,7 @@ func (csi *complianceServerImpl) RepeatDataPathTrailingResource(ctx context.Cont
 //go:embed compliance_suite.json
 var complianceSuiteBytes []byte
 
-// complianceSuiteStatus contains the staus result of loading the compliance test suite
+// complianceSuiteStatus contains the status result of loading the compliance test suite
 type complianceSuiteStatus int
 
 const (
