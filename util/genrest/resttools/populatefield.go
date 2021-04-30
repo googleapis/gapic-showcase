@@ -153,7 +153,7 @@ func PopulateOneField(protoMessage proto.Message, fieldPath string, fieldValues 
 
 		case protoreflect.EnumKind:
 			if _, parseError = strconv.ParseFloat(value, 32); parseError == nil {
-				return fmt.Errorf("enum value %q for field path %q appears to be a number rather than an identifier", fieldName, fieldPath)
+				return fmt.Errorf("(EnumValueNotStringError) enum value %q for field path %q appears to be a number rather than an identifier", fieldName, fieldPath)
 			}
 			parsedValue := fieldDescriptor.Enum().Values().ByName(protoreflect.Name(value)).Number()
 			parseError, protoValue = nil, protoreflect.ValueOfEnum(parsedValue)
@@ -194,7 +194,7 @@ func parseBool(asString string) (bool, error) {
 // `foo_5_bar`).
 func findProtoFieldByJSONName(fieldName string, fields protoreflect.FieldDescriptors) (result protoreflect.FieldDescriptor, err error) {
 	if ToDottedLowerCamel(fieldName) != fieldName {
-		return nil, fmt.Errorf("field name %q is not lower-camel-cased", fieldName)
+		return nil, fmt.Errorf("(QueryParameterNameIncorrectlyCasedError)field name %q is not lower-camel-cased", fieldName)
 	}
 	numFields := fields.Len()
 	for idx := 0; idx < numFields; idx++ {

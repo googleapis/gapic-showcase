@@ -174,7 +174,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				if len(excludedQueryParams) > 0 {
 					source.P("  excludedQueryParams := %#v", excludedQueryParams)
 					source.P("  if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {")
-					source.P(`    backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %%v", duplicates)`)
+					source.P(`    backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %%v", duplicates)`)
 					source.P("    return")
 					source.P("  }")
 				}
