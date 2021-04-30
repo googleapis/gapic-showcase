@@ -135,7 +135,7 @@ func (backend *RESTBackend) HandleRepeatDataBodyInfo(w http.ResponseWriter, r *h
 	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"info"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
-		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
 		return
 	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
@@ -242,7 +242,7 @@ func (backend *RESTBackend) HandleRepeatDataSimplePath(w http.ResponseWriter, r 
 	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"info.f_string", "info.f_int32", "info.f_double", "info.f_bool", "info.f_kingdom"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
-		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
 		return
 	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
@@ -298,7 +298,7 @@ func (backend *RESTBackend) HandleRepeatDataPathResource(w http.ResponseWriter, 
 	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"info.f_string", "info.f_child.f_string", "info.f_bool"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
-		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
 		return
 	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
@@ -354,7 +354,7 @@ func (backend *RESTBackend) HandleRepeatDataPathTrailingResource(w http.Response
 	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"info.f_string", "info.f_child.f_string"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
-		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
 		return
 	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {

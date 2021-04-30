@@ -118,7 +118,7 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
-		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
 		return
 	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
@@ -237,7 +237,7 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
-		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
 		return
 	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
@@ -470,7 +470,7 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
-		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
 		return
 	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
@@ -526,7 +526,7 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
-		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
 		return
 	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
@@ -708,7 +708,7 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
-		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
 		return
 	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
@@ -764,7 +764,7 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
-		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
 		return
 	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
@@ -820,7 +820,7 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"parent"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
-		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
 		return
 	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
@@ -876,7 +876,7 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"parent"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
-		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
 		return
 	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
@@ -995,7 +995,7 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"parent"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
-		backend.Error(w, http.StatusBadRequest, " found keys that should not appear in query params: %v", duplicates)
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
 		return
 	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
