@@ -24,19 +24,23 @@ import (
 
 	"github.com/googleapis/gapic-showcase/server/genproto"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
+	"github.com/googleapis/gapic-showcase/server/services"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-// func TestComplianceSuiteVerifyErrors(t *testing.T) {
-// 	suite, server, err := complianceSuiteTestSetup()
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	server.Start()
-// 	defer server.Close()
+func TestComplianceSuiteVerifyErrors(t *testing.T) {
+	if services.ComplianceSuiteStatus != services.ComplianceSuiteLoaded {
+		t.Fatalf("compliance suite was not loaded: status %#v %s", services.ComplianceSuiteStatus, services.ComplianceSuiteStatusMessage)
+	}
+	// 	suite, server, err := complianceSuiteTestSetup()
+	// 	if err != nil {
+	// 		t.Fatal(err)
+	// 	}
+	// 	server.Start()
+	// 	defer server.Close()
 
-// }
+}
 
 func checkExpectedFailure(t *testing.T, verb, url, requestBody, failure, errorPrefix, prepName string) {
 	// Issue the request
@@ -75,7 +79,7 @@ func checkExpectedFailure(t *testing.T, verb, url, requestBody, failure, errorPr
 // ill-defined. We want Showcase to require the generators be strict in the transcoding format they
 // use.
 func TestComplianceSuiteErrors(t *testing.T) {
-	suite, server, err := complianceSuiteTestSetup()
+	masterSuite, server, err := complianceSuiteTestSetup()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,12 +99,12 @@ func TestComplianceSuiteErrors(t *testing.T) {
 		"Compliance.RepeatDataSimplePath": {prepRepeatDataSimplePathNegativeTestEnum},
 	}
 
-	for _, group := range suite.GetGroup() {
+	for groupIdx, group := range masterSuite.GetGroup() {
 		rpcsToTest := group.GetRpcs()
-		for requestIdx, requestProto := range group.GetRequests() {
+		for requestIdx, masterProto := range group.GetRequests() {
 			for rpcIdx, rpcName := range rpcsToTest {
 				errorPrefix := fmt.Sprintf("[request %d/%q: rpc %q/%d/%q]",
-					requestIdx, requestProto.GetName(), group.Name, rpcIdx, rpcName)
+					requestIdx, masterProto.GetName(), group.Name, rpcIdx, rpcName)
 
 				// Ensure that we issue only the RPCs the test suite is expecting.
 				restTest, ok := restRPCs[rpcName]
@@ -110,6 +114,15 @@ func TestComplianceSuiteErrors(t *testing.T) {
 				}
 
 				for _, rpcPrep := range restTest {
+					// since these tests may modify the request protos, get a
+					// clean request every time as the starting point, in order
+					// to prevent previous modifications from affecting the
+					// current test case
+					suite, err := getCleanComplianceSuite()
+					if err != nil {
+						t.Fatal(err)
+					}
+					requestProto := suite.GetGroup()[groupIdx].GetRequests()[requestIdx]
 
 					prepName, verb, path, requestBody, failure, err := rpcPrep(requestProto)
 					if err != nil {
