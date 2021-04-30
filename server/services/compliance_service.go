@@ -16,18 +16,33 @@ package services
 
 import (
 	"context"
+	_ "embed"
+	"fmt"
 
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 )
 
+//go:embed compliance_suite.json
+var complianceSuiteBytes []byte
+
 // NewComplianceServer returns a new ComplianceServer for the Showcase API.
 func NewComplianceServer() pb.ComplianceServer {
-	return &complianceServerImpl{waiter: server.GetWaiterInstance()}
+	// read embedded data set
+	// process into protos?
+	// store data internally (global? see how done in messaging)
+
+	fmt.Printf("loaded compliance suite: size %d, starts with %q\n", len(complianceSuiteBytes), string(complianceSuiteBytes[0:100]))
+
+	return &complianceServerImpl{
+		waiter:               server.GetWaiterInstance(),
+		complianceSuiteBytes: complianceSuiteBytes,
+	}
 }
 
 type complianceServerImpl struct {
-	waiter server.Waiter
+	waiter               server.Waiter
+	complianceSuiteBytes []byte
 }
 
 func (s *complianceServerImpl) Repeat(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {

@@ -83,6 +83,7 @@ service Compliance {
 
 message RepeatRequest {
   string name = 1;
+  optional string data_set = 3;
   ComplianceData info = 2;
 }
 
