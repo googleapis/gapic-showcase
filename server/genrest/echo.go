@@ -56,8 +56,8 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
-		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
+	if err := resttools.CheckRequestFormat(&jsonReader, r.Header, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
 
@@ -131,8 +131,8 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
-		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
+	if err := resttools.CheckRequestFormat(&jsonReader, r.Header, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
 
@@ -194,8 +194,8 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
-		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
+	if err := resttools.CheckRequestFormat(&jsonReader, r.Header, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
 
@@ -257,8 +257,8 @@ func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
-		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
+	if err := resttools.CheckRequestFormat(&jsonReader, r.Header, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
 

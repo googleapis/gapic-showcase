@@ -56,8 +56,8 @@ func (backend *RESTBackend) HandleRepeatDataBody(w http.ResponseWriter, r *http.
 		return
 	}
 
-	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
-		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
+	if err := resttools.CheckRequestFormat(&jsonReader, r.Header, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
 
@@ -120,8 +120,8 @@ func (backend *RESTBackend) HandleRepeatDataBodyInfo(w http.ResponseWriter, r *h
 		return
 	}
 
-	if err := resttools.CheckRESTBody(&jsonReader, request.ProtoReflect()); err != nil {
-		backend.Error(w, http.StatusBadRequest, "REST body '*' failed format check: %s", err)
+	if err := resttools.CheckRequestFormat(&jsonReader, r.Header, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
 	request.Info = &bodyField
@@ -178,6 +178,10 @@ func (backend *RESTBackend) HandleRepeatDataQuery(w http.ResponseWriter, r *http
 	}
 
 	request := &genprotopb.RepeatRequest{}
+	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
+		return
+	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
@@ -225,6 +229,10 @@ func (backend *RESTBackend) HandleRepeatDataSimplePath(w http.ResponseWriter, r 
 	}
 
 	request := &genprotopb.RepeatRequest{}
+	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
+		return
+	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
@@ -277,6 +285,10 @@ func (backend *RESTBackend) HandleRepeatDataPathResource(w http.ResponseWriter, 
 	}
 
 	request := &genprotopb.RepeatRequest{}
+	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
+		return
+	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
@@ -329,6 +341,10 @@ func (backend *RESTBackend) HandleRepeatDataPathTrailingResource(w http.Response
 	}
 
 	request := &genprotopb.RepeatRequest{}
+	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
+		return
+	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
 		return
