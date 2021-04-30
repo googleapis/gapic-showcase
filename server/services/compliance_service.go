@@ -32,19 +32,12 @@ import (
 // Test method with optional field unset present x {query,body}
 
 // NewComplianceServer returns a new ComplianceServer for the Showcase API.
-func NewComplianceServer() (pb.ComplianceServer, error) {
+func NewComplianceServer() pb.ComplianceServer {
 	server := &complianceServerImpl{
 		waiter: server.GetWaiterInstance(),
 	}
 
-	suite := &pb.ComplianceSuite{}
-	if err := protojson.Unmarshal(complianceSuiteBytes, suite); err != nil {
-		suite = nil
-	}
-	server.indexTestingRequests(suite)
-	err := indexTestingRequests(suite)
-
-	return server, err
+	return server
 }
 
 type complianceServerImpl struct {
@@ -69,9 +62,12 @@ func (csi *complianceServerImpl) requestMatchesExpectation(received *pb.RepeatRe
 	if !received.GetServerVerify() {
 		return nil
 	}
+	if ComplianceSuiteStatus == ComplianceSuiteError {
+		return fmt.Errorf(ComplianceSuiteStatusMessage)
+	}
 
 	name := received.GetName()
-	expectedRequest, ok := csi.testingRequests[name]
+	expectedRequest, ok := ComplianceSuiteRequests[name]
 	if !ok {
 		return fmt.Errorf("(ComplianceSuiteRequestNotFoundError) compliance suite does not contain a request %q", name)
 	}
@@ -118,20 +114,52 @@ func (csi *complianceServerImpl) RepeatDataPathTrailingResource(ctx context.Cont
 //go:embed compliance_suite.json
 var complianceSuiteBytes []byte
 
-var ComplianceSuiteRequests map[string]*pb.RepeatRequest
+// complianceSuiteStatus contains the staus result of loading the compliance test suite
+type complianceSuiteStatus int
+
+const (
+	ComplianceSuiteUninitialized complianceSuiteStatus = iota
+	ComplianceSuiteLoaded
+	ComplianceSuiteError
+)
+
+var (
+	ComplianceSuiteRequests      map[string]*pb.RepeatRequest // all requests, indexed by name
+	ComplianceSuite              *pb.ComplianceSuite
+	ComplianceSuiteStatus        complianceSuiteStatus
+	ComplianceSuiteStatusMessage string // message explaining the status
+)
 
 // indexTestingRequests creates a map by request name of the the requests in the compliance test
 // suite, for eay retrieval later.
-func indexTestingRequests(suite *pb.ComplianceSuite) error {
+func indexTestingRequests() {
+	if ComplianceSuiteStatus == ComplianceSuiteLoaded {
+		return
+	}
+
+	ComplianceSuite = &pb.ComplianceSuite{}
+	if err := protojson.Unmarshal(complianceSuiteBytes, ComplianceSuite); err != nil {
+		ComplianceSuiteStatus = ComplianceSuiteError
+		ComplianceSuiteStatusMessage = fmt.Sprintf("(ComplianceServiceReadError) could not read compliance suite file: %s", err)
+		return
+
+	}
+
 	ComplianceSuiteRequests = make(map[string]*pb.RepeatRequest)
-	for _, group := range suite.GetGroup() {
+	for _, group := range ComplianceSuite.GetGroup() {
 		for _, requestProto := range group.GetRequests() {
 			name := requestProto.GetName()
 			if _, exists := ComplianceSuiteRequests[name]; exists {
-				return fmt.Errorf("(ComplianceServiceSetupError) multiple requests in compliance suite have name %q", name)
+				ComplianceSuiteStatus = ComplianceSuiteError
+				ComplianceSuiteStatusMessage = fmt.Sprintf("(ComplianceServiceSetupError) multiple requests in compliance suite have name %q", name)
 			}
 			ComplianceSuiteRequests[name] = requestProto
 		}
 	}
-	return nil
+	ComplianceSuiteStatus = ComplianceSuiteLoaded
+	ComplianceSuiteStatusMessage = "OK"
+}
+
+func init() {
+	indexTestingRequests()
 }
