@@ -130,8 +130,24 @@ var (
 	ComplianceSuiteStatusMessage string // message explaining the status
 )
 
-// indexTestingRequests creates a map by request name of the the requests in the compliance test
-// suite, for eay retrieval later.
+// IndexComplianceSuite creates a map by request name of the the requests in the
+// suite, for easy retrieval later.
+func IndexComplianceSuite(suite *pb.ComplianceSuite) (map[string]*pb.RepeatRequest, error) {
+	indexedSuite := make(map[string]*pb.RepeatRequest)
+	for _, group := range suite.GetGroup() {
+		for _, requestProto := range group.GetRequests() {
+			name := requestProto.GetName()
+			if _, exists := indexedSuite[name]; exists {
+				return nil, fmt.Errorf("multiple requests in compliance suite have name %q", name)
+			}
+			indexedSuite[name] = requestProto
+		}
+	}
+	return indexedSuite, nil
+}
+
+// indexTestingRequests creates a map by request name of the the requests in the
+// complianceSuiteBytes, for easy retrieval later.
 func indexTestingRequests() {
 	if ComplianceSuiteStatus == ComplianceSuiteLoaded {
 		return
@@ -145,17 +161,13 @@ func indexTestingRequests() {
 
 	}
 
-	ComplianceSuiteRequests = make(map[string]*pb.RepeatRequest)
-	for _, group := range ComplianceSuite.GetGroup() {
-		for _, requestProto := range group.GetRequests() {
-			name := requestProto.GetName()
-			if _, exists := ComplianceSuiteRequests[name]; exists {
-				ComplianceSuiteStatus = ComplianceSuiteError
-				ComplianceSuiteStatusMessage = fmt.Sprintf("(ComplianceServiceSetupError) multiple requests in compliance suite have name %q", name)
-			}
-			ComplianceSuiteRequests[name] = requestProto
-		}
+	indexedSuite, err := IndexComplianceSuite(ComplianceSuite)
+	if err != nil {
+		ComplianceSuiteStatus = ComplianceSuiteError
+		ComplianceSuiteStatusMessage = fmt.Sprintf("(ComplianceServiceSetupError) %s", err)
+		return
 	}
+	ComplianceSuiteRequests = indexedSuite
 	ComplianceSuiteStatus = ComplianceSuiteLoaded
 	ComplianceSuiteStatusMessage = "OK"
 }

@@ -30,15 +30,25 @@ import (
 )
 
 func TestComplianceSuiteVerifyErrors(t *testing.T) {
-	if services.ComplianceSuiteStatus != services.ComplianceSuiteLoaded {
-		t.Fatalf("compliance suite was not loaded: status %#v %s", services.ComplianceSuiteStatus, services.ComplianceSuiteStatusMessage)
+	suite, server, err := complianceSuiteTestSetup()
+	if err != nil {
+		t.Fatal(err)
 	}
-	// 	suite, server, err := complianceSuiteTestSetup()
-	// 	if err != nil {
-	// 		t.Fatal(err)
-	// 	}
-	// 	server.Start()
-	// 	defer server.Close()
+	server.Start()
+	defer server.Close()
+
+	indexedSuite, err := services.IndexComplianceSuite(suite)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request := indexedSuite["Zero values for non-string fields"]
+	request.GetInfo().PBool = nil
+	verb, name, path, body, error := prepRepeatDataBodyTest(request)
+	if error != nil {
+		t.Fatalf("could not construct request: %s", err)
+	}
+	checkExpectedFailure(t, verb, server.URL+path, body, "", "set optional field not sent", name)
 
 }
 
