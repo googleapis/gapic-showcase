@@ -29,7 +29,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-func TestComplianceSuiteVerifyErrors(t *testing.T) {
+func TestComplianceSuiteUnexpectedFieldPresence(t *testing.T) {
 	suite, server, err := complianceSuiteTestSetup()
 	if err != nil {
 		t.Fatal(err)
@@ -42,14 +42,131 @@ func TestComplianceSuiteVerifyErrors(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	request := indexedSuite["Zero values for non-string fields"]
-	request.GetInfo().PBool = nil
-	verb, name, path, body, error := prepRepeatDataBodyTest(request)
-	if error != nil {
-		t.Fatalf("could not construct request: %s", err)
-	}
-	checkExpectedFailure(t, verb, server.URL+path, body, "", "set optional field not sent", name)
+	requestsModified := map[string]bool{}
+	for idx, testCase := range []struct {
+		name        string
+		requestName string
+		modify      requestModifier
+		subCases    map[string]prepRepeatDataTestFunc
+		failureMode string
+	}{
+		{
+			name:        "detecting requests not included in test suite",
+			requestName: "Zero values for all fields",
+			modify: func(request *pb.RepeatRequest) {
+				request.Name = "modified name"
+			},
+			subCases: map[string]prepRepeatDataTestFunc{
+				"body":  prepRepeatDataBodyTest,
+				"query": prepRepeatDataQueryTest,
+			},
+			failureMode: "(ComplianceSuiteRequestNotFoundError)",
+		},
 
+		{
+			name:        "detecting set optional bool field erroneously not sent",
+			requestName: "Zero values for all fields",
+			modify: func(request *pb.RepeatRequest) {
+				request.GetInfo().PBool = nil
+			},
+			subCases: map[string]prepRepeatDataTestFunc{
+				"body":  prepRepeatDataBodyTest,
+				"query": prepRepeatDataQueryTest,
+			},
+			failureMode: "(ComplianceSuiteRequestMismatchError)",
+		},
+		{
+			name:        "detecting unset optional bool field erroneously sent",
+			requestName: "Basic types, no optional fields",
+			modify: func(request *pb.RepeatRequest) {
+				myFalse := false
+				request.GetInfo().PBool = &myFalse
+			},
+			subCases: map[string]prepRepeatDataTestFunc{
+				"body":  prepRepeatDataBodyTest,
+				"query": prepRepeatDataQueryTest,
+			},
+			failureMode: "(ComplianceSuiteRequestMismatchError)",
+		},
+
+		{
+			name:        "detecting set optional string field erroneously not sent",
+			requestName: "Zero values for all fields",
+			modify: func(request *pb.RepeatRequest) {
+				request.GetInfo().PString = nil
+			},
+			subCases: map[string]prepRepeatDataTestFunc{
+				"body":  prepRepeatDataBodyTest,
+				"query": prepRepeatDataQueryTest,
+			},
+			failureMode: "(ComplianceSuiteRequestMismatchError)",
+		},
+		{
+			name:        "detecting unset optional string field erroneously sent",
+			requestName: "Basic types, no optional fields",
+			modify: func(request *pb.RepeatRequest) {
+				myEmpty := ""
+				request.GetInfo().PString = &myEmpty
+			},
+			subCases: map[string]prepRepeatDataTestFunc{
+				"body":  prepRepeatDataBodyTest,
+				"query": prepRepeatDataQueryTest,
+			},
+			failureMode: "(ComplianceSuiteRequestMismatchError)",
+		},
+
+		{
+			name:        "detecting set optional int32 field erroneously not sent",
+			requestName: "Zero values for all fields",
+			modify: func(request *pb.RepeatRequest) {
+				request.GetInfo().PInt32 = nil
+			},
+			subCases: map[string]prepRepeatDataTestFunc{
+				"body":  prepRepeatDataBodyTest,
+				"query": prepRepeatDataQueryTest,
+			},
+			failureMode: "(ComplianceSuiteRequestMismatchError)",
+		},
+		{
+			name:        "detecting unset optional int32 field erroneously sent",
+			requestName: "Basic types, no optional fields",
+			modify: func(request *pb.RepeatRequest) {
+				myInt := int32(0)
+				request.GetInfo().PInt32 = &myInt
+			},
+			subCases: map[string]prepRepeatDataTestFunc{
+				"body":  prepRepeatDataBodyTest,
+				"query": prepRepeatDataQueryTest,
+			},
+			failureMode: "(ComplianceSuiteRequestMismatchError)",
+		},
+	} {
+		if _, done := requestsModified[testCase.requestName]; done {
+			if suite, err = getCleanComplianceSuite(); err != nil {
+				t.Fatal(err)
+			}
+			if indexedSuite, err = services.IndexComplianceSuite(suite); err != nil {
+				t.Fatal(err)
+			}
+			requestsModified = map[string]bool{}
+		}
+		requestsModified[testCase.requestName] = true
+
+		request, ok := indexedSuite[testCase.requestName]
+		if !ok {
+			t.Fatalf("could not find request by name: %q", testCase.requestName)
+		}
+		testCase.modify(request)
+
+		for subCaseName, prep := range testCase.subCases {
+			prefix := fmt.Sprintf("[case %d: %s: %s]", idx, testCase.name, subCaseName)
+			verb, prepName, path, body, error := prep(request)
+			if error != nil {
+				t.Fatalf("%s could not construct request: %s", prefix, err)
+			}
+			checkExpectedFailure(t, verb, server.URL+path, body, testCase.failureMode, prefix, prepName)
+		}
+	}
 }
 
 func checkExpectedFailure(t *testing.T, verb, url, requestBody, failure, errorPrefix, prepName string) {
@@ -74,12 +191,13 @@ func checkExpectedFailure(t *testing.T, verb, url, requestBody, failure, errorPr
 	}
 
 	body, err := ioutil.ReadAll(httpResponse.Body)
+	httpResponse.Body.Close()
 	if err != nil {
 		t.Fatalf("%s could not read response body: %s", errorPrefix, err)
 	}
 	if got, want := string(body), failure; !strings.Contains(got, want) {
-		t.Errorf("%s response body: wanted response to include %q, but instead got: %q   name:%q\n   %s %s\nrequest body: %s\n----------------------------------------\n",
-			errorPrefix, want, got, prepName, verb, url, requestBody)
+		t.Errorf("%s response body: wanted response to include %q, but instead got: %q   (status %d) header: %v name:%q\n   %s %s\nrequest body: %s\n----------------------------------------\n",
+			errorPrefix, want, got, httpResponse.StatusCode, httpResponse.Header, prepName, verb, url, requestBody)
 	}
 
 }
@@ -240,3 +358,6 @@ func prepRepeatDataSimplePathNegativeTestEnum(request *genproto.RepeatRequest) (
 	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
 	return name, "GET", path + queryString, body, "(EnumValueNotStringError)", err
 }
+
+//requestModifer is a function that modifies a request in-place.
+type requestModifier func(*pb.RepeatRequest)

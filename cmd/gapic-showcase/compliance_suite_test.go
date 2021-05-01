@@ -75,7 +75,7 @@ func TestComplianceSuite(t *testing.T) {
 					continue
 				}
 
-				prepName, verb, path, requestBody, err := rpcPrep(requestProto)
+				verb, prepName, path, requestBody, err := rpcPrep(requestProto)
 				if err != nil {
 					t.Errorf("%s error: %s", errorPrefix, err)
 				}
@@ -165,7 +165,7 @@ type prepRepeatDataTestFunc func(request *genproto.RepeatRequest) (verb string, 
 func prepRepeatDataBodyTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
 	name = "Compliance.RepeatDataBody"
 	bodyBytes, err := resttools.ToJSON().Marshal(request)
-	return name, "POST", "/v1beta1/repeat:body", string(bodyBytes), err
+	return "POST", name, "/v1beta1/repeat:body", string(bodyBytes), err
 }
 
 func prepRepeatDataBodyInfoTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
@@ -173,13 +173,13 @@ func prepRepeatDataBodyInfoTest(request *genproto.RepeatRequest) (verb string, n
 	bodyBytes, err := resttools.ToJSON().Marshal(request.Info)
 	queryString := prepRepeatDataTestsQueryString(request, map[string]bool{"info": true})
 	_ = bodyBytes
-	return name, "POST", "/v1beta1/repeat:bodyinfo" + queryString, string(bodyBytes), err
+	return "POST", name, "/v1beta1/repeat:bodyinfo" + queryString, string(bodyBytes), err
 }
 
 func prepRepeatDataQueryTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
 	name = "Compliance.RepeatDataQuery"
 	queryString := prepRepeatDataTestsQueryString(request, nil)
-	return name, "GET", "/v1beta1/repeat:query" + queryString, body, err
+	return "GET", name, "/v1beta1/repeat:query" + queryString, body, err
 }
 
 func prepRepeatDataSimplePathTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
@@ -210,7 +210,7 @@ func prepRepeatDataSimplePathTest(request *genproto.RepeatRequest) (verb string,
 	path = fmt.Sprintf("/v1beta1/repeat/%s:simplepath", strings.Join(pathParts, "/"))
 
 	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
-	return name, "GET", path + queryString, body, err
+	return "GET", name, path + queryString, body, err
 }
 
 func prepRepeatDataPathResourceTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
@@ -240,7 +240,7 @@ func prepRepeatDataPathResourceTest(request *genproto.RepeatRequest) (verb strin
 	path = fmt.Sprintf("/v1beta1/repeat/%s:pathresource", strings.Join(pathParts, "/"))
 
 	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
-	return name, "GET", path + queryString, body, err
+	return "GET", name, path + queryString, body, err
 }
 
 func prepRepeatDataPathTrailingResourceTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
@@ -269,7 +269,7 @@ func prepRepeatDataPathTrailingResourceTest(request *genproto.RepeatRequest) (ve
 	path = fmt.Sprintf("/v1beta1/repeat/%s:pathtrailingresource", strings.Join(pathParts, "/"))
 
 	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
-	return name, "GET", path + queryString, body, err
+	return "GET", name, path + queryString, body, err
 }
 
 // prepRepeatDataTestsQueryString returns the query string containing all fields in `request.info`
@@ -282,6 +282,9 @@ func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map
 func prepRepeatDataTestsQueryParams(request *genproto.RepeatRequest, exclude map[string]bool, caser queryStringCaser) []string {
 	info := request.GetInfo()
 	queryParams := []string{}
+	if request.GetServerVerify() {
+		queryParams = append(queryParams, "serverVerify=true", fmt.Sprintf("name=%s", url.QueryEscape(request.GetName())))
+	}
 	addParam := func(key string, condition bool, value string) {
 		if exclude["info"] || exclude["info."+key] || !condition {
 			return

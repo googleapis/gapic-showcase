@@ -26,11 +26,6 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// Test method with no name
-// Test method with mismatched name (change name in prep function)
-// Test method with optional field explicit value 0 missing x {query,body}
-// Test method with optional field unset present x {query,body}
-
 // NewComplianceServer returns a new ComplianceServer for the Showcase API.
 func NewComplianceServer() pb.ComplianceServer {
 	server := &complianceServerImpl{
@@ -41,19 +36,7 @@ func NewComplianceServer() pb.ComplianceServer {
 }
 
 type complianceServerImpl struct {
-	waiter          server.Waiter
-	testingRequests map[string]*pb.RepeatRequest
-}
-
-// indexTestingRequests creates a map by request name of the the requests in the compliance test
-// suite, for eay retrieval later.
-func (csi *complianceServerImpl) indexTestingRequests(suite *pb.ComplianceSuite) {
-	csi.testingRequests = make(map[string]*pb.RepeatRequest)
-	for _, group := range suite.GetGroup() {
-		for _, requestProto := range group.GetRequests() {
-			csi.testingRequests[requestProto.GetName()] = requestProto
-		}
-	}
+	waiter server.Waiter
 }
 
 // requestMatchesExpectations returns an error iff the received request asks for server verification and its
