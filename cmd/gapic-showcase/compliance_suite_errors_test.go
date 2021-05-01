@@ -169,39 +169,6 @@ func TestComplianceSuiteUnexpectedFieldPresence(t *testing.T) {
 	}
 }
 
-func checkExpectedFailure(t *testing.T, verb, url, requestBody, failure, errorPrefix, prepName string) {
-	// Issue the request
-	httpRequest, err := http.NewRequest(verb, url, strings.NewReader(requestBody))
-	if err != nil {
-		t.Errorf("%s error creating request: %s", errorPrefix, err)
-		return
-	}
-	resttools.PopulateRequestHeaders(httpRequest)
-	httpResponse, err := http.DefaultClient.Do(httpRequest)
-	if err != nil {
-		t.Errorf("%s error issuing call: %s", errorPrefix, err)
-		return
-	}
-
-	// Check for unsuccessful response.
-	if got, notWant := httpResponse.StatusCode, http.StatusOK; got == notWant {
-		t.Errorf("%s response code: got %d, notWant %d  name:%q\n   %s %s\nrequest body: %s\n----------------------------------------\n",
-			errorPrefix, got, notWant, prepName, verb, url, requestBody)
-		return
-	}
-
-	body, err := ioutil.ReadAll(httpResponse.Body)
-	httpResponse.Body.Close()
-	if err != nil {
-		t.Fatalf("%s could not read response body: %s", errorPrefix, err)
-	}
-	if got, want := string(body), failure; !strings.Contains(got, want) {
-		t.Errorf("%s response body: wanted response to include %q, but instead got: %q   (status %d) header: %v name:%q\n   %s %s\nrequest body: %s\n----------------------------------------\n",
-			errorPrefix, want, got, httpResponse.StatusCode, httpResponse.Header, prepName, verb, url, requestBody)
-	}
-
-}
-
 // TestComplianceSuiteErrors checks for non-spec-compliant HTTP requests. Not all of these
 // conditions necessarily generate a server error in a real service, but the behavior is often
 // ill-defined. We want Showcase to require the generators be strict in the transcoding format they
@@ -357,6 +324,42 @@ func prepRepeatDataSimplePathNegativeTestEnum(request *genproto.RepeatRequest) (
 
 	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
 	return name, "GET", path + queryString, body, "(EnumValueNotStringError)", err
+}
+
+// checkExpectedFailure issues a request using the specified verb, URL, and request body. It expects
+// a failing HTTP code and a response message containing the substring in `failure`. Test errors are
+// reported using the given errorPrefix and the name prepName of the prepping function.
+func checkExpectedFailure(t *testing.T, verb, url, requestBody, failure, errorPrefix, prepName string) {
+	// Issue the request
+	httpRequest, err := http.NewRequest(verb, url, strings.NewReader(requestBody))
+	if err != nil {
+		t.Errorf("%s error creating request: %s", errorPrefix, err)
+		return
+	}
+	resttools.PopulateRequestHeaders(httpRequest)
+	httpResponse, err := http.DefaultClient.Do(httpRequest)
+	if err != nil {
+		t.Errorf("%s error issuing call: %s", errorPrefix, err)
+		return
+	}
+
+	// Check for unsuccessful response.
+	if got, notWant := httpResponse.StatusCode, http.StatusOK; got == notWant {
+		t.Errorf("%s response code: got %d, notWant %d  name:%q\n   %s %s\nrequest body: %s\n----------------------------------------\n",
+			errorPrefix, got, notWant, prepName, verb, url, requestBody)
+		return
+	}
+
+	body, err := ioutil.ReadAll(httpResponse.Body)
+	httpResponse.Body.Close()
+	if err != nil {
+		t.Fatalf("%s could not read response body: %s", errorPrefix, err)
+	}
+	if got, want := string(body), failure; !strings.Contains(got, want) {
+		t.Errorf("%s response body: wanted response to include %q, but instead got: %q   (status %d) header: %v name:%q\n   %s %s\nrequest body: %s\n----------------------------------------\n",
+			errorPrefix, want, got, httpResponse.StatusCode, httpResponse.Header, prepName, verb, url, requestBody)
+	}
+
 }
 
 //requestModifer is a function that modifies a request in-place.

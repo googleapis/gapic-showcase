@@ -144,18 +144,6 @@ func TestComplianceSuiteLoadedf(t *testing.T) {
 	}
 }
 
-func complianceSuiteTestSetup() (suite *pb.ComplianceSuite, server *httptest.Server, err error) {
-	// Run the Showcase REST server locally.
-	server = httptest.NewUnstartedServer(nil)
-	backend := createBackends()
-	restServer := newEndpointREST(nil, backend)
-	server.Config = restServer.server
-
-	suite, err = getCleanComplianceSuite()
-
-	return suite, server, err
-}
-
 // The following are helpers for TestComplianceSuite, since Showcase doesn't intrinsically define a
 // REST client. Each GAPIC generator should instead use the GAPIC it generated for the Showcase
 // API.
@@ -279,6 +267,8 @@ func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map
 	return prepQueryString(prepRepeatDataTestsQueryParams(request, exclude, queryStringLowerCamelCaser))
 }
 
+// prepRepeatDataTestsQueryParams returns the list of key=value query params based on the contents
+// of request, excluding the fields in `exclude` and using the indicated caser.
 func prepRepeatDataTestsQueryParams(request *genproto.RepeatRequest, exclude map[string]bool, caser queryStringCaser) []string {
 	info := request.GetInfo()
 	queryParams := []string{}
@@ -335,20 +325,17 @@ func prepQueryString(queryParams []string) string {
 	return queryString
 }
 
-func loadComplianceSuiteFile() (err error) {
-	if len(complianceSuiteJSON) > 0 {
-		// already loaded
-		return nil
-	}
+// complianceSuiteTestSetup sets up the compliance suite test cases configuring the servers.
+func complianceSuiteTestSetup() (suite *pb.ComplianceSuite, server *httptest.Server, err error) {
+	// Run the Showcase REST server locally.
+	server = httptest.NewUnstartedServer(nil)
+	backend := createBackends()
+	restServer := newEndpointREST(nil, backend)
+	server.Config = restServer.server
 
-	// Locate, load
-	_, thisFile, _, _ := runtime.Caller(0)
-	complianceSuiteFileName = filepath.Join(filepath.Dir(thisFile), "../../schema/google/showcase/v1beta1/compliance_suite.json")
-	complianceSuiteJSON, err = ioutil.ReadFile(complianceSuiteFileName)
-	if err != nil {
-		return fmt.Errorf("could not open suite file %q", complianceSuiteFileName)
-	}
-	return nil
+	suite, err = getCleanComplianceSuite()
+
+	return suite, server, err
 }
 
 // getCleanComplianceSuite returns a clean copy of the compliance suite as parsed from the JSON
@@ -366,14 +353,35 @@ func getCleanComplianceSuite() (*pb.ComplianceSuite, error) {
 	return suite, nil
 }
 
+// loadComplianceSuiteFile loads the exported compliance_suite.json file (under schema/) to
+// complianceSuiteJSON if it hasn't been loaded already. This is done lazily at run-time rather than
+// in init() so we can report errors.
+func loadComplianceSuiteFile() (err error) {
+	if len(complianceSuiteJSON) > 0 {
+		// already loaded
+		return nil
+	}
+
+	// Locate, load
+	_, thisFile, _, _ := runtime.Caller(0)
+	complianceSuiteFileName = filepath.Join(filepath.Dir(thisFile), "../../schema/google/showcase/v1beta1/compliance_suite.json")
+	complianceSuiteJSON, err = ioutil.ReadFile(complianceSuiteFileName)
+	if err != nil {
+		return fmt.Errorf("could not open suite file %q", complianceSuiteFileName)
+	}
+	return nil
+}
+
 // queryStringCaser is a convenience function type taking a string and returning its representation
 // under a particular casing scheme.
 type queryStringCaser func(string) string
 
 var queryStringLowerCamelCaser, queryStringSnakeCaser queryStringCaser
 
-var complianceSuiteJSON []byte
-var complianceSuiteFileName string
+var (
+	complianceSuiteJSON     []byte // the contents of the suite file
+	complianceSuiteFileName string // the name of the suite file
+)
 
 func init() {
 	queryStringLowerCamelCaser = resttools.ToDottedLowerCamel

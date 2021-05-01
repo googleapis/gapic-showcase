@@ -28,11 +28,7 @@ import (
 
 // NewComplianceServer returns a new ComplianceServer for the Showcase API.
 func NewComplianceServer() pb.ComplianceServer {
-	server := &complianceServerImpl{
-		waiter: server.GetWaiterInstance(),
-	}
-
-	return server
+	return &complianceServerImpl{waiter: server.GetWaiterInstance()}
 }
 
 type complianceServerImpl struct {
@@ -94,6 +90,7 @@ func (csi *complianceServerImpl) RepeatDataPathTrailingResource(ctx context.Cont
 	return csi.Repeat(ctx, in)
 }
 
+// complianceSuiteBytes contains the contents of the compliance suite JSON file. This requires GoO 1.16.
 //go:embed compliance_suite.json
 var complianceSuiteBytes []byte
 
