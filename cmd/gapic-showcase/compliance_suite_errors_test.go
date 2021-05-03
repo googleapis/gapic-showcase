@@ -29,6 +29,73 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
+// TestComplianceSuiteErrors checks for non-spec-compliant HTTP requests. Not all of these
+// conditions necessarily generate a server error in a real service, but the behavior is often
+// ill-defined. We want Showcase to require the generators be strict in the transcoding format they
+// use.
+func TestComplianceSuiteErrors(t *testing.T) {
+	masterSuite, server, err := complianceSuiteTestSetup()
+	if err != nil {
+		t.Fatal(err)
+	}
+	server.Start()
+	defer server.Close()
+
+	restRPCs := map[string][]prepRepeatDataNegativeTestFunc{
+		"Compliance.RepeatDataBodyInfo": {
+			prepRepeatDataBodyInfoNegativeTestInvalidFields,
+			prepRepeatDataBodyInfoNegativeTestSnakeCasedFieldNames,
+		},
+		"Compliance.RepeatDataQuery": {
+			prepRepeatDataQueryNegativeTestNumericEnums,
+			prepRepeatDataQueryNegativeTestNumericOptionalEnums,
+			prepRepeatDataQueryNegativeTestSnakeCasedFieldNames,
+		},
+		"Compliance.RepeatDataSimplePath": {prepRepeatDataSimplePathNegativeTestEnum},
+	}
+
+	for groupIdx, group := range masterSuite.GetGroup() {
+		rpcsToTest := group.GetRpcs()
+		for requestIdx, masterProto := range group.GetRequests() {
+			for rpcIdx, rpcName := range rpcsToTest {
+				errorPrefix := fmt.Sprintf("[request %d/%q: rpc %q/%d/%q]",
+					requestIdx, masterProto.GetName(), group.Name, rpcIdx, rpcName)
+
+				// Ensure that we issue only the RPCs the test suite is expecting.
+				restTest, ok := restRPCs[rpcName]
+				if !ok {
+					// we don't have a negative test for this RPC
+					continue
+				}
+
+				for _, rpcPrep := range restTest {
+					// since these tests may modify the request protos, get a
+					// clean request every time as the starting point, in order
+					// to prevent previous modifications from affecting the
+					// current test case
+					suite, err := getCleanComplianceSuite()
+					if err != nil {
+						t.Fatal(err)
+					}
+					requestProto := suite.GetGroup()[groupIdx].GetRequests()[requestIdx]
+
+					prepName, verb, path, requestBody, failure, err := rpcPrep(requestProto)
+					if err != nil {
+						t.Errorf("%s error: %s", errorPrefix, err)
+					}
+					if got, want := prepName, rpcName; !strings.HasPrefix(prepName, rpcName) {
+						t.Errorf("%s retrieved mismatched prep function: got %q, want %q", errorPrefix, got, want)
+					}
+
+					checkExpectedFailure(t, verb, server.URL+path, requestBody, failure, errorPrefix, prepName)
+				}
+			}
+		}
+	}
+}
+
+// TestComplianceSuiteUnexpectedFieldPresence checks that we detect erroneous presence/absence of
+// optional fields.
 func TestComplianceSuiteUnexpectedFieldPresence(t *testing.T) {
 	suite, server, err := complianceSuiteTestSetup()
 	if err != nil {
@@ -165,71 +232,6 @@ func TestComplianceSuiteUnexpectedFieldPresence(t *testing.T) {
 				t.Fatalf("%s could not construct request: %s", prefix, err)
 			}
 			checkExpectedFailure(t, verb, server.URL+path, body, testCase.failureMode, prefix, prepName)
-		}
-	}
-}
-
-// TestComplianceSuiteErrors checks for non-spec-compliant HTTP requests. Not all of these
-// conditions necessarily generate a server error in a real service, but the behavior is often
-// ill-defined. We want Showcase to require the generators be strict in the transcoding format they
-// use.
-func TestComplianceSuiteErrors(t *testing.T) {
-	masterSuite, server, err := complianceSuiteTestSetup()
-	if err != nil {
-		t.Fatal(err)
-	}
-	server.Start()
-	defer server.Close()
-
-	restRPCs := map[string][]prepRepeatDataNegativeTestFunc{
-		"Compliance.RepeatDataBodyInfo": {
-			prepRepeatDataBodyInfoNegativeTestInvalidFields,
-			prepRepeatDataBodyInfoNegativeTestSnakeCasedFieldNames,
-		},
-		"Compliance.RepeatDataQuery": {
-			prepRepeatDataQueryNegativeTestNumericEnums,
-			prepRepeatDataQueryNegativeTestNumericOptionalEnums,
-			prepRepeatDataQueryNegativeTestSnakeCasedFieldNames,
-		},
-		"Compliance.RepeatDataSimplePath": {prepRepeatDataSimplePathNegativeTestEnum},
-	}
-
-	for groupIdx, group := range masterSuite.GetGroup() {
-		rpcsToTest := group.GetRpcs()
-		for requestIdx, masterProto := range group.GetRequests() {
-			for rpcIdx, rpcName := range rpcsToTest {
-				errorPrefix := fmt.Sprintf("[request %d/%q: rpc %q/%d/%q]",
-					requestIdx, masterProto.GetName(), group.Name, rpcIdx, rpcName)
-
-				// Ensure that we issue only the RPCs the test suite is expecting.
-				restTest, ok := restRPCs[rpcName]
-				if !ok {
-					// we don't have a negative test for this RPC
-					continue
-				}
-
-				for _, rpcPrep := range restTest {
-					// since these tests may modify the request protos, get a
-					// clean request every time as the starting point, in order
-					// to prevent previous modifications from affecting the
-					// current test case
-					suite, err := getCleanComplianceSuite()
-					if err != nil {
-						t.Fatal(err)
-					}
-					requestProto := suite.GetGroup()[groupIdx].GetRequests()[requestIdx]
-
-					prepName, verb, path, requestBody, failure, err := rpcPrep(requestProto)
-					if err != nil {
-						t.Errorf("%s error: %s", errorPrefix, err)
-					}
-					if got, want := prepName, rpcName; !strings.HasPrefix(prepName, rpcName) {
-						t.Errorf("%s retrieved mismatched prep function: got %q, want %q", errorPrefix, got, want)
-					}
-
-					checkExpectedFailure(t, verb, server.URL+path, requestBody, failure, errorPrefix, prepName)
-				}
-			}
 		}
 	}
 }
