@@ -16,7 +16,7 @@ package services
 
 import (
 	"context"
-	_ "embed"
+	_ "embed" // for storing compliance suite data, used to verify  incoming requests
 	"fmt"
 
 	"github.com/google/go-cmp/cmp"
@@ -90,24 +90,39 @@ func (csi *complianceServerImpl) RepeatDataPathTrailingResource(ctx context.Cont
 	return csi.Repeat(ctx, in)
 }
 
-// complianceSuiteBytes contains the contents of the compliance suite JSON file. This requires GoO 1.16.
+// complianceSuiteBytes contains the contents of the compliance suite JSON file. This requires Go
+// 1.16. Note that embedding can only be applied to global variables at package scope.
 //go:embed compliance_suite.json
 var complianceSuiteBytes []byte
 
-// complianceSuiteStatus contains the status result of loading the compliance test suite
-type complianceSuiteStatus int
+// ComplianceSuiteInitStatus contains the status result of loading the compliance test suite
+type ComplianceSuiteInitStatus int
 
 const (
-	ComplianceSuiteUninitialized complianceSuiteStatus = iota
+	// ComplianceSuiteUninitialized means we have not attempted to parse the compliance suite data into services.ComplianceSuite.
+	ComplianceSuiteUninitialized ComplianceSuiteInitStatus = iota
+
+	// ComplianceSuiteLoaded means we have successfully parsed the compliance suite data into services.ComplianceSuite.
 	ComplianceSuiteLoaded
+
+	// ComplianceSuiteError means we failed parsing the compliance suite data into services.ComplianceSuite.
 	ComplianceSuiteError
 )
 
 var (
-	ComplianceSuiteRequests      map[string]*pb.RepeatRequest // all requests, indexed by name
-	ComplianceSuite              *pb.ComplianceSuite
-	ComplianceSuiteStatus        complianceSuiteStatus
-	ComplianceSuiteStatusMessage string // message explaining the status
+	// ComplianceSuite holds the protocol buffer representation of the compliance suite data.
+	ComplianceSuite *pb.ComplianceSuite
+
+	// ComplianceSuiteRequests holds all the requests in ComplianceSuite, indexed by the `name` field of the request.
+	ComplianceSuiteRequests map[string]*pb.RepeatRequest
+
+	// ComplianceSuiteStatus reports the status of loading the compliance suite data into services.ComplianceSuite.
+	ComplianceSuiteStatus ComplianceSuiteInitStatus
+
+	// ComplianceSuiteStatusMessage holds a message explaining ComplianceSuiteStatus. This is
+	// typically used to provide more information in the case
+	// ComplianceSuiteStatus==ComplianceSuiteError.
+	ComplianceSuiteStatusMessage string
 )
 
 // IndexComplianceSuite creates a map by request name of the the requests in the
