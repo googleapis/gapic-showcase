@@ -181,6 +181,8 @@ func init() {
 
 	RepeatDataQueryCmd.Flags().BoolVar(&RepeatDataQueryInput.Info.PChild.PChild.FBool, "info.p_child.p_child.f_bool", false, "")
 
+	RepeatDataQueryCmd.Flags().BoolVar(&RepeatDataQueryInput.ServerVerify, "server_verify", false, "If true, the server will verify that the received...")
+
 	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
 }

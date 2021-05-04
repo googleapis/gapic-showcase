@@ -181,6 +181,8 @@ func init() {
 
 	RepeatDataSimplePathCmd.Flags().BoolVar(&RepeatDataSimplePathInput.Info.PChild.PChild.FBool, "info.p_child.p_child.f_bool", false, "")
 
+	RepeatDataSimplePathCmd.Flags().BoolVar(&RepeatDataSimplePathInput.ServerVerify, "server_verify", false, "If true, the server will verify that the received...")
+
 	RepeatDataSimplePathCmd.Flags().StringVar(&RepeatDataSimplePathFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
 }

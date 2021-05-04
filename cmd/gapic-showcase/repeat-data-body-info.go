@@ -181,6 +181,8 @@ func init() {
 
 	RepeatDataBodyInfoCmd.Flags().BoolVar(&RepeatDataBodyInfoInput.Info.PChild.PChild.FBool, "info.p_child.p_child.f_bool", false, "")
 
+	RepeatDataBodyInfoCmd.Flags().BoolVar(&RepeatDataBodyInfoInput.ServerVerify, "server_verify", false, "If true, the server will verify that the received...")
+
 	RepeatDataBodyInfoCmd.Flags().StringVar(&RepeatDataBodyInfoFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
 }

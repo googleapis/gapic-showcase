@@ -181,6 +181,8 @@ func init() {
 
 	RepeatDataPathTrailingResourceCmd.Flags().BoolVar(&RepeatDataPathTrailingResourceInput.Info.PChild.PChild.FBool, "info.p_child.p_child.f_bool", false, "")
 
+	RepeatDataPathTrailingResourceCmd.Flags().BoolVar(&RepeatDataPathTrailingResourceInput.ServerVerify, "server_verify", false, "If true, the server will verify that the received...")
+
 	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&RepeatDataPathTrailingResourceFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
 }
