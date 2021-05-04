@@ -28,6 +28,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/gapic-showcase/server/genproto"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
+	"github.com/googleapis/gapic-showcase/server/services"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	"github.com/iancoleman/strcase"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -74,7 +75,7 @@ func TestComplianceSuite(t *testing.T) {
 					continue
 				}
 
-				prepName, verb, path, requestBody, err := rpcPrep(requestProto)
+				verb, prepName, path, requestBody, err := rpcPrep(requestProto)
 				if err != nil {
 					t.Errorf("%s error: %s", errorPrefix, err)
 				}
@@ -128,27 +129,19 @@ func TestComplianceSuite(t *testing.T) {
 	}
 }
 
-func complianceSuiteTestSetup() (suite *pb.ComplianceSuite, server *httptest.Server, err error) {
-	// Run the Showcase REST server locally.
-	server = httptest.NewUnstartedServer(nil)
-	backend := createBackends()
-	restServer := newEndpointREST(nil, backend)
-	server.Config = restServer.server
+func TestComplianceSuiteLoadedf(t *testing.T) {
+	if services.ComplianceSuiteStatus != services.ComplianceSuiteLoaded {
+		t.Fatalf("embedded compliance suite was not loaded: status %#v %s", services.ComplianceSuiteStatus, services.ComplianceSuiteStatusMessage)
+	}
 
-	// Locate, load, and unmarshal the compliance suite.
-	_, thisFile, _, _ := runtime.Caller(0)
-	suiteFile := filepath.Join(filepath.Dir(thisFile), "../../schema/google/showcase/v1beta1/compliance_suite.json")
-	jsonProto, err := ioutil.ReadFile(suiteFile)
+	suite, err := getCleanComplianceSuite()
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not open suite file %q", suiteFile)
+		t.Fatal(err)
 	}
 
-	suite = &pb.ComplianceSuite{}
-	if err := protojson.Unmarshal(jsonProto, suite); err != nil {
-		return nil, nil, fmt.Errorf("error unmarshalling from json %s:\n   file: %s\n   input was: %s", err, suiteFile, jsonProto)
+	if diff := cmp.Diff(suite, services.ComplianceSuite, cmp.Comparer(proto.Equal)); diff != "" {
+		t.Errorf("embedded compliance suite does not match released suite at %q", complianceSuiteFileName)
 	}
-
-	return suite, server, nil
 }
 
 // The following are helpers for TestComplianceSuite, since Showcase doesn't intrinsically define a
@@ -160,7 +153,7 @@ type prepRepeatDataTestFunc func(request *genproto.RepeatRequest) (verb string, 
 func prepRepeatDataBodyTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
 	name = "Compliance.RepeatDataBody"
 	bodyBytes, err := resttools.ToJSON().Marshal(request)
-	return name, "POST", "/v1beta1/repeat:body", string(bodyBytes), err
+	return "POST", name, "/v1beta1/repeat:body", string(bodyBytes), err
 }
 
 func prepRepeatDataBodyInfoTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
@@ -168,13 +161,13 @@ func prepRepeatDataBodyInfoTest(request *genproto.RepeatRequest) (verb string, n
 	bodyBytes, err := resttools.ToJSON().Marshal(request.Info)
 	queryString := prepRepeatDataTestsQueryString(request, map[string]bool{"info": true})
 	_ = bodyBytes
-	return name, "POST", "/v1beta1/repeat:bodyinfo" + queryString, string(bodyBytes), err
+	return "POST", name, "/v1beta1/repeat:bodyinfo" + queryString, string(bodyBytes), err
 }
 
 func prepRepeatDataQueryTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
 	name = "Compliance.RepeatDataQuery"
 	queryString := prepRepeatDataTestsQueryString(request, nil)
-	return name, "GET", "/v1beta1/repeat:query" + queryString, body, err
+	return "GET", name, "/v1beta1/repeat:query" + queryString, body, err
 }
 
 func prepRepeatDataSimplePathTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
@@ -205,7 +198,7 @@ func prepRepeatDataSimplePathTest(request *genproto.RepeatRequest) (verb string,
 	path = fmt.Sprintf("/v1beta1/repeat/%s:simplepath", strings.Join(pathParts, "/"))
 
 	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
-	return name, "GET", path + queryString, body, err
+	return "GET", name, path + queryString, body, err
 }
 
 func prepRepeatDataPathResourceTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
@@ -235,7 +228,7 @@ func prepRepeatDataPathResourceTest(request *genproto.RepeatRequest) (verb strin
 	path = fmt.Sprintf("/v1beta1/repeat/%s:pathresource", strings.Join(pathParts, "/"))
 
 	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
-	return name, "GET", path + queryString, body, err
+	return "GET", name, path + queryString, body, err
 }
 
 func prepRepeatDataPathTrailingResourceTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
@@ -264,7 +257,7 @@ func prepRepeatDataPathTrailingResourceTest(request *genproto.RepeatRequest) (ve
 	path = fmt.Sprintf("/v1beta1/repeat/%s:pathtrailingresource", strings.Join(pathParts, "/"))
 
 	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
-	return name, "GET", path + queryString, body, err
+	return "GET", name, path + queryString, body, err
 }
 
 // prepRepeatDataTestsQueryString returns the query string containing all fields in `request.info`
@@ -274,9 +267,14 @@ func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map
 	return prepQueryString(prepRepeatDataTestsQueryParams(request, exclude, queryStringLowerCamelCaser))
 }
 
+// prepRepeatDataTestsQueryParams returns the list of key=value query params based on the contents
+// of request, excluding the fields in `exclude` and using the indicated caser.
 func prepRepeatDataTestsQueryParams(request *genproto.RepeatRequest, exclude map[string]bool, caser queryStringCaser) []string {
 	info := request.GetInfo()
 	queryParams := []string{}
+	if request.GetServerVerify() {
+		queryParams = append(queryParams, "serverVerify=true", fmt.Sprintf("name=%s", url.QueryEscape(request.GetName())))
+	}
 	addParam := func(key string, condition bool, value string) {
 		if exclude["info"] || exclude["info."+key] || !condition {
 			return
@@ -327,11 +325,63 @@ func prepQueryString(queryParams []string) string {
 	return queryString
 }
 
+// complianceSuiteTestSetup sets up the compliance suite test cases configuring the servers.
+func complianceSuiteTestSetup() (suite *pb.ComplianceSuite, server *httptest.Server, err error) {
+	// Run the Showcase REST server locally.
+	server = httptest.NewUnstartedServer(nil)
+	backend := createBackends()
+	restServer := newEndpointREST(nil, backend)
+	server.Config = restServer.server
+
+	suite, err = getCleanComplianceSuite()
+
+	return suite, server, err
+}
+
+// getCleanComplianceSuite returns a clean copy of the compliance suite as parsed from the JSON
+// complianceSuiteFileName. This is needed because some negative tests modify requests, so we want to
+// always start with a fresh copy.
+func getCleanComplianceSuite() (*pb.ComplianceSuite, error) {
+	if err := loadComplianceSuiteFile(); err != nil {
+		return nil, err
+	}
+
+	suite := &pb.ComplianceSuite{}
+	if err := protojson.Unmarshal(complianceSuiteJSON, suite); err != nil {
+		return nil, fmt.Errorf("error unmarshalling from json %s:\n   file: %s\n   input was: %s", err, complianceSuiteFileName, complianceSuiteJSON)
+	}
+	return suite, nil
+}
+
+// loadComplianceSuiteFile loads the exported compliance_suite.json file (under schema/) to
+// complianceSuiteJSON if it hasn't been loaded already. This is done lazily at run-time rather than
+// in init() so we can report errors.
+func loadComplianceSuiteFile() (err error) {
+	if len(complianceSuiteJSON) > 0 {
+		// already loaded
+		return nil
+	}
+
+	// Locate, load
+	_, thisFile, _, _ := runtime.Caller(0)
+	complianceSuiteFileName = filepath.Join(filepath.Dir(thisFile), "../../schema/google/showcase/v1beta1/compliance_suite.json")
+	complianceSuiteJSON, err = ioutil.ReadFile(complianceSuiteFileName)
+	if err != nil {
+		return fmt.Errorf("could not open suite file %q", complianceSuiteFileName)
+	}
+	return nil
+}
+
 // queryStringCaser is a convenience function type taking a string and returning its representation
 // under a particular casing scheme.
 type queryStringCaser func(string) string
 
 var queryStringLowerCamelCaser, queryStringSnakeCaser queryStringCaser
+
+var (
+	complianceSuiteJSON     []byte // the contents of the suite file
+	complianceSuiteFileName string // the name of the suite file
+)
 
 func init() {
 	queryStringLowerCamelCaser = resttools.ToDottedLowerCamel

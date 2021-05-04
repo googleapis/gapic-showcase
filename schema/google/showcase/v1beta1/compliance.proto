@@ -84,6 +84,10 @@ service Compliance {
 message RepeatRequest {
   string name = 1;
   ComplianceData info = 2;
+
+  // If true, the server will verify that the received request matches
+  // the request with the same name in the compliance test suite.
+  bool server_verify = 3;
 }
 
 message RepeatResponse {

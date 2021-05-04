@@ -24,6 +24,7 @@ import (
 
 	"github.com/googleapis/gapic-showcase/server/genproto"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
+	"github.com/googleapis/gapic-showcase/server/services"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -33,7 +34,7 @@ import (
 // ill-defined. We want Showcase to require the generators be strict in the transcoding format they
 // use.
 func TestComplianceSuiteErrors(t *testing.T) {
-	suite, server, err := complianceSuiteTestSetup()
+	masterSuite, server, err := complianceSuiteTestSetup()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,12 +54,12 @@ func TestComplianceSuiteErrors(t *testing.T) {
 		"Compliance.RepeatDataSimplePath": {prepRepeatDataSimplePathNegativeTestEnum},
 	}
 
-	for _, group := range suite.GetGroup() {
+	for groupIdx, group := range masterSuite.GetGroup() {
 		rpcsToTest := group.GetRpcs()
-		for requestIdx, requestProto := range group.GetRequests() {
+		for requestIdx, masterProto := range group.GetRequests() {
 			for rpcIdx, rpcName := range rpcsToTest {
 				errorPrefix := fmt.Sprintf("[request %d/%q: rpc %q/%d/%q]",
-					requestIdx, requestProto.GetName(), group.Name, rpcIdx, rpcName)
+					requestIdx, masterProto.GetName(), group.Name, rpcIdx, rpcName)
 
 				// Ensure that we issue only the RPCs the test suite is expecting.
 				restTest, ok := restRPCs[rpcName]
@@ -68,8 +69,17 @@ func TestComplianceSuiteErrors(t *testing.T) {
 				}
 
 				for _, rpcPrep := range restTest {
+					// since these tests may modify the request protos, get a
+					// clean request every time as the starting point, in order
+					// to prevent previous modifications from affecting the
+					// current test case
+					suite, err := getCleanComplianceSuite()
+					if err != nil {
+						t.Fatal(err)
+					}
+					requestProto := suite.GetGroup()[groupIdx].GetRequests()[requestIdx]
 
-					prepName, verb, path, requestBody, expect, err := rpcPrep(requestProto)
+					prepName, verb, path, requestBody, failure, err := rpcPrep(requestProto)
 					if err != nil {
 						t.Errorf("%s error: %s", errorPrefix, err)
 					}
@@ -77,36 +87,151 @@ func TestComplianceSuiteErrors(t *testing.T) {
 						t.Errorf("%s retrieved mismatched prep function: got %q, want %q", errorPrefix, got, want)
 					}
 
-					// Issue the request
-					httpRequest, err := http.NewRequest(verb, server.URL+path, strings.NewReader(requestBody))
-					if err != nil {
-						t.Errorf("%s error creating request: %s", errorPrefix, err)
-						continue
-					}
-					resttools.PopulateRequestHeaders(httpRequest)
-					httpResponse, err := http.DefaultClient.Do(httpRequest)
-					if err != nil {
-						t.Errorf("%s error issuing call: %s", errorPrefix, err)
-						continue
-					}
-
-					// Check for unsuccessful response.
-					if got, notWant := httpResponse.StatusCode, http.StatusOK; got == notWant {
-						t.Errorf("%s response code: got %d, notWant %d  name:%q\n   %s %s\nrequest body: %s\n----------------------------------------\n",
-							errorPrefix, got, notWant, prepName, verb, server.URL+path, requestBody)
-						continue
-					}
-
-					body, err := ioutil.ReadAll(httpResponse.Body)
-					if err != nil {
-						t.Fatalf("%s could not read response body: %s", errorPrefix, err)
-					}
-					if got, want := string(body), expect; !strings.Contains(got, want) {
-						t.Errorf("%s response body: wanted response to include %q, but instead got: %q   name:%q\n   %s %s\nrequest body: %s\n----------------------------------------\n",
-							errorPrefix, want, got, prepName, verb, server.URL+path, requestBody)
-					}
+					checkExpectedFailure(t, verb, server.URL+path, requestBody, failure, errorPrefix, prepName)
 				}
 			}
+		}
+	}
+}
+
+// TestComplianceSuiteUnexpectedFieldPresence checks that we detect erroneous presence/absence of
+// optional fields.
+func TestComplianceSuiteUnexpectedFieldPresence(t *testing.T) {
+	suite, server, err := complianceSuiteTestSetup()
+	if err != nil {
+		t.Fatal(err)
+	}
+	server.Start()
+	defer server.Close()
+
+	indexedSuite, err := services.IndexComplianceSuite(suite)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	requestsModified := map[string]bool{}
+	for idx, testCase := range []struct {
+		name        string
+		requestName string
+		modify      requestModifier
+		subCases    map[string]prepRepeatDataTestFunc
+		failureMode string
+	}{
+		{
+			name:        "detecting requests not included in test suite",
+			requestName: "Zero values for all fields",
+			modify: func(request *pb.RepeatRequest) {
+				request.Name = "modified name"
+			},
+			subCases: map[string]prepRepeatDataTestFunc{
+				"body":  prepRepeatDataBodyTest,
+				"query": prepRepeatDataQueryTest,
+			},
+			failureMode: "(ComplianceSuiteRequestNotFoundError)",
+		},
+
+		{
+			name:        "detecting set optional bool field erroneously not sent",
+			requestName: "Zero values for all fields",
+			modify: func(request *pb.RepeatRequest) {
+				request.GetInfo().PBool = nil
+			},
+			subCases: map[string]prepRepeatDataTestFunc{
+				"body":  prepRepeatDataBodyTest,
+				"query": prepRepeatDataQueryTest,
+			},
+			failureMode: "(ComplianceSuiteRequestMismatchError)",
+		},
+		{
+			name:        "detecting unset optional bool field erroneously sent",
+			requestName: "Basic types, no optional fields",
+			modify: func(request *pb.RepeatRequest) {
+				myFalse := false
+				request.GetInfo().PBool = &myFalse
+			},
+			subCases: map[string]prepRepeatDataTestFunc{
+				"body":  prepRepeatDataBodyTest,
+				"query": prepRepeatDataQueryTest,
+			},
+			failureMode: "(ComplianceSuiteRequestMismatchError)",
+		},
+
+		{
+			name:        "detecting set optional string field erroneously not sent",
+			requestName: "Zero values for all fields",
+			modify: func(request *pb.RepeatRequest) {
+				request.GetInfo().PString = nil
+			},
+			subCases: map[string]prepRepeatDataTestFunc{
+				"body":  prepRepeatDataBodyTest,
+				"query": prepRepeatDataQueryTest,
+			},
+			failureMode: "(ComplianceSuiteRequestMismatchError)",
+		},
+		{
+			name:        "detecting unset optional string field erroneously sent",
+			requestName: "Basic types, no optional fields",
+			modify: func(request *pb.RepeatRequest) {
+				myEmpty := ""
+				request.GetInfo().PString = &myEmpty
+			},
+			subCases: map[string]prepRepeatDataTestFunc{
+				"body":  prepRepeatDataBodyTest,
+				"query": prepRepeatDataQueryTest,
+			},
+			failureMode: "(ComplianceSuiteRequestMismatchError)",
+		},
+
+		{
+			name:        "detecting set optional int32 field erroneously not sent",
+			requestName: "Zero values for all fields",
+			modify: func(request *pb.RepeatRequest) {
+				request.GetInfo().PInt32 = nil
+			},
+			subCases: map[string]prepRepeatDataTestFunc{
+				"body":  prepRepeatDataBodyTest,
+				"query": prepRepeatDataQueryTest,
+			},
+			failureMode: "(ComplianceSuiteRequestMismatchError)",
+		},
+		{
+			name:        "detecting unset optional int32 field erroneously sent",
+			requestName: "Basic types, no optional fields",
+			modify: func(request *pb.RepeatRequest) {
+				myInt := int32(0)
+				request.GetInfo().PInt32 = &myInt
+			},
+			subCases: map[string]prepRepeatDataTestFunc{
+				"body":  prepRepeatDataBodyTest,
+				"query": prepRepeatDataQueryTest,
+			},
+			failureMode: "(ComplianceSuiteRequestMismatchError)",
+		},
+	} {
+		if _, done := requestsModified[testCase.requestName]; done {
+			if suite, err = getCleanComplianceSuite(); err != nil {
+				t.Fatal(err)
+			}
+			if indexedSuite, err = services.IndexComplianceSuite(suite); err != nil {
+				t.Fatal(err)
+			}
+			requestsModified = map[string]bool{}
+		}
+		requestsModified[testCase.requestName] = true
+
+		request, ok := indexedSuite[testCase.requestName]
+		if !ok {
+			t.Fatalf("could not find request by name: %q", testCase.requestName)
+		}
+		testCase.modify(request)
+
+		for subCaseName, prep := range testCase.subCases {
+			prefix := fmt.Sprintf("[case %d: %s: %s]", idx, testCase.name, subCaseName)
+			verb, prepName, path, body, error := prep(request)
+			if error != nil {
+				t.Fatalf("%s could not construct request: %s", prefix, err)
+			}
+			checkExpectedFailure(t, verb, server.URL+path, body, testCase.failureMode, prefix, prepName)
 		}
 	}
 }
@@ -202,3 +327,42 @@ func prepRepeatDataSimplePathNegativeTestEnum(request *genproto.RepeatRequest) (
 	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
 	return name, "GET", path + queryString, body, "(EnumValueNotStringError)", err
 }
+
+// checkExpectedFailure issues a request using the specified verb, URL, and request body. It expects
+// a failing HTTP code and a response message containing the substring in `failure`. Test errors are
+// reported using the given errorPrefix and the name prepName of the prepping function.
+func checkExpectedFailure(t *testing.T, verb, url, requestBody, failure, errorPrefix, prepName string) {
+	// Issue the request
+	httpRequest, err := http.NewRequest(verb, url, strings.NewReader(requestBody))
+	if err != nil {
+		t.Errorf("%s error creating request: %s", errorPrefix, err)
+		return
+	}
+	resttools.PopulateRequestHeaders(httpRequest)
+	httpResponse, err := http.DefaultClient.Do(httpRequest)
+	if err != nil {
+		t.Errorf("%s error issuing call: %s", errorPrefix, err)
+		return
+	}
+
+	// Check for unsuccessful response.
+	if got, notWant := httpResponse.StatusCode, http.StatusOK; got == notWant {
+		t.Errorf("%s response code: got %d, notWant %d  name:%q\n   %s %s\nrequest body: %s\n----------------------------------------\n",
+			errorPrefix, got, notWant, prepName, verb, url, requestBody)
+		return
+	}
+
+	body, err := ioutil.ReadAll(httpResponse.Body)
+	httpResponse.Body.Close()
+	if err != nil {
+		t.Fatalf("%s could not read response body: %s", errorPrefix, err)
+	}
+	if got, want := string(body), failure; !strings.Contains(got, want) {
+		t.Errorf("%s response body: wanted response to include %q, but instead got: %q   (status %d) header: %v name:%q\n   %s %s\nrequest body: %s\n----------------------------------------\n",
+			errorPrefix, want, got, httpResponse.StatusCode, httpResponse.Header, prepName, verb, url, requestBody)
+	}
+
+}
+
+//requestModifer is a function that modifies a request in-place.
+type requestModifier func(*pb.RepeatRequest)
