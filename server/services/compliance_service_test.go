@@ -115,5 +115,45 @@ func TestRequestMatchesExpectation(t *testing.T) {
 	if _, got := server.Repeat(context.Background(), request); got != nil {
 		t.Errorf("expected Repeat() to succeed with verified request, but got error: %s", got)
 	}
+}
 
+func TestIndexTestingRequests(t *testing.T) {
+	// set up
+	ComplianceSuiteStatus = ComplianceSuiteUninitialized
+
+	suiteBytes := []byte("nonexistent_field: 5 ")
+
+	if err := indexTestingRequests(suiteBytes); err == nil {
+		t.Errorf("expected JSON unmarshaling to fail, but it succeeded")
+	} else {
+		if got, want := err.Error(), "(ComplianceServiceReadError)"; !strings.Contains(got, want) {
+			t.Errorf("error message does not contain expected substring: want: %q  got %q", want, got)
+		}
+	}
+
+	suiteBytes = []byte(`
+            {
+              "group": [
+                 {
+                  "name": "sample suite",
+                  "requests": [
+                     { "name": "Alpha"},
+                     { "name": "Beta"},
+                     { "name": "Alpha"}
+                  ]
+                 }
+                ]
+             }
+               `)
+
+	if err := indexTestingRequests(suiteBytes); err == nil {
+		t.Errorf("expected JSON unmarshaling to fail, but it succeeded")
+	} else {
+		if got, want := err.Error(), "(ComplianceServiceSetupError)"; !strings.Contains(got, want) {
+			t.Errorf("error message does not contain expected substring: want: %q  got %q", want, got)
+		}
+	}
+
+	// clean up
+	indexTestingRequests(complianceSuiteBytes)
 }

@@ -141,18 +141,18 @@ func IndexComplianceSuite(suite *pb.ComplianceSuite) (map[string]*pb.RepeatReque
 	return indexedSuite, nil
 }
 
-// indexTestingRequests creates a map by request name of the the requests in the
-// complianceSuiteBytes, for easy retrieval later.
-func indexTestingRequests() {
+// indexTestingRequests creates a map by request name of the requests in suiteBytes (a
+// JSON-formatted encoding of pb.ComplianceSuite), for easy retrieval later.
+func indexTestingRequests(suiteBytes []byte) (err error) {
 	if ComplianceSuiteStatus == ComplianceSuiteLoaded {
-		return
+		return nil
 	}
 
 	ComplianceSuite = &pb.ComplianceSuite{}
-	if err := protojson.Unmarshal(complianceSuiteBytes, ComplianceSuite); err != nil {
+	if err := protojson.Unmarshal(suiteBytes, ComplianceSuite); err != nil {
 		ComplianceSuiteStatus = ComplianceSuiteError
 		ComplianceSuiteStatusMessage = fmt.Sprintf("(ComplianceServiceReadError) could not read compliance suite file: %s", err)
-		return
+		return fmt.Errorf(ComplianceSuiteStatusMessage)
 
 	}
 
@@ -160,13 +160,14 @@ func indexTestingRequests() {
 	if err != nil {
 		ComplianceSuiteStatus = ComplianceSuiteError
 		ComplianceSuiteStatusMessage = fmt.Sprintf("(ComplianceServiceSetupError) %s", err)
-		return
+		return fmt.Errorf(ComplianceSuiteStatusMessage)
 	}
 	ComplianceSuiteRequests = indexedSuite
 	ComplianceSuiteStatus = ComplianceSuiteLoaded
 	ComplianceSuiteStatusMessage = "OK"
+	return nil
 }
 
 func init() {
-	indexTestingRequests()
+	indexTestingRequests(complianceSuiteBytes)
 }
