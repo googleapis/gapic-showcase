@@ -16,6 +16,7 @@ package services
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -63,4 +64,56 @@ func TestComplianceRepeats(t *testing.T) {
 			t.Errorf("call %d: got=-, want=+:%s", idx, diff)
 		}
 	}
+}
+
+func TestRequestMatchesExpectation(t *testing.T) {
+	server := &complianceServerImpl{}
+
+	info := &pb.ComplianceData{
+		FString:   "Terra Incognita",
+		FInt32:    1,
+		FSint32:   -2,
+		FSfixed32: -300000000,
+	}
+	request := &pb.RepeatRequest{
+		Name: "Basic data types", // matches a name in compliance_suite.json
+		Info: info,
+	}
+
+	if got := server.requestMatchesExpectation(request); got != nil {
+		t.Errorf("expected request to trivially match when serverVerify unset. Got error: %s", got)
+	}
+
+	request.ServerVerify = true
+	if err := server.requestMatchesExpectation(request); err == nil {
+		t.Errorf("expected verified request with differing data to not match")
+	} else {
+		if got, want := err.Error(), "(ComplianceSuiteRequestMismatchError)"; !strings.Contains(got, want) {
+			t.Errorf("error message does not contain expected substring: want: %q  got %q", want, got)
+		}
+		if _, got := server.Repeat(context.Background(), request); got == nil {
+			t.Errorf("expected Repeat() to error with unverified request, but it didn't")
+		}
+	}
+
+	request.Name = "non-existent case"
+	if err := server.requestMatchesExpectation(request); err == nil {
+		t.Errorf("expected verified request with unmatched name to cause an error")
+	} else {
+		if got, want := err.Error(), "(ComplianceSuiteRequestNotFoundError)"; !strings.Contains(got, want) {
+			t.Errorf("error message does not contain expected substring: want: %q  got %q", want, got)
+		}
+		if _, got := server.Repeat(context.Background(), request); got == nil {
+			t.Errorf("expected Repeat() to error with unverified request, but it didn't")
+		}
+	}
+
+	request = ComplianceSuiteRequests["Basic data types"] // matches a name in compliance_suite.json
+	if got := server.requestMatchesExpectation(request); got != nil {
+		t.Errorf("expected test suite case to match. Got error: %s", got)
+	}
+	if _, got := server.Repeat(context.Background(), request); got != nil {
+		t.Errorf("expected Repeat() to succeed with verified request, but got error: %s", got)
+	}
+
 }
