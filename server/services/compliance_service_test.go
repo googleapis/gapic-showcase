@@ -66,7 +66,7 @@ func TestComplianceRepeats(t *testing.T) {
 	}
 }
 
-func TestRequestMatchesExpectation(t *testing.T) {
+func TestMatchinComplianceSuiteRequests(t *testing.T) {
 	server := &complianceServerImpl{}
 
 	info := &pb.ComplianceData{
@@ -117,7 +117,7 @@ func TestRequestMatchesExpectation(t *testing.T) {
 	}
 }
 
-func TestIndexTestingRequests(t *testing.T) {
+func TestIndexingComplianceSuite(t *testing.T) {
 	// set up
 	ComplianceSuiteStatus = ComplianceSuiteUninitialized
 
@@ -154,6 +154,30 @@ func TestIndexTestingRequests(t *testing.T) {
 		}
 	}
 
+	// test that the indexing error gets properly propagated
+	server := &complianceServerImpl{}
+	request := &pb.RepeatRequest{
+		Name:         "Basic data types", // matches a name in compliance_suite.json
+		ServerVerify: true,
+	}
+	if err := server.requestMatchesExpectation(request); err == nil {
+		t.Errorf("expected verified request with differing data to not match")
+	} else {
+		if got, want := err.Error(), "(ComplianceServiceSetupError)"; !strings.Contains(got, want) {
+			t.Errorf("error message does not contain expected substring: want: %q  got %q", want, got)
+		}
+		if _, got := server.Repeat(context.Background(), request); got == nil {
+			t.Errorf("expected Repeat() to error with unverified request, but it didn't")
+		}
+	}
+
 	// clean up
-	indexTestingRequests(complianceSuiteBytes)
+	ComplianceSuiteStatus = ComplianceSuiteUninitialized
+	if err := indexTestingRequests(complianceSuiteBytes); err != nil {
+		t.Errorf("initializing ComplianceSuite with real suite data should not have errored, but got: %s", err)
+	}
+
+	if err := indexTestingRequests(complianceSuiteBytes); err != nil {
+		t.Errorf("initializing ComplianceSuite a second time should not have errored, but got: %s", err)
+	}
 }
