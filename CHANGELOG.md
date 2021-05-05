@@ -1,5 +1,10 @@
 # Release History
 
+### v0.15.0 / 2021-05-05
+- Enforce `Content-Type: application/json` in the bodies of REST requests
+- Enforce correct `optional` field presence/absence in test suite requests (bodies and query strings)
+- Lower-camel-case field names in `compliance_suite.json`
+
 ### v0.14.0 / 2021-04-27
 - Fix collision between operation helper for `Echo.Wait` and generated mixin `Operations.WaitOpertation`
 - REST endpoints: ensure enum values are received as string values
