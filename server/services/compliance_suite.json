@@ -4,185 +4,185 @@
       "name": "Fully working conversions, no resources",
       "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery", "Compliance.RepeatDataSimplePath", "Compliance.RepeatDataBodyInfo"],
       "requests": [
-  {
-    "name": "Basic data types",
-    "server_verify": true,
-    "info": {
-            "f_string": "Hello",
-	    "f_int32": -1,
-	    "f_sint32" : -2,
-	    "f_sfixed32": -3,
-	    "f_uint32": 5,
-	    "f_fixed32": 7,
-	    "f_int64": -11,
-	    "f_sint64": -13,
-	    "f_sfixed64": -17,
-	    "f_uint64": 19,
-	    "f_fixed64":23,
-	    "f_double": -29e4,
-	    "f_float": -31,
-	    "f_bool": true,
-	    "f_kingdom": "ANIMALIA", 
+        {
+          "name": "Basic data types",
+          "serverVerify": true,
+          "info": {
+            "fString": "Hello",
+	    "fInt32": -1,
+	    "fSint32" : -2,
+	    "fSfixed32": -3,
+	    "fUint32": 5,
+	    "fFixed32": 7,
+	    "fInt64": -11,
+	    "fSint64": -13,
+	    "fSfixed64": -17,
+	    "fUint64": 19,
+	    "fFixed64":23,
+	    "fDouble": -29e4,
+	    "fFloat": -31,
+	    "fBool": true,
+	    "fKingdom": "ANIMALIA", 
 
-	    "p_string": "Goodbye",
-	    "p_int32": -37,
-	    "p_double": -41.43,
-	    "p_bool": true,
-	    "p_kingdom": "PLANTAE",
+	    "pString": "Goodbye",
+	    "pInt32": -37,
+	    "pDouble": -41.43,
+	    "pBool": true,
+	    "pKingdom": "PLANTAE",
 
-            "f_child": {
-        "f_string": "second/bool/salutation"
-      }
-    }
-  },
-  {
-    "name": "Basic types, no optional fields",
-    "server_verify": true,
-    "info": {
-            "f_string": "Hello",
-	    "f_int32": -1,
-	    "f_sint32" : -2,
-	    "f_sfixed32": -3,
-	    "f_uint32": 5,
-	    "f_fixed32": 7,
-	    "f_int64": -11,
-	    "f_sint64": -13,
-	    "f_sfixed64": -17,
-	    "f_uint64": 19,
-	    "f_fixed64":23,
-	    "f_double": -29e4,
-	    "f_float": -31,
-	    "f_bool": true,
-	    "f_kingdom": "ANIMALIA", 
+            "fChild": {
+              "fString": "second/bool/salutation"
+            }
+          }
+        },
+        {
+          "name": "Basic types, no optional fields",
+          "serverVerify": true,
+          "info": {
+            "fString": "Hello",
+	    "fInt32": -1,
+	    "fSint32" : -2,
+	    "fSfixed32": -3,
+	    "fUint32": 5,
+	    "fFixed32": 7,
+	    "fInt64": -11,
+	    "fSint64": -13,
+	    "fSfixed64": -17,
+	    "fUint64": 19,
+	    "fFixed64":23,
+	    "fDouble": -29e4,
+	    "fFloat": -31,
+	    "fBool": true,
+	    "fKingdom": "ANIMALIA", 
 
-            "f_child": {
-        "f_string": "second/bool/salutation"
-      }
-    }
-  },
-  
-  {
-    "name": "Zero values for non-string fields",
-    "server_verify": true,
-    "info": {
-            "f_string": "Hello",
-	    "f_int32": 0,
-	    "f_sint32" : 0,
-	    "f_sfixed32": 0,
-	    "f_uint32": 0,
-	    "f_fixed32": 0,
-	    "f_int64": 0,
-	    "f_sint64": 0,
-	    "f_sfixed64": 0,
-	    "f_uint64": 0,
-	    "f_fixed64": 0,
-	    "f_double": 0,
-	    "f_float": 0,
-	    "f_bool": false,
-	    "f_kingdom": "LIFE_KINGDOM_UNSPECIFIED",
+            "fChild": {
+              "fString": "second/bool/salutation"
+            }
+          }
+        },
+        
+        {
+          "name": "Zero values for non-string fields",
+          "serverVerify": true,
+          "info": {
+            "fString": "Hello",
+	    "fInt32": 0,
+	    "fSint32" : 0,
+	    "fSfixed32": 0,
+	    "fUint32": 0,
+	    "fFixed32": 0,
+	    "fInt64": 0,
+	    "fSint64": 0,
+	    "fSfixed64": 0,
+	    "fUint64": 0,
+	    "fFixed64": 0,
+	    "fDouble": 0,
+	    "fFloat": 0,
+	    "fBool": false,
+	    "fKingdom": "LIFE_KINGDOM_UNSPECIFIED",
 
-	    "p_string": "Goodbye",
-	    "p_int32": 0,
-	    "p_double": 0,
-	    "p_bool": false,
-	    "p_kingdom": "LIFE_KINGDOM_UNSPECIFIED"
+	    "pString": "Goodbye",
+	    "pInt32": 0,
+	    "pDouble": 0,
+	    "pBool": false,
+	    "pKingdom": "LIFE_KINGDOM_UNSPECIFIED"
 	  }
 	},
 	{
 	  "name": "Extreme values",
-    "server_verify": true,
+          "serverVerify": true,
 	  "info": {
-            "f_string": "non-ASCII+non-printable string ☺ → ← \"\\\/\b\f\r\t\u1234 works, not newlines yet",
-      "f_int32": 2147483647,
-      "f_sint32" : 2147483647,
-      "f_sfixed32": 2147483647,
-      "f_uint32": 4294967295,
-      "f_fixed32": 4294967295,
-      "f_int64": 9223372036854775807,
-      "f_sint64": 9223372036854775807,
-      "f_sfixed64": 9223372036854775807,
-      "f_uint64": 18446744073709551615,
-      "f_fixed64": 18446744073709551615,
-      "f_double": 1.797693134862315708145274237317043567981e+308,
-      "f_float": 3.40282346638528859811704183484516925440e+38,
-      "f_bool": false,
+            "fString": "non-ASCII+non-printable string ☺ → ← \"\\\/\b\f\r\t\u1234 works, not newlines yet",
+            "fInt32": 2147483647,
+            "fSint32" : 2147483647,
+            "fSfixed32": 2147483647,
+            "fUint32": 4294967295,
+            "fFixed32": 4294967295,
+            "fInt64": 9223372036854775807,
+            "fSint64": 9223372036854775807,
+            "fSfixed64": 9223372036854775807,
+            "fUint64": 18446744073709551615,
+            "fFixed64": 18446744073709551615,
+            "fDouble": 1.797693134862315708145274237317043567981e+308,
+            "fFloat": 3.40282346638528859811704183484516925440e+38,
+            "fBool": false,
 
-      "p_string": "Goodbye",
-      "p_int32": 2147483647,
-      "p_double": 1.797693134862315708145274237317043567981e+308,
-      "p_bool": false
-    }
-  },
-  {
-    "name": "Strings with spaces",
-    "server_verify": true,
-    "info": {
-            "f_string": "Hello there"
-    }
-  },
-  {
-    "name": "Strings with quotes",
-    "server_verify": true,
-    "info": {
-            "f_string": "Hello \"You\""
-    }
-  },
-  {
-    "name": "Strings with percents",
-    "server_verify": true,
-    "info": {
-            "f_string": "Hello 100%"
-    }
-  }
+            "pString": "Goodbye",
+            "pInt32": 2147483647,
+            "pDouble": 1.797693134862315708145274237317043567981e+308,
+            "pBool": false
+          }
+        },
+        {
+          "name": "Strings with spaces",
+          "serverVerify": true,
+          "info": {
+            "fString": "Hello there"
+          }
+        },
+        {
+          "name": "Strings with quotes",
+          "serverVerify": true,
+          "info": {
+            "fString": "Hello \"You\""
+          }
+        },
+        {
+          "name": "Strings with percents",
+          "serverVerify": true,
+          "info": {
+            "fString": "Hello 100%"
+          }
+        }
       ]
     },
     {
       "name": "Fully working conversions, resources",
       "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery", "Compliance.RepeatDataSimplePath", "Compliance.RepeatDataPathResource", "Compliance.RepeatDataPathTrailingResource"],
       "requests": [
-  {
-    "name": "Strings with slashes and values that resemble subsequent resource templates",
-    "server_verify": true,
-    "info": {
-            "f_string": "first/hello/second/greetings",
-      "p_bool": true,
+        {
+          "name": "Strings with slashes and values that resemble subsequent resource templates",
+          "serverVerify": true,
+          "info": {
+            "fString": "first/hello/second/greetings",
+            "pBool": true,
 
-            "f_child": {
-        "f_string": "second/zzz/bool/true"
-      }
-    }
-  }
+            "fChild": {
+              "fString": "second/zzz/bool/true"
+            }
+          }
+        }
       ]
     },
     {
       "name": "Cases that apply to non-path requests",
       "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery"],
       "requests": [
-  {
-    "name": "Zero values for all fields",
-    "server_verify": true,
-    "info": {
-            "f_string": "",
-      "f_int32": 0,
-      "f_sint32" : 0,
-      "f_sfixed32": 0,
-      "f_uint32": 0,
-      "f_fixed32": 0,
-      "f_int64": 0,
-      "f_sint64": 0,
-      "f_sfixed64": 0,
-      "f_uint64": 0,
-      "f_fixed64":20,
-      "f_double": 0,
-      "f_float": 0,
-      "f_bool": false,
+        {
+          "name": "Zero values for all fields",
+          "serverVerify": true,
+          "info": {
+            "fString": "",
+            "fInt32": 0,
+            "fSint32" : 0,
+            "fSfixed32": 0,
+            "fUint32": 0,
+            "fFixed32": 0,
+            "fInt64": 0,
+            "fSint64": 0,
+            "fSfixed64": 0,
+            "fUint64": 0,
+            "fFixed64":20,
+            "fDouble": 0,
+            "fFloat": 0,
+            "fBool": false,
 
-      "p_string": "",
-      "p_int32": 0,
-      "p_double": 0,
-      "p_bool": false
-    }
-  }
+            "pString": "",
+            "pInt32": 0,
+            "pDouble": 0,
+            "pBool": false
+          }
+        }
       ]
     }
   ]
