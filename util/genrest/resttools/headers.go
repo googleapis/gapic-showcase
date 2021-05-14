@@ -62,11 +62,13 @@ func CheckAPIClientHeader(header http.Header) error {
 	var haveREST, haveGAPIC bool
 	for _, token := range strings.Split(content[0], " ") {
 		trimmed := strings.TrimSpace(token)
-		if strings.HasPrefix(trimmed, headerValueTransportRESTPrefix) {
+		if !haveREST && strings.HasPrefix(trimmed, headerValueTransportRESTPrefix) {
 			haveREST = true
-		}
-		if strings.HasPrefix(trimmed, headerValueClientGAPICPrefix) {
+		} else if !haveGAPIC && strings.HasPrefix(trimmed, headerValueClientGAPICPrefix) {
 			haveGAPIC = true
+		} else {
+			// nothing changed
+			continue
 		}
 		if haveREST && haveGAPIC {
 			return nil
