@@ -92,6 +92,15 @@ func TestCheckRequestFormat(t *testing.T) {
 			wantError: "(HeaderTransportRESTError)",
 		},
 		{
+			label: "no header gapic token",
+			json:  `{"fString": "hi"}`,
+			header: http.Header{
+				headerNameContentType: []string{headerValueContentTypeJSON},
+				headerNameAPIClient:   []string{"foo/1 rest/foo blah"},
+			},
+			wantError: "(HeaderClientGAPICError)",
+		},
+		{
 			label: "no content-type header",
 			json:  `{"fString": "hi"}`,
 			header: http.Header{

@@ -26,6 +26,7 @@ const (
 
 	headerNameAPIClient            = "X-Goog-Api-Client"
 	headerValueTransportRESTPrefix = "rest/"
+	headerValueClientGAPICPrefix   = "gapic/"
 )
 
 // PopulateRequestHeaders inspects request and adds the correct headers. This
@@ -33,10 +34,10 @@ const (
 // headers.
 func PopulateRequestHeaders(request *http.Request) {
 	header := http.Header{}
-	header[headerNameAPIClient] = []string{headerValueTransportRESTPrefix + "0.0.0"}
+	header.Set(headerNameAPIClient, fmt.Sprintf("%s0.0.0 %s0.0.0", headerValueTransportRESTPrefix, headerValueClientGAPICPrefix))
 
 	if request.Body != nil {
-		header[headerNameContentType] = []string{headerValueContentTypeJSON}
+		header.Set(headerNameContentType, headerValueContentTypeJSON)
 	}
 
 	request.Header = header
@@ -63,4 +64,19 @@ func CheckRESTHeader(header http.Header) error {
 		}
 	}
 	return fmt.Errorf("(HeaderTransportRESTError) did not find expected HTTP header token %q: %q", headerNameAPIClient, headerValueTransportRESTPrefix)
+}
+
+// CheckGAPICHeader checks header to ensure that "x-goog-api-client" contains the "gapic/" token.
+func CheckGAPICHeader(header http.Header) error {
+	content, ok := header[headerNameAPIClient]
+	if !ok || len(content) != 1 {
+		return fmt.Errorf("(HeaderAPIClientError) did not find expected HTTP header %q: %q", headerNameAPIClient, headerValueTransportRESTPrefix)
+	}
+
+	for _, token := range strings.Split(content[0], " ") {
+		if strings.HasPrefix(strings.TrimSpace(token), headerValueClientGAPICPrefix) {
+			return nil
+		}
+	}
+	return fmt.Errorf("(HeaderClientGAPICError) did not find expected HTTP header token %q: %q", headerNameAPIClient, headerValueClientGAPICPrefix)
 }
