@@ -158,7 +158,7 @@ func TestCheckRequestFormat(t *testing.T) {
 			PopulateRequestHeaders(request)
 		}
 		err = CheckRequestFormat(request.Body, request.Header, complianceData.ProtoReflect())
-		if (err != nil) != (len(testCase.wantError) > 0) {
+		if (err != nil) != (testCase.wantError != "") {
 			t.Errorf("test case %d[%q] CheckRequestFormat(): expected error==%v, got: %v", idx, testCase.label, testCase.wantError, err)
 			continue
 		}
