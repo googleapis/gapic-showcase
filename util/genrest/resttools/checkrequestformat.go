@@ -31,10 +31,7 @@ import (
 
 // CheckRequestFormat verifies that the incoming request has the correct format in its body (via jsonReader) and in its HTTP headers.
 func CheckRequestFormat(jsonReader io.Reader, header http.Header, message protoreflect.Message) error {
-	if err := CheckGAPICHeader(header); err != nil {
-		return err
-	}
-	if err := CheckRESTHeader(header); err != nil {
+	if err := CheckAPIClientHeader(header); err != nil {
 		return err
 	}
 

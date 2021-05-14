@@ -51,32 +51,32 @@ func CheckContentType(header http.Header) error {
 	return nil
 }
 
-// CheckRESTHeader checks header to ensure that "x-goog-api-client" contains the "rest/" token.
-func CheckRESTHeader(header http.Header) error {
+// CheckAPIClientHeader verifies that the "x-goog-api-client" header contains the expected tokens
+// ("rest/..." and "gapic/...").
+func CheckAPIClientHeader(header http.Header) error {
 	content, ok := header[headerNameAPIClient]
 	if !ok || len(content) != 1 {
 		return fmt.Errorf("(HeaderAPIClientError) did not find expected HTTP header %q: %q", headerNameAPIClient, headerValueTransportRESTPrefix)
 	}
 
+	var haveREST, haveGAPIC bool
 	for _, token := range strings.Split(content[0], " ") {
-		if strings.HasPrefix(strings.TrimSpace(token), headerValueTransportRESTPrefix) {
+		trimmed := strings.TrimSpace(token)
+		if strings.HasPrefix(trimmed, headerValueTransportRESTPrefix) {
+			haveREST = true
+		}
+		if strings.HasPrefix(trimmed, headerValueClientGAPICPrefix) {
+			haveGAPIC = true
+		}
+		if haveREST && haveGAPIC {
 			return nil
 		}
 	}
-	return fmt.Errorf("(HeaderTransportRESTError) did not find expected HTTP header token %q: %q", headerNameAPIClient, headerValueTransportRESTPrefix)
-}
-
-// CheckGAPICHeader checks header to ensure that "x-goog-api-client" contains the "gapic/" token.
-func CheckGAPICHeader(header http.Header) error {
-	content, ok := header[headerNameAPIClient]
-	if !ok || len(content) != 1 {
-		return fmt.Errorf("(HeaderAPIClientError) did not find expected HTTP header %q: %q", headerNameAPIClient, headerValueTransportRESTPrefix)
+	if !haveREST {
+		return fmt.Errorf("(HeaderTransportRESTError) did not find expected HTTP header token %q: %q", headerNameAPIClient, headerValueTransportRESTPrefix)
 	}
-
-	for _, token := range strings.Split(content[0], " ") {
-		if strings.HasPrefix(strings.TrimSpace(token), headerValueClientGAPICPrefix) {
-			return nil
-		}
+	if !haveGAPIC {
+		return fmt.Errorf("(HeaderClientGAPICError) did not find expected HTTP header token %q: %q", headerNameAPIClient, headerValueClientGAPICPrefix)
 	}
-	return fmt.Errorf("(HeaderClientGAPICError) did not find expected HTTP header token %q: %q", headerNameAPIClient, headerValueClientGAPICPrefix)
+	return fmt.Errorf("internal inconsistency")
 }
