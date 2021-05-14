@@ -46,7 +46,7 @@ func TestCheckRequestFormat(t *testing.T) {
 		label     string
 		json      string
 		header    http.Header // nil means standard headers
-		wantError bool
+		wantError string
 	}{
 		{
 			label: "normal case",
@@ -69,33 +69,73 @@ func TestCheckRequestFormat(t *testing.T) {
 			json:  `{"fString": "hi"}`,
 		},
 		{
+			label: "normal case, correct headers",
+			json:  `{"fString": "hi"}`,
+			header: http.Header{
+				headerNameContentType: []string{headerValueContentTypeJSON},
+				headerNameAPIClient:   []string{"foo/1 rest/foo gapic/2 blah"},
+			},
+		},
+		{
+			label:     "no api client header",
+			json:      `{"fString": "hi"}`,
+			header:    http.Header{headerNameContentType: []string{headerValueContentTypeJSON}},
+			wantError: "(HeaderAPIClientError)",
+		},
+		{
+			label: "no header rest token",
+			json:  `{"fString": "hi"}`,
+			header: http.Header{
+				headerNameContentType: []string{headerValueContentTypeJSON},
+				headerNameAPIClient:   []string{"foo/1 gapic/2 blah"},
+			},
+			wantError: "(HeaderTransportRESTError)",
+		},
+		{
+			label: "no content-type header",
+			json:  `{"fString": "hi"}`,
+			header: http.Header{
+				headerNameAPIClient: []string{"foo/1 rest/foo gapic/2 blah"},
+			},
+			wantError: "(HeaderContentTypeError)",
+		},
+		{
+			label: "bad content-type header",
+			json:  `{"fString": "hi"}`,
+			header: http.Header{
+				headerNameContentType: []string{"something " + headerValueContentTypeJSON},
+				headerNameAPIClient:   []string{"foo/1 rest/foo gapic/2 blah"},
+			},
+			wantError: "(HeaderContentTypeError)",
+		},
+
+		{
 			label: "random string does not fail",
 			json:  `{"fString": "hi", "fKingdom": "MONACO"}`,
 		},
 		{
 			label:     "numeric enum",
 			json:      `{"fString": "hi", "fKingdom": 56}`,
-			wantError: true,
+			wantError: "(EnumEncodingError)",
 		},
 		{
 			label:     "numeric optional enum",
 			json:      `{"fString": "hi", "pKingdom": 57}`,
-			wantError: true,
+			wantError: "(EnumEncodingError)",
 		},
 		{
 			label:     "stringy numeric enum",
 			json:      `{"fString": "hi", "fKingdom": "56"}`,
-			wantError: true,
+			wantError: "(EnumEncodingError)",
 		},
 		{
 			label:     "stringy optional numeric enum",
 			json:      `{"fString": "hi", "fKingdom": "57"}`,
-			wantError: true,
+			wantError: "(EnumEncodingError)",
 		},
 		{
-			label:     "stringy number+letter enum",
-			json:      `{"fString": "hi", "fKingdom": "56Abacus"}`,
-			wantError: false,
+			label: "stringy number+letter enum",
+			json:  `{"fString": "hi", "fKingdom": "56Abacus"}`,
 		},
 	} {
 		complianceData := &genprotopb.ComplianceData{}
@@ -108,8 +148,16 @@ func TestCheckRequestFormat(t *testing.T) {
 		if request.Header == nil {
 			PopulateRequestHeaders(request)
 		}
-		if err := CheckRequestFormat(request.Body, request.Header, complianceData.ProtoReflect()); (err != nil) != testCase.wantError {
-			t.Errorf("test case %d[%q] text enum encoding: expected error==%v, got: %v", idx, testCase.label, testCase.wantError, err)
+		err = CheckRequestFormat(request.Body, request.Header, complianceData.ProtoReflect())
+		if (err != nil) != (len(testCase.wantError) > 0) {
+			t.Errorf("test case %d[%q] CheckRequestFormat(): expected error==%v, got: %v", idx, testCase.label, testCase.wantError, err)
+			continue
+		}
+		if err == nil {
+			continue
+		}
+		if got, want := err.Error(), testCase.wantError; !strings.Contains(got, want) {
+			t.Errorf("test case %d[%q] CheckRequestFormat(): incorrect error: want: %q, got %q", idx, testCase.label, want, got)
 		}
 	}
 }

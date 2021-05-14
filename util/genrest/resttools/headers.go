@@ -15,19 +15,52 @@
 package resttools
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 )
 
 const (
 	headerNameContentType      = "Content-Type"
 	headerValueContentTypeJSON = "application/json"
+
+	headerNameAPIClient            = "X-Goog-Api-Client"
+	headerValueTransportRESTPrefix = "rest/"
 )
 
 // PopulateRequestHeaders inspects request and adds the correct headers. This
 // is useful for tests where we're not trying to send incorrect
 // headers.
 func PopulateRequestHeaders(request *http.Request) {
+	header := http.Header{}
+	header[headerNameAPIClient] = []string{headerValueTransportRESTPrefix + "0.0.0"}
+
 	if request.Body != nil {
-		request.Header = http.Header{headerNameContentType: []string{headerValueContentTypeJSON}}
+		header[headerNameContentType] = []string{headerValueContentTypeJSON}
 	}
+
+	request.Header = header
+}
+
+// CheckContentType checks header to ensure the expected JSON content type is specified.
+func CheckContentType(header http.Header) error {
+	if content, ok := header[headerNameContentType]; !ok || len(content) != 1 || !strings.HasPrefix(strings.ToLower(strings.TrimSpace(content[0])), headerValueContentTypeJSON) {
+		return fmt.Errorf("(HeaderContentTypeError) did not find expected HTTP header %q: %q", headerNameContentType, headerValueContentTypeJSON)
+	}
+	return nil
+}
+
+// CheckRESTHeader checks header to ensure that "x-goog-api-client" contains the "rest/" token.
+func CheckRESTHeader(header http.Header) error {
+	content, ok := header[headerNameAPIClient]
+	if !ok || len(content) != 1 {
+		return fmt.Errorf("(HeaderAPIClientError) did not find expected HTTP header %q: %q", headerNameAPIClient, headerValueTransportRESTPrefix)
+	}
+
+	for _, token := range strings.Split(content[0], " ") {
+		if strings.HasPrefix(strings.TrimSpace(token), headerValueTransportRESTPrefix) {
+			return nil
+		}
+	}
+	return fmt.Errorf("(HeaderTransportRESTError) did not find expected HTTP header token %q: %q", headerNameAPIClient, headerValueTransportRESTPrefix)
 }
