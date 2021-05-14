@@ -31,6 +31,10 @@ import (
 
 // CheckRequestFormat verifies that the incoming request has the correct format in its body (via jsonReader) and in its HTTP headers.
 func CheckRequestFormat(jsonReader io.Reader, header http.Header, message protoreflect.Message) error {
+	if err := CheckAPIClientHeader(header); err != nil {
+		return err
+	}
+
 	if jsonReader == nil {
 		// TODO: above this if-statement, check for headers needed by all requests, not just those with a body
 		return nil
@@ -54,14 +58,6 @@ func CheckRequestFormat(jsonReader io.Reader, header http.Header, message protor
 
 	enumFields := GetEnumFields(message)
 	return CheckJSONEnumFields(payload, enumFields)
-}
-
-// CheckContentType checks header to ensure the expected JSON content type is specified.
-func CheckContentType(header http.Header) error {
-	if content, ok := header[headerNameContentType]; !ok || len(content) != 1 || !strings.HasPrefix(strings.ToLower(strings.TrimSpace(content[0])), headerValueContentTypeJSON) {
-		return fmt.Errorf("(HeaderContentTypeError) did not find expected HTTP header %q: %q", headerNameContentType, headerValueContentTypeJSON)
-	}
-	return nil
 }
 
 // CheckFieldNames checks that the field names in the JSON request body are properly formatted
@@ -93,7 +89,7 @@ func CheckJSONEnumFields(payload jsonPayload, fieldsToCheck [][]protoreflect.Nam
 		}
 	}
 	if len(badFields) > 0 {
-		return fmt.Errorf("badly transcoded enum values in fields: %v", badFields)
+		return fmt.Errorf("(EnumEncodingError) badly transcoded enum values in fields: %v", badFields)
 	}
 	return nil
 }
