@@ -96,16 +96,6 @@ func CompileProtos(version string) {
 			"cmd/gapic-showcase/wait.go",
 			"s/EndEnd_time/EndEndTime/g",
 		},
-		// Fixes a name collision with the operation helper WaitOperation by renaming the mixin method.
-		{
-			"client/echo_client.go",
-			"1,/WaitOperation(ctx/{s/WaitOperation(ctx/WaitOperationMixin(ctx/;}",
-		},
-		// Fixes a name collision with the operation helper WaitOperation by renaming the mixin method.
-		{
-			"client/echo_client_example_test.go",
-			"1,/WaitOperation(ctx/{s/WaitOperation(ctx/WaitOperationMixin(ctx/;}",
-		},
 	}
 	command = []string{
 		"sed",
