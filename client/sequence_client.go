@@ -54,10 +54,9 @@ type SequenceCallOptions struct {
 	GetOperation       []gax.CallOption
 	DeleteOperation    []gax.CallOption
 	CancelOperation    []gax.CallOption
-	WaitOperation      []gax.CallOption
 }
 
-func defaultSequenceClientOptions() []option.ClientOption {
+func defaultSequenceGRPCClientOptions() []option.ClientOption {
 	return []option.ClientOption{
 		internaloption.WithDefaultEndpoint("localhost:7469"),
 		internaloption.WithDefaultMTLSEndpoint("localhost:7469"),
@@ -94,19 +93,132 @@ func defaultSequenceCallOptions() *SequenceCallOptions {
 		GetOperation:       []gax.CallOption{},
 		DeleteOperation:    []gax.CallOption{},
 		CancelOperation:    []gax.CallOption{},
-		WaitOperation:      []gax.CallOption{},
 	}
 }
 
+// internalSequenceClient is an interface that defines the methods availaible from Client Libraries Showcase API.
+type internalSequenceClient interface {
+	Close() error
+	setGoogleClientInfo(...string)
+	Connection() *grpc.ClientConn
+	CreateSequence(context.Context, *genprotopb.CreateSequenceRequest, ...gax.CallOption) (*genprotopb.Sequence, error)
+	GetSequenceReport(context.Context, *genprotopb.GetSequenceReportRequest, ...gax.CallOption) (*genprotopb.SequenceReport, error)
+	AttemptSequence(context.Context, *genprotopb.AttemptSequenceRequest, ...gax.CallOption) error
+	ListLocations(context.Context, *locationpb.ListLocationsRequest, ...gax.CallOption) *LocationIterator
+	GetLocation(context.Context, *locationpb.GetLocationRequest, ...gax.CallOption) (*locationpb.Location, error)
+	SetIamPolicy(context.Context, *iampb.SetIamPolicyRequest, ...gax.CallOption) (*iampb.Policy, error)
+	GetIamPolicy(context.Context, *iampb.GetIamPolicyRequest, ...gax.CallOption) (*iampb.Policy, error)
+	TestIamPermissions(context.Context, *iampb.TestIamPermissionsRequest, ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error)
+	ListOperations(context.Context, *longrunningpb.ListOperationsRequest, ...gax.CallOption) *OperationIterator
+	GetOperation(context.Context, *longrunningpb.GetOperationRequest, ...gax.CallOption) (*longrunningpb.Operation, error)
+	DeleteOperation(context.Context, *longrunningpb.DeleteOperationRequest, ...gax.CallOption) error
+	CancelOperation(context.Context, *longrunningpb.CancelOperationRequest, ...gax.CallOption) error
+}
+
 // SequenceClient is a client for interacting with Client Libraries Showcase API.
-//
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 type SequenceClient struct {
+	// The internal transport-dependent client.
+	internalClient internalSequenceClient
+
+	// The call options for this service.
+	CallOptions *SequenceCallOptions
+}
+
+// Wrapper methods routed to the internal client.
+
+// Close closes the connection to the API service. The user should invoke this when
+// the client is no longer required.
+func (c *SequenceClient) Close() error {
+	return c.internalClient.Close()
+}
+
+// setGoogleClientInfo sets the name and version of the application in
+// the `x-goog-api-client` header passed on each request. Intended for
+// use by Google-written clients.
+func (c *SequenceClient) setGoogleClientInfo(...string) {
+	c.internalClient.setGoogleClientInfo()
+}
+
+// Connection returns a connection to the API service.
+//
+// Deprecated.
+func (c *SequenceClient) Connection() *grpc.ClientConn {
+	return c.internalClient.Connection()
+}
+
+// CreateSequence creates a sequence.
+func (c *SequenceClient) CreateSequence(ctx context.Context, req *genprotopb.CreateSequenceRequest, opts ...gax.CallOption) (*genprotopb.Sequence, error) {
+	return c.internalClient.CreateSequence(ctx, req, opts...)
+}
+
+// GetSequenceReport retrieves a sequence.
+func (c *SequenceClient) GetSequenceReport(ctx context.Context, req *genprotopb.GetSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.SequenceReport, error) {
+	return c.internalClient.GetSequenceReport(ctx, req, opts...)
+}
+
+// AttemptSequence attempts a sequence.
+func (c *SequenceClient) AttemptSequence(ctx context.Context, req *genprotopb.AttemptSequenceRequest, opts ...gax.CallOption) error {
+	return c.internalClient.AttemptSequence(ctx, req, opts...)
+}
+
+// ListLocations is a utility method from google.cloud.location.Locations.
+func (c *SequenceClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
+	return c.internalClient.ListLocations(ctx, req, opts...)
+}
+
+// GetLocation is a utility method from google.cloud.location.Locations.
+func (c *SequenceClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
+	return c.internalClient.GetLocation(ctx, req, opts...)
+}
+
+// SetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
+func (c *SequenceClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
+	return c.internalClient.SetIamPolicy(ctx, req, opts...)
+}
+
+// GetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
+func (c *SequenceClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
+	return c.internalClient.GetIamPolicy(ctx, req, opts...)
+}
+
+// TestIamPermissions is a utility method from google.iam.v1.IAMPolicy.
+func (c *SequenceClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
+	return c.internalClient.TestIamPermissions(ctx, req, opts...)
+}
+
+// ListOperations is a utility method from google.longrunning.Operations.
+func (c *SequenceClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
+	return c.internalClient.ListOperations(ctx, req, opts...)
+}
+
+// GetOperation is a utility method from google.longrunning.Operations.
+func (c *SequenceClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
+	return c.internalClient.GetOperation(ctx, req, opts...)
+}
+
+// DeleteOperation is a utility method from google.longrunning.Operations.
+func (c *SequenceClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
+	return c.internalClient.DeleteOperation(ctx, req, opts...)
+}
+
+// CancelOperation is a utility method from google.longrunning.Operations.
+func (c *SequenceClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
+	return c.internalClient.CancelOperation(ctx, req, opts...)
+}
+
+// sequenceGRPCClient is a client for interacting with Client Libraries Showcase API over gRPC transport.
+//
+// Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
+type sequenceGRPCClient struct {
 	// Connection pool of gRPC connections to the service.
 	connPool gtransport.ConnPool
 
 	// flag to opt out of default deadlines via GOOGLE_API_GO_EXPERIMENTAL_DISABLE_DEFAULT_DEADLINE
 	disableDeadlines bool
+
+	// Points back to the CallOptions field of the containing SequenceClient
+	CallOptions **SequenceCallOptions
 
 	// The gRPC API client.
 	sequenceClient genprotopb.SequenceServiceClient
@@ -117,18 +229,14 @@ type SequenceClient struct {
 
 	locationsClient locationpb.LocationsClient
 
-	// The call options for this service.
-	CallOptions *SequenceCallOptions
-
 	// The x-goog-* metadata to be sent with each request.
 	xGoogMetadata metadata.MD
 }
 
-// NewSequenceClient creates a new sequence service client.
-//
+// NewSequenceClient creates a new sequence service client based on gRPC.
+// The returned client must be Closed when it is done being used to clean up its underlying connections.
 func NewSequenceClient(ctx context.Context, opts ...option.ClientOption) (*SequenceClient, error) {
-	clientOpts := defaultSequenceClientOptions()
-
+	clientOpts := defaultSequenceGRPCClientOptions()
 	if newSequenceClientHook != nil {
 		hookOpts, err := newSequenceClientHook(ctx, clientHookParams{})
 		if err != nil {
@@ -146,55 +254,54 @@ func NewSequenceClient(ctx context.Context, opts ...option.ClientOption) (*Seque
 	if err != nil {
 		return nil, err
 	}
-	c := &SequenceClient{
+	client := SequenceClient{CallOptions: defaultSequenceCallOptions()}
+
+	c := &sequenceGRPCClient{
 		connPool:         connPool,
 		disableDeadlines: disableDeadlines,
-		CallOptions:      defaultSequenceCallOptions(),
-
-		sequenceClient: genprotopb.NewSequenceServiceClient(connPool),
+		sequenceClient:   genprotopb.NewSequenceServiceClient(connPool),
+		CallOptions:      &client.CallOptions,
+		operationsClient: longrunningpb.NewOperationsClient(connPool),
+		iamPolicyClient:  iampb.NewIAMPolicyClient(connPool),
+		locationsClient:  locationpb.NewLocationsClient(connPool),
 	}
 	c.setGoogleClientInfo()
 
-	c.operationsClient = longrunningpb.NewOperationsClient(connPool)
+	client.internalClient = c
 
-	c.iamPolicyClient = iampb.NewIAMPolicyClient(connPool)
-
-	c.locationsClient = locationpb.NewLocationsClient(connPool)
-
-	return c, nil
+	return &client, nil
 }
 
 // Connection returns a connection to the API service.
 //
 // Deprecated.
-func (c *SequenceClient) Connection() *grpc.ClientConn {
+func (c *sequenceGRPCClient) Connection() *grpc.ClientConn {
 	return c.connPool.Conn()
-}
-
-// Close closes the connection to the API service. The user should invoke this when
-// the client is no longer required.
-func (c *SequenceClient) Close() error {
-	return c.connPool.Close()
 }
 
 // setGoogleClientInfo sets the name and version of the application in
 // the `x-goog-api-client` header passed on each request. Intended for
 // use by Google-written clients.
-func (c *SequenceClient) setGoogleClientInfo(keyval ...string) {
+func (c *sequenceGRPCClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", versionGo()}, keyval...)
 	kv = append(kv, "gapic", versionClient, "gax", gax.Version, "grpc", grpc.Version)
 	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
 }
 
-// CreateSequence creates a sequence.
-func (c *SequenceClient) CreateSequence(ctx context.Context, req *genprotopb.CreateSequenceRequest, opts ...gax.CallOption) (*genprotopb.Sequence, error) {
+// Close closes the connection to the API service. The user should invoke this when
+// the client is no longer required.
+func (c *sequenceGRPCClient) Close() error {
+	return c.connPool.Close()
+}
+
+func (c *sequenceGRPCClient) CreateSequence(ctx context.Context, req *genprotopb.CreateSequenceRequest, opts ...gax.CallOption) (*genprotopb.Sequence, error) {
 	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
 		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
 		defer cancel()
 		ctx = cctx
 	}
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
-	opts = append(c.CallOptions.CreateSequence[0:len(c.CallOptions.CreateSequence):len(c.CallOptions.CreateSequence)], opts...)
+	opts = append((*c.CallOptions).CreateSequence[0:len((*c.CallOptions).CreateSequence):len((*c.CallOptions).CreateSequence)], opts...)
 	var resp *genprotopb.Sequence
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -207,8 +314,7 @@ func (c *SequenceClient) CreateSequence(ctx context.Context, req *genprotopb.Cre
 	return resp, nil
 }
 
-// GetSequenceReport retrieves a sequence.
-func (c *SequenceClient) GetSequenceReport(ctx context.Context, req *genprotopb.GetSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.SequenceReport, error) {
+func (c *sequenceGRPCClient) GetSequenceReport(ctx context.Context, req *genprotopb.GetSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.SequenceReport, error) {
 	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
 		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
 		defer cancel()
@@ -216,7 +322,7 @@ func (c *SequenceClient) GetSequenceReport(ctx context.Context, req *genprotopb.
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.GetSequenceReport[0:len(c.CallOptions.GetSequenceReport):len(c.CallOptions.GetSequenceReport)], opts...)
+	opts = append((*c.CallOptions).GetSequenceReport[0:len((*c.CallOptions).GetSequenceReport):len((*c.CallOptions).GetSequenceReport)], opts...)
 	var resp *genprotopb.SequenceReport
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -229,8 +335,7 @@ func (c *SequenceClient) GetSequenceReport(ctx context.Context, req *genprotopb.
 	return resp, nil
 }
 
-// AttemptSequence attempts a sequence.
-func (c *SequenceClient) AttemptSequence(ctx context.Context, req *genprotopb.AttemptSequenceRequest, opts ...gax.CallOption) error {
+func (c *sequenceGRPCClient) AttemptSequence(ctx context.Context, req *genprotopb.AttemptSequenceRequest, opts ...gax.CallOption) error {
 	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
 		cctx, cancel := context.WithTimeout(ctx, 10000*time.Millisecond)
 		defer cancel()
@@ -238,7 +343,7 @@ func (c *SequenceClient) AttemptSequence(ctx context.Context, req *genprotopb.At
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.AttemptSequence[0:len(c.CallOptions.AttemptSequence):len(c.CallOptions.AttemptSequence)], opts...)
+	opts = append((*c.CallOptions).AttemptSequence[0:len((*c.CallOptions).AttemptSequence):len((*c.CallOptions).AttemptSequence)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		_, err = c.sequenceClient.AttemptSequence(ctx, req, settings.GRPC...)
@@ -247,10 +352,9 @@ func (c *SequenceClient) AttemptSequence(ctx context.Context, req *genprotopb.At
 	return err
 }
 
-func (c *SequenceClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
-	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.ListLocations[0:len(c.CallOptions.ListLocations):len(c.CallOptions.ListLocations)], opts...)
+func (c *sequenceGRPCClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).ListLocations[0:len((*c.CallOptions).ListLocations):len((*c.CallOptions).ListLocations)], opts...)
 	it := &LocationIterator{}
 	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
@@ -287,10 +391,9 @@ func (c *SequenceClient) ListLocations(ctx context.Context, req *locationpb.List
 	return it
 }
 
-func (c *SequenceClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
-	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.GetLocation[0:len(c.CallOptions.GetLocation):len(c.CallOptions.GetLocation)], opts...)
+func (c *sequenceGRPCClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).GetLocation[0:len((*c.CallOptions).GetLocation):len((*c.CallOptions).GetLocation)], opts...)
 	var resp *locationpb.Location
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -303,10 +406,9 @@ func (c *SequenceClient) GetLocation(ctx context.Context, req *locationpb.GetLoc
 	return resp, nil
 }
 
-func (c *SequenceClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
-	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.SetIamPolicy[0:len(c.CallOptions.SetIamPolicy):len(c.CallOptions.SetIamPolicy)], opts...)
+func (c *sequenceGRPCClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).SetIamPolicy[0:len((*c.CallOptions).SetIamPolicy):len((*c.CallOptions).SetIamPolicy)], opts...)
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -319,10 +421,9 @@ func (c *SequenceClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPoli
 	return resp, nil
 }
 
-func (c *SequenceClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
-	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.GetIamPolicy[0:len(c.CallOptions.GetIamPolicy):len(c.CallOptions.GetIamPolicy)], opts...)
+func (c *sequenceGRPCClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).GetIamPolicy[0:len((*c.CallOptions).GetIamPolicy):len((*c.CallOptions).GetIamPolicy)], opts...)
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -335,10 +436,9 @@ func (c *SequenceClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPoli
 	return resp, nil
 }
 
-func (c *SequenceClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
-	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.TestIamPermissions[0:len(c.CallOptions.TestIamPermissions):len(c.CallOptions.TestIamPermissions)], opts...)
+func (c *sequenceGRPCClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).TestIamPermissions[0:len((*c.CallOptions).TestIamPermissions):len((*c.CallOptions).TestIamPermissions)], opts...)
 	var resp *iampb.TestIamPermissionsResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -351,10 +451,9 @@ func (c *SequenceClient) TestIamPermissions(ctx context.Context, req *iampb.Test
 	return resp, nil
 }
 
-func (c *SequenceClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
-	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.ListOperations[0:len(c.CallOptions.ListOperations):len(c.CallOptions.ListOperations)], opts...)
+func (c *sequenceGRPCClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).ListOperations[0:len((*c.CallOptions).ListOperations):len((*c.CallOptions).ListOperations)], opts...)
 	it := &OperationIterator{}
 	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
@@ -391,10 +490,9 @@ func (c *SequenceClient) ListOperations(ctx context.Context, req *longrunningpb.
 	return it
 }
 
-func (c *SequenceClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
-	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.GetOperation[0:len(c.CallOptions.GetOperation):len(c.CallOptions.GetOperation)], opts...)
+func (c *sequenceGRPCClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).GetOperation[0:len((*c.CallOptions).GetOperation):len((*c.CallOptions).GetOperation)], opts...)
 	var resp *longrunningpb.Operation
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -407,10 +505,9 @@ func (c *SequenceClient) GetOperation(ctx context.Context, req *longrunningpb.Ge
 	return resp, nil
 }
 
-func (c *SequenceClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
-	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.DeleteOperation[0:len(c.CallOptions.DeleteOperation):len(c.CallOptions.DeleteOperation)], opts...)
+func (c *sequenceGRPCClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).DeleteOperation[0:len((*c.CallOptions).DeleteOperation):len((*c.CallOptions).DeleteOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		_, err = c.operationsClient.DeleteOperation(ctx, req, settings.GRPC...)
@@ -419,29 +516,13 @@ func (c *SequenceClient) DeleteOperation(ctx context.Context, req *longrunningpb
 	return err
 }
 
-func (c *SequenceClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
-	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
-	opts = append(c.CallOptions.CancelOperation[0:len(c.CallOptions.CancelOperation):len(c.CallOptions.CancelOperation)], opts...)
+func (c *sequenceGRPCClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).CancelOperation[0:len((*c.CallOptions).CancelOperation):len((*c.CallOptions).CancelOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		_, err = c.operationsClient.CancelOperation(ctx, req, settings.GRPC...)
 		return err
 	}, opts...)
 	return err
-}
-
-func (c *SequenceClient) WaitOperation(ctx context.Context, req *longrunningpb.WaitOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
-	opts = append(c.CallOptions.WaitOperation[0:len(c.CallOptions.WaitOperation):len(c.CallOptions.WaitOperation)], opts...)
-	var resp *longrunningpb.Operation
-	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
-		var err error
-		resp, err = c.operationsClient.WaitOperation(ctx, req, settings.GRPC...)
-		return err
-	}, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
 }

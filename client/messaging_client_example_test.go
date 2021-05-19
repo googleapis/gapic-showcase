@@ -34,18 +34,19 @@ func ExampleNewMessagingClient() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
+
 	// TODO: Use client.
 	_ = c
 }
 
 func ExampleMessagingClient_CreateRoom() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.CreateRoomRequest{
 		// TODO: Fill request struct fields.
@@ -59,13 +60,12 @@ func ExampleMessagingClient_CreateRoom() {
 }
 
 func ExampleMessagingClient_GetRoom() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.GetRoomRequest{
 		// TODO: Fill request struct fields.
@@ -79,13 +79,12 @@ func ExampleMessagingClient_GetRoom() {
 }
 
 func ExampleMessagingClient_UpdateRoom() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.UpdateRoomRequest{
 		// TODO: Fill request struct fields.
@@ -104,6 +103,7 @@ func ExampleMessagingClient_DeleteRoom() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.DeleteRoomRequest{
 		// TODO: Fill request struct fields.
@@ -115,14 +115,12 @@ func ExampleMessagingClient_DeleteRoom() {
 }
 
 func ExampleMessagingClient_ListRooms() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-	// import "google.golang.org/api/iterator"
-
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.ListRoomsRequest{
 		// TODO: Fill request struct fields.
@@ -142,13 +140,12 @@ func ExampleMessagingClient_ListRooms() {
 }
 
 func ExampleMessagingClient_CreateBlurb() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.CreateBlurbRequest{
 		// TODO: Fill request struct fields.
@@ -162,13 +159,12 @@ func ExampleMessagingClient_CreateBlurb() {
 }
 
 func ExampleMessagingClient_GetBlurb() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.GetBlurbRequest{
 		// TODO: Fill request struct fields.
@@ -182,13 +178,12 @@ func ExampleMessagingClient_GetBlurb() {
 }
 
 func ExampleMessagingClient_UpdateBlurb() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.UpdateBlurbRequest{
 		// TODO: Fill request struct fields.
@@ -207,6 +202,7 @@ func ExampleMessagingClient_DeleteBlurb() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.DeleteBlurbRequest{
 		// TODO: Fill request struct fields.
@@ -218,14 +214,12 @@ func ExampleMessagingClient_DeleteBlurb() {
 }
 
 func ExampleMessagingClient_ListBlurbs() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-	// import "google.golang.org/api/iterator"
-
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.ListBlurbsRequest{
 		// TODO: Fill request struct fields.
@@ -245,13 +239,12 @@ func ExampleMessagingClient_ListBlurbs() {
 }
 
 func ExampleMessagingClient_SearchBlurbs() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.SearchBlurbsRequest{
 		// TODO: Fill request struct fields.
@@ -270,13 +263,12 @@ func ExampleMessagingClient_SearchBlurbs() {
 }
 
 func ExampleMessagingClient_Connect() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 	stream, err := c.Connect(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -306,14 +298,12 @@ func ExampleMessagingClient_Connect() {
 }
 
 func ExampleMessagingClient_ListLocations() {
-	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
-	// import "google.golang.org/api/iterator"
-
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &locationpb.ListLocationsRequest{
 		// TODO: Fill request struct fields.
@@ -333,13 +323,12 @@ func ExampleMessagingClient_ListLocations() {
 }
 
 func ExampleMessagingClient_GetLocation() {
-	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
-
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &locationpb.GetLocationRequest{
 		// TODO: Fill request struct fields.
@@ -353,13 +342,12 @@ func ExampleMessagingClient_GetLocation() {
 }
 
 func ExampleMessagingClient_SetIamPolicy() {
-	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
-
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &iampb.SetIamPolicyRequest{
 		// TODO: Fill request struct fields.
@@ -373,13 +361,12 @@ func ExampleMessagingClient_SetIamPolicy() {
 }
 
 func ExampleMessagingClient_GetIamPolicy() {
-	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
-
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &iampb.GetIamPolicyRequest{
 		// TODO: Fill request struct fields.
@@ -393,13 +380,12 @@ func ExampleMessagingClient_GetIamPolicy() {
 }
 
 func ExampleMessagingClient_TestIamPermissions() {
-	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
-
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &iampb.TestIamPermissionsRequest{
 		// TODO: Fill request struct fields.
@@ -413,14 +399,12 @@ func ExampleMessagingClient_TestIamPermissions() {
 }
 
 func ExampleMessagingClient_ListOperations() {
-	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
-	// import "google.golang.org/api/iterator"
-
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.ListOperationsRequest{
 		// TODO: Fill request struct fields.
@@ -440,13 +424,12 @@ func ExampleMessagingClient_ListOperations() {
 }
 
 func ExampleMessagingClient_GetOperation() {
-	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
-
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.GetOperationRequest{
 		// TODO: Fill request struct fields.
@@ -465,6 +448,7 @@ func ExampleMessagingClient_DeleteOperation() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.DeleteOperationRequest{
 		// TODO: Fill request struct fields.
@@ -481,6 +465,7 @@ func ExampleMessagingClient_CancelOperation() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.CancelOperationRequest{
 		// TODO: Fill request struct fields.
@@ -489,24 +474,4 @@ func ExampleMessagingClient_CancelOperation() {
 	if err != nil {
 		// TODO: Handle error.
 	}
-}
-
-func ExampleMessagingClient_WaitOperation() {
-	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
-
-	ctx := context.Background()
-	c, err := client.NewMessagingClient(ctx)
-	if err != nil {
-		// TODO: Handle error.
-	}
-
-	req := &longrunningpb.WaitOperationRequest{
-		// TODO: Fill request struct fields.
-	}
-	resp, err := c.WaitOperation(ctx, req)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	// TODO: Use resp.
-	_ = resp
 }

@@ -33,18 +33,19 @@ func ExampleNewTestingClient() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
+
 	// TODO: Use client.
 	_ = c
 }
 
 func ExampleTestingClient_CreateSession() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.CreateSessionRequest{
 		// TODO: Fill request struct fields.
@@ -58,13 +59,12 @@ func ExampleTestingClient_CreateSession() {
 }
 
 func ExampleTestingClient_GetSession() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.GetSessionRequest{
 		// TODO: Fill request struct fields.
@@ -78,14 +78,12 @@ func ExampleTestingClient_GetSession() {
 }
 
 func ExampleTestingClient_ListSessions() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-	// import "google.golang.org/api/iterator"
-
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.ListSessionsRequest{
 		// TODO: Fill request struct fields.
@@ -110,6 +108,7 @@ func ExampleTestingClient_DeleteSession() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.DeleteSessionRequest{
 		// TODO: Fill request struct fields.
@@ -121,13 +120,12 @@ func ExampleTestingClient_DeleteSession() {
 }
 
 func ExampleTestingClient_ReportSession() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.ReportSessionRequest{
 		// TODO: Fill request struct fields.
@@ -141,14 +139,12 @@ func ExampleTestingClient_ReportSession() {
 }
 
 func ExampleTestingClient_ListTests() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-	// import "google.golang.org/api/iterator"
-
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.ListTestsRequest{
 		// TODO: Fill request struct fields.
@@ -173,6 +169,7 @@ func ExampleTestingClient_DeleteTest() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.DeleteTestRequest{
 		// TODO: Fill request struct fields.
@@ -184,13 +181,12 @@ func ExampleTestingClient_DeleteTest() {
 }
 
 func ExampleTestingClient_VerifyTest() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.VerifyTestRequest{
 		// TODO: Fill request struct fields.
@@ -204,14 +200,12 @@ func ExampleTestingClient_VerifyTest() {
 }
 
 func ExampleTestingClient_ListLocations() {
-	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
-	// import "google.golang.org/api/iterator"
-
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &locationpb.ListLocationsRequest{
 		// TODO: Fill request struct fields.
@@ -231,13 +225,12 @@ func ExampleTestingClient_ListLocations() {
 }
 
 func ExampleTestingClient_GetLocation() {
-	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
-
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &locationpb.GetLocationRequest{
 		// TODO: Fill request struct fields.
@@ -251,13 +244,12 @@ func ExampleTestingClient_GetLocation() {
 }
 
 func ExampleTestingClient_SetIamPolicy() {
-	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
-
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &iampb.SetIamPolicyRequest{
 		// TODO: Fill request struct fields.
@@ -271,13 +263,12 @@ func ExampleTestingClient_SetIamPolicy() {
 }
 
 func ExampleTestingClient_GetIamPolicy() {
-	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
-
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &iampb.GetIamPolicyRequest{
 		// TODO: Fill request struct fields.
@@ -291,13 +282,12 @@ func ExampleTestingClient_GetIamPolicy() {
 }
 
 func ExampleTestingClient_TestIamPermissions() {
-	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
-
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &iampb.TestIamPermissionsRequest{
 		// TODO: Fill request struct fields.
@@ -311,14 +301,12 @@ func ExampleTestingClient_TestIamPermissions() {
 }
 
 func ExampleTestingClient_ListOperations() {
-	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
-	// import "google.golang.org/api/iterator"
-
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.ListOperationsRequest{
 		// TODO: Fill request struct fields.
@@ -338,13 +326,12 @@ func ExampleTestingClient_ListOperations() {
 }
 
 func ExampleTestingClient_GetOperation() {
-	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
-
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.GetOperationRequest{
 		// TODO: Fill request struct fields.
@@ -363,6 +350,7 @@ func ExampleTestingClient_DeleteOperation() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.DeleteOperationRequest{
 		// TODO: Fill request struct fields.
@@ -379,6 +367,7 @@ func ExampleTestingClient_CancelOperation() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.CancelOperationRequest{
 		// TODO: Fill request struct fields.
@@ -387,24 +376,4 @@ func ExampleTestingClient_CancelOperation() {
 	if err != nil {
 		// TODO: Handle error.
 	}
-}
-
-func ExampleTestingClient_WaitOperation() {
-	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
-
-	ctx := context.Background()
-	c, err := client.NewTestingClient(ctx)
-	if err != nil {
-		// TODO: Handle error.
-	}
-
-	req := &longrunningpb.WaitOperationRequest{
-		// TODO: Fill request struct fields.
-	}
-	resp, err := c.WaitOperation(ctx, req)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	// TODO: Use resp.
-	_ = resp
 }

@@ -33,18 +33,19 @@ func ExampleNewIdentityClient() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
+
 	// TODO: Use client.
 	_ = c
 }
 
 func ExampleIdentityClient_CreateUser() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewIdentityClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.CreateUserRequest{
 		// TODO: Fill request struct fields.
@@ -58,13 +59,12 @@ func ExampleIdentityClient_CreateUser() {
 }
 
 func ExampleIdentityClient_GetUser() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewIdentityClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.GetUserRequest{
 		// TODO: Fill request struct fields.
@@ -78,13 +78,12 @@ func ExampleIdentityClient_GetUser() {
 }
 
 func ExampleIdentityClient_UpdateUser() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewIdentityClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.UpdateUserRequest{
 		// TODO: Fill request struct fields.
@@ -103,6 +102,7 @@ func ExampleIdentityClient_DeleteUser() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.DeleteUserRequest{
 		// TODO: Fill request struct fields.
@@ -114,14 +114,12 @@ func ExampleIdentityClient_DeleteUser() {
 }
 
 func ExampleIdentityClient_ListUsers() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-	// import "google.golang.org/api/iterator"
-
 	ctx := context.Background()
 	c, err := client.NewIdentityClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.ListUsersRequest{
 		// TODO: Fill request struct fields.
@@ -141,14 +139,12 @@ func ExampleIdentityClient_ListUsers() {
 }
 
 func ExampleIdentityClient_ListLocations() {
-	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
-	// import "google.golang.org/api/iterator"
-
 	ctx := context.Background()
 	c, err := client.NewIdentityClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &locationpb.ListLocationsRequest{
 		// TODO: Fill request struct fields.
@@ -168,13 +164,12 @@ func ExampleIdentityClient_ListLocations() {
 }
 
 func ExampleIdentityClient_GetLocation() {
-	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
-
 	ctx := context.Background()
 	c, err := client.NewIdentityClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &locationpb.GetLocationRequest{
 		// TODO: Fill request struct fields.
@@ -188,13 +183,12 @@ func ExampleIdentityClient_GetLocation() {
 }
 
 func ExampleIdentityClient_SetIamPolicy() {
-	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
-
 	ctx := context.Background()
 	c, err := client.NewIdentityClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &iampb.SetIamPolicyRequest{
 		// TODO: Fill request struct fields.
@@ -208,13 +202,12 @@ func ExampleIdentityClient_SetIamPolicy() {
 }
 
 func ExampleIdentityClient_GetIamPolicy() {
-	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
-
 	ctx := context.Background()
 	c, err := client.NewIdentityClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &iampb.GetIamPolicyRequest{
 		// TODO: Fill request struct fields.
@@ -228,13 +221,12 @@ func ExampleIdentityClient_GetIamPolicy() {
 }
 
 func ExampleIdentityClient_TestIamPermissions() {
-	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
-
 	ctx := context.Background()
 	c, err := client.NewIdentityClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &iampb.TestIamPermissionsRequest{
 		// TODO: Fill request struct fields.
@@ -248,14 +240,12 @@ func ExampleIdentityClient_TestIamPermissions() {
 }
 
 func ExampleIdentityClient_ListOperations() {
-	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
-	// import "google.golang.org/api/iterator"
-
 	ctx := context.Background()
 	c, err := client.NewIdentityClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.ListOperationsRequest{
 		// TODO: Fill request struct fields.
@@ -275,13 +265,12 @@ func ExampleIdentityClient_ListOperations() {
 }
 
 func ExampleIdentityClient_GetOperation() {
-	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
-
 	ctx := context.Background()
 	c, err := client.NewIdentityClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.GetOperationRequest{
 		// TODO: Fill request struct fields.
@@ -300,6 +289,7 @@ func ExampleIdentityClient_DeleteOperation() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.DeleteOperationRequest{
 		// TODO: Fill request struct fields.
@@ -316,6 +306,7 @@ func ExampleIdentityClient_CancelOperation() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.CancelOperationRequest{
 		// TODO: Fill request struct fields.
@@ -324,24 +315,4 @@ func ExampleIdentityClient_CancelOperation() {
 	if err != nil {
 		// TODO: Handle error.
 	}
-}
-
-func ExampleIdentityClient_WaitOperation() {
-	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
-
-	ctx := context.Background()
-	c, err := client.NewIdentityClient(ctx)
-	if err != nil {
-		// TODO: Handle error.
-	}
-
-	req := &longrunningpb.WaitOperationRequest{
-		// TODO: Fill request struct fields.
-	}
-	resp, err := c.WaitOperation(ctx, req)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	// TODO: Use resp.
-	_ = resp
 }

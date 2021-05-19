@@ -33,18 +33,19 @@ func ExampleNewSequenceClient() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
+
 	// TODO: Use client.
 	_ = c
 }
 
 func ExampleSequenceClient_CreateSequence() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewSequenceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.CreateSequenceRequest{
 		// TODO: Fill request struct fields.
@@ -58,13 +59,12 @@ func ExampleSequenceClient_CreateSequence() {
 }
 
 func ExampleSequenceClient_GetSequenceReport() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewSequenceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.GetSequenceReportRequest{
 		// TODO: Fill request struct fields.
@@ -83,6 +83,7 @@ func ExampleSequenceClient_AttemptSequence() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.AttemptSequenceRequest{
 		// TODO: Fill request struct fields.
@@ -94,14 +95,12 @@ func ExampleSequenceClient_AttemptSequence() {
 }
 
 func ExampleSequenceClient_ListLocations() {
-	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
-	// import "google.golang.org/api/iterator"
-
 	ctx := context.Background()
 	c, err := client.NewSequenceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &locationpb.ListLocationsRequest{
 		// TODO: Fill request struct fields.
@@ -121,13 +120,12 @@ func ExampleSequenceClient_ListLocations() {
 }
 
 func ExampleSequenceClient_GetLocation() {
-	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
-
 	ctx := context.Background()
 	c, err := client.NewSequenceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &locationpb.GetLocationRequest{
 		// TODO: Fill request struct fields.
@@ -141,13 +139,12 @@ func ExampleSequenceClient_GetLocation() {
 }
 
 func ExampleSequenceClient_SetIamPolicy() {
-	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
-
 	ctx := context.Background()
 	c, err := client.NewSequenceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &iampb.SetIamPolicyRequest{
 		// TODO: Fill request struct fields.
@@ -161,13 +158,12 @@ func ExampleSequenceClient_SetIamPolicy() {
 }
 
 func ExampleSequenceClient_GetIamPolicy() {
-	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
-
 	ctx := context.Background()
 	c, err := client.NewSequenceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &iampb.GetIamPolicyRequest{
 		// TODO: Fill request struct fields.
@@ -181,13 +177,12 @@ func ExampleSequenceClient_GetIamPolicy() {
 }
 
 func ExampleSequenceClient_TestIamPermissions() {
-	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
-
 	ctx := context.Background()
 	c, err := client.NewSequenceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &iampb.TestIamPermissionsRequest{
 		// TODO: Fill request struct fields.
@@ -201,14 +196,12 @@ func ExampleSequenceClient_TestIamPermissions() {
 }
 
 func ExampleSequenceClient_ListOperations() {
-	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
-	// import "google.golang.org/api/iterator"
-
 	ctx := context.Background()
 	c, err := client.NewSequenceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.ListOperationsRequest{
 		// TODO: Fill request struct fields.
@@ -228,13 +221,12 @@ func ExampleSequenceClient_ListOperations() {
 }
 
 func ExampleSequenceClient_GetOperation() {
-	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
-
 	ctx := context.Background()
 	c, err := client.NewSequenceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.GetOperationRequest{
 		// TODO: Fill request struct fields.
@@ -253,6 +245,7 @@ func ExampleSequenceClient_DeleteOperation() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.DeleteOperationRequest{
 		// TODO: Fill request struct fields.
@@ -269,6 +262,7 @@ func ExampleSequenceClient_CancelOperation() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.CancelOperationRequest{
 		// TODO: Fill request struct fields.
@@ -277,24 +271,4 @@ func ExampleSequenceClient_CancelOperation() {
 	if err != nil {
 		// TODO: Handle error.
 	}
-}
-
-func ExampleSequenceClient_WaitOperation() {
-	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
-
-	ctx := context.Background()
-	c, err := client.NewSequenceClient(ctx)
-	if err != nil {
-		// TODO: Handle error.
-	}
-
-	req := &longrunningpb.WaitOperationRequest{
-		// TODO: Fill request struct fields.
-	}
-	resp, err := c.WaitOperation(ctx, req)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	// TODO: Use resp.
-	_ = resp
 }

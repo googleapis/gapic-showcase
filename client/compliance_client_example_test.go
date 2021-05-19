@@ -33,18 +33,19 @@ func ExampleNewComplianceClient() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
+
 	// TODO: Use client.
 	_ = c
 }
 
 func ExampleComplianceClient_RepeatDataBody() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.RepeatRequest{
 		// TODO: Fill request struct fields.
@@ -58,13 +59,12 @@ func ExampleComplianceClient_RepeatDataBody() {
 }
 
 func ExampleComplianceClient_RepeatDataBodyInfo() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.RepeatRequest{
 		// TODO: Fill request struct fields.
@@ -78,13 +78,12 @@ func ExampleComplianceClient_RepeatDataBodyInfo() {
 }
 
 func ExampleComplianceClient_RepeatDataQuery() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.RepeatRequest{
 		// TODO: Fill request struct fields.
@@ -98,13 +97,12 @@ func ExampleComplianceClient_RepeatDataQuery() {
 }
 
 func ExampleComplianceClient_RepeatDataSimplePath() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.RepeatRequest{
 		// TODO: Fill request struct fields.
@@ -118,13 +116,12 @@ func ExampleComplianceClient_RepeatDataSimplePath() {
 }
 
 func ExampleComplianceClient_RepeatDataPathResource() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.RepeatRequest{
 		// TODO: Fill request struct fields.
@@ -138,13 +135,12 @@ func ExampleComplianceClient_RepeatDataPathResource() {
 }
 
 func ExampleComplianceClient_RepeatDataPathTrailingResource() {
-	// import genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &genprotopb.RepeatRequest{
 		// TODO: Fill request struct fields.
@@ -158,14 +154,12 @@ func ExampleComplianceClient_RepeatDataPathTrailingResource() {
 }
 
 func ExampleComplianceClient_ListLocations() {
-	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
-	// import "google.golang.org/api/iterator"
-
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &locationpb.ListLocationsRequest{
 		// TODO: Fill request struct fields.
@@ -185,13 +179,12 @@ func ExampleComplianceClient_ListLocations() {
 }
 
 func ExampleComplianceClient_GetLocation() {
-	// import locationpb "google.golang.org/genproto/googleapis/cloud/location"
-
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &locationpb.GetLocationRequest{
 		// TODO: Fill request struct fields.
@@ -205,13 +198,12 @@ func ExampleComplianceClient_GetLocation() {
 }
 
 func ExampleComplianceClient_SetIamPolicy() {
-	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
-
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &iampb.SetIamPolicyRequest{
 		// TODO: Fill request struct fields.
@@ -225,13 +217,12 @@ func ExampleComplianceClient_SetIamPolicy() {
 }
 
 func ExampleComplianceClient_GetIamPolicy() {
-	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
-
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &iampb.GetIamPolicyRequest{
 		// TODO: Fill request struct fields.
@@ -245,13 +236,12 @@ func ExampleComplianceClient_GetIamPolicy() {
 }
 
 func ExampleComplianceClient_TestIamPermissions() {
-	// import iampb "google.golang.org/genproto/googleapis/iam/v1"
-
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &iampb.TestIamPermissionsRequest{
 		// TODO: Fill request struct fields.
@@ -265,14 +255,12 @@ func ExampleComplianceClient_TestIamPermissions() {
 }
 
 func ExampleComplianceClient_ListOperations() {
-	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
-	// import "google.golang.org/api/iterator"
-
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.ListOperationsRequest{
 		// TODO: Fill request struct fields.
@@ -292,13 +280,12 @@ func ExampleComplianceClient_ListOperations() {
 }
 
 func ExampleComplianceClient_GetOperation() {
-	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
-
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.GetOperationRequest{
 		// TODO: Fill request struct fields.
@@ -317,6 +304,7 @@ func ExampleComplianceClient_DeleteOperation() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.DeleteOperationRequest{
 		// TODO: Fill request struct fields.
@@ -333,6 +321,7 @@ func ExampleComplianceClient_CancelOperation() {
 	if err != nil {
 		// TODO: Handle error.
 	}
+	defer c.Close()
 
 	req := &longrunningpb.CancelOperationRequest{
 		// TODO: Fill request struct fields.
@@ -341,24 +330,4 @@ func ExampleComplianceClient_CancelOperation() {
 	if err != nil {
 		// TODO: Handle error.
 	}
-}
-
-func ExampleComplianceClient_WaitOperation() {
-	// import longrunningpb "google.golang.org/genproto/googleapis/longrunning"
-
-	ctx := context.Background()
-	c, err := client.NewComplianceClient(ctx)
-	if err != nil {
-		// TODO: Handle error.
-	}
-
-	req := &longrunningpb.WaitOperationRequest{
-		// TODO: Fill request struct fields.
-	}
-	resp, err := c.WaitOperation(ctx, req)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	// TODO: Use resp.
-	_ = resp
 }
