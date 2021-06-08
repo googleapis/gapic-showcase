@@ -28,3 +28,21 @@ git pull origin master
 git tag v{VERSION}
 git push origin v{VERSION}
 ```
+
+7. Build a Docker image.
+```sh
+docker build -t gcr.io/gapic-images/gapic-showcase:latest .
+```
+
+8. Ensure your Docker daemon is authenticated with your GCP credentials.
+```sh
+gcloud auth login
+gcloud auth configure-docker
+```
+
+9. Tag with the release version and push both the `latest` and the versioned images.
+```sh
+docker tag gcr.io/gapic-images/gapic-showcase:latest gcr.io/gapic-images/gapic-showcase:{VERSION}
+docker push gcr.io/gapic-images/gapic-showcase:lastet
+docker push gcr.io/gapic-images/gapic-showcase:{VERSION}
+```
