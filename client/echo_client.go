@@ -17,8 +17,13 @@
 package client
 
 import (
+	"bytes"
 	"context"
+	"fmt"
+	"io/ioutil"
 	"math"
+	"net/http"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/longrunning"
@@ -30,12 +35,14 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/api/option/internaloption"
 	gtransport "google.golang.org/api/transport/grpc"
+	httptransport "google.golang.org/api/transport/http"
 	locationpb "google.golang.org/genproto/googleapis/cloud/location"
 	iampb "google.golang.org/genproto/googleapis/iam/v1"
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var newEchoClientHook clientHook
@@ -397,6 +404,72 @@ func (c *echoGRPCClient) Close() error {
 	return c.connPool.Close()
 }
 
+// Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
+type echoRESTClient struct {
+	// The http endpoint to connect to.
+	endpoint string
+
+	// The http client.
+	httpClient *http.Client
+
+	// The x-goog-* metadata to be sent with each request.
+	xGoogMetadata metadata.MD
+}
+
+// NewEchoRESTClient creates a new echo rest client.
+//
+// This service is used showcase the four main types of rpcs - unary, server
+// side streaming, client side streaming, and bidirectional streaming. This
+// service also exposes methods that explicitly implement server delay, and
+// paginated calls. Set the ‘showcase-trailer’ metadata key on any method
+// to have the values echoed in the response trailers.
+func NewEchoRESTClient(ctx context.Context, opts ...option.ClientOption) (*EchoClient, error) {
+	clientOpts := defaultEchoRESTClientOptions()
+	httpClient, endpoint, err := httptransport.NewClient(ctx, append(clientOpts, opts...)...)
+	if err != nil {
+		return nil, err
+	}
+
+	c := &echoRESTClient{
+		endpoint:   endpoint,
+		httpClient: httpClient,
+	}
+	c.setGoogleClientInfo()
+
+	return &EchoClient{internalClient: c, CallOptions: defaultEchoCallOptions()}, nil
+}
+
+func defaultEchoRESTClientOptions() []option.ClientOption {
+	return []option.ClientOption{
+		internaloption.WithDefaultEndpoint("localhost:7469"),
+		internaloption.WithDefaultMTLSEndpoint("localhost:7469"),
+		internaloption.WithDefaultAudience("https://localhost/"),
+		internaloption.WithDefaultScopes(DefaultAuthScopes()...),
+	}
+}
+
+// setGoogleClientInfo sets the name and version of the application in
+// the `x-goog-api-client` header passed on each request. Intended for
+// use by Google-written clients.
+func (c *echoRESTClient) setGoogleClientInfo(keyval ...string) {
+	kv := append([]string{"gl-go", versionGo()}, keyval...)
+	kv = append(kv, "gapic", versionClient, "gax", gax.Version, "rest", "UNKNOWN")
+	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
+}
+
+// Close closes the connection to the API service. The user should invoke this when
+// the client is no longer required.
+func (c *echoRESTClient) Close() error {
+	c.httpClient.CloseIdleConnections()
+	return nil
+}
+
+// Connection returns a connection to the API service.
+//
+// Deprecated.
+func (c *echoRESTClient) Connection() *grpc.ClientConn {
+	return nil
+}
 func (c *echoGRPCClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, opts ...gax.CallOption) (*genprotopb.EchoResponse, error) {
 	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
 		cctx, cancel := context.WithTimeout(ctx, 10000*time.Millisecond)
@@ -715,6 +788,599 @@ func (c *echoGRPCClient) CancelOperation(ctx context.Context, req *longrunningpb
 		return err
 	}, opts...)
 	return err
+}
+
+// Echo this method simply echoes the request. This method showcases unary RPCs.
+func (c *echoRESTClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, opts ...gax.CallOption) (*genprotopb.EchoResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetContent() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("content=%v", req.GetContent()))
+	}
+	if req.GetError() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("error=%v", req.GetError()))
+	}
+	if req.GetSeverity() != 0 {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("severity=%v", req.GetSeverity()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s/v1beta1/echo:echo",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &genprotopb.EchoResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// Expand this method splits the given content into words and will pass each word back
+// through the stream. This method showcases server-side streaming RPCs.
+func (c *echoRESTClient) Expand(ctx context.Context, req *genprotopb.ExpandRequest, opts ...gax.CallOption) (genprotopb.Echo_ExpandClient, error) {
+	return nil, fmt.Errorf("Expand not yet supported for REST clients")
+}
+
+// Collect this method will collect the words given to it. When the stream is closed
+// by the client, this method will return the a concatenation of the strings
+// passed to it. This method showcases client-side streaming RPCs.
+func (c *echoRESTClient) Collect(ctx context.Context, opts ...gax.CallOption) (genprotopb.Echo_CollectClient, error) {
+	return nil, fmt.Errorf("Collect not yet supported for REST clients")
+}
+
+// Chat this method, upon receiving a request on the stream, will pass the same
+// content back on the stream. This method showcases bidirectional
+// streaming RPCs.
+func (c *echoRESTClient) Chat(ctx context.Context, opts ...gax.CallOption) (genprotopb.Echo_ChatClient, error) {
+	return nil, fmt.Errorf("Chat not yet supported for REST clients")
+}
+
+// PagedExpand this is similar to the Expand method but instead of returning a stream of
+// expanded words, this method returns a paged list of expanded words.
+func (c *echoRESTClient) PagedExpand(ctx context.Context, req *genprotopb.PagedExpandRequest, opts ...gax.CallOption) *EchoResponseIterator {
+	it := &EchoResponseIterator{}
+	req = proto.Clone(req).(*genprotopb.PagedExpandRequest)
+	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.EchoResponse, string, error) {
+		return nil, "", fmt.Errorf("PagedExpand not yet supported for REST clients")
+	}
+
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.GetPageSize())
+	it.pageInfo.Token = req.GetPageToken()
+
+	return it
+}
+
+// Wait this method will wait for the requested amount of time and then return.
+// This method showcases how a client handles a request timeout.
+func (c *echoRESTClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, opts ...gax.CallOption) (*WaitOperation, error) {
+	return nil, fmt.Errorf("Wait not yet supported for REST clients")
+}
+
+// WaitOperation returns a new WaitOperation from a given name.
+// The name must be that of a previously created WaitOperation, possibly from a different process.
+func (c *echoRESTClient) WaitOperation(name string) *WaitOperation {
+	return &WaitOperation{}
+}
+
+// Block this method will block (wait) for the requested amount of time
+// and then return the response or error.
+// This method showcases how a client handles delays or retries.
+func (c *echoRESTClient) Block(ctx context.Context, req *genprotopb.BlockRequest, opts ...gax.CallOption) (*genprotopb.BlockResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetError() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("error=%v", req.GetError()))
+	}
+	if req.GetResponseDelay() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("responseDelay=%v", req.GetResponseDelay()))
+	}
+	if req.GetSuccess() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("success=%v", req.GetSuccess()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s/v1beta1/echo:block",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &genprotopb.BlockResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// ListLocations is a utility method from google.cloud.location.Locations.
+func (c *echoRESTClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
+	it := &LocationIterator{}
+	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
+	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
+		return nil, "", fmt.Errorf("ListLocations not yet supported for REST clients")
+	}
+
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.GetPageSize())
+	it.pageInfo.Token = req.GetPageToken()
+
+	return it
+}
+
+// GetLocation is a utility method from google.cloud.location.Locations.
+func (c *echoRESTClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &locationpb.Location{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// SetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
+func (c *echoRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetPolicy() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("policy=%v", req.GetPolicy()))
+	}
+	if req.GetResource() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("resource=%v", req.GetResource()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &iampb.Policy{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// GetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
+func (c *echoRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetOptions() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("options=%v", req.GetOptions()))
+	}
+	if req.GetResource() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("resource=%v", req.GetResource()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &iampb.Policy{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// TestIamPermissions is a utility method from google.iam.v1.IAMPolicy.
+func (c *echoRESTClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetPermissions() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("permissions=%v", req.GetPermissions()))
+	}
+	if req.GetResource() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("resource=%v", req.GetResource()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &iampb.TestIamPermissionsResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// ListOperations is a utility method from google.longrunning.Operations.
+func (c *echoRESTClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
+	it := &OperationIterator{}
+	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
+	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
+		return nil, "", fmt.Errorf("ListOperations not yet supported for REST clients")
+	}
+
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.GetPageSize())
+	it.pageInfo.Token = req.GetPageToken()
+
+	return it
+}
+
+// GetOperation is a utility method from google.longrunning.Operations.
+func (c *echoRESTClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &longrunningpb.Operation{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// DeleteOperation is a utility method from google.longrunning.Operations.
+func (c *echoRESTClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
+	// The default (false) for the other options are fine.
+	// Field names should be lowerCamel, not snake.
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true, UseProtoNames: false}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return err
+	}
+
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return err
+	}
+	defer httpRsp.Body.Close()
+	if httpRsp.StatusCode != http.StatusOK {
+		return fmt.Errorf(httpRsp.Status)
+	}
+
+	return nil
+}
+
+// CancelOperation is a utility method from google.longrunning.Operations.
+func (c *echoRESTClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
+	// The default (false) for the other options are fine.
+	// Field names should be lowerCamel, not snake.
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true, UseProtoNames: false}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return err
+	}
+
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return err
+	}
+	defer httpRsp.Body.Close()
+	if httpRsp.StatusCode != http.StatusOK {
+		return fmt.Errorf(httpRsp.Status)
+	}
+
+	return nil
 }
 
 // WaitOperation manages a long-running operation from Wait.

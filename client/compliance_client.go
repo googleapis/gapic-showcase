@@ -17,10 +17,14 @@
 package client
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"math"
+	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/golang/protobuf/proto"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
@@ -29,11 +33,13 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/api/option/internaloption"
 	gtransport "google.golang.org/api/transport/grpc"
+	httptransport "google.golang.org/api/transport/http"
 	locationpb "google.golang.org/genproto/googleapis/cloud/location"
 	iampb "google.golang.org/genproto/googleapis/iam/v1"
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var newComplianceClientHook clientHook
@@ -317,6 +323,69 @@ func (c *complianceGRPCClient) Close() error {
 	return c.connPool.Close()
 }
 
+// Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
+type complianceRESTClient struct {
+	// The http endpoint to connect to.
+	endpoint string
+
+	// The http client.
+	httpClient *http.Client
+
+	// The x-goog-* metadata to be sent with each request.
+	xGoogMetadata metadata.MD
+}
+
+// NewComplianceRESTClient creates a new compliance rest client.
+//
+// This service is used to test that GAPICs can transcode proto3 requests to
+// REST format correctly for various types of HTTP annotations.
+func NewComplianceRESTClient(ctx context.Context, opts ...option.ClientOption) (*ComplianceClient, error) {
+	clientOpts := defaultComplianceRESTClientOptions()
+	httpClient, endpoint, err := httptransport.NewClient(ctx, append(clientOpts, opts...)...)
+	if err != nil {
+		return nil, err
+	}
+
+	c := &complianceRESTClient{
+		endpoint:   endpoint,
+		httpClient: httpClient,
+	}
+	c.setGoogleClientInfo()
+
+	return &ComplianceClient{internalClient: c, CallOptions: defaultComplianceCallOptions()}, nil
+}
+
+func defaultComplianceRESTClientOptions() []option.ClientOption {
+	return []option.ClientOption{
+		internaloption.WithDefaultEndpoint("localhost:7469"),
+		internaloption.WithDefaultMTLSEndpoint("localhost:7469"),
+		internaloption.WithDefaultAudience("https://localhost/"),
+		internaloption.WithDefaultScopes(DefaultAuthScopes()...),
+	}
+}
+
+// setGoogleClientInfo sets the name and version of the application in
+// the `x-goog-api-client` header passed on each request. Intended for
+// use by Google-written clients.
+func (c *complianceRESTClient) setGoogleClientInfo(keyval ...string) {
+	kv := append([]string{"gl-go", versionGo()}, keyval...)
+	kv = append(kv, "gapic", versionClient, "gax", gax.Version, "rest", "UNKNOWN")
+	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
+}
+
+// Close closes the connection to the API service. The user should invoke this when
+// the client is no longer required.
+func (c *complianceRESTClient) Close() error {
+	c.httpClient.CloseIdleConnections()
+	return nil
+}
+
+// Connection returns a connection to the API service.
+//
+// Deprecated.
+func (c *complianceRESTClient) Connection() *grpc.ClientConn {
+	return nil
+}
 func (c *complianceGRPCClient) RepeatDataBody(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append((*c.CallOptions).RepeatDataBody[0:len((*c.CallOptions).RepeatDataBody):len((*c.CallOptions).RepeatDataBody)], opts...)
@@ -583,6 +652,849 @@ func (c *complianceGRPCClient) CancelOperation(ctx context.Context, req *longrun
 		return err
 	}, opts...)
 	return err
+}
+
+// RepeatDataBody this method echoes the ComplianceData request. This method exercises
+// sending the entire request object in the REST body.
+func (c *complianceRESTClient) RepeatDataBody(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetInfo() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("info=%v", req.GetInfo()))
+	}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	if req.GetServerVerify() {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("serverVerify=%v", req.GetServerVerify()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s/v1beta1/repeat:body",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &genprotopb.RepeatResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// RepeatDataBodyInfo this method echoes the ComplianceData request. This method exercises
+// sending the a message-type field in the REST body. Per AIP-127, only
+// top-level, non-repeated fields can be sent this way.
+func (c *complianceRESTClient) RepeatDataBodyInfo(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	body := req.GetInfo()
+	queryParamStrs := []string{}
+	if body.GetFBool() {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fBool=%v", body.GetFBool()))
+	}
+	if body.GetFBytes() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fBytes=%v", body.GetFBytes()))
+	}
+	if body.GetFChild() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fChild=%v", body.GetFChild()))
+	}
+	if body.GetFDouble() != 0 {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fDouble=%v", body.GetFDouble()))
+	}
+	if body.GetFFixed32() != 0 {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fFixed32=%v", body.GetFFixed32()))
+	}
+	if body.GetFFixed64() != 0 {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fFixed64=%v", body.GetFFixed64()))
+	}
+	if body.GetFFloat() != 0 {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fFloat=%v", body.GetFFloat()))
+	}
+	if body.GetFInt32() != 0 {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fInt32=%v", body.GetFInt32()))
+	}
+	if body.GetFInt64() != 0 {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fInt64=%v", body.GetFInt64()))
+	}
+	if body.GetFKingdom() != 0 {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fKingdom=%v", body.GetFKingdom()))
+	}
+	if body.GetFSfixed32() != 0 {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fSfixed32=%v", body.GetFSfixed32()))
+	}
+	if body.GetFSfixed64() != 0 {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fSfixed64=%v", body.GetFSfixed64()))
+	}
+	if body.GetFSint32() != 0 {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fSint32=%v", body.GetFSint32()))
+	}
+	if body.GetFSint64() != 0 {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fSint64=%v", body.GetFSint64()))
+	}
+	if body.GetFString() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fString=%v", body.GetFString()))
+	}
+	if body.GetFUint32() != 0 {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fUint32=%v", body.GetFUint32()))
+	}
+	if body.GetFUint64() != 0 {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fUint64=%v", body.GetFUint64()))
+	}
+	if body.GetPBool() {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("pBool=%v", body.GetPBool()))
+	}
+	if body.GetPChild() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("pChild=%v", body.GetPChild()))
+	}
+	if body.GetPDouble() != 0 {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("pDouble=%v", body.GetPDouble()))
+	}
+	if body.GetPInt32() != 0 {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("pInt32=%v", body.GetPInt32()))
+	}
+	if body.GetPKingdom() != 0 {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("pKingdom=%v", body.GetPKingdom()))
+	}
+	if body.GetPString() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("pString=%v", body.GetPString()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s/v1beta1/repeat:bodyinfo",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &genprotopb.RepeatResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// RepeatDataQuery this method echoes the ComplianceData request. This method exercises
+// sending all request fields as query parameters.
+func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetInfo() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("info=%v", req.GetInfo()))
+	}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	if req.GetServerVerify() {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("serverVerify=%v", req.GetServerVerify()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s/v1beta1/repeat:query",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &genprotopb.RepeatResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// RepeatDataSimplePath this method echoes the ComplianceData request. This method exercises
+// sending some parameters as “simple” path variables (i.e., of the form
+// “/bar/{foo}” rather than “/{foo=bar/*}”), and the rest as query parameters.
+func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetInfo() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("info=%v", req.GetInfo()))
+	}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	if req.GetServerVerify() {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("serverVerify=%v", req.GetServerVerify()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s/v1beta1/repeat/%v/%v/%v/%v/%v:simplepath",
+		c.endpoint,
+		req.GetInfo().GetFString(),
+		req.GetInfo().GetFInt32(),
+		req.GetInfo().GetFDouble(),
+		req.GetInfo().GetFBool(),
+		req.GetInfo().GetFKingdom(),
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &genprotopb.RepeatResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// RepeatDataPathResource same as RepeatDataSimplePath, but with a path resource.
+func (c *complianceRESTClient) RepeatDataPathResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetInfo() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("info=%v", req.GetInfo()))
+	}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	if req.GetServerVerify() {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("serverVerify=%v", req.GetServerVerify()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/*}/bool/%v:pathresource",
+		c.endpoint,
+		req.GetInfo().GetFBool(),
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &genprotopb.RepeatResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// RepeatDataPathTrailingResource same as RepeatDataSimplePath, but with a trailing resource.
+func (c *complianceRESTClient) RepeatDataPathTrailingResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetInfo() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("info=%v", req.GetInfo()))
+	}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	if req.GetServerVerify() {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("serverVerify=%v", req.GetServerVerify()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/**}:pathtrailingresource",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &genprotopb.RepeatResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// ListLocations is a utility method from google.cloud.location.Locations.
+func (c *complianceRESTClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
+	it := &LocationIterator{}
+	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
+	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
+		return nil, "", fmt.Errorf("ListLocations not yet supported for REST clients")
+	}
+
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.GetPageSize())
+	it.pageInfo.Token = req.GetPageToken()
+
+	return it
+}
+
+// GetLocation is a utility method from google.cloud.location.Locations.
+func (c *complianceRESTClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &locationpb.Location{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// SetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
+func (c *complianceRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetPolicy() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("policy=%v", req.GetPolicy()))
+	}
+	if req.GetResource() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("resource=%v", req.GetResource()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &iampb.Policy{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// GetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
+func (c *complianceRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetOptions() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("options=%v", req.GetOptions()))
+	}
+	if req.GetResource() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("resource=%v", req.GetResource()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &iampb.Policy{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// TestIamPermissions is a utility method from google.iam.v1.IAMPolicy.
+func (c *complianceRESTClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetPermissions() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("permissions=%v", req.GetPermissions()))
+	}
+	if req.GetResource() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("resource=%v", req.GetResource()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &iampb.TestIamPermissionsResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// ListOperations is a utility method from google.longrunning.Operations.
+func (c *complianceRESTClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
+	it := &OperationIterator{}
+	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
+	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
+		return nil, "", fmt.Errorf("ListOperations not yet supported for REST clients")
+	}
+
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.GetPageSize())
+	it.pageInfo.Token = req.GetPageToken()
+
+	return it
+}
+
+// GetOperation is a utility method from google.longrunning.Operations.
+func (c *complianceRESTClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &longrunningpb.Operation{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// DeleteOperation is a utility method from google.longrunning.Operations.
+func (c *complianceRESTClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
+	// The default (false) for the other options are fine.
+	// Field names should be lowerCamel, not snake.
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true, UseProtoNames: false}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return err
+	}
+
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return err
+	}
+	defer httpRsp.Body.Close()
+	if httpRsp.StatusCode != http.StatusOK {
+		return fmt.Errorf(httpRsp.Status)
+	}
+
+	return nil
+}
+
+// CancelOperation is a utility method from google.longrunning.Operations.
+func (c *complianceRESTClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
+	// The default (false) for the other options are fine.
+	// Field names should be lowerCamel, not snake.
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true, UseProtoNames: false}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return err
+	}
+
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return err
+	}
+	defer httpRsp.Body.Close()
+	if httpRsp.StatusCode != http.StatusOK {
+		return fmt.Errorf(httpRsp.Status)
+	}
+
+	return nil
 }
 
 // LocationIterator manages a stream of *locationpb.Location.

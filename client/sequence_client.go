@@ -17,10 +17,14 @@
 package client
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"math"
+	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -30,12 +34,14 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/api/option/internaloption"
 	gtransport "google.golang.org/api/transport/grpc"
+	httptransport "google.golang.org/api/transport/http"
 	locationpb "google.golang.org/genproto/googleapis/cloud/location"
 	iampb "google.golang.org/genproto/googleapis/iam/v1"
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var newSequenceClientHook clientHook
@@ -294,6 +300,66 @@ func (c *sequenceGRPCClient) Close() error {
 	return c.connPool.Close()
 }
 
+// Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
+type sequenceRESTClient struct {
+	// The http endpoint to connect to.
+	endpoint string
+
+	// The http client.
+	httpClient *http.Client
+
+	// The x-goog-* metadata to be sent with each request.
+	xGoogMetadata metadata.MD
+}
+
+// NewSequenceRESTClient creates a new sequence service rest client.
+func NewSequenceRESTClient(ctx context.Context, opts ...option.ClientOption) (*SequenceClient, error) {
+	clientOpts := defaultSequenceRESTClientOptions()
+	httpClient, endpoint, err := httptransport.NewClient(ctx, append(clientOpts, opts...)...)
+	if err != nil {
+		return nil, err
+	}
+
+	c := &sequenceRESTClient{
+		endpoint:   endpoint,
+		httpClient: httpClient,
+	}
+	c.setGoogleClientInfo()
+
+	return &SequenceClient{internalClient: c, CallOptions: defaultSequenceCallOptions()}, nil
+}
+
+func defaultSequenceRESTClientOptions() []option.ClientOption {
+	return []option.ClientOption{
+		internaloption.WithDefaultEndpoint("localhost:7469"),
+		internaloption.WithDefaultMTLSEndpoint("localhost:7469"),
+		internaloption.WithDefaultAudience("https://localhost/"),
+		internaloption.WithDefaultScopes(DefaultAuthScopes()...),
+	}
+}
+
+// setGoogleClientInfo sets the name and version of the application in
+// the `x-goog-api-client` header passed on each request. Intended for
+// use by Google-written clients.
+func (c *sequenceRESTClient) setGoogleClientInfo(keyval ...string) {
+	kv := append([]string{"gl-go", versionGo()}, keyval...)
+	kv = append(kv, "gapic", versionClient, "gax", gax.Version, "rest", "UNKNOWN")
+	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
+}
+
+// Close closes the connection to the API service. The user should invoke this when
+// the client is no longer required.
+func (c *sequenceRESTClient) Close() error {
+	c.httpClient.CloseIdleConnections()
+	return nil
+}
+
+// Connection returns a connection to the API service.
+//
+// Deprecated.
+func (c *sequenceRESTClient) Connection() *grpc.ClientConn {
+	return nil
+}
 func (c *sequenceGRPCClient) CreateSequence(ctx context.Context, req *genprotopb.CreateSequenceRequest, opts ...gax.CallOption) (*genprotopb.Sequence, error) {
 	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
 		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
@@ -525,4 +591,577 @@ func (c *sequenceGRPCClient) CancelOperation(ctx context.Context, req *longrunni
 		return err
 	}, opts...)
 	return err
+}
+
+// CreateSequence creates a sequence.
+func (c *sequenceRESTClient) CreateSequence(ctx context.Context, req *genprotopb.CreateSequenceRequest, opts ...gax.CallOption) (*genprotopb.Sequence, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	body := req.GetSequence()
+	queryParamStrs := []string{}
+	if body.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", body.GetName()))
+	}
+	if body.GetResponses() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("responses=%v", body.GetResponses()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s/v1beta1/sequences",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &genprotopb.Sequence{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// GetSequenceReport retrieves a sequence.
+func (c *sequenceRESTClient) GetSequenceReport(ctx context.Context, req *genprotopb.GetSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.SequenceReport, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s/v1beta1/{name=sequences/*/sequenceReport}",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &genprotopb.SequenceReport{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// AttemptSequence attempts a sequence.
+func (c *sequenceRESTClient) AttemptSequence(ctx context.Context, req *genprotopb.AttemptSequenceRequest, opts ...gax.CallOption) error {
+	// The default (false) for the other options are fine.
+	// Field names should be lowerCamel, not snake.
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true, UseProtoNames: false}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s/v1beta1/{name=sequences/*}",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return err
+	}
+
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return err
+	}
+	defer httpRsp.Body.Close()
+	if httpRsp.StatusCode != http.StatusOK {
+		return fmt.Errorf(httpRsp.Status)
+	}
+
+	return nil
+}
+
+// ListLocations is a utility method from google.cloud.location.Locations.
+func (c *sequenceRESTClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
+	it := &LocationIterator{}
+	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
+	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
+		return nil, "", fmt.Errorf("ListLocations not yet supported for REST clients")
+	}
+
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.GetPageSize())
+	it.pageInfo.Token = req.GetPageToken()
+
+	return it
+}
+
+// GetLocation is a utility method from google.cloud.location.Locations.
+func (c *sequenceRESTClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &locationpb.Location{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// SetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
+func (c *sequenceRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetPolicy() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("policy=%v", req.GetPolicy()))
+	}
+	if req.GetResource() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("resource=%v", req.GetResource()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &iampb.Policy{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// GetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
+func (c *sequenceRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetOptions() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("options=%v", req.GetOptions()))
+	}
+	if req.GetResource() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("resource=%v", req.GetResource()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &iampb.Policy{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// TestIamPermissions is a utility method from google.iam.v1.IAMPolicy.
+func (c *sequenceRESTClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetPermissions() != nil {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("permissions=%v", req.GetPermissions()))
+	}
+	if req.GetResource() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("resource=%v", req.GetResource()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &iampb.TestIamPermissionsResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// ListOperations is a utility method from google.longrunning.Operations.
+func (c *sequenceRESTClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
+	it := &OperationIterator{}
+	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
+	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
+		return nil, "", fmt.Errorf("ListOperations not yet supported for REST clients")
+	}
+
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.GetPageSize())
+	it.pageInfo.Token = req.GetPageToken()
+
+	return it
+}
+
+// GetOperation is a utility method from google.longrunning.Operations.
+func (c *sequenceRESTClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode >= http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &longrunningpb.Operation{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// DeleteOperation is a utility method from google.longrunning.Operations.
+func (c *sequenceRESTClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
+	// The default (false) for the other options are fine.
+	// Field names should be lowerCamel, not snake.
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true, UseProtoNames: false}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return err
+	}
+
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return err
+	}
+	defer httpRsp.Body.Close()
+	if httpRsp.StatusCode != http.StatusOK {
+		return fmt.Errorf(httpRsp.Status)
+	}
+
+	return nil
+}
+
+// CancelOperation is a utility method from google.longrunning.Operations.
+func (c *sequenceRESTClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
+	// The default (false) for the other options are fine.
+	// Field names should be lowerCamel, not snake.
+	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true, UseProtoNames: false}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return err
+	}
+
+	queryParamStrs := []string{}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
+
+	url := fmt.Sprintf("%s",
+		c.endpoint,
+	)
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
+	if err != nil {
+		return err
+	}
+
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return err
+	}
+	defer httpRsp.Body.Close()
+	if httpRsp.StatusCode != http.StatusOK {
+		return fmt.Errorf(httpRsp.Status)
+	}
+
+	return nil
 }
