@@ -424,8 +424,8 @@ type echoRESTClient struct {
 // paginated calls. Set the ‘showcase-trailer’ metadata key on any method
 // to have the values echoed in the response trailers.
 func NewEchoRESTClient(ctx context.Context, opts ...option.ClientOption) (*EchoClient, error) {
-	clientOpts := defaultEchoRESTClientOptions()
-	httpClient, endpoint, err := httptransport.NewClient(ctx, append(clientOpts, opts...)...)
+	clientOpts := append(defaultEchoRESTClientOptions(), opts...)
+	httpClient, endpoint, err := httptransport.NewClient(ctx, clientOpts...)
 	if err != nil {
 		return nil, err
 	}

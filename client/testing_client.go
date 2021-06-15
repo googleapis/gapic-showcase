@@ -360,8 +360,8 @@ type testingRESTClient struct {
 // A service to facilitate running discrete sets of tests
 // against Showcase.
 func NewTestingRESTClient(ctx context.Context, opts ...option.ClientOption) (*TestingClient, error) {
-	clientOpts := defaultTestingRESTClientOptions()
-	httpClient, endpoint, err := httptransport.NewClient(ctx, append(clientOpts, opts...)...)
+	clientOpts := append(defaultTestingRESTClientOptions(), opts...)
+	httpClient, endpoint, err := httptransport.NewClient(ctx, clientOpts...)
 	if err != nil {
 		return nil, err
 	}

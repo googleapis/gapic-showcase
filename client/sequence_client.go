@@ -314,8 +314,8 @@ type sequenceRESTClient struct {
 
 // NewSequenceRESTClient creates a new sequence service rest client.
 func NewSequenceRESTClient(ctx context.Context, opts ...option.ClientOption) (*SequenceClient, error) {
-	clientOpts := defaultSequenceRESTClientOptions()
-	httpClient, endpoint, err := httptransport.NewClient(ctx, append(clientOpts, opts...)...)
+	clientOpts := append(defaultSequenceRESTClientOptions(), opts...)
+	httpClient, endpoint, err := httptransport.NewClient(ctx, clientOpts...)
 	if err != nil {
 		return nil, err
 	}

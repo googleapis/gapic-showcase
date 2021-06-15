@@ -347,8 +347,8 @@ type identityRESTClient struct {
 //
 // A simple identity service.
 func NewIdentityRESTClient(ctx context.Context, opts ...option.ClientOption) (*IdentityClient, error) {
-	clientOpts := defaultIdentityRESTClientOptions()
-	httpClient, endpoint, err := httptransport.NewClient(ctx, append(clientOpts, opts...)...)
+	clientOpts := append(defaultIdentityRESTClientOptions(), opts...)
+	httpClient, endpoint, err := httptransport.NewClient(ctx, clientOpts...)
 	if err != nil {
 		return nil, err
 	}

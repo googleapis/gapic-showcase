@@ -340,8 +340,8 @@ type complianceRESTClient struct {
 // This service is used to test that GAPICs can transcode proto3 requests to
 // REST format correctly for various types of HTTP annotations.
 func NewComplianceRESTClient(ctx context.Context, opts ...option.ClientOption) (*ComplianceClient, error) {
-	clientOpts := defaultComplianceRESTClientOptions()
-	httpClient, endpoint, err := httptransport.NewClient(ctx, append(clientOpts, opts...)...)
+	clientOpts := append(defaultComplianceRESTClientOptions(), opts...)
+	httpClient, endpoint, err := httptransport.NewClient(ctx, clientOpts...)
 	if err != nil {
 		return nil, err
 	}
