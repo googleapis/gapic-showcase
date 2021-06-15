@@ -11,7 +11,7 @@ require (
 	github.com/soheilhy/cmux v0.1.5
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.7.1
-	golang.org/x/oauth2 v0.0.0-20210514164344-f6687ab2804c
+	golang.org/x/oauth2 v0.0.0-20210615190721-d04028783cf1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/api v0.48.0
 	google.golang.org/genproto v0.0.0-20210614182748-5b3b54cad159
