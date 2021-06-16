@@ -1,5 +1,12 @@
 # Release History
 
+### v0.16.0 / 2021-06-16
+- Require incoming REST requests to have expected `x-goog-api-client` header tokens
+- Allow mTLS to work over gRPC when using `cmux` to also listen to REST requests on the same port
+- Make REST `PATCH` methods work
+- Fix multi-line truncation in release notes
+- Add Docker push instructions to RELEASING.md
+
 ### v0.15.0 / 2021-05-05
 - Enforce `Content-Type: application/json` in the bodies of REST requests
 - Enforce correct `optional` field presence/absence in test suite requests (bodies and query strings)
