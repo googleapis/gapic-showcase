@@ -10,7 +10,7 @@ require (
 	github.com/iancoleman/strcase v0.1.3
 	github.com/soheilhy/cmux v0.1.5
 	github.com/spf13/cobra v1.1.3
-	github.com/spf13/viper v1.7.1
+	github.com/spf13/viper v1.8.0
 	golang.org/x/oauth2 v0.0.0-20210615190721-d04028783cf1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/api v0.48.0
