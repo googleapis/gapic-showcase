@@ -85,7 +85,7 @@ func CreateAllEndpoints(config RuntimeConfig) Endpoint {
 	stdLog.Printf("Showcase listening on port: %s", config.port)
 
 	m := cmux.New(lis)
-	httpListener := m.Match(cmux.HTTP1Fast())
+	httpListener := m.Match(cmux.HTTP1())
 	// cmux.Any() is needed below to get mTLS to work for
 	// gRPC, and that in turn means the order of the matchers matters. See
 	// https://github.com/open-telemetry/opentelemetry-collector/issues/2732
