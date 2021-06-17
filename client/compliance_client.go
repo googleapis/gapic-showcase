@@ -663,25 +663,9 @@ func (c *complianceRESTClient) RepeatDataBody(ctx context.Context, req *genproto
 		return nil, err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetInfo() != nil {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("info=%v", req.GetInfo()))
-	}
-	if req.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
-	}
-	if req.GetServerVerify() {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("serverVerify=%v", req.GetServerVerify()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s/v1beta1/repeat:body",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -719,87 +703,24 @@ func (c *complianceRESTClient) RepeatDataBody(ctx context.Context, req *genproto
 // top-level, non-repeated fields can be sent this way.
 func (c *complianceRESTClient) RepeatDataBodyInfo(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
-	jsonReq, err := m.Marshal(req)
+	body := req.GetInfo()
+	jsonReq, err := m.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 
-	body := req.GetInfo()
-	queryParamStrs := []string{}
-	if body.GetFBool() {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fBool=%v", body.GetFBool()))
-	}
-	if body.GetFBytes() != nil {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fBytes=%v", body.GetFBytes()))
-	}
-	if body.GetFChild() != nil {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fChild=%v", body.GetFChild()))
-	}
-	if body.GetFDouble() != 0 {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fDouble=%v", body.GetFDouble()))
-	}
-	if body.GetFFixed32() != 0 {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fFixed32=%v", body.GetFFixed32()))
-	}
-	if body.GetFFixed64() != 0 {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fFixed64=%v", body.GetFFixed64()))
-	}
-	if body.GetFFloat() != 0 {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fFloat=%v", body.GetFFloat()))
-	}
-	if body.GetFInt32() != 0 {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fInt32=%v", body.GetFInt32()))
-	}
-	if body.GetFInt64() != 0 {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fInt64=%v", body.GetFInt64()))
-	}
-	if body.GetFKingdom() != 0 {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fKingdom=%v", body.GetFKingdom()))
-	}
-	if body.GetFSfixed32() != 0 {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fSfixed32=%v", body.GetFSfixed32()))
-	}
-	if body.GetFSfixed64() != 0 {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fSfixed64=%v", body.GetFSfixed64()))
-	}
-	if body.GetFSint32() != 0 {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fSint32=%v", body.GetFSint32()))
-	}
-	if body.GetFSint64() != 0 {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fSint64=%v", body.GetFSint64()))
-	}
-	if body.GetFString() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fString=%v", body.GetFString()))
-	}
-	if body.GetFUint32() != 0 {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fUint32=%v", body.GetFUint32()))
-	}
-	if body.GetFUint64() != 0 {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("fUint64=%v", body.GetFUint64()))
-	}
-	if body.GetPBool() {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("pBool=%v", body.GetPBool()))
-	}
-	if body.GetPChild() != nil {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("pChild=%v", body.GetPChild()))
-	}
-	if body.GetPDouble() != 0 {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("pDouble=%v", body.GetPDouble()))
-	}
-	if body.GetPInt32() != 0 {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("pInt32=%v", body.GetPInt32()))
-	}
-	if body.GetPKingdom() != 0 {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("pKingdom=%v", body.GetPKingdom()))
-	}
-	if body.GetPString() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("pString=%v", body.GetPString()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s/v1beta1/repeat:bodyinfo",
 		c.endpoint,
 	)
+
+	queryParamStrs := []string{}
+	if req.GetName() != "" {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
+	}
+	if req.GetServerVerify() {
+		queryParamStrs = append(queryParamStrs, fmt.Sprintf("serverVerify=%v", req.GetServerVerify()))
+	}
+	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
 
 	if query != "" {
 		url += "?" + query
@@ -845,25 +766,9 @@ func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprot
 		return nil, err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetInfo() != nil {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("info=%v", req.GetInfo()))
-	}
-	if req.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
-	}
-	if req.GetServerVerify() {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("serverVerify=%v", req.GetServerVerify()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s/v1beta1/repeat:query",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -906,18 +811,6 @@ func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *ge
 		return nil, err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetInfo() != nil {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("info=%v", req.GetInfo()))
-	}
-	if req.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
-	}
-	if req.GetServerVerify() {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("serverVerify=%v", req.GetServerVerify()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s/v1beta1/repeat/%v/%v/%v/%v/%v:simplepath",
 		c.endpoint,
 		req.GetInfo().GetFString(),
@@ -926,10 +819,6 @@ func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *ge
 		req.GetInfo().GetFBool(),
 		req.GetInfo().GetFKingdom(),
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -970,26 +859,10 @@ func (c *complianceRESTClient) RepeatDataPathResource(ctx context.Context, req *
 		return nil, err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetInfo() != nil {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("info=%v", req.GetInfo()))
-	}
-	if req.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
-	}
-	if req.GetServerVerify() {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("serverVerify=%v", req.GetServerVerify()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/*}/bool/%v:pathresource",
 		c.endpoint,
 		req.GetInfo().GetFBool(),
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -1030,25 +903,9 @@ func (c *complianceRESTClient) RepeatDataPathTrailingResource(ctx context.Contex
 		return nil, err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetInfo() != nil {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("info=%v", req.GetInfo()))
-	}
-	if req.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
-	}
-	if req.GetServerVerify() {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("serverVerify=%v", req.GetServerVerify()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/**}:pathtrailingresource",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -1113,19 +970,9 @@ func (c *complianceRESTClient) GetLocation(ctx context.Context, req *locationpb.
 		return nil, err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -1166,22 +1013,9 @@ func (c *complianceRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetI
 		return nil, err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetPolicy() != nil {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("policy=%v", req.GetPolicy()))
-	}
-	if req.GetResource() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("resource=%v", req.GetResource()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -1222,22 +1056,9 @@ func (c *complianceRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetI
 		return nil, err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetOptions() != nil {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("options=%v", req.GetOptions()))
-	}
-	if req.GetResource() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("resource=%v", req.GetResource()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -1278,22 +1099,9 @@ func (c *complianceRESTClient) TestIamPermissions(ctx context.Context, req *iamp
 		return nil, err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetPermissions() != nil {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("permissions=%v", req.GetPermissions()))
-	}
-	if req.GetResource() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("resource=%v", req.GetResource()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -1358,19 +1166,9 @@ func (c *complianceRESTClient) GetOperation(ctx context.Context, req *longrunnin
 		return nil, err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -1413,19 +1211,9 @@ func (c *complianceRESTClient) DeleteOperation(ctx context.Context, req *longrun
 		return err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -1460,19 +1248,9 @@ func (c *complianceRESTClient) CancelOperation(ctx context.Context, req *longrun
 		return err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
 	if err != nil {

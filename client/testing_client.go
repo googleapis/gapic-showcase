@@ -24,7 +24,6 @@ import (
 	"math"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/golang/protobuf/proto"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
@@ -750,28 +749,15 @@ func (c *testingGRPCClient) CancelOperation(ctx context.Context, req *longrunnin
 // CreateSession creates a new testing session.
 func (c *testingRESTClient) CreateSession(ctx context.Context, req *genprotopb.CreateSessionRequest, opts ...gax.CallOption) (*genprotopb.Session, error) {
 	m := protojson.MarshalOptions{AllowPartial: true, EmitUnpopulated: true}
-	jsonReq, err := m.Marshal(req)
+	body := req.GetSession()
+	jsonReq, err := m.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 
-	body := req.GetSession()
-	queryParamStrs := []string{}
-	if body.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", body.GetName()))
-	}
-	if body.GetVersion() != 0 {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("version=%v", body.GetVersion()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s/v1beta1/sessions",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -812,19 +798,9 @@ func (c *testingRESTClient) GetSession(ctx context.Context, req *genprotopb.GetS
 		return nil, err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s/v1beta1/{name=sessions/*}",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -891,19 +867,9 @@ func (c *testingRESTClient) DeleteSession(ctx context.Context, req *genprotopb.D
 		return err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s/v1beta1/{name=sessions/*}",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "DELETE", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -938,19 +904,9 @@ func (c *testingRESTClient) ReportSession(ctx context.Context, req *genprotopb.R
 		return nil, err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s/v1beta1/{name=sessions/*}:report",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -1022,19 +978,9 @@ func (c *testingRESTClient) DeleteTest(ctx context.Context, req *genprotopb.Dele
 		return err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s/v1beta1/{name=sessions/*/tests/*}",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "DELETE", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -1070,25 +1016,9 @@ func (c *testingRESTClient) VerifyTest(ctx context.Context, req *genprotopb.Veri
 		return nil, err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetAnswer() != nil {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("answer=%v", req.GetAnswer()))
-	}
-	if req.GetAnswers() != nil {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("answers=%v", req.GetAnswers()))
-	}
-	if req.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s/v1beta1/{name=sessions/*/tests/*}:check",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -1153,19 +1083,9 @@ func (c *testingRESTClient) GetLocation(ctx context.Context, req *locationpb.Get
 		return nil, err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -1206,22 +1126,9 @@ func (c *testingRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamP
 		return nil, err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetPolicy() != nil {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("policy=%v", req.GetPolicy()))
-	}
-	if req.GetResource() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("resource=%v", req.GetResource()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -1262,22 +1169,9 @@ func (c *testingRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamP
 		return nil, err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetOptions() != nil {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("options=%v", req.GetOptions()))
-	}
-	if req.GetResource() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("resource=%v", req.GetResource()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -1318,22 +1212,9 @@ func (c *testingRESTClient) TestIamPermissions(ctx context.Context, req *iampb.T
 		return nil, err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetPermissions() != nil {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("permissions=%v", req.GetPermissions()))
-	}
-	if req.GetResource() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("resource=%v", req.GetResource()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -1398,19 +1279,9 @@ func (c *testingRESTClient) GetOperation(ctx context.Context, req *longrunningpb
 		return nil, err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -1453,19 +1324,9 @@ func (c *testingRESTClient) DeleteOperation(ctx context.Context, req *longrunnin
 		return err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
 	if err != nil {
@@ -1500,19 +1361,9 @@ func (c *testingRESTClient) CancelOperation(ctx context.Context, req *longrunnin
 		return err
 	}
 
-	queryParamStrs := []string{}
-	if req.GetName() != "" {
-		queryParamStrs = append(queryParamStrs, fmt.Sprintf("name=%v", req.GetName()))
-	}
-	query := strings.ReplaceAll(strings.Join(queryParamStrs, "&"), " ", "+")
-
 	url := fmt.Sprintf("%s",
 		c.endpoint,
 	)
-
-	if query != "" {
-		url += "?" + query
-	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "", url, bytes.NewReader(jsonReq))
 	if err != nil {
