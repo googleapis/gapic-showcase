@@ -91,7 +91,7 @@ message RepeatRequest {
 }
 
 message RepeatResponse {
-  ComplianceData info = 1;
+  RepeatRequest request = 1;
 }
 
 // ComplianceSuite contains a set of requests that microgenerators should issue

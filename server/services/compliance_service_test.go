@@ -60,7 +60,7 @@ func TestComplianceRepeats(t *testing.T) {
 		if err != nil {
 			t.Errorf("call %d: error: %s", idx, err)
 		}
-		if diff := cmp.Diff(response.GetInfo(), request.GetInfo(), cmp.Comparer(proto.Equal)); diff != "" {
+		if diff := cmp.Diff(response.GetRequest(), request, cmp.Comparer(proto.Equal)); diff != "" {
 			t.Errorf("call %d: got=-, want=+:%s", idx, diff)
 		}
 	}

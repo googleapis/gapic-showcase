@@ -120,7 +120,7 @@ func TestComplianceSuite(t *testing.T) {
 				}
 
 				// Check for expected response.
-				if diff := cmp.Diff(response.GetInfo(), requestProto.GetInfo(), cmp.Comparer(proto.Equal)); diff != "" {
+				if diff := cmp.Diff(response.GetRequest(), requestProto, cmp.Comparer(proto.Equal)); diff != "" {
 					t.Errorf("%s unexpected response: got=-, want=+:%s\n   %s %s\n------------------------------\n",
 						errorPrefix, diff, verb, server.URL+path)
 				}

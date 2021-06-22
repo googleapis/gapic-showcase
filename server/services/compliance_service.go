@@ -63,7 +63,7 @@ func (csi *complianceServerImpl) Repeat(ctx context.Context, in *pb.RepeatReques
 	if err := csi.requestMatchesExpectation(in); err != nil {
 		return nil, err
 	}
-	return &pb.RepeatResponse{Info: in.GetInfo()}, nil
+	return &pb.RepeatResponse{Request: in}, nil
 }
 
 func (csi *complianceServerImpl) RepeatDataBody(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
