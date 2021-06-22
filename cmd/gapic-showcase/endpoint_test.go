@@ -54,12 +54,12 @@ func TestRESTCalls(t *testing.T) {
 			verb: "POST",
 			path: "/v1beta1/repeat:body",
 			body: `{"info":{"fString":"jonas^ mila"}}`,
-			want: `{"info":{"fString":"jonas^ mila"}}`,
+			want: `{"request":{"info":{"fString":"jonas^ mila"}}}`,
 		},
 		{
 			verb: "GET",
 			path: "/v1beta1/repeat:query?info.fString=jonas+mila",
-			want: `{"info":{"fString":"jonas mila"}}`,
+			want: `{"request":{"info":{"fString":"jonas mila"}}}`,
 		},
 		{
 			verb: "GET",
@@ -67,7 +67,7 @@ func TestRESTCalls(t *testing.T) {
 
 			// TODO: Fix so that this returns an error, because `^` is not URL-escaped
 			statusCode: 200,
-			want:       `{"info":{"fString":"jonas^mila"}}`,
+			want:       `{"request":{"info":{"fString":"jonas^mila"}}}`,
 		},
 		{
 			verb:       "GET",
@@ -101,27 +101,32 @@ func TestRESTCalls(t *testing.T) {
 			body:     `{"info":{"fString":"jonas^ mila", "pDouble": 0}}`,
 			fullJSON: true,
 			want: `{
-                          "info": {
-                            "fString": "jonas^ mila",
-                            "fInt32": 0,
-                            "fSint32": 0,
-                            "fSfixed32": 0,
-                            "fUint32": 0,
-                            "fFixed32": 0,
-                            "fInt64": "0",
-                            "fSint64": "0",
-                            "fSfixed64": "0",
-                            "fUint64": "0",
-                            "fFixed64": "0",
-                            "fDouble": 0,
-                            "fFloat": 0,
-                            "fBool": false,
-                            "fBytes": "",
-                            "fKingdom": "LIFE_KINGDOM_UNSPECIFIED",
-                            "fChild": null,
-                            "pDouble": 0
+                          "request": {
+                            "name": "",
+                            "info": {
+                              "fString": "jonas^ mila",
+                              "fInt32": 0,
+                              "fSint32": 0,
+                              "fSfixed32": 0,
+                              "fUint32": 0,
+                              "fFixed32": 0,
+                              "fInt64": "0",
+                              "fSint64": "0",
+                              "fSfixed64": "0",
+                              "fUint64": "0",
+                              "fFixed64": "0",
+                              "fDouble": 0,
+                              "fFloat": 0,
+                              "fBool": false,
+                              "fBytes": "",
+                              "fKingdom": "LIFE_KINGDOM_UNSPECIFIED",
+                              "fChild": null,
+                              "pDouble": 0
+                            },
+                            "serverVerify": false
                           }
-                        }`,
+                        }
+                      `,
 		},
 	} {
 
