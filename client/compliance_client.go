@@ -795,7 +795,7 @@ func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprot
 	if req.GetInfo().GetFChild().GetFString() != "" {
 		params.Add("info.fChild.fString", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFString()))
 	}
-	if req.GetInfo().GetFChild().GetPBool() {
+	if req.GetInfo().GetFChild() != nil && req.GetInfo().GetFChild().PBool != nil {
 		params.Add("info.fChild.pBool", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPBool()))
 	}
 	if req.GetInfo().GetFChild().GetPChild().GetFBool() {
@@ -810,13 +810,13 @@ func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprot
 	if req.GetInfo().GetFChild().GetPContinent() != 0 {
 		params.Add("info.fChild.pContinent", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPContinent()))
 	}
-	if req.GetInfo().GetFChild().GetPDouble() != 0 {
+	if req.GetInfo().GetFChild() != nil && req.GetInfo().GetFChild().PDouble != nil {
 		params.Add("info.fChild.pDouble", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPDouble()))
 	}
-	if req.GetInfo().GetFChild().GetPFloat() != 0 {
+	if req.GetInfo().GetFChild() != nil && req.GetInfo().GetFChild().PFloat != nil {
 		params.Add("info.fChild.pFloat", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPFloat()))
 	}
-	if req.GetInfo().GetFChild().GetPString() != "" {
+	if req.GetInfo().GetFChild() != nil && req.GetInfo().GetFChild().PString != nil {
 		params.Add("info.fChild.pString", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPString()))
 	}
 	if req.GetInfo().GetFDouble() != 0 {
@@ -861,7 +861,7 @@ func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprot
 	if req.GetInfo().GetFUint64() != 0 {
 		params.Add("info.fUint64", fmt.Sprintf("%v", req.GetInfo().GetFUint64()))
 	}
-	if req.GetInfo().GetPBool() {
+	if req.GetInfo() != nil && req.GetInfo().PBool != nil {
 		params.Add("info.pBool", fmt.Sprintf("%v", req.GetInfo().GetPBool()))
 	}
 	if req.GetInfo().GetPChild().GetFBool() {
@@ -888,7 +888,7 @@ func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprot
 	if req.GetInfo().GetPChild().GetFString() != "" {
 		params.Add("info.pChild.fString", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFString()))
 	}
-	if req.GetInfo().GetPChild().GetPBool() {
+	if req.GetInfo().GetPChild() != nil && req.GetInfo().GetPChild().PBool != nil {
 		params.Add("info.pChild.pBool", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPBool()))
 	}
 	if req.GetInfo().GetPChild().GetPChild().GetFBool() {
@@ -903,25 +903,25 @@ func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprot
 	if req.GetInfo().GetPChild().GetPContinent() != 0 {
 		params.Add("info.pChild.pContinent", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPContinent()))
 	}
-	if req.GetInfo().GetPChild().GetPDouble() != 0 {
+	if req.GetInfo().GetPChild() != nil && req.GetInfo().GetPChild().PDouble != nil {
 		params.Add("info.pChild.pDouble", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPDouble()))
 	}
-	if req.GetInfo().GetPChild().GetPFloat() != 0 {
+	if req.GetInfo().GetPChild() != nil && req.GetInfo().GetPChild().PFloat != nil {
 		params.Add("info.pChild.pFloat", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPFloat()))
 	}
-	if req.GetInfo().GetPChild().GetPString() != "" {
+	if req.GetInfo().GetPChild() != nil && req.GetInfo().GetPChild().PString != nil {
 		params.Add("info.pChild.pString", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPString()))
 	}
-	if req.GetInfo().GetPDouble() != 0 {
+	if req.GetInfo() != nil && req.GetInfo().PDouble != nil {
 		params.Add("info.pDouble", fmt.Sprintf("%v", req.GetInfo().GetPDouble()))
 	}
-	if req.GetInfo().GetPInt32() != 0 {
+	if req.GetInfo() != nil && req.GetInfo().PInt32 != nil {
 		params.Add("info.pInt32", fmt.Sprintf("%v", req.GetInfo().GetPInt32()))
 	}
-	if req.GetInfo().GetPKingdom() != 0 {
+	if req.GetInfo() != nil && req.GetInfo().PKingdom != nil {
 		params.Add("info.pKingdom", fmt.Sprintf("%v", req.GetInfo().GetPKingdom()))
 	}
-	if req.GetInfo().GetPString() != "" {
+	if req.GetInfo() != nil && req.GetInfo().PString != nil {
 		params.Add("info.pString", fmt.Sprintf("%v", req.GetInfo().GetPString()))
 	}
 	if req.GetName() != "" {
@@ -1005,7 +1005,7 @@ func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *ge
 	if req.GetInfo().GetFChild().GetFString() != "" {
 		params.Add("info.fChild.fString", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFString()))
 	}
-	if req.GetInfo().GetFChild().GetPBool() {
+	if req.GetInfo().GetFChild() != nil && req.GetInfo().GetFChild().PBool != nil {
 		params.Add("info.fChild.pBool", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPBool()))
 	}
 	if req.GetInfo().GetFChild().GetPChild().GetFBool() {
@@ -1020,13 +1020,13 @@ func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *ge
 	if req.GetInfo().GetFChild().GetPContinent() != 0 {
 		params.Add("info.fChild.pContinent", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPContinent()))
 	}
-	if req.GetInfo().GetFChild().GetPDouble() != 0 {
+	if req.GetInfo().GetFChild() != nil && req.GetInfo().GetFChild().PDouble != nil {
 		params.Add("info.fChild.pDouble", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPDouble()))
 	}
-	if req.GetInfo().GetFChild().GetPFloat() != 0 {
+	if req.GetInfo().GetFChild() != nil && req.GetInfo().GetFChild().PFloat != nil {
 		params.Add("info.fChild.pFloat", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPFloat()))
 	}
-	if req.GetInfo().GetFChild().GetPString() != "" {
+	if req.GetInfo().GetFChild() != nil && req.GetInfo().GetFChild().PString != nil {
 		params.Add("info.fChild.pString", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPString()))
 	}
 	if req.GetInfo().GetFFixed32() != 0 {
@@ -1059,7 +1059,7 @@ func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *ge
 	if req.GetInfo().GetFUint64() != 0 {
 		params.Add("info.fUint64", fmt.Sprintf("%v", req.GetInfo().GetFUint64()))
 	}
-	if req.GetInfo().GetPBool() {
+	if req.GetInfo() != nil && req.GetInfo().PBool != nil {
 		params.Add("info.pBool", fmt.Sprintf("%v", req.GetInfo().GetPBool()))
 	}
 	if req.GetInfo().GetPChild().GetFBool() {
@@ -1086,7 +1086,7 @@ func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *ge
 	if req.GetInfo().GetPChild().GetFString() != "" {
 		params.Add("info.pChild.fString", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFString()))
 	}
-	if req.GetInfo().GetPChild().GetPBool() {
+	if req.GetInfo().GetPChild() != nil && req.GetInfo().GetPChild().PBool != nil {
 		params.Add("info.pChild.pBool", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPBool()))
 	}
 	if req.GetInfo().GetPChild().GetPChild().GetFBool() {
@@ -1101,25 +1101,25 @@ func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *ge
 	if req.GetInfo().GetPChild().GetPContinent() != 0 {
 		params.Add("info.pChild.pContinent", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPContinent()))
 	}
-	if req.GetInfo().GetPChild().GetPDouble() != 0 {
+	if req.GetInfo().GetPChild() != nil && req.GetInfo().GetPChild().PDouble != nil {
 		params.Add("info.pChild.pDouble", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPDouble()))
 	}
-	if req.GetInfo().GetPChild().GetPFloat() != 0 {
+	if req.GetInfo().GetPChild() != nil && req.GetInfo().GetPChild().PFloat != nil {
 		params.Add("info.pChild.pFloat", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPFloat()))
 	}
-	if req.GetInfo().GetPChild().GetPString() != "" {
+	if req.GetInfo().GetPChild() != nil && req.GetInfo().GetPChild().PString != nil {
 		params.Add("info.pChild.pString", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPString()))
 	}
-	if req.GetInfo().GetPDouble() != 0 {
+	if req.GetInfo() != nil && req.GetInfo().PDouble != nil {
 		params.Add("info.pDouble", fmt.Sprintf("%v", req.GetInfo().GetPDouble()))
 	}
-	if req.GetInfo().GetPInt32() != 0 {
+	if req.GetInfo() != nil && req.GetInfo().PInt32 != nil {
 		params.Add("info.pInt32", fmt.Sprintf("%v", req.GetInfo().GetPInt32()))
 	}
-	if req.GetInfo().GetPKingdom() != 0 {
+	if req.GetInfo() != nil && req.GetInfo().PKingdom != nil {
 		params.Add("info.pKingdom", fmt.Sprintf("%v", req.GetInfo().GetPKingdom()))
 	}
-	if req.GetInfo().GetPString() != "" {
+	if req.GetInfo() != nil && req.GetInfo().PString != nil {
 		params.Add("info.pString", fmt.Sprintf("%v", req.GetInfo().GetPString()))
 	}
 	if req.GetName() != "" {
