@@ -33,7 +33,14 @@
             "fChild": {
               "fString": "second/bool/salutation"
             }
-          }
+          },
+	  "fInt32": -10,
+	  "fInt64": -110,
+	  "fDouble": -54e4,
+          
+	  "pInt32": -47,
+          "pInt64": -477,
+	  "pDouble": -61.73
         },
         {
           "name": "Basic types, no optional fields",

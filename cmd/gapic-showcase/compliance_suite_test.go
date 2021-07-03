@@ -272,44 +272,54 @@ func prepRepeatDataTestsQueryString(request *genproto.RepeatRequest, exclude map
 func prepRepeatDataTestsQueryParams(request *genproto.RepeatRequest, exclude map[string]bool, caser queryStringCaser) []string {
 	info := request.GetInfo()
 	queryParams := []string{}
-	if request.GetServerVerify() {
-		queryParams = append(queryParams, "serverVerify=true", fmt.Sprintf("name=%s", url.QueryEscape(request.GetName())))
-	}
 	addParam := func(key string, condition bool, value string) {
-		if exclude["info"] || exclude["info."+key] || !condition {
+		if (exclude["info"] && strings.HasPrefix(key, "info.")) || exclude[key] || !condition {
 			return
 		}
-		queryParams = append(queryParams, fmt.Sprintf("info.%s=%s", caser(key), value))
+		queryParams = append(queryParams, fmt.Sprintf("%s=%s", caser(key), value))
 	}
 
-	addParam("f_string", len(info.GetFString()) > 0, url.QueryEscape(info.GetFString()))
-	addParam("f_int32", info.GetFInt32() != 0, fmt.Sprintf("%d", info.GetFInt32()))
-	addParam("f_sint32", info.GetFSint32() != 0, fmt.Sprintf("%d", info.GetFSint32()))
-	addParam("f_sfixed32", info.GetFSfixed32() != 0, fmt.Sprintf("%d", info.GetFSfixed32()))
-	addParam("f_uint32", info.GetFUint32() != 0, fmt.Sprintf("%d", info.GetFUint32()))
-	addParam("f_fixed32", info.GetFFixed32() != 0, fmt.Sprintf("%d", info.GetFFixed32()))
-	addParam("f_int64", info.GetFInt64() != 0, fmt.Sprintf("%d", info.GetFInt64()))
-	addParam("f_sint64", info.GetFSint64() != 0, fmt.Sprintf("%d", info.GetFSint64()))
-	addParam("f_sfixed64", info.GetFSfixed64() != 0, fmt.Sprintf("%d", info.GetFSfixed64()))
-	addParam("f_uint64", info.GetFUint64() != 0, fmt.Sprintf("%d", info.GetFUint64()))
-	addParam("f_fixed64", info.GetFFixed64() != 0, fmt.Sprintf("%d", info.GetFFixed64()))
+	// Top-level fields
+	addParam("server_verify", request.GetServerVerify(), "true")
+	addParam("name", len(request.GetName()) > 0, url.QueryEscape(request.GetName()))
 
-	addParam("f_double", info.GetFDouble() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFDouble())))
-	addParam("f_float", info.GetFFloat() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFFloat())))
-	addParam("f_bool", info.GetFBool(), "true")
-	addParam("f_bytes", len(info.GetFBytes()) > 0, url.QueryEscape(string(info.GetFBytes()))) // TODO: Check this is correct, given runes in strings
-	addParam("f_kingdom", info.GetFKingdom() != pb.ComplianceData_LIFE_KINGDOM_UNSPECIFIED, info.GetFKingdom().String())
+	addParam("f_int32", request.GetFInt32() != 0, fmt.Sprintf("%d", request.GetFInt32()))
+	addParam("f_int64", request.GetFInt64() != 0, fmt.Sprintf("%d", request.GetFInt64()))
+	addParam("f_double", request.GetFDouble() != 0, url.QueryEscape(fmt.Sprintf("%g", request.GetFDouble())))
 
-	addParam("p_string", info.PString != nil, url.QueryEscape(info.GetPString()))
-	addParam("p_int32", info.PInt32 != nil, fmt.Sprintf("%d", info.GetPInt32()))
-	addParam("p_double", info.PDouble != nil, url.QueryEscape(fmt.Sprintf("%g", info.GetPDouble())))
-	addParam("p_bool", info.PBool != nil, fmt.Sprintf("%t", info.GetPBool()))
-	addParam("p_kingdom", info.PKingdom != nil, info.GetPKingdom().String())
+	addParam("p_int32", request.PInt32 != nil, fmt.Sprintf("%d", request.GetPInt32()))
+	addParam("p_int64", request.PInt64 != nil, fmt.Sprintf("%d", request.GetPInt64()))
+	addParam("p_double", request.PDouble != nil, url.QueryEscape(fmt.Sprintf("%g", request.GetPDouble())))
 
-	addParam("f_child.f_string", len(info.GetFChild().GetFString()) > 0, url.QueryEscape(info.GetFChild().GetFString()))
-	addParam("f_child.f_float", info.GetFChild().GetFFloat() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFChild().GetFFloat())))
-	addParam("f_child.f_double", info.GetFChild().GetFDouble() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFChild().GetFDouble())))
-	addParam("f_child.f_bool", info.GetFChild().GetFBool(), "true")
+	// info.* fields
+	addParam("info.f_string", len(info.GetFString()) > 0, url.QueryEscape(info.GetFString()))
+	addParam("info.f_int32", info.GetFInt32() != 0, fmt.Sprintf("%d", info.GetFInt32()))
+	addParam("info.f_sint32", info.GetFSint32() != 0, fmt.Sprintf("%d", info.GetFSint32()))
+	addParam("info.f_sfixed32", info.GetFSfixed32() != 0, fmt.Sprintf("%d", info.GetFSfixed32()))
+	addParam("info.f_uint32", info.GetFUint32() != 0, fmt.Sprintf("%d", info.GetFUint32()))
+	addParam("info.f_fixed32", info.GetFFixed32() != 0, fmt.Sprintf("%d", info.GetFFixed32()))
+	addParam("info.f_int64", info.GetFInt64() != 0, fmt.Sprintf("%d", info.GetFInt64()))
+	addParam("info.f_sint64", info.GetFSint64() != 0, fmt.Sprintf("%d", info.GetFSint64()))
+	addParam("info.f_sfixed64", info.GetFSfixed64() != 0, fmt.Sprintf("%d", info.GetFSfixed64()))
+	addParam("info.f_uint64", info.GetFUint64() != 0, fmt.Sprintf("%d", info.GetFUint64()))
+	addParam("info.f_fixed64", info.GetFFixed64() != 0, fmt.Sprintf("%d", info.GetFFixed64()))
+
+	addParam("info.f_double", info.GetFDouble() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFDouble())))
+	addParam("info.f_float", info.GetFFloat() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFFloat())))
+	addParam("info.f_bool", info.GetFBool(), "true")
+	addParam("info.f_bytes", len(info.GetFBytes()) > 0, url.QueryEscape(string(info.GetFBytes()))) // TODO: Check this is correct, given runes in strings
+	addParam("info.f_kingdom", info.GetFKingdom() != pb.ComplianceData_LIFE_KINGDOM_UNSPECIFIED, info.GetFKingdom().String())
+
+	addParam("info.p_string", info.PString != nil, url.QueryEscape(info.GetPString()))
+	addParam("info.p_int32", info.PInt32 != nil, fmt.Sprintf("%d", info.GetPInt32()))
+	addParam("info.p_double", info.PDouble != nil, url.QueryEscape(fmt.Sprintf("%g", info.GetPDouble())))
+	addParam("info.p_bool", info.PBool != nil, fmt.Sprintf("%t", info.GetPBool()))
+	addParam("info.p_kingdom", info.PKingdom != nil, info.GetPKingdom().String())
+
+	addParam("info.f_child.f_string", len(info.GetFChild().GetFString()) > 0, url.QueryEscape(info.GetFChild().GetFString()))
+	addParam("info.f_child.f_float", info.GetFChild().GetFFloat() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFChild().GetFFloat())))
+	addParam("info.f_child.f_double", info.GetFChild().GetFDouble() != 0, url.QueryEscape(fmt.Sprintf("%g", info.GetFChild().GetFDouble())))
+	addParam("info.f_child.f_bool", info.GetFChild().GetFBool(), "true")
 
 	// If needed for test cases, we'll have to add remaining nested message fields.
 
