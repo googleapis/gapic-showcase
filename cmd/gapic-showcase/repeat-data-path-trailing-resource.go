@@ -56,6 +56,12 @@ var repeatDataPathTrailingResourceInputInfoPChildPBool bool
 
 var RepeatDataPathTrailingResourceInputInfoPChildPContinent string
 
+var repeatDataPathTrailingResourceInputPInt32 int32
+
+var repeatDataPathTrailingResourceInputPInt64 int64
+
+var repeatDataPathTrailingResourceInputPDouble float64
+
 func init() {
 	ComplianceServiceCmd.AddCommand(RepeatDataPathTrailingResourceCmd)
 
@@ -183,6 +189,18 @@ func init() {
 
 	RepeatDataPathTrailingResourceCmd.Flags().BoolVar(&RepeatDataPathTrailingResourceInput.ServerVerify, "server_verify", false, "If true, the server will verify that the received...")
 
+	RepeatDataPathTrailingResourceCmd.Flags().Int32Var(&RepeatDataPathTrailingResourceInput.FInt32, "f_int32", 0, "Some top level fields, to test that these are...")
+
+	RepeatDataPathTrailingResourceCmd.Flags().Int64Var(&RepeatDataPathTrailingResourceInput.FInt64, "f_int64", 0, "")
+
+	RepeatDataPathTrailingResourceCmd.Flags().Float64Var(&RepeatDataPathTrailingResourceInput.FDouble, "f_double", 0.0, "")
+
+	RepeatDataPathTrailingResourceCmd.Flags().Int32Var(&repeatDataPathTrailingResourceInputPInt32, "p_int32", 0, "")
+
+	RepeatDataPathTrailingResourceCmd.Flags().Int64Var(&repeatDataPathTrailingResourceInputPInt64, "p_int64", 0, "")
+
+	RepeatDataPathTrailingResourceCmd.Flags().Float64Var(&repeatDataPathTrailingResourceInputPDouble, "p_double", 0.0, "")
+
 	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&RepeatDataPathTrailingResourceFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
 }
@@ -276,6 +294,18 @@ var RepeatDataPathTrailingResourceCmd = &cobra.Command{
 
 			if cmd.Flags().Changed("info.p_child.p_bool") {
 				RepeatDataPathTrailingResourceInput.Info.PChild.PBool = &repeatDataPathTrailingResourceInputInfoPChildPBool
+			}
+
+			if cmd.Flags().Changed("p_int32") {
+				RepeatDataPathTrailingResourceInput.PInt32 = &repeatDataPathTrailingResourceInputPInt32
+			}
+
+			if cmd.Flags().Changed("p_int64") {
+				RepeatDataPathTrailingResourceInput.PInt64 = &repeatDataPathTrailingResourceInputPInt64
+			}
+
+			if cmd.Flags().Changed("p_double") {
+				RepeatDataPathTrailingResourceInput.PDouble = &repeatDataPathTrailingResourceInputPDouble
 			}
 
 		}
