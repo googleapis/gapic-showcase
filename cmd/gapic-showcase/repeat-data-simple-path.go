@@ -56,6 +56,12 @@ var repeatDataSimplePathInputInfoPChildPBool bool
 
 var RepeatDataSimplePathInputInfoPChildPContinent string
 
+var repeatDataSimplePathInputPInt32 int32
+
+var repeatDataSimplePathInputPInt64 int64
+
+var repeatDataSimplePathInputPDouble float64
+
 func init() {
 	ComplianceServiceCmd.AddCommand(RepeatDataSimplePathCmd)
 
@@ -183,6 +189,18 @@ func init() {
 
 	RepeatDataSimplePathCmd.Flags().BoolVar(&RepeatDataSimplePathInput.ServerVerify, "server_verify", false, "If true, the server will verify that the received...")
 
+	RepeatDataSimplePathCmd.Flags().Int32Var(&RepeatDataSimplePathInput.FInt32, "f_int32", 0, "Some top level fields, to test that these are...")
+
+	RepeatDataSimplePathCmd.Flags().Int64Var(&RepeatDataSimplePathInput.FInt64, "f_int64", 0, "")
+
+	RepeatDataSimplePathCmd.Flags().Float64Var(&RepeatDataSimplePathInput.FDouble, "f_double", 0.0, "")
+
+	RepeatDataSimplePathCmd.Flags().Int32Var(&repeatDataSimplePathInputPInt32, "p_int32", 0, "")
+
+	RepeatDataSimplePathCmd.Flags().Int64Var(&repeatDataSimplePathInputPInt64, "p_int64", 0, "")
+
+	RepeatDataSimplePathCmd.Flags().Float64Var(&repeatDataSimplePathInputPDouble, "p_double", 0.0, "")
+
 	RepeatDataSimplePathCmd.Flags().StringVar(&RepeatDataSimplePathFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
 }
@@ -276,6 +294,18 @@ var RepeatDataSimplePathCmd = &cobra.Command{
 
 			if cmd.Flags().Changed("info.p_child.p_bool") {
 				RepeatDataSimplePathInput.Info.PChild.PBool = &repeatDataSimplePathInputInfoPChildPBool
+			}
+
+			if cmd.Flags().Changed("p_int32") {
+				RepeatDataSimplePathInput.PInt32 = &repeatDataSimplePathInputPInt32
+			}
+
+			if cmd.Flags().Changed("p_int64") {
+				RepeatDataSimplePathInput.PInt64 = &repeatDataSimplePathInputPInt64
+			}
+
+			if cmd.Flags().Changed("p_double") {
+				RepeatDataSimplePathInput.PDouble = &repeatDataSimplePathInputPDouble
 			}
 
 		}

@@ -56,6 +56,12 @@ var repeatDataQueryInputInfoPChildPBool bool
 
 var RepeatDataQueryInputInfoPChildPContinent string
 
+var repeatDataQueryInputPInt32 int32
+
+var repeatDataQueryInputPInt64 int64
+
+var repeatDataQueryInputPDouble float64
+
 func init() {
 	ComplianceServiceCmd.AddCommand(RepeatDataQueryCmd)
 
@@ -183,6 +189,18 @@ func init() {
 
 	RepeatDataQueryCmd.Flags().BoolVar(&RepeatDataQueryInput.ServerVerify, "server_verify", false, "If true, the server will verify that the received...")
 
+	RepeatDataQueryCmd.Flags().Int32Var(&RepeatDataQueryInput.FInt32, "f_int32", 0, "Some top level fields, to test that these are...")
+
+	RepeatDataQueryCmd.Flags().Int64Var(&RepeatDataQueryInput.FInt64, "f_int64", 0, "")
+
+	RepeatDataQueryCmd.Flags().Float64Var(&RepeatDataQueryInput.FDouble, "f_double", 0.0, "")
+
+	RepeatDataQueryCmd.Flags().Int32Var(&repeatDataQueryInputPInt32, "p_int32", 0, "")
+
+	RepeatDataQueryCmd.Flags().Int64Var(&repeatDataQueryInputPInt64, "p_int64", 0, "")
+
+	RepeatDataQueryCmd.Flags().Float64Var(&repeatDataQueryInputPDouble, "p_double", 0.0, "")
+
 	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
 }
@@ -276,6 +294,18 @@ var RepeatDataQueryCmd = &cobra.Command{
 
 			if cmd.Flags().Changed("info.p_child.p_bool") {
 				RepeatDataQueryInput.Info.PChild.PBool = &repeatDataQueryInputInfoPChildPBool
+			}
+
+			if cmd.Flags().Changed("p_int32") {
+				RepeatDataQueryInput.PInt32 = &repeatDataQueryInputPInt32
+			}
+
+			if cmd.Flags().Changed("p_int64") {
+				RepeatDataQueryInput.PInt64 = &repeatDataQueryInputPInt64
+			}
+
+			if cmd.Flags().Changed("p_double") {
+				RepeatDataQueryInput.PDouble = &repeatDataQueryInputPDouble
 			}
 
 		}

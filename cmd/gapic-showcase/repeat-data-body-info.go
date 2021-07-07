@@ -56,6 +56,12 @@ var repeatDataBodyInfoInputInfoPChildPBool bool
 
 var RepeatDataBodyInfoInputInfoPChildPContinent string
 
+var repeatDataBodyInfoInputPInt32 int32
+
+var repeatDataBodyInfoInputPInt64 int64
+
+var repeatDataBodyInfoInputPDouble float64
+
 func init() {
 	ComplianceServiceCmd.AddCommand(RepeatDataBodyInfoCmd)
 
@@ -183,6 +189,18 @@ func init() {
 
 	RepeatDataBodyInfoCmd.Flags().BoolVar(&RepeatDataBodyInfoInput.ServerVerify, "server_verify", false, "If true, the server will verify that the received...")
 
+	RepeatDataBodyInfoCmd.Flags().Int32Var(&RepeatDataBodyInfoInput.FInt32, "f_int32", 0, "Some top level fields, to test that these are...")
+
+	RepeatDataBodyInfoCmd.Flags().Int64Var(&RepeatDataBodyInfoInput.FInt64, "f_int64", 0, "")
+
+	RepeatDataBodyInfoCmd.Flags().Float64Var(&RepeatDataBodyInfoInput.FDouble, "f_double", 0.0, "")
+
+	RepeatDataBodyInfoCmd.Flags().Int32Var(&repeatDataBodyInfoInputPInt32, "p_int32", 0, "")
+
+	RepeatDataBodyInfoCmd.Flags().Int64Var(&repeatDataBodyInfoInputPInt64, "p_int64", 0, "")
+
+	RepeatDataBodyInfoCmd.Flags().Float64Var(&repeatDataBodyInfoInputPDouble, "p_double", 0.0, "")
+
 	RepeatDataBodyInfoCmd.Flags().StringVar(&RepeatDataBodyInfoFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
 }
@@ -276,6 +294,18 @@ var RepeatDataBodyInfoCmd = &cobra.Command{
 
 			if cmd.Flags().Changed("info.p_child.p_bool") {
 				RepeatDataBodyInfoInput.Info.PChild.PBool = &repeatDataBodyInfoInputInfoPChildPBool
+			}
+
+			if cmd.Flags().Changed("p_int32") {
+				RepeatDataBodyInfoInput.PInt32 = &repeatDataBodyInfoInputPInt32
+			}
+
+			if cmd.Flags().Changed("p_int64") {
+				RepeatDataBodyInfoInput.PInt64 = &repeatDataBodyInfoInputPInt64
+			}
+
+			if cmd.Flags().Changed("p_double") {
+				RepeatDataBodyInfoInput.PDouble = &repeatDataBodyInfoInputPDouble
 			}
 
 		}
