@@ -123,7 +123,10 @@ func TestRESTCalls(t *testing.T) {
                               "fChild": null,
                               "pDouble": 0
                             },
-                            "serverVerify": false
+                            "serverVerify": false,
+                            "fInt32": 0,
+                            "fInt64": "0",
+                            "fDouble": 0
                           }
                         }
                       `,
