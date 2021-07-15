@@ -30,13 +30,14 @@ import (
 )
 
 // CheckRequestFormat verifies that the incoming request has the correct format in its body (via jsonReader) and in its HTTP headers.
-func CheckRequestFormat(jsonReader io.Reader, header http.Header, message protoreflect.Message) error {
+func CheckRequestFormat(jsonReader io.Reader, request *http.Request, message protoreflect.Message) error {
+	header := request.Header
+
 	if err := CheckAPIClientHeader(header); err != nil {
 		return err
 	}
 
 	if jsonReader == nil {
-		// TODO: above this if-statement, check for headers needed by all requests, not just those with a body
 		return nil
 	}
 
@@ -47,6 +48,10 @@ func CheckRequestFormat(jsonReader io.Reader, header http.Header, message protor
 	jsonBytes, err := ioutil.ReadAll(jsonReader)
 	if err != nil {
 		return err
+	}
+
+	if (request.Method == http.MethodGet || request.Method == http.MethodDelete) && request.Body != nil {
+		return fmt.Errorf("(UnexpectedRequestBodyError) non-zero body for HTTP %q", request.Method)
 	}
 
 	var payload jsonPayload
