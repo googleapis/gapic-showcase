@@ -79,6 +79,11 @@ func RegisterHandlers(router *gmux.Router, backend *services.Backend) {
 	router.HandleFunc("/v1beta1/{parent:sessions/.+}/tests", rest.HandleListTests).Methods("GET")
 	router.HandleFunc("/v1beta1/{name:sessions/.+/tests/.+}", rest.HandleDeleteTest).Methods("DELETE")
 	router.HandleFunc("/v1beta1/{name:sessions/.+/tests/.+}:check", rest.HandleVerifyTest).Methods("POST")
+	router.PathPrefix("/").HandlerFunc(rest.catchAllHandler)
+}
+
+func (backend *RESTBackend) catchAllHandler(w http.ResponseWriter, r *http.Request) {
+	backend.Error(w, http.StatusBadRequest, "unrecognized request: %s %q", r.Method, r.URL)
 }
 
 func (backend *RESTBackend) Error(w http.ResponseWriter, status int, format string, args ...interface{}) {
