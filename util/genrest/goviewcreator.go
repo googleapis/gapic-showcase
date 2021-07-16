@@ -114,7 +114,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				source.P("    return")
 				source.P("  }")
 				source.P("")
-				source.P("  if err := resttools.CheckRequestFormat(&jsonReader, r.Header, %s.ProtoReflect()); err != nil {", handler.RequestVariable)
+				source.P("  if err := resttools.CheckRequestFormat(&jsonReader, r, %s.ProtoReflect()); err != nil {", handler.RequestVariable)
 				source.P(`    backend.Error(w, http.StatusBadRequest, "REST request failed format check: %%s", err)`)
 				source.P("    return")
 				source.P("  }")
@@ -146,7 +146,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				source.P("    return")
 				source.P("  }")
 				source.P("")
-				source.P("  if err := resttools.CheckRequestFormat(&jsonReader, r.Header, %s.ProtoReflect()); err != nil {", handler.RequestVariable)
+				source.P("  if err := resttools.CheckRequestFormat(&jsonReader, r, %s.ProtoReflect()); err != nil {", handler.RequestVariable)
 				source.P(`    backend.Error(w, http.StatusBadRequest, "REST request failed format check: %%s", err)`)
 				source.P("    return")
 				source.P("  }")
@@ -155,7 +155,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				excludedQueryParams = append(excludedQueryParams, handler.RequestBodyFieldProtoName)
 
 			default:
-				source.P("  if err := resttools.CheckRequestFormat(nil, r.Header, %s.ProtoReflect()); err != nil {", handler.RequestVariable)
+				source.P("  if err := resttools.CheckRequestFormat(nil, r, %s.ProtoReflect()); err != nil {", handler.RequestVariable)
 				source.P(`    backend.Error(w, http.StatusBadRequest, "REST request failed format check: %%s", err)`)
 				source.P("    return")
 				source.P("  }")
@@ -248,16 +248,16 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	// here, and to explicitly path decode in resttools.PopulateSingularFields. We should also
 	// add '\n' to the "ExtremeValues" ComplianceGroup in compliance_suite.json.
 
-	// TODO: Fix PATCH requests, like
-	//  `curl -X PATCH http://localhost:7469/v1beta1/users/Victor`
-	// which don't seem to make it through to the handler. (It doesn't seem to be an issue with
-	// them being shadowed by other HTTP verb handlers, since the problem persists even when not
-	// registering other handlers with the same URL pattern.) Consider using gorilla/mux
-	// subroutes, selecting by HTTP verb before the URL path.
 	for _, handler := range registered {
 		file.P(`  router.HandleFunc(%q, rest.%s).Methods(%q)`, handler.pattern, handler.function, handler.verb)
 	}
+	file.P(`  router.PathPrefix("/").HandlerFunc(rest.catchAllHandler)`)
 	file.P(`}`)
+	file.P("")
+
+	file.P("func (backend *RESTBackend) catchAllHandler(w http.ResponseWriter, r *http.Request) {")
+	file.P(`  backend.Error(w, http.StatusBadRequest, "unrecognized request: %%s %%q", r.Method, r.URL)`)
+	file.P("}")
 	file.P("")
 
 	file.P("func (backend *RESTBackend) Error(w http.ResponseWriter, status int, format string, args ...interface{}) {")

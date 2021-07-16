@@ -46,11 +46,22 @@ func TestCheckRequestFormat(t *testing.T) {
 		label     string
 		json      string
 		header    http.Header // nil means standard headers
+		method    string      // empty means POST
 		wantError string
 	}{
 		{
 			label: "normal case",
 			json:  `{"fString": "hi", "fKingdom": "FUNGI"}`,
+		},
+		{
+			label:  "normal case using PUT",
+			json:   `{"fString": "hi", "fKingdom": "FUNGI"}`,
+			method: "PUT",
+		},
+		{
+			label:  "normal case using PATCH",
+			json:   `{"fString": "hi", "fKingdom": "FUNGI"}`,
+			method: "PATCH",
 		},
 		{
 			label: "normal case, optional field",
@@ -75,6 +86,18 @@ func TestCheckRequestFormat(t *testing.T) {
 				headerNameContentType: []string{headerValueContentTypeJSON},
 				headerNameAPIClient:   []string{"foo/1 rest/foo gapic/2 blah"},
 			},
+		},
+		{
+			label:     "GET with a body",
+			json:      `{"fString": "hi", "fKingdom": "FUNGI"}`,
+			method:    "GET",
+			wantError: "(UnexpectedRequestBodyError)",
+		},
+		{
+			label:     "DELETE with a body",
+			json:      `{"fString": "hi", "fKingdom": "FUNGI"}`,
+			method:    "DELETE",
+			wantError: "(UnexpectedRequestBodyError)",
 		},
 		{
 			label:     "no api client header",
@@ -148,7 +171,11 @@ func TestCheckRequestFormat(t *testing.T) {
 		},
 	} {
 		complianceData := &genprotopb.ComplianceData{}
-		request, err := http.NewRequest("POST", "showcase.foo.com", strings.NewReader(testCase.json))
+		method := testCase.method
+		if len(method) == 0 {
+			method = "POST"
+		}
+		request, err := http.NewRequest(method, "showcase.foo.com", strings.NewReader(testCase.json))
 		if err != nil {
 			t.Fatalf("test case %d[%q] could not create request: %s", idx, testCase.label, err)
 
@@ -157,7 +184,7 @@ func TestCheckRequestFormat(t *testing.T) {
 		if request.Header == nil {
 			PopulateRequestHeaders(request)
 		}
-		err = CheckRequestFormat(request.Body, request.Header, complianceData.ProtoReflect())
+		err = CheckRequestFormat(request.Body, request, complianceData.ProtoReflect())
 		if (err != nil) != (testCase.wantError != "") {
 			t.Errorf("test case %d[%q] CheckRequestFormat(): expected error==%v, got: %v", idx, testCase.label, testCase.wantError, err)
 			continue
