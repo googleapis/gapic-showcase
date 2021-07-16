@@ -56,7 +56,7 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if err := resttools.CheckRequestFormat(&jsonReader, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -105,7 +105,7 @@ func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request
 	}
 
 	request := &genprotopb.GetUserRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -175,7 +175,7 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if err := resttools.CheckRequestFormat(&jsonReader, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -224,7 +224,7 @@ func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.DeleteUserRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -280,7 +280,7 @@ func (backend *RESTBackend) HandleListUsers(w http.ResponseWriter, r *http.Reque
 	}
 
 	request := &genprotopb.ListUsersRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}

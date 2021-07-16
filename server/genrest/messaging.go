@@ -56,7 +56,7 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if err := resttools.CheckRequestFormat(&jsonReader, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -105,7 +105,7 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 	}
 
 	request := &genprotopb.GetRoomRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -175,7 +175,7 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if err := resttools.CheckRequestFormat(&jsonReader, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -224,7 +224,7 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.DeleteRoomRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -280,7 +280,7 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 	}
 
 	request := &genprotopb.ListRoomsRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -345,7 +345,7 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	if err := resttools.CheckRequestFormat(&jsonReader, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -408,7 +408,7 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if err := resttools.CheckRequestFormat(&jsonReader, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -457,7 +457,7 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 	}
 
 	request := &genprotopb.GetBlurbRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -513,7 +513,7 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.GetBlurbRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -583,7 +583,7 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	if err := resttools.CheckRequestFormat(&jsonReader, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -646,7 +646,7 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if err := resttools.CheckRequestFormat(&jsonReader, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -695,7 +695,7 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 	}
 
 	request := &genprotopb.DeleteBlurbRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -751,7 +751,7 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 	}
 
 	request := &genprotopb.DeleteBlurbRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -807,7 +807,7 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.ListBlurbsRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -863,7 +863,7 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 	}
 
 	request := &genprotopb.ListBlurbsRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -933,7 +933,7 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	if err := resttools.CheckRequestFormat(&jsonReader, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -982,7 +982,7 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 	}
 
 	request := &genprotopb.SearchBlurbsRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}

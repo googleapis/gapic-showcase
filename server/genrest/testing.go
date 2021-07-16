@@ -57,7 +57,7 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if err := resttools.CheckRequestFormat(&jsonReader, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -115,7 +115,7 @@ func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.GetSessionRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -171,7 +171,7 @@ func (backend *RESTBackend) HandleListSessions(w http.ResponseWriter, r *http.Re
 	}
 
 	request := &genprotopb.ListSessionsRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -222,7 +222,7 @@ func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.R
 	}
 
 	request := &genprotopb.DeleteSessionRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -278,7 +278,7 @@ func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.R
 	}
 
 	request := &genprotopb.ReportSessionRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -334,7 +334,7 @@ func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Reque
 	}
 
 	request := &genprotopb.ListTestsRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -390,7 +390,7 @@ func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.DeleteTestRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -446,7 +446,7 @@ func (backend *RESTBackend) HandleVerifyTest(w http.ResponseWriter, r *http.Requ
 	}
 
 	request := &genprotopb.VerifyTestRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}

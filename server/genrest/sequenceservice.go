@@ -57,7 +57,7 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 		return
 	}
 
-	if err := resttools.CheckRequestFormat(&jsonReader, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -115,7 +115,7 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 	}
 
 	request := &genprotopb.GetSequenceReportRequest{}
-	if err := resttools.CheckRequestFormat(nil, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
@@ -185,7 +185,7 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 		return
 	}
 
-	if err := resttools.CheckRequestFormat(&jsonReader, r.Header, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
