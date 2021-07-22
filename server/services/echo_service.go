@@ -104,6 +104,15 @@ func (s *echoServerImpl) Chat(stream pb.Echo_ChatServer) error {
 	}
 }
 
+func (s *echoServerImpl) PagedExpandLegacy(ctx context.Context, in *pb.PagedExpandLegacyRequest) (*pb.PagedExpandResponse, error) {
+	req := &pb.PagedExpandRequest{
+		Content:   in.Content,
+		PageSize:  in.MaxResults,
+		PageToken: in.PageToken,
+	}
+	return s.PagedExpand(ctx, req)
+}
+
 func (s *echoServerImpl) PagedExpand(ctx context.Context, in *pb.PagedExpandRequest) (*pb.PagedExpandResponse, error) {
 	if in.GetPageSize() < 0 {
 		return nil, status.Error(codes.InvalidArgument, "The page size provided must not be negative.")

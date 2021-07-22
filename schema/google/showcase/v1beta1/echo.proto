@@ -83,6 +83,16 @@ service Echo {
     };
   }
 
+  // This is similar to the PagedExpand except that it uses
+  // max_results instead of page_size, as some legacy APIs still
+  // do. This usage is strongly disfavored.
+  rpc PagedExpandLegacy(PagedExpandLegacyRequest) returns (PagedExpandResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:pagedExpandLegacy"
+      body: "*"
+    };
+  }
+
   // This method will wait for the requested amount of time and then return.
   // This method showcases how a client handles a request timeout.
   rpc Wait(WaitRequest) returns (google.longrunning.Operation) {
@@ -158,6 +168,20 @@ message PagedExpandRequest {
 
   // The amount of words to returned in each page.
   int32 page_size = 2;
+
+  // The position of the page to be returned.
+  string page_token = 3;
+}
+
+// The request for the PagedExpandLegacy method. New APIs should NOT
+// use this pattern; use PagedExapndRequest instead.
+message PagedExpandLegacyRequest {
+  // The string to expand.
+  string content = 1 [(google.api.field_behavior) = REQUIRED];
+
+  // The amount of words to returned in each page.  This is a legacy, non-standard pattern that
+  // violates http://https://google.aip.dev/158
+  int32 max_results = 2;
 
   // The position of the page to be returned.
   string page_token = 3;

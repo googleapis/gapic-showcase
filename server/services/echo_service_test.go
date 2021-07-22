@@ -468,6 +468,95 @@ func TestPagedExpand(t *testing.T) {
 	}
 }
 
+func TestPagedExpandLegacy_invalidArgs(t *testing.T) {
+	tests := []*pb.PagedExpandLegacyRequest{
+		{MaxResults: -1},
+		{PageToken: "-1"},
+		{PageToken: "BOGUS"},
+		{Content: "one", PageToken: "1"},
+		{Content: "one", PageToken: "2"},
+	}
+	server := NewEchoServer()
+	for _, in := range tests {
+		_, err := server.PagedExpandLegacy(context.Background(), in)
+		s, _ := status.FromError(err)
+		if s.Code() != codes.InvalidArgument {
+			t.Errorf("PagedExpandLegacy() expected error code: %d, got error code %d",
+				codes.InvalidArgument, s.Code())
+		}
+	}
+}
+
+func TestPagedExpandLegacy(t *testing.T) {
+	tests := []struct {
+		in  *pb.PagedExpandLegacyRequest
+		out *pb.PagedExpandResponse
+	}{
+		{
+			&pb.PagedExpandLegacyRequest{Content: "Hello world!"},
+			&pb.PagedExpandResponse{
+				Responses: []*pb.EchoResponse{
+					{Content: "Hello"},
+					{Content: "world!"},
+				},
+			},
+		},
+		{
+			&pb.PagedExpandLegacyRequest{MaxResults: 3, Content: "Hello world!"},
+			&pb.PagedExpandResponse{
+				Responses: []*pb.EchoResponse{
+					{Content: "Hello"},
+					{Content: "world!"},
+				},
+			},
+		},
+		{
+			&pb.PagedExpandLegacyRequest{
+				MaxResults: 3,
+				Content:    "The rain in Spain falls mainly on the plain!",
+			},
+			&pb.PagedExpandResponse{
+				Responses: []*pb.EchoResponse{
+					{Content: "The"},
+					{Content: "rain"},
+					{Content: "in"},
+				},
+				NextPageToken: "3",
+			},
+		},
+		{
+			&pb.PagedExpandLegacyRequest{
+				MaxResults: 3,
+				PageToken:  "3",
+				Content:    "The rain in Spain falls mainly on the plain!",
+			},
+			&pb.PagedExpandResponse{
+				Responses: []*pb.EchoResponse{
+					{Content: "Spain"},
+					{Content: "falls"},
+					{Content: "mainly"},
+				},
+				NextPageToken: "6",
+			},
+		},
+	}
+
+	server := NewEchoServer()
+	for _, test := range tests {
+		mockStream := &mockUnaryStream{t: t}
+		ctx := appendTestOutgoingMetadata(context.Background(), &mockSTS{t: t, stream: mockStream})
+		out, err := server.PagedExpandLegacy(ctx, test.in)
+		if err != nil {
+			t.Error(err)
+		}
+		if !proto.Equal(test.out, out) {
+			t.Errorf("PagedExpandLegacy with input '%q', expected: '%q', got: %q",
+				test.in.String(), test.out.String(), out.String())
+		}
+		mockStream.verify(err == nil)
+	}
+}
+
 func TestWait(t *testing.T) {
 	endTime, _ := ptypes.TimestampProto(time.Now())
 	req := &pb.WaitRequest{End: &pb.WaitRequest_EndTime{EndTime: endTime}}
