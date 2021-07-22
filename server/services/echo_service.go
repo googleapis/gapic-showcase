@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/googleapis/gapic-showcase/server"
@@ -129,6 +130,52 @@ func (s *echoServerImpl) PagedExpand(ctx context.Context, in *pb.PagedExpandRequ
 	echoTrailers(ctx)
 	return &pb.PagedExpandResponse{
 		Responses:     responses,
+		NextPageToken: nextToken,
+	}, nil
+}
+
+// This is a WIP. It needs tests
+// Currently it does not compile: I get the following errors:
+//    % go run ./util/cmd/compile_protos && go test ./...
+//    # github.com/googleapis/gapic-showcase/client
+//    client/echo_client.go:545:62: undefined: genproto.PagedExpandLegacyMappedResponse_AlphabetizedEntry
+//    client/echo_client.go:914:14: undefined: genproto.PagedExpandLegacyMappedResponse_AlphabetizedEntry
+//    client/echo_client.go:929:65: undefined: genproto.PagedExpandLegacyMappedResponse_AlphabetizedEntry
+//    client/echo_client.go:939:79: undefined: genproto.PagedExpandLegacyMappedResponse_AlphabetizedEntry
+//    client/echo_client.go:940:12: undefined: genproto.PagedExpandLegacyMappedResponse_AlphabetizedEntry
+// The symbols on the right are indeed not in the echo.pb.go file.
+func (s *echoServerImpl) PagedExpandLegacyMapped(ctx context.Context, in *pb.PagedExpandRequest) (*pb.PagedExpandLegacyMappedResponse, error) {
+	words := strings.Fields(in.GetContent())
+	start, end, nextToken, err := processPageTokens(len(words), in.GetPageSize(), in.GetPageToken())
+	if err != nil {
+		return nil, err
+	}
+
+	// Construct a map with the following properties:
+
+	// 1. The map has a one-rune string key corresponding to the first rune of EVERY word in words.
+	// 2. The value corresponding to the a given rune key is a list of only those words between
+	// `start` and `end` whose first rune is that key.
+	// 3. Consequently, initial runes that only appear outside the [start,end) range will have
+	// empty list entries, even if they are non-empty in subsequent pages.
+	alphabetized := make(map[string]*pb.PagedExpandResponseList, 255) //assume most input is ASCII
+	for idx, word := range words {
+		initialRune, _ := utf8.DecodeRuneInString(word)
+		key := string(initialRune) // enforces #1
+		prev, ok := alphabetized[key]
+		if !ok {
+			prev = &pb.PagedExpandResponseList{} // enforces #3
+			alphabetized[key] = prev
+		}
+		if int32(idx) >= start && int32(idx) < end { // enforces #2
+			prev.Words = append(prev.Words, word)
+			alphabetized[key] = prev
+		}
+	}
+
+	echoTrailers(ctx)
+	return &pb.PagedExpandLegacyMappedResponse{
+		Alphabetized:  alphabetized,
 		NextPageToken: nextToken,
 	}, nil
 }
