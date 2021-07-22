@@ -93,6 +93,13 @@ service Echo {
     };
   }
 
+  rpc PagedExpandLegacyMapped(PagedExpandRequest) returns (PagedExpandLegacyMappedResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:pagedExpandLegacyMapped"
+      body: "*"
+    };
+  }
+
   // This method will wait for the requested amount of time and then return.
   // This method showcases how a client handles a request timeout.
   rpc Wait(WaitRequest) returns (google.longrunning.Operation) {
@@ -193,6 +200,18 @@ message PagedExpandLegacyRequest {
 message PagedExpandResponse {
   // The words that were expanded.
   repeated EchoResponse responses = 1;
+
+  // The next page token.
+  string next_page_token = 2;
+}
+
+message PagedExpandResponseList {
+  repeated string words = 1;
+}
+
+message PagedExpandLegacyMappedResponse {
+  // The words that were expanded, indexed by "forward" or "backward"
+  map<string, PagedExpandResponseList> alphabetized = 1;
 
   // The next page token.
   string next_page_token = 2;
