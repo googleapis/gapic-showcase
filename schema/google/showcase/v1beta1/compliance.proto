@@ -79,6 +79,23 @@ service Compliance {
       get: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/**}:pathtrailingresource"
     };
   }
+
+  // This method echoes the ComplianceData request, using the HTTP PUT method.
+  rpc RepeatDataBodyPut(RepeatRequest) returns (RepeatResponse) {
+    option (google.api.http) = {
+      put: "/v1beta1/repeat:bodyput"
+      body: "*"
+    };
+  }
+
+  // This method echoes the ComplianceData request, using the HTTP PATCH method.
+  rpc RepeatDataBodyPatch(RepeatRequest) returns (RepeatResponse) {
+    option (google.api.http) = {
+      patch: "/v1beta1/repeat:bodypatch"
+      body: "*"
+    };
+  }
+
 }
 
 message RepeatRequest {

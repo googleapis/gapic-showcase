@@ -55,6 +55,16 @@
                 "RepeatDataBodyInfo"
               ]
             },
+            "RepeatDataBodyPatch": {
+              "methods": [
+                "RepeatDataBodyPatch"
+              ]
+            },
+            "RepeatDataBodyPut": {
+              "methods": [
+                "RepeatDataBodyPut"
+              ]
+            },
             "RepeatDataPathResource": {
               "methods": [
                 "RepeatDataPathResource"
