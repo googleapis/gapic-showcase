@@ -46,6 +46,8 @@ type ComplianceCallOptions struct {
 	RepeatDataSimplePath           []gax.CallOption
 	RepeatDataPathResource         []gax.CallOption
 	RepeatDataPathTrailingResource []gax.CallOption
+	RepeatDataBodyPut              []gax.CallOption
+	RepeatDataBodyPatch            []gax.CallOption
 	ListLocations                  []gax.CallOption
 	GetLocation                    []gax.CallOption
 	SetIamPolicy                   []gax.CallOption
@@ -78,6 +80,8 @@ func defaultComplianceCallOptions() *ComplianceCallOptions {
 		RepeatDataSimplePath:           []gax.CallOption{},
 		RepeatDataPathResource:         []gax.CallOption{},
 		RepeatDataPathTrailingResource: []gax.CallOption{},
+		RepeatDataBodyPut:              []gax.CallOption{},
+		RepeatDataBodyPatch:            []gax.CallOption{},
 		ListLocations:                  []gax.CallOption{},
 		GetLocation:                    []gax.CallOption{},
 		SetIamPolicy:                   []gax.CallOption{},
@@ -101,6 +105,8 @@ type internalComplianceClient interface {
 	RepeatDataSimplePath(context.Context, *genprotopb.RepeatRequest, ...gax.CallOption) (*genprotopb.RepeatResponse, error)
 	RepeatDataPathResource(context.Context, *genprotopb.RepeatRequest, ...gax.CallOption) (*genprotopb.RepeatResponse, error)
 	RepeatDataPathTrailingResource(context.Context, *genprotopb.RepeatRequest, ...gax.CallOption) (*genprotopb.RepeatResponse, error)
+	RepeatDataBodyPut(context.Context, *genprotopb.RepeatRequest, ...gax.CallOption) (*genprotopb.RepeatResponse, error)
+	RepeatDataBodyPatch(context.Context, *genprotopb.RepeatRequest, ...gax.CallOption) (*genprotopb.RepeatResponse, error)
 	ListLocations(context.Context, *locationpb.ListLocationsRequest, ...gax.CallOption) *LocationIterator
 	GetLocation(context.Context, *locationpb.GetLocationRequest, ...gax.CallOption) (*locationpb.Location, error)
 	SetIamPolicy(context.Context, *iampb.SetIamPolicyRequest, ...gax.CallOption) (*iampb.Policy, error)
@@ -181,6 +187,16 @@ func (c *ComplianceClient) RepeatDataPathResource(ctx context.Context, req *genp
 // RepeatDataPathTrailingResource same as RepeatDataSimplePath, but with a trailing resource.
 func (c *ComplianceClient) RepeatDataPathTrailingResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	return c.internalClient.RepeatDataPathTrailingResource(ctx, req, opts...)
+}
+
+// RepeatDataBodyPut this method echoes the ComplianceData request, using the HTTP PUT method.
+func (c *ComplianceClient) RepeatDataBodyPut(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	return c.internalClient.RepeatDataBodyPut(ctx, req, opts...)
+}
+
+// RepeatDataBodyPatch this method echoes the ComplianceData request, using the HTTP PATCH method.
+func (c *ComplianceClient) RepeatDataBodyPatch(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	return c.internalClient.RepeatDataBodyPatch(ctx, req, opts...)
 }
 
 // ListLocations is a utility method from google.cloud.location.Locations.
@@ -403,6 +419,36 @@ func (c *complianceGRPCClient) RepeatDataPathTrailingResource(ctx context.Contex
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		resp, err = c.complianceClient.RepeatDataPathTrailingResource(ctx, req, settings.GRPC...)
+		return err
+	}, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (c *complianceGRPCClient) RepeatDataBodyPut(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).RepeatDataBodyPut[0:len((*c.CallOptions).RepeatDataBodyPut):len((*c.CallOptions).RepeatDataBodyPut)], opts...)
+	var resp *genprotopb.RepeatResponse
+	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		var err error
+		resp, err = c.complianceClient.RepeatDataBodyPut(ctx, req, settings.GRPC...)
+		return err
+	}, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (c *complianceGRPCClient) RepeatDataBodyPatch(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).RepeatDataBodyPatch[0:len((*c.CallOptions).RepeatDataBodyPatch):len((*c.CallOptions).RepeatDataBodyPatch)], opts...)
+	var resp *genprotopb.RepeatResponse
+	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		var err error
+		resp, err = c.complianceClient.RepeatDataBodyPatch(ctx, req, settings.GRPC...)
 		return err
 	}, opts...)
 	if err != nil {

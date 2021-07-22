@@ -23,6 +23,8 @@ var ComplianceSubCommands []string = []string{
 	"repeat-data-simple-path",
 	"repeat-data-path-resource",
 	"repeat-data-path-trailing-resource",
+	"repeat-data-body-put",
+	"repeat-data-body-patch",
 }
 
 func init() {
