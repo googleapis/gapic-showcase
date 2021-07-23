@@ -169,6 +169,11 @@
                 "PagedExpand"
               ]
             },
+            "PagedExpandLegacy": {
+              "methods": [
+                "PagedExpandLegacy"
+              ]
+            },
             "SetIamPolicy": {
               "methods": [
                 "SetIamPolicy"

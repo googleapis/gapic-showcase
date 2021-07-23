@@ -47,6 +47,7 @@ type EchoCallOptions struct {
 	Collect            []gax.CallOption
 	Chat               []gax.CallOption
 	PagedExpand        []gax.CallOption
+	PagedExpandLegacy  []gax.CallOption
 	Wait               []gax.CallOption
 	Block              []gax.CallOption
 	ListLocations      []gax.CallOption
@@ -113,6 +114,7 @@ func defaultEchoCallOptions() *EchoCallOptions {
 				})
 			}),
 		},
+		PagedExpandLegacy:  []gax.CallOption{},
 		Wait:               []gax.CallOption{},
 		Block:              []gax.CallOption{},
 		ListLocations:      []gax.CallOption{},
@@ -137,6 +139,7 @@ type internalEchoClient interface {
 	Collect(context.Context, ...gax.CallOption) (genprotopb.Echo_CollectClient, error)
 	Chat(context.Context, ...gax.CallOption) (genprotopb.Echo_ChatClient, error)
 	PagedExpand(context.Context, *genprotopb.PagedExpandRequest, ...gax.CallOption) *EchoResponseIterator
+	PagedExpandLegacy(context.Context, *genprotopb.PagedExpandLegacyRequest, ...gax.CallOption) (*genprotopb.PagedExpandResponse, error)
 	Wait(context.Context, *genprotopb.WaitRequest, ...gax.CallOption) (*WaitOperation, error)
 	WaitOperation(name string) *WaitOperation
 	Block(context.Context, *genprotopb.BlockRequest, ...gax.CallOption) (*genprotopb.BlockResponse, error)
@@ -223,6 +226,13 @@ func (c *EchoClient) Chat(ctx context.Context, opts ...gax.CallOption) (genproto
 // expanded words, this method returns a paged list of expanded words.
 func (c *EchoClient) PagedExpand(ctx context.Context, req *genprotopb.PagedExpandRequest, opts ...gax.CallOption) *EchoResponseIterator {
 	return c.internalClient.PagedExpand(ctx, req, opts...)
+}
+
+// PagedExpandLegacy this is similar to the PagedExpand except that it uses
+// max_results instead of page_size, as some legacy APIs still
+// do. New APIs should NOT use this pattern.
+func (c *EchoClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.PagedExpandLegacyRequest, opts ...gax.CallOption) (*genprotopb.PagedExpandResponse, error) {
+	return c.internalClient.PagedExpandLegacy(ctx, req, opts...)
 }
 
 // Wait this method will wait for the requested amount of time and then return.
@@ -499,6 +509,26 @@ func (c *echoGRPCClient) PagedExpand(ctx context.Context, req *genprotopb.PagedE
 	it.pageInfo.MaxSize = int(req.GetPageSize())
 	it.pageInfo.Token = req.GetPageToken()
 	return it
+}
+
+func (c *echoGRPCClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.PagedExpandLegacyRequest, opts ...gax.CallOption) (*genprotopb.PagedExpandResponse, error) {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).PagedExpandLegacy[0:len((*c.CallOptions).PagedExpandLegacy):len((*c.CallOptions).PagedExpandLegacy)], opts...)
+	var resp *genprotopb.PagedExpandResponse
+	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		var err error
+		resp, err = c.echoClient.PagedExpandLegacy(ctx, req, settings.GRPC...)
+		return err
+	}, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
 func (c *echoGRPCClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, opts ...gax.CallOption) (*WaitOperation, error) {

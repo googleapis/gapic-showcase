@@ -119,6 +119,25 @@ func ExampleEchoClient_PagedExpand() {
 	}
 }
 
+func ExampleEchoClient_PagedExpandLegacy() {
+	ctx := context.Background()
+	c, err := client.NewEchoClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.PagedExpandLegacyRequest{
+		// TODO: Fill request struct fields.
+	}
+	resp, err := c.PagedExpandLegacy(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
 func ExampleEchoClient_Wait() {
 	ctx := context.Background()
 	c, err := client.NewEchoClient(ctx)

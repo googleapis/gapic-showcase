@@ -23,6 +23,7 @@ Echo (.google.showcase.v1beta1.Echo):
   .google.showcase.v1beta1.Echo.Expand[0] : POST: "/v1beta1/echo:expand"
   .google.showcase.v1beta1.Echo.Collect[0] : POST: "/v1beta1/echo:collect"
   .google.showcase.v1beta1.Echo.PagedExpand[0] : POST: "/v1beta1/echo:pagedExpand"
+  .google.showcase.v1beta1.Echo.PagedExpandLegacy[0] : POST: "/v1beta1/echo:pagedExpandLegacy"
   .google.showcase.v1beta1.Echo.Wait[0] : POST: "/v1beta1/echo:wait"
   .google.showcase.v1beta1.Echo.Block[0] : POST: "/v1beta1/echo:block"
 
@@ -108,7 +109,7 @@ Shim "Echo" (.google.showcase.v1beta1.Echo)
   Imports:
     genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
     longrunningpb: "google.golang.org/genproto/googleapis/longrunning" "google.golang.org/genproto/googleapis/longrunning"
-  Handlers (6):
+  Handlers (7):
         POST                                 /v1beta1/echo:echo func Echo(request genprotopb.EchoRequest) (response genprotopb.EchoResponse) {}
 ["/" "v1beta1" "/" "echo" ":" "echo"]
 
@@ -126,6 +127,9 @@ Shim "Echo" (.google.showcase.v1beta1.Echo)
 
         POST                          /v1beta1/echo:pagedExpand func PagedExpand(request genprotopb.PagedExpandRequest) (response genprotopb.PagedExpandResponse) {}
 ["/" "v1beta1" "/" "echo" ":" "pagedExpand"]
+
+        POST                    /v1beta1/echo:pagedExpandLegacy func PagedExpandLegacy(request genprotopb.PagedExpandLegacyRequest) (response genprotopb.PagedExpandResponse) {}
+["/" "v1beta1" "/" "echo" ":" "pagedExpandLegacy"]
 
 ----------------------------------------
 Shim "Identity" (.google.showcase.v1beta1.Identity)
