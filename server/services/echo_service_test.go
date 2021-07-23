@@ -468,6 +468,8 @@ func TestPagedExpand(t *testing.T) {
 	}
 }
 
+// NOTE: The TestPagedExpandLegacy*() tests mirror the TestPagedExpand*() tests.
+
 func TestPagedExpandLegacy_invalidArgs(t *testing.T) {
 	tests := []*pb.PagedExpandLegacyRequest{
 		{MaxResults: -1},

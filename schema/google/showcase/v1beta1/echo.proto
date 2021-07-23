@@ -85,7 +85,7 @@ service Echo {
 
   // This is similar to the PagedExpand except that it uses
   // max_results instead of page_size, as some legacy APIs still
-  // do. This usage is strongly disfavored.
+  // do. New APIs should NOT use this pattern.
   rpc PagedExpandLegacy(PagedExpandLegacyRequest) returns (PagedExpandResponse) {
     option (google.api.http) = {
       post: "/v1beta1/echo:pagedExpandLegacy"
@@ -174,7 +174,7 @@ message PagedExpandRequest {
 }
 
 // The request for the PagedExpandLegacy method. New APIs should NOT
-// use this pattern; use PagedExapndRequest instead.
+// use this pattern; use PagedExpandRequest instead.
 message PagedExpandLegacyRequest {
   // The string to expand.
   string content = 1 [(google.api.field_behavior) = REQUIRED];
