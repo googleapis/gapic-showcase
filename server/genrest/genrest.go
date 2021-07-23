@@ -36,6 +36,8 @@ func RegisterHandlers(router *gmux.Router, backend *services.Backend) {
 	router.HandleFunc("/v1beta1/repeat/{info.fString:.+}/{info.fInt32:.+}/{info.fDouble:.+}/{info.fBool:.+}/{info.fKingdom:.+}:simplepath", rest.HandleRepeatDataSimplePath).Methods("GET")
 	router.HandleFunc("/v1beta1/repeat/{info.fString:first/.+}/{info.fChild.fString:second/.+}/bool/{info.fBool:.+}:pathresource", rest.HandleRepeatDataPathResource).Methods("GET")
 	router.HandleFunc("/v1beta1/repeat/{info.fString:first/.+}/{info.fChild.fString:second/.+}:pathtrailingresource", rest.HandleRepeatDataPathTrailingResource).Methods("GET")
+	router.HandleFunc("/v1beta1/repeat:bodyput", rest.HandleRepeatDataBodyPut).Methods("PUT")
+	router.HandleFunc("/v1beta1/repeat:bodypatch", rest.HandleRepeatDataBodyPatch).Methods("PATCH")
 	router.HandleFunc("/v1beta1/echo:echo", rest.HandleEcho).Methods("POST")
 	router.HandleFunc("/v1beta1/echo:expand", rest.HandleExpand).Methods("POST")
 	router.HandleFunc("/v1beta1/echo:collect", rest.HandleCollect).Methods("POST")

@@ -2,7 +2,7 @@
   "group": [
     {
       "name": "Fully working conversions, no resources",
-      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery", "Compliance.RepeatDataSimplePath", "Compliance.RepeatDataBodyInfo"],
+      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataBodyPut", "Compliance.RepeatDataBodyPatch", "Compliance.RepeatDataQuery", "Compliance.RepeatDataSimplePath", "Compliance.RepeatDataBodyInfo"],
       "requests": [
         {
           "name": "Basic data types",
@@ -145,7 +145,7 @@
     },
     {
       "name": "Fully working conversions, resources",
-      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery", "Compliance.RepeatDataSimplePath", "Compliance.RepeatDataPathResource", "Compliance.RepeatDataPathTrailingResource"],
+      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataBodyPut", "Compliance.RepeatDataBodyPatch", "Compliance.RepeatDataQuery", "Compliance.RepeatDataSimplePath", "Compliance.RepeatDataPathResource", "Compliance.RepeatDataPathTrailingResource"],
       "requests": [
         {
           "name": "Strings with slashes and values that resemble subsequent resource templates",
@@ -163,7 +163,7 @@
     },
     {
       "name": "Cases that apply to non-path requests",
-      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataQuery"],
+      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataBodyPut", "Compliance.RepeatDataBodyPatch", "Compliance.RepeatDataQuery"],
       "requests": [
         {
           "name": "Zero values for all fields",

@@ -153,6 +153,44 @@ func ExampleComplianceClient_RepeatDataPathTrailingResource() {
 	_ = resp
 }
 
+func ExampleComplianceClient_RepeatDataBodyPut() {
+	ctx := context.Background()
+	c, err := client.NewComplianceClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.RepeatRequest{
+		// TODO: Fill request struct fields.
+	}
+	resp, err := c.RepeatDataBodyPut(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
+func ExampleComplianceClient_RepeatDataBodyPatch() {
+	ctx := context.Background()
+	c, err := client.NewComplianceClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.RepeatRequest{
+		// TODO: Fill request struct fields.
+	}
+	resp, err := c.RepeatDataBodyPatch(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
 func ExampleComplianceClient_ListLocations() {
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)

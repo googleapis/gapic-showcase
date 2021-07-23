@@ -54,6 +54,8 @@ func TestComplianceSuite(t *testing.T) {
 	// each of their handlers invoking the correct GAPIC library method for the Showcase API.
 	restRPCs := map[string]prepRepeatDataTestFunc{
 		"Compliance.RepeatDataBody":                 prepRepeatDataBodyTest,
+		"Compliance.RepeatDataBodyPut":              prepRepeatDataBodyPutTest,
+		"Compliance.RepeatDataBodyPatch":            prepRepeatDataBodyPatchTest,
 		"Compliance.RepeatDataBodyInfo":             prepRepeatDataBodyInfoTest,
 		"Compliance.RepeatDataQuery":                prepRepeatDataQueryTest,
 		"Compliance.RepeatDataSimplePath":           prepRepeatDataSimplePathTest,
@@ -154,6 +156,16 @@ func prepRepeatDataBodyTest(request *genproto.RepeatRequest) (verb string, name 
 	name = "Compliance.RepeatDataBody"
 	bodyBytes, err := resttools.ToJSON().Marshal(request)
 	return "POST", name, "/v1beta1/repeat:body", string(bodyBytes), err
+}
+
+func prepRepeatDataBodyPutTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
+	_, _, path, body, err = prepRepeatDataBodyTest(request)
+	return "PUT", "Compliance.RepeatDataBodyPut", path + "put", body, err
+}
+
+func prepRepeatDataBodyPatchTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
+	_, _, path, body, err = prepRepeatDataBodyTest(request)
+	return "PATCH", "Compliance.RepeatDataBodyPatch", path + "patch", body, err
 }
 
 func prepRepeatDataBodyInfoTest(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {

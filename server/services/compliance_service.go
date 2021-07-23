@@ -90,6 +90,14 @@ func (csi *complianceServerImpl) RepeatDataPathTrailingResource(ctx context.Cont
 	return csi.Repeat(ctx, in)
 }
 
+func (csi *complianceServerImpl) RepeatDataBodyPut(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
+	return csi.Repeat(ctx, in)
+}
+
+func (csi *complianceServerImpl) RepeatDataBodyPatch(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
+	return csi.Repeat(ctx, in)
+}
+
 // complianceSuiteBytes contains the contents of the compliance suite JSON file. This requires Go
 // 1.16. Note that embedding can only be applied to global variables at package scope.
 //go:embed compliance_suite.json

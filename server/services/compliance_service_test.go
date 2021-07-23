@@ -55,6 +55,8 @@ func TestComplianceRepeats(t *testing.T) {
 		server.RepeatDataSimplePath,
 		server.RepeatDataPathResource,
 		server.RepeatDataPathTrailingResource,
+		server.RepeatDataBodyPut,
+		server.RepeatDataBodyPatch,
 	} {
 		response, err := rpc(context.Background(), request)
 		if err != nil {
@@ -66,7 +68,7 @@ func TestComplianceRepeats(t *testing.T) {
 	}
 }
 
-func TestMatchinComplianceSuiteRequests(t *testing.T) {
+func TestMatchingComplianceSuiteRequests(t *testing.T) {
 	server := &complianceServerImpl{}
 
 	info := &pb.ComplianceData{

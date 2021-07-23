@@ -15,6 +15,8 @@ Compliance (.google.showcase.v1beta1.Compliance):
   .google.showcase.v1beta1.Compliance.RepeatDataSimplePath[0] : GET: "/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}/{info.f_kingdom}:simplepath"
   .google.showcase.v1beta1.Compliance.RepeatDataPathResource[0] : GET: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/*}/bool/{info.f_bool}:pathresource"
   .google.showcase.v1beta1.Compliance.RepeatDataPathTrailingResource[0] : GET: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/**}:pathtrailingresource"
+  .google.showcase.v1beta1.Compliance.RepeatDataBodyPut[0] : PUT: "/v1beta1/repeat:bodyput"
+  .google.showcase.v1beta1.Compliance.RepeatDataBodyPatch[0] : PATCH: "/v1beta1/repeat:bodypatch"
 
 Echo (.google.showcase.v1beta1.Echo):
   .google.showcase.v1beta1.Echo.Echo[0] : POST: "/v1beta1/echo:echo"
@@ -76,7 +78,7 @@ GoModel
 Shim "Compliance" (.google.showcase.v1beta1.Compliance)
   Imports:
     genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
-  Handlers (6):
+  Handlers (8):
          GET                              /v1beta1/repeat:query func RepeatDataQuery(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
 ["/" "v1beta1" "/" "repeat" ":" "query"]
 
@@ -89,11 +91,17 @@ Shim "Compliance" (.google.showcase.v1beta1.Compliance)
          GET /v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}/{info.f_kingdom}:simplepath func RepeatDataSimplePath(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
 ["/" "v1beta1" "/" "repeat" "/" {info.f_string = []} "/" {info.f_int32 = []} "/" {info.f_double = []} "/" {info.f_bool = []} "/" {info.f_kingdom = []} ":" "simplepath"]
 
+         PUT                            /v1beta1/repeat:bodyput func RepeatDataBodyPut(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
+["/" "v1beta1" "/" "repeat" ":" "bodyput"]
+
         POST                               /v1beta1/repeat:body func RepeatDataBody(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
 ["/" "v1beta1" "/" "repeat" ":" "body"]
 
         POST                           /v1beta1/repeat:bodyinfo func RepeatDataBodyInfo(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
 ["/" "v1beta1" "/" "repeat" ":" "bodyinfo"]
+
+       PATCH                          /v1beta1/repeat:bodypatch func RepeatDataBodyPatch(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
+["/" "v1beta1" "/" "repeat" ":" "bodypatch"]
 
 ----------------------------------------
 Shim "Echo" (.google.showcase.v1beta1.Echo)
