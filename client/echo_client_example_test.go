@@ -40,6 +40,18 @@ func ExampleNewEchoClient() {
 	_ = c
 }
 
+func ExampleNewEchoRESTClient() {
+	ctx := context.Background()
+	c, err := client.NewEchoRESTClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	// TODO: Use client.
+	_ = c
+}
+
 func ExampleEchoClient_Echo() {
 	ctx := context.Background()
 	c, err := client.NewEchoClient(ctx)
@@ -130,12 +142,18 @@ func ExampleEchoClient_PagedExpandLegacy() {
 	req := &genprotopb.PagedExpandLegacyRequest{
 		// TODO: Fill request struct fields.
 	}
-	resp, err := c.PagedExpandLegacy(ctx, req)
-	if err != nil {
-		// TODO: Handle error.
+	it := c.PagedExpandLegacy(ctx, req)
+	for {
+		resp, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			// TODO: Handle error.
+		}
+		// TODO: Use resp.
+		_ = resp
 	}
-	// TODO: Use resp.
-	_ = resp
 }
 
 func ExampleEchoClient_Wait() {

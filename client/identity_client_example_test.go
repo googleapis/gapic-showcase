@@ -39,6 +39,18 @@ func ExampleNewIdentityClient() {
 	_ = c
 }
 
+func ExampleNewIdentityRESTClient() {
+	ctx := context.Background()
+	c, err := client.NewIdentityRESTClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	// TODO: Use client.
+	_ = c
+}
+
 func ExampleIdentityClient_CreateUser() {
 	ctx := context.Background()
 	c, err := client.NewIdentityClient(ctx)

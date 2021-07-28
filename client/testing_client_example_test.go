@@ -39,6 +39,18 @@ func ExampleNewTestingClient() {
 	_ = c
 }
 
+func ExampleNewTestingRESTClient() {
+	ctx := context.Background()
+	c, err := client.NewTestingRESTClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	// TODO: Use client.
+	_ = c
+}
+
 func ExampleTestingClient_CreateSession() {
 	ctx := context.Background()
 	c, err := client.NewTestingClient(ctx)
