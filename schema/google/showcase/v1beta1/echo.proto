@@ -115,7 +115,46 @@ service Echo {
       body: "*"
     };
   };
+    rpc MapExpand(MapExpandRequest) returns (MapExpandResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:mapExpand"
+      body: "*"
+    };  
+  };
+
+  rpc SecondMapExpand(SecondMapExpandRequest) returns (SecondMapExpandResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:secondMapExpand"
+      body: "*"
+    };  
+  }; 
+
+
 }
+
+message MapExpandRequest {
+    string page_token = 1;
+    int32 page_size = 2;
+    string query = 3;
+}
+
+message MapExpandResponse {
+    string next_page_token = 1;
+    map<string, int32> items = 2;
+}
+
+message SecondMapExpandRequest {
+    string page_token = 1;
+    int32 page_size = 2;
+    string query = 3;
+}
+
+message SecondMapExpandResponse {
+    string next_page_token = 1;
+    map<string, int32> items = 2;
+}
+
+
 
 // A severity enum used to test enum capabilities in GAPIC surfaces.
 enum Severity {

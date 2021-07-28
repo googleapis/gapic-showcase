@@ -199,6 +199,56 @@ func ExampleEchoClient_Block() {
 	_ = resp
 }
 
+func ExampleEchoClient_MapExpand() {
+	ctx := context.Background()
+	c, err := client.NewEchoClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.MapExpandRequest{
+		// TODO: Fill request struct fields.
+	}
+	it := c.MapExpand(ctx, req)
+	for {
+		resp, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			// TODO: Handle error.
+		}
+		// TODO: Use resp.
+		_ = resp
+	}
+}
+
+func ExampleEchoClient_SecondMapExpand() {
+	ctx := context.Background()
+	c, err := client.NewEchoClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.SecondMapExpandRequest{
+		// TODO: Fill request struct fields.
+	}
+	it := c.SecondMapExpand(ctx, req)
+	for {
+		resp, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			// TODO: Handle error.
+		}
+		// TODO: Use resp.
+		_ = resp
+	}
+}
+
 func ExampleEchoClient_ListLocations() {
 	ctx := context.Background()
 	c, err := client.NewEchoClient(ctx)

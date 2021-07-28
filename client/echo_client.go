@@ -24,6 +24,7 @@ import (
 	"math"
 	"net/http"
 	"net/url"
+	"sort"
 	"time"
 
 	"cloud.google.com/go/longrunning"
@@ -57,6 +58,8 @@ type EchoCallOptions struct {
 	PagedExpandLegacy  []gax.CallOption
 	Wait               []gax.CallOption
 	Block              []gax.CallOption
+	MapExpand          []gax.CallOption
+	SecondMapExpand    []gax.CallOption
 	ListLocations      []gax.CallOption
 	GetLocation        []gax.CallOption
 	SetIamPolicy       []gax.CallOption
@@ -124,6 +127,8 @@ func defaultEchoCallOptions() *EchoCallOptions {
 		PagedExpandLegacy:  []gax.CallOption{},
 		Wait:               []gax.CallOption{},
 		Block:              []gax.CallOption{},
+		MapExpand:          []gax.CallOption{},
+		SecondMapExpand:    []gax.CallOption{},
 		ListLocations:      []gax.CallOption{},
 		GetLocation:        []gax.CallOption{},
 		SetIamPolicy:       []gax.CallOption{},
@@ -150,6 +155,8 @@ type internalEchoClient interface {
 	Wait(context.Context, *genprotopb.WaitRequest, ...gax.CallOption) (*WaitOperation, error)
 	WaitOperation(name string) *WaitOperation
 	Block(context.Context, *genprotopb.BlockRequest, ...gax.CallOption) (*genprotopb.BlockResponse, error)
+	MapExpand(context.Context, *genprotopb.MapExpandRequest, ...gax.CallOption) *StringInt32PairIterator
+	SecondMapExpand(context.Context, *genprotopb.SecondMapExpandRequest, ...gax.CallOption) *StringInt32PairIterator
 	ListLocations(context.Context, *locationpb.ListLocationsRequest, ...gax.CallOption) *LocationIterator
 	GetLocation(context.Context, *locationpb.GetLocationRequest, ...gax.CallOption) (*locationpb.Location, error)
 	SetIamPolicy(context.Context, *iampb.SetIamPolicyRequest, ...gax.CallOption) (*iampb.Policy, error)
@@ -259,6 +266,14 @@ func (c *EchoClient) WaitOperation(name string) *WaitOperation {
 // This method showcases how a client handles delays or retries.
 func (c *EchoClient) Block(ctx context.Context, req *genprotopb.BlockRequest, opts ...gax.CallOption) (*genprotopb.BlockResponse, error) {
 	return c.internalClient.Block(ctx, req, opts...)
+}
+
+func (c *EchoClient) MapExpand(ctx context.Context, req *genprotopb.MapExpandRequest, opts ...gax.CallOption) *StringInt32PairIterator {
+	return c.internalClient.MapExpand(ctx, req, opts...)
+}
+
+func (c *EchoClient) SecondMapExpand(ctx context.Context, req *genprotopb.SecondMapExpandRequest, opts ...gax.CallOption) *StringInt32PairIterator {
+	return c.internalClient.SecondMapExpand(ctx, req, opts...)
 }
 
 // ListLocations is a utility method from google.cloud.location.Locations.
@@ -664,6 +679,98 @@ func (c *echoGRPCClient) Block(ctx context.Context, req *genprotopb.BlockRequest
 		return nil, err
 	}
 	return resp, nil
+}
+
+func (c *echoGRPCClient) MapExpand(ctx context.Context, req *genprotopb.MapExpandRequest, opts ...gax.CallOption) *StringInt32PairIterator {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).MapExpand[0:len((*c.CallOptions).MapExpand):len((*c.CallOptions).MapExpand)], opts...)
+	it := &StringInt32PairIterator{}
+	req = proto.Clone(req).(*genprotopb.MapExpandRequest)
+	it.InternalFetch = func(pageSize int, pageToken string) ([]StringInt32Pair, string, error) {
+		var resp *genprotopb.MapExpandResponse
+		req.PageToken = pageToken
+		if pageSize > math.MaxInt32 {
+			req.PageSize = math.MaxInt32
+		} else {
+			req.PageSize = int32(pageSize)
+		}
+		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			var err error
+			resp, err = c.echoClient.MapExpand(ctx, req, settings.GRPC...)
+			return err
+		}, opts...)
+		if err != nil {
+			return nil, "", err
+		}
+
+		it.Response = resp
+
+		elts := make([]StringInt32Pair, 0, len(resp.GetItems()))
+		for k, v := range resp.GetItems() {
+			elts = append(elts, StringInt32Pair{k, v})
+		}
+		sort.Slice(elts, func(i, j int) bool { return elts[i].Key < elts[j].Key })
+
+		return elts, resp.GetNextPageToken(), nil
+	}
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.GetPageSize())
+	it.pageInfo.Token = req.GetPageToken()
+	return it
+}
+
+func (c *echoGRPCClient) SecondMapExpand(ctx context.Context, req *genprotopb.SecondMapExpandRequest, opts ...gax.CallOption) *StringInt32PairIterator {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).SecondMapExpand[0:len((*c.CallOptions).SecondMapExpand):len((*c.CallOptions).SecondMapExpand)], opts...)
+	it := &StringInt32PairIterator{}
+	req = proto.Clone(req).(*genprotopb.SecondMapExpandRequest)
+	it.InternalFetch = func(pageSize int, pageToken string) ([]StringInt32Pair, string, error) {
+		var resp *genprotopb.SecondMapExpandResponse
+		req.PageToken = pageToken
+		if pageSize > math.MaxInt32 {
+			req.PageSize = math.MaxInt32
+		} else {
+			req.PageSize = int32(pageSize)
+		}
+		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			var err error
+			resp, err = c.echoClient.SecondMapExpand(ctx, req, settings.GRPC...)
+			return err
+		}, opts...)
+		if err != nil {
+			return nil, "", err
+		}
+
+		it.Response = resp
+
+		elts := make([]StringInt32Pair, 0, len(resp.GetItems()))
+		for k, v := range resp.GetItems() {
+			elts = append(elts, StringInt32Pair{k, v})
+		}
+		sort.Slice(elts, func(i, j int) bool { return elts[i].Key < elts[j].Key })
+
+		return elts, resp.GetNextPageToken(), nil
+	}
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.GetPageSize())
+	it.pageInfo.Token = req.GetPageToken()
+	return it
 }
 
 func (c *echoGRPCClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
@@ -1096,6 +1203,156 @@ func (c *echoRESTClient) Block(ctx context.Context, req *genprotopb.BlockRequest
 	rsp := &genprotopb.BlockResponse{}
 
 	return rsp, unm.Unmarshal(buf, rsp)
+}
+func (c *echoRESTClient) MapExpand(ctx context.Context, req *genprotopb.MapExpandRequest, opts ...gax.CallOption) *StringInt32PairIterator {
+	it := &StringInt32PairIterator{}
+	req = proto.Clone(req).(*genprotopb.MapExpandRequest)
+	m := protojson.MarshalOptions{AllowPartial: true, UseProtoNames: false}
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	it.InternalFetch = func(pageSize int, pageToken string) ([]StringInt32Pair, string, error) {
+		resp := &genprotopb.MapExpandResponse{}
+		if pageSize > math.MaxInt32 {
+			req.PageSize = math.MaxInt32
+		} else {
+			req.PageSize = int32(pageSize)
+		}
+		req.PageToken = pageToken
+
+		jsonReq, err := m.Marshal(req)
+		if err != nil {
+			return nil, "", err
+		}
+
+		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl.Path += fmt.Sprintf("/v1beta1/echo:mapExpand")
+
+		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
+		if err != nil {
+			return nil, "", err
+		}
+
+		// Set the headers
+		for k, v := range c.xGoogMetadata {
+			httpReq.Header[k] = v
+		}
+
+		httpReq.Header["Content-Type"] = []string{"application/json"}
+		httpRsp, err := c.httpClient.Do(httpReq)
+		if err != nil {
+			return nil, "", err
+		}
+		defer httpRsp.Body.Close()
+
+		if httpRsp.StatusCode != http.StatusOK {
+			return nil, "", fmt.Errorf(httpRsp.Status)
+		}
+
+		buf, err := ioutil.ReadAll(httpRsp.Body)
+		if err != nil {
+			return nil, "", err
+		}
+
+		unm.Unmarshal(buf, resp)
+		it.Response = resp
+
+		elts := make([]StringInt32Pair, 0, len(resp.GetItems()))
+		for k, v := range resp.GetItems() {
+			elts = append(elts, StringInt32Pair{k, v})
+		}
+		sort.Slice(elts, func(i, j int) bool { return elts[i].Key < elts[j].Key })
+
+		return elts, resp.GetNextPageToken(), nil
+	}
+
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.GetPageSize())
+	it.pageInfo.Token = req.GetPageToken()
+
+	return it
+}
+func (c *echoRESTClient) SecondMapExpand(ctx context.Context, req *genprotopb.SecondMapExpandRequest, opts ...gax.CallOption) *StringInt32PairIterator {
+	it := &StringInt32PairIterator{}
+	req = proto.Clone(req).(*genprotopb.SecondMapExpandRequest)
+	m := protojson.MarshalOptions{AllowPartial: true, UseProtoNames: false}
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	it.InternalFetch = func(pageSize int, pageToken string) ([]StringInt32Pair, string, error) {
+		resp := &genprotopb.SecondMapExpandResponse{}
+		if pageSize > math.MaxInt32 {
+			req.PageSize = math.MaxInt32
+		} else {
+			req.PageSize = int32(pageSize)
+		}
+		req.PageToken = pageToken
+
+		jsonReq, err := m.Marshal(req)
+		if err != nil {
+			return nil, "", err
+		}
+
+		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl.Path += fmt.Sprintf("/v1beta1/echo:secondMapExpand")
+
+		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
+		if err != nil {
+			return nil, "", err
+		}
+
+		// Set the headers
+		for k, v := range c.xGoogMetadata {
+			httpReq.Header[k] = v
+		}
+
+		httpReq.Header["Content-Type"] = []string{"application/json"}
+		httpRsp, err := c.httpClient.Do(httpReq)
+		if err != nil {
+			return nil, "", err
+		}
+		defer httpRsp.Body.Close()
+
+		if httpRsp.StatusCode != http.StatusOK {
+			return nil, "", fmt.Errorf(httpRsp.Status)
+		}
+
+		buf, err := ioutil.ReadAll(httpRsp.Body)
+		if err != nil {
+			return nil, "", err
+		}
+
+		unm.Unmarshal(buf, resp)
+		it.Response = resp
+
+		elts := make([]StringInt32Pair, 0, len(resp.GetItems()))
+		for k, v := range resp.GetItems() {
+			elts = append(elts, StringInt32Pair{k, v})
+		}
+		sort.Slice(elts, func(i, j int) bool { return elts[i].Key < elts[j].Key })
+
+		return elts, resp.GetNextPageToken(), nil
+	}
+
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.GetPageSize())
+	it.pageInfo.Token = req.GetPageToken()
+
+	return it
 }
 
 // ListLocations is a utility method from google.cloud.location.Locations.
@@ -1682,6 +1939,59 @@ func (it *EchoResponseIterator) bufLen() int {
 }
 
 func (it *EchoResponseIterator) takeBuf() interface{} {
+	b := it.items
+	it.items = nil
+	return b
+}
+
+// Holder type for string/int32 map entries
+type StringInt32Pair struct {
+	Key   string
+	Value int32
+}
+
+// StringInt32PairIterator manages a stream of StringInt32Pair.
+type StringInt32PairIterator struct {
+	items    []StringInt32Pair
+	pageInfo *iterator.PageInfo
+	nextFunc func() error
+
+	// Response is the raw response for the current page.
+	// It must be cast to the RPC response type.
+	// Calling Next() or InternalFetch() updates this value.
+	Response interface{}
+
+	// InternalFetch is for use by the Google Cloud Libraries only.
+	// It is not part of the stable interface of this package.
+	//
+	// InternalFetch returns results from a single call to the underlying RPC.
+	// The number of results is no greater than pageSize.
+	// If there are no more results, nextPageToken is empty and err is nil.
+	InternalFetch func(pageSize int, pageToken string) (results []StringInt32Pair, nextPageToken string, err error)
+}
+
+// PageInfo supports pagination. See the google.golang.org/api/iterator package for details.
+func (it *StringInt32PairIterator) PageInfo() *iterator.PageInfo {
+	return it.pageInfo
+}
+
+// Next returns the next result. Its second return value is iterator.Done if there are no more
+// results. Once Next returns Done, all subsequent calls will return Done.
+func (it *StringInt32PairIterator) Next() (StringInt32Pair, error) {
+	var item StringInt32Pair
+	if err := it.nextFunc(); err != nil {
+		return item, err
+	}
+	item = it.items[0]
+	it.items = it.items[1:]
+	return item, nil
+}
+
+func (it *StringInt32PairIterator) bufLen() int {
+	return len(it.items)
+}
+
+func (it *StringInt32PairIterator) takeBuf() interface{} {
 	b := it.items
 	it.items = nil
 	return b
