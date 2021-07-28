@@ -17,9 +17,12 @@
 package client
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"math"
+	"net/http"
 	"net/url"
 
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
@@ -28,11 +31,13 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/api/option/internaloption"
 	gtransport "google.golang.org/api/transport/grpc"
+	httptransport "google.golang.org/api/transport/http"
 	locationpb "google.golang.org/genproto/googleapis/cloud/location"
 	iampb "google.golang.org/genproto/googleapis/iam/v1"
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -334,6 +339,70 @@ func (c *complianceGRPCClient) Close() error {
 	return c.connPool.Close()
 }
 
+// Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
+type complianceRESTClient struct {
+	// The http endpoint to connect to.
+	endpoint string
+
+	// The http client.
+	httpClient *http.Client
+
+	// The x-goog-* metadata to be sent with each request.
+	xGoogMetadata metadata.MD
+}
+
+// NewComplianceRESTClient creates a new compliance rest client.
+//
+// This service is used to test that GAPICs can transcode proto3 requests to
+// REST format correctly for various types of HTTP annotations.
+func NewComplianceRESTClient(ctx context.Context, opts ...option.ClientOption) (*ComplianceClient, error) {
+	clientOpts := append(defaultComplianceRESTClientOptions(), opts...)
+	httpClient, endpoint, err := httptransport.NewClient(ctx, clientOpts...)
+	if err != nil {
+		return nil, err
+	}
+
+	c := &complianceRESTClient{
+		endpoint:   endpoint,
+		httpClient: httpClient,
+	}
+	c.setGoogleClientInfo()
+
+	return &ComplianceClient{internalClient: c, CallOptions: &ComplianceCallOptions{}}, nil
+}
+
+func defaultComplianceRESTClientOptions() []option.ClientOption {
+	return []option.ClientOption{
+		internaloption.WithDefaultEndpoint("https://localhost:7469"),
+		internaloption.WithDefaultMTLSEndpoint("https://localhost:7469"),
+		internaloption.WithDefaultAudience("https://localhost/"),
+		internaloption.WithDefaultScopes(DefaultAuthScopes()...),
+	}
+}
+
+// setGoogleClientInfo sets the name and version of the application in
+// the `x-goog-api-client` header passed on each request. Intended for
+// use by Google-written clients.
+func (c *complianceRESTClient) setGoogleClientInfo(keyval ...string) {
+	kv := append([]string{"gl-go", versionGo()}, keyval...)
+	kv = append(kv, "gapic", versionClient, "gax", gax.Version, "rest", "UNKNOWN")
+	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
+}
+
+// Close closes the connection to the API service. The user should invoke this when
+// the client is no longer required.
+func (c *complianceRESTClient) Close() error {
+	// Replace httpClient with nil to force cleanup.
+	c.httpClient = nil
+	return nil
+}
+
+// Connection returns a connection to the API service.
+//
+// Deprecated.
+func (c *complianceRESTClient) Connection() *grpc.ClientConn {
+	return nil
+}
 func (c *complianceGRPCClient) RepeatDataBody(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append((*c.CallOptions).RepeatDataBody[0:len((*c.CallOptions).RepeatDataBody):len((*c.CallOptions).RepeatDataBody)], opts...)
@@ -630,6 +699,1123 @@ func (c *complianceGRPCClient) CancelOperation(ctx context.Context, req *longrun
 		return err
 	}, opts...)
 	return err
+}
+
+// RepeatDataBody this method echoes the ComplianceData request. This method exercises
+// sending the entire request object in the REST body.
+func (c *complianceRESTClient) RepeatDataBody(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat:body")
+
+	httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	httpReq = httpReq.WithContext(ctx)
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &genprotopb.RepeatResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// RepeatDataBodyInfo this method echoes the ComplianceData request. This method exercises
+// sending the a message-type field in the REST body. Per AIP-127, only
+// top-level, non-repeated fields can be sent this way.
+func (c *complianceRESTClient) RepeatDataBodyInfo(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true}
+	body := req.GetInfo()
+	jsonReq, err := m.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+
+	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat:bodyinfo")
+
+	params := url.Values{}
+	if req.GetFDouble() != 0 {
+		params.Add("fDouble", fmt.Sprintf("%v", req.GetFDouble()))
+	}
+	if req.GetFInt32() != 0 {
+		params.Add("fInt32", fmt.Sprintf("%v", req.GetFInt32()))
+	}
+	if req.GetFInt64() != 0 {
+		params.Add("fInt64", fmt.Sprintf("%v", req.GetFInt64()))
+	}
+	if req.GetName() != "" {
+		params.Add("name", fmt.Sprintf("%v", req.GetName()))
+	}
+	if req != nil && req.PDouble != nil {
+		params.Add("pDouble", fmt.Sprintf("%v", req.GetPDouble()))
+	}
+	if req != nil && req.PInt32 != nil {
+		params.Add("pInt32", fmt.Sprintf("%v", req.GetPInt32()))
+	}
+	if req != nil && req.PInt64 != nil {
+		params.Add("pInt64", fmt.Sprintf("%v", req.GetPInt64()))
+	}
+	if req.GetServerVerify() {
+		params.Add("serverVerify", fmt.Sprintf("%v", req.GetServerVerify()))
+	}
+
+	baseUrl.RawQuery = params.Encode()
+
+	httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	httpReq = httpReq.WithContext(ctx)
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &genprotopb.RepeatResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// RepeatDataQuery this method echoes the ComplianceData request. This method exercises
+// sending all request fields as query parameters.
+func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat:query")
+
+	params := url.Values{}
+	if req.GetFDouble() != 0 {
+		params.Add("fDouble", fmt.Sprintf("%v", req.GetFDouble()))
+	}
+	if req.GetFInt32() != 0 {
+		params.Add("fInt32", fmt.Sprintf("%v", req.GetFInt32()))
+	}
+	if req.GetFInt64() != 0 {
+		params.Add("fInt64", fmt.Sprintf("%v", req.GetFInt64()))
+	}
+	if req.GetInfo().GetFBool() {
+		params.Add("info.fBool", fmt.Sprintf("%v", req.GetInfo().GetFBool()))
+	}
+	if req.GetInfo().GetFBytes() != nil {
+		params.Add("info.fBytes", fmt.Sprintf("%v", req.GetInfo().GetFBytes()))
+	}
+	if req.GetInfo().GetFChild().GetFBool() {
+		params.Add("info.fChild.fBool", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFBool()))
+	}
+	if req.GetInfo().GetFChild().GetFChild().GetFBool() {
+		params.Add("info.fChild.fChild.fBool", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFChild().GetFBool()))
+	}
+	if req.GetInfo().GetFChild().GetFChild().GetFDouble() != 0 {
+		params.Add("info.fChild.fChild.fDouble", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFChild().GetFDouble()))
+	}
+	if req.GetInfo().GetFChild().GetFChild().GetFString() != "" {
+		params.Add("info.fChild.fChild.fString", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFChild().GetFString()))
+	}
+	if req.GetInfo().GetFChild().GetFContinent() != 0 {
+		params.Add("info.fChild.fContinent", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFContinent()))
+	}
+	if req.GetInfo().GetFChild().GetFDouble() != 0 {
+		params.Add("info.fChild.fDouble", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFDouble()))
+	}
+	if req.GetInfo().GetFChild().GetFFloat() != 0 {
+		params.Add("info.fChild.fFloat", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFFloat()))
+	}
+	if req.GetInfo().GetFChild().GetFString() != "" {
+		params.Add("info.fChild.fString", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFString()))
+	}
+	if req.GetInfo().GetFChild() != nil && req.GetInfo().GetFChild().PBool != nil {
+		params.Add("info.fChild.pBool", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPBool()))
+	}
+	if req.GetInfo().GetFChild().GetPChild().GetFBool() {
+		params.Add("info.fChild.pChild.fBool", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPChild().GetFBool()))
+	}
+	if req.GetInfo().GetFChild().GetPChild().GetFDouble() != 0 {
+		params.Add("info.fChild.pChild.fDouble", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPChild().GetFDouble()))
+	}
+	if req.GetInfo().GetFChild().GetPChild().GetFString() != "" {
+		params.Add("info.fChild.pChild.fString", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPChild().GetFString()))
+	}
+	if req.GetInfo().GetFChild().GetPContinent() != 0 {
+		params.Add("info.fChild.pContinent", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPContinent()))
+	}
+	if req.GetInfo().GetFChild() != nil && req.GetInfo().GetFChild().PDouble != nil {
+		params.Add("info.fChild.pDouble", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPDouble()))
+	}
+	if req.GetInfo().GetFChild() != nil && req.GetInfo().GetFChild().PFloat != nil {
+		params.Add("info.fChild.pFloat", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPFloat()))
+	}
+	if req.GetInfo().GetFChild() != nil && req.GetInfo().GetFChild().PString != nil {
+		params.Add("info.fChild.pString", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPString()))
+	}
+	if req.GetInfo().GetFDouble() != 0 {
+		params.Add("info.fDouble", fmt.Sprintf("%v", req.GetInfo().GetFDouble()))
+	}
+	if req.GetInfo().GetFFixed32() != 0 {
+		params.Add("info.fFixed32", fmt.Sprintf("%v", req.GetInfo().GetFFixed32()))
+	}
+	if req.GetInfo().GetFFixed64() != 0 {
+		params.Add("info.fFixed64", fmt.Sprintf("%v", req.GetInfo().GetFFixed64()))
+	}
+	if req.GetInfo().GetFFloat() != 0 {
+		params.Add("info.fFloat", fmt.Sprintf("%v", req.GetInfo().GetFFloat()))
+	}
+	if req.GetInfo().GetFInt32() != 0 {
+		params.Add("info.fInt32", fmt.Sprintf("%v", req.GetInfo().GetFInt32()))
+	}
+	if req.GetInfo().GetFInt64() != 0 {
+		params.Add("info.fInt64", fmt.Sprintf("%v", req.GetInfo().GetFInt64()))
+	}
+	if req.GetInfo().GetFKingdom() != 0 {
+		params.Add("info.fKingdom", fmt.Sprintf("%v", req.GetInfo().GetFKingdom()))
+	}
+	if req.GetInfo().GetFSfixed32() != 0 {
+		params.Add("info.fSfixed32", fmt.Sprintf("%v", req.GetInfo().GetFSfixed32()))
+	}
+	if req.GetInfo().GetFSfixed64() != 0 {
+		params.Add("info.fSfixed64", fmt.Sprintf("%v", req.GetInfo().GetFSfixed64()))
+	}
+	if req.GetInfo().GetFSint32() != 0 {
+		params.Add("info.fSint32", fmt.Sprintf("%v", req.GetInfo().GetFSint32()))
+	}
+	if req.GetInfo().GetFSint64() != 0 {
+		params.Add("info.fSint64", fmt.Sprintf("%v", req.GetInfo().GetFSint64()))
+	}
+	if req.GetInfo().GetFString() != "" {
+		params.Add("info.fString", fmt.Sprintf("%v", req.GetInfo().GetFString()))
+	}
+	if req.GetInfo().GetFUint32() != 0 {
+		params.Add("info.fUint32", fmt.Sprintf("%v", req.GetInfo().GetFUint32()))
+	}
+	if req.GetInfo().GetFUint64() != 0 {
+		params.Add("info.fUint64", fmt.Sprintf("%v", req.GetInfo().GetFUint64()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PBool != nil {
+		params.Add("info.pBool", fmt.Sprintf("%v", req.GetInfo().GetPBool()))
+	}
+	if req.GetInfo().GetPChild().GetFBool() {
+		params.Add("info.pChild.fBool", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFBool()))
+	}
+	if req.GetInfo().GetPChild().GetFChild().GetFBool() {
+		params.Add("info.pChild.fChild.fBool", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFChild().GetFBool()))
+	}
+	if req.GetInfo().GetPChild().GetFChild().GetFDouble() != 0 {
+		params.Add("info.pChild.fChild.fDouble", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFChild().GetFDouble()))
+	}
+	if req.GetInfo().GetPChild().GetFChild().GetFString() != "" {
+		params.Add("info.pChild.fChild.fString", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFChild().GetFString()))
+	}
+	if req.GetInfo().GetPChild().GetFContinent() != 0 {
+		params.Add("info.pChild.fContinent", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFContinent()))
+	}
+	if req.GetInfo().GetPChild().GetFDouble() != 0 {
+		params.Add("info.pChild.fDouble", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFDouble()))
+	}
+	if req.GetInfo().GetPChild().GetFFloat() != 0 {
+		params.Add("info.pChild.fFloat", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFFloat()))
+	}
+	if req.GetInfo().GetPChild().GetFString() != "" {
+		params.Add("info.pChild.fString", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFString()))
+	}
+	if req.GetInfo().GetPChild() != nil && req.GetInfo().GetPChild().PBool != nil {
+		params.Add("info.pChild.pBool", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPBool()))
+	}
+	if req.GetInfo().GetPChild().GetPChild().GetFBool() {
+		params.Add("info.pChild.pChild.fBool", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPChild().GetFBool()))
+	}
+	if req.GetInfo().GetPChild().GetPChild().GetFDouble() != 0 {
+		params.Add("info.pChild.pChild.fDouble", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPChild().GetFDouble()))
+	}
+	if req.GetInfo().GetPChild().GetPChild().GetFString() != "" {
+		params.Add("info.pChild.pChild.fString", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPChild().GetFString()))
+	}
+	if req.GetInfo().GetPChild().GetPContinent() != 0 {
+		params.Add("info.pChild.pContinent", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPContinent()))
+	}
+	if req.GetInfo().GetPChild() != nil && req.GetInfo().GetPChild().PDouble != nil {
+		params.Add("info.pChild.pDouble", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPDouble()))
+	}
+	if req.GetInfo().GetPChild() != nil && req.GetInfo().GetPChild().PFloat != nil {
+		params.Add("info.pChild.pFloat", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPFloat()))
+	}
+	if req.GetInfo().GetPChild() != nil && req.GetInfo().GetPChild().PString != nil {
+		params.Add("info.pChild.pString", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPString()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PDouble != nil {
+		params.Add("info.pDouble", fmt.Sprintf("%v", req.GetInfo().GetPDouble()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PInt32 != nil {
+		params.Add("info.pInt32", fmt.Sprintf("%v", req.GetInfo().GetPInt32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PKingdom != nil {
+		params.Add("info.pKingdom", fmt.Sprintf("%v", req.GetInfo().GetPKingdom()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PString != nil {
+		params.Add("info.pString", fmt.Sprintf("%v", req.GetInfo().GetPString()))
+	}
+	if req.GetName() != "" {
+		params.Add("name", fmt.Sprintf("%v", req.GetName()))
+	}
+	if req != nil && req.PDouble != nil {
+		params.Add("pDouble", fmt.Sprintf("%v", req.GetPDouble()))
+	}
+	if req != nil && req.PInt32 != nil {
+		params.Add("pInt32", fmt.Sprintf("%v", req.GetPInt32()))
+	}
+	if req != nil && req.PInt64 != nil {
+		params.Add("pInt64", fmt.Sprintf("%v", req.GetPInt64()))
+	}
+	if req.GetServerVerify() {
+		params.Add("serverVerify", fmt.Sprintf("%v", req.GetServerVerify()))
+	}
+
+	baseUrl.RawQuery = params.Encode()
+
+	httpReq, err := http.NewRequest("GET", baseUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	httpReq = httpReq.WithContext(ctx)
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &genprotopb.RepeatResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// RepeatDataSimplePath this method echoes the ComplianceData request. This method exercises
+// sending some parameters as “simple” path variables (i.e., of the form
+// “/bar/{foo}” rather than “/{foo=bar/*}”), and the rest as query parameters.
+func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat/%v/%v/%v/%v/%v:simplepath", req.GetInfo().GetFString(), req.GetInfo().GetFInt32(), req.GetInfo().GetFDouble(), req.GetInfo().GetFBool(), req.GetInfo().GetFKingdom())
+
+	params := url.Values{}
+	if req.GetFDouble() != 0 {
+		params.Add("fDouble", fmt.Sprintf("%v", req.GetFDouble()))
+	}
+	if req.GetFInt32() != 0 {
+		params.Add("fInt32", fmt.Sprintf("%v", req.GetFInt32()))
+	}
+	if req.GetFInt64() != 0 {
+		params.Add("fInt64", fmt.Sprintf("%v", req.GetFInt64()))
+	}
+	if req.GetInfo().GetFBytes() != nil {
+		params.Add("info.fBytes", fmt.Sprintf("%v", req.GetInfo().GetFBytes()))
+	}
+	if req.GetInfo().GetFChild().GetFBool() {
+		params.Add("info.fChild.fBool", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFBool()))
+	}
+	if req.GetInfo().GetFChild().GetFChild().GetFBool() {
+		params.Add("info.fChild.fChild.fBool", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFChild().GetFBool()))
+	}
+	if req.GetInfo().GetFChild().GetFChild().GetFDouble() != 0 {
+		params.Add("info.fChild.fChild.fDouble", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFChild().GetFDouble()))
+	}
+	if req.GetInfo().GetFChild().GetFChild().GetFString() != "" {
+		params.Add("info.fChild.fChild.fString", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFChild().GetFString()))
+	}
+	if req.GetInfo().GetFChild().GetFContinent() != 0 {
+		params.Add("info.fChild.fContinent", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFContinent()))
+	}
+	if req.GetInfo().GetFChild().GetFDouble() != 0 {
+		params.Add("info.fChild.fDouble", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFDouble()))
+	}
+	if req.GetInfo().GetFChild().GetFFloat() != 0 {
+		params.Add("info.fChild.fFloat", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFFloat()))
+	}
+	if req.GetInfo().GetFChild().GetFString() != "" {
+		params.Add("info.fChild.fString", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFString()))
+	}
+	if req.GetInfo().GetFChild() != nil && req.GetInfo().GetFChild().PBool != nil {
+		params.Add("info.fChild.pBool", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPBool()))
+	}
+	if req.GetInfo().GetFChild().GetPChild().GetFBool() {
+		params.Add("info.fChild.pChild.fBool", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPChild().GetFBool()))
+	}
+	if req.GetInfo().GetFChild().GetPChild().GetFDouble() != 0 {
+		params.Add("info.fChild.pChild.fDouble", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPChild().GetFDouble()))
+	}
+	if req.GetInfo().GetFChild().GetPChild().GetFString() != "" {
+		params.Add("info.fChild.pChild.fString", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPChild().GetFString()))
+	}
+	if req.GetInfo().GetFChild().GetPContinent() != 0 {
+		params.Add("info.fChild.pContinent", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPContinent()))
+	}
+	if req.GetInfo().GetFChild() != nil && req.GetInfo().GetFChild().PDouble != nil {
+		params.Add("info.fChild.pDouble", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPDouble()))
+	}
+	if req.GetInfo().GetFChild() != nil && req.GetInfo().GetFChild().PFloat != nil {
+		params.Add("info.fChild.pFloat", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPFloat()))
+	}
+	if req.GetInfo().GetFChild() != nil && req.GetInfo().GetFChild().PString != nil {
+		params.Add("info.fChild.pString", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPString()))
+	}
+	if req.GetInfo().GetFFixed32() != 0 {
+		params.Add("info.fFixed32", fmt.Sprintf("%v", req.GetInfo().GetFFixed32()))
+	}
+	if req.GetInfo().GetFFixed64() != 0 {
+		params.Add("info.fFixed64", fmt.Sprintf("%v", req.GetInfo().GetFFixed64()))
+	}
+	if req.GetInfo().GetFFloat() != 0 {
+		params.Add("info.fFloat", fmt.Sprintf("%v", req.GetInfo().GetFFloat()))
+	}
+	if req.GetInfo().GetFInt64() != 0 {
+		params.Add("info.fInt64", fmt.Sprintf("%v", req.GetInfo().GetFInt64()))
+	}
+	if req.GetInfo().GetFSfixed32() != 0 {
+		params.Add("info.fSfixed32", fmt.Sprintf("%v", req.GetInfo().GetFSfixed32()))
+	}
+	if req.GetInfo().GetFSfixed64() != 0 {
+		params.Add("info.fSfixed64", fmt.Sprintf("%v", req.GetInfo().GetFSfixed64()))
+	}
+	if req.GetInfo().GetFSint32() != 0 {
+		params.Add("info.fSint32", fmt.Sprintf("%v", req.GetInfo().GetFSint32()))
+	}
+	if req.GetInfo().GetFSint64() != 0 {
+		params.Add("info.fSint64", fmt.Sprintf("%v", req.GetInfo().GetFSint64()))
+	}
+	if req.GetInfo().GetFUint32() != 0 {
+		params.Add("info.fUint32", fmt.Sprintf("%v", req.GetInfo().GetFUint32()))
+	}
+	if req.GetInfo().GetFUint64() != 0 {
+		params.Add("info.fUint64", fmt.Sprintf("%v", req.GetInfo().GetFUint64()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PBool != nil {
+		params.Add("info.pBool", fmt.Sprintf("%v", req.GetInfo().GetPBool()))
+	}
+	if req.GetInfo().GetPChild().GetFBool() {
+		params.Add("info.pChild.fBool", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFBool()))
+	}
+	if req.GetInfo().GetPChild().GetFChild().GetFBool() {
+		params.Add("info.pChild.fChild.fBool", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFChild().GetFBool()))
+	}
+	if req.GetInfo().GetPChild().GetFChild().GetFDouble() != 0 {
+		params.Add("info.pChild.fChild.fDouble", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFChild().GetFDouble()))
+	}
+	if req.GetInfo().GetPChild().GetFChild().GetFString() != "" {
+		params.Add("info.pChild.fChild.fString", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFChild().GetFString()))
+	}
+	if req.GetInfo().GetPChild().GetFContinent() != 0 {
+		params.Add("info.pChild.fContinent", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFContinent()))
+	}
+	if req.GetInfo().GetPChild().GetFDouble() != 0 {
+		params.Add("info.pChild.fDouble", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFDouble()))
+	}
+	if req.GetInfo().GetPChild().GetFFloat() != 0 {
+		params.Add("info.pChild.fFloat", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFFloat()))
+	}
+	if req.GetInfo().GetPChild().GetFString() != "" {
+		params.Add("info.pChild.fString", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFString()))
+	}
+	if req.GetInfo().GetPChild() != nil && req.GetInfo().GetPChild().PBool != nil {
+		params.Add("info.pChild.pBool", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPBool()))
+	}
+	if req.GetInfo().GetPChild().GetPChild().GetFBool() {
+		params.Add("info.pChild.pChild.fBool", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPChild().GetFBool()))
+	}
+	if req.GetInfo().GetPChild().GetPChild().GetFDouble() != 0 {
+		params.Add("info.pChild.pChild.fDouble", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPChild().GetFDouble()))
+	}
+	if req.GetInfo().GetPChild().GetPChild().GetFString() != "" {
+		params.Add("info.pChild.pChild.fString", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPChild().GetFString()))
+	}
+	if req.GetInfo().GetPChild().GetPContinent() != 0 {
+		params.Add("info.pChild.pContinent", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPContinent()))
+	}
+	if req.GetInfo().GetPChild() != nil && req.GetInfo().GetPChild().PDouble != nil {
+		params.Add("info.pChild.pDouble", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPDouble()))
+	}
+	if req.GetInfo().GetPChild() != nil && req.GetInfo().GetPChild().PFloat != nil {
+		params.Add("info.pChild.pFloat", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPFloat()))
+	}
+	if req.GetInfo().GetPChild() != nil && req.GetInfo().GetPChild().PString != nil {
+		params.Add("info.pChild.pString", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetPString()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PDouble != nil {
+		params.Add("info.pDouble", fmt.Sprintf("%v", req.GetInfo().GetPDouble()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PInt32 != nil {
+		params.Add("info.pInt32", fmt.Sprintf("%v", req.GetInfo().GetPInt32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PKingdom != nil {
+		params.Add("info.pKingdom", fmt.Sprintf("%v", req.GetInfo().GetPKingdom()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PString != nil {
+		params.Add("info.pString", fmt.Sprintf("%v", req.GetInfo().GetPString()))
+	}
+	if req.GetName() != "" {
+		params.Add("name", fmt.Sprintf("%v", req.GetName()))
+	}
+	if req != nil && req.PDouble != nil {
+		params.Add("pDouble", fmt.Sprintf("%v", req.GetPDouble()))
+	}
+	if req != nil && req.PInt32 != nil {
+		params.Add("pInt32", fmt.Sprintf("%v", req.GetPInt32()))
+	}
+	if req != nil && req.PInt64 != nil {
+		params.Add("pInt64", fmt.Sprintf("%v", req.GetPInt64()))
+	}
+	if req.GetServerVerify() {
+		params.Add("serverVerify", fmt.Sprintf("%v", req.GetServerVerify()))
+	}
+
+	baseUrl.RawQuery = params.Encode()
+
+	httpReq, err := http.NewRequest("GET", baseUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	httpReq = httpReq.WithContext(ctx)
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &genprotopb.RepeatResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// RepeatDataPathResource same as RepeatDataSimplePath, but with a path resource.
+func (c *complianceRESTClient) RepeatDataPathResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	return nil, fmt.Errorf("complex url paths are not yet supported: /v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/*}/bool/{info.f_bool}:pathresource")
+}
+
+// RepeatDataPathTrailingResource same as RepeatDataSimplePath, but with a trailing resource.
+func (c *complianceRESTClient) RepeatDataPathTrailingResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	return nil, fmt.Errorf("complex url paths are not yet supported: /v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/**}:pathtrailingresource")
+}
+
+// RepeatDataBodyPut this method echoes the ComplianceData request, using the HTTP PUT method.
+func (c *complianceRESTClient) RepeatDataBodyPut(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat:bodyput")
+
+	httpReq, err := http.NewRequest("PUT", baseUrl.String(), bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	httpReq = httpReq.WithContext(ctx)
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &genprotopb.RepeatResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// RepeatDataBodyPatch this method echoes the ComplianceData request, using the HTTP PATCH method.
+func (c *complianceRESTClient) RepeatDataBodyPatch(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat:bodypatch")
+
+	httpReq, err := http.NewRequest("PATCH", baseUrl.String(), bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	httpReq = httpReq.WithContext(ctx)
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &genprotopb.RepeatResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// ListLocations is a utility method from google.cloud.location.Locations.
+func (c *complianceRESTClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
+	it := &LocationIterator{}
+	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
+	m := protojson.MarshalOptions{AllowPartial: true, UseProtoNames: false}
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
+		resp := &locationpb.ListLocationsResponse{}
+		if pageSize > math.MaxInt32 {
+			req.PageSize = math.MaxInt32
+		} else {
+			req.PageSize = int32(pageSize)
+		}
+		req.PageToken = pageToken
+
+		jsonReq, err := m.Marshal(req)
+		if err != nil {
+			return nil, "", err
+		}
+
+		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl.Path += fmt.Sprintf("")
+
+		params := url.Values{}
+		if req.GetFilter() != "" {
+			params.Add("filter", fmt.Sprintf("%v", req.GetFilter()))
+		}
+		if req.GetName() != "" {
+			params.Add("name", fmt.Sprintf("%v", req.GetName()))
+		}
+		if req.GetPageSize() != 0 {
+			params.Add("pageSize", fmt.Sprintf("%v", req.GetPageSize()))
+		}
+		if req.GetPageToken() != "" {
+			params.Add("pageToken", fmt.Sprintf("%v", req.GetPageToken()))
+		}
+
+		baseUrl.RawQuery = params.Encode()
+
+		httpReq, err := http.NewRequest("", baseUrl.String(), bytes.NewReader(jsonReq))
+		if err != nil {
+			return nil, "", err
+		}
+
+		// Set the headers
+		for k, v := range c.xGoogMetadata {
+			httpReq.Header[k] = v
+		}
+
+		httpReq.Header["Content-Type"] = []string{"application/json"}
+		httpRsp, err := c.httpClient.Do(httpReq)
+		if err != nil {
+			return nil, "", err
+		}
+		defer httpRsp.Body.Close()
+
+		if httpRsp.StatusCode != http.StatusOK {
+			return nil, "", fmt.Errorf(httpRsp.Status)
+		}
+
+		buf, err := ioutil.ReadAll(httpRsp.Body)
+		if err != nil {
+			return nil, "", err
+		}
+
+		unm.Unmarshal(buf, resp)
+		it.Response = resp
+		return resp.GetLocations(), resp.GetNextPageToken(), nil
+	}
+
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.GetPageSize())
+	it.pageInfo.Token = req.GetPageToken()
+
+	return it
+}
+
+// GetLocation is a utility method from google.cloud.location.Locations.
+func (c *complianceRESTClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
+	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl.Path += fmt.Sprintf("")
+
+	params := url.Values{}
+	if req.GetName() != "" {
+		params.Add("name", fmt.Sprintf("%v", req.GetName()))
+	}
+
+	baseUrl.RawQuery = params.Encode()
+
+	httpReq, err := http.NewRequest("", baseUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	httpReq = httpReq.WithContext(ctx)
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &locationpb.Location{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// SetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
+func (c *complianceRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
+	m := protojson.MarshalOptions{AllowPartial: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl.Path += fmt.Sprintf("")
+
+	httpReq, err := http.NewRequest("", baseUrl.String(), bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	httpReq = httpReq.WithContext(ctx)
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &iampb.Policy{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// GetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
+func (c *complianceRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
+	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl.Path += fmt.Sprintf("")
+
+	params := url.Values{}
+	if req.GetOptions().GetRequestedPolicyVersion() != 0 {
+		params.Add("options.requestedPolicyVersion", fmt.Sprintf("%v", req.GetOptions().GetRequestedPolicyVersion()))
+	}
+	if req.GetResource() != "" {
+		params.Add("resource", fmt.Sprintf("%v", req.GetResource()))
+	}
+
+	baseUrl.RawQuery = params.Encode()
+
+	httpReq, err := http.NewRequest("", baseUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	httpReq = httpReq.WithContext(ctx)
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &iampb.Policy{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// TestIamPermissions is a utility method from google.iam.v1.IAMPolicy.
+func (c *complianceRESTClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl.Path += fmt.Sprintf("")
+
+	httpReq, err := http.NewRequest("", baseUrl.String(), bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	httpReq = httpReq.WithContext(ctx)
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &iampb.TestIamPermissionsResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// ListOperations is a utility method from google.longrunning.Operations.
+func (c *complianceRESTClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
+	it := &OperationIterator{}
+	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
+	m := protojson.MarshalOptions{AllowPartial: true, UseProtoNames: false}
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
+		resp := &longrunningpb.ListOperationsResponse{}
+		if pageSize > math.MaxInt32 {
+			req.PageSize = math.MaxInt32
+		} else {
+			req.PageSize = int32(pageSize)
+		}
+		req.PageToken = pageToken
+
+		jsonReq, err := m.Marshal(req)
+		if err != nil {
+			return nil, "", err
+		}
+
+		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl.Path += fmt.Sprintf("")
+
+		params := url.Values{}
+		if req.GetFilter() != "" {
+			params.Add("filter", fmt.Sprintf("%v", req.GetFilter()))
+		}
+		if req.GetName() != "" {
+			params.Add("name", fmt.Sprintf("%v", req.GetName()))
+		}
+		if req.GetPageSize() != 0 {
+			params.Add("pageSize", fmt.Sprintf("%v", req.GetPageSize()))
+		}
+		if req.GetPageToken() != "" {
+			params.Add("pageToken", fmt.Sprintf("%v", req.GetPageToken()))
+		}
+
+		baseUrl.RawQuery = params.Encode()
+
+		httpReq, err := http.NewRequest("", baseUrl.String(), bytes.NewReader(jsonReq))
+		if err != nil {
+			return nil, "", err
+		}
+
+		// Set the headers
+		for k, v := range c.xGoogMetadata {
+			httpReq.Header[k] = v
+		}
+
+		httpReq.Header["Content-Type"] = []string{"application/json"}
+		httpRsp, err := c.httpClient.Do(httpReq)
+		if err != nil {
+			return nil, "", err
+		}
+		defer httpRsp.Body.Close()
+
+		if httpRsp.StatusCode != http.StatusOK {
+			return nil, "", fmt.Errorf(httpRsp.Status)
+		}
+
+		buf, err := ioutil.ReadAll(httpRsp.Body)
+		if err != nil {
+			return nil, "", err
+		}
+
+		unm.Unmarshal(buf, resp)
+		it.Response = resp
+		return resp.GetOperations(), resp.GetNextPageToken(), nil
+	}
+
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.GetPageSize())
+	it.pageInfo.Token = req.GetPageToken()
+
+	return it
+}
+
+// GetOperation is a utility method from google.longrunning.Operations.
+func (c *complianceRESTClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
+	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl.Path += fmt.Sprintf("")
+
+	params := url.Values{}
+	if req.GetName() != "" {
+		params.Add("name", fmt.Sprintf("%v", req.GetName()))
+	}
+
+	baseUrl.RawQuery = params.Encode()
+
+	httpReq, err := http.NewRequest("", baseUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	httpReq = httpReq.WithContext(ctx)
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &longrunningpb.Operation{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// DeleteOperation is a utility method from google.longrunning.Operations.
+func (c *complianceRESTClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
+	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl.Path += fmt.Sprintf("")
+
+	params := url.Values{}
+	if req.GetName() != "" {
+		params.Add("name", fmt.Sprintf("%v", req.GetName()))
+	}
+
+	baseUrl.RawQuery = params.Encode()
+
+	httpReq, err := http.NewRequest("", baseUrl.String(), nil)
+	if err != nil {
+		return err
+	}
+	httpReq = httpReq.WithContext(ctx)
+
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode != http.StatusOK {
+		return fmt.Errorf(httpRsp.Status)
+	}
+
+	return nil
+}
+
+// CancelOperation is a utility method from google.longrunning.Operations.
+func (c *complianceRESTClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
+	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl.Path += fmt.Sprintf("")
+
+	params := url.Values{}
+	if req.GetName() != "" {
+		params.Add("name", fmt.Sprintf("%v", req.GetName()))
+	}
+
+	baseUrl.RawQuery = params.Encode()
+
+	httpReq, err := http.NewRequest("", baseUrl.String(), nil)
+	if err != nil {
+		return err
+	}
+	httpReq = httpReq.WithContext(ctx)
+
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode != http.StatusOK {
+		return fmt.Errorf(httpRsp.Status)
+	}
+
+	return nil
 }
 
 // LocationIterator manages a stream of *locationpb.Location.

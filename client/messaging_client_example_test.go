@@ -40,6 +40,18 @@ func ExampleNewMessagingClient() {
 	_ = c
 }
 
+func ExampleNewMessagingRESTClient() {
+	ctx := context.Background()
+	c, err := client.NewMessagingRESTClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	// TODO: Use client.
+	_ = c
+}
+
 func ExampleMessagingClient_CreateRoom() {
 	ctx := context.Background()
 	c, err := client.NewMessagingClient(ctx)
