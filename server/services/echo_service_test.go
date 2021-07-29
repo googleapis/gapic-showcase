@@ -461,7 +461,7 @@ func TestPagedExpand(t *testing.T) {
 			t.Error(err)
 		}
 		if !proto.Equal(test.out, out) {
-			t.Errorf("PagedExpand with input '%q', expected: '%q', got: %q",
+			t.Errorf("PagedExpand with input '%q', expected: %q, got: %q",
 				test.in.String(), test.out.String(), out.String())
 		}
 		mockStream.verify(err == nil)
@@ -552,7 +552,107 @@ func TestPagedExpandLegacy(t *testing.T) {
 			t.Error(err)
 		}
 		if !proto.Equal(test.out, out) {
-			t.Errorf("PagedExpandLegacy with input '%q', expected: '%q', got: %q",
+			t.Errorf("PagedExpandLegacy with input '%q', expected: %q, got: %q",
+				test.in.String(), test.out.String(), out.String())
+		}
+		mockStream.verify(err == nil)
+	}
+}
+
+func TestPagedExpandLegacyMapped_invalidArgs(t *testing.T) {
+	tests := []*pb.PagedExpandRequest{
+		{PageSize: -1},
+		{PageToken: "-1"},
+		{PageToken: "BOGUS"},
+		{Content: "one", PageToken: "1"},
+		{Content: "one", PageToken: "2"},
+	}
+	server := NewEchoServer()
+	for _, in := range tests {
+		_, err := server.PagedExpandLegacyMapped(context.Background(), in)
+		s, _ := status.FromError(err)
+		if s.Code() != codes.InvalidArgument {
+			t.Errorf("PagedExpand() expected error code: %d, got error code %d",
+				codes.InvalidArgument, s.Code())
+		}
+	}
+}
+
+func TestPagedExpandLegacyMapped(t *testing.T) {
+	text := "It was the best of times, it was the worst of times"
+	tests := []struct {
+		in  *pb.PagedExpandRequest
+		out *pb.PagedExpandLegacyMappedResponse
+	}{
+		{
+			&pb.PagedExpandRequest{Content: text},
+			&pb.PagedExpandLegacyMappedResponse{
+				Alphabetized: map[string]*pb.PagedExpandResponseList{
+					"b": {Words: []string{"best"}},
+					"I": {Words: []string{"It"}},
+					"i": {Words: []string{"it"}},
+					"o": {Words: []string{"of", "of"}},
+					"t": {Words: []string{"the", "times,", "the", "times"}},
+					"w": {Words: []string{"was", "was", "worst"}},
+				},
+			},
+		},
+
+		{
+			&pb.PagedExpandRequest{PageSize: 1, Content: text},
+			&pb.PagedExpandLegacyMappedResponse{
+				Alphabetized: map[string]*pb.PagedExpandResponseList{
+					"I": {Words: []string{"It"}},
+					"b": {Words: []string{}},
+					"i": {Words: []string{}},
+					"o": {Words: []string{}},
+					"t": {Words: []string{}},
+					"w": {Words: []string{}},
+				},
+				NextPageToken: "1",
+			},
+		},
+
+		{
+			&pb.PagedExpandRequest{PageSize: 4, PageToken: "2", Content: text},
+			&pb.PagedExpandLegacyMappedResponse{
+				Alphabetized: map[string]*pb.PagedExpandResponseList{
+					"b": {Words: []string{"best"}},
+					"I": {Words: []string{}},
+					"i": {Words: []string{}},
+					"o": {Words: []string{"of"}},
+					"t": {Words: []string{"the", "times,"}},
+					"w": {Words: []string{}},
+				},
+				NextPageToken: "6",
+			},
+		},
+
+		{
+			&pb.PagedExpandRequest{PageSize: 4, PageToken: "8", Content: text},
+			&pb.PagedExpandLegacyMappedResponse{
+				Alphabetized: map[string]*pb.PagedExpandResponseList{
+					"b": {Words: []string{}},
+					"I": {Words: []string{}},
+					"i": {Words: []string{}},
+					"o": {Words: []string{"of"}},
+					"t": {Words: []string{"the", "times"}},
+					"w": {Words: []string{"worst"}},
+				},
+			},
+		},
+	}
+
+	server := NewEchoServer()
+	for _, test := range tests {
+		mockStream := &mockUnaryStream{t: t}
+		ctx := appendTestOutgoingMetadata(context.Background(), &mockSTS{t: t, stream: mockStream})
+		out, err := server.PagedExpandLegacyMapped(ctx, test.in)
+		if err != nil {
+			t.Error(err)
+		}
+		if !proto.Equal(test.out, out) {
+			t.Errorf("PagedExpand with input '%q':\n  expected: %#v\n       got: %#v\n",
 				test.in.String(), test.out.String(), out.String())
 		}
 		mockStream.verify(err == nil)
