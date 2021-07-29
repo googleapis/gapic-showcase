@@ -210,7 +210,7 @@ message PagedExpandResponseList {
 }
 
 message PagedExpandLegacyMappedResponse {
-  // The words that were expanded, indexed by "forward" or "backward"
+  // The words that were expanded, indexed by their initial rune.
   map<string, PagedExpandResponseList> alphabetized = 1;
 
   // The next page token.
