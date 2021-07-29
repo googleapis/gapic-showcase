@@ -134,16 +134,6 @@ func (s *echoServerImpl) PagedExpand(ctx context.Context, in *pb.PagedExpandRequ
 	}, nil
 }
 
-// This is a WIP. It needs tests
-// Currently it does not compile: I get the following errors:
-//    % go run ./util/cmd/compile_protos && go test ./...
-//    # github.com/googleapis/gapic-showcase/client
-//    client/echo_client.go:545:62: undefined: genproto.PagedExpandLegacyMappedResponse_AlphabetizedEntry
-//    client/echo_client.go:914:14: undefined: genproto.PagedExpandLegacyMappedResponse_AlphabetizedEntry
-//    client/echo_client.go:929:65: undefined: genproto.PagedExpandLegacyMappedResponse_AlphabetizedEntry
-//    client/echo_client.go:939:79: undefined: genproto.PagedExpandLegacyMappedResponse_AlphabetizedEntry
-//    client/echo_client.go:940:12: undefined: genproto.PagedExpandLegacyMappedResponse_AlphabetizedEntry
-// The symbols on the right are indeed not in the echo.pb.go file.
 func (s *echoServerImpl) PagedExpandLegacyMapped(ctx context.Context, in *pb.PagedExpandRequest) (*pb.PagedExpandLegacyMappedResponse, error) {
 	words := strings.Fields(in.GetContent())
 	start, end, nextToken, err := processPageTokens(len(words), in.GetPageSize(), in.GetPageToken())

@@ -572,7 +572,7 @@ func TestPagedExpandLegacyMapped_invalidArgs(t *testing.T) {
 		_, err := server.PagedExpandLegacyMapped(context.Background(), in)
 		s, _ := status.FromError(err)
 		if s.Code() != codes.InvalidArgument {
-			t.Errorf("PagedExpand() expected error code: %d, got error code %d",
+			t.Errorf("PagedExpandLegacyMapped() expected error code: %d, got error code %d",
 				codes.InvalidArgument, s.Code())
 		}
 	}
@@ -597,7 +597,6 @@ func TestPagedExpandLegacyMapped(t *testing.T) {
 				},
 			},
 		},
-
 		{
 			&pb.PagedExpandRequest{PageSize: 1, Content: text},
 			&pb.PagedExpandLegacyMappedResponse{
@@ -612,7 +611,6 @@ func TestPagedExpandLegacyMapped(t *testing.T) {
 				NextPageToken: "1",
 			},
 		},
-
 		{
 			&pb.PagedExpandRequest{PageSize: 4, PageToken: "2", Content: text},
 			&pb.PagedExpandLegacyMappedResponse{
@@ -627,7 +625,6 @@ func TestPagedExpandLegacyMapped(t *testing.T) {
 				NextPageToken: "6",
 			},
 		},
-
 		{
 			&pb.PagedExpandRequest{PageSize: 4, PageToken: "8", Content: text},
 			&pb.PagedExpandLegacyMappedResponse{
@@ -652,7 +649,7 @@ func TestPagedExpandLegacyMapped(t *testing.T) {
 			t.Error(err)
 		}
 		if !proto.Equal(test.out, out) {
-			t.Errorf("PagedExpand with input '%q':\n  expected: %#v\n       got: %#v\n",
+			t.Errorf("PagedExpandLegacyMapped with input '%q':\n  expected: %#v\n       got: %#v\n",
 				test.in.String(), test.out.String(), out.String())
 		}
 		mockStream.verify(err == nil)

@@ -93,6 +93,11 @@ service Echo {
     };
   }
 
+  // This method returns a map containing lists of words that appear in the input, keyed by their
+  // initial character. The only words returned are the ones included in the current page,
+  // as determined by page_token and page_size, which both refer to the word indices in the
+  // input. This paging result consisting of a map of lists is a pattern used by some legacy
+  // APIs. New APIs should NOT use this pattern.
   rpc PagedExpandLegacyMapped(PagedExpandRequest) returns (PagedExpandLegacyMappedResponse) {
     option (google.api.http) = {
       post: "/v1beta1/echo:pagedExpandLegacyMapped"
@@ -205,12 +210,15 @@ message PagedExpandResponse {
   string next_page_token = 2;
 }
 
+// A list of words.
 message PagedExpandResponseList {
   repeated string words = 1;
 }
 
 message PagedExpandLegacyMappedResponse {
-  // The words that were expanded, indexed by their initial rune.
+  // The words that were expanded, indexed by their initial character.
+  // (-- aip.dev/not-precedent: This is a legacy, non-standard pattern that violates
+  //     aip.dev/158. Ordinarily, this should be a `repeated` field, as in PagedExpandResponse. --)
   map<string, PagedExpandResponseList> alphabetized = 1;
 
   // The next page token.
