@@ -159,7 +159,6 @@ func (s *echoServerImpl) PagedExpandLegacyMapped(ctx context.Context, in *pb.Pag
 		}
 		if int32(idx) >= start && int32(idx) < end { // enforces #2
 			prev.Words = append(prev.Words, word)
-			alphabetized[key] = prev
 		}
 	}
 
