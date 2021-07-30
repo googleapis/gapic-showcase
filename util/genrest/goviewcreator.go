@@ -191,6 +191,9 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			source.P("")
 
 			if handler.StreamingServer {
+
+				helperSource, streamerType := constructServerStreamer(service, handler)
+				methodSources = append(methodSources, helperSource)
 				serverStreamerType := fmt.Sprintf("%s%sServer", service.ShortName, handler.GoMethod)
 				serverStreamerInterface := fmt.Sprintf("%s.%s_%sServer", handler.RequestTypePackage, service.ShortName, handler.GoMethod)
 
@@ -201,8 +204,12 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				source.P(" }")
 				source.P(" w.Write([]byte(stream.ListJSON()))")
 
-				source.P(` /*`)
+				asdljsd
 				source.P(`
+
+`)
+
+				source.P(`/*
                                     // STUB server-streaming response
 
 
@@ -318,6 +325,13 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	file.P("}")
 
 	return view, nil
+}
+
+func constructServerStreamer(service *gomodel.ServiceModel, handler *gomodel.RESTHandler) (helper *goview.Source, streamerType string) {
+	helper = goview.NewSource()
+	helper.P("// server stream helper STUB")
+	streamerType = "stubStreamerType"
+	return helper, streamerType
 }
 
 // registeredHandler pairs a URL path pattern with the name of the associated handler
