@@ -73,8 +73,8 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			source.P("// %s translates REST requests/responses on the wire to internal proto messages for %s", handlerName, handler.GoMethod)
 			source.P("//    Generated for HTTP binding pattern: %q", handler.URIPattern)
 			source.P("func (backend *RESTBackend) %s(w http.ResponseWriter, r *http.Request) {", handlerName)
-			if handler.StreamingClient || handler.StreamingServer {
-				source.P(`  backend.Error(w, http.StatusNotImplemented, "streaming methods not implemented yet (request matched '%s': %%q)", r.URL)`, handler.URIPattern)
+			if handler.StreamingClient {
+				source.P(`  backend.Error(w, http.StatusNotImplemented, "client-streaming methods not implemented yet (request matched '%s': %%q)", r.URL)`, handler.URIPattern)
 				source.P("}")
 				continue
 			}
@@ -189,21 +189,71 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			source.P("  requestJSON, _ := marshaler.Marshal(%s)", handler.RequestVariable)
 			source.P(`  backend.StdLog.Printf("  request: %%s", requestJSON)`)
 			source.P("")
-			// TODO: In the future, we may want to redirect all REST-endpoint requests to the gRPC endpoint so that the gRPC-registered observers get invoked.
-			source.P("  %s, err := backend.%sServer.%s(context.Background(), %s)", handler.ResponseVariable, service.ShortName, handler.GoMethod, handler.RequestVariable)
-			source.P("  if err != nil {")
-			source.P("    // TODO: Properly handle error. Is StatusInternalServerError (500) the right response?")
-			source.P(`    backend.Error(w, http.StatusInternalServerError, "server error: %%s", err.Error())`)
-			source.P("    return")
-			source.P("  }")
-			source.P("")
-			source.P("  json, err := marshaler.Marshal(%s)", handler.ResponseVariable)
-			source.P("  if err != nil {")
-			source.P(`    backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %%s", err.Error())`)
-			source.P("    return")
-			source.P("  }")
-			source.P("")
-			source.P("  w.Write(json)")
+
+			if handler.StreamingServer {
+				serverStreamerType := fmt.Sprintf("%s%sServer", service.ShortName, handler.GoMethod)
+				serverStreamerInterface := fmt.Sprintf("%s.%s_%sServer", handler.RequestTypePackage, service.ShortName, handler.GoMethod)
+
+				source.P(` stream := resttools.ServerStreamer{} // implements %s` /*serverStreamerType,*/, serverStreamerInterface)
+				source.P(" if err := backend.%sServer.%s(%s, stream); err != nil {", service.ShortName, handler.GoMethod, handler.RequestVariable)
+				source.P("    // TODO: Properly handle error. Is StatusInternalServerError (500) the right response?")
+				source.P(`    backend.Error(w, http.StatusInternalServerError, "server error: %%s", err.Error())`)
+				source.P(" }")
+				source.P(" w.Write([]byte(stream.ListJSON()))")
+
+				source.P(` /*`)
+				source.P(`
+                                    // STUB server-streaming response
+
+
+                                     type %s struct { // implements %s
+                                        responses []string
+                                     }
+
+                                    func (streamer *%s) Send(response *%s.%s) error {   // this could just take the interface for proto,
+                                                                                        // same as Marshal, and so we only have one instance in genrest
+  			              json, err := marshaler.Marshal(response)
+                                      if err != nil {
+                                        return fmt.Errorf("error json-encoding response: %%s", err.Error())
+		                      }
+                                      streamer.responses = append(streamer.responses, json)
+
+                                      return nil
+                                    }
+
+                                    func (streamer *%s) AsJson() string {
+                                      return fmt.Sprintf("{\n%%s\n}", strings.Join(",\n", streamer.responses))
+                                    }
+`,
+					serverStreamerType, serverStreamerInterface, // struct
+					serverStreamerType, handler.ResponseTypePackage, handler.ResponseType, // func Send
+					serverStreamerType, // func Send
+				)
+
+				source.P(` stream := &%s{} // implements %s`, serverStreamerType, serverStreamerInterface)
+				source.P(" if err := backend.%sServer.%s(%s, stream); err != nil {", service.ShortName, handler.GoMethod, handler.RequestVariable)
+				source.P("    // do something")
+				source.P(" }")
+				source.P(" // w.Write(stream.AsJSON())")
+
+				source.P(` */`)
+			} else { // regular unary call
+				// TODO: In the future, we may want to redirect all REST-endpoint requests to the gRPC endpoint so that the gRPC-registered observers get invoked.
+				source.P("  %s, err := backend.%sServer.%s(context.Background(), %s)", handler.ResponseVariable, service.ShortName, handler.GoMethod, handler.RequestVariable)
+				source.P("  if err != nil {")
+				source.P("    // TODO: Properly handle error. Is StatusInternalServerError (500) the right response?")
+				source.P(`    backend.Error(w, http.StatusInternalServerError, "server error: %%s", err.Error())`)
+				source.P("    return")
+				source.P("  }")
+				source.P("")
+				source.P("  json, err := marshaler.Marshal(%s)", handler.ResponseVariable)
+				source.P("  if err != nil {")
+				source.P(`    backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %%s", err.Error())`)
+				source.P("    return")
+				source.P("  }")
+				source.P("")
+				source.P("  w.Write(json)")
+			}
 			source.P("}\n")
 		}
 
