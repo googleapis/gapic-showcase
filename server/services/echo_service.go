@@ -142,9 +142,9 @@ func (s *echoServerImpl) PagedExpandLegacyMapped(ctx context.Context, in *pb.Pag
 	}
 
 	// Construct a map with the following properties:
-
+	//
 	// 1. The map has a one-rune string key corresponding to the first rune of EVERY word in words.
-	// 2. The value corresponding to the a given rune key is a list of only those words between
+	// 2. The value corresponding to a given rune key is a list of only those words between
 	// `start` and `end` whose first rune is that key.
 	// 3. Consequently, initial runes that only appear outside the [start,end) range will have
 	// empty list entries, even if they are non-empty in subsequent pages.

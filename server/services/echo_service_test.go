@@ -461,7 +461,7 @@ func TestPagedExpand(t *testing.T) {
 			t.Error(err)
 		}
 		if !proto.Equal(test.out, out) {
-			t.Errorf("PagedExpand with input '%q', expected: %q, got: %q",
+			t.Errorf("PagedExpand with input %q, expected: %q, got: %q",
 				test.in.String(), test.out.String(), out.String())
 		}
 		mockStream.verify(err == nil)
@@ -552,7 +552,7 @@ func TestPagedExpandLegacy(t *testing.T) {
 			t.Error(err)
 		}
 		if !proto.Equal(test.out, out) {
-			t.Errorf("PagedExpandLegacy with input '%q', expected: %q, got: %q",
+			t.Errorf("PagedExpandLegacy with input %q, expected: %q, got: %q",
 				test.in.String(), test.out.String(), out.String())
 		}
 		mockStream.verify(err == nil)
@@ -649,7 +649,7 @@ func TestPagedExpandLegacyMapped(t *testing.T) {
 			t.Error(err)
 		}
 		if !proto.Equal(test.out, out) {
-			t.Errorf("PagedExpandLegacyMapped with input '%q':\n  expected: %#v\n       got: %#v\n",
+			t.Errorf("PagedExpandLegacyMapped with input %q:\n  expected: %#v\n       got: %#v\n",
 				test.in.String(), test.out.String(), out.String())
 		}
 		mockStream.verify(err == nil)
