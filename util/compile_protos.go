@@ -84,6 +84,15 @@ func CompileProtos(version string) {
 	}
 	Execute(command...)
 
+	// Remove CLI file that cannot deal with maps as paged responses.
+	//
+	// TODO: Remove this once the CLI generator can accommodate paging calls that return maps.
+	command = []string{
+		"rm",
+		filepath.Join(pwd, "cmd", "gapic-showcase", "paged-expand-legacy-mapped.go"),
+	}
+	Execute(command...)
+
 	// Fix some generated errors.
 	fixes := []struct {
 		file string
