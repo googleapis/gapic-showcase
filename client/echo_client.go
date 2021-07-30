@@ -17,8 +17,14 @@
 package client
 
 import (
+	"bytes"
 	"context"
+	"fmt"
+	"io/ioutil"
 	"math"
+	"net/http"
+	"net/url"
+	"sort"
 	"time"
 
 	"cloud.google.com/go/longrunning"
@@ -29,12 +35,11 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/api/option/internaloption"
 	gtransport "google.golang.org/api/transport/grpc"
-	locationpb "google.golang.org/genproto/googleapis/cloud/location"
-	iampb "google.golang.org/genproto/googleapis/iam/v1"
+	httptransport "google.golang.org/api/transport/http"
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -42,22 +47,15 @@ var newEchoClientHook clientHook
 
 // EchoCallOptions contains the retry settings for each method of EchoClient.
 type EchoCallOptions struct {
-	Echo               []gax.CallOption
-	Expand             []gax.CallOption
-	Collect            []gax.CallOption
-	Chat               []gax.CallOption
-	PagedExpand        []gax.CallOption
-	Wait               []gax.CallOption
-	Block              []gax.CallOption
-	ListLocations      []gax.CallOption
-	GetLocation        []gax.CallOption
-	SetIamPolicy       []gax.CallOption
-	GetIamPolicy       []gax.CallOption
-	TestIamPermissions []gax.CallOption
-	ListOperations     []gax.CallOption
-	GetOperation       []gax.CallOption
-	DeleteOperation    []gax.CallOption
-	CancelOperation    []gax.CallOption
+	Echo                    []gax.CallOption
+	Expand                  []gax.CallOption
+	Collect                 []gax.CallOption
+	Chat                    []gax.CallOption
+	PagedExpand             []gax.CallOption
+	PagedExpandLegacy       []gax.CallOption
+	PagedExpandLegacyMapped []gax.CallOption
+	Wait                    []gax.CallOption
+	Block                   []gax.CallOption
 }
 
 func defaultEchoGRPCClientOptions() []option.ClientOption {
@@ -75,59 +73,19 @@ func defaultEchoGRPCClientOptions() []option.ClientOption {
 
 func defaultEchoCallOptions() *EchoCallOptions {
 	return &EchoCallOptions{
-		Echo: []gax.CallOption{
-			gax.WithRetry(func() gax.Retryer {
-				return gax.OnCodes([]codes.Code{
-					codes.Unavailable,
-					codes.Unknown,
-				}, gax.Backoff{
-					Initial:    100 * time.Millisecond,
-					Max:        3000 * time.Millisecond,
-					Multiplier: 2.00,
-				})
-			}),
-		},
-		Expand: []gax.CallOption{
-			gax.WithRetry(func() gax.Retryer {
-				return gax.OnCodes([]codes.Code{
-					codes.Unavailable,
-					codes.Unknown,
-				}, gax.Backoff{
-					Initial:    100 * time.Millisecond,
-					Max:        3000 * time.Millisecond,
-					Multiplier: 2.00,
-				})
-			}),
-		},
-		Collect: []gax.CallOption{},
-		Chat:    []gax.CallOption{},
-		PagedExpand: []gax.CallOption{
-			gax.WithRetry(func() gax.Retryer {
-				return gax.OnCodes([]codes.Code{
-					codes.Unavailable,
-					codes.Unknown,
-				}, gax.Backoff{
-					Initial:    100 * time.Millisecond,
-					Max:        3000 * time.Millisecond,
-					Multiplier: 2.00,
-				})
-			}),
-		},
-		Wait:               []gax.CallOption{},
-		Block:              []gax.CallOption{},
-		ListLocations:      []gax.CallOption{},
-		GetLocation:        []gax.CallOption{},
-		SetIamPolicy:       []gax.CallOption{},
-		GetIamPolicy:       []gax.CallOption{},
-		TestIamPermissions: []gax.CallOption{},
-		ListOperations:     []gax.CallOption{},
-		GetOperation:       []gax.CallOption{},
-		DeleteOperation:    []gax.CallOption{},
-		CancelOperation:    []gax.CallOption{},
+		Echo:                    []gax.CallOption{},
+		Expand:                  []gax.CallOption{},
+		Collect:                 []gax.CallOption{},
+		Chat:                    []gax.CallOption{},
+		PagedExpand:             []gax.CallOption{},
+		PagedExpandLegacy:       []gax.CallOption{},
+		PagedExpandLegacyMapped: []gax.CallOption{},
+		Wait:                    []gax.CallOption{},
+		Block:                   []gax.CallOption{},
 	}
 }
 
-// internalEchoClient is an interface that defines the methods availaible from Client Libraries Showcase API.
+// internalEchoClient is an interface that defines the methods availaible from .
 type internalEchoClient interface {
 	Close() error
 	setGoogleClientInfo(...string)
@@ -137,21 +95,14 @@ type internalEchoClient interface {
 	Collect(context.Context, ...gax.CallOption) (genprotopb.Echo_CollectClient, error)
 	Chat(context.Context, ...gax.CallOption) (genprotopb.Echo_ChatClient, error)
 	PagedExpand(context.Context, *genprotopb.PagedExpandRequest, ...gax.CallOption) *EchoResponseIterator
+	PagedExpandLegacy(context.Context, *genprotopb.PagedExpandLegacyRequest, ...gax.CallOption) *EchoResponseIterator
+	PagedExpandLegacyMapped(context.Context, *genprotopb.PagedExpandRequest, ...gax.CallOption) *PagedExpandResponseListPairIterator
 	Wait(context.Context, *genprotopb.WaitRequest, ...gax.CallOption) (*WaitOperation, error)
 	WaitOperation(name string) *WaitOperation
 	Block(context.Context, *genprotopb.BlockRequest, ...gax.CallOption) (*genprotopb.BlockResponse, error)
-	ListLocations(context.Context, *locationpb.ListLocationsRequest, ...gax.CallOption) *LocationIterator
-	GetLocation(context.Context, *locationpb.GetLocationRequest, ...gax.CallOption) (*locationpb.Location, error)
-	SetIamPolicy(context.Context, *iampb.SetIamPolicyRequest, ...gax.CallOption) (*iampb.Policy, error)
-	GetIamPolicy(context.Context, *iampb.GetIamPolicyRequest, ...gax.CallOption) (*iampb.Policy, error)
-	TestIamPermissions(context.Context, *iampb.TestIamPermissionsRequest, ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error)
-	ListOperations(context.Context, *longrunningpb.ListOperationsRequest, ...gax.CallOption) *OperationIterator
-	GetOperation(context.Context, *longrunningpb.GetOperationRequest, ...gax.CallOption) (*longrunningpb.Operation, error)
-	DeleteOperation(context.Context, *longrunningpb.DeleteOperationRequest, ...gax.CallOption) error
-	CancelOperation(context.Context, *longrunningpb.CancelOperationRequest, ...gax.CallOption) error
 }
 
-// EchoClient is a client for interacting with Client Libraries Showcase API.
+// EchoClient is a client for interacting with .
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 //
 // This service is used showcase the four main types of rpcs - unary, server
@@ -225,6 +176,17 @@ func (c *EchoClient) PagedExpand(ctx context.Context, req *genprotopb.PagedExpan
 	return c.internalClient.PagedExpand(ctx, req, opts...)
 }
 
+// PagedExpandLegacy this is similar to the PagedExpand except that it uses
+// max_results instead of page_size, as some legacy APIs still
+// do. New APIs should NOT use this pattern.
+func (c *EchoClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.PagedExpandLegacyRequest, opts ...gax.CallOption) *EchoResponseIterator {
+	return c.internalClient.PagedExpandLegacy(ctx, req, opts...)
+}
+
+func (c *EchoClient) PagedExpandLegacyMapped(ctx context.Context, req *genprotopb.PagedExpandRequest, opts ...gax.CallOption) *PagedExpandResponseListPairIterator {
+	return c.internalClient.PagedExpandLegacyMapped(ctx, req, opts...)
+}
+
 // Wait this method will wait for the requested amount of time and then return.
 // This method showcases how a client handles a request timeout.
 func (c *EchoClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, opts ...gax.CallOption) (*WaitOperation, error) {
@@ -244,52 +206,7 @@ func (c *EchoClient) Block(ctx context.Context, req *genprotopb.BlockRequest, op
 	return c.internalClient.Block(ctx, req, opts...)
 }
 
-// ListLocations is a utility method from google.cloud.location.Locations.
-func (c *EchoClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
-	return c.internalClient.ListLocations(ctx, req, opts...)
-}
-
-// GetLocation is a utility method from google.cloud.location.Locations.
-func (c *EchoClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
-	return c.internalClient.GetLocation(ctx, req, opts...)
-}
-
-// SetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
-func (c *EchoClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	return c.internalClient.SetIamPolicy(ctx, req, opts...)
-}
-
-// GetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
-func (c *EchoClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	return c.internalClient.GetIamPolicy(ctx, req, opts...)
-}
-
-// TestIamPermissions is a utility method from google.iam.v1.IAMPolicy.
-func (c *EchoClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
-	return c.internalClient.TestIamPermissions(ctx, req, opts...)
-}
-
-// ListOperations is a utility method from google.longrunning.Operations.
-func (c *EchoClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
-	return c.internalClient.ListOperations(ctx, req, opts...)
-}
-
-// GetOperation is a utility method from google.longrunning.Operations.
-func (c *EchoClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
-	return c.internalClient.GetOperation(ctx, req, opts...)
-}
-
-// DeleteOperation is a utility method from google.longrunning.Operations.
-func (c *EchoClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
-	return c.internalClient.DeleteOperation(ctx, req, opts...)
-}
-
-// CancelOperation is a utility method from google.longrunning.Operations.
-func (c *EchoClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
-	return c.internalClient.CancelOperation(ctx, req, opts...)
-}
-
-// echoGRPCClient is a client for interacting with Client Libraries Showcase API over gRPC transport.
+// echoGRPCClient is a client for interacting with  over gRPC transport.
 //
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 type echoGRPCClient struct {
@@ -309,12 +226,6 @@ type echoGRPCClient struct {
 	// It is exposed so that its CallOptions can be modified if required.
 	// Users should not Close this client.
 	LROClient **lroauto.OperationsClient
-
-	operationsClient longrunningpb.OperationsClient
-
-	iamPolicyClient iampb.IAMPolicyClient
-
-	locationsClient locationpb.LocationsClient
 
 	// The x-goog-* metadata to be sent with each request.
 	xGoogMetadata metadata.MD
@@ -354,9 +265,6 @@ func NewEchoClient(ctx context.Context, opts ...option.ClientOption) (*EchoClien
 		disableDeadlines: disableDeadlines,
 		echoClient:       genprotopb.NewEchoClient(connPool),
 		CallOptions:      &client.CallOptions,
-		operationsClient: longrunningpb.NewOperationsClient(connPool),
-		iamPolicyClient:  iampb.NewIAMPolicyClient(connPool),
-		locationsClient:  locationpb.NewLocationsClient(connPool),
 	}
 	c.setGoogleClientInfo()
 
@@ -398,12 +306,74 @@ func (c *echoGRPCClient) Close() error {
 	return c.connPool.Close()
 }
 
-func (c *echoGRPCClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, opts ...gax.CallOption) (*genprotopb.EchoResponse, error) {
-	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
-		cctx, cancel := context.WithTimeout(ctx, 10000*time.Millisecond)
-		defer cancel()
-		ctx = cctx
+// Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
+type echoRESTClient struct {
+	// The http endpoint to connect to.
+	endpoint string
+
+	// The http client.
+	httpClient *http.Client
+
+	// The x-goog-* metadata to be sent with each request.
+	xGoogMetadata metadata.MD
+}
+
+// NewEchoRESTClient creates a new echo rest client.
+//
+// This service is used showcase the four main types of rpcs - unary, server
+// side streaming, client side streaming, and bidirectional streaming. This
+// service also exposes methods that explicitly implement server delay, and
+// paginated calls. Set the ‘showcase-trailer’ metadata key on any method
+// to have the values echoed in the response trailers.
+func NewEchoRESTClient(ctx context.Context, opts ...option.ClientOption) (*EchoClient, error) {
+	clientOpts := append(defaultEchoRESTClientOptions(), opts...)
+	httpClient, endpoint, err := httptransport.NewClient(ctx, clientOpts...)
+	if err != nil {
+		return nil, err
 	}
+
+	c := &echoRESTClient{
+		endpoint:   endpoint,
+		httpClient: httpClient,
+	}
+	c.setGoogleClientInfo()
+
+	return &EchoClient{internalClient: c, CallOptions: &EchoCallOptions{}}, nil
+}
+
+func defaultEchoRESTClientOptions() []option.ClientOption {
+	return []option.ClientOption{
+		internaloption.WithDefaultEndpoint("https://localhost:7469"),
+		internaloption.WithDefaultMTLSEndpoint("https://localhost:7469"),
+		internaloption.WithDefaultAudience("https://localhost/"),
+		internaloption.WithDefaultScopes(DefaultAuthScopes()...),
+	}
+}
+
+// setGoogleClientInfo sets the name and version of the application in
+// the `x-goog-api-client` header passed on each request. Intended for
+// use by Google-written clients.
+func (c *echoRESTClient) setGoogleClientInfo(keyval ...string) {
+	kv := append([]string{"gl-go", versionGo()}, keyval...)
+	kv = append(kv, "gapic", versionClient, "gax", gax.Version, "rest", "UNKNOWN")
+	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
+}
+
+// Close closes the connection to the API service. The user should invoke this when
+// the client is no longer required.
+func (c *echoRESTClient) Close() error {
+	// Replace httpClient with nil to force cleanup.
+	c.httpClient = nil
+	return nil
+}
+
+// Connection returns a connection to the API service.
+//
+// Deprecated.
+func (c *echoRESTClient) Connection() *grpc.ClientConn {
+	return nil
+}
+func (c *echoGRPCClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, opts ...gax.CallOption) (*genprotopb.EchoResponse, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append((*c.CallOptions).Echo[0:len((*c.CallOptions).Echo):len((*c.CallOptions).Echo)], opts...)
 	var resp *genprotopb.EchoResponse
@@ -501,12 +471,92 @@ func (c *echoGRPCClient) PagedExpand(ctx context.Context, req *genprotopb.PagedE
 	return it
 }
 
-func (c *echoGRPCClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, opts ...gax.CallOption) (*WaitOperation, error) {
-	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
-		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
-		defer cancel()
-		ctx = cctx
+func (c *echoGRPCClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.PagedExpandLegacyRequest, opts ...gax.CallOption) *EchoResponseIterator {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).PagedExpandLegacy[0:len((*c.CallOptions).PagedExpandLegacy):len((*c.CallOptions).PagedExpandLegacy)], opts...)
+	it := &EchoResponseIterator{}
+	req = proto.Clone(req).(*genprotopb.PagedExpandLegacyRequest)
+	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.EchoResponse, string, error) {
+		var resp *genprotopb.PagedExpandResponse
+		req.PageToken = pageToken
+		if pageSize > math.MaxInt32 {
+			req.MaxResults = math.MaxInt32
+		} else {
+			req.MaxResults = int32(pageSize)
+		}
+		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			var err error
+			resp, err = c.echoClient.PagedExpandLegacy(ctx, req, settings.GRPC...)
+			return err
+		}, opts...)
+		if err != nil {
+			return nil, "", err
+		}
+
+		it.Response = resp
+		return resp.GetResponses(), resp.GetNextPageToken(), nil
 	}
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.GetMaxResults())
+	it.pageInfo.Token = req.GetPageToken()
+	return it
+}
+
+func (c *echoGRPCClient) PagedExpandLegacyMapped(ctx context.Context, req *genprotopb.PagedExpandRequest, opts ...gax.CallOption) *PagedExpandResponseListPairIterator {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).PagedExpandLegacyMapped[0:len((*c.CallOptions).PagedExpandLegacyMapped):len((*c.CallOptions).PagedExpandLegacyMapped)], opts...)
+	it := &PagedExpandResponseListPairIterator{}
+	req = proto.Clone(req).(*genprotopb.PagedExpandRequest)
+	it.InternalFetch = func(pageSize int, pageToken string) ([]PagedExpandResponseListPair, string, error) {
+		var resp *genprotopb.PagedExpandLegacyMappedResponse
+		req.PageToken = pageToken
+		if pageSize > math.MaxInt32 {
+			req.PageSize = math.MaxInt32
+		} else {
+			req.PageSize = int32(pageSize)
+		}
+		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			var err error
+			resp, err = c.echoClient.PagedExpandLegacyMapped(ctx, req, settings.GRPC...)
+			return err
+		}, opts...)
+		if err != nil {
+			return nil, "", err
+		}
+
+		it.Response = resp
+
+		elems := make([]PagedExpandResponseListPair, 0, len(resp.GetAlphabetized()))
+		for k, v := range resp.GetAlphabetized() {
+			elems = append(elems, PagedExpandResponseListPair{k, v})
+		}
+		sort.Slice(elems, func(i, j int) bool { return elems[i].Key < elems[j].Key })
+
+		return elems, resp.GetNextPageToken(), nil
+	}
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.GetPageSize())
+	it.pageInfo.Token = req.GetPageToken()
+	return it
+}
+
+func (c *echoGRPCClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, opts ...gax.CallOption) (*WaitOperation, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append((*c.CallOptions).Wait[0:len((*c.CallOptions).Wait):len((*c.CallOptions).Wait)], opts...)
 	var resp *longrunningpb.Operation
@@ -524,11 +574,6 @@ func (c *echoGRPCClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, 
 }
 
 func (c *echoGRPCClient) Block(ctx context.Context, req *genprotopb.BlockRequest, opts ...gax.CallOption) (*genprotopb.BlockResponse, error) {
-	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
-		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
-		defer cancel()
-		ctx = cctx
-	}
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append((*c.CallOptions).Block[0:len((*c.CallOptions).Block):len((*c.CallOptions).Block)], opts...)
 	var resp *genprotopb.BlockResponse
@@ -543,31 +588,124 @@ func (c *echoGRPCClient) Block(ctx context.Context, req *genprotopb.BlockRequest
 	return resp, nil
 }
 
-func (c *echoGRPCClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
-	opts = append((*c.CallOptions).ListLocations[0:len((*c.CallOptions).ListLocations):len((*c.CallOptions).ListLocations)], opts...)
-	it := &LocationIterator{}
-	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
-	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
-		var resp *locationpb.ListLocationsResponse
-		req.PageToken = pageToken
+// Echo this method simply echoes the request. This method showcases unary RPCs.
+func (c *echoRESTClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, opts ...gax.CallOption) (*genprotopb.EchoResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl.Path += fmt.Sprintf("/v1beta1/echo:echo")
+
+	httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	httpReq = httpReq.WithContext(ctx)
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &genprotopb.EchoResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
+}
+
+// Expand this method splits the given content into words and will pass each word back
+// through the stream. This method showcases server-side streaming RPCs.
+func (c *echoRESTClient) Expand(ctx context.Context, req *genprotopb.ExpandRequest, opts ...gax.CallOption) (genprotopb.Echo_ExpandClient, error) {
+	return nil, fmt.Errorf("Expand not yet supported for REST clients")
+}
+
+// Collect this method will collect the words given to it. When the stream is closed
+// by the client, this method will return the a concatenation of the strings
+// passed to it. This method showcases client-side streaming RPCs.
+func (c *echoRESTClient) Collect(ctx context.Context, opts ...gax.CallOption) (genprotopb.Echo_CollectClient, error) {
+	return nil, fmt.Errorf("Collect not yet supported for REST clients")
+}
+
+// Chat this method, upon receiving a request on the stream, will pass the same
+// content back on the stream. This method showcases bidirectional
+// streaming RPCs.
+func (c *echoRESTClient) Chat(ctx context.Context, opts ...gax.CallOption) (genprotopb.Echo_ChatClient, error) {
+	return nil, fmt.Errorf("Chat not yet supported for REST clients")
+}
+
+// PagedExpand this is similar to the Expand method but instead of returning a stream of
+// expanded words, this method returns a paged list of expanded words.
+func (c *echoRESTClient) PagedExpand(ctx context.Context, req *genprotopb.PagedExpandRequest, opts ...gax.CallOption) *EchoResponseIterator {
+	it := &EchoResponseIterator{}
+	req = proto.Clone(req).(*genprotopb.PagedExpandRequest)
+	m := protojson.MarshalOptions{AllowPartial: true, UseProtoNames: false}
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.EchoResponse, string, error) {
+		resp := &genprotopb.PagedExpandResponse{}
 		if pageSize > math.MaxInt32 {
 			req.PageSize = math.MaxInt32
 		} else {
 			req.PageSize = int32(pageSize)
 		}
-		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
-			var err error
-			resp, err = c.locationsClient.ListLocations(ctx, req, settings.GRPC...)
-			return err
-		}, opts...)
+		req.PageToken = pageToken
+
+		jsonReq, err := m.Marshal(req)
 		if err != nil {
 			return nil, "", err
 		}
 
+		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl.Path += fmt.Sprintf("/v1beta1/echo:pagedExpand")
+
+		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
+		if err != nil {
+			return nil, "", err
+		}
+
+		// Set the headers
+		for k, v := range c.xGoogMetadata {
+			httpReq.Header[k] = v
+		}
+
+		httpReq.Header["Content-Type"] = []string{"application/json"}
+		httpRsp, err := c.httpClient.Do(httpReq)
+		if err != nil {
+			return nil, "", err
+		}
+		defer httpRsp.Body.Close()
+
+		if httpRsp.StatusCode != http.StatusOK {
+			return nil, "", fmt.Errorf(httpRsp.Status)
+		}
+
+		buf, err := ioutil.ReadAll(httpRsp.Body)
+		if err != nil {
+			return nil, "", err
+		}
+
+		unm.Unmarshal(buf, resp)
 		it.Response = resp
-		return resp.GetLocations(), resp.GetNextPageToken(), nil
+		return resp.GetResponses(), resp.GetNextPageToken(), nil
 	}
+
 	fetch := func(pageSize int, pageToken string) (string, error) {
 		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
 		if err != nil {
@@ -576,97 +714,70 @@ func (c *echoGRPCClient) ListLocations(ctx context.Context, req *locationpb.List
 		it.items = append(it.items, items...)
 		return nextPageToken, nil
 	}
+
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
 	it.pageInfo.MaxSize = int(req.GetPageSize())
 	it.pageInfo.Token = req.GetPageToken()
+
 	return it
 }
 
-func (c *echoGRPCClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
-	opts = append((*c.CallOptions).GetLocation[0:len((*c.CallOptions).GetLocation):len((*c.CallOptions).GetLocation)], opts...)
-	var resp *locationpb.Location
-	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
-		var err error
-		resp, err = c.locationsClient.GetLocation(ctx, req, settings.GRPC...)
-		return err
-	}, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-func (c *echoGRPCClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
-	opts = append((*c.CallOptions).SetIamPolicy[0:len((*c.CallOptions).SetIamPolicy):len((*c.CallOptions).SetIamPolicy)], opts...)
-	var resp *iampb.Policy
-	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
-		var err error
-		resp, err = c.iamPolicyClient.SetIamPolicy(ctx, req, settings.GRPC...)
-		return err
-	}, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-func (c *echoGRPCClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
-	opts = append((*c.CallOptions).GetIamPolicy[0:len((*c.CallOptions).GetIamPolicy):len((*c.CallOptions).GetIamPolicy)], opts...)
-	var resp *iampb.Policy
-	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
-		var err error
-		resp, err = c.iamPolicyClient.GetIamPolicy(ctx, req, settings.GRPC...)
-		return err
-	}, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-func (c *echoGRPCClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
-	opts = append((*c.CallOptions).TestIamPermissions[0:len((*c.CallOptions).TestIamPermissions):len((*c.CallOptions).TestIamPermissions)], opts...)
-	var resp *iampb.TestIamPermissionsResponse
-	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
-		var err error
-		resp, err = c.iamPolicyClient.TestIamPermissions(ctx, req, settings.GRPC...)
-		return err
-	}, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-func (c *echoGRPCClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
-	opts = append((*c.CallOptions).ListOperations[0:len((*c.CallOptions).ListOperations):len((*c.CallOptions).ListOperations)], opts...)
-	it := &OperationIterator{}
-	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
-	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
-		var resp *longrunningpb.ListOperationsResponse
-		req.PageToken = pageToken
+// PagedExpandLegacy this is similar to the PagedExpand except that it uses
+// max_results instead of page_size, as some legacy APIs still
+// do. New APIs should NOT use this pattern.
+func (c *echoRESTClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.PagedExpandLegacyRequest, opts ...gax.CallOption) *EchoResponseIterator {
+	it := &EchoResponseIterator{}
+	req = proto.Clone(req).(*genprotopb.PagedExpandLegacyRequest)
+	m := protojson.MarshalOptions{AllowPartial: true, UseProtoNames: false}
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.EchoResponse, string, error) {
+		resp := &genprotopb.PagedExpandResponse{}
 		if pageSize > math.MaxInt32 {
-			req.PageSize = math.MaxInt32
+			req.MaxResults = math.MaxInt32
 		} else {
-			req.PageSize = int32(pageSize)
+			req.MaxResults = int32(pageSize)
 		}
-		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
-			var err error
-			resp, err = c.operationsClient.ListOperations(ctx, req, settings.GRPC...)
-			return err
-		}, opts...)
+		req.PageToken = pageToken
+
+		jsonReq, err := m.Marshal(req)
 		if err != nil {
 			return nil, "", err
 		}
 
+		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl.Path += fmt.Sprintf("/v1beta1/echo:pagedExpandLegacy")
+
+		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
+		if err != nil {
+			return nil, "", err
+		}
+
+		// Set the headers
+		for k, v := range c.xGoogMetadata {
+			httpReq.Header[k] = v
+		}
+
+		httpReq.Header["Content-Type"] = []string{"application/json"}
+		httpRsp, err := c.httpClient.Do(httpReq)
+		if err != nil {
+			return nil, "", err
+		}
+		defer httpRsp.Body.Close()
+
+		if httpRsp.StatusCode != http.StatusOK {
+			return nil, "", fmt.Errorf(httpRsp.Status)
+		}
+
+		buf, err := ioutil.ReadAll(httpRsp.Body)
+		if err != nil {
+			return nil, "", err
+		}
+
+		unm.Unmarshal(buf, resp)
 		it.Response = resp
-		return resp.GetOperations(), resp.GetNextPageToken(), nil
+		return resp.GetResponses(), resp.GetNextPageToken(), nil
 	}
+
 	fetch := func(pageSize int, pageToken string) (string, error) {
 		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
 		if err != nil {
@@ -675,47 +786,138 @@ func (c *echoGRPCClient) ListOperations(ctx context.Context, req *longrunningpb.
 		it.items = append(it.items, items...)
 		return nextPageToken, nil
 	}
+
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.GetMaxResults())
+	it.pageInfo.Token = req.GetPageToken()
+
+	return it
+}
+func (c *echoRESTClient) PagedExpandLegacyMapped(ctx context.Context, req *genprotopb.PagedExpandRequest, opts ...gax.CallOption) *PagedExpandResponseListPairIterator {
+	it := &PagedExpandResponseListPairIterator{}
+	req = proto.Clone(req).(*genprotopb.PagedExpandRequest)
+	m := protojson.MarshalOptions{AllowPartial: true, UseProtoNames: false}
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	it.InternalFetch = func(pageSize int, pageToken string) ([]PagedExpandResponseListPair, string, error) {
+		resp := &genprotopb.PagedExpandLegacyMappedResponse{}
+		if pageSize > math.MaxInt32 {
+			req.PageSize = math.MaxInt32
+		} else {
+			req.PageSize = int32(pageSize)
+		}
+		req.PageToken = pageToken
+
+		jsonReq, err := m.Marshal(req)
+		if err != nil {
+			return nil, "", err
+		}
+
+		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl.Path += fmt.Sprintf("/v1beta1/echo:pagedExpandLegacyMapped")
+
+		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
+		if err != nil {
+			return nil, "", err
+		}
+
+		// Set the headers
+		for k, v := range c.xGoogMetadata {
+			httpReq.Header[k] = v
+		}
+
+		httpReq.Header["Content-Type"] = []string{"application/json"}
+		httpRsp, err := c.httpClient.Do(httpReq)
+		if err != nil {
+			return nil, "", err
+		}
+		defer httpRsp.Body.Close()
+
+		if httpRsp.StatusCode != http.StatusOK {
+			return nil, "", fmt.Errorf(httpRsp.Status)
+		}
+
+		buf, err := ioutil.ReadAll(httpRsp.Body)
+		if err != nil {
+			return nil, "", err
+		}
+
+		unm.Unmarshal(buf, resp)
+		it.Response = resp
+
+		elems := make([]PagedExpandResponseListPair, 0, len(resp.GetAlphabetized()))
+		for k, v := range resp.GetAlphabetized() {
+			elems = append(elems, PagedExpandResponseListPair{k, v})
+		}
+		sort.Slice(elems, func(i, j int) bool { return elems[i].Key < elems[j].Key })
+
+		return elems, resp.GetNextPageToken(), nil
+	}
+
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
 	it.pageInfo.MaxSize = int(req.GetPageSize())
 	it.pageInfo.Token = req.GetPageToken()
+
 	return it
 }
 
-func (c *echoGRPCClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
-	opts = append((*c.CallOptions).GetOperation[0:len((*c.CallOptions).GetOperation):len((*c.CallOptions).GetOperation)], opts...)
-	var resp *longrunningpb.Operation
-	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
-		var err error
-		resp, err = c.operationsClient.GetOperation(ctx, req, settings.GRPC...)
-		return err
-	}, opts...)
+// Wait this method will wait for the requested amount of time and then return.
+// This method showcases how a client handles a request timeout.
+func (c *echoRESTClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, opts ...gax.CallOption) (*WaitOperation, error) {
+	return nil, fmt.Errorf("Wait not yet supported for REST clients")
+}
+
+// Block this method will block (wait) for the requested amount of time
+// and then return the response or error.
+// This method showcases how a client handles delays or retries.
+func (c *echoRESTClient) Block(ctx context.Context, req *genprotopb.BlockRequest, opts ...gax.CallOption) (*genprotopb.BlockResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true}
+	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
 	}
-	return resp, nil
-}
 
-func (c *echoGRPCClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
-	opts = append((*c.CallOptions).DeleteOperation[0:len((*c.CallOptions).DeleteOperation):len((*c.CallOptions).DeleteOperation)], opts...)
-	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
-		var err error
-		_, err = c.operationsClient.DeleteOperation(ctx, req, settings.GRPC...)
-		return err
-	}, opts...)
-	return err
-}
+	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl.Path += fmt.Sprintf("/v1beta1/echo:block")
 
-func (c *echoGRPCClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
-	opts = append((*c.CallOptions).CancelOperation[0:len((*c.CallOptions).CancelOperation):len((*c.CallOptions).CancelOperation)], opts...)
-	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
-		var err error
-		_, err = c.operationsClient.CancelOperation(ctx, req, settings.GRPC...)
-		return err
-	}, opts...)
-	return err
+	httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
+	if err != nil {
+		return nil, err
+	}
+	httpReq = httpReq.WithContext(ctx)
+	// Set the headers
+	for k, v := range c.xGoogMetadata {
+		httpReq.Header[k] = v
+	}
+	httpReq.Header["Content-Type"] = []string{"application/json"}
+
+	httpRsp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	if httpRsp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(httpRsp.Status)
+	}
+
+	buf, err := ioutil.ReadAll(httpRsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	rsp := &genprotopb.BlockResponse{}
+
+	return rsp, unm.Unmarshal(buf, rsp)
 }
 
 // WaitOperation manages a long-running operation from Wait.
@@ -729,6 +931,12 @@ func (c *echoGRPCClient) WaitOperation(name string) *WaitOperation {
 	return &WaitOperation{
 		lro: longrunning.InternalNewOperation(*c.LROClient, &longrunningpb.Operation{Name: name}),
 	}
+}
+
+// WaitOperation returns a new WaitOperation from a given name.
+// The name must be that of a previously created WaitOperation, possibly from a different process.
+func (c *echoRESTClient) WaitOperation(name string) *WaitOperation {
+	return &WaitOperation{}
 }
 
 // Wait blocks until the long-running operation is completed, returning the response and any errors encountered.
@@ -829,6 +1037,59 @@ func (it *EchoResponseIterator) bufLen() int {
 }
 
 func (it *EchoResponseIterator) takeBuf() interface{} {
+	b := it.items
+	it.items = nil
+	return b
+}
+
+// Holder type for string/*genprotopb.PagedExpandResponseList map entries
+type PagedExpandResponseListPair struct {
+	Key   string
+	Value *genprotopb.PagedExpandResponseList
+}
+
+// PagedExpandResponseListPairIterator manages a stream of PagedExpandResponseListPair.
+type PagedExpandResponseListPairIterator struct {
+	items    []PagedExpandResponseListPair
+	pageInfo *iterator.PageInfo
+	nextFunc func() error
+
+	// Response is the raw response for the current page.
+	// It must be cast to the RPC response type.
+	// Calling Next() or InternalFetch() updates this value.
+	Response interface{}
+
+	// InternalFetch is for use by the Google Cloud Libraries only.
+	// It is not part of the stable interface of this package.
+	//
+	// InternalFetch returns results from a single call to the underlying RPC.
+	// The number of results is no greater than pageSize.
+	// If there are no more results, nextPageToken is empty and err is nil.
+	InternalFetch func(pageSize int, pageToken string) (results []PagedExpandResponseListPair, nextPageToken string, err error)
+}
+
+// PageInfo supports pagination. See the google.golang.org/api/iterator package for details.
+func (it *PagedExpandResponseListPairIterator) PageInfo() *iterator.PageInfo {
+	return it.pageInfo
+}
+
+// Next returns the next result. Its second return value is iterator.Done if there are no more
+// results. Once Next returns Done, all subsequent calls will return Done.
+func (it *PagedExpandResponseListPairIterator) Next() (PagedExpandResponseListPair, error) {
+	var item PagedExpandResponseListPair
+	if err := it.nextFunc(); err != nil {
+		return item, err
+	}
+	item = it.items[0]
+	it.items = it.items[1:]
+	return item, nil
+}
+
+func (it *PagedExpandResponseListPairIterator) bufLen() int {
+	return len(it.items)
+}
+
+func (it *PagedExpandResponseListPairIterator) takeBuf() interface{} {
 	b := it.items
 	it.items = nil
 	return b
