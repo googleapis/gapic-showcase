@@ -1042,7 +1042,7 @@ func (it *EchoResponseIterator) takeBuf() interface{} {
 	return b
 }
 
-// Holder type for string/*genprotopb.PagedExpandResponseList map entries
+// PagedExpandResponseListPair is a holder type for string/*genprotopb.PagedExpandResponseList map entries
 type PagedExpandResponseListPair struct {
 	Key   string
 	Value *genprotopb.PagedExpandResponseList
