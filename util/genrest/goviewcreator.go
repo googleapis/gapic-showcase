@@ -16,6 +16,7 @@ package genrest
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -195,8 +196,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			source.P("")
 
 			if handler.StreamingServer {
-				streamerDefinition, streamerType := constructServerStreamer(service, handler, fileImports)
-				helperSources[streamerType] = streamerDefinition
+				streamerType := constructServerStreamer(service, handler, fileImports, helperSources)
 
 				source.P(` streamer := &%s{}`, streamerType)
 				source.P(" if err := backend.%sServer.%s(%s, streamer); err != nil {", service.ShortName, handler.GoMethod, handler.RequestVariable)
@@ -236,8 +236,15 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 		for _, method := range methodSources {
 			file.Append(method)
 		}
-		for _, helper := range helperSources {
-			file.Append(helper)
+
+		// emit helperSources in a deterministic order
+		keys := []string{}
+		for k := range helperSources {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			file.Append(helperSources[k])
 		}
 	}
 
@@ -291,51 +298,70 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	return view, nil
 }
 
-func constructServerStreamer(service *gomodel.ServiceModel, handler *gomodel.RESTHandler, fileImports map[string]string) (helper *goview.Source, streamerType string) {
-	helper = goview.NewSource()
+func constructServerStreamer(service *gomodel.ServiceModel, handler *gomodel.RESTHandler, fileImports map[string]string, helperSources map[string]*goview.Source) (streamerType string) {
 	streamerType = fmt.Sprintf("%s_%sServer", service.ShortName, handler.GoMethod)
+	baseStreamerType := fmt.Sprintf("%s_BaseServerStreamer", service.ShortName)
 	streamerInterface := fmt.Sprintf("%s.%s_%sServer", handler.RequestTypePackage, service.ShortName, handler.GoMethod)
 	streamerElement := fmt.Sprintf("*%s.%s", handler.ResponseTypePackage, handler.ResponseType)
-	fileImports["google.golang.org/protobuf/encoding/protojson"] = ""
+
+	helper := goview.NewSource()
+	baseHelper := goview.NewSource()
+	helperSources[baseStreamerType] = baseHelper
+	helperSources[streamerType] = helper
+
 	fileImports["sync"] = ""
 	fileImports["fmt"] = ""
 	fileImports["strings"] = ""
 	fileImports["google.golang.org/grpc"] = ""
+	fileImports["google.golang.org/protobuf/encoding/protojson"] = ""
+	fileImports["google.golang.org/protobuf/proto"] = ""
 
-	helper.P(`// %s implements %s to provide server-side streamong over REST, returning all the`, streamerType, streamerInterface)
+	baseHelper.P(`// %s contains the basic accumulation and emit functionality to help handle all server streaming RPCs in the %s service.`,
+		baseStreamerType, service.ShortName)
+	baseHelper.P(`type %s struct{`, baseStreamerType)
+	baseHelper.P(`   responses []string`)
+	baseHelper.P(`   initialization sync.Once`)
+	baseHelper.P(`   marshaler      *protojson.MarshalOptions`)
+	baseHelper.P(` `)
+	baseHelper.P(`   grpc.ServerStream`)
+	baseHelper.P(` }`)
+	baseHelper.P(``)
+	baseHelper.P(`func (streamer *%s) accumulate(response proto.Message) error {`, baseStreamerType)
+	baseHelper.P(`   streamer.initialization.Do(streamer.initialize)`)
+	baseHelper.P(`   json, err := streamer.marshaler.Marshal(response)`)
+	baseHelper.P(`   if err != nil {`)
+	baseHelper.P(`     return fmt.Errorf("error json-encoding response: %%s", err.Error())`)
+	baseHelper.P(`   }`)
+	baseHelper.P(`   streamer.responses = append(streamer.responses, string(json))`)
+	baseHelper.P(`   return nil`)
+	baseHelper.P(`}`)
+	baseHelper.P(``)
+	baseHelper.P(`// ListJSON returns a list of all the accumulated responses, in JSON format.`)
+	baseHelper.P(`func (streamer *%s) ListJSON() string {`, baseStreamerType)
+	baseHelper.P(`   return fmt.Sprintf("{\n%%s\n}", strings.Join(streamer.responses, ",\n"))`)
+	baseHelper.P(`}`)
+	baseHelper.P(``)
+	baseHelper.P(`func (streamer *%s) initialize() {`, baseStreamerType)
+	baseHelper.P(`   streamer.marshaler = resttools.ToJSON()`)
+	baseHelper.P(`}`)
+	baseHelper.P(``)
+	baseHelper.P(`func (streamer *%s) Context() context.Context {`, baseStreamerType)
+	baseHelper.P(`   return context.Background()`)
+	baseHelper.P(`}`)
+	baseHelper.P(``)
+
+	helper.P(`// %s implements %s to provide server-side streaming over REST, returning all the`, streamerType, streamerInterface)
 	helper.P(`// individual responses as part of a long JSON list.`)
 	helper.P(`type %s struct{`, streamerType)
-	helper.P(`   responses []string`)
-	helper.P(`   initialization sync.Once`)
-	helper.P(`   marshaler      *protojson.MarshalOptions`)
-	helper.P(` `)
-	helper.P(`   grpc.ServerStream`)
-	helper.P(` }`)
-	helper.P(` `)
+	helper.P(`   %s`, baseStreamerType)
+	helper.P(`}`)
+	helper.P(``)
 	helper.P(` // Send accumulates a response to be fetched later as part of response list returned over REST.`)
 	helper.P(`func (streamer *%s) Send(response %s) error {`, streamerType, streamerElement)
-	helper.P(`   streamer.initialization.Do(streamer.initialize)`)
-	helper.P(`   json, err := streamer.marshaler.Marshal(response)`)
-	helper.P(`   if err != nil {`)
-	helper.P(`     return fmt.Errorf("error json-encoding response: %%s", err.Error())`)
-	helper.P(`   }`)
-	helper.P(`   streamer.responses = append(streamer.responses, string(json))`)
-	helper.P(`   return nil`)
+	helper.P(`  return streamer.accumulate(response)`)
 	helper.P(`}`)
-	helper.P(``)
-	helper.P(`// ListJSON returns a list of all the accumulated responses, in JSON format.`)
-	helper.P(`func (streamer *%s) ListJSON() string {`, streamerType)
-	helper.P(`   return fmt.Sprintf("{\n%%s\n}", strings.Join(streamer.responses, ",\n"))`)
-	helper.P(`}`)
-	helper.P(``)
-	helper.P(`func (streamer *%s) initialize() {`, streamerType)
-	helper.P(`   streamer.marshaler = resttools.ToJSON()`)
-	helper.P(`}`)
-	helper.P(``)
-	helper.P(`func (streamer *%s) Context() context.Context {`, streamerType)
-	helper.P(`   return context.Background()`)
-	helper.P(`}`)
-	return helper, streamerType
+
+	return streamerType
 }
 
 // registeredHandler pairs a URL path pattern with the name of the associated handler
