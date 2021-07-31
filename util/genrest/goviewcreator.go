@@ -55,8 +55,12 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 		// TODO: Properly deal with import strings. They may need to be taken out of the gomodel
 
-		// Accumulate source code for each method and the imports the code requires.
+		// Accumulate source code for each method corresponding to an RPC, as well as the imports the code requires.
 		methodSources := []*goview.Source{}
+
+		// Accumulate helper methods required by RPC methods, taking care to not duplicate them.
+		helperSources := map[string]*goview.Source{}
+
 		for _, handler := range service.Handlers {
 			source := goview.NewSource()
 			methodSources = append(methodSources, source)
@@ -191,59 +195,16 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			source.P("")
 
 			if handler.StreamingServer {
+				streamerDefinition, streamerType := constructServerStreamer(service, handler, fileImports)
+				helperSources[streamerType] = streamerDefinition
 
-				helperSource, streamerType := constructServerStreamer(service, handler)
-				methodSources = append(methodSources, helperSource)
-				serverStreamerType := fmt.Sprintf("%s%sServer", service.ShortName, handler.GoMethod)
-				serverStreamerInterface := fmt.Sprintf("%s.%s_%sServer", handler.RequestTypePackage, service.ShortName, handler.GoMethod)
-
-				source.P(` stream := resttools.ServerStreamer{} // implements %s` /*serverStreamerType,*/, serverStreamerInterface)
-				source.P(" if err := backend.%sServer.%s(%s, stream); err != nil {", service.ShortName, handler.GoMethod, handler.RequestVariable)
+				source.P(` streamer := &%s{}`, streamerType)
+				source.P(" if err := backend.%sServer.%s(%s, streamer); err != nil {", service.ShortName, handler.GoMethod, handler.RequestVariable)
 				source.P("    // TODO: Properly handle error. Is StatusInternalServerError (500) the right response?")
 				source.P(`    backend.Error(w, http.StatusInternalServerError, "server error: %%s", err.Error())`)
 				source.P(" }")
-				source.P(" w.Write([]byte(stream.ListJSON()))")
+				source.P(" w.Write([]byte(streamer.ListJSON()))")
 
-				asdljsd
-				source.P(`
-
-`)
-
-				source.P(`/*
-                                    // STUB server-streaming response
-
-
-                                     type %s struct { // implements %s
-                                        responses []string
-                                     }
-
-                                    func (streamer *%s) Send(response *%s.%s) error {   // this could just take the interface for proto,
-                                                                                        // same as Marshal, and so we only have one instance in genrest
-  			              json, err := marshaler.Marshal(response)
-                                      if err != nil {
-                                        return fmt.Errorf("error json-encoding response: %%s", err.Error())
-		                      }
-                                      streamer.responses = append(streamer.responses, json)
-
-                                      return nil
-                                    }
-
-                                    func (streamer *%s) AsJson() string {
-                                      return fmt.Sprintf("{\n%%s\n}", strings.Join(",\n", streamer.responses))
-                                    }
-`,
-					serverStreamerType, serverStreamerInterface, // struct
-					serverStreamerType, handler.ResponseTypePackage, handler.ResponseType, // func Send
-					serverStreamerType, // func Send
-				)
-
-				source.P(` stream := &%s{} // implements %s`, serverStreamerType, serverStreamerInterface)
-				source.P(" if err := backend.%sServer.%s(%s, stream); err != nil {", service.ShortName, handler.GoMethod, handler.RequestVariable)
-				source.P("    // do something")
-				source.P(" }")
-				source.P(" // w.Write(stream.AsJSON())")
-
-				source.P(` */`)
 			} else { // regular unary call
 				// TODO: In the future, we may want to redirect all REST-endpoint requests to the gRPC endpoint so that the gRPC-registered observers get invoked.
 				source.P("  %s, err := backend.%sServer.%s(context.Background(), %s)", handler.ResponseVariable, service.ShortName, handler.GoMethod, handler.RequestVariable)
@@ -274,6 +235,9 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 		file.P("")
 		for _, method := range methodSources {
 			file.Append(method)
+		}
+		for _, helper := range helperSources {
+			file.Append(helper)
 		}
 	}
 
@@ -327,10 +291,50 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	return view, nil
 }
 
-func constructServerStreamer(service *gomodel.ServiceModel, handler *gomodel.RESTHandler) (helper *goview.Source, streamerType string) {
+func constructServerStreamer(service *gomodel.ServiceModel, handler *gomodel.RESTHandler, fileImports map[string]string) (helper *goview.Source, streamerType string) {
 	helper = goview.NewSource()
-	helper.P("// server stream helper STUB")
-	streamerType = "stubStreamerType"
+	streamerType = fmt.Sprintf("%s_%sServer", service.ShortName, handler.GoMethod)
+	streamerInterface := fmt.Sprintf("%s.%s_%sServer", handler.RequestTypePackage, service.ShortName, handler.GoMethod)
+	streamerElement := fmt.Sprintf("*%s.%s", handler.ResponseTypePackage, handler.ResponseType)
+	fileImports["google.golang.org/protobuf/encoding/protojson"] = ""
+	fileImports["sync"] = ""
+	fileImports["fmt"] = ""
+	fileImports["strings"] = ""
+	fileImports["google.golang.org/grpc"] = ""
+
+	helper.P(`// %s implements %s to provide server-side streamong over REST, returning all the`, streamerType, streamerInterface)
+	helper.P(`// individual responses as part of a long JSON list.`)
+	helper.P(`type %s struct{`, streamerType)
+	helper.P(`   responses []string`)
+	helper.P(`   initialization sync.Once`)
+	helper.P(`   marshaler      *protojson.MarshalOptions`)
+	helper.P(` `)
+	helper.P(`   grpc.ServerStream`)
+	helper.P(` }`)
+	helper.P(` `)
+	helper.P(` // Send accumulates a response to be fetched later as part of response list returned over REST.`)
+	helper.P(`func (streamer *%s) Send(response %s) error {`, streamerType, streamerElement)
+	helper.P(`   streamer.initialization.Do(streamer.initialize)`)
+	helper.P(`   json, err := streamer.marshaler.Marshal(response)`)
+	helper.P(`   if err != nil {`)
+	helper.P(`     return fmt.Errorf("error json-encoding response: %%s", err.Error())`)
+	helper.P(`   }`)
+	helper.P(`   streamer.responses = append(streamer.responses, string(json))`)
+	helper.P(`   return nil`)
+	helper.P(`}`)
+	helper.P(``)
+	helper.P(`// ListJSON returns a list of all the accumulated responses, in JSON format.`)
+	helper.P(`func (streamer *%s) ListJSON() string {`, streamerType)
+	helper.P(`   return fmt.Sprintf("{\n%%s\n}", strings.Join(streamer.responses, ",\n"))`)
+	helper.P(`}`)
+	helper.P(``)
+	helper.P(`func (streamer *%s) initialize() {`, streamerType)
+	helper.P(`   streamer.marshaler = resttools.ToJSON()`)
+	helper.P(`}`)
+	helper.P(``)
+	helper.P(`func (streamer *%s) Context() context.Context {`, streamerType)
+	helper.P(`   return context.Background()`)
+	helper.P(`}`)
 	return helper, streamerType
 }
 
