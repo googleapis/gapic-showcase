@@ -238,12 +238,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 		}
 
 		// emit helperSources in a deterministic order
-		keys := []string{}
-		for k := range helperSources {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
-		for _, k := range keys {
+		for _, k := range alphabetizeKeys(helperSources) {
 			file.Append(helperSources[k])
 		}
 	}
@@ -443,6 +438,15 @@ func (namer *Namer) Get(newName string) string {
 		newName = fmt.Sprintf("%s_%d", newName, numSeen)
 		// run through the loop again to ensure the new name hasn't been previously registered either.
 	}
+}
+
+func alphabetizeKeys(helpers map[string]*goview.Source) []string {
+	keys := []string{}
+	for k := range helpers {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 var license string

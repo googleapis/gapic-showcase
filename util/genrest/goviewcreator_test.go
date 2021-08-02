@@ -15,10 +15,13 @@
 package genrest
 
 import (
+	"io/ioutil"
 	"reflect"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/gapic-showcase/util/genrest/gomodel"
+	"github.com/googleapis/gapic-showcase/util/genrest/goview"
 )
 
 func TestMatchingPath(t *testing.T) {
@@ -82,5 +85,52 @@ func TestNamer(t *testing.T) {
 		if got, want := namer.Get(testCase.requested), testCase.expected; got != want {
 			t.Errorf("testCase %2d: got %q, want %q", idx, got, want)
 		}
+	}
+}
+
+func TestConstructStreamingServer(t *testing.T) {
+	fileImports := map[string]string{}
+	helperSources := map[string]*goview.Source{}
+
+	constructServerStreamer(&gomodel.ServiceModel{ShortName: "Catalog"},
+		&gomodel.RESTHandler{RequestTypePackage: "catalogpb", GoMethod: "StreamAuthors", ResponseType: "AuthorEntry"},
+		fileImports, helperSources)
+	if got, want := len(helperSources), 2; got != want {
+		t.Errorf("unexpected length of helperSources: got %d, want %d", got, want)
+	}
+
+	constructServerStreamer(&gomodel.ServiceModel{ShortName: "Catalog"},
+		&gomodel.RESTHandler{RequestTypePackage: "catalogpb", GoMethod: "StreamTitles", ResponseType: "TitleEntry"},
+		fileImports, helperSources)
+	if got, want := len(helperSources), 3; got != want {
+		t.Errorf("unexpected length of helperSources: got %d, want %d", got, want)
+	}
+
+	constructServerStreamer(&gomodel.ServiceModel{ShortName: "Media"},
+		&gomodel.RESTHandler{RequestTypePackage: "mediapb", GoMethod: "StreamAudio", ResponseType: "AudioEntry"},
+		fileImports, helperSources)
+	if got, want := len(helperSources), 5; got != want {
+		t.Errorf("unexpected length of helperSources: got %d, want %d", got, want)
+	}
+
+	constructServerStreamer(&gomodel.ServiceModel{ShortName: "Media"},
+		&gomodel.RESTHandler{RequestTypePackage: "mediapb", GoMethod: "StreamVideo", ResponseType: "VideoEntry"},
+		fileImports, helperSources)
+	if got, want := len(helperSources), 6; got != want {
+		t.Errorf("unexpected length of helperSources: got %d, want %d", got, want)
+	}
+
+	actualSources := ""
+	for _, key := range alphabetizeKeys(helperSources) {
+		actualSources += helperSources[key].Contents() + "\n"
+	}
+
+	expectedSources, err := ioutil.ReadFile("testdata/TestConstructServerStreamer.go.baseline")
+	if err != nil {
+		t.Fatalf("could not load file: %s", err)
+	}
+
+	if got, want := actualSources, string(expectedSources); got != want {
+		t.Errorf("unexpected helper sources:\n = got: ===\n%s\n= want: ===\n%s\n= diff ===\n%s", got, want, cmp.Diff(got, want))
 	}
 }
