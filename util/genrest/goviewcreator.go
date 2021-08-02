@@ -60,7 +60,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 		methodSources := []*goview.Source{}
 
 		// Accumulate helper methods required by RPC methods, taking care to not duplicate them.
-		helperSources := map[string]*goview.Source{}
+		helperSources := sourceMap{}
 
 		for _, handler := range service.Handlers {
 			source := goview.NewSource()
@@ -237,8 +237,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			file.Append(method)
 		}
 
-		// emit helperSources in a deterministic order
-		for _, k := range alphabetizeKeys(helperSources) {
+		for _, k := range helperSources.sortedKeys() {
 			file.Append(helperSources[k])
 		}
 	}
@@ -293,7 +292,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	return view, nil
 }
 
-func constructServerStreamer(service *gomodel.ServiceModel, handler *gomodel.RESTHandler, fileImports map[string]string, helperSources map[string]*goview.Source) (streamerType string) {
+func constructServerStreamer(service *gomodel.ServiceModel, handler *gomodel.RESTHandler, fileImports map[string]string, helperSources sourceMap) (streamerType string) {
 	streamerType = fmt.Sprintf("%s_%sServer", service.ShortName, handler.GoMethod)
 	baseStreamerType := fmt.Sprintf("%s_BaseServerStreamer", service.ShortName)
 	streamerInterface := fmt.Sprintf("%s.%s_%sServer", handler.RequestTypePackage, service.ShortName, handler.GoMethod)
@@ -440,9 +439,13 @@ func (namer *Namer) Get(newName string) string {
 	}
 }
 
-func alphabetizeKeys(helpers map[string]*goview.Source) []string {
+// sourceMap implements a method to return the keys in sorted order.
+type sourceMap map[string]*goview.Source
+
+// sortedKeys returns a slice containing all the keys in sm, sorted.
+func (sm sourceMap) sortedKeys() []string {
 	keys := []string{}
-	for k := range helpers {
+	for k := range sm {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)

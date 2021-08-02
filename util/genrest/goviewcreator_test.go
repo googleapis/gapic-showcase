@@ -21,7 +21,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/gapic-showcase/util/genrest/gomodel"
-	"github.com/googleapis/gapic-showcase/util/genrest/goview"
 )
 
 func TestMatchingPath(t *testing.T) {
@@ -90,38 +89,58 @@ func TestNamer(t *testing.T) {
 
 func TestConstructStreamingServer(t *testing.T) {
 	fileImports := map[string]string{}
-	helperSources := map[string]*goview.Source{}
+	helperSources := sourceMap{}
 
 	constructServerStreamer(&gomodel.ServiceModel{ShortName: "Catalog"},
-		&gomodel.RESTHandler{RequestTypePackage: "catalogpb", GoMethod: "StreamAuthors", ResponseType: "AuthorEntry"},
+		&gomodel.RESTHandler{
+			RequestTypePackage:  "catalogpb",
+			ResponseTypePackage: "responsepb",
+			GoMethod:            "StreamAuthors",
+			ResponseType:        "AuthorEntry",
+		},
 		fileImports, helperSources)
 	if got, want := len(helperSources), 2; got != want {
 		t.Errorf("unexpected length of helperSources: got %d, want %d", got, want)
 	}
 
 	constructServerStreamer(&gomodel.ServiceModel{ShortName: "Catalog"},
-		&gomodel.RESTHandler{RequestTypePackage: "catalogpb", GoMethod: "StreamTitles", ResponseType: "TitleEntry"},
+		&gomodel.RESTHandler{
+			RequestTypePackage:  "catalogpb",
+			ResponseTypePackage: "responsepb",
+			GoMethod:            "StreamTitles",
+			ResponseType:        "TitleEntry",
+		},
 		fileImports, helperSources)
 	if got, want := len(helperSources), 3; got != want {
 		t.Errorf("unexpected length of helperSources: got %d, want %d", got, want)
 	}
 
 	constructServerStreamer(&gomodel.ServiceModel{ShortName: "Media"},
-		&gomodel.RESTHandler{RequestTypePackage: "mediapb", GoMethod: "StreamAudio", ResponseType: "AudioEntry"},
+		&gomodel.RESTHandler{
+			RequestTypePackage:  "mediapb",
+			ResponseTypePackage: "responsepb",
+			GoMethod:            "StreamAudio",
+			ResponseType:        "AudioEntry",
+		},
 		fileImports, helperSources)
 	if got, want := len(helperSources), 5; got != want {
 		t.Errorf("unexpected length of helperSources: got %d, want %d", got, want)
 	}
 
 	constructServerStreamer(&gomodel.ServiceModel{ShortName: "Media"},
-		&gomodel.RESTHandler{RequestTypePackage: "mediapb", GoMethod: "StreamVideo", ResponseType: "VideoEntry"},
+		&gomodel.RESTHandler{
+			RequestTypePackage:  "mediapb",
+			ResponseTypePackage: "responsepb",
+			GoMethod:            "StreamVideo",
+			ResponseType:        "VideoEntry",
+		},
 		fileImports, helperSources)
 	if got, want := len(helperSources), 6; got != want {
 		t.Errorf("unexpected length of helperSources: got %d, want %d", got, want)
 	}
 
 	actualSources := ""
-	for _, key := range alphabetizeKeys(helperSources) {
+	for _, key := range helperSources.sortedKeys() {
 		actualSources += helperSources[key].Contents() + "\n"
 	}
 
