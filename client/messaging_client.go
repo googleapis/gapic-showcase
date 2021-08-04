@@ -573,11 +573,13 @@ func (c *messagingGRPCClient) ListRooms(ctx context.Context, req *genprotopb.Lis
 	it := &RoomIterator{}
 	req = proto.Clone(req).(*genprotopb.ListRoomsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.Room, string, error) {
-		var resp *genprotopb.ListRoomsResponse
-		req.PageToken = pageToken
+		resp := &genprotopb.ListRoomsResponse{}
+		if pageToken != "" {
+			req.PageToken = pageToken
+		}
 		if pageSize > math.MaxInt32 {
 			req.PageSize = math.MaxInt32
-		} else {
+		} else if pageSize != 0 {
 			req.PageSize = int32(pageSize)
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -600,9 +602,11 @@ func (c *messagingGRPCClient) ListRooms(ctx context.Context, req *genprotopb.Lis
 		it.items = append(it.items, items...)
 		return nextPageToken, nil
 	}
+
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
 	it.pageInfo.MaxSize = int(req.GetPageSize())
 	it.pageInfo.Token = req.GetPageToken()
+
 	return it
 }
 
@@ -693,11 +697,13 @@ func (c *messagingGRPCClient) ListBlurbs(ctx context.Context, req *genprotopb.Li
 	it := &BlurbIterator{}
 	req = proto.Clone(req).(*genprotopb.ListBlurbsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.Blurb, string, error) {
-		var resp *genprotopb.ListBlurbsResponse
-		req.PageToken = pageToken
+		resp := &genprotopb.ListBlurbsResponse{}
+		if pageToken != "" {
+			req.PageToken = pageToken
+		}
 		if pageSize > math.MaxInt32 {
 			req.PageSize = math.MaxInt32
-		} else {
+		} else if pageSize != 0 {
 			req.PageSize = int32(pageSize)
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -720,9 +726,11 @@ func (c *messagingGRPCClient) ListBlurbs(ctx context.Context, req *genprotopb.Li
 		it.items = append(it.items, items...)
 		return nextPageToken, nil
 	}
+
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
 	it.pageInfo.MaxSize = int(req.GetPageSize())
 	it.pageInfo.Token = req.GetPageToken()
+
 	return it
 }
 
@@ -800,11 +808,13 @@ func (c *messagingGRPCClient) ListLocations(ctx context.Context, req *locationpb
 	it := &LocationIterator{}
 	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
-		var resp *locationpb.ListLocationsResponse
-		req.PageToken = pageToken
+		resp := &locationpb.ListLocationsResponse{}
+		if pageToken != "" {
+			req.PageToken = pageToken
+		}
 		if pageSize > math.MaxInt32 {
 			req.PageSize = math.MaxInt32
-		} else {
+		} else if pageSize != 0 {
 			req.PageSize = int32(pageSize)
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -827,9 +837,11 @@ func (c *messagingGRPCClient) ListLocations(ctx context.Context, req *locationpb
 		it.items = append(it.items, items...)
 		return nextPageToken, nil
 	}
+
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
 	it.pageInfo.MaxSize = int(req.GetPageSize())
 	it.pageInfo.Token = req.GetPageToken()
+
 	return it
 }
 
@@ -899,11 +911,13 @@ func (c *messagingGRPCClient) ListOperations(ctx context.Context, req *longrunni
 	it := &OperationIterator{}
 	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
-		var resp *longrunningpb.ListOperationsResponse
-		req.PageToken = pageToken
+		resp := &longrunningpb.ListOperationsResponse{}
+		if pageToken != "" {
+			req.PageToken = pageToken
+		}
 		if pageSize > math.MaxInt32 {
 			req.PageSize = math.MaxInt32
-		} else {
+		} else if pageSize != 0 {
 			req.PageSize = int32(pageSize)
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -926,9 +940,11 @@ func (c *messagingGRPCClient) ListOperations(ctx context.Context, req *longrunni
 		it.items = append(it.items, items...)
 		return nextPageToken, nil
 	}
+
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
 	it.pageInfo.MaxSize = int(req.GetPageSize())
 	it.pageInfo.Token = req.GetPageToken()
+
 	return it
 }
 
