@@ -139,7 +139,7 @@ type internalEchoClient interface {
 	Collect(context.Context, ...gax.CallOption) (genprotopb.Echo_CollectClient, error)
 	Chat(context.Context, ...gax.CallOption) (genprotopb.Echo_ChatClient, error)
 	PagedExpand(context.Context, *genprotopb.PagedExpandRequest, ...gax.CallOption) *EchoResponseIterator
-	PagedExpandLegacy(context.Context, *genprotopb.PagedExpandLegacyRequest, ...gax.CallOption) (*genprotopb.PagedExpandResponse, error)
+	PagedExpandLegacy(context.Context, *genprotopb.PagedExpandLegacyRequest, ...gax.CallOption) *EchoResponseIterator
 	Wait(context.Context, *genprotopb.WaitRequest, ...gax.CallOption) (*WaitOperation, error)
 	WaitOperation(name string) *WaitOperation
 	Block(context.Context, *genprotopb.BlockRequest, ...gax.CallOption) (*genprotopb.BlockResponse, error)
@@ -231,7 +231,7 @@ func (c *EchoClient) PagedExpand(ctx context.Context, req *genprotopb.PagedExpan
 // PagedExpandLegacy this is similar to the PagedExpand except that it uses
 // max_results instead of page_size, as some legacy APIs still
 // do. New APIs should NOT use this pattern.
-func (c *EchoClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.PagedExpandLegacyRequest, opts ...gax.CallOption) (*genprotopb.PagedExpandResponse, error) {
+func (c *EchoClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.PagedExpandLegacyRequest, opts ...gax.CallOption) *EchoResponseIterator {
 	return c.internalClient.PagedExpandLegacy(ctx, req, opts...)
 }
 
@@ -478,11 +478,13 @@ func (c *echoGRPCClient) PagedExpand(ctx context.Context, req *genprotopb.PagedE
 	it := &EchoResponseIterator{}
 	req = proto.Clone(req).(*genprotopb.PagedExpandRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.EchoResponse, string, error) {
-		var resp *genprotopb.PagedExpandResponse
-		req.PageToken = pageToken
+		resp := &genprotopb.PagedExpandResponse{}
+		if pageToken != "" {
+			req.PageToken = pageToken
+		}
 		if pageSize > math.MaxInt32 {
 			req.PageSize = math.MaxInt32
-		} else {
+		} else if pageSize != 0 {
 			req.PageSize = int32(pageSize)
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -505,30 +507,55 @@ func (c *echoGRPCClient) PagedExpand(ctx context.Context, req *genprotopb.PagedE
 		it.items = append(it.items, items...)
 		return nextPageToken, nil
 	}
+
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
 	it.pageInfo.MaxSize = int(req.GetPageSize())
 	it.pageInfo.Token = req.GetPageToken()
+
 	return it
 }
 
-func (c *echoGRPCClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.PagedExpandLegacyRequest, opts ...gax.CallOption) (*genprotopb.PagedExpandResponse, error) {
-	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
-		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
-		defer cancel()
-		ctx = cctx
-	}
+func (c *echoGRPCClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.PagedExpandLegacyRequest, opts ...gax.CallOption) *EchoResponseIterator {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append((*c.CallOptions).PagedExpandLegacy[0:len((*c.CallOptions).PagedExpandLegacy):len((*c.CallOptions).PagedExpandLegacy)], opts...)
-	var resp *genprotopb.PagedExpandResponse
-	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
-		var err error
-		resp, err = c.echoClient.PagedExpandLegacy(ctx, req, settings.GRPC...)
-		return err
-	}, opts...)
-	if err != nil {
-		return nil, err
+	it := &EchoResponseIterator{}
+	req = proto.Clone(req).(*genprotopb.PagedExpandLegacyRequest)
+	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.EchoResponse, string, error) {
+		resp := &genprotopb.PagedExpandResponse{}
+		if pageToken != "" {
+			req.PageToken = pageToken
+		}
+		if pageSize > math.MaxInt32 {
+			req.MaxResults = math.MaxInt32
+		} else if pageSize != 0 {
+			req.MaxResults = int32(pageSize)
+		}
+		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			var err error
+			resp, err = c.echoClient.PagedExpandLegacy(ctx, req, settings.GRPC...)
+			return err
+		}, opts...)
+		if err != nil {
+			return nil, "", err
+		}
+
+		it.Response = resp
+		return resp.GetResponses(), resp.GetNextPageToken(), nil
 	}
-	return resp, nil
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.GetMaxResults())
+	it.pageInfo.Token = req.GetPageToken()
+
+	return it
 }
 
 func (c *echoGRPCClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, opts ...gax.CallOption) (*WaitOperation, error) {
@@ -579,11 +606,13 @@ func (c *echoGRPCClient) ListLocations(ctx context.Context, req *locationpb.List
 	it := &LocationIterator{}
 	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
-		var resp *locationpb.ListLocationsResponse
-		req.PageToken = pageToken
+		resp := &locationpb.ListLocationsResponse{}
+		if pageToken != "" {
+			req.PageToken = pageToken
+		}
 		if pageSize > math.MaxInt32 {
 			req.PageSize = math.MaxInt32
-		} else {
+		} else if pageSize != 0 {
 			req.PageSize = int32(pageSize)
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -606,9 +635,11 @@ func (c *echoGRPCClient) ListLocations(ctx context.Context, req *locationpb.List
 		it.items = append(it.items, items...)
 		return nextPageToken, nil
 	}
+
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
 	it.pageInfo.MaxSize = int(req.GetPageSize())
 	it.pageInfo.Token = req.GetPageToken()
+
 	return it
 }
 
@@ -678,11 +709,13 @@ func (c *echoGRPCClient) ListOperations(ctx context.Context, req *longrunningpb.
 	it := &OperationIterator{}
 	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
-		var resp *longrunningpb.ListOperationsResponse
-		req.PageToken = pageToken
+		resp := &longrunningpb.ListOperationsResponse{}
+		if pageToken != "" {
+			req.PageToken = pageToken
+		}
 		if pageSize > math.MaxInt32 {
 			req.PageSize = math.MaxInt32
-		} else {
+		} else if pageSize != 0 {
 			req.PageSize = int32(pageSize)
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -705,9 +738,11 @@ func (c *echoGRPCClient) ListOperations(ctx context.Context, req *longrunningpb.
 		it.items = append(it.items, items...)
 		return nextPageToken, nil
 	}
+
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
 	it.pageInfo.MaxSize = int(req.GetPageSize())
 	it.pageInfo.Token = req.GetPageToken()
+
 	return it
 }
 
