@@ -68,7 +68,6 @@ func CompileProtos(version string) {
 		"--go_gapic_opt=metadata",
 		"--go_rest_server_out=" + filepath.Join("server", "genrest"),
 		"--go_out=plugins=grpc:" + outDir,
-		"--plugin=/tmp/bin/protoc-gen-go_gapic", // REMOVE THIS
 	}
 	Execute(append(command, files...)...)
 
@@ -81,15 +80,6 @@ func CompileProtos(version string) {
 		tempClient,
 		tempServer,
 		pwd,
-	}
-	Execute(command...)
-
-	// Remove CLI file that cannot deal with maps as paged responses.
-	//
-	// TODO: Remove this once the CLI generator can accommodate paging calls that return maps.
-	command = []string{
-		"rm",
-		filepath.Join(pwd, "cmd", "gapic-showcase", "paged-expand-legacy-mapped.go"),
 	}
 	Execute(command...)
 
@@ -116,8 +106,10 @@ func CompileProtos(version string) {
 
 		// Remove the backup file.
 		Execute("rm", fmt.Sprintf("%s.bak", f.file))
-		Execute("rm", "-f", "cmd/gapic-showcase/paged-expand-legacy.go")
 	}
+
+	// TODO: Remove this once the CLI generator supports mapped pagination responses.
+	Execute("rm", "-f", "cmd/gapic-showcase/paged-expand-legacy.go")
 
 	// Format generated output
 	Execute("go", "fmt", "./...")
