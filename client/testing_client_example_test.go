@@ -49,6 +49,7 @@ func ExampleTestingClient_CreateSession() {
 
 	req := &genprotopb.CreateSessionRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#CreateSessionRequest.
 	}
 	resp, err := c.CreateSession(ctx, req)
 	if err != nil {
@@ -68,6 +69,7 @@ func ExampleTestingClient_GetSession() {
 
 	req := &genprotopb.GetSessionRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#GetSessionRequest.
 	}
 	resp, err := c.GetSession(ctx, req)
 	if err != nil {
@@ -87,6 +89,7 @@ func ExampleTestingClient_ListSessions() {
 
 	req := &genprotopb.ListSessionsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#ListSessionsRequest.
 	}
 	it := c.ListSessions(ctx, req)
 	for {
@@ -112,6 +115,7 @@ func ExampleTestingClient_DeleteSession() {
 
 	req := &genprotopb.DeleteSessionRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#DeleteSessionRequest.
 	}
 	err = c.DeleteSession(ctx, req)
 	if err != nil {
@@ -129,6 +133,7 @@ func ExampleTestingClient_ReportSession() {
 
 	req := &genprotopb.ReportSessionRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#ReportSessionRequest.
 	}
 	resp, err := c.ReportSession(ctx, req)
 	if err != nil {
@@ -148,6 +153,7 @@ func ExampleTestingClient_ListTests() {
 
 	req := &genprotopb.ListTestsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#ListTestsRequest.
 	}
 	it := c.ListTests(ctx, req)
 	for {
@@ -173,6 +179,7 @@ func ExampleTestingClient_DeleteTest() {
 
 	req := &genprotopb.DeleteTestRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#DeleteTestRequest.
 	}
 	err = c.DeleteTest(ctx, req)
 	if err != nil {
@@ -190,6 +197,7 @@ func ExampleTestingClient_VerifyTest() {
 
 	req := &genprotopb.VerifyTestRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#VerifyTestRequest.
 	}
 	resp, err := c.VerifyTest(ctx, req)
 	if err != nil {
@@ -209,6 +217,7 @@ func ExampleTestingClient_ListLocations() {
 
 	req := &locationpb.ListLocationsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/cloud/location#ListLocationsRequest.
 	}
 	it := c.ListLocations(ctx, req)
 	for {
@@ -234,6 +243,7 @@ func ExampleTestingClient_GetLocation() {
 
 	req := &locationpb.GetLocationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/cloud/location#GetLocationRequest.
 	}
 	resp, err := c.GetLocation(ctx, req)
 	if err != nil {
@@ -253,6 +263,7 @@ func ExampleTestingClient_SetIamPolicy() {
 
 	req := &iampb.SetIamPolicyRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/iam/v1#SetIamPolicyRequest.
 	}
 	resp, err := c.SetIamPolicy(ctx, req)
 	if err != nil {
@@ -272,6 +283,7 @@ func ExampleTestingClient_GetIamPolicy() {
 
 	req := &iampb.GetIamPolicyRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/iam/v1#GetIamPolicyRequest.
 	}
 	resp, err := c.GetIamPolicy(ctx, req)
 	if err != nil {
@@ -291,6 +303,7 @@ func ExampleTestingClient_TestIamPermissions() {
 
 	req := &iampb.TestIamPermissionsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/iam/v1#TestIamPermissionsRequest.
 	}
 	resp, err := c.TestIamPermissions(ctx, req)
 	if err != nil {
@@ -310,6 +323,7 @@ func ExampleTestingClient_ListOperations() {
 
 	req := &longrunningpb.ListOperationsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#ListOperationsRequest.
 	}
 	it := c.ListOperations(ctx, req)
 	for {
@@ -335,6 +349,7 @@ func ExampleTestingClient_GetOperation() {
 
 	req := &longrunningpb.GetOperationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#GetOperationRequest.
 	}
 	resp, err := c.GetOperation(ctx, req)
 	if err != nil {
@@ -354,6 +369,7 @@ func ExampleTestingClient_DeleteOperation() {
 
 	req := &longrunningpb.DeleteOperationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#DeleteOperationRequest.
 	}
 	err = c.DeleteOperation(ctx, req)
 	if err != nil {
@@ -371,6 +387,7 @@ func ExampleTestingClient_CancelOperation() {
 
 	req := &longrunningpb.CancelOperationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#CancelOperationRequest.
 	}
 	err = c.CancelOperation(ctx, req)
 	if err != nil {

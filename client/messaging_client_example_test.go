@@ -50,6 +50,7 @@ func ExampleMessagingClient_CreateRoom() {
 
 	req := &genprotopb.CreateRoomRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#CreateRoomRequest.
 	}
 	resp, err := c.CreateRoom(ctx, req)
 	if err != nil {
@@ -69,6 +70,7 @@ func ExampleMessagingClient_GetRoom() {
 
 	req := &genprotopb.GetRoomRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#GetRoomRequest.
 	}
 	resp, err := c.GetRoom(ctx, req)
 	if err != nil {
@@ -88,6 +90,7 @@ func ExampleMessagingClient_UpdateRoom() {
 
 	req := &genprotopb.UpdateRoomRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#UpdateRoomRequest.
 	}
 	resp, err := c.UpdateRoom(ctx, req)
 	if err != nil {
@@ -107,6 +110,7 @@ func ExampleMessagingClient_DeleteRoom() {
 
 	req := &genprotopb.DeleteRoomRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#DeleteRoomRequest.
 	}
 	err = c.DeleteRoom(ctx, req)
 	if err != nil {
@@ -124,6 +128,7 @@ func ExampleMessagingClient_ListRooms() {
 
 	req := &genprotopb.ListRoomsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#ListRoomsRequest.
 	}
 	it := c.ListRooms(ctx, req)
 	for {
@@ -149,6 +154,7 @@ func ExampleMessagingClient_CreateBlurb() {
 
 	req := &genprotopb.CreateBlurbRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#CreateBlurbRequest.
 	}
 	resp, err := c.CreateBlurb(ctx, req)
 	if err != nil {
@@ -168,6 +174,7 @@ func ExampleMessagingClient_GetBlurb() {
 
 	req := &genprotopb.GetBlurbRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#GetBlurbRequest.
 	}
 	resp, err := c.GetBlurb(ctx, req)
 	if err != nil {
@@ -187,6 +194,7 @@ func ExampleMessagingClient_UpdateBlurb() {
 
 	req := &genprotopb.UpdateBlurbRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#UpdateBlurbRequest.
 	}
 	resp, err := c.UpdateBlurb(ctx, req)
 	if err != nil {
@@ -206,6 +214,7 @@ func ExampleMessagingClient_DeleteBlurb() {
 
 	req := &genprotopb.DeleteBlurbRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#DeleteBlurbRequest.
 	}
 	err = c.DeleteBlurb(ctx, req)
 	if err != nil {
@@ -223,6 +232,7 @@ func ExampleMessagingClient_ListBlurbs() {
 
 	req := &genprotopb.ListBlurbsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#ListBlurbsRequest.
 	}
 	it := c.ListBlurbs(ctx, req)
 	for {
@@ -248,6 +258,7 @@ func ExampleMessagingClient_SearchBlurbs() {
 
 	req := &genprotopb.SearchBlurbsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#SearchBlurbsRequest.
 	}
 	op, err := c.SearchBlurbs(ctx, req)
 	if err != nil {
@@ -307,6 +318,7 @@ func ExampleMessagingClient_ListLocations() {
 
 	req := &locationpb.ListLocationsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/cloud/location#ListLocationsRequest.
 	}
 	it := c.ListLocations(ctx, req)
 	for {
@@ -332,6 +344,7 @@ func ExampleMessagingClient_GetLocation() {
 
 	req := &locationpb.GetLocationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/cloud/location#GetLocationRequest.
 	}
 	resp, err := c.GetLocation(ctx, req)
 	if err != nil {
@@ -351,6 +364,7 @@ func ExampleMessagingClient_SetIamPolicy() {
 
 	req := &iampb.SetIamPolicyRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/iam/v1#SetIamPolicyRequest.
 	}
 	resp, err := c.SetIamPolicy(ctx, req)
 	if err != nil {
@@ -370,6 +384,7 @@ func ExampleMessagingClient_GetIamPolicy() {
 
 	req := &iampb.GetIamPolicyRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/iam/v1#GetIamPolicyRequest.
 	}
 	resp, err := c.GetIamPolicy(ctx, req)
 	if err != nil {
@@ -389,6 +404,7 @@ func ExampleMessagingClient_TestIamPermissions() {
 
 	req := &iampb.TestIamPermissionsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/iam/v1#TestIamPermissionsRequest.
 	}
 	resp, err := c.TestIamPermissions(ctx, req)
 	if err != nil {
@@ -408,6 +424,7 @@ func ExampleMessagingClient_ListOperations() {
 
 	req := &longrunningpb.ListOperationsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#ListOperationsRequest.
 	}
 	it := c.ListOperations(ctx, req)
 	for {
@@ -433,6 +450,7 @@ func ExampleMessagingClient_GetOperation() {
 
 	req := &longrunningpb.GetOperationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#GetOperationRequest.
 	}
 	resp, err := c.GetOperation(ctx, req)
 	if err != nil {
@@ -452,6 +470,7 @@ func ExampleMessagingClient_DeleteOperation() {
 
 	req := &longrunningpb.DeleteOperationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#DeleteOperationRequest.
 	}
 	err = c.DeleteOperation(ctx, req)
 	if err != nil {
@@ -469,6 +488,7 @@ func ExampleMessagingClient_CancelOperation() {
 
 	req := &longrunningpb.CancelOperationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#CancelOperationRequest.
 	}
 	err = c.CancelOperation(ctx, req)
 	if err != nil {
