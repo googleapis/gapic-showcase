@@ -50,6 +50,7 @@ func ExampleEchoClient_Echo() {
 
 	req := &genprotopb.EchoRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#EchoRequest.
 	}
 	resp, err := c.Echo(ctx, req)
 	if err != nil {
@@ -104,6 +105,7 @@ func ExampleEchoClient_PagedExpand() {
 
 	req := &genprotopb.PagedExpandRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#PagedExpandRequest.
 	}
 	it := c.PagedExpand(ctx, req)
 	for {
@@ -129,6 +131,7 @@ func ExampleEchoClient_PagedExpandLegacy() {
 
 	req := &genprotopb.PagedExpandLegacyRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#PagedExpandLegacyRequest.
 	}
 	it := c.PagedExpandLegacy(ctx, req)
 	for {
@@ -154,6 +157,7 @@ func ExampleEchoClient_Wait() {
 
 	req := &genprotopb.WaitRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#WaitRequest.
 	}
 	op, err := c.Wait(ctx, req)
 	if err != nil {
@@ -178,6 +182,7 @@ func ExampleEchoClient_Block() {
 
 	req := &genprotopb.BlockRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#BlockRequest.
 	}
 	resp, err := c.Block(ctx, req)
 	if err != nil {
@@ -197,6 +202,7 @@ func ExampleEchoClient_ListLocations() {
 
 	req := &locationpb.ListLocationsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/cloud/location#ListLocationsRequest.
 	}
 	it := c.ListLocations(ctx, req)
 	for {
@@ -222,6 +228,7 @@ func ExampleEchoClient_GetLocation() {
 
 	req := &locationpb.GetLocationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/cloud/location#GetLocationRequest.
 	}
 	resp, err := c.GetLocation(ctx, req)
 	if err != nil {
@@ -241,6 +248,7 @@ func ExampleEchoClient_SetIamPolicy() {
 
 	req := &iampb.SetIamPolicyRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/iam/v1#SetIamPolicyRequest.
 	}
 	resp, err := c.SetIamPolicy(ctx, req)
 	if err != nil {
@@ -260,6 +268,7 @@ func ExampleEchoClient_GetIamPolicy() {
 
 	req := &iampb.GetIamPolicyRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/iam/v1#GetIamPolicyRequest.
 	}
 	resp, err := c.GetIamPolicy(ctx, req)
 	if err != nil {
@@ -279,6 +288,7 @@ func ExampleEchoClient_TestIamPermissions() {
 
 	req := &iampb.TestIamPermissionsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/iam/v1#TestIamPermissionsRequest.
 	}
 	resp, err := c.TestIamPermissions(ctx, req)
 	if err != nil {
@@ -298,6 +308,7 @@ func ExampleEchoClient_ListOperations() {
 
 	req := &longrunningpb.ListOperationsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#ListOperationsRequest.
 	}
 	it := c.ListOperations(ctx, req)
 	for {
@@ -323,6 +334,7 @@ func ExampleEchoClient_GetOperation() {
 
 	req := &longrunningpb.GetOperationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#GetOperationRequest.
 	}
 	resp, err := c.GetOperation(ctx, req)
 	if err != nil {
@@ -342,6 +354,7 @@ func ExampleEchoClient_DeleteOperation() {
 
 	req := &longrunningpb.DeleteOperationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#DeleteOperationRequest.
 	}
 	err = c.DeleteOperation(ctx, req)
 	if err != nil {
@@ -359,6 +372,7 @@ func ExampleEchoClient_CancelOperation() {
 
 	req := &longrunningpb.CancelOperationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#CancelOperationRequest.
 	}
 	err = c.CancelOperation(ctx, req)
 	if err != nil {

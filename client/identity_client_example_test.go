@@ -49,6 +49,7 @@ func ExampleIdentityClient_CreateUser() {
 
 	req := &genprotopb.CreateUserRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#CreateUserRequest.
 	}
 	resp, err := c.CreateUser(ctx, req)
 	if err != nil {
@@ -68,6 +69,7 @@ func ExampleIdentityClient_GetUser() {
 
 	req := &genprotopb.GetUserRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#GetUserRequest.
 	}
 	resp, err := c.GetUser(ctx, req)
 	if err != nil {
@@ -87,6 +89,7 @@ func ExampleIdentityClient_UpdateUser() {
 
 	req := &genprotopb.UpdateUserRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#UpdateUserRequest.
 	}
 	resp, err := c.UpdateUser(ctx, req)
 	if err != nil {
@@ -106,6 +109,7 @@ func ExampleIdentityClient_DeleteUser() {
 
 	req := &genprotopb.DeleteUserRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#DeleteUserRequest.
 	}
 	err = c.DeleteUser(ctx, req)
 	if err != nil {
@@ -123,6 +127,7 @@ func ExampleIdentityClient_ListUsers() {
 
 	req := &genprotopb.ListUsersRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#ListUsersRequest.
 	}
 	it := c.ListUsers(ctx, req)
 	for {
@@ -148,6 +153,7 @@ func ExampleIdentityClient_ListLocations() {
 
 	req := &locationpb.ListLocationsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/cloud/location#ListLocationsRequest.
 	}
 	it := c.ListLocations(ctx, req)
 	for {
@@ -173,6 +179,7 @@ func ExampleIdentityClient_GetLocation() {
 
 	req := &locationpb.GetLocationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/cloud/location#GetLocationRequest.
 	}
 	resp, err := c.GetLocation(ctx, req)
 	if err != nil {
@@ -192,6 +199,7 @@ func ExampleIdentityClient_SetIamPolicy() {
 
 	req := &iampb.SetIamPolicyRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/iam/v1#SetIamPolicyRequest.
 	}
 	resp, err := c.SetIamPolicy(ctx, req)
 	if err != nil {
@@ -211,6 +219,7 @@ func ExampleIdentityClient_GetIamPolicy() {
 
 	req := &iampb.GetIamPolicyRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/iam/v1#GetIamPolicyRequest.
 	}
 	resp, err := c.GetIamPolicy(ctx, req)
 	if err != nil {
@@ -230,6 +239,7 @@ func ExampleIdentityClient_TestIamPermissions() {
 
 	req := &iampb.TestIamPermissionsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/iam/v1#TestIamPermissionsRequest.
 	}
 	resp, err := c.TestIamPermissions(ctx, req)
 	if err != nil {
@@ -249,6 +259,7 @@ func ExampleIdentityClient_ListOperations() {
 
 	req := &longrunningpb.ListOperationsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#ListOperationsRequest.
 	}
 	it := c.ListOperations(ctx, req)
 	for {
@@ -274,6 +285,7 @@ func ExampleIdentityClient_GetOperation() {
 
 	req := &longrunningpb.GetOperationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#GetOperationRequest.
 	}
 	resp, err := c.GetOperation(ctx, req)
 	if err != nil {
@@ -293,6 +305,7 @@ func ExampleIdentityClient_DeleteOperation() {
 
 	req := &longrunningpb.DeleteOperationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#DeleteOperationRequest.
 	}
 	err = c.DeleteOperation(ctx, req)
 	if err != nil {
@@ -310,6 +323,7 @@ func ExampleIdentityClient_CancelOperation() {
 
 	req := &longrunningpb.CancelOperationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#CancelOperationRequest.
 	}
 	err = c.CancelOperation(ctx, req)
 	if err != nil {

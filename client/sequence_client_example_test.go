@@ -49,6 +49,7 @@ func ExampleSequenceClient_CreateSequence() {
 
 	req := &genprotopb.CreateSequenceRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#CreateSequenceRequest.
 	}
 	resp, err := c.CreateSequence(ctx, req)
 	if err != nil {
@@ -68,6 +69,7 @@ func ExampleSequenceClient_GetSequenceReport() {
 
 	req := &genprotopb.GetSequenceReportRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#GetSequenceReportRequest.
 	}
 	resp, err := c.GetSequenceReport(ctx, req)
 	if err != nil {
@@ -87,6 +89,7 @@ func ExampleSequenceClient_AttemptSequence() {
 
 	req := &genprotopb.AttemptSequenceRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#AttemptSequenceRequest.
 	}
 	err = c.AttemptSequence(ctx, req)
 	if err != nil {
@@ -104,6 +107,7 @@ func ExampleSequenceClient_ListLocations() {
 
 	req := &locationpb.ListLocationsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/cloud/location#ListLocationsRequest.
 	}
 	it := c.ListLocations(ctx, req)
 	for {
@@ -129,6 +133,7 @@ func ExampleSequenceClient_GetLocation() {
 
 	req := &locationpb.GetLocationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/cloud/location#GetLocationRequest.
 	}
 	resp, err := c.GetLocation(ctx, req)
 	if err != nil {
@@ -148,6 +153,7 @@ func ExampleSequenceClient_SetIamPolicy() {
 
 	req := &iampb.SetIamPolicyRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/iam/v1#SetIamPolicyRequest.
 	}
 	resp, err := c.SetIamPolicy(ctx, req)
 	if err != nil {
@@ -167,6 +173,7 @@ func ExampleSequenceClient_GetIamPolicy() {
 
 	req := &iampb.GetIamPolicyRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/iam/v1#GetIamPolicyRequest.
 	}
 	resp, err := c.GetIamPolicy(ctx, req)
 	if err != nil {
@@ -186,6 +193,7 @@ func ExampleSequenceClient_TestIamPermissions() {
 
 	req := &iampb.TestIamPermissionsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/iam/v1#TestIamPermissionsRequest.
 	}
 	resp, err := c.TestIamPermissions(ctx, req)
 	if err != nil {
@@ -205,6 +213,7 @@ func ExampleSequenceClient_ListOperations() {
 
 	req := &longrunningpb.ListOperationsRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#ListOperationsRequest.
 	}
 	it := c.ListOperations(ctx, req)
 	for {
@@ -230,6 +239,7 @@ func ExampleSequenceClient_GetOperation() {
 
 	req := &longrunningpb.GetOperationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#GetOperationRequest.
 	}
 	resp, err := c.GetOperation(ctx, req)
 	if err != nil {
@@ -249,6 +259,7 @@ func ExampleSequenceClient_DeleteOperation() {
 
 	req := &longrunningpb.DeleteOperationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#DeleteOperationRequest.
 	}
 	err = c.DeleteOperation(ctx, req)
 	if err != nil {
@@ -266,6 +277,7 @@ func ExampleSequenceClient_CancelOperation() {
 
 	req := &longrunningpb.CancelOperationRequest{
 		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/longrunning#CancelOperationRequest.
 	}
 	err = c.CancelOperation(ctx, req)
 	if err != nil {
