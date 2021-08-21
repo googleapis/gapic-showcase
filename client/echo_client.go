@@ -19,6 +19,7 @@ package client
 import (
 	"context"
 	"math"
+	"sort"
 	"time"
 
 	"cloud.google.com/go/longrunning"
@@ -42,23 +43,24 @@ var newEchoClientHook clientHook
 
 // EchoCallOptions contains the retry settings for each method of EchoClient.
 type EchoCallOptions struct {
-	Echo               []gax.CallOption
-	Expand             []gax.CallOption
-	Collect            []gax.CallOption
-	Chat               []gax.CallOption
-	PagedExpand        []gax.CallOption
-	PagedExpandLegacy  []gax.CallOption
-	Wait               []gax.CallOption
-	Block              []gax.CallOption
-	ListLocations      []gax.CallOption
-	GetLocation        []gax.CallOption
-	SetIamPolicy       []gax.CallOption
-	GetIamPolicy       []gax.CallOption
-	TestIamPermissions []gax.CallOption
-	ListOperations     []gax.CallOption
-	GetOperation       []gax.CallOption
-	DeleteOperation    []gax.CallOption
-	CancelOperation    []gax.CallOption
+	Echo                    []gax.CallOption
+	Expand                  []gax.CallOption
+	Collect                 []gax.CallOption
+	Chat                    []gax.CallOption
+	PagedExpand             []gax.CallOption
+	PagedExpandLegacy       []gax.CallOption
+	PagedExpandLegacyMapped []gax.CallOption
+	Wait                    []gax.CallOption
+	Block                   []gax.CallOption
+	ListLocations           []gax.CallOption
+	GetLocation             []gax.CallOption
+	SetIamPolicy            []gax.CallOption
+	GetIamPolicy            []gax.CallOption
+	TestIamPermissions      []gax.CallOption
+	ListOperations          []gax.CallOption
+	GetOperation            []gax.CallOption
+	DeleteOperation         []gax.CallOption
+	CancelOperation         []gax.CallOption
 }
 
 func defaultEchoGRPCClientOptions() []option.ClientOption {
@@ -114,18 +116,19 @@ func defaultEchoCallOptions() *EchoCallOptions {
 				})
 			}),
 		},
-		PagedExpandLegacy:  []gax.CallOption{},
-		Wait:               []gax.CallOption{},
-		Block:              []gax.CallOption{},
-		ListLocations:      []gax.CallOption{},
-		GetLocation:        []gax.CallOption{},
-		SetIamPolicy:       []gax.CallOption{},
-		GetIamPolicy:       []gax.CallOption{},
-		TestIamPermissions: []gax.CallOption{},
-		ListOperations:     []gax.CallOption{},
-		GetOperation:       []gax.CallOption{},
-		DeleteOperation:    []gax.CallOption{},
-		CancelOperation:    []gax.CallOption{},
+		PagedExpandLegacy:       []gax.CallOption{},
+		PagedExpandLegacyMapped: []gax.CallOption{},
+		Wait:                    []gax.CallOption{},
+		Block:                   []gax.CallOption{},
+		ListLocations:           []gax.CallOption{},
+		GetLocation:             []gax.CallOption{},
+		SetIamPolicy:            []gax.CallOption{},
+		GetIamPolicy:            []gax.CallOption{},
+		TestIamPermissions:      []gax.CallOption{},
+		ListOperations:          []gax.CallOption{},
+		GetOperation:            []gax.CallOption{},
+		DeleteOperation:         []gax.CallOption{},
+		CancelOperation:         []gax.CallOption{},
 	}
 }
 
@@ -140,6 +143,7 @@ type internalEchoClient interface {
 	Chat(context.Context, ...gax.CallOption) (genprotopb.Echo_ChatClient, error)
 	PagedExpand(context.Context, *genprotopb.PagedExpandRequest, ...gax.CallOption) *EchoResponseIterator
 	PagedExpandLegacy(context.Context, *genprotopb.PagedExpandLegacyRequest, ...gax.CallOption) *EchoResponseIterator
+	PagedExpandLegacyMapped(context.Context, *genprotopb.PagedExpandRequest, ...gax.CallOption) *PagedExpandResponseListPairIterator
 	Wait(context.Context, *genprotopb.WaitRequest, ...gax.CallOption) (*WaitOperation, error)
 	WaitOperation(name string) *WaitOperation
 	Block(context.Context, *genprotopb.BlockRequest, ...gax.CallOption) (*genprotopb.BlockResponse, error)
@@ -233,6 +237,15 @@ func (c *EchoClient) PagedExpand(ctx context.Context, req *genprotopb.PagedExpan
 // do. New APIs should NOT use this pattern.
 func (c *EchoClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.PagedExpandLegacyRequest, opts ...gax.CallOption) *EchoResponseIterator {
 	return c.internalClient.PagedExpandLegacy(ctx, req, opts...)
+}
+
+// PagedExpandLegacyMapped this method returns a map containing lists of words that appear in the input, keyed by their
+// initial character. The only words returned are the ones included in the current page,
+// as determined by page_token and page_size, which both refer to the word indices in the
+// input. This paging result consisting of a map of lists is a pattern used by some legacy
+// APIs. New APIs should NOT use this pattern.
+func (c *EchoClient) PagedExpandLegacyMapped(ctx context.Context, req *genprotopb.PagedExpandRequest, opts ...gax.CallOption) *PagedExpandResponseListPairIterator {
+	return c.internalClient.PagedExpandLegacyMapped(ctx, req, opts...)
 }
 
 // Wait this method will wait for the requested amount of time and then return.
@@ -553,6 +566,56 @@ func (c *echoGRPCClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.
 
 	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
 	it.pageInfo.MaxSize = int(req.GetMaxResults())
+	it.pageInfo.Token = req.GetPageToken()
+
+	return it
+}
+
+func (c *echoGRPCClient) PagedExpandLegacyMapped(ctx context.Context, req *genprotopb.PagedExpandRequest, opts ...gax.CallOption) *PagedExpandResponseListPairIterator {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).PagedExpandLegacyMapped[0:len((*c.CallOptions).PagedExpandLegacyMapped):len((*c.CallOptions).PagedExpandLegacyMapped)], opts...)
+	it := &PagedExpandResponseListPairIterator{}
+	req = proto.Clone(req).(*genprotopb.PagedExpandRequest)
+	it.InternalFetch = func(pageSize int, pageToken string) ([]PagedExpandResponseListPair, string, error) {
+		resp := &genprotopb.PagedExpandLegacyMappedResponse{}
+		if pageToken != "" {
+			req.PageToken = pageToken
+		}
+		if pageSize > math.MaxInt32 {
+			req.PageSize = math.MaxInt32
+		} else if pageSize != 0 {
+			req.PageSize = int32(pageSize)
+		}
+		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			var err error
+			resp, err = c.echoClient.PagedExpandLegacyMapped(ctx, req, settings.GRPC...)
+			return err
+		}, opts...)
+		if err != nil {
+			return nil, "", err
+		}
+
+		it.Response = resp
+
+		elems := make([]PagedExpandResponseListPair, 0, len(resp.GetAlphabetized()))
+		for k, v := range resp.GetAlphabetized() {
+			elems = append(elems, PagedExpandResponseListPair{k, v})
+		}
+		sort.Slice(elems, func(i, j int) bool { return elems[i].Key < elems[j].Key })
+
+		return elems, resp.GetNextPageToken(), nil
+	}
+	fetch := func(pageSize int, pageToken string) (string, error) {
+		items, nextPageToken, err := it.InternalFetch(pageSize, pageToken)
+		if err != nil {
+			return "", err
+		}
+		it.items = append(it.items, items...)
+		return nextPageToken, nil
+	}
+
+	it.pageInfo, it.nextFunc = iterator.NewPageInfo(fetch, it.bufLen, it.takeBuf)
+	it.pageInfo.MaxSize = int(req.GetPageSize())
 	it.pageInfo.Token = req.GetPageToken()
 
 	return it
@@ -894,6 +957,59 @@ func (it *EchoResponseIterator) bufLen() int {
 }
 
 func (it *EchoResponseIterator) takeBuf() interface{} {
+	b := it.items
+	it.items = nil
+	return b
+}
+
+// PagedExpandResponseListPair is a holder type for string/*genprotopb.PagedExpandResponseList map entries
+type PagedExpandResponseListPair struct {
+	Key   string
+	Value *genprotopb.PagedExpandResponseList
+}
+
+// PagedExpandResponseListPairIterator manages a stream of PagedExpandResponseListPair.
+type PagedExpandResponseListPairIterator struct {
+	items    []PagedExpandResponseListPair
+	pageInfo *iterator.PageInfo
+	nextFunc func() error
+
+	// Response is the raw response for the current page.
+	// It must be cast to the RPC response type.
+	// Calling Next() or InternalFetch() updates this value.
+	Response interface{}
+
+	// InternalFetch is for use by the Google Cloud Libraries only.
+	// It is not part of the stable interface of this package.
+	//
+	// InternalFetch returns results from a single call to the underlying RPC.
+	// The number of results is no greater than pageSize.
+	// If there are no more results, nextPageToken is empty and err is nil.
+	InternalFetch func(pageSize int, pageToken string) (results []PagedExpandResponseListPair, nextPageToken string, err error)
+}
+
+// PageInfo supports pagination. See the google.golang.org/api/iterator package for details.
+func (it *PagedExpandResponseListPairIterator) PageInfo() *iterator.PageInfo {
+	return it.pageInfo
+}
+
+// Next returns the next result. Its second return value is iterator.Done if there are no more
+// results. Once Next returns Done, all subsequent calls will return Done.
+func (it *PagedExpandResponseListPairIterator) Next() (PagedExpandResponseListPair, error) {
+	var item PagedExpandResponseListPair
+	if err := it.nextFunc(); err != nil {
+		return item, err
+	}
+	item = it.items[0]
+	it.items = it.items[1:]
+	return item, nil
+}
+
+func (it *PagedExpandResponseListPairIterator) bufLen() int {
+	return len(it.items)
+}
+
+func (it *PagedExpandResponseListPairIterator) takeBuf() interface{} {
 	b := it.items
 	it.items = nil
 	return b

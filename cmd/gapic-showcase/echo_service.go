@@ -23,6 +23,7 @@ var EchoSubCommands []string = []string{
 	"chat",
 	"paged-expand",
 	"paged-expand-legacy",
+	"paged-expand-legacy-mapped",
 	"wait",
 	"poll-wait", "block",
 }
