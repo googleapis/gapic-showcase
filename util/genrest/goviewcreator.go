@@ -24,6 +24,14 @@ import (
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 )
 
+var customFunctions map[string]string
+
+func init() {
+	customFunctions = map[string]string{
+		".google.showcase.v1beta1.Compliance.RepeatWithUnknownEnum": "customRepeatWithUnknownEnum",
+	}
+}
+
 // NewView creates a a new goview.View (a series of files to be output) from a gomodel.Model. The
 // current approach is to generate one file per service, with that file containing all the service's
 // RPCs. An additional file `genrest.go` is also created to register all these handlers with a
@@ -189,6 +197,16 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			source.P("  requestJSON, _ := marshaler.Marshal(%s)", handler.RequestVariable)
 			source.P(`  backend.StdLog.Printf("  request: %%s", requestJSON)`)
 			source.P("")
+
+			methodId := fmt.Sprintf("%s.%s", service.ProtoPath, handler.GoMethod)
+			customHandler, _ := customFunctions[methodId]
+			source.P("  // %s", methodId)
+			if len(customHandler) > 0 {
+				source.P("  backend.%s(w, r, request)  // %s", customHandler, methodId)
+				source.P("}")
+				continue
+			}
+
 			// TODO: In the future, we may want to redirect all REST-endpoint requests to the gRPC endpoint so that the gRPC-registered observers get invoked.
 			source.P("  %s, err := backend.%sServer.%s(context.Background(), %s)", handler.ResponseVariable, service.ShortName, handler.GoMethod, handler.RequestVariable)
 			source.P("  if err != nil {")
