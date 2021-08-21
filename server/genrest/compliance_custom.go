@@ -15,6 +15,7 @@
 package genrest
 
 import (
+	"bytes"
 	"context"
 	"net/http"
 
@@ -22,7 +23,7 @@ import (
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 )
 
-// .google.showcase.v1beta1.Compliance.HandleRepeatDataBody
+// customRepeatWithUnknownEnum provides REST-specific handling for a RepeatWithUnknownEnum request. It returns a JSON response with an unknown enum symbol string in an enum field.
 func (backend *RESTBackend) customRepeatWithUnknownEnum(w http.ResponseWriter, r *http.Request, request *genprotopb.RepeatRequest) {
 	marshaler := resttools.ToJSON()
 
@@ -33,7 +34,10 @@ func (backend *RESTBackend) customRepeatWithUnknownEnum(w http.ResponseWriter, r
 		return
 	}
 
-	// FIXME: change response field to sentinel enum
+	// Make sure we have at least one sentinel value before serializing properly.
+	sentinelValue := genprotopb.ComplianceData_LIFE_KINGDOM_UNSPECIFIED
+	sentinelString := genprotopb.ComplianceData_LifeKingdom_name[int32(sentinelValue)]
+	response.Request.Info.FKingdom = sentinelValue
 
 	json, err := marshaler.Marshal(response)
 	if err != nil {
@@ -41,7 +45,8 @@ func (backend *RESTBackend) customRepeatWithUnknownEnum(w http.ResponseWriter, r
 		return
 	}
 
-	// FIXME: change sentinel to unknown value
+	// Change the sentinel string to an unknown value.
+	json = bytes.ReplaceAll(json, []byte(sentinelString), []byte("LIFE_KINGDOM_NEW"))
 
 	w.Write(json)
 }
