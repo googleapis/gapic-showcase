@@ -503,6 +503,113 @@ func (x *PagedExpandResponse) GetNextPageToken() string {
 	return ""
 }
 
+// A list of words.
+type PagedExpandResponseList struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Words []string `protobuf:"bytes,1,rep,name=words,proto3" json:"words,omitempty"`
+}
+
+func (x *PagedExpandResponseList) Reset() {
+	*x = PagedExpandResponseList{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PagedExpandResponseList) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PagedExpandResponseList) ProtoMessage() {}
+
+func (x *PagedExpandResponseList) ProtoReflect() protoreflect.Message {
+	mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PagedExpandResponseList.ProtoReflect.Descriptor instead.
+func (*PagedExpandResponseList) Descriptor() ([]byte, []int) {
+	return file_google_showcase_v1beta1_echo_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *PagedExpandResponseList) GetWords() []string {
+	if x != nil {
+		return x.Words
+	}
+	return nil
+}
+
+type PagedExpandLegacyMappedResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// The words that were expanded, indexed by their initial character.
+	// (-- aip.dev/not-precedent: This is a legacy, non-standard pattern that violates
+	//     aip.dev/158. Ordinarily, this should be a `repeated` field, as in PagedExpandResponse. --)
+	Alphabetized map[string]*PagedExpandResponseList `protobuf:"bytes,1,rep,name=alphabetized,proto3" json:"alphabetized,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	// The next page token.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+}
+
+func (x *PagedExpandLegacyMappedResponse) Reset() {
+	*x = PagedExpandLegacyMappedResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PagedExpandLegacyMappedResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PagedExpandLegacyMappedResponse) ProtoMessage() {}
+
+func (x *PagedExpandLegacyMappedResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PagedExpandLegacyMappedResponse.ProtoReflect.Descriptor instead.
+func (*PagedExpandLegacyMappedResponse) Descriptor() ([]byte, []int) {
+	return file_google_showcase_v1beta1_echo_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *PagedExpandLegacyMappedResponse) GetAlphabetized() map[string]*PagedExpandResponseList {
+	if x != nil {
+		return x.Alphabetized
+	}
+	return nil
+}
+
+func (x *PagedExpandLegacyMappedResponse) GetNextPageToken() string {
+	if x != nil {
+		return x.NextPageToken
+	}
+	return ""
+}
+
 // The request for Wait method.
 type WaitRequest struct {
 	state         protoimpl.MessageState
@@ -522,7 +629,7 @@ type WaitRequest struct {
 func (x *WaitRequest) Reset() {
 	*x = WaitRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[6]
+		mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -535,7 +642,7 @@ func (x *WaitRequest) String() string {
 func (*WaitRequest) ProtoMessage() {}
 
 func (x *WaitRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[6]
+	mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -548,7 +655,7 @@ func (x *WaitRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WaitRequest.ProtoReflect.Descriptor instead.
 func (*WaitRequest) Descriptor() ([]byte, []int) {
-	return file_google_showcase_v1beta1_echo_proto_rawDescGZIP(), []int{6}
+	return file_google_showcase_v1beta1_echo_proto_rawDescGZIP(), []int{8}
 }
 
 func (m *WaitRequest) GetEnd() isWaitRequest_End {
@@ -643,7 +750,7 @@ type WaitResponse struct {
 func (x *WaitResponse) Reset() {
 	*x = WaitResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[7]
+		mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -656,7 +763,7 @@ func (x *WaitResponse) String() string {
 func (*WaitResponse) ProtoMessage() {}
 
 func (x *WaitResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[7]
+	mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -669,7 +776,7 @@ func (x *WaitResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WaitResponse.ProtoReflect.Descriptor instead.
 func (*WaitResponse) Descriptor() ([]byte, []int) {
-	return file_google_showcase_v1beta1_echo_proto_rawDescGZIP(), []int{7}
+	return file_google_showcase_v1beta1_echo_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *WaitResponse) GetContent() string {
@@ -692,7 +799,7 @@ type WaitMetadata struct {
 func (x *WaitMetadata) Reset() {
 	*x = WaitMetadata{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[8]
+		mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -705,7 +812,7 @@ func (x *WaitMetadata) String() string {
 func (*WaitMetadata) ProtoMessage() {}
 
 func (x *WaitMetadata) ProtoReflect() protoreflect.Message {
-	mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[8]
+	mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -718,7 +825,7 @@ func (x *WaitMetadata) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WaitMetadata.ProtoReflect.Descriptor instead.
 func (*WaitMetadata) Descriptor() ([]byte, []int) {
-	return file_google_showcase_v1beta1_echo_proto_rawDescGZIP(), []int{8}
+	return file_google_showcase_v1beta1_echo_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *WaitMetadata) GetEndTime() *timestamppb.Timestamp {
@@ -745,7 +852,7 @@ type BlockRequest struct {
 func (x *BlockRequest) Reset() {
 	*x = BlockRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[9]
+		mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -758,7 +865,7 @@ func (x *BlockRequest) String() string {
 func (*BlockRequest) ProtoMessage() {}
 
 func (x *BlockRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[9]
+	mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -771,7 +878,7 @@ func (x *BlockRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BlockRequest.ProtoReflect.Descriptor instead.
 func (*BlockRequest) Descriptor() ([]byte, []int) {
-	return file_google_showcase_v1beta1_echo_proto_rawDescGZIP(), []int{9}
+	return file_google_showcase_v1beta1_echo_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *BlockRequest) GetResponseDelay() *durationpb.Duration {
@@ -835,7 +942,7 @@ type BlockResponse struct {
 func (x *BlockResponse) Reset() {
 	*x = BlockResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[10]
+		mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -848,7 +955,7 @@ func (x *BlockResponse) String() string {
 func (*BlockResponse) ProtoMessage() {}
 
 func (x *BlockResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[10]
+	mi := &file_google_showcase_v1beta1_echo_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -861,7 +968,7 @@ func (x *BlockResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BlockResponse.ProtoReflect.Descriptor instead.
 func (*BlockResponse) Descriptor() ([]byte, []int) {
-	return file_google_showcase_v1beta1_echo_proto_rawDescGZIP(), []int{10}
+	return file_google_showcase_v1beta1_echo_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *BlockResponse) GetContent() string {
@@ -936,7 +1043,29 @@ var file_google_showcase_v1beta1_echo_proto_rawDesc = []byte{
 	0x6e, 0x73, 0x65, 0x52, 0x09, 0x72, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x73, 0x12, 0x26,
 	0x0a, 0x0f, 0x6e, 0x65, 0x78, 0x74, 0x5f, 0x70, 0x61, 0x67, 0x65, 0x5f, 0x74, 0x6f, 0x6b, 0x65,
 	0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x6e, 0x65, 0x78, 0x74, 0x50, 0x61, 0x67,
-	0x65, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x22, 0xf7, 0x01, 0x0a, 0x0b, 0x57, 0x61, 0x69, 0x74, 0x52,
+	0x65, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x22, 0x2f, 0x0a, 0x17, 0x50, 0x61, 0x67, 0x65, 0x64, 0x45,
+	0x78, 0x70, 0x61, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x4c, 0x69, 0x73,
+	0x74, 0x12, 0x14, 0x0a, 0x05, 0x77, 0x6f, 0x72, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09,
+	0x52, 0x05, 0x77, 0x6f, 0x72, 0x64, 0x73, 0x22, 0xac, 0x02, 0x0a, 0x1f, 0x50, 0x61, 0x67, 0x65,
+	0x64, 0x45, 0x78, 0x70, 0x61, 0x6e, 0x64, 0x4c, 0x65, 0x67, 0x61, 0x63, 0x79, 0x4d, 0x61, 0x70,
+	0x70, 0x65, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x6e, 0x0a, 0x0c, 0x61,
+	0x6c, 0x70, 0x68, 0x61, 0x62, 0x65, 0x74, 0x69, 0x7a, 0x65, 0x64, 0x18, 0x01, 0x20, 0x03, 0x28,
+	0x0b, 0x32, 0x4a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x73, 0x68, 0x6f, 0x77, 0x63,
+	0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x50, 0x61, 0x67, 0x65,
+	0x64, 0x45, 0x78, 0x70, 0x61, 0x6e, 0x64, 0x4c, 0x65, 0x67, 0x61, 0x63, 0x79, 0x4d, 0x61, 0x70,
+	0x70, 0x65, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x41, 0x6c, 0x70, 0x68,
+	0x61, 0x62, 0x65, 0x74, 0x69, 0x7a, 0x65, 0x64, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x0c, 0x61,
+	0x6c, 0x70, 0x68, 0x61, 0x62, 0x65, 0x74, 0x69, 0x7a, 0x65, 0x64, 0x12, 0x26, 0x0a, 0x0f, 0x6e,
+	0x65, 0x78, 0x74, 0x5f, 0x70, 0x61, 0x67, 0x65, 0x5f, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x6e, 0x65, 0x78, 0x74, 0x50, 0x61, 0x67, 0x65, 0x54, 0x6f,
+	0x6b, 0x65, 0x6e, 0x1a, 0x71, 0x0a, 0x11, 0x41, 0x6c, 0x70, 0x68, 0x61, 0x62, 0x65, 0x74, 0x69,
+	0x7a, 0x65, 0x64, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x46, 0x0a, 0x05, 0x76, 0x61,
+	0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x30, 0x2e, 0x67, 0x6f, 0x6f, 0x67,
+	0x6c, 0x65, 0x2e, 0x73, 0x68, 0x6f, 0x77, 0x63, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65,
+	0x74, 0x61, 0x31, 0x2e, 0x50, 0x61, 0x67, 0x65, 0x64, 0x45, 0x78, 0x70, 0x61, 0x6e, 0x64, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x05, 0x76, 0x61, 0x6c,
+	0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x22, 0xf7, 0x01, 0x0a, 0x0b, 0x57, 0x61, 0x69, 0x74, 0x52,
 	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x37, 0x0a, 0x08, 0x65, 0x6e, 0x64, 0x5f, 0x74, 0x69,
 	0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
 	0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73,
@@ -979,7 +1108,7 @@ var file_google_showcase_v1beta1_echo_proto_rawDesc = []byte{
 	0x45, 0x53, 0x53, 0x41, 0x52, 0x59, 0x10, 0x00, 0x12, 0x0d, 0x0a, 0x09, 0x4e, 0x45, 0x43, 0x45,
 	0x53, 0x53, 0x41, 0x52, 0x59, 0x10, 0x01, 0x12, 0x0a, 0x0a, 0x06, 0x55, 0x52, 0x47, 0x45, 0x4e,
 	0x54, 0x10, 0x02, 0x12, 0x0c, 0x0a, 0x08, 0x43, 0x52, 0x49, 0x54, 0x49, 0x43, 0x41, 0x4c, 0x10,
-	0x03, 0x32, 0xa7, 0x08, 0x0a, 0x04, 0x45, 0x63, 0x68, 0x6f, 0x12, 0x72, 0x0a, 0x04, 0x45, 0x63,
+	0x03, 0x32, 0xdc, 0x09, 0x0a, 0x04, 0x45, 0x63, 0x68, 0x6f, 0x12, 0x72, 0x0a, 0x04, 0x45, 0x63,
 	0x68, 0x6f, 0x12, 0x24, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x73, 0x68, 0x6f, 0x77,
 	0x63, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x45, 0x63, 0x68,
 	0x6f, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x25, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
@@ -1028,32 +1157,43 @@ var file_google_showcase_v1beta1_echo_proto_rawDesc = []byte{
 	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x2a, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x24,
 	0x22, 0x1f, 0x2f, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2f, 0x65, 0x63, 0x68, 0x6f, 0x3a,
 	0x70, 0x61, 0x67, 0x65, 0x64, 0x45, 0x78, 0x70, 0x61, 0x6e, 0x64, 0x4c, 0x65, 0x67, 0x61, 0x63,
-	0x79, 0x3a, 0x01, 0x2a, 0x12, 0x89, 0x01, 0x0a, 0x04, 0x57, 0x61, 0x69, 0x74, 0x12, 0x24, 0x2e,
+	0x79, 0x3a, 0x01, 0x2a, 0x12, 0xb2, 0x01, 0x0a, 0x17, 0x50, 0x61, 0x67, 0x65, 0x64, 0x45, 0x78,
+	0x70, 0x61, 0x6e, 0x64, 0x4c, 0x65, 0x67, 0x61, 0x63, 0x79, 0x4d, 0x61, 0x70, 0x70, 0x65, 0x64,
+	0x12, 0x2b, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x73, 0x68, 0x6f, 0x77, 0x63, 0x61,
+	0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x50, 0x61, 0x67, 0x65, 0x64,
+	0x45, 0x78, 0x70, 0x61, 0x6e, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x38, 0x2e,
 	0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x73, 0x68, 0x6f, 0x77, 0x63, 0x61, 0x73, 0x65, 0x2e,
-	0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x57, 0x61, 0x69, 0x74, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x1a, 0x1d, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x6c, 0x6f, 0x6e,
-	0x67, 0x72, 0x75, 0x6e, 0x6e, 0x69, 0x6e, 0x67, 0x2e, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x22, 0x3c, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x17, 0x22, 0x12, 0x2f, 0x76, 0x31, 0x62,
-	0x65, 0x74, 0x61, 0x31, 0x2f, 0x65, 0x63, 0x68, 0x6f, 0x3a, 0x77, 0x61, 0x69, 0x74, 0x3a, 0x01,
-	0x2a, 0xca, 0x41, 0x1c, 0x0a, 0x0c, 0x57, 0x61, 0x69, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x12, 0x0c, 0x57, 0x61, 0x69, 0x74, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61,
-	0x12, 0x76, 0x0a, 0x05, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x12, 0x25, 0x2e, 0x67, 0x6f, 0x6f, 0x67,
-	0x6c, 0x65, 0x2e, 0x73, 0x68, 0x6f, 0x77, 0x63, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65,
-	0x74, 0x61, 0x31, 0x2e, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x1a, 0x26, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x73, 0x68, 0x6f, 0x77, 0x63, 0x61,
-	0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x42, 0x6c, 0x6f, 0x63, 0x6b,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x1e, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x18,
-	0x22, 0x13, 0x2f, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2f, 0x65, 0x63, 0x68, 0x6f, 0x3a,
-	0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x3a, 0x01, 0x2a, 0x1a, 0x11, 0xca, 0x41, 0x0e, 0x6c, 0x6f, 0x63,
-	0x61, 0x6c, 0x68, 0x6f, 0x73, 0x74, 0x3a, 0x37, 0x34, 0x36, 0x39, 0x42, 0x71, 0x0a, 0x1b, 0x63,
-	0x6f, 0x6d, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x73, 0x68, 0x6f, 0x77, 0x63, 0x61,
-	0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x50, 0x01, 0x5a, 0x34, 0x67, 0x69,
-	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x61,
-	0x70, 0x69, 0x73, 0x2f, 0x67, 0x61, 0x70, 0x69, 0x63, 0x2d, 0x73, 0x68, 0x6f, 0x77, 0x63, 0x61,
-	0x73, 0x65, 0x2f, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2f, 0x67, 0x65, 0x6e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0xea, 0x02, 0x19, 0x47, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x3a, 0x3a, 0x53, 0x68, 0x6f,
-	0x77, 0x63, 0x61, 0x73, 0x65, 0x3a, 0x3a, 0x56, 0x31, 0x42, 0x65, 0x74, 0x61, 0x31, 0x62, 0x06,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x50, 0x61, 0x67, 0x65, 0x64, 0x45, 0x78, 0x70,
+	0x61, 0x6e, 0x64, 0x4c, 0x65, 0x67, 0x61, 0x63, 0x79, 0x4d, 0x61, 0x70, 0x70, 0x65, 0x64, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x30, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x2a, 0x22,
+	0x25, 0x2f, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2f, 0x65, 0x63, 0x68, 0x6f, 0x3a, 0x70,
+	0x61, 0x67, 0x65, 0x64, 0x45, 0x78, 0x70, 0x61, 0x6e, 0x64, 0x4c, 0x65, 0x67, 0x61, 0x63, 0x79,
+	0x4d, 0x61, 0x70, 0x70, 0x65, 0x64, 0x3a, 0x01, 0x2a, 0x12, 0x89, 0x01, 0x0a, 0x04, 0x57, 0x61,
+	0x69, 0x74, 0x12, 0x24, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x73, 0x68, 0x6f, 0x77,
+	0x63, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x57, 0x61, 0x69,
+	0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1d, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
+	0x65, 0x2e, 0x6c, 0x6f, 0x6e, 0x67, 0x72, 0x75, 0x6e, 0x6e, 0x69, 0x6e, 0x67, 0x2e, 0x4f, 0x70,
+	0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x3c, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x17, 0x22,
+	0x12, 0x2f, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2f, 0x65, 0x63, 0x68, 0x6f, 0x3a, 0x77,
+	0x61, 0x69, 0x74, 0x3a, 0x01, 0x2a, 0xca, 0x41, 0x1c, 0x0a, 0x0c, 0x57, 0x61, 0x69, 0x74, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0c, 0x57, 0x61, 0x69, 0x74, 0x4d, 0x65, 0x74,
+	0x61, 0x64, 0x61, 0x74, 0x61, 0x12, 0x76, 0x0a, 0x05, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x12, 0x25,
+	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x73, 0x68, 0x6f, 0x77, 0x63, 0x61, 0x73, 0x65,
+	0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x26, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x73,
+	0x68, 0x6f, 0x77, 0x63, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e,
+	0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x1e, 0x82,
+	0xd3, 0xe4, 0x93, 0x02, 0x18, 0x22, 0x13, 0x2f, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2f,
+	0x65, 0x63, 0x68, 0x6f, 0x3a, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x3a, 0x01, 0x2a, 0x1a, 0x11, 0xca,
+	0x41, 0x0e, 0x6c, 0x6f, 0x63, 0x61, 0x6c, 0x68, 0x6f, 0x73, 0x74, 0x3a, 0x37, 0x34, 0x36, 0x39,
+	0x42, 0x71, 0x0a, 0x1b, 0x63, 0x6f, 0x6d, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x73,
+	0x68, 0x6f, 0x77, 0x63, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x50,
+	0x01, 0x5a, 0x34, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x6f,
+	0x6f, 0x67, 0x6c, 0x65, 0x61, 0x70, 0x69, 0x73, 0x2f, 0x67, 0x61, 0x70, 0x69, 0x63, 0x2d, 0x73,
+	0x68, 0x6f, 0x77, 0x63, 0x61, 0x73, 0x65, 0x2f, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2f, 0x67,
+	0x65, 0x6e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0xea, 0x02, 0x19, 0x47, 0x6f, 0x6f, 0x67, 0x6c, 0x65,
+	0x3a, 0x3a, 0x53, 0x68, 0x6f, 0x77, 0x63, 0x61, 0x73, 0x65, 0x3a, 0x3a, 0x56, 0x31, 0x42, 0x65,
+	0x74, 0x61, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1069,60 +1209,67 @@ func file_google_showcase_v1beta1_echo_proto_rawDescGZIP() []byte {
 }
 
 var file_google_showcase_v1beta1_echo_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_google_showcase_v1beta1_echo_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_google_showcase_v1beta1_echo_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_google_showcase_v1beta1_echo_proto_goTypes = []interface{}{
-	(Severity)(0),                    // 0: google.showcase.v1beta1.Severity
-	(*EchoRequest)(nil),              // 1: google.showcase.v1beta1.EchoRequest
-	(*EchoResponse)(nil),             // 2: google.showcase.v1beta1.EchoResponse
-	(*ExpandRequest)(nil),            // 3: google.showcase.v1beta1.ExpandRequest
-	(*PagedExpandRequest)(nil),       // 4: google.showcase.v1beta1.PagedExpandRequest
-	(*PagedExpandLegacyRequest)(nil), // 5: google.showcase.v1beta1.PagedExpandLegacyRequest
-	(*PagedExpandResponse)(nil),      // 6: google.showcase.v1beta1.PagedExpandResponse
-	(*WaitRequest)(nil),              // 7: google.showcase.v1beta1.WaitRequest
-	(*WaitResponse)(nil),             // 8: google.showcase.v1beta1.WaitResponse
-	(*WaitMetadata)(nil),             // 9: google.showcase.v1beta1.WaitMetadata
-	(*BlockRequest)(nil),             // 10: google.showcase.v1beta1.BlockRequest
-	(*BlockResponse)(nil),            // 11: google.showcase.v1beta1.BlockResponse
-	(*status.Status)(nil),            // 12: google.rpc.Status
-	(*timestamppb.Timestamp)(nil),    // 13: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),      // 14: google.protobuf.Duration
-	(*longrunning.Operation)(nil),    // 15: google.longrunning.Operation
+	(Severity)(0),                           // 0: google.showcase.v1beta1.Severity
+	(*EchoRequest)(nil),                     // 1: google.showcase.v1beta1.EchoRequest
+	(*EchoResponse)(nil),                    // 2: google.showcase.v1beta1.EchoResponse
+	(*ExpandRequest)(nil),                   // 3: google.showcase.v1beta1.ExpandRequest
+	(*PagedExpandRequest)(nil),              // 4: google.showcase.v1beta1.PagedExpandRequest
+	(*PagedExpandLegacyRequest)(nil),        // 5: google.showcase.v1beta1.PagedExpandLegacyRequest
+	(*PagedExpandResponse)(nil),             // 6: google.showcase.v1beta1.PagedExpandResponse
+	(*PagedExpandResponseList)(nil),         // 7: google.showcase.v1beta1.PagedExpandResponseList
+	(*PagedExpandLegacyMappedResponse)(nil), // 8: google.showcase.v1beta1.PagedExpandLegacyMappedResponse
+	(*WaitRequest)(nil),                     // 9: google.showcase.v1beta1.WaitRequest
+	(*WaitResponse)(nil),                    // 10: google.showcase.v1beta1.WaitResponse
+	(*WaitMetadata)(nil),                    // 11: google.showcase.v1beta1.WaitMetadata
+	(*BlockRequest)(nil),                    // 12: google.showcase.v1beta1.BlockRequest
+	(*BlockResponse)(nil),                   // 13: google.showcase.v1beta1.BlockResponse
+	nil,                                     // 14: google.showcase.v1beta1.PagedExpandLegacyMappedResponse.AlphabetizedEntry
+	(*status.Status)(nil),                   // 15: google.rpc.Status
+	(*timestamppb.Timestamp)(nil),           // 16: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),             // 17: google.protobuf.Duration
+	(*longrunning.Operation)(nil),           // 18: google.longrunning.Operation
 }
 var file_google_showcase_v1beta1_echo_proto_depIdxs = []int32{
-	12, // 0: google.showcase.v1beta1.EchoRequest.error:type_name -> google.rpc.Status
+	15, // 0: google.showcase.v1beta1.EchoRequest.error:type_name -> google.rpc.Status
 	0,  // 1: google.showcase.v1beta1.EchoRequest.severity:type_name -> google.showcase.v1beta1.Severity
 	0,  // 2: google.showcase.v1beta1.EchoResponse.severity:type_name -> google.showcase.v1beta1.Severity
-	12, // 3: google.showcase.v1beta1.ExpandRequest.error:type_name -> google.rpc.Status
+	15, // 3: google.showcase.v1beta1.ExpandRequest.error:type_name -> google.rpc.Status
 	2,  // 4: google.showcase.v1beta1.PagedExpandResponse.responses:type_name -> google.showcase.v1beta1.EchoResponse
-	13, // 5: google.showcase.v1beta1.WaitRequest.end_time:type_name -> google.protobuf.Timestamp
-	14, // 6: google.showcase.v1beta1.WaitRequest.ttl:type_name -> google.protobuf.Duration
-	12, // 7: google.showcase.v1beta1.WaitRequest.error:type_name -> google.rpc.Status
-	8,  // 8: google.showcase.v1beta1.WaitRequest.success:type_name -> google.showcase.v1beta1.WaitResponse
-	13, // 9: google.showcase.v1beta1.WaitMetadata.end_time:type_name -> google.protobuf.Timestamp
-	14, // 10: google.showcase.v1beta1.BlockRequest.response_delay:type_name -> google.protobuf.Duration
-	12, // 11: google.showcase.v1beta1.BlockRequest.error:type_name -> google.rpc.Status
-	11, // 12: google.showcase.v1beta1.BlockRequest.success:type_name -> google.showcase.v1beta1.BlockResponse
-	1,  // 13: google.showcase.v1beta1.Echo.Echo:input_type -> google.showcase.v1beta1.EchoRequest
-	3,  // 14: google.showcase.v1beta1.Echo.Expand:input_type -> google.showcase.v1beta1.ExpandRequest
-	1,  // 15: google.showcase.v1beta1.Echo.Collect:input_type -> google.showcase.v1beta1.EchoRequest
-	1,  // 16: google.showcase.v1beta1.Echo.Chat:input_type -> google.showcase.v1beta1.EchoRequest
-	4,  // 17: google.showcase.v1beta1.Echo.PagedExpand:input_type -> google.showcase.v1beta1.PagedExpandRequest
-	5,  // 18: google.showcase.v1beta1.Echo.PagedExpandLegacy:input_type -> google.showcase.v1beta1.PagedExpandLegacyRequest
-	7,  // 19: google.showcase.v1beta1.Echo.Wait:input_type -> google.showcase.v1beta1.WaitRequest
-	10, // 20: google.showcase.v1beta1.Echo.Block:input_type -> google.showcase.v1beta1.BlockRequest
-	2,  // 21: google.showcase.v1beta1.Echo.Echo:output_type -> google.showcase.v1beta1.EchoResponse
-	2,  // 22: google.showcase.v1beta1.Echo.Expand:output_type -> google.showcase.v1beta1.EchoResponse
-	2,  // 23: google.showcase.v1beta1.Echo.Collect:output_type -> google.showcase.v1beta1.EchoResponse
-	2,  // 24: google.showcase.v1beta1.Echo.Chat:output_type -> google.showcase.v1beta1.EchoResponse
-	6,  // 25: google.showcase.v1beta1.Echo.PagedExpand:output_type -> google.showcase.v1beta1.PagedExpandResponse
-	6,  // 26: google.showcase.v1beta1.Echo.PagedExpandLegacy:output_type -> google.showcase.v1beta1.PagedExpandResponse
-	15, // 27: google.showcase.v1beta1.Echo.Wait:output_type -> google.longrunning.Operation
-	11, // 28: google.showcase.v1beta1.Echo.Block:output_type -> google.showcase.v1beta1.BlockResponse
-	21, // [21:29] is the sub-list for method output_type
-	13, // [13:21] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	14, // 5: google.showcase.v1beta1.PagedExpandLegacyMappedResponse.alphabetized:type_name -> google.showcase.v1beta1.PagedExpandLegacyMappedResponse.AlphabetizedEntry
+	16, // 6: google.showcase.v1beta1.WaitRequest.end_time:type_name -> google.protobuf.Timestamp
+	17, // 7: google.showcase.v1beta1.WaitRequest.ttl:type_name -> google.protobuf.Duration
+	15, // 8: google.showcase.v1beta1.WaitRequest.error:type_name -> google.rpc.Status
+	10, // 9: google.showcase.v1beta1.WaitRequest.success:type_name -> google.showcase.v1beta1.WaitResponse
+	16, // 10: google.showcase.v1beta1.WaitMetadata.end_time:type_name -> google.protobuf.Timestamp
+	17, // 11: google.showcase.v1beta1.BlockRequest.response_delay:type_name -> google.protobuf.Duration
+	15, // 12: google.showcase.v1beta1.BlockRequest.error:type_name -> google.rpc.Status
+	13, // 13: google.showcase.v1beta1.BlockRequest.success:type_name -> google.showcase.v1beta1.BlockResponse
+	7,  // 14: google.showcase.v1beta1.PagedExpandLegacyMappedResponse.AlphabetizedEntry.value:type_name -> google.showcase.v1beta1.PagedExpandResponseList
+	1,  // 15: google.showcase.v1beta1.Echo.Echo:input_type -> google.showcase.v1beta1.EchoRequest
+	3,  // 16: google.showcase.v1beta1.Echo.Expand:input_type -> google.showcase.v1beta1.ExpandRequest
+	1,  // 17: google.showcase.v1beta1.Echo.Collect:input_type -> google.showcase.v1beta1.EchoRequest
+	1,  // 18: google.showcase.v1beta1.Echo.Chat:input_type -> google.showcase.v1beta1.EchoRequest
+	4,  // 19: google.showcase.v1beta1.Echo.PagedExpand:input_type -> google.showcase.v1beta1.PagedExpandRequest
+	5,  // 20: google.showcase.v1beta1.Echo.PagedExpandLegacy:input_type -> google.showcase.v1beta1.PagedExpandLegacyRequest
+	4,  // 21: google.showcase.v1beta1.Echo.PagedExpandLegacyMapped:input_type -> google.showcase.v1beta1.PagedExpandRequest
+	9,  // 22: google.showcase.v1beta1.Echo.Wait:input_type -> google.showcase.v1beta1.WaitRequest
+	12, // 23: google.showcase.v1beta1.Echo.Block:input_type -> google.showcase.v1beta1.BlockRequest
+	2,  // 24: google.showcase.v1beta1.Echo.Echo:output_type -> google.showcase.v1beta1.EchoResponse
+	2,  // 25: google.showcase.v1beta1.Echo.Expand:output_type -> google.showcase.v1beta1.EchoResponse
+	2,  // 26: google.showcase.v1beta1.Echo.Collect:output_type -> google.showcase.v1beta1.EchoResponse
+	2,  // 27: google.showcase.v1beta1.Echo.Chat:output_type -> google.showcase.v1beta1.EchoResponse
+	6,  // 28: google.showcase.v1beta1.Echo.PagedExpand:output_type -> google.showcase.v1beta1.PagedExpandResponse
+	6,  // 29: google.showcase.v1beta1.Echo.PagedExpandLegacy:output_type -> google.showcase.v1beta1.PagedExpandResponse
+	8,  // 30: google.showcase.v1beta1.Echo.PagedExpandLegacyMapped:output_type -> google.showcase.v1beta1.PagedExpandLegacyMappedResponse
+	18, // 31: google.showcase.v1beta1.Echo.Wait:output_type -> google.longrunning.Operation
+	13, // 32: google.showcase.v1beta1.Echo.Block:output_type -> google.showcase.v1beta1.BlockResponse
+	24, // [24:33] is the sub-list for method output_type
+	15, // [15:24] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_google_showcase_v1beta1_echo_proto_init() }
@@ -1204,7 +1351,7 @@ func file_google_showcase_v1beta1_echo_proto_init() {
 			}
 		}
 		file_google_showcase_v1beta1_echo_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*WaitRequest); i {
+			switch v := v.(*PagedExpandResponseList); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1216,7 +1363,7 @@ func file_google_showcase_v1beta1_echo_proto_init() {
 			}
 		}
 		file_google_showcase_v1beta1_echo_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*WaitResponse); i {
+			switch v := v.(*PagedExpandLegacyMappedResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1228,7 +1375,7 @@ func file_google_showcase_v1beta1_echo_proto_init() {
 			}
 		}
 		file_google_showcase_v1beta1_echo_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*WaitMetadata); i {
+			switch v := v.(*WaitRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1240,7 +1387,7 @@ func file_google_showcase_v1beta1_echo_proto_init() {
 			}
 		}
 		file_google_showcase_v1beta1_echo_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*BlockRequest); i {
+			switch v := v.(*WaitResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1252,6 +1399,30 @@ func file_google_showcase_v1beta1_echo_proto_init() {
 			}
 		}
 		file_google_showcase_v1beta1_echo_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*WaitMetadata); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_google_showcase_v1beta1_echo_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*BlockRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_google_showcase_v1beta1_echo_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*BlockResponse); i {
 			case 0:
 				return &v.state
@@ -1268,13 +1439,13 @@ func file_google_showcase_v1beta1_echo_proto_init() {
 		(*EchoRequest_Content)(nil),
 		(*EchoRequest_Error)(nil),
 	}
-	file_google_showcase_v1beta1_echo_proto_msgTypes[6].OneofWrappers = []interface{}{
+	file_google_showcase_v1beta1_echo_proto_msgTypes[8].OneofWrappers = []interface{}{
 		(*WaitRequest_EndTime)(nil),
 		(*WaitRequest_Ttl)(nil),
 		(*WaitRequest_Error)(nil),
 		(*WaitRequest_Success)(nil),
 	}
-	file_google_showcase_v1beta1_echo_proto_msgTypes[9].OneofWrappers = []interface{}{
+	file_google_showcase_v1beta1_echo_proto_msgTypes[11].OneofWrappers = []interface{}{
 		(*BlockRequest_Error)(nil),
 		(*BlockRequest_Success)(nil),
 	}
@@ -1284,7 +1455,7 @@ func file_google_showcase_v1beta1_echo_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_google_showcase_v1beta1_echo_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   11,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -1331,6 +1502,12 @@ type EchoClient interface {
 	// max_results instead of page_size, as some legacy APIs still
 	// do. New APIs should NOT use this pattern.
 	PagedExpandLegacy(ctx context.Context, in *PagedExpandLegacyRequest, opts ...grpc.CallOption) (*PagedExpandResponse, error)
+	// This method returns a map containing lists of words that appear in the input, keyed by their
+	// initial character. The only words returned are the ones included in the current page,
+	// as determined by page_token and page_size, which both refer to the word indices in the
+	// input. This paging result consisting of a map of lists is a pattern used by some legacy
+	// APIs. New APIs should NOT use this pattern.
+	PagedExpandLegacyMapped(ctx context.Context, in *PagedExpandRequest, opts ...grpc.CallOption) (*PagedExpandLegacyMappedResponse, error)
 	// This method will wait for the requested amount of time and then return.
 	// This method showcases how a client handles a request timeout.
 	Wait(ctx context.Context, in *WaitRequest, opts ...grpc.CallOption) (*longrunning.Operation, error)
@@ -1472,6 +1649,15 @@ func (c *echoClient) PagedExpandLegacy(ctx context.Context, in *PagedExpandLegac
 	return out, nil
 }
 
+func (c *echoClient) PagedExpandLegacyMapped(ctx context.Context, in *PagedExpandRequest, opts ...grpc.CallOption) (*PagedExpandLegacyMappedResponse, error) {
+	out := new(PagedExpandLegacyMappedResponse)
+	err := c.cc.Invoke(ctx, "/google.showcase.v1beta1.Echo/PagedExpandLegacyMapped", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *echoClient) Wait(ctx context.Context, in *WaitRequest, opts ...grpc.CallOption) (*longrunning.Operation, error) {
 	out := new(longrunning.Operation)
 	err := c.cc.Invoke(ctx, "/google.showcase.v1beta1.Echo/Wait", in, out, opts...)
@@ -1512,6 +1698,12 @@ type EchoServer interface {
 	// max_results instead of page_size, as some legacy APIs still
 	// do. New APIs should NOT use this pattern.
 	PagedExpandLegacy(context.Context, *PagedExpandLegacyRequest) (*PagedExpandResponse, error)
+	// This method returns a map containing lists of words that appear in the input, keyed by their
+	// initial character. The only words returned are the ones included in the current page,
+	// as determined by page_token and page_size, which both refer to the word indices in the
+	// input. This paging result consisting of a map of lists is a pattern used by some legacy
+	// APIs. New APIs should NOT use this pattern.
+	PagedExpandLegacyMapped(context.Context, *PagedExpandRequest) (*PagedExpandLegacyMappedResponse, error)
 	// This method will wait for the requested amount of time and then return.
 	// This method showcases how a client handles a request timeout.
 	Wait(context.Context, *WaitRequest) (*longrunning.Operation, error)
@@ -1542,6 +1734,9 @@ func (*UnimplementedEchoServer) PagedExpand(context.Context, *PagedExpandRequest
 }
 func (*UnimplementedEchoServer) PagedExpandLegacy(context.Context, *PagedExpandLegacyRequest) (*PagedExpandResponse, error) {
 	return nil, status1.Errorf(codes.Unimplemented, "method PagedExpandLegacy not implemented")
+}
+func (*UnimplementedEchoServer) PagedExpandLegacyMapped(context.Context, *PagedExpandRequest) (*PagedExpandLegacyMappedResponse, error) {
+	return nil, status1.Errorf(codes.Unimplemented, "method PagedExpandLegacyMapped not implemented")
 }
 func (*UnimplementedEchoServer) Wait(context.Context, *WaitRequest) (*longrunning.Operation, error) {
 	return nil, status1.Errorf(codes.Unimplemented, "method Wait not implemented")
@@ -1681,6 +1876,24 @@ func _Echo_PagedExpandLegacy_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Echo_PagedExpandLegacyMapped_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PagedExpandRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EchoServer).PagedExpandLegacyMapped(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/google.showcase.v1beta1.Echo/PagedExpandLegacyMapped",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EchoServer).PagedExpandLegacyMapped(ctx, req.(*PagedExpandRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Echo_Wait_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(WaitRequest)
 	if err := dec(in); err != nil {
@@ -1732,6 +1945,10 @@ var _Echo_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PagedExpandLegacy",
 			Handler:    _Echo_PagedExpandLegacy_Handler,
+		},
+		{
+			MethodName: "PagedExpandLegacyMapped",
+			Handler:    _Echo_PagedExpandLegacyMapped_Handler,
 		},
 		{
 			MethodName: "Wait",

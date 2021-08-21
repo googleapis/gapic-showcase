@@ -147,6 +147,32 @@ func ExampleEchoClient_PagedExpandLegacy() {
 	}
 }
 
+func ExampleEchoClient_PagedExpandLegacyMapped() {
+	ctx := context.Background()
+	c, err := client.NewEchoClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.PagedExpandRequest{
+		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#PagedExpandRequest.
+	}
+	it := c.PagedExpandLegacyMapped(ctx, req)
+	for {
+		resp, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			// TODO: Handle error.
+		}
+		// TODO: Use resp.
+		_ = resp
+	}
+}
+
 func ExampleEchoClient_Wait() {
 	ctx := context.Background()
 	c, err := client.NewEchoClient(ctx)

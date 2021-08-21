@@ -43,6 +43,7 @@ func RegisterHandlers(router *gmux.Router, backend *services.Backend) {
 	router.HandleFunc("/v1beta1/echo:collect", rest.HandleCollect).Methods("POST")
 	router.HandleFunc("/v1beta1/echo:pagedExpand", rest.HandlePagedExpand).Methods("POST")
 	router.HandleFunc("/v1beta1/echo:pagedExpandLegacy", rest.HandlePagedExpandLegacy).Methods("POST")
+	router.HandleFunc("/v1beta1/echo:pagedExpandLegacyMapped", rest.HandlePagedExpandLegacyMapped).Methods("POST")
 	router.HandleFunc("/v1beta1/echo:wait", rest.HandleWait).Methods("POST")
 	router.HandleFunc("/v1beta1/echo:block", rest.HandleBlock).Methods("POST")
 	router.HandleFunc("/v1beta1/users", rest.HandleCreateUser).Methods("POST")
