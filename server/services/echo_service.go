@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/googleapis/gapic-showcase/server"
@@ -114,39 +115,16 @@ func (s *echoServerImpl) PagedExpandLegacy(ctx context.Context, in *pb.PagedExpa
 }
 
 func (s *echoServerImpl) PagedExpand(ctx context.Context, in *pb.PagedExpandRequest) (*pb.PagedExpandResponse, error) {
-	if in.GetPageSize() < 0 {
-		return nil, status.Error(codes.InvalidArgument, "The page size provided must not be negative.")
-	}
 	words := strings.Fields(in.GetContent())
 
-	start := int32(0)
-	if in.GetPageToken() != "" {
-		token, err := strconv.Atoi(in.GetPageToken())
-		token32 := int32(token)
-		if err != nil || token32 < 0 || token32 >= int32(len(words)) {
-			return nil, status.Errorf(
-				codes.InvalidArgument,
-				"Invalid page token: %s. Token must be within the range [0, %d)",
-				in.GetPageToken(),
-				len(words))
-		}
-		start = token32
+	start, end, nextToken, err := processPageTokens(len(words), in.GetPageSize(), in.GetPageToken())
+	if err != nil {
+		return nil, err
 	}
-
-	pageSize := in.GetPageSize()
-	if pageSize == 0 {
-		pageSize = int32(len(words))
-	}
-	end := min(start+pageSize, int32(len(words)))
 
 	responses := []*pb.EchoResponse{}
 	for _, word := range words[start:end] {
 		responses = append(responses, &pb.EchoResponse{Content: word})
-	}
-
-	nextToken := ""
-	if end < int32(len(words)) {
-		nextToken = strconv.Itoa(int(end))
 	}
 
 	echoTrailers(ctx)
@@ -154,6 +132,71 @@ func (s *echoServerImpl) PagedExpand(ctx context.Context, in *pb.PagedExpandRequ
 		Responses:     responses,
 		NextPageToken: nextToken,
 	}, nil
+}
+
+func (s *echoServerImpl) PagedExpandLegacyMapped(ctx context.Context, in *pb.PagedExpandRequest) (*pb.PagedExpandLegacyMappedResponse, error) {
+	words := strings.Fields(in.GetContent())
+	start, end, nextToken, err := processPageTokens(len(words), in.GetPageSize(), in.GetPageToken())
+	if err != nil {
+		return nil, err
+	}
+
+	// Construct a map with the following properties:
+	//
+	// 1. The map has a one-rune string key corresponding to the first rune of EVERY word in words.
+	// 2. The value corresponding to a given rune key is a list of only those words between
+	// `start` and `end` whose first rune is that key.
+	// 3. Consequently, initial runes that only appear outside the [start,end) range will have
+	// empty list entries, even if they are non-empty in subsequent pages.
+	alphabetized := make(map[string]*pb.PagedExpandResponseList, 255) //assume most input is ASCII
+	for idx, word := range words {
+		initialRune, _ := utf8.DecodeRuneInString(word)
+		key := string(initialRune) // enforces #1
+		prev, ok := alphabetized[key]
+		if !ok {
+			prev = &pb.PagedExpandResponseList{} // enforces #3
+			alphabetized[key] = prev
+		}
+		if int32(idx) >= start && int32(idx) < end { // enforces #2
+			prev.Words = append(prev.Words, word)
+		}
+	}
+
+	echoTrailers(ctx)
+	return &pb.PagedExpandLegacyMappedResponse{
+		Alphabetized:  alphabetized,
+		NextPageToken: nextToken,
+	}, nil
+}
+
+func processPageTokens(numElements int, pageSize int32, pageToken string) (start, end int32, nextToken string, err error) {
+	if pageSize < 0 {
+		return 0, 0, "", status.Error(codes.InvalidArgument, "the page size provided must not be negative.")
+	}
+
+	if pageToken != "" {
+		token, err := strconv.Atoi(pageToken)
+		token32 := int32(token)
+		if err != nil || token32 < 0 || token32 >= int32(numElements) {
+			return 0, 0, "", status.Errorf(
+				codes.InvalidArgument,
+				"invalid page token: %s. Token must be within the range [0, %d)",
+				pageToken,
+				numElements)
+		}
+		start = token32
+	}
+
+	if pageSize == 0 {
+		pageSize = int32(numElements)
+	}
+	end = min(start+pageSize, int32(numElements))
+
+	if end < int32(numElements) {
+		nextToken = strconv.Itoa(int(end))
+	}
+
+	return start, end, nextToken, nil
 }
 
 func min(x int32, y int32) int32 {

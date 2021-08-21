@@ -106,8 +106,10 @@ func CompileProtos(version string) {
 
 		// Remove the backup file.
 		Execute("rm", fmt.Sprintf("%s.bak", f.file))
-		Execute("rm", "-f", "cmd/gapic-showcase/paged-expand-legacy.go")
 	}
+
+	// TODO: Remove this once the CLI generator supports mapped pagination responses.
+	Execute("rm", "-f", "cmd/gapic-showcase/paged-expand-legacy.go")
 
 	// Format generated output
 	Execute("go", "fmt", "./...")
