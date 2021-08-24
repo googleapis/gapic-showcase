@@ -37,6 +37,12 @@ func (backend *RESTBackend) customRepeatWithUnknownEnum(w http.ResponseWriter, r
 	// Make sure we have at least one sentinel value before serializing properly.
 	sentinelValue := genprotopb.ComplianceData_LIFE_KINGDOM_UNSPECIFIED
 	sentinelString := genprotopb.ComplianceData_LifeKingdom_name[int32(sentinelValue)]
+	if response.Request == nil {
+		response.Request = &genprotopb.RepeatRequest{}
+	}
+	if response.Request.Info == nil {
+		response.Request.Info = &genprotopb.ComplianceData{}
+	}
 	response.Request.Info.FKingdom = sentinelValue
 
 	json, err := marshaler.Marshal(response)

@@ -107,7 +107,7 @@ func TestComplianceSuite(t *testing.T) {
 				}
 
 				// Unmarshal httpResponse body, interpreted as JSON.
-				// should do this.
+				// GAPIC generators should do this in their tests.
 				responseBody, err := ioutil.ReadAll(httpResponse.Body)
 				httpResponse.Body.Close()
 				if err != nil {
