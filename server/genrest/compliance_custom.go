@@ -50,8 +50,11 @@ func (backend *RESTBackend) customRepeatWithUnknownEnumMethod(w http.ResponseWri
 		return
 	}
 
-	// Make sure we have at least one sentinel value before serializing properly.
-	sentinelValue := genprotopb.ComplianceData_LIFE_KINGDOM_UNSPECIFIED
+	// Make sure we have at least one sentinel value before serializing properly; we will then
+	// replace the sentinel value in the JSON with an unknown value. The sentinel value should
+	// be a non-zero value, since unset non-proto-optional fields will serialize with the zero
+	// value, which would result in all of these always getting the new, unknown value
+	sentinelValue := genprotopb.ComplianceData_ANIMALIA
 	sentinelString := genprotopb.ComplianceData_LifeKingdom_name[int32(sentinelValue)]
 	if response.Request == nil {
 		response.Request = &genprotopb.RepeatRequest{}
