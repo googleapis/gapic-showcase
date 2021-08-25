@@ -28,7 +28,8 @@ var customFunctions map[string]string
 
 func init() {
 	customFunctions = map[string]string{
-		".google.showcase.v1beta1.Compliance.RepeatWithUnknownEnum": "customRepeatWithUnknownEnum",
+		".google.showcase.v1beta1.Compliance.RepeatWithUnknownEnum":         "customRepeatWithUnknownEnum",
+		".google.showcase.v1beta1.Compliance.RepeatWithUnknownOptionalEnum": "customRepeatWithUnknownOptionalEnum",
 	}
 }
 

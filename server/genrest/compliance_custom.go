@@ -25,6 +25,22 @@ import (
 
 // customRepeatWithUnknownEnum provides REST-specific handling for a RepeatWithUnknownEnum request. It returns a JSON response with an unknown enum symbol string in an enum field.
 func (backend *RESTBackend) customRepeatWithUnknownEnum(w http.ResponseWriter, r *http.Request, request *genprotopb.RepeatRequest) {
+	mutator := func(data *genprotopb.ComplianceData, sentinelValue genprotopb.ComplianceData_LifeKingdom) {
+		data.FKingdom = sentinelValue
+	}
+	backend.customRepeatWithUnknownEnumMethod(w, r, request, mutator)
+}
+
+// customRepeatWithUnknownOptionalEnum provides REST-specific handling for a RepeatWithUnknownOptionalEnum request. It returns a JSON response with an unknown enum symbol string in an enum field.
+func (backend *RESTBackend) customRepeatWithUnknownOptionalEnum(w http.ResponseWriter, r *http.Request, request *genprotopb.RepeatRequest) {
+	mutator := func(data *genprotopb.ComplianceData, sentinelValue genprotopb.ComplianceData_LifeKingdom) {
+		data.PKingdom = &sentinelValue
+	}
+	backend.customRepeatWithUnknownEnumMethod(w, r, request, mutator)
+}
+
+// customRepeatWithUnknownEnumMethod provides REST-specific handling for the RepeatWithUnknown*Enum request. It returns a JSON response with an unknown enum symbol string in an enum field.
+func (backend *RESTBackend) customRepeatWithUnknownEnumMethod(w http.ResponseWriter, r *http.Request, request *genprotopb.RepeatRequest, mutate enumMutator) {
 	marshaler := resttools.ToJSON()
 
 	response, err := backend.ComplianceServer.RepeatWithUnknownEnum(context.Background(), request)
@@ -43,7 +59,7 @@ func (backend *RESTBackend) customRepeatWithUnknownEnum(w http.ResponseWriter, r
 	if response.Request.Info == nil {
 		response.Request.Info = &genprotopb.ComplianceData{}
 	}
-	response.Request.Info.FKingdom = sentinelValue
+	mutate(response.Request.Info, sentinelValue)
 
 	json, err := marshaler.Marshal(response)
 	if err != nil {
@@ -56,3 +72,6 @@ func (backend *RESTBackend) customRepeatWithUnknownEnum(w http.ResponseWriter, r
 
 	w.Write(json)
 }
+
+// enumMutator represents a function that modifies data in place using sentinelValue.
+type enumMutator func(data *genprotopb.ComplianceData, sentinelValue genprotopb.ComplianceData_LifeKingdom)

@@ -107,6 +107,18 @@ service Compliance {
       body: "*"
     };
   }
+
+  // This method returns an unknown enum value. Client libraries should either error gracefully (not
+  // crash), ignore the value, or, depending on the API, set it to the zero default.
+  //
+  // This only works over REST currently. Requests over gRPC will echo the request and should
+  // succeed on the client side
+  rpc RepeatWithUnknownOptionalEnum(RepeatRequest) returns (RepeatResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/repeat:invalidoptionalenum"
+      body: "*"
+    };
+  }
 }
 
 message RepeatRequest {
