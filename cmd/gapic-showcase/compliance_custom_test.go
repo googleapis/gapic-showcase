@@ -27,7 +27,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-// TestRepeatWithUnknownEnum
+// TestRepeatWithUnknownEnum tests both RepeatWithUnknownEnum and RepeatWithUnknownOptionalEnum
 func TestRepeatWithUnknownEnum(t *testing.T) {
 	_, server, err := complianceSuiteTestSetup()
 	if err != nil {
@@ -39,9 +39,7 @@ func TestRepeatWithUnknownEnum(t *testing.T) {
 	resttools.JSONMarshaler.Replace(nil)
 	defer resttools.JSONMarshaler.Restore()
 
-	request := &genprotopb.RepeatRequest{
-		FInt32: 23,
-	}
+	request := &genprotopb.RepeatRequest{}
 
 	for idx, variant := range []string{"invalidenum", "invalidoptionalenum"} {
 		errorPrefix := fmt.Sprintf("[%d %q]", idx, variant)
@@ -69,6 +67,8 @@ func TestRepeatWithUnknownEnum(t *testing.T) {
 	}
 }
 
+// getJSONResponse is a helper function for TestRepeatWithUnknownEnum. It issues the REST request to
+// the given URI and returns both the response and request JSON bodies.
 func getJSONResponse(t *testing.T, request *genprotopb.RepeatRequest, uri, errorPrefix string) (responseBody, requestBody []byte) {
 	verb := "POST"
 	requestBody, err := resttools.ToJSON().Marshal(request)
@@ -100,5 +100,3 @@ func getJSONResponse(t *testing.T, request *genprotopb.RepeatRequest, uri, error
 	}
 	return responseBody, requestBody
 }
-
-// repeat wtih same message for invalidenum; check for error

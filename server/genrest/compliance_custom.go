@@ -23,7 +23,8 @@ import (
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 )
 
-// customRepeatWithUnknownEnum provides REST-specific handling for a RepeatWithUnknownEnum request. It returns a JSON response with an unknown enum symbol string in an enum field.
+// customRepeatWithUnknownEnum provides REST-specific handling for a RepeatWithUnknownEnum
+// request. It returns a JSON response with an unknown enum symbol string in an enum field.
 func (backend *RESTBackend) customRepeatWithUnknownEnum(w http.ResponseWriter, r *http.Request, request *genprotopb.RepeatRequest) {
 	mutator := func(data *genprotopb.ComplianceData, sentinelValue genprotopb.ComplianceData_LifeKingdom) {
 		data.FKingdom = sentinelValue
@@ -31,7 +32,9 @@ func (backend *RESTBackend) customRepeatWithUnknownEnum(w http.ResponseWriter, r
 	backend.customRepeatWithUnknownEnumMethod(w, r, request, mutator)
 }
 
-// customRepeatWithUnknownOptionalEnum provides REST-specific handling for a RepeatWithUnknownOptionalEnum request. It returns a JSON response with an unknown enum symbol string in an enum field.
+// customRepeatWithUnknownOptionalEnum provides REST-specific handling for a
+// RepeatWithUnknownOptionalEnum request. It returns a JSON response with an unknown enum symbol
+// string in an enum field.
 func (backend *RESTBackend) customRepeatWithUnknownOptionalEnum(w http.ResponseWriter, r *http.Request, request *genprotopb.RepeatRequest) {
 	mutator := func(data *genprotopb.ComplianceData, sentinelValue genprotopb.ComplianceData_LifeKingdom) {
 		data.PKingdom = &sentinelValue
@@ -39,7 +42,8 @@ func (backend *RESTBackend) customRepeatWithUnknownOptionalEnum(w http.ResponseW
 	backend.customRepeatWithUnknownEnumMethod(w, r, request, mutator)
 }
 
-// customRepeatWithUnknownEnumMethod provides REST-specific handling for the RepeatWithUnknown*Enum request. It returns a JSON response with an unknown enum symbol string in an enum field.
+// customRepeatWithUnknownEnumMethod provides REST-specific handling for the RepeatWithUnknown*Enum
+// request. It returns a JSON response with an unknown enum symbol string in an enum field.
 func (backend *RESTBackend) customRepeatWithUnknownEnumMethod(w http.ResponseWriter, r *http.Request, request *genprotopb.RepeatRequest, mutate enumMutator) {
 	marshaler := resttools.ToJSON()
 
@@ -76,5 +80,5 @@ func (backend *RESTBackend) customRepeatWithUnknownEnumMethod(w http.ResponseWri
 	w.Write(json)
 }
 
-// enumMutator represents a function that modifies data in place using sentinelValue.
+// enumMutator represents a function that modifies `data` in place using `sentinelValue`.
 type enumMutator func(data *genprotopb.ComplianceData, sentinelValue genprotopb.ComplianceData_LifeKingdom)

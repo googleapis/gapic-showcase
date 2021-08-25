@@ -24,15 +24,6 @@ import (
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 )
 
-var customFunctions map[string]string
-
-func init() {
-	customFunctions = map[string]string{
-		".google.showcase.v1beta1.Compliance.RepeatWithUnknownEnum":         "customRepeatWithUnknownEnum",
-		".google.showcase.v1beta1.Compliance.RepeatWithUnknownOptionalEnum": "customRepeatWithUnknownOptionalEnum",
-	}
-}
-
 // NewView creates a a new goview.View (a series of files to be output) from a gomodel.Model. The
 // current approach is to generate one file per service, with that file containing all the service's
 // RPCs. An additional file `genrest.go` is also created to register all these handlers with a
@@ -201,9 +192,8 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 			methodId := fmt.Sprintf("%s.%s", service.ProtoPath, handler.GoMethod)
 			customHandler, _ := customFunctions[methodId]
-			source.P("  // %s", methodId)
 			if len(customHandler) > 0 {
-				source.P("  backend.%s(w, r, request)  // %s", customHandler, methodId)
+				source.P("  backend.%s(w, r, request)", customHandler)
 				source.P("}")
 				continue
 			}
@@ -372,7 +362,19 @@ func (namer *Namer) Get(newName string) string {
 
 var license string
 
+// customFunctions contains a map of fully qualified RPC names to their manually written REST
+// handlers (in package gapic-showcase/server/genrest). For these RPCs, the generated code created
+// by this file calls these custom handlers, instead of delegating to the core gRPC server
+// implementation as most of the REST handlers do. This allows Showcase to provide REST-specific
+// behavior in some scenarios.
+var customFunctions map[string]string
+
 func init() {
+	customFunctions = map[string]string{
+		".google.showcase.v1beta1.Compliance.RepeatWithUnknownEnum":         "customRepeatWithUnknownEnum",
+		".google.showcase.v1beta1.Compliance.RepeatWithUnknownOptionalEnum": "customRepeatWithUnknownOptionalEnum",
+	}
+
 	license = fmt.Sprintf(`// Copyright %d Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");

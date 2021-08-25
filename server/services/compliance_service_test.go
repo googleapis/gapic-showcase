@@ -57,6 +57,8 @@ func TestComplianceRepeats(t *testing.T) {
 		server.RepeatDataPathTrailingResource,
 		server.RepeatDataBodyPut,
 		server.RepeatDataBodyPatch,
+		server.RepeatWithUnknownEnum,
+		server.RepeatWithUnknownOptionalEnum,
 	} {
 		response, err := rpc(context.Background(), request)
 		if err != nil {
