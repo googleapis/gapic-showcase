@@ -15,6 +15,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -42,28 +43,30 @@ func TestRepeatWithUnknownEnum(t *testing.T) {
 		FInt32: 23,
 	}
 
-	// First ensure the request would be otherwise successful
-	errorPrefix := `"repeat:body":`
-	responseBody, requestBody := getJSONResponse(t, request, server.URL+"/v1beta1/repeat:body", errorPrefix)
-	var response genproto.RepeatResponse
-	if err := protojson.Unmarshal(responseBody, &response); err != nil {
-		t.Fatalf("%s could not unmarshal httpResponse body: %s\n   response body: %s\n   request: %s\n",
-			errorPrefix, err, string(responseBody), string(requestBody))
-	}
+	for idx, variant := range []string{"invalidenum", "invalidoptionalenum"} {
+		errorPrefix := fmt.Sprintf("[%d %q]", idx, variant)
 
-	// Then ensure the expected error occurs
-	errorPrefix = `"repeat:invalidenum":`
-	responseBody, requestBody = getJSONResponse(t, request, server.URL+"/v1beta1/repeat:invalidenum", errorPrefix)
-	err = protojson.Unmarshal(responseBody, &response)
-	if err == nil {
-		t.Fatalf("%s did not receive an error:\n   response body: %s\n   request: %s\n",
-			errorPrefix, string(responseBody), string(requestBody))
-	}
-	if !strings.Contains(err.Error(), "invalid value for enum type") {
-		t.Fatalf("%s received different error than expected: %s\n   response body: %s\n   request: %s\n",
-			errorPrefix, err, string(responseBody), string(requestBody))
-	}
+		// First ensure the request would be otherwise successful
+		responseBody, requestBody := getJSONResponse(t, request, server.URL+"/v1beta1/repeat:body", errorPrefix)
+		var response genproto.RepeatResponse
+		if err := protojson.Unmarshal(responseBody, &response); err != nil {
+			t.Fatalf("%s could not unmarshal valid response body: %s\n   response body: %s\n   request: %s\n",
+				errorPrefix, err, string(responseBody), string(requestBody))
+		}
 
+		// Then ensure the expected error occurs
+		responseBody, requestBody = getJSONResponse(t, request,
+			fmt.Sprintf("%s/v1beta1/repeat:%s", server.URL, variant), errorPrefix)
+		err = protojson.Unmarshal(responseBody, &response)
+		if err == nil {
+			t.Fatalf("%s did not receive an error:\n   response body: %s\n   request: %s\n",
+				errorPrefix, string(responseBody), string(requestBody))
+		}
+		if !strings.Contains(err.Error(), "invalid value for enum type") {
+			t.Fatalf("%s received different error than expected: %s\n   response body: %s\n   request: %s\n",
+				errorPrefix, err, string(responseBody), string(requestBody))
+		}
+	}
 }
 
 func getJSONResponse(t *testing.T, request *genprotopb.RepeatRequest, uri, errorPrefix string) (responseBody, requestBody []byte) {
