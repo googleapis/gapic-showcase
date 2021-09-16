@@ -4,7 +4,7 @@ require (
 	cloud.google.com/go v0.94.1
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.6
-	github.com/googleapis/gax-go/v2 v2.1.0
+	github.com/googleapis/gax-go/v2 v2.1.1
 	github.com/googleapis/grpc-fallback-go v0.1.4
 	github.com/gorilla/mux v1.8.0
 	github.com/iancoleman/strcase v0.2.0
