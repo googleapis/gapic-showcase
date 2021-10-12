@@ -96,6 +96,29 @@ service Compliance {
     };
   }
 
+  // This method returns an unknown value for a non-optional enum field. Client libraries should
+  // either error gracefully (not crash), ignore the value, or, depending on the API, set it to the
+  // zero default.
+  //
+  // This only works over REST currently. Requests over gRPC will simply echo the request.
+  rpc RepeatWithUnknownEnum(RepeatRequest) returns (RepeatResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/repeat:invalidenum"
+      body: "*"
+    };
+  }
+
+  // This method returns an unknown value for an optional enum field. Client libraries should either
+  // error gracefully (not crash), ignore the value, or, depending on the API, set it to the zero
+  // default.
+  //
+  // This only works over REST currently. Requests over gRPC will simply echo the request.
+  rpc RepeatWithUnknownOptionalEnum(RepeatRequest) returns (RepeatResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/repeat:invalidoptionalenum"
+      body: "*"
+    };
+  }
 }
 
 message RepeatRequest {

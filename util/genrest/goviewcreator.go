@@ -189,6 +189,15 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			source.P("  requestJSON, _ := marshaler.Marshal(%s)", handler.RequestVariable)
 			source.P(`  backend.StdLog.Printf("  request: %%s", requestJSON)`)
 			source.P("")
+
+			methodId := fmt.Sprintf("%s.%s", service.ProtoPath, handler.GoMethod)
+			customHandler, _ := customFunctions[methodId]
+			if len(customHandler) > 0 {
+				source.P("  backend.%s(w, r, request)", customHandler)
+				source.P("}")
+				continue
+			}
+
 			// TODO: In the future, we may want to redirect all REST-endpoint requests to the gRPC endpoint so that the gRPC-registered observers get invoked.
 			source.P("  %s, err := backend.%sServer.%s(context.Background(), %s)", handler.ResponseVariable, service.ShortName, handler.GoMethod, handler.RequestVariable)
 			source.P("  if err != nil {")
@@ -353,7 +362,19 @@ func (namer *Namer) Get(newName string) string {
 
 var license string
 
+// customFunctions contains a map of fully qualified RPC names to their manually written REST
+// handlers (in package gapic-showcase/server/genrest). For these RPCs, the generated code created
+// by this file calls these custom handlers, instead of delegating to the core gRPC server
+// implementation as most of the REST handlers do. This allows Showcase to provide REST-specific
+// behavior in some scenarios.
+var customFunctions map[string]string
+
 func init() {
+	customFunctions = map[string]string{
+		".google.showcase.v1beta1.Compliance.RepeatWithUnknownEnum":         "customRepeatWithUnknownEnum",
+		".google.showcase.v1beta1.Compliance.RepeatWithUnknownOptionalEnum": "customRepeatWithUnknownOptionalEnum",
+	}
+
 	license = fmt.Sprintf(`// Copyright %d Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
