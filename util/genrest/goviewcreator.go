@@ -332,7 +332,7 @@ func constructServerStreamer(service *gomodel.ServiceModel, handler *gomodel.RES
 	baseHelper.P(``)
 	baseHelper.P(`// ListJSON returns a list of all the accumulated responses, in JSON format.`)
 	baseHelper.P(`func (streamer *%s) ListJSON() string {`, baseStreamerType)
-	baseHelper.P(`   return fmt.Sprintf("{\n%%s\n}", strings.Join(streamer.responses, ",\n"))`)
+	baseHelper.P(`   return fmt.Sprintf("[%%s]", strings.Join(streamer.responses, ",\n"))`)
 	baseHelper.P(`}`)
 	baseHelper.P(``)
 	baseHelper.P(`func (streamer *%s) initialize() {`, baseStreamerType)

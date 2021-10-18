@@ -19,7 +19,7 @@ func (streamer *Catalog_BaseServerStreamer) accumulate(response proto.Message) e
 
 // ListJSON returns a list of all the accumulated responses, in JSON format.
 func (streamer *Catalog_BaseServerStreamer) ListJSON() string {
-   return fmt.Sprintf("{\n%s\n}", strings.Join(streamer.responses, ",\n"))
+   return fmt.Sprintf("[%s]", strings.Join(streamer.responses, ",\n"))
 }
 
 func (streamer *Catalog_BaseServerStreamer) initialize() {
@@ -74,7 +74,7 @@ func (streamer *Media_BaseServerStreamer) accumulate(response proto.Message) err
 
 // ListJSON returns a list of all the accumulated responses, in JSON format.
 func (streamer *Media_BaseServerStreamer) ListJSON() string {
-   return fmt.Sprintf("{\n%s\n}", strings.Join(streamer.responses, ",\n"))
+   return fmt.Sprintf("[%s]", strings.Join(streamer.responses, ",\n"))
 }
 
 func (streamer *Media_BaseServerStreamer) initialize() {
