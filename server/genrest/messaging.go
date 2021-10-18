@@ -20,11 +20,17 @@ package genrest
 import (
 	"bytes"
 	"context"
+	"fmt"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 	"io"
 	"net/http"
+	"strings"
+	"sync"
 )
 
 // HandleCreateRoom translates REST requests/responses on the wire to internal proto messages for CreateRoom
@@ -1026,23 +1032,164 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 // HandleStreamBlurbs translates REST requests/responses on the wire to internal proto messages for StreamBlurbs
 //    Generated for HTTP binding pattern: "/v1beta1/{name=rooms/*}/blurbs:stream"
 func (backend *RESTBackend) HandleStreamBlurbs(w http.ResponseWriter, r *http.Request) {
-	backend.Error(w, http.StatusNotImplemented, "streaming methods not implemented yet (request matched '/v1beta1/{name=rooms/*}/blurbs:stream': %q)", r.URL)
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=rooms/*}/blurbs:stream': %q", r.Method, r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
+		return
+	}
+
+	request := &genprotopb.StreamBlurbsRequest{}
+	// Intentional: Field values in the URL path override those set in the body.
+	var jsonReader bytes.Buffer
+	bodyReader := io.TeeReader(r.Body, &jsonReader)
+	rBytes := make([]byte, r.ContentLength)
+	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
+		return
+	}
+
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
+		return
+	}
+	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
+		return
+	}
+
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
+
+	streamer := &Messaging_StreamBlurbsServer{}
+	if err := backend.MessagingServer.StreamBlurbs(request, streamer); err != nil {
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+	}
+	w.Write([]byte(streamer.ListJSON()))
 }
 
 // HandleStreamBlurbs_1 translates REST requests/responses on the wire to internal proto messages for StreamBlurbs
 //    Generated for HTTP binding pattern: "/v1beta1/{name=users/*/profile}/blurbs:stream"
 func (backend *RESTBackend) HandleStreamBlurbs_1(w http.ResponseWriter, r *http.Request) {
-	backend.Error(w, http.StatusNotImplemented, "streaming methods not implemented yet (request matched '/v1beta1/{name=users/*/profile}/blurbs:stream': %q)", r.URL)
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=users/*/profile}/blurbs:stream': %q", r.Method, r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
+		return
+	}
+
+	request := &genprotopb.StreamBlurbsRequest{}
+	// Intentional: Field values in the URL path override those set in the body.
+	var jsonReader bytes.Buffer
+	bodyReader := io.TeeReader(r.Body, &jsonReader)
+	rBytes := make([]byte, r.ContentLength)
+	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
+		return
+	}
+
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
+		return
+	}
+	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
+		return
+	}
+
+	marshaler := resttools.ToJSON()
+	requestJSON, _ := marshaler.Marshal(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
+
+	streamer := &Messaging_StreamBlurbsServer{}
+	if err := backend.MessagingServer.StreamBlurbs(request, streamer); err != nil {
+		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+	}
+	w.Write([]byte(streamer.ListJSON()))
 }
 
 // HandleSendBlurbs translates REST requests/responses on the wire to internal proto messages for SendBlurbs
 //    Generated for HTTP binding pattern: "/v1beta1/{parent=rooms/*}/blurbs:send"
 func (backend *RESTBackend) HandleSendBlurbs(w http.ResponseWriter, r *http.Request) {
-	backend.Error(w, http.StatusNotImplemented, "streaming methods not implemented yet (request matched '/v1beta1/{parent=rooms/*}/blurbs:send': %q)", r.URL)
+	backend.Error(w, http.StatusNotImplemented, "client-streaming methods not implemented yet (request matched '/v1beta1/{parent=rooms/*}/blurbs:send': %q)", r.URL)
 }
 
 // HandleSendBlurbs_1 translates REST requests/responses on the wire to internal proto messages for SendBlurbs
 //    Generated for HTTP binding pattern: "/v1beta1/{parent=users/*/profile}/blurbs:send"
 func (backend *RESTBackend) HandleSendBlurbs_1(w http.ResponseWriter, r *http.Request) {
-	backend.Error(w, http.StatusNotImplemented, "streaming methods not implemented yet (request matched '/v1beta1/{parent=users/*/profile}/blurbs:send': %q)", r.URL)
+	backend.Error(w, http.StatusNotImplemented, "client-streaming methods not implemented yet (request matched '/v1beta1/{parent=users/*/profile}/blurbs:send': %q)", r.URL)
+}
+
+// Messaging_BaseServerStreamer contains the basic accumulation and emit functionality to help handle all server streaming RPCs in the Messaging service.
+type Messaging_BaseServerStreamer struct {
+	responses      []string
+	initialization sync.Once
+	marshaler      *protojson.MarshalOptions
+
+	grpc.ServerStream
+}
+
+func (streamer *Messaging_BaseServerStreamer) accumulate(response proto.Message) error {
+	streamer.initialization.Do(streamer.initialize)
+	json, err := streamer.marshaler.Marshal(response)
+	if err != nil {
+		return fmt.Errorf("error json-encoding response: %s", err.Error())
+	}
+	streamer.responses = append(streamer.responses, string(json))
+	return nil
+}
+
+// ListJSON returns a list of all the accumulated responses, in JSON format.
+func (streamer *Messaging_BaseServerStreamer) ListJSON() string {
+	return fmt.Sprintf("[%s]", strings.Join(streamer.responses, ",\n"))
+}
+
+func (streamer *Messaging_BaseServerStreamer) initialize() {
+	streamer.marshaler = resttools.ToJSON()
+}
+
+func (streamer *Messaging_BaseServerStreamer) Context() context.Context {
+	return context.Background()
+}
+
+// Messaging_StreamBlurbsServer implements genprotopb.Messaging_StreamBlurbsServer to provide server-side streaming over REST, returning all the
+// individual responses as part of a long JSON list.
+type Messaging_StreamBlurbsServer struct {
+	Messaging_BaseServerStreamer
+}
+
+// Send accumulates a response to be fetched later as part of response list returned over REST.
+func (streamer *Messaging_StreamBlurbsServer) Send(response *genprotopb.StreamBlurbsResponse) error {
+	return streamer.accumulate(response)
 }
