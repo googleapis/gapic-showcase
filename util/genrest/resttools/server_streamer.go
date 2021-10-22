@@ -17,6 +17,7 @@ package resttools
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 
 	"google.golang.org/grpc"
@@ -30,7 +31,7 @@ import (
 // ensure this, users must call the End() method to terminate the stream properly, typically by
 // using `defer`.
 type ServerStreamer struct {
-	output    http.ResponseWriter
+	output    io.Writer
 	marshaler *protojson.MarshalOptions
 	flusher   http.Flusher
 	grpc.ServerStream
@@ -39,7 +40,7 @@ type ServerStreamer struct {
 
 // NewServerStreamer returns a ServerStreamer instance initialized to write to responseWriter. Users
 // must call the End() method to terminate the stream properly, typically by using `defer`.
-func NewServerStreamer(responseWriter http.ResponseWriter) (*ServerStreamer, error) {
+func NewServerStreamer(responseWriter io.Writer) (*ServerStreamer, error) {
 	if responseWriter == nil {
 		return nil, fmt.Errorf("error: responseWriter provided is nil")
 	}
@@ -58,29 +59,14 @@ func NewServerStreamer(responseWriter http.ResponseWriter) (*ServerStreamer, err
 	return streamer, nil
 }
 
-// Send sends `response` over the REST stream by writing the message and then flushing the writer.
-func (streamer *ServerStreamer) Send(response proto.Message) error {
-	json, err := streamer.marshaler.Marshal(response)
+// Send sends `message` over the REST stream as a chunk to be immediately be sent over the wire.
+func (streamer *ServerStreamer) Send(message proto.Message) error {
+	json, err := streamer.marshaler.Marshal(message)
 	if err != nil {
-		return fmt.Errorf("error json-encoding response: %s", err.Error())
+		return fmt.Errorf("error json-encoding message: %s", err.Error())
 	}
 
-	var prefix []byte
-	switch streamer.started {
-	case false:
-		prefix = []byte("[")
-		streamer.started = true
-	case true:
-		prefix = []byte(",")
-	}
-
-	if _, err := streamer.output.Write(append(prefix, json...)); err != nil {
-		return fmt.Errorf("error writing streamed json message: %s", err.Error())
-	}
-
-	streamer.flusher.Flush()
-
-	return nil
+	return streamer.sendJSONArrayChunk(json)
 }
 
 // End terminates the REST stream by sending the trailing bytes (the closing bracket for the array).
@@ -93,10 +79,42 @@ func (streamer *ServerStreamer) End() error {
 		return fmt.Errorf("error terminating json stream: %s", err.Error())
 	}
 
+	streamer.flusher.Flush()
+
 	return nil
 }
 
 // Context is needed to satisfy grpc.ServerStream.
 func (streamer *ServerStreamer) Context() context.Context {
 	return context.Background()
+}
+
+// sendJSONArrayChunk sends chunk over the REST stream by writing chunk and then flushing the
+// writer. Each chunk is assumed to be a JSON object delimited by curly braces, inasmuch as chunks
+// are separated by commas, the first chunk is preceded by an opening square bracket, and End() will
+// send the final closing square bracket. Empty chunks do not get written.
+func (streamer *ServerStreamer) sendJSONArrayChunk(chunk []byte) error {
+	if len(chunk) == 0 {
+		return nil
+	}
+
+	var prefix []byte
+	switch streamer.started {
+	case false:
+		prefix = []byte("[")
+		streamer.started = true
+	case true:
+		prefix = []byte(",")
+	}
+
+	if _, err := streamer.output.Write(append(prefix, chunk...)); err != nil {
+		return fmt.Errorf("error writing streamed json message: %s", err.Error())
+	}
+
+	// Flush() causes the chunk to be sent immediately, and chunked transfer encoding to be set
+	// in the HTTP headers before the first chunk.
+	// cf. https://stackoverflow.com/a/30603654
+	streamer.flusher.Flush()
+
+	return nil
 }
