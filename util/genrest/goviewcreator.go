@@ -301,56 +301,11 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 func constructServerStreamer(service *gomodel.ServiceModel, handler *gomodel.RESTHandler, fileImports map[string]string, helperSources sourceMap) (streamerType string) {
 	streamerType = fmt.Sprintf("%s_%sServer", service.ShortName, handler.GoMethod)
-	baseStreamerType := fmt.Sprintf("%s_BaseServerStreamer", service.ShortName)
 	streamerInterface := fmt.Sprintf("%s.%s_%sServer", handler.RequestTypePackage, service.ShortName, handler.GoMethod)
 	streamerElement := fmt.Sprintf("*%s.%s", handler.ResponseTypePackage, handler.ResponseType)
-	_ = streamerElement
 
 	helper := goview.NewSource()
-	baseHelper := goview.NewSource()
-	helperSources[baseStreamerType] = baseHelper
 	helperSources[streamerType] = helper
-
-	fileImports["sync"] = ""
-	fileImports["fmt"] = ""
-	fileImports["strings"] = ""
-	fileImports["google.golang.org/grpc"] = ""
-	fileImports["google.golang.org/protobuf/encoding/protojson"] = ""
-	fileImports["google.golang.org/protobuf/proto"] = ""
-
-	baseHelper.P(`// %s contains the basic accumulation and emit functionality to help handle all server streaming RPCs in the %s service.`,
-		baseStreamerType, service.ShortName)
-	baseHelper.P(`type %s struct{`, baseStreamerType)
-	baseHelper.P(`   responses []string`)
-	baseHelper.P(`   initialization sync.Once`)
-	baseHelper.P(`   marshaler      *protojson.MarshalOptions`)
-	baseHelper.P(` `)
-	baseHelper.P(`   grpc.ServerStream`)
-	baseHelper.P(` }`)
-	baseHelper.P(``)
-	baseHelper.P(`func (streamer *%s) accumulate(response proto.Message) error {`, baseStreamerType)
-	baseHelper.P(`   streamer.initialization.Do(streamer.initialize)`)
-	baseHelper.P(`   json, err := streamer.marshaler.Marshal(response)`)
-	baseHelper.P(`   if err != nil {`)
-	baseHelper.P(`     return fmt.Errorf("error json-encoding response: %%s", err.Error())`)
-	baseHelper.P(`   }`)
-	baseHelper.P(`   streamer.responses = append(streamer.responses, string(json))`)
-	baseHelper.P(`   return nil`)
-	baseHelper.P(`}`)
-	baseHelper.P(``)
-	baseHelper.P(`// ListJSON returns a list of all the accumulated responses, in JSON format.`)
-	baseHelper.P(`func (streamer *%s) ListJSON() string {`, baseStreamerType)
-	baseHelper.P(`   return fmt.Sprintf("[%%s]", strings.Join(streamer.responses, ",\n"))`)
-	baseHelper.P(`}`)
-	baseHelper.P(``)
-	baseHelper.P(`func (streamer *%s) initialize() {`, baseStreamerType)
-	baseHelper.P(`   streamer.marshaler = resttools.ToJSON()`)
-	baseHelper.P(`}`)
-	baseHelper.P(``)
-	baseHelper.P(`func (streamer *%s) Context() context.Context {`, baseStreamerType)
-	baseHelper.P(`   return context.Background()`)
-	baseHelper.P(`}`)
-	baseHelper.P(``)
 
 	helper.P(`// %s implements %s to provide server-side streaming over REST, returning all the`, streamerType, streamerInterface)
 	helper.P(`// individual responses as part of a long JSON list.`)
