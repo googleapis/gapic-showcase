@@ -1,110 +1,44 @@
-// Catalog_BaseServerStreamer contains the basic accumulation and emit functionality to help handle all server streaming RPCs in the Catalog service.
-type Catalog_BaseServerStreamer struct{
-   responses []string
-   initialization sync.Once
-   marshaler      *protojson.MarshalOptions
- 
-   grpc.ServerStream
- }
-
-func (streamer *Catalog_BaseServerStreamer) accumulate(response proto.Message) error {
-   streamer.initialization.Do(streamer.initialize)
-   json, err := streamer.marshaler.Marshal(response)
-   if err != nil {
-     return fmt.Errorf("error json-encoding response: %s", err.Error())
-   }
-   streamer.responses = append(streamer.responses, string(json))
-   return nil
-}
-
-// ListJSON returns a list of all the accumulated responses, in JSON format.
-func (streamer *Catalog_BaseServerStreamer) ListJSON() string {
-   return fmt.Sprintf("[%s]", strings.Join(streamer.responses, ",\n"))
-}
-
-func (streamer *Catalog_BaseServerStreamer) initialize() {
-   streamer.marshaler = resttools.ToJSON()
-}
-
-func (streamer *Catalog_BaseServerStreamer) Context() context.Context {
-   return context.Background()
-}
-
-
 // Catalog_StreamAuthorsServer implements catalogpb.Catalog_StreamAuthorsServer to provide server-side streaming over REST, returning all the
 // individual responses as part of a long JSON list.
 type Catalog_StreamAuthorsServer struct{
-   Catalog_BaseServerStreamer
+   *resttools.ServerStreamer
 }
 
  // Send accumulates a response to be fetched later as part of response list returned over REST.
 func (streamer *Catalog_StreamAuthorsServer) Send(response *responsepb.AuthorEntry) error {
-  return streamer.accumulate(response)
+  return streamer.ServerStreamer.Send(response)
 }
 
 // Catalog_StreamTitlesServer implements catalogpb.Catalog_StreamTitlesServer to provide server-side streaming over REST, returning all the
 // individual responses as part of a long JSON list.
 type Catalog_StreamTitlesServer struct{
-   Catalog_BaseServerStreamer
+   *resttools.ServerStreamer
 }
 
  // Send accumulates a response to be fetched later as part of response list returned over REST.
 func (streamer *Catalog_StreamTitlesServer) Send(response *responsepb.TitleEntry) error {
-  return streamer.accumulate(response)
+  return streamer.ServerStreamer.Send(response)
 }
-
-// Media_BaseServerStreamer contains the basic accumulation and emit functionality to help handle all server streaming RPCs in the Media service.
-type Media_BaseServerStreamer struct{
-   responses []string
-   initialization sync.Once
-   marshaler      *protojson.MarshalOptions
- 
-   grpc.ServerStream
- }
-
-func (streamer *Media_BaseServerStreamer) accumulate(response proto.Message) error {
-   streamer.initialization.Do(streamer.initialize)
-   json, err := streamer.marshaler.Marshal(response)
-   if err != nil {
-     return fmt.Errorf("error json-encoding response: %s", err.Error())
-   }
-   streamer.responses = append(streamer.responses, string(json))
-   return nil
-}
-
-// ListJSON returns a list of all the accumulated responses, in JSON format.
-func (streamer *Media_BaseServerStreamer) ListJSON() string {
-   return fmt.Sprintf("[%s]", strings.Join(streamer.responses, ",\n"))
-}
-
-func (streamer *Media_BaseServerStreamer) initialize() {
-   streamer.marshaler = resttools.ToJSON()
-}
-
-func (streamer *Media_BaseServerStreamer) Context() context.Context {
-   return context.Background()
-}
-
 
 // Media_StreamAudioServer implements mediapb.Media_StreamAudioServer to provide server-side streaming over REST, returning all the
 // individual responses as part of a long JSON list.
 type Media_StreamAudioServer struct{
-   Media_BaseServerStreamer
+   *resttools.ServerStreamer
 }
 
  // Send accumulates a response to be fetched later as part of response list returned over REST.
 func (streamer *Media_StreamAudioServer) Send(response *responsepb.AudioEntry) error {
-  return streamer.accumulate(response)
+  return streamer.ServerStreamer.Send(response)
 }
 
 // Media_StreamVideoServer implements mediapb.Media_StreamVideoServer to provide server-side streaming over REST, returning all the
 // individual responses as part of a long JSON list.
 type Media_StreamVideoServer struct{
-   Media_BaseServerStreamer
+   *resttools.ServerStreamer
 }
 
  // Send accumulates a response to be fetched later as part of response list returned over REST.
 func (streamer *Media_StreamVideoServer) Send(response *responsepb.VideoEntry) error {
-  return streamer.accumulate(response)
+  return streamer.ServerStreamer.Send(response)
 }
 
