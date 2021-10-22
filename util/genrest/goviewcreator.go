@@ -198,12 +198,19 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			if handler.StreamingServer {
 				streamerType := constructServerStreamer(service, handler, fileImports, helperSources)
 
-				source.P(` streamer := &%s{}`, streamerType)
+				source.P(`  serverStreamer, err := resttools.NewServerStreamer(w)`)
+				source.P(`  if err != nil {`)
+				source.P(`    backend.Error(w,http.StatusInternalServerError, "server error: could not construct server streamer: %%s", err.Error())`)
+				source.P(`    return`)
+				source.P(`  }`)
+				source.P(`  defer serverStreamer.End()`)
+
+				source.P(` streamer := &%s{serverStreamer}`, streamerType)
+
 				source.P(" if err := backend.%sServer.%s(%s, streamer); err != nil {", service.ShortName, handler.GoMethod, handler.RequestVariable)
 				source.P("    // TODO: Properly handle error. Is StatusInternalServerError (500) the right response?")
 				source.P(`    backend.Error(w, http.StatusInternalServerError, "server error: %%s", err.Error())`)
 				source.P(" }")
-				source.P(" w.Write([]byte(streamer.ListJSON()))")
 
 			} else { // regular unary call
 				// TODO: In the future, we may want to redirect all REST-endpoint requests to the gRPC endpoint so that the gRPC-registered observers get invoked.
@@ -297,6 +304,7 @@ func constructServerStreamer(service *gomodel.ServiceModel, handler *gomodel.RES
 	baseStreamerType := fmt.Sprintf("%s_BaseServerStreamer", service.ShortName)
 	streamerInterface := fmt.Sprintf("%s.%s_%sServer", handler.RequestTypePackage, service.ShortName, handler.GoMethod)
 	streamerElement := fmt.Sprintf("*%s.%s", handler.ResponseTypePackage, handler.ResponseType)
+	_ = streamerElement
 
 	helper := goview.NewSource()
 	baseHelper := goview.NewSource()
@@ -347,12 +355,12 @@ func constructServerStreamer(service *gomodel.ServiceModel, handler *gomodel.RES
 	helper.P(`// %s implements %s to provide server-side streaming over REST, returning all the`, streamerType, streamerInterface)
 	helper.P(`// individual responses as part of a long JSON list.`)
 	helper.P(`type %s struct{`, streamerType)
-	helper.P(`   %s`, baseStreamerType)
+	helper.P(`   *resttools.ServerStreamer`)
 	helper.P(`}`)
 	helper.P(``)
 	helper.P(` // Send accumulates a response to be fetched later as part of response list returned over REST.`)
 	helper.P(`func (streamer *%s) Send(response %s) error {`, streamerType, streamerElement)
-	helper.P(`  return streamer.accumulate(response)`)
+	helper.P(`  return streamer.ServerStreamer.Send(response)`)
 	helper.P(`}`)
 
 	return streamerType
