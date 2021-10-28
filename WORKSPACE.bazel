@@ -23,9 +23,9 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 #
 http_archive(
   name = "com_google_googleapis",
-  strip_prefix = "googleapis-9679873a51726373a6f233953aac762159716d43",
-  urls = ["https://github.com/googleapis/googleapis/archive/9679873a51726373a6f233953aac762159716d43.zip"],
-  sha256 = "47f75b0eac6a1072bae7874ca70c77e814053c78e68dff3c9e02be2851c75f3d"
+  strip_prefix = "googleapis-4381242ee4d8c0694ae1188520e9ac1a72edf817",
+  urls = ["https://github.com/googleapis/googleapis/archive/4381242ee4d8c0694ae1188520e9ac1a72edf817.zip"],
+  sha256 = "3ddf170c9567dffe03f6279c84d8fa0aaedb9f283e82265f84a308607871d6c5"
 )
 load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
 switched_rules_by_language(name = "com_google_googleapis_imports", grpc = True)
