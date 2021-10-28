@@ -198,7 +198,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			if handler.StreamingServer {
 				streamerType := constructServerStreamer(service, handler, fileImports, helperSources)
 
-				source.P(`  serverStreamer, err := resttools.NewServerStreamer(w)`)
+				source.P(`  serverStreamer, err := resttools.NewServerStreamer(w, resttools.ServerStreamingChunkSize)`)
 				source.P(`  if err != nil {`)
 				source.P(`    backend.Error(w,http.StatusInternalServerError, "server error: could not construct server streamer: %%s", err.Error())`)
 				source.P(`    return`)
