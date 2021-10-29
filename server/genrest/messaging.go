@@ -20,17 +20,11 @@ package genrest
 import (
 	"bytes"
 	"context"
-	"fmt"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
 	"io"
 	"net/http"
-	"strings"
-	"sync"
 )
 
 // HandleCreateRoom translates REST requests/responses on the wire to internal proto messages for CreateRoom
@@ -1076,12 +1070,17 @@ func (backend *RESTBackend) HandleStreamBlurbs(w http.ResponseWriter, r *http.Re
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	streamer := &Messaging_StreamBlurbsServer{}
+	serverStreamer, err := resttools.NewServerStreamer(w, resttools.ServerStreamingChunkSize)
+	if err != nil {
+		backend.Error(w, http.StatusInternalServerError, "server error: could not construct server streamer: %s", err.Error())
+		return
+	}
+	defer serverStreamer.End()
+	streamer := &Messaging_StreamBlurbsServer{serverStreamer}
 	if err := backend.MessagingServer.StreamBlurbs(request, streamer); err != nil {
 		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
 		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 	}
-	w.Write([]byte(streamer.ListJSON()))
 }
 
 // HandleStreamBlurbs_1 translates REST requests/responses on the wire to internal proto messages for StreamBlurbs
@@ -1131,12 +1130,17 @@ func (backend *RESTBackend) HandleStreamBlurbs_1(w http.ResponseWriter, r *http.
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	streamer := &Messaging_StreamBlurbsServer{}
+	serverStreamer, err := resttools.NewServerStreamer(w, resttools.ServerStreamingChunkSize)
+	if err != nil {
+		backend.Error(w, http.StatusInternalServerError, "server error: could not construct server streamer: %s", err.Error())
+		return
+	}
+	defer serverStreamer.End()
+	streamer := &Messaging_StreamBlurbsServer{serverStreamer}
 	if err := backend.MessagingServer.StreamBlurbs(request, streamer); err != nil {
 		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
 		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 	}
-	w.Write([]byte(streamer.ListJSON()))
 }
 
 // HandleSendBlurbs translates REST requests/responses on the wire to internal proto messages for SendBlurbs
@@ -1151,45 +1155,13 @@ func (backend *RESTBackend) HandleSendBlurbs_1(w http.ResponseWriter, r *http.Re
 	backend.Error(w, http.StatusNotImplemented, "client-streaming methods not implemented yet (request matched '/v1beta1/{parent=users/*/profile}/blurbs:send': %q)", r.URL)
 }
 
-// Messaging_BaseServerStreamer contains the basic accumulation and emit functionality to help handle all server streaming RPCs in the Messaging service.
-type Messaging_BaseServerStreamer struct {
-	responses      []string
-	initialization sync.Once
-	marshaler      *protojson.MarshalOptions
-
-	grpc.ServerStream
-}
-
-func (streamer *Messaging_BaseServerStreamer) accumulate(response proto.Message) error {
-	streamer.initialization.Do(streamer.initialize)
-	json, err := streamer.marshaler.Marshal(response)
-	if err != nil {
-		return fmt.Errorf("error json-encoding response: %s", err.Error())
-	}
-	streamer.responses = append(streamer.responses, string(json))
-	return nil
-}
-
-// ListJSON returns a list of all the accumulated responses, in JSON format.
-func (streamer *Messaging_BaseServerStreamer) ListJSON() string {
-	return fmt.Sprintf("[%s]", strings.Join(streamer.responses, ",\n"))
-}
-
-func (streamer *Messaging_BaseServerStreamer) initialize() {
-	streamer.marshaler = resttools.ToJSON()
-}
-
-func (streamer *Messaging_BaseServerStreamer) Context() context.Context {
-	return context.Background()
-}
-
 // Messaging_StreamBlurbsServer implements genprotopb.Messaging_StreamBlurbsServer to provide server-side streaming over REST, returning all the
 // individual responses as part of a long JSON list.
 type Messaging_StreamBlurbsServer struct {
-	Messaging_BaseServerStreamer
+	*resttools.ServerStreamer
 }
 
 // Send accumulates a response to be fetched later as part of response list returned over REST.
 func (streamer *Messaging_StreamBlurbsServer) Send(response *genprotopb.StreamBlurbsResponse) error {
-	return streamer.accumulate(response)
+	return streamer.ServerStreamer.Send(response)
 }
