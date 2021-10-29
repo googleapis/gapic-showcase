@@ -99,7 +99,7 @@ func TestConstructStreamingServer(t *testing.T) {
 			ResponseType:        "AuthorEntry",
 		},
 		fileImports, helperSources)
-	if got, want := len(helperSources), 2; got != want {
+	if got, want := len(helperSources), 1; got != want {
 		t.Errorf("unexpected length of helperSources: got %d, want %d", got, want)
 	}
 
@@ -111,7 +111,7 @@ func TestConstructStreamingServer(t *testing.T) {
 			ResponseType:        "TitleEntry",
 		},
 		fileImports, helperSources)
-	if got, want := len(helperSources), 3; got != want {
+	if got, want := len(helperSources), 2; got != want {
 		t.Errorf("unexpected length of helperSources: got %d, want %d", got, want)
 	}
 
@@ -123,7 +123,7 @@ func TestConstructStreamingServer(t *testing.T) {
 			ResponseType:        "AudioEntry",
 		},
 		fileImports, helperSources)
-	if got, want := len(helperSources), 5; got != want {
+	if got, want := len(helperSources), 3; got != want {
 		t.Errorf("unexpected length of helperSources: got %d, want %d", got, want)
 	}
 
@@ -135,7 +135,7 @@ func TestConstructStreamingServer(t *testing.T) {
 			ResponseType:        "VideoEntry",
 		},
 		fileImports, helperSources)
-	if got, want := len(helperSources), 6; got != want {
+	if got, want := len(helperSources), 4; got != want {
 		t.Errorf("unexpected length of helperSources: got %d, want %d", got, want)
 	}
 
