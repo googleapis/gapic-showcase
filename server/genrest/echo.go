@@ -20,17 +20,11 @@ package genrest
 import (
 	"bytes"
 	"context"
-	"fmt"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
 	"io"
 	"net/http"
-	"strings"
-	"sync"
 )
 
 // HandleEcho translates REST requests/responses on the wire to internal proto messages for Echo
@@ -143,12 +137,17 @@ func (backend *RESTBackend) HandleExpand(w http.ResponseWriter, r *http.Request)
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	streamer := &Echo_ExpandServer{}
+	serverStreamer, err := resttools.NewServerStreamer(w, resttools.ServerStreamingChunkSize)
+	if err != nil {
+		backend.Error(w, http.StatusInternalServerError, "server error: could not construct server streamer: %s", err.Error())
+		return
+	}
+	defer serverStreamer.End()
+	streamer := &Echo_ExpandServer{serverStreamer}
 	if err := backend.EchoServer.Expand(request, streamer); err != nil {
 		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
 		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
 	}
-	w.Write([]byte(streamer.ListJSON()))
 }
 
 // HandleCollect translates REST requests/responses on the wire to internal proto messages for Collect
@@ -472,45 +471,13 @@ func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) 
 	w.Write(json)
 }
 
-// Echo_BaseServerStreamer contains the basic accumulation and emit functionality to help handle all server streaming RPCs in the Echo service.
-type Echo_BaseServerStreamer struct {
-	responses      []string
-	initialization sync.Once
-	marshaler      *protojson.MarshalOptions
-
-	grpc.ServerStream
-}
-
-func (streamer *Echo_BaseServerStreamer) accumulate(response proto.Message) error {
-	streamer.initialization.Do(streamer.initialize)
-	json, err := streamer.marshaler.Marshal(response)
-	if err != nil {
-		return fmt.Errorf("error json-encoding response: %s", err.Error())
-	}
-	streamer.responses = append(streamer.responses, string(json))
-	return nil
-}
-
-// ListJSON returns a list of all the accumulated responses, in JSON format.
-func (streamer *Echo_BaseServerStreamer) ListJSON() string {
-	return fmt.Sprintf("[%s]", strings.Join(streamer.responses, ",\n"))
-}
-
-func (streamer *Echo_BaseServerStreamer) initialize() {
-	streamer.marshaler = resttools.ToJSON()
-}
-
-func (streamer *Echo_BaseServerStreamer) Context() context.Context {
-	return context.Background()
-}
-
 // Echo_ExpandServer implements genprotopb.Echo_ExpandServer to provide server-side streaming over REST, returning all the
 // individual responses as part of a long JSON list.
 type Echo_ExpandServer struct {
-	Echo_BaseServerStreamer
+	*resttools.ServerStreamer
 }
 
 // Send accumulates a response to be fetched later as part of response list returned over REST.
 func (streamer *Echo_ExpandServer) Send(response *genprotopb.EchoResponse) error {
-	return streamer.accumulate(response)
+	return streamer.ServerStreamer.Send(response)
 }
