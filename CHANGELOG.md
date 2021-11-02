@@ -1,5 +1,11 @@
 # Release History
 
+### v0.17.0 / 2021-11-02
+- Implement server streaming RPCs over REST, using chunked encoding.
+- Implement RPCs that map to PUT and PATCH HTTP verbs
+- Check that REST RPCs using HTTP GET or DELETE don't contain bodies.
+- Disable TypeScript smoke tests pending upstream fixes (TS generator Docker image).
+
 ### v0.16.0 / 2021-06-16
 - Require incoming REST requests to have expected `x-goog-api-client` header tokens
 - Allow mTLS to work over gRPC when using `cmux` to also listen to REST requests on the same port
