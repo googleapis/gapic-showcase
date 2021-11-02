@@ -10,6 +10,7 @@ branchProtectionRules:
     - 'tests'
     - 'probes'
     - 'protobufjs-load-test'
+    - 'typescript-smoke-test'
     - 'cla/google'
   requiredApprovingReviewCount: 1
   requiresCodeOwnerReviews: true

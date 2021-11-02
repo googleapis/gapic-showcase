@@ -139,27 +139,26 @@ jobs:
         echo "gRPC exit code: $GRPC_EXIT_CODE"
         echo "REST status code: $STATUSCODE"
         [ $STATUSCODE = "200" ]  && [ GRPC_EXIT_CODE != 0 ]
-  # Disabled until https://github.com/googleapis/gapic-generator-typescript/pull/955 is merged/released.
-  # typescript-smoke-test:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - uses: actions/setup-node@v2
-  #     with:
-  #       node-version: '12'
-  #   - name: Run gapic-generator-typescript
-  #     run: |
-  #       mkdir tsout
-  #       docker run --rm --user $UID \
-  #         --mount type=bind,source="$(pwd)"/schema,destination=/in/protos/google/showcase/v1beta1,readonly \
-  #         --mount type=bind,source="$(pwd)"/tsout,destination=/out/ \
-  #         gcr.io/gapic-images/gapic-generator-typescript:latest
-  #   - name: Run auto-generated tests
-  #     run: |
-  #       cd tsout
-  #       npm install
-  #       npm test
-  #       npm run system-test
+  typescript-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '12'
+    - name: Run gapic-generator-typescript
+      run: |
+        mkdir tsout
+        docker run --rm --user $UID \
+          --mount type=bind,source="$(pwd)"/schema,destination=/in/protos/google/showcase/v1beta1,readonly \
+          --mount type=bind,source="$(pwd)"/tsout,destination=/out/ \
+          gcr.io/gapic-images/gapic-generator-typescript:latest
+    - name: Run auto-generated tests
+      run: |
+        cd tsout
+        npm install
+        npm test
+        npm run system-test
   protobufjs-load-test:
     runs-on: ubuntu-latest
     steps:
