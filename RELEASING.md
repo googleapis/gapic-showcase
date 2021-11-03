@@ -18,7 +18,7 @@ git checkout -b v${VERSION}
 go run ./util/cmd/bump_version --${TYPE}
 ```
 
-3. Update the CHANGELOG.md file with the changes made since the last release including the version in the heading for the changes. Please note that the version must start with the character `v` in order to match the git tag that will be pushed in a later step. You can get the list of PRs from your local git commit history on the `master` branch, or from GitHub by using the the query `is:pr merged:>=YYYY-MM-DD` (where the date refers to the _last_ release date).
+3. Update the CHANGELOG.md file with the changes made since the last release including the version in the heading for the changes. Please note that the version must start with the character `v` in order to match the git tag that will be pushed in a later step. You can get the list of PRs from your local git commit history on the `master` branch, or from GitHub by using the the query `is:pr merged:>=YYYY-MM-DD -author:renovate-bot  NOT deps in:title -author:yoshi-code-bot ` (where the date refers to the _last_ release date; yes, the syntax is slightly unusual because the two `-author:` conditions don't work when next to each other).
 
 4. Create a pull request for this release merging the version branch into master.
 
