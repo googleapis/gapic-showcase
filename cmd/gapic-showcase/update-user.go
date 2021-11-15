@@ -109,6 +109,9 @@ var UpdateUserCmd = &cobra.Command{
 			printVerboseInput("Identity", "UpdateUser", &UpdateUserInput)
 		}
 		resp, err := IdentityClient.UpdateUser(ctx, &UpdateUserInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")

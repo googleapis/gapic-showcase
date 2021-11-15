@@ -103,6 +103,9 @@ var CreateUserCmd = &cobra.Command{
 			printVerboseInput("Identity", "CreateUser", &CreateUserInput)
 		}
 		resp, err := IdentityClient.CreateUser(ctx, &CreateUserInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")

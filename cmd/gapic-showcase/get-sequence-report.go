@@ -61,6 +61,9 @@ var GetSequenceReportCmd = &cobra.Command{
 			printVerboseInput("Sequence", "GetSequenceReport", &GetSequenceReportInput)
 		}
 		resp, err := SequenceClient.GetSequenceReport(ctx, &GetSequenceReportInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")

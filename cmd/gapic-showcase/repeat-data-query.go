@@ -314,6 +314,9 @@ var RepeatDataQueryCmd = &cobra.Command{
 			printVerboseInput("Compliance", "RepeatDataQuery", &RepeatDataQueryInput)
 		}
 		resp, err := ComplianceClient.RepeatDataQuery(ctx, &RepeatDataQueryInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")

@@ -59,6 +59,9 @@ var DeleteRoomCmd = &cobra.Command{
 			printVerboseInput("Messaging", "DeleteRoom", &DeleteRoomInput)
 		}
 		err = MessagingClient.DeleteRoom(ctx, &DeleteRoomInput)
+		if err != nil {
+			return err
+		}
 
 		return err
 	},

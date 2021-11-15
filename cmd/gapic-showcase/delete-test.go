@@ -57,6 +57,9 @@ var DeleteTestCmd = &cobra.Command{
 			printVerboseInput("Testing", "DeleteTest", &DeleteTestInput)
 		}
 		err = TestingClient.DeleteTest(ctx, &DeleteTestInput)
+		if err != nil {
+			return err
+		}
 
 		return err
 	},

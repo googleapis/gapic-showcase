@@ -59,6 +59,9 @@ var AttemptSequenceCmd = &cobra.Command{
 			printVerboseInput("Sequence", "AttemptSequence", &AttemptSequenceInput)
 		}
 		err = SequenceClient.AttemptSequence(ctx, &AttemptSequenceInput)
+		if err != nil {
+			return err
+		}
 
 		return err
 	},

@@ -71,6 +71,9 @@ var CreateSessionCmd = &cobra.Command{
 			printVerboseInput("Testing", "CreateSession", &CreateSessionInput)
 		}
 		resp, err := TestingClient.CreateSession(ctx, &CreateSessionInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")

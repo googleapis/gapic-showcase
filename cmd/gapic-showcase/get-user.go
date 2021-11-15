@@ -61,6 +61,9 @@ var GetUserCmd = &cobra.Command{
 			printVerboseInput("Identity", "GetUser", &GetUserInput)
 		}
 		resp, err := IdentityClient.GetUser(ctx, &GetUserInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")

@@ -314,6 +314,9 @@ var RepeatDataPathResourceCmd = &cobra.Command{
 			printVerboseInput("Compliance", "RepeatDataPathResource", &RepeatDataPathResourceInput)
 		}
 		resp, err := ComplianceClient.RepeatDataPathResource(ctx, &RepeatDataPathResourceInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")

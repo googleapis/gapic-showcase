@@ -59,6 +59,9 @@ var ReportSessionCmd = &cobra.Command{
 			printVerboseInput("Testing", "ReportSession", &ReportSessionInput)
 		}
 		resp, err := TestingClient.ReportSession(ctx, &ReportSessionInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")

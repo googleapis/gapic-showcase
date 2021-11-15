@@ -50,6 +50,9 @@ var ChatCmd = &cobra.Command{
 		}
 
 		stream, err := EchoClient.Chat(ctx)
+		if err != nil {
+			return err
+		}
 
 		out, err := os.OpenFile(ChatOutFile, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 		if err != nil {

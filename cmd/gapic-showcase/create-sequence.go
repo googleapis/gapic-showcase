@@ -74,6 +74,9 @@ var CreateSequenceCmd = &cobra.Command{
 			printVerboseInput("Sequence", "CreateSequence", &CreateSequenceInput)
 		}
 		resp, err := SequenceClient.CreateSequence(ctx, &CreateSequenceInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")

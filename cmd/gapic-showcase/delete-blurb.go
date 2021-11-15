@@ -59,6 +59,9 @@ var DeleteBlurbCmd = &cobra.Command{
 			printVerboseInput("Messaging", "DeleteBlurb", &DeleteBlurbInput)
 		}
 		err = MessagingClient.DeleteBlurb(ctx, &DeleteBlurbInput)
+		if err != nil {
+			return err
+		}
 
 		return err
 	},

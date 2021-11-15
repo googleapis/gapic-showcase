@@ -57,6 +57,9 @@ var DeleteSessionCmd = &cobra.Command{
 			printVerboseInput("Testing", "DeleteSession", &DeleteSessionInput)
 		}
 		err = TestingClient.DeleteSession(ctx, &DeleteSessionInput)
+		if err != nil {
+			return err
+		}
 
 		return err
 	},

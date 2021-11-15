@@ -61,6 +61,9 @@ var GetBlurbCmd = &cobra.Command{
 			printVerboseInput("Messaging", "GetBlurb", &GetBlurbInput)
 		}
 		resp, err := MessagingClient.GetBlurb(ctx, &GetBlurbInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")

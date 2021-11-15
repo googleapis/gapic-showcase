@@ -86,6 +86,9 @@ var ExpandCmd = &cobra.Command{
 			printVerboseInput("Echo", "Expand", &ExpandInput)
 		}
 		resp, err := EchoClient.Expand(ctx, &ExpandInput)
+		if err != nil {
+			return err
+		}
 
 		var item *genprotopb.EchoResponse
 		for {

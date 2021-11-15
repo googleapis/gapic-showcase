@@ -314,6 +314,9 @@ var RepeatDataSimplePathCmd = &cobra.Command{
 			printVerboseInput("Compliance", "RepeatDataSimplePath", &RepeatDataSimplePathInput)
 		}
 		resp, err := ComplianceClient.RepeatDataSimplePath(ctx, &RepeatDataSimplePathInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")
