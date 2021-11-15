@@ -50,6 +50,9 @@ var ConnectCmd = &cobra.Command{
 		}
 
 		stream, err := MessagingClient.Connect(ctx)
+		if err != nil {
+			return err
+		}
 
 		out, err := os.OpenFile(ConnectOutFile, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 		if err != nil {

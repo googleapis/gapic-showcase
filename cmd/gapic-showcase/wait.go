@@ -162,6 +162,9 @@ var WaitCmd = &cobra.Command{
 			printVerboseInput("Echo", "Wait", &WaitInput)
 		}
 		resp, err := EchoClient.Wait(ctx, &WaitInput)
+		if err != nil {
+			return err
+		}
 
 		if !WaitFollow {
 			var s interface{}

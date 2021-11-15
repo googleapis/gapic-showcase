@@ -61,6 +61,9 @@ var VerifyTestCmd = &cobra.Command{
 			printVerboseInput("Testing", "VerifyTest", &VerifyTestInput)
 		}
 		resp, err := TestingClient.VerifyTest(ctx, &VerifyTestInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")

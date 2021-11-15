@@ -118,6 +118,9 @@ var BlockCmd = &cobra.Command{
 			printVerboseInput("Echo", "Block", &BlockInput)
 		}
 		resp, err := EchoClient.Block(ctx, &BlockInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")

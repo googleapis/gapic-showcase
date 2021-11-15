@@ -59,6 +59,9 @@ var DeleteUserCmd = &cobra.Command{
 			printVerboseInput("Identity", "DeleteUser", &DeleteUserInput)
 		}
 		err = IdentityClient.DeleteUser(ctx, &DeleteUserInput)
+		if err != nil {
+			return err
+		}
 
 		return err
 	},

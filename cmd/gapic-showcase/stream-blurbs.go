@@ -71,6 +71,9 @@ var StreamBlurbsCmd = &cobra.Command{
 			printVerboseInput("Messaging", "StreamBlurbs", &StreamBlurbsInput)
 		}
 		resp, err := MessagingClient.StreamBlurbs(ctx, &StreamBlurbsInput)
+		if err != nil {
+			return err
+		}
 
 		var item *genprotopb.StreamBlurbsResponse
 		for {

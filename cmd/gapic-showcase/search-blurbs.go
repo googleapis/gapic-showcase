@@ -81,6 +81,9 @@ var SearchBlurbsCmd = &cobra.Command{
 			printVerboseInput("Messaging", "SearchBlurbs", &SearchBlurbsInput)
 		}
 		resp, err := MessagingClient.SearchBlurbs(ctx, &SearchBlurbsInput)
+		if err != nil {
+			return err
+		}
 
 		if !SearchBlurbsFollow {
 			var s interface{}

@@ -61,6 +61,9 @@ var GetRoomCmd = &cobra.Command{
 			printVerboseInput("Messaging", "GetRoom", &GetRoomInput)
 		}
 		resp, err := MessagingClient.GetRoom(ctx, &GetRoomInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")

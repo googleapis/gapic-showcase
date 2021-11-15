@@ -45,6 +45,9 @@ var SendBlurbsCmd = &cobra.Command{
 		}
 
 		stream, err := MessagingClient.SendBlurbs(ctx)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Println("Client stream open. Close with ctrl+D.")

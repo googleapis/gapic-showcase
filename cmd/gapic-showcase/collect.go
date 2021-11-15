@@ -45,6 +45,9 @@ var CollectCmd = &cobra.Command{
 		}
 
 		stream, err := EchoClient.Collect(ctx)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Println("Client stream open. Close with ctrl+D.")

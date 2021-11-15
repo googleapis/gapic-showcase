@@ -73,6 +73,9 @@ var UpdateRoomCmd = &cobra.Command{
 			printVerboseInput("Messaging", "UpdateRoom", &UpdateRoomInput)
 		}
 		resp, err := MessagingClient.UpdateRoom(ctx, &UpdateRoomInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")

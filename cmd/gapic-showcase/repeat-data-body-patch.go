@@ -314,6 +314,9 @@ var RepeatDataBodyPatchCmd = &cobra.Command{
 			printVerboseInput("Compliance", "RepeatDataBodyPatch", &RepeatDataBodyPatchInput)
 		}
 		resp, err := ComplianceClient.RepeatDataBodyPatch(ctx, &RepeatDataBodyPatchInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")

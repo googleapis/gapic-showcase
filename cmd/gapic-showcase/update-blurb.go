@@ -125,6 +125,9 @@ var UpdateBlurbCmd = &cobra.Command{
 			printVerboseInput("Messaging", "UpdateBlurb", &UpdateBlurbInput)
 		}
 		resp, err := MessagingClient.UpdateBlurb(ctx, &UpdateBlurbInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")

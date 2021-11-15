@@ -67,6 +67,9 @@ var CreateRoomCmd = &cobra.Command{
 			printVerboseInput("Messaging", "CreateRoom", &CreateRoomInput)
 		}
 		resp, err := MessagingClient.CreateRoom(ctx, &CreateRoomInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")

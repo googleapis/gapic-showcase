@@ -116,6 +116,9 @@ var EchoCmd = &cobra.Command{
 			printVerboseInput("Echo", "Echo", &EchoInput)
 		}
 		resp, err := EchoClient.Echo(ctx, &EchoInput)
+		if err != nil {
+			return err
+		}
 
 		if Verbose {
 			fmt.Print("Output: ")
