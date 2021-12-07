@@ -1,5 +1,9 @@
 # Release History
 
+### v0.18.0 / 2021-12-06
+- add `parent` to method signature for `Messaging.SearchBlurbs()`
+- update `RELEASING.md` instructions
+
 ### v0.17.0 / 2021-11-02
 - Implement server streaming RPCs over REST, using chunked encoding.
 - Implement RPCs that map to PUT and PATCH HTTP verbs
