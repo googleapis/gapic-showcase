@@ -17,6 +17,7 @@ syntax = "proto3";
 import "google/api/annotations.proto";
 import "google/api/client.proto";
 import "google/api/field_behavior.proto";
+import "google/api/routing.proto";
 import "google/longrunning/operations.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
@@ -33,7 +34,9 @@ option ruby_package = "Google::Showcase::V1Beta1";
 // side streaming, client side streaming, and bidirectional streaming. This
 // service also exposes methods that explicitly implement server delay, and
 // paginated calls. Set the 'showcase-trailer' metadata key on any method
-// to have the values echoed in the response trailers.
+// to have the values echoed in the response trailers. Set the 
+// 'x-goog-request-params' metadata key on any method to have the values
+// echoed in the response headers.
 service Echo {
   // This service is meant to only run locally on the port 7469 (keypad digits
   // for "show").
@@ -44,6 +47,39 @@ service Echo {
     option (google.api.http) = {
       post: "/v1beta1/echo:echo"
       body: "*"
+    };
+    option (google.api.routing) = {
+      routing_parameters{
+        field: "header"
+      }
+      routing_parameters{
+        field: "header"
+        path_template: "{routing_id=**}"
+      }
+      routing_parameters{
+        field: "header"
+        path_template: "{table_name=regions/*/zones/*/**}"
+      }
+      routing_parameters{
+        field: "header"
+        path_template: "{super_id=projects/*}/**"
+      }
+      routing_parameters{
+        field: "header"
+        path_template: "{table_name=projects/*/instances/*/**}"
+      }
+      routing_parameters{
+        field: "header"
+        path_template: "projects/*/{instance_id=instances/*}/**"
+      }
+      routing_parameters{
+        field: "other_header"
+        path_template: "{baz=**}"
+      }
+      routing_parameters{
+        field: "other_header"
+        path_template: "{qux=projects/*}/**"
+      }
     };
   }
 
@@ -153,6 +189,12 @@ message EchoRequest {
 
   // The severity to be echoed by the server.
   Severity severity = 3;
+
+  // Optional. This field can be set to test the routing annotation on the Echo method.
+  string header = 4;
+
+  // Optional. This field can be set to test the routing annotation on the Echo method.
+  string other_header = 5;
 }
 
 // The response message for the Echo methods.

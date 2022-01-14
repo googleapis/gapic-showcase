@@ -98,11 +98,12 @@ type mockSTS struct {
 }
 
 func (m *mockSTS) Method() string                  { return "" }
-func (m *mockSTS) SetHeader(md metadata.MD) error  { return m.stream.SetHeader(md) }
+func (m *mockSTS) SetHeader(md metadata.MD) error  { m.stream.SetHeader(md); return nil }
 func (m *mockSTS) SendHeader(md metadata.MD) error { return m.stream.SendHeader(md) }
 func (m *mockSTS) SetTrailer(md metadata.MD) error { m.stream.SetTrailer(md); return nil }
 
 type mockUnaryStream struct {
+	head  []string
 	trail []string
 	t     *testing.T
 	grpc.ServerStream
@@ -114,14 +115,19 @@ func (m *mockUnaryStream) Context() context.Context         { return nil }
 func (m *mockUnaryStream) SetTrailer(md metadata.MD) {
 	m.trail = append(m.trail, md.Get("showcase-trailer")...)
 }
-func (m *mockUnaryStream) verify(expectTrailers bool) {
-	if expectTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) {
-		m.t.Errorf("Unary stream did not get all expected trailers. Got: %+v", m.trail)
+func (m *mockUnaryStream) SetHeader(md metadata.MD) error {
+	m.head = append(m.head, md.Get("x-goog-request-params")...)
+	return nil
+}
+func (m *mockUnaryStream) verify(expectHeadersAndTrailers bool) {
+	if expectHeadersAndTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) && !reflect.DeepEqual([]string{"showcaseHeader, anotherHeader"}, m.head) {
+		m.t.Errorf("Unary stream did not get all expected headers and trailers.\nGot these headers: %+v\nGot these trailers: %+v", m.head, m.trail)
 	}
 }
 
 type mockExpandStream struct {
 	exp   []string
+	head  []string
 	trail []string
 	t     *testing.T
 	pb.Echo_ExpandServer
@@ -143,12 +149,17 @@ func (m *mockExpandStream) SetTrailer(md metadata.MD) {
 	m.trail = append(m.trail, md.Get("showcase-trailer")...)
 }
 
-func (m *mockExpandStream) verify(expectTrailers bool) {
+func (m *mockExpandStream) SetHeader(md metadata.MD) error {
+	m.head = append(m.head, md.Get("x-goog-request-params")...)
+	return nil
+}
+
+func (m *mockExpandStream) verify(expectHeadersAndTrailers bool) {
 	if len(m.exp) > 0 {
 		m.t.Errorf("Expand did not stream all expected values. %d expected values remaining.", len(m.exp))
 	}
-	if expectTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) {
-		m.t.Errorf("Expand did not get all expected trailers. Got: %+v", m.trail)
+	if expectHeadersAndTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) && !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head) {
+		m.t.Errorf("Expand did not get all expected headers and trailers.\nGot these headers: %+v\nGot these trailers: %+v", m.head, m.trail)
 	}
 }
 
@@ -195,6 +206,7 @@ func TestExpand_streamErr(t *testing.T) {
 
 type mockCollectStream struct {
 	reqs  []*pb.EchoRequest
+	head  []string
 	trail []string
 	exp   *string
 	t     *testing.T
@@ -224,13 +236,18 @@ func (m *mockCollectStream) Context() context.Context {
 	return appendTestOutgoingMetadata(context.Background(), &mockSTS{stream: m, t: m.t})
 }
 
+func (m *mockCollectStream) SetHeader(md metadata.MD) error {
+	m.head = append(m.head, md.Get("x-goog-request-params")...)
+	return nil
+}
+
 func (m *mockCollectStream) SetTrailer(md metadata.MD) {
 	m.trail = append(m.trail, md.Get("showcase-trailer")...)
 }
 
-func (m *mockCollectStream) verify(expectTrailers bool) {
-	if expectTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) {
-		m.t.Errorf("Collect did not get all expected trailers. Got: %+v", m.trail)
+func (m *mockCollectStream) verify(expectHeadersAndTrailers bool) {
+	if expectHeadersAndTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) && !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head) {
+		m.t.Errorf("Collect did not get all expected trailers.\nGot these headers: %+v\nGot these trailers: %+v", m.head, m.trail)
 	}
 }
 
@@ -283,12 +300,13 @@ func TestCollect_streamErr(t *testing.T) {
 	server := NewEchoServer()
 	err := server.Collect(stream)
 	if e != err {
-		t.Error("Expand expected to pass through stream errors.")
+		t.Error("Collect expected to pass through stream errors.")
 	}
 }
 
 type mockChatStream struct {
 	reqs  []*pb.EchoRequest
+	head  []string
 	trail []string
 	curr  *pb.EchoRequest
 	t     *testing.T
@@ -319,13 +337,18 @@ func (m *mockChatStream) Context() context.Context {
 	return appendTestOutgoingMetadata(context.Background(), &mockSTS{stream: m, t: m.t})
 }
 
+func (m *mockChatStream) SetHeader(md metadata.MD) error {
+	m.head = append(m.head, md.Get("x-goog-request-params")...)
+	return nil
+}
+
 func (m *mockChatStream) SetTrailer(md metadata.MD) {
 	m.trail = append(m.trail, md.Get("showcase-trailer")...)
 }
 
-func (m *mockChatStream) verify(expectTrailers bool) {
-	if expectTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) {
-		m.t.Errorf("Chat did not get all expected trailers. Got: %+v", m.trail)
+func (m *mockChatStream) verify(expectHeadersAndTrailers bool) {
+	if expectHeadersAndTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) && !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head) {
+		m.t.Errorf("Chat did not get all expected trailers.\nGot these headers: %+v\nGot these trailers: %+v", m.head, m.trail)
 	}
 }
 
@@ -375,7 +398,7 @@ func TestChat_streamErr(t *testing.T) {
 	server := NewEchoServer()
 	err := server.Chat(stream)
 	if e != err {
-		t.Error("Expand expected to pass through stream errors.")
+		t.Error("Chat expected to pass through stream errors.")
 	}
 }
 
@@ -739,6 +762,6 @@ func TestBlockError(t *testing.T) {
 
 func appendTestOutgoingMetadata(ctx context.Context, stream grpc.ServerTransportStream) context.Context {
 	ctx = grpc.NewContextWithServerTransportStream(ctx, stream)
-	ctx = metadata.NewIncomingContext(ctx, metadata.Pairs("showcase-trailer", "show", "showcase-trailer", "case", "trailer", "trail"))
+	ctx = metadata.NewIncomingContext(ctx, metadata.Pairs("showcase-trailer", "show", "showcase-trailer", "case", "trailer", "trail", "x-goog-request-params", "showcaseHeader", "x-goog-request-params", "anotherHeader", "header", "head"))
 	return ctx
 }
