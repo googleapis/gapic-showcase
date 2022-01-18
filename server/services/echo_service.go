@@ -17,7 +17,6 @@ package services
 import (
 	"context"
 	"io"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -54,10 +53,8 @@ func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.Echo
 
 func (s *echoServerImpl) Expand(in *pb.ExpandRequest, stream pb.Echo_ExpandServer) error {
 	for _, word := range strings.Fields(in.GetContent()) {
-		log.Printf("range_stream: %v:", stream)
 		err := stream.Send(&pb.EchoResponse{Content: word})
 		if err != nil {
-			log.Printf("err_stream: %v:", stream)
 			return err
 		}
 	}
@@ -66,7 +63,6 @@ func (s *echoServerImpl) Expand(in *pb.ExpandRequest, stream pb.Echo_ExpandServe
 		return status.ErrorProto(in.GetError())
 	}
 	echoStreamingTrailers(stream)
-	log.Printf("ending_stream: %v:", stream)
 	return nil
 }
 
