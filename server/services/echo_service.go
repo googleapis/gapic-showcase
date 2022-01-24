@@ -46,6 +46,7 @@ func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.Echo
 	if err != nil {
 		return nil, err
 	}
+	echoHeaders(ctx)
 	echoTrailers(ctx)
 	return &pb.EchoResponse{Content: in.GetContent(), Severity: in.GetSeverity()}, nil
 }
@@ -57,6 +58,7 @@ func (s *echoServerImpl) Expand(in *pb.ExpandRequest, stream pb.Echo_ExpandServe
 			return err
 		}
 	}
+	echoStreamingHeaders(stream)
 	if in.GetError() != nil {
 		return status.ErrorProto(in.GetError())
 	}
@@ -70,6 +72,7 @@ func (s *echoServerImpl) Collect(stream pb.Echo_CollectServer) error {
 	for {
 		req, err := stream.Recv()
 		if err == io.EOF {
+			echoStreamingHeaders(stream)
 			echoStreamingTrailers(stream)
 			return stream.SendAndClose(&pb.EchoResponse{Content: strings.Join(resp, " ")})
 		}
@@ -101,6 +104,7 @@ func (s *echoServerImpl) Chat(stream pb.Echo_ChatServer) error {
 		if s != nil {
 			return s
 		}
+		echoStreamingHeaders(stream)
 		stream.Send(&pb.EchoResponse{Content: req.GetContent()})
 	}
 }
@@ -127,6 +131,7 @@ func (s *echoServerImpl) PagedExpand(ctx context.Context, in *pb.PagedExpandRequ
 		responses = append(responses, &pb.EchoResponse{Content: word})
 	}
 
+	echoHeaders(ctx)
 	echoTrailers(ctx)
 	return &pb.PagedExpandResponse{
 		Responses:     responses,
@@ -162,6 +167,7 @@ func (s *echoServerImpl) PagedExpandLegacyMapped(ctx context.Context, in *pb.Pag
 		}
 	}
 
+	echoHeaders(ctx)
 	echoTrailers(ctx)
 	return &pb.PagedExpandLegacyMappedResponse{
 		Alphabetized:  alphabetized,
@@ -207,6 +213,7 @@ func min(x int32, y int32) int32 {
 }
 
 func (s *echoServerImpl) Wait(ctx context.Context, in *pb.WaitRequest) (*lropb.Operation, error) {
+	echoHeaders(ctx)
 	echoTrailers(ctx)
 	return s.waiter.Wait(in), nil
 }
@@ -217,8 +224,37 @@ func (s *echoServerImpl) Block(ctx context.Context, in *pb.BlockRequest) (*pb.Bl
 	if in.GetError() != nil {
 		return nil, status.ErrorProto(in.GetError())
 	}
+	echoHeaders(ctx)
 	echoTrailers(ctx)
 	return in.GetSuccess(), nil
+}
+
+//echo any provided headers in the metadata
+func echoHeaders(ctx context.Context) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return
+	}
+
+	values := md.Get("x-goog-request-params")
+	for _, value := range values {
+		header := metadata.Pairs("x-goog-request-params", value)
+		grpc.SetHeader(ctx, header)
+	}
+}
+
+func echoStreamingHeaders(stream grpc.ServerStream) {
+	md, ok := metadata.FromIncomingContext(stream.Context())
+	if !ok {
+		return
+	}
+	values := md.Get("x-goog-request-params")
+	for _, value := range values {
+		header := metadata.Pairs("x-goog-request-params", value)
+		if stream.SetHeader(header) != nil {
+			return
+		}
+	}
 }
 
 // echo any provided trailing metadata

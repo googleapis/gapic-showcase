@@ -49,6 +49,10 @@ func init() {
 
 	EchoCmd.Flags().StringVar(&EchoInputSeverity, "severity", "", "The severity to be echoed by the server.")
 
+	EchoCmd.Flags().StringVar(&EchoInput.Header, "header", "", "Optional. This field can be set to test the...")
+
+	EchoCmd.Flags().StringVar(&EchoInput.OtherHeader, "other_header", "", "Optional. This field can be set to test the...")
+
 	EchoCmd.Flags().StringVar(&EchoInputResponse, "response", "", "Choices: content, error")
 
 	EchoCmd.Flags().StringVar(&EchoFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
