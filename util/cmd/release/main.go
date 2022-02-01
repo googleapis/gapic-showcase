@@ -73,6 +73,7 @@ func main() {
 	util.Execute("cp", filepath.Join(apiPath, "field_behavior.proto"), tmpAPIPath)
 	util.Execute("cp", filepath.Join(apiPath, "http.proto"), tmpAPIPath)
 	util.Execute("cp", filepath.Join(apiPath, "resource.proto"), tmpAPIPath)
+	util.Execute("cp", filepath.Join(apiPath, "routing.proto"), tmpAPIPath)
 
 	longrunningPath := filepath.Join("schema", "api-common-protos", "google", "longrunning")
 	tmpLongrunningPath := filepath.Join(tmpProtoPath, "google", "longrunning")
