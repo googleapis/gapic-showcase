@@ -96,6 +96,96 @@
               ]
             }
           }
+        },
+        "rest": {
+          "libraryClient": "ComplianceClient",
+          "rpcs": {
+            "CancelOperation": {
+              "methods": [
+                "CancelOperation"
+              ]
+            },
+            "DeleteOperation": {
+              "methods": [
+                "DeleteOperation"
+              ]
+            },
+            "GetIamPolicy": {
+              "methods": [
+                "GetIamPolicy"
+              ]
+            },
+            "GetLocation": {
+              "methods": [
+                "GetLocation"
+              ]
+            },
+            "GetOperation": {
+              "methods": [
+                "GetOperation"
+              ]
+            },
+            "ListLocations": {
+              "methods": [
+                "ListLocations"
+              ]
+            },
+            "ListOperations": {
+              "methods": [
+                "ListOperations"
+              ]
+            },
+            "RepeatDataBody": {
+              "methods": [
+                "RepeatDataBody"
+              ]
+            },
+            "RepeatDataBodyInfo": {
+              "methods": [
+                "RepeatDataBodyInfo"
+              ]
+            },
+            "RepeatDataBodyPatch": {
+              "methods": [
+                "RepeatDataBodyPatch"
+              ]
+            },
+            "RepeatDataBodyPut": {
+              "methods": [
+                "RepeatDataBodyPut"
+              ]
+            },
+            "RepeatDataPathResource": {
+              "methods": [
+                "RepeatDataPathResource"
+              ]
+            },
+            "RepeatDataPathTrailingResource": {
+              "methods": [
+                "RepeatDataPathTrailingResource"
+              ]
+            },
+            "RepeatDataQuery": {
+              "methods": [
+                "RepeatDataQuery"
+              ]
+            },
+            "RepeatDataSimplePath": {
+              "methods": [
+                "RepeatDataSimplePath"
+              ]
+            },
+            "SetIamPolicy": {
+              "methods": [
+                "SetIamPolicy"
+              ]
+            },
+            "TestIamPermissions": {
+              "methods": [
+                "TestIamPermissions"
+              ]
+            }
+          }
         }
       }
     },
@@ -195,12 +285,182 @@
               ]
             }
           }
+        },
+        "rest": {
+          "libraryClient": "EchoClient",
+          "rpcs": {
+            "Block": {
+              "methods": [
+                "Block"
+              ]
+            },
+            "CancelOperation": {
+              "methods": [
+                "CancelOperation"
+              ]
+            },
+            "Chat": {
+              "methods": [
+                "Chat"
+              ]
+            },
+            "Collect": {
+              "methods": [
+                "Collect"
+              ]
+            },
+            "DeleteOperation": {
+              "methods": [
+                "DeleteOperation"
+              ]
+            },
+            "Echo": {
+              "methods": [
+                "Echo"
+              ]
+            },
+            "Expand": {
+              "methods": [
+                "Expand"
+              ]
+            },
+            "GetIamPolicy": {
+              "methods": [
+                "GetIamPolicy"
+              ]
+            },
+            "GetLocation": {
+              "methods": [
+                "GetLocation"
+              ]
+            },
+            "GetOperation": {
+              "methods": [
+                "GetOperation"
+              ]
+            },
+            "ListLocations": {
+              "methods": [
+                "ListLocations"
+              ]
+            },
+            "ListOperations": {
+              "methods": [
+                "ListOperations"
+              ]
+            },
+            "PagedExpand": {
+              "methods": [
+                "PagedExpand"
+              ]
+            },
+            "PagedExpandLegacy": {
+              "methods": [
+                "PagedExpandLegacy"
+              ]
+            },
+            "PagedExpandLegacyMapped": {
+              "methods": [
+                "PagedExpandLegacyMapped"
+              ]
+            },
+            "SetIamPolicy": {
+              "methods": [
+                "SetIamPolicy"
+              ]
+            },
+            "TestIamPermissions": {
+              "methods": [
+                "TestIamPermissions"
+              ]
+            },
+            "Wait": {
+              "methods": [
+                "Wait"
+              ]
+            }
+          }
         }
       }
     },
     "Identity": {
       "clients": {
         "grpc": {
+          "libraryClient": "IdentityClient",
+          "rpcs": {
+            "CancelOperation": {
+              "methods": [
+                "CancelOperation"
+              ]
+            },
+            "CreateUser": {
+              "methods": [
+                "CreateUser"
+              ]
+            },
+            "DeleteOperation": {
+              "methods": [
+                "DeleteOperation"
+              ]
+            },
+            "DeleteUser": {
+              "methods": [
+                "DeleteUser"
+              ]
+            },
+            "GetIamPolicy": {
+              "methods": [
+                "GetIamPolicy"
+              ]
+            },
+            "GetLocation": {
+              "methods": [
+                "GetLocation"
+              ]
+            },
+            "GetOperation": {
+              "methods": [
+                "GetOperation"
+              ]
+            },
+            "GetUser": {
+              "methods": [
+                "GetUser"
+              ]
+            },
+            "ListLocations": {
+              "methods": [
+                "ListLocations"
+              ]
+            },
+            "ListOperations": {
+              "methods": [
+                "ListOperations"
+              ]
+            },
+            "ListUsers": {
+              "methods": [
+                "ListUsers"
+              ]
+            },
+            "SetIamPolicy": {
+              "methods": [
+                "SetIamPolicy"
+              ]
+            },
+            "TestIamPermissions": {
+              "methods": [
+                "TestIamPermissions"
+              ]
+            },
+            "UpdateUser": {
+              "methods": [
+                "UpdateUser"
+              ]
+            }
+          }
+        },
+        "rest": {
           "libraryClient": "IdentityClient",
           "rpcs": {
             "CancelOperation": {
@@ -398,6 +658,126 @@
               ]
             }
           }
+        },
+        "rest": {
+          "libraryClient": "MessagingClient",
+          "rpcs": {
+            "CancelOperation": {
+              "methods": [
+                "CancelOperation"
+              ]
+            },
+            "Connect": {
+              "methods": [
+                "Connect"
+              ]
+            },
+            "CreateBlurb": {
+              "methods": [
+                "CreateBlurb"
+              ]
+            },
+            "CreateRoom": {
+              "methods": [
+                "CreateRoom"
+              ]
+            },
+            "DeleteBlurb": {
+              "methods": [
+                "DeleteBlurb"
+              ]
+            },
+            "DeleteOperation": {
+              "methods": [
+                "DeleteOperation"
+              ]
+            },
+            "DeleteRoom": {
+              "methods": [
+                "DeleteRoom"
+              ]
+            },
+            "GetBlurb": {
+              "methods": [
+                "GetBlurb"
+              ]
+            },
+            "GetIamPolicy": {
+              "methods": [
+                "GetIamPolicy"
+              ]
+            },
+            "GetLocation": {
+              "methods": [
+                "GetLocation"
+              ]
+            },
+            "GetOperation": {
+              "methods": [
+                "GetOperation"
+              ]
+            },
+            "GetRoom": {
+              "methods": [
+                "GetRoom"
+              ]
+            },
+            "ListBlurbs": {
+              "methods": [
+                "ListBlurbs"
+              ]
+            },
+            "ListLocations": {
+              "methods": [
+                "ListLocations"
+              ]
+            },
+            "ListOperations": {
+              "methods": [
+                "ListOperations"
+              ]
+            },
+            "ListRooms": {
+              "methods": [
+                "ListRooms"
+              ]
+            },
+            "SearchBlurbs": {
+              "methods": [
+                "SearchBlurbs"
+              ]
+            },
+            "SendBlurbs": {
+              "methods": [
+                "SendBlurbs"
+              ]
+            },
+            "SetIamPolicy": {
+              "methods": [
+                "SetIamPolicy"
+              ]
+            },
+            "StreamBlurbs": {
+              "methods": [
+                "StreamBlurbs"
+              ]
+            },
+            "TestIamPermissions": {
+              "methods": [
+                "TestIamPermissions"
+              ]
+            },
+            "UpdateBlurb": {
+              "methods": [
+                "UpdateBlurb"
+              ]
+            },
+            "UpdateRoom": {
+              "methods": [
+                "UpdateRoom"
+              ]
+            }
+          }
         }
       }
     },
@@ -467,12 +847,167 @@
               ]
             }
           }
+        },
+        "rest": {
+          "libraryClient": "SequenceClient",
+          "rpcs": {
+            "AttemptSequence": {
+              "methods": [
+                "AttemptSequence"
+              ]
+            },
+            "CancelOperation": {
+              "methods": [
+                "CancelOperation"
+              ]
+            },
+            "CreateSequence": {
+              "methods": [
+                "CreateSequence"
+              ]
+            },
+            "DeleteOperation": {
+              "methods": [
+                "DeleteOperation"
+              ]
+            },
+            "GetIamPolicy": {
+              "methods": [
+                "GetIamPolicy"
+              ]
+            },
+            "GetLocation": {
+              "methods": [
+                "GetLocation"
+              ]
+            },
+            "GetOperation": {
+              "methods": [
+                "GetOperation"
+              ]
+            },
+            "GetSequenceReport": {
+              "methods": [
+                "GetSequenceReport"
+              ]
+            },
+            "ListLocations": {
+              "methods": [
+                "ListLocations"
+              ]
+            },
+            "ListOperations": {
+              "methods": [
+                "ListOperations"
+              ]
+            },
+            "SetIamPolicy": {
+              "methods": [
+                "SetIamPolicy"
+              ]
+            },
+            "TestIamPermissions": {
+              "methods": [
+                "TestIamPermissions"
+              ]
+            }
+          }
         }
       }
     },
     "Testing": {
       "clients": {
         "grpc": {
+          "libraryClient": "TestingClient",
+          "rpcs": {
+            "CancelOperation": {
+              "methods": [
+                "CancelOperation"
+              ]
+            },
+            "CreateSession": {
+              "methods": [
+                "CreateSession"
+              ]
+            },
+            "DeleteOperation": {
+              "methods": [
+                "DeleteOperation"
+              ]
+            },
+            "DeleteSession": {
+              "methods": [
+                "DeleteSession"
+              ]
+            },
+            "DeleteTest": {
+              "methods": [
+                "DeleteTest"
+              ]
+            },
+            "GetIamPolicy": {
+              "methods": [
+                "GetIamPolicy"
+              ]
+            },
+            "GetLocation": {
+              "methods": [
+                "GetLocation"
+              ]
+            },
+            "GetOperation": {
+              "methods": [
+                "GetOperation"
+              ]
+            },
+            "GetSession": {
+              "methods": [
+                "GetSession"
+              ]
+            },
+            "ListLocations": {
+              "methods": [
+                "ListLocations"
+              ]
+            },
+            "ListOperations": {
+              "methods": [
+                "ListOperations"
+              ]
+            },
+            "ListSessions": {
+              "methods": [
+                "ListSessions"
+              ]
+            },
+            "ListTests": {
+              "methods": [
+                "ListTests"
+              ]
+            },
+            "ReportSession": {
+              "methods": [
+                "ReportSession"
+              ]
+            },
+            "SetIamPolicy": {
+              "methods": [
+                "SetIamPolicy"
+              ]
+            },
+            "TestIamPermissions": {
+              "methods": [
+                "TestIamPermissions"
+              ]
+            },
+            "VerifyTest": {
+              "methods": [
+                "VerifyTest"
+              ]
+            }
+          }
+        },
+        "rest": {
           "libraryClient": "TestingClient",
           "rpcs": {
             "CancelOperation": {

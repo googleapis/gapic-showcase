@@ -40,6 +40,18 @@ func ExampleNewEchoClient() {
 	_ = c
 }
 
+func ExampleNewEchoRESTClient() {
+	ctx := context.Background()
+	c, err := client.NewEchoRESTClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	// TODO: Use client.
+	_ = c
+}
+
 func ExampleEchoClient_Echo() {
 	ctx := context.Background()
 	c, err := client.NewEchoClient(ctx)
