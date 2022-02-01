@@ -39,6 +39,18 @@ func ExampleNewSequenceClient() {
 	_ = c
 }
 
+func ExampleNewSequenceRESTClient() {
+	ctx := context.Background()
+	c, err := client.NewSequenceRESTClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	// TODO: Use client.
+	_ = c
+}
+
 func ExampleSequenceClient_CreateSequence() {
 	ctx := context.Background()
 	c, err := client.NewSequenceClient(ctx)

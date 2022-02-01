@@ -39,6 +39,18 @@ func ExampleNewComplianceClient() {
 	_ = c
 }
 
+func ExampleNewComplianceRESTClient() {
+	ctx := context.Background()
+	c, err := client.NewComplianceRESTClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	// TODO: Use client.
+	_ = c
+}
+
 func ExampleComplianceClient_RepeatDataBody() {
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)
