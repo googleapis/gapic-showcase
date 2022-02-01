@@ -3,7 +3,7 @@ To make a new release of gapic-showcase the following steps should be performed.
 
 0. Determine the new API version for the api, such as 
 ```sh
-export VERSION=0.18.0
+export VERSION=0.19.0
 ```
 
 1. Create a new branch of the version

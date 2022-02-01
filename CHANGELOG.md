@@ -1,5 +1,10 @@
 # Release History
 
+### v0.19.0 / 2022-01-31
+- update api-common-protos submodule
+- add ability to echo headers and added several routing annotations to the `Echo` method
+- enable generation of both grpc and rest clients
+
 ### v0.18.0 / 2021-12-06
 - add `parent` to method signature for `Messaging.SearchBlurbs()`
 - update `RELEASING.md` instructions

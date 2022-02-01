@@ -19,12 +19,12 @@ page, or simply by installing from source using go.
 
 ### Docker
 ```sh
-$ docker pull gcr.io/gapic-images/gapic-showcase:0.18.0
+$ docker pull gcr.io/gapic-images/gapic-showcase:0.19.0
 $ docker run \
     --rm \
     -p 7469:7469/tcp \
     -p 7469:7469/udp \
-    gcr.io/gapic-images/gapic-showcase:0.18.0 \
+    gcr.io/gapic-images/gapic-showcase:0.19.0 \
     --help
 > Root command of gapic-showcase
 >
@@ -51,7 +51,7 @@ $ docker run \
 
 ### Binary
 ```sh
-$ export GAPIC_SHOWCASE_VERSION=0.18.0
+$ export GAPIC_SHOWCASE_VERSION=0.19.0
 $ export OS=linux
 $ export ARCH=amd64
 $ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${GAPIC_SHOWCASE_VERSION}-${OS}-${ARCH}.tar.gz | sudo tar -zx --directory /usr/local/bin/
