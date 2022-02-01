@@ -66,6 +66,7 @@ func CompileProtos(version string) {
 		"--go_gapic_opt=grpc-service-config=schema/google/showcase/v1beta1/showcase_grpc_service_config.json",
 		"--go_gapic_opt=api-service-config=schema/google/showcase/v1beta1/showcase_v1beta1.yaml",
 		"--go_gapic_opt=metadata",
+		"--go_gapic_opt=transport=grpc+rest",
 		"--go_rest_server_out=" + filepath.Join("server", "genrest"),
 		"--go_out=plugins=grpc:" + outDir,
 	}
