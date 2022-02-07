@@ -189,6 +189,11 @@ Check out our [releases](https://github.com/googleapis/gapic-showcase/releases) 
 GAPIC Showcase follows semantic versioning. All artifacts that are
 released for a certain version are guaranteed to be compatible with one another.
 
+## Releases
+Releases are made by [release-please](https://github.com/googleapis/release-please)
+based on the contents of the Conventional Commits made to the project. Assets
+are then uploaded to the releases that are created.
+
 ## Supported Go Versions
 GAPIC Showcase is supported for go versions 1.11 and later.
 
