@@ -19,12 +19,12 @@ page, or simply by installing from source using go.
 
 ### Docker
 ```sh
-$ docker pull gcr.io/gapic-images/gapic-showcase:0.19.0
+$ docker pull gcr.io/gapic-images/gapic-showcase:latest
 $ docker run \
     --rm \
     -p 7469:7469/tcp \
     -p 7469:7469/udp \
-    gcr.io/gapic-images/gapic-showcase:0.19.0 \
+    gcr.io/gapic-images/gapic-showcase:latest \
     --help
 > Root command of gapic-showcase
 >
@@ -195,7 +195,7 @@ based on the contents of the Conventional Commits made to the project. Assets
 are then uploaded to the releases that are created.
 
 ## Supported Go Versions
-GAPIC Showcase is supported for go versions 1.11 and later.
+GAPIC Showcase is supported for go versions 1.16 and later.
 
 ## FAQ
 
