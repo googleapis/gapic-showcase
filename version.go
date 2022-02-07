@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,19 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package version
 
 import (
-	"strings"
-
-	root "github.com/googleapis/gapic-showcase"
+	_ "embed"
 )
 
-func init() {
-	// Make roots version option only emit the version. This is used in Actions.
-	// The template looks weird on purpose. Leaving as a single line causes the
-	// output to append an extra character.
-	rootCmd.Version = strings.TrimSpace(root.Version)
-	rootCmd.SetVersionTemplate(
-		`{{printf "%s" .Version}}`)
-}
+// Version contains the current version of this project, as declared in the
+// version.txt file, for its tools to reference.
+//go:embed version.txt
+var Version string
