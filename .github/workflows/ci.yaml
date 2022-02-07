@@ -3,7 +3,7 @@ name: Showcase CI
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
 
 jobs:
@@ -180,11 +180,11 @@ jobs:
   push-generated-sources:
     needs: [regenerate, lint, tests, probes]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && needs.regenerate.outputs.modified_files
+    if: github.ref == 'refs/heads/main' && needs.regenerate.outputs.modified_files
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: master
+        ref: main
     - uses: actions/download-artifact@v2
       with:
         name: regenerated-sources
@@ -199,10 +199,10 @@ jobs:
         command: pr
         upstream_owner: googleapis
         upstream_repo: gapic-showcase
-        description: 'Regenerated sources resulting from most recent commit to master'
+        description: 'Regenerated sources resulting from most recent commit to main'
         title: 'chore: regenerate sources'
         message: 'chore: regenerate sources'
-        primary: 'master'
+        primary: 'main'
         labels: |
           automerge
         branch: regen

@@ -31,7 +31,7 @@ func init() {
 	flag.StringVar(&version, "version", "", "the version tag [required]")
 }
 
-// This script is ran in CI when a new version tag is pushed to master. This script
+// This script is ran in CI when a new version tag is pushed to main. This script
 // places the compiled proto descriptor set, a tarball of showcase-protos alongside it's
 // dependencies, and the compiled executables of the gapic-showcase cli tool inside the
 // directory "dist"

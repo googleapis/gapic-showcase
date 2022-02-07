@@ -207,8 +207,8 @@ This API is not publicly served.
 
 This is not an official Google product.
 
-[codecovimg]: https://codecov.io/github/googleapis/gapic-showcase/coverage.svg?branch=master
-[codecov]: https://codecov.io/github/googleapis/gapic-showcase?branch=master
+[codecovimg]: https://codecov.io/github/googleapis/gapic-showcase/coverage.svg?branch=main
+[codecov]: https://codecov.io/github/googleapis/gapic-showcase?branch=main
 [godoc]: https://godoc.org/github.com/googleapis/gapic-showcase/server
 [godocimg]: https://godoc.org/github.com/googleapis/gapic-showcase/server?status.svg
 [releaselevel]: https://cloud.google.com/terms/launch-stages
