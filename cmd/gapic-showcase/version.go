@@ -14,11 +14,17 @@
 
 package main
 
+import (
+	"strings"
+
+	root "github.com/googleapis/gapic-showcase"
+)
+
 func init() {
 	// Make roots version option only emit the version. This is used in Actions.
 	// The template looks weird on purpose. Leaving as a single line causes the
 	// output to append an extra character.
-	rootCmd.Version = "0.19.0"
+	rootCmd.Version = strings.TrimSpace(root.Version)
 	rootCmd.SetVersionTemplate(
 		`{{printf "%s" .Version}}`)
 }
