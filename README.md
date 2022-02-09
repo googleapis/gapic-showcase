@@ -61,7 +61,7 @@ $ gapic-showcase --help
 
 ### Source
 ```sh
-$ go get github.com/googleapis/gapic-showcase/cmd/gapic-showcase
+$ go install github.com/googleapis/gapic-showcase/cmd/gapic-showcase@latest
 $ PATH=$PATH:`go env GOPATH`/bin
 $ gapic-showcase --help
 ...
