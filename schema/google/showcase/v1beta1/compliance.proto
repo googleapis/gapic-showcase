@@ -22,6 +22,7 @@ package google.showcase.v1beta1;
 option go_package = "github.com/googleapis/gapic-showcase/server/genproto";
 option java_package = "com.google.showcase.v1beta1";
 option java_multiple_files = true;
+option ruby_package = "Google::Showcase::V1beta1";
 
 // This service is used to test that GAPICs can transcode proto3 requests to
 // REST format correctly for various types of HTTP annotations.
