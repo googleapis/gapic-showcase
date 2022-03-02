@@ -329,7 +329,7 @@ func (c *complianceGRPCClient) Connection() *grpc.ClientConn {
 // use by Google-written clients.
 func (c *complianceGRPCClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", versionGo()}, keyval...)
-	kv = append(kv, "gapic", versionClient, "gax", gax.Version, "grpc", grpc.Version)
+	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "grpc", grpc.Version)
 	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
 }
 
@@ -385,7 +385,7 @@ func defaultComplianceRESTClientOptions() []option.ClientOption {
 // use by Google-written clients.
 func (c *complianceRESTClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", versionGo()}, keyval...)
-	kv = append(kv, "gapic", versionClient, "gax", gax.Version, "rest", "UNKNOWN")
+	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "rest", "UNKNOWN")
 	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
 }
 
@@ -450,6 +450,7 @@ func (c *complianceGRPCClient) RepeatDataQuery(ctx context.Context, req *genprot
 
 func (c *complianceGRPCClient) RepeatDataSimplePath(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v&%s=%v&%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_int32", req.GetInfo().GetFInt32(), "info.f_double", url.QueryEscape(fmt.Sprintf("%g", req.GetInfo().GetFDouble())), "info.f_bool", req.GetInfo().GetFBool(), "info.f_kingdom", genprotopb.ComplianceData_LifeKingdom_name[int32(req.GetInfo().GetFKingdom())]))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).RepeatDataSimplePath[0:len((*c.CallOptions).RepeatDataSimplePath):len((*c.CallOptions).RepeatDataSimplePath)], opts...)
 	var resp *genprotopb.RepeatResponse
@@ -466,6 +467,7 @@ func (c *complianceGRPCClient) RepeatDataSimplePath(ctx context.Context, req *ge
 
 func (c *complianceGRPCClient) RepeatDataPathResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_child.f_string", url.QueryEscape(req.GetInfo().GetFChild().GetFString()), "info.f_bool", req.GetInfo().GetFBool()))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).RepeatDataPathResource[0:len((*c.CallOptions).RepeatDataPathResource):len((*c.CallOptions).RepeatDataPathResource)], opts...)
 	var resp *genprotopb.RepeatResponse
@@ -482,6 +484,7 @@ func (c *complianceGRPCClient) RepeatDataPathResource(ctx context.Context, req *
 
 func (c *complianceGRPCClient) RepeatDataPathTrailingResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_child.f_string", url.QueryEscape(req.GetInfo().GetFChild().GetFString())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).RepeatDataPathTrailingResource[0:len((*c.CallOptions).RepeatDataPathTrailingResource):len((*c.CallOptions).RepeatDataPathTrailingResource)], opts...)
 	var resp *genprotopb.RepeatResponse

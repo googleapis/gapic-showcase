@@ -333,7 +333,7 @@ func (c *testingGRPCClient) Connection() *grpc.ClientConn {
 // use by Google-written clients.
 func (c *testingGRPCClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", versionGo()}, keyval...)
-	kv = append(kv, "gapic", versionClient, "gax", gax.Version, "grpc", grpc.Version)
+	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "grpc", grpc.Version)
 	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
 }
 
@@ -389,7 +389,7 @@ func defaultTestingRESTClientOptions() []option.ClientOption {
 // use by Google-written clients.
 func (c *testingRESTClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", versionGo()}, keyval...)
-	kv = append(kv, "gapic", versionClient, "gax", gax.Version, "rest", "UNKNOWN")
+	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "rest", "UNKNOWN")
 	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
 }
 
@@ -424,6 +424,7 @@ func (c *testingGRPCClient) CreateSession(ctx context.Context, req *genprotopb.C
 
 func (c *testingGRPCClient) GetSession(ctx context.Context, req *genprotopb.GetSessionRequest, opts ...gax.CallOption) (*genprotopb.Session, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).GetSession[0:len((*c.CallOptions).GetSession):len((*c.CallOptions).GetSession)], opts...)
 	var resp *genprotopb.Session
@@ -483,6 +484,7 @@ func (c *testingGRPCClient) ListSessions(ctx context.Context, req *genprotopb.Li
 
 func (c *testingGRPCClient) DeleteSession(ctx context.Context, req *genprotopb.DeleteSessionRequest, opts ...gax.CallOption) error {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).DeleteSession[0:len((*c.CallOptions).DeleteSession):len((*c.CallOptions).DeleteSession)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -495,6 +497,7 @@ func (c *testingGRPCClient) DeleteSession(ctx context.Context, req *genprotopb.D
 
 func (c *testingGRPCClient) ReportSession(ctx context.Context, req *genprotopb.ReportSessionRequest, opts ...gax.CallOption) (*genprotopb.ReportSessionResponse, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).ReportSession[0:len((*c.CallOptions).ReportSession):len((*c.CallOptions).ReportSession)], opts...)
 	var resp *genprotopb.ReportSessionResponse
@@ -511,6 +514,7 @@ func (c *testingGRPCClient) ReportSession(ctx context.Context, req *genprotopb.R
 
 func (c *testingGRPCClient) ListTests(ctx context.Context, req *genprotopb.ListTestsRequest, opts ...gax.CallOption) *TestIterator {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).ListTests[0:len((*c.CallOptions).ListTests):len((*c.CallOptions).ListTests)], opts...)
 	it := &TestIterator{}
@@ -555,6 +559,7 @@ func (c *testingGRPCClient) ListTests(ctx context.Context, req *genprotopb.ListT
 
 func (c *testingGRPCClient) DeleteTest(ctx context.Context, req *genprotopb.DeleteTestRequest, opts ...gax.CallOption) error {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).DeleteTest[0:len((*c.CallOptions).DeleteTest):len((*c.CallOptions).DeleteTest)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -567,6 +572,7 @@ func (c *testingGRPCClient) DeleteTest(ctx context.Context, req *genprotopb.Dele
 
 func (c *testingGRPCClient) VerifyTest(ctx context.Context, req *genprotopb.VerifyTestRequest, opts ...gax.CallOption) (*genprotopb.VerifyTestResponse, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).VerifyTest[0:len((*c.CallOptions).VerifyTest):len((*c.CallOptions).VerifyTest)], opts...)
 	var resp *genprotopb.VerifyTestResponse
