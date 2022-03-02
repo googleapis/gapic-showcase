@@ -24,7 +24,9 @@ import (
 	"math"
 	"net/http"
 	"net/url"
+	"regexp"
 	"sort"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/longrunning"
@@ -422,7 +424,7 @@ func (c *echoGRPCClient) Connection() *grpc.ClientConn {
 // use by Google-written clients.
 func (c *echoGRPCClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", versionGo()}, keyval...)
-	kv = append(kv, "gapic", versionClient, "gax", gax.Version, "grpc", grpc.Version)
+	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "grpc", grpc.Version)
 	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
 }
 
@@ -483,7 +485,7 @@ func defaultEchoRESTClientOptions() []option.ClientOption {
 // use by Google-written clients.
 func (c *echoRESTClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", versionGo()}, keyval...)
-	kv = append(kv, "gapic", versionClient, "gax", gax.Version, "rest", "UNKNOWN")
+	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "rest", "UNKNOWN")
 	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
 }
 
@@ -507,7 +509,39 @@ func (c *echoGRPCClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, 
 		defer cancel()
 		ctx = cctx
 	}
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	routingHeaders := ""
+	routingHeadersMap := make(map[string]string)
+	if reg := regexp.MustCompile("(.*)"); reg.MatchString(req.GetHeader()) && len(url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])) > 0 {
+		routingHeadersMap["header"] = url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])
+	}
+	if reg := regexp.MustCompile("(?P<routing_id>.*)"); reg.MatchString(req.GetHeader()) && len(url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])) > 0 {
+		routingHeadersMap["routing_id"] = url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])
+	}
+	if reg := regexp.MustCompile("(?P<table_name>regions/[^/]+/zones/[^/]+(?:/.*)?)"); reg.MatchString(req.GetHeader()) && len(url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])) > 0 {
+		routingHeadersMap["table_name"] = url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])
+	}
+	if reg := regexp.MustCompile("(?P<super_id>projects/[^/]+)(?:/.*)?"); reg.MatchString(req.GetHeader()) && len(url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])) > 0 {
+		routingHeadersMap["super_id"] = url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])
+	}
+	if reg := regexp.MustCompile("(?P<table_name>projects/[^/]+/instances/[^/]+(?:/.*)?)"); reg.MatchString(req.GetHeader()) && len(url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])) > 0 {
+		routingHeadersMap["table_name"] = url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])
+	}
+	if reg := regexp.MustCompile("projects/[^/]+/(?P<instance_id>instances/[^/]+)(?:/.*)?"); reg.MatchString(req.GetHeader()) && len(url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])) > 0 {
+		routingHeadersMap["instance_id"] = url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])
+	}
+	if reg := regexp.MustCompile("(?P<baz>.*)"); reg.MatchString(req.GetOtherHeader()) && len(url.QueryEscape(reg.FindStringSubmatch(req.GetOtherHeader())[1])) > 0 {
+		routingHeadersMap["baz"] = url.QueryEscape(reg.FindStringSubmatch(req.GetOtherHeader())[1])
+	}
+	if reg := regexp.MustCompile("(?P<qux>projects/[^/]+)(?:/.*)?"); reg.MatchString(req.GetOtherHeader()) && len(url.QueryEscape(reg.FindStringSubmatch(req.GetOtherHeader())[1])) > 0 {
+		routingHeadersMap["qux"] = url.QueryEscape(reg.FindStringSubmatch(req.GetOtherHeader())[1])
+	}
+	for headerName, headerValue := range routingHeadersMap {
+		routingHeaders = fmt.Sprintf("%s%s=%s&", routingHeaders, headerName, headerValue)
+	}
+	routingHeaders = strings.TrimSuffix(routingHeaders, "&")
+	md := metadata.Pairs("x-goog-request-params", routingHeaders)
+
+	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).Echo[0:len((*c.CallOptions).Echo):len((*c.CallOptions).Echo)], opts...)
 	var resp *genprotopb.EchoResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
