@@ -483,7 +483,7 @@ func (c *messagingGRPCClient) Connection() *grpc.ClientConn {
 // use by Google-written clients.
 func (c *messagingGRPCClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", versionGo()}, keyval...)
-	kv = append(kv, "gapic", versionClient, "gax", gax.Version, "grpc", grpc.Version)
+	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "grpc", grpc.Version)
 	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
 }
 
@@ -541,7 +541,7 @@ func defaultMessagingRESTClientOptions() []option.ClientOption {
 // use by Google-written clients.
 func (c *messagingRESTClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", versionGo()}, keyval...)
-	kv = append(kv, "gapic", versionClient, "gax", gax.Version, "rest", "UNKNOWN")
+	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "rest", "UNKNOWN")
 	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
 }
 
@@ -586,6 +586,7 @@ func (c *messagingGRPCClient) GetRoom(ctx context.Context, req *genprotopb.GetRo
 		ctx = cctx
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).GetRoom[0:len((*c.CallOptions).GetRoom):len((*c.CallOptions).GetRoom)], opts...)
 	var resp *genprotopb.Room
@@ -607,6 +608,7 @@ func (c *messagingGRPCClient) UpdateRoom(ctx context.Context, req *genprotopb.Up
 		ctx = cctx
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "room.name", url.QueryEscape(req.GetRoom().GetName())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).UpdateRoom[0:len((*c.CallOptions).UpdateRoom):len((*c.CallOptions).UpdateRoom)], opts...)
 	var resp *genprotopb.Room
@@ -628,6 +630,7 @@ func (c *messagingGRPCClient) DeleteRoom(ctx context.Context, req *genprotopb.De
 		ctx = cctx
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).DeleteRoom[0:len((*c.CallOptions).DeleteRoom):len((*c.CallOptions).DeleteRoom)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -688,6 +691,7 @@ func (c *messagingGRPCClient) CreateBlurb(ctx context.Context, req *genprotopb.C
 		ctx = cctx
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).CreateBlurb[0:len((*c.CallOptions).CreateBlurb):len((*c.CallOptions).CreateBlurb)], opts...)
 	var resp *genprotopb.Blurb
@@ -709,6 +713,7 @@ func (c *messagingGRPCClient) GetBlurb(ctx context.Context, req *genprotopb.GetB
 		ctx = cctx
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).GetBlurb[0:len((*c.CallOptions).GetBlurb):len((*c.CallOptions).GetBlurb)], opts...)
 	var resp *genprotopb.Blurb
@@ -730,6 +735,7 @@ func (c *messagingGRPCClient) UpdateBlurb(ctx context.Context, req *genprotopb.U
 		ctx = cctx
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "blurb.name", url.QueryEscape(req.GetBlurb().GetName())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).UpdateBlurb[0:len((*c.CallOptions).UpdateBlurb):len((*c.CallOptions).UpdateBlurb)], opts...)
 	var resp *genprotopb.Blurb
@@ -751,6 +757,7 @@ func (c *messagingGRPCClient) DeleteBlurb(ctx context.Context, req *genprotopb.D
 		ctx = cctx
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).DeleteBlurb[0:len((*c.CallOptions).DeleteBlurb):len((*c.CallOptions).DeleteBlurb)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -763,6 +770,7 @@ func (c *messagingGRPCClient) DeleteBlurb(ctx context.Context, req *genprotopb.D
 
 func (c *messagingGRPCClient) ListBlurbs(ctx context.Context, req *genprotopb.ListBlurbsRequest, opts ...gax.CallOption) *BlurbIterator {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).ListBlurbs[0:len((*c.CallOptions).ListBlurbs):len((*c.CallOptions).ListBlurbs)], opts...)
 	it := &BlurbIterator{}
@@ -812,6 +820,7 @@ func (c *messagingGRPCClient) SearchBlurbs(ctx context.Context, req *genprotopb.
 		ctx = cctx
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).SearchBlurbs[0:len((*c.CallOptions).SearchBlurbs):len((*c.CallOptions).SearchBlurbs)], opts...)
 	var resp *longrunningpb.Operation
@@ -830,6 +839,7 @@ func (c *messagingGRPCClient) SearchBlurbs(ctx context.Context, req *genprotopb.
 
 func (c *messagingGRPCClient) StreamBlurbs(ctx context.Context, req *genprotopb.StreamBlurbsRequest, opts ...gax.CallOption) (genprotopb.Messaging_StreamBlurbsClient, error) {
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	var resp genprotopb.Messaging_StreamBlurbsClient
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {

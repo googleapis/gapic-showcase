@@ -290,7 +290,7 @@ func (c *sequenceGRPCClient) Connection() *grpc.ClientConn {
 // use by Google-written clients.
 func (c *sequenceGRPCClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", versionGo()}, keyval...)
-	kv = append(kv, "gapic", versionClient, "gax", gax.Version, "grpc", grpc.Version)
+	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "grpc", grpc.Version)
 	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
 }
 
@@ -343,7 +343,7 @@ func defaultSequenceRESTClientOptions() []option.ClientOption {
 // use by Google-written clients.
 func (c *sequenceRESTClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", versionGo()}, keyval...)
-	kv = append(kv, "gapic", versionClient, "gax", gax.Version, "rest", "UNKNOWN")
+	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "rest", "UNKNOWN")
 	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
 }
 
@@ -388,6 +388,7 @@ func (c *sequenceGRPCClient) GetSequenceReport(ctx context.Context, req *genprot
 		ctx = cctx
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).GetSequenceReport[0:len((*c.CallOptions).GetSequenceReport):len((*c.CallOptions).GetSequenceReport)], opts...)
 	var resp *genprotopb.SequenceReport
@@ -409,6 +410,7 @@ func (c *sequenceGRPCClient) AttemptSequence(ctx context.Context, req *genprotop
 		ctx = cctx
 	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).AttemptSequence[0:len((*c.CallOptions).AttemptSequence):len((*c.CallOptions).AttemptSequence)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
