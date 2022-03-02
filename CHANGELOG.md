@@ -1,5 +1,12 @@
 # Release History
 
+### [0.19.2](https://github.com/googleapis/gapic-showcase/compare/v0.19.1...v0.19.2) (2022-03-02)
+
+
+### Bug Fixes
+
+* use tag_name for proto-assets upload ([#1021](https://github.com/googleapis/gapic-showcase/issues/1021)) ([c3f2f36](https://github.com/googleapis/gapic-showcase/commit/c3f2f36128a3c7b5c51fc1bd87c83f8f833adf9a))
+
 ### [0.19.1](https://github.com/googleapis/gapic-showcase/compare/v0.19.0...v0.19.1) (2022-03-02)
 
 
