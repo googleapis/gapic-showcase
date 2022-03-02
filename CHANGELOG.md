@@ -1,5 +1,12 @@
 # Release History
 
+### [0.19.1](https://github.com/googleapis/gapic-showcase/compare/v0.19.0...v0.19.1) (2022-03-02)
+
+
+### Bug Fixes
+
+* ruby package name ([#1015](https://github.com/googleapis/gapic-showcase/issues/1015)) ([7289f2e](https://github.com/googleapis/gapic-showcase/commit/7289f2e20afa198695d3da9d5a5362a161032244))
+
 ### v0.19.0 / 2022-01-31
 - update api-common-protos submodule
 - add ability to echo headers and added several routing annotations to the `Echo` method
