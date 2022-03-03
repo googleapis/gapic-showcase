@@ -5,6 +5,10 @@ on:
     types:
       - created
 
+env:
+  # e.g. v1.0.0
+  TAG_NAME: ${{ github.event.release.tag_name }}
+
 jobs:
   proto-assets:
     runs-on: ubuntu-latest
@@ -22,18 +26,18 @@ jobs:
           unzip -d protobuf protobuf/protoc.zip
           echo "./protobuf/bin" >> $GITHUB_PATH
       - name: Compile proto release assets
-        run: go run ./util/cmd/release -version=${{ github.event.release.tag_name }}
+        run: go run ./util/cmd/release -version=${TAG_NAME#v}
       - name: Upload proto release assets
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ github.token }}
           file: ./dist/*
-          tag: ${{ github.event.release.tag_name }}
+          tag: ${TAG_NAME}
           overwrite: true
           file_glob: true
   binary-assets:
     runs-on: ubuntu-latest
-      - proto-assets
+    needs: proto-assets
     strategy:
       matrix:
         osarch:
@@ -71,7 +75,7 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./gapic-showcase.tar.gz
-          asset_name: gapic-showcase-${{ github.event.release.tag_name }}-${{ matrix.osarch.os }}-${{ matrix.osarch.arch }}.tar.gz
+          asset_name: gapic-showcase-${TAG_NAME#v}-${{ matrix.osarch.os }}-${{ matrix.osarch.arch }}.tar.gz
           asset_content_type: application/tar+gzip
   # Note: Disabled until better solution for storing the GCR key is found.
   # push_to_registry:
