@@ -37,7 +37,7 @@ jobs:
           file_glob: true
   binary-assets:
     runs-on: ubuntu-latest
-      - proto-assets
+    needs: proto-assets
     strategy:
       matrix:
         osarch:
