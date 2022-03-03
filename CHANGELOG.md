@@ -1,5 +1,12 @@
 # Release History
 
+### [0.19.4](https://github.com/googleapis/gapic-showcase/compare/v0.19.3...v0.19.4) (2022-03-03)
+
+
+### Bug Fixes
+
+* **ci:** yet another attempt to fix asset ci ([#1026](https://github.com/googleapis/gapic-showcase/issues/1026)) ([32a2603](https://github.com/googleapis/gapic-showcase/commit/32a2603550220dcd0a86d533a883fa1ba860a3b1))
+
 ### [0.19.3](https://github.com/googleapis/gapic-showcase/compare/v0.19.2...v0.19.3) (2022-03-03)
 
 
