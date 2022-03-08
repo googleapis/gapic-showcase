@@ -1,5 +1,12 @@
 # Release History
 
+### [0.19.5](https://github.com/googleapis/gapic-showcase/compare/v0.19.4...v0.19.5) (2022-03-08)
+
+
+### Bug Fixes
+
+* add a routing.proto dependency to showcase proto bazel target ([#1033](https://github.com/googleapis/gapic-showcase/issues/1033)) ([e2aa303](https://github.com/googleapis/gapic-showcase/commit/e2aa3033e67c0c50c5650512211001e1ad29d36a))
+
 ### [0.19.4](https://github.com/googleapis/gapic-showcase/compare/v0.19.3...v0.19.4) (2022-03-03)
 
 
