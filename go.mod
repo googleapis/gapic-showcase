@@ -14,7 +14,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20220309155454-6242fa91716a
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/api v0.73.0
-	google.golang.org/genproto v0.0.0-20220322021311-435b647f9ef2
+	google.golang.org/genproto v0.0.0-20220328180837-c47567c462d1
 	google.golang.org/grpc v1.45.0
 	google.golang.org/protobuf v1.28.0
 )
