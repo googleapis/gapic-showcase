@@ -1604,7 +1604,93 @@ func (c *messagingRESTClient) SearchBlurbs(ctx context.Context, req *genprotopb.
 // StreamBlurbs this returns a stream that emits the blurbs that are created for a
 // particular chat room or user profile.
 func (c *messagingRESTClient) StreamBlurbs(ctx context.Context, req *genprotopb.StreamBlurbsRequest, opts ...gax.CallOption) (genprotopb.Messaging_StreamBlurbsClient, error) {
-	return nil, fmt.Errorf("StreamBlurbs not yet supported for REST clients")
+	m := protojson.MarshalOptions{AllowPartial: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl.Path += fmt.Sprintf("/v1beta1/%v/blurbs:stream", req.GetName())
+
+	// Build HTTP headers from client and context metadata.
+	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	var streamClient *streamBlurbsRESTClient
+	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
+		if err != nil {
+			return err
+		}
+		httpReq = httpReq.WithContext(ctx)
+		httpReq.Header = headers
+
+		httpRsp, err := c.httpClient.Do(httpReq)
+		if err != nil {
+			return err
+		}
+
+		if err = googleapi.CheckResponse(httpRsp); err != nil {
+			return err
+		}
+
+		streamClient = &streamBlurbsRESTClient{
+			ctx:    ctx,
+			md:     metadata.MD(httpRsp.Header),
+			stream: gax.NewProtoJSONStreamReader(httpRsp.Body, (&genprotopb.StreamBlurbsResponse{}).ProtoReflect().Type()),
+		}
+		return nil
+	}, opts...)
+
+	return streamClient, e
+}
+
+// streamBlurbsRESTClient is the stream client used to consume the server stream created by
+// the REST implementation of StreamBlurbs.
+type streamBlurbsRESTClient struct {
+	ctx    context.Context
+	md     metadata.MD
+	stream *gax.ProtoJSONStream
+}
+
+func (c *streamBlurbsRESTClient) Recv() (*genprotopb.StreamBlurbsResponse, error) {
+	if err := c.ctx.Err(); err != nil {
+		defer c.stream.Close()
+		return nil, err
+	}
+	msg, err := c.stream.Recv()
+	if err != nil {
+		defer c.stream.Close()
+		return nil, err
+	}
+	res := msg.(*genprotopb.StreamBlurbsResponse)
+	return res, nil
+}
+
+func (c *streamBlurbsRESTClient) Header() (metadata.MD, error) {
+	return c.md, nil
+}
+
+func (c *streamBlurbsRESTClient) Trailer() metadata.MD {
+	return c.md
+}
+
+func (c *streamBlurbsRESTClient) CloseSend() error {
+	// This is a no-op to fulfill the interface.
+	return fmt.Errorf("this method is not implemented for a server-stream")
+}
+
+func (c *streamBlurbsRESTClient) Context() context.Context {
+	return c.ctx
+}
+
+func (c *streamBlurbsRESTClient) SendMsg(m interface{}) error {
+	// This is a no-op to fulfill the interface.
+	return fmt.Errorf("this method is not implemented for a server-stream")
+}
+
+func (c *streamBlurbsRESTClient) RecvMsg(m interface{}) error {
+	// This is a no-op to fulfill the interface.
+	return fmt.Errorf("this method is not implemented, use Recv")
 }
 
 // SendBlurbs this is a stream to create multiple blurbs. If an invalid blurb is
