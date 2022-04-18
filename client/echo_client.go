@@ -968,14 +968,52 @@ func (c *echoRESTClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, 
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/echo:echo")
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	routingHeaders := ""
+	routingHeadersMap := make(map[string]string)
+	if reg := regexp.MustCompile("(.*)"); reg.MatchString(req.GetHeader()) && len(url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])) > 0 {
+		routingHeadersMap["header"] = url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])
+	}
+	if reg := regexp.MustCompile("(?P<routing_id>.*)"); reg.MatchString(req.GetHeader()) && len(url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])) > 0 {
+		routingHeadersMap["routing_id"] = url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])
+	}
+	if reg := regexp.MustCompile("(?P<table_name>regions/[^/]+/zones/[^/]+(?:/.*)?)"); reg.MatchString(req.GetHeader()) && len(url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])) > 0 {
+		routingHeadersMap["table_name"] = url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])
+	}
+	if reg := regexp.MustCompile("(?P<super_id>projects/[^/]+)(?:/.*)?"); reg.MatchString(req.GetHeader()) && len(url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])) > 0 {
+		routingHeadersMap["super_id"] = url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])
+	}
+	if reg := regexp.MustCompile("(?P<table_name>projects/[^/]+/instances/[^/]+(?:/.*)?)"); reg.MatchString(req.GetHeader()) && len(url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])) > 0 {
+		routingHeadersMap["table_name"] = url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])
+	}
+	if reg := regexp.MustCompile("projects/[^/]+/(?P<instance_id>instances/[^/]+)(?:/.*)?"); reg.MatchString(req.GetHeader()) && len(url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])) > 0 {
+		routingHeadersMap["instance_id"] = url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])
+	}
+	if reg := regexp.MustCompile("(?P<baz>.*)"); reg.MatchString(req.GetOtherHeader()) && len(url.QueryEscape(reg.FindStringSubmatch(req.GetOtherHeader())[1])) > 0 {
+		routingHeadersMap["baz"] = url.QueryEscape(reg.FindStringSubmatch(req.GetOtherHeader())[1])
+	}
+	if reg := regexp.MustCompile("(?P<qux>projects/[^/]+)(?:/.*)?"); reg.MatchString(req.GetOtherHeader()) && len(url.QueryEscape(reg.FindStringSubmatch(req.GetOtherHeader())[1])) > 0 {
+		routingHeadersMap["qux"] = url.QueryEscape(reg.FindStringSubmatch(req.GetOtherHeader())[1])
+	}
+	for headerName, headerValue := range routingHeadersMap {
+		routingHeaders = fmt.Sprintf("%s%s=%s&", routingHeaders, headerName, headerValue)
+	}
+	routingHeaders = strings.TrimSuffix(routingHeaders, "&")
+	md := metadata.Pairs("x-goog-request-params", routingHeaders)
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.EchoResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -1019,13 +1057,19 @@ func (c *echoRESTClient) Expand(ctx context.Context, req *genprotopb.ExpandReque
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/echo:expand")
 
 	// Build HTTP headers from client and context metadata.
 	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 	var streamClient *expandRESTClient
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -1138,12 +1182,18 @@ func (c *echoRESTClient) PagedExpand(ctx context.Context, req *genprotopb.PagedE
 			return nil, "", err
 		}
 
-		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl, err := url.Parse(c.endpoint)
+		if err != nil {
+			return nil, "", err
+		}
 		baseUrl.Path += fmt.Sprintf("/v1beta1/echo:pagedExpand")
 
 		// Build HTTP headers from client and context metadata.
 		headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 		e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			if settings.Path != "" {
+				baseUrl.Path = settings.Path
+			}
 			httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
 			if err != nil {
 				return err
@@ -1217,12 +1267,18 @@ func (c *echoRESTClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.
 			return nil, "", err
 		}
 
-		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl, err := url.Parse(c.endpoint)
+		if err != nil {
+			return nil, "", err
+		}
 		baseUrl.Path += fmt.Sprintf("/v1beta1/echo:pagedExpandLegacy")
 
 		// Build HTTP headers from client and context metadata.
 		headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 		e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			if settings.Path != "" {
+				baseUrl.Path = settings.Path
+			}
 			httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
 			if err != nil {
 				return err
@@ -1298,12 +1354,18 @@ func (c *echoRESTClient) PagedExpandLegacyMapped(ctx context.Context, req *genpr
 			return nil, "", err
 		}
 
-		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl, err := url.Parse(c.endpoint)
+		if err != nil {
+			return nil, "", err
+		}
 		baseUrl.Path += fmt.Sprintf("/v1beta1/echo:pagedExpandLegacyMapped")
 
 		// Build HTTP headers from client and context metadata.
 		headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 		e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			if settings.Path != "" {
+				baseUrl.Path = settings.Path
+			}
 			httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
 			if err != nil {
 				return err
@@ -1377,7 +1439,10 @@ func (c *echoRESTClient) Block(ctx context.Context, req *genprotopb.BlockRequest
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/echo:block")
 
 	// Build HTTP headers from client and context metadata.
@@ -1385,6 +1450,9 @@ func (c *echoRESTClient) Block(ctx context.Context, req *genprotopb.BlockRequest
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.BlockResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -1434,7 +1502,10 @@ func (c *echoRESTClient) ListLocations(ctx context.Context, req *locationpb.List
 		} else if pageSize != 0 {
 			req.PageSize = int32(pageSize)
 		}
-		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl, err := url.Parse(c.endpoint)
+		if err != nil {
+			return nil, "", err
+		}
 		baseUrl.Path += fmt.Sprintf("")
 
 		params := url.Values{}
@@ -1456,6 +1527,9 @@ func (c *echoRESTClient) ListLocations(ctx context.Context, req *locationpb.List
 		// Build HTTP headers from client and context metadata.
 		headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 		e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			if settings.Path != "" {
+				baseUrl.Path = settings.Path
+			}
 			httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 			if err != nil {
 				return err
@@ -1508,7 +1582,10 @@ func (c *echoRESTClient) ListLocations(ctx context.Context, req *locationpb.List
 
 // GetLocation is a utility method from google.cloud.location.Locations.
 func (c *echoRESTClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -1523,6 +1600,9 @@ func (c *echoRESTClient) GetLocation(ctx context.Context, req *locationpb.GetLoc
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &locationpb.Location{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -1565,7 +1645,10 @@ func (c *echoRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPoli
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	// Build HTTP headers from client and context metadata.
@@ -1573,6 +1656,9 @@ func (c *echoRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPoli
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.Policy{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -1609,7 +1695,10 @@ func (c *echoRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPoli
 
 // GetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
 func (c *echoRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -1625,6 +1714,9 @@ func (c *echoRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPoli
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.Policy{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -1667,7 +1759,10 @@ func (c *echoRESTClient) TestIamPermissions(ctx context.Context, req *iampb.Test
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	// Build HTTP headers from client and context metadata.
@@ -1675,6 +1770,9 @@ func (c *echoRESTClient) TestIamPermissions(ctx context.Context, req *iampb.Test
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.TestIamPermissionsResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -1724,7 +1822,10 @@ func (c *echoRESTClient) ListOperations(ctx context.Context, req *longrunningpb.
 		} else if pageSize != 0 {
 			req.PageSize = int32(pageSize)
 		}
-		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl, err := url.Parse(c.endpoint)
+		if err != nil {
+			return nil, "", err
+		}
 		baseUrl.Path += fmt.Sprintf("")
 
 		params := url.Values{}
@@ -1746,6 +1847,9 @@ func (c *echoRESTClient) ListOperations(ctx context.Context, req *longrunningpb.
 		// Build HTTP headers from client and context metadata.
 		headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 		e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			if settings.Path != "" {
+				baseUrl.Path = settings.Path
+			}
 			httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 			if err != nil {
 				return err
@@ -1798,7 +1902,10 @@ func (c *echoRESTClient) ListOperations(ctx context.Context, req *longrunningpb.
 
 // GetOperation is a utility method from google.longrunning.Operations.
 func (c *echoRESTClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -1813,6 +1920,9 @@ func (c *echoRESTClient) GetOperation(ctx context.Context, req *longrunningpb.Ge
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &longrunningpb.Operation{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -1849,7 +1959,10 @@ func (c *echoRESTClient) GetOperation(ctx context.Context, req *longrunningpb.Ge
 
 // DeleteOperation is a utility method from google.longrunning.Operations.
 func (c *echoRESTClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -1862,6 +1975,9 @@ func (c *echoRESTClient) DeleteOperation(ctx context.Context, req *longrunningpb
 	// Build HTTP headers from client and context metadata.
 	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 	return gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -1883,7 +1999,10 @@ func (c *echoRESTClient) DeleteOperation(ctx context.Context, req *longrunningpb
 
 // CancelOperation is a utility method from google.longrunning.Operations.
 func (c *echoRESTClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -1896,6 +2015,9 @@ func (c *echoRESTClient) CancelOperation(ctx context.Context, req *longrunningpb
 	// Build HTTP headers from client and context metadata.
 	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 	return gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err
