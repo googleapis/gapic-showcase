@@ -721,7 +721,10 @@ func (c *complianceRESTClient) RepeatDataBody(ctx context.Context, req *genproto
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat:body")
 
 	// Build HTTP headers from client and context metadata.
@@ -729,6 +732,9 @@ func (c *complianceRESTClient) RepeatDataBody(ctx context.Context, req *genproto
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.RepeatResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -774,7 +780,10 @@ func (c *complianceRESTClient) RepeatDataBodyInfo(ctx context.Context, req *genp
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat:bodyinfo")
 
 	params := url.Values{}
@@ -810,6 +819,9 @@ func (c *complianceRESTClient) RepeatDataBodyInfo(ctx context.Context, req *genp
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.RepeatResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -847,7 +859,10 @@ func (c *complianceRESTClient) RepeatDataBodyInfo(ctx context.Context, req *genp
 // RepeatDataQuery this method echoes the ComplianceData request. This method exercises
 // sending all request fields as query parameters.
 func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat:query")
 
 	params := url.Values{}
@@ -1042,6 +1057,9 @@ func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprot
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.RepeatResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("GET", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -1080,7 +1098,10 @@ func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprot
 // sending some parameters as “simple” path variables (i.e., of the form
 // “/bar/{foo}” rather than “/{foo=bar/*}”), and the rest as query parameters.
 func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat/%v/%v/%v/%v/%v:simplepath", req.GetInfo().GetFString(), req.GetInfo().GetFInt32(), req.GetInfo().GetFDouble(), req.GetInfo().GetFBool(), req.GetInfo().GetFKingdom())
 
 	params := url.Values{}
@@ -1256,10 +1277,15 @@ func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *ge
 	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v&%s=%v&%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_int32", req.GetInfo().GetFInt32(), "info.f_double", url.QueryEscape(fmt.Sprintf("%g", req.GetInfo().GetFDouble())), "info.f_bool", req.GetInfo().GetFBool(), "info.f_kingdom", genprotopb.ComplianceData_LifeKingdom_name[int32(req.GetInfo().GetFKingdom())]))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.RepeatResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("GET", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -1296,7 +1322,10 @@ func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *ge
 
 // RepeatDataPathResource same as RepeatDataSimplePath, but with a path resource.
 func (c *complianceRESTClient) RepeatDataPathResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat/%v/%v/bool/%v:pathresource", req.GetInfo().GetFString(), req.GetInfo().GetFChild().GetFString(), req.GetInfo().GetFBool())
 
 	params := url.Values{}
@@ -1484,10 +1513,15 @@ func (c *complianceRESTClient) RepeatDataPathResource(ctx context.Context, req *
 	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_child.f_string", url.QueryEscape(req.GetInfo().GetFChild().GetFString()), "info.f_bool", req.GetInfo().GetFBool()))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.RepeatResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("GET", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -1524,7 +1558,10 @@ func (c *complianceRESTClient) RepeatDataPathResource(ctx context.Context, req *
 
 // RepeatDataPathTrailingResource same as RepeatDataSimplePath, but with a trailing resource.
 func (c *complianceRESTClient) RepeatDataPathTrailingResource(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat/%v/%v:pathtrailingresource", req.GetInfo().GetFString(), req.GetInfo().GetFChild().GetFString())
 
 	params := url.Values{}
@@ -1715,10 +1752,15 @@ func (c *complianceRESTClient) RepeatDataPathTrailingResource(ctx context.Contex
 	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_child.f_string", url.QueryEscape(req.GetInfo().GetFChild().GetFString())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.RepeatResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("GET", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -1761,7 +1803,10 @@ func (c *complianceRESTClient) RepeatDataBodyPut(ctx context.Context, req *genpr
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat:bodyput")
 
 	// Build HTTP headers from client and context metadata.
@@ -1769,6 +1814,9 @@ func (c *complianceRESTClient) RepeatDataBodyPut(ctx context.Context, req *genpr
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.RepeatResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("PUT", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -1811,7 +1859,10 @@ func (c *complianceRESTClient) RepeatDataBodyPatch(ctx context.Context, req *gen
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat:bodypatch")
 
 	// Build HTTP headers from client and context metadata.
@@ -1819,6 +1870,9 @@ func (c *complianceRESTClient) RepeatDataBodyPatch(ctx context.Context, req *gen
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.RepeatResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("PATCH", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -1868,7 +1922,10 @@ func (c *complianceRESTClient) ListLocations(ctx context.Context, req *locationp
 		} else if pageSize != 0 {
 			req.PageSize = int32(pageSize)
 		}
-		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl, err := url.Parse(c.endpoint)
+		if err != nil {
+			return nil, "", err
+		}
 		baseUrl.Path += fmt.Sprintf("")
 
 		params := url.Values{}
@@ -1890,6 +1947,9 @@ func (c *complianceRESTClient) ListLocations(ctx context.Context, req *locationp
 		// Build HTTP headers from client and context metadata.
 		headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 		e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			if settings.Path != "" {
+				baseUrl.Path = settings.Path
+			}
 			httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 			if err != nil {
 				return err
@@ -1942,7 +2002,10 @@ func (c *complianceRESTClient) ListLocations(ctx context.Context, req *locationp
 
 // GetLocation is a utility method from google.cloud.location.Locations.
 func (c *complianceRESTClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -1957,6 +2020,9 @@ func (c *complianceRESTClient) GetLocation(ctx context.Context, req *locationpb.
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &locationpb.Location{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -1999,7 +2065,10 @@ func (c *complianceRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetI
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	// Build HTTP headers from client and context metadata.
@@ -2007,6 +2076,9 @@ func (c *complianceRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetI
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.Policy{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -2043,7 +2115,10 @@ func (c *complianceRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetI
 
 // GetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
 func (c *complianceRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -2059,6 +2134,9 @@ func (c *complianceRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetI
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.Policy{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -2101,7 +2179,10 @@ func (c *complianceRESTClient) TestIamPermissions(ctx context.Context, req *iamp
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	// Build HTTP headers from client and context metadata.
@@ -2109,6 +2190,9 @@ func (c *complianceRESTClient) TestIamPermissions(ctx context.Context, req *iamp
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.TestIamPermissionsResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -2158,7 +2242,10 @@ func (c *complianceRESTClient) ListOperations(ctx context.Context, req *longrunn
 		} else if pageSize != 0 {
 			req.PageSize = int32(pageSize)
 		}
-		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl, err := url.Parse(c.endpoint)
+		if err != nil {
+			return nil, "", err
+		}
 		baseUrl.Path += fmt.Sprintf("")
 
 		params := url.Values{}
@@ -2180,6 +2267,9 @@ func (c *complianceRESTClient) ListOperations(ctx context.Context, req *longrunn
 		// Build HTTP headers from client and context metadata.
 		headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 		e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			if settings.Path != "" {
+				baseUrl.Path = settings.Path
+			}
 			httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 			if err != nil {
 				return err
@@ -2232,7 +2322,10 @@ func (c *complianceRESTClient) ListOperations(ctx context.Context, req *longrunn
 
 // GetOperation is a utility method from google.longrunning.Operations.
 func (c *complianceRESTClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -2247,6 +2340,9 @@ func (c *complianceRESTClient) GetOperation(ctx context.Context, req *longrunnin
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &longrunningpb.Operation{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -2283,7 +2379,10 @@ func (c *complianceRESTClient) GetOperation(ctx context.Context, req *longrunnin
 
 // DeleteOperation is a utility method from google.longrunning.Operations.
 func (c *complianceRESTClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -2296,6 +2395,9 @@ func (c *complianceRESTClient) DeleteOperation(ctx context.Context, req *longrun
 	// Build HTTP headers from client and context metadata.
 	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 	return gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -2317,7 +2419,10 @@ func (c *complianceRESTClient) DeleteOperation(ctx context.Context, req *longrun
 
 // CancelOperation is a utility method from google.longrunning.Operations.
 func (c *complianceRESTClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -2330,6 +2435,9 @@ func (c *complianceRESTClient) CancelOperation(ctx context.Context, req *longrun
 	// Build HTTP headers from client and context metadata.
 	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 	return gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err

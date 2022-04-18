@@ -1074,7 +1074,10 @@ func (c *messagingRESTClient) CreateRoom(ctx context.Context, req *genprotopb.Cr
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/rooms")
 
 	// Build HTTP headers from client and context metadata.
@@ -1082,6 +1085,9 @@ func (c *messagingRESTClient) CreateRoom(ctx context.Context, req *genprotopb.Cr
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.Room{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -1118,7 +1124,10 @@ func (c *messagingRESTClient) CreateRoom(ctx context.Context, req *genprotopb.Cr
 
 // GetRoom retrieves the Room with the given resource name.
 func (c *messagingRESTClient) GetRoom(ctx context.Context, req *genprotopb.GetRoomRequest, opts ...gax.CallOption) (*genprotopb.Room, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
 	params := url.Values{}
@@ -1127,10 +1136,15 @@ func (c *messagingRESTClient) GetRoom(ctx context.Context, req *genprotopb.GetRo
 	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.Room{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("GET", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -1173,14 +1187,22 @@ func (c *messagingRESTClient) UpdateRoom(ctx context.Context, req *genprotopb.Up
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetRoom().GetName())
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "room.name", url.QueryEscape(req.GetRoom().GetName())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.Room{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("PATCH", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -1217,7 +1239,10 @@ func (c *messagingRESTClient) UpdateRoom(ctx context.Context, req *genprotopb.Up
 
 // DeleteRoom deletes a room and all of its blurbs.
 func (c *messagingRESTClient) DeleteRoom(ctx context.Context, req *genprotopb.DeleteRoomRequest, opts ...gax.CallOption) error {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
 	params := url.Values{}
@@ -1226,8 +1251,13 @@ func (c *messagingRESTClient) DeleteRoom(ctx context.Context, req *genprotopb.De
 	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	return gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("DELETE", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -1262,7 +1292,10 @@ func (c *messagingRESTClient) ListRooms(ctx context.Context, req *genprotopb.Lis
 		} else if pageSize != 0 {
 			req.PageSize = int32(pageSize)
 		}
-		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl, err := url.Parse(c.endpoint)
+		if err != nil {
+			return nil, "", err
+		}
 		baseUrl.Path += fmt.Sprintf("/v1beta1/rooms")
 
 		params := url.Values{}
@@ -1278,6 +1311,9 @@ func (c *messagingRESTClient) ListRooms(ctx context.Context, req *genprotopb.Lis
 		// Build HTTP headers from client and context metadata.
 		headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 		e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			if settings.Path != "" {
+				baseUrl.Path = settings.Path
+			}
 			httpReq, err := http.NewRequest("GET", baseUrl.String(), nil)
 			if err != nil {
 				return err
@@ -1338,14 +1374,22 @@ func (c *messagingRESTClient) CreateBlurb(ctx context.Context, req *genprotopb.C
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v/blurbs", req.GetParent())
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.Blurb{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -1382,7 +1426,10 @@ func (c *messagingRESTClient) CreateBlurb(ctx context.Context, req *genprotopb.C
 
 // GetBlurb retrieves the Blurb with the given resource name.
 func (c *messagingRESTClient) GetBlurb(ctx context.Context, req *genprotopb.GetBlurbRequest, opts ...gax.CallOption) (*genprotopb.Blurb, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
 	params := url.Values{}
@@ -1391,10 +1438,15 @@ func (c *messagingRESTClient) GetBlurb(ctx context.Context, req *genprotopb.GetB
 	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.Blurb{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("GET", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -1437,14 +1489,22 @@ func (c *messagingRESTClient) UpdateBlurb(ctx context.Context, req *genprotopb.U
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetBlurb().GetName())
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "blurb.name", url.QueryEscape(req.GetBlurb().GetName())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.Blurb{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("PATCH", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -1481,7 +1541,10 @@ func (c *messagingRESTClient) UpdateBlurb(ctx context.Context, req *genprotopb.U
 
 // DeleteBlurb deletes a blurb.
 func (c *messagingRESTClient) DeleteBlurb(ctx context.Context, req *genprotopb.DeleteBlurbRequest, opts ...gax.CallOption) error {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
 	params := url.Values{}
@@ -1490,8 +1553,13 @@ func (c *messagingRESTClient) DeleteBlurb(ctx context.Context, req *genprotopb.D
 	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	return gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("DELETE", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -1527,7 +1595,10 @@ func (c *messagingRESTClient) ListBlurbs(ctx context.Context, req *genprotopb.Li
 		} else if pageSize != 0 {
 			req.PageSize = int32(pageSize)
 		}
-		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl, err := url.Parse(c.endpoint)
+		if err != nil {
+			return nil, "", err
+		}
 		baseUrl.Path += fmt.Sprintf("/v1beta1/%v/blurbs", req.GetParent())
 
 		params := url.Values{}
@@ -1544,6 +1615,9 @@ func (c *messagingRESTClient) ListBlurbs(ctx context.Context, req *genprotopb.Li
 		// Build HTTP headers from client and context metadata.
 		headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 		e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			if settings.Path != "" {
+				baseUrl.Path = settings.Path
+			}
 			httpReq, err := http.NewRequest("GET", baseUrl.String(), nil)
 			if err != nil {
 				return err
@@ -1610,13 +1684,21 @@ func (c *messagingRESTClient) StreamBlurbs(ctx context.Context, req *genprotopb.
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v/blurbs:stream", req.GetName())
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	var streamClient *streamBlurbsRESTClient
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -1722,7 +1804,10 @@ func (c *messagingRESTClient) ListLocations(ctx context.Context, req *locationpb
 		} else if pageSize != 0 {
 			req.PageSize = int32(pageSize)
 		}
-		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl, err := url.Parse(c.endpoint)
+		if err != nil {
+			return nil, "", err
+		}
 		baseUrl.Path += fmt.Sprintf("")
 
 		params := url.Values{}
@@ -1744,6 +1829,9 @@ func (c *messagingRESTClient) ListLocations(ctx context.Context, req *locationpb
 		// Build HTTP headers from client and context metadata.
 		headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 		e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			if settings.Path != "" {
+				baseUrl.Path = settings.Path
+			}
 			httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 			if err != nil {
 				return err
@@ -1796,7 +1884,10 @@ func (c *messagingRESTClient) ListLocations(ctx context.Context, req *locationpb
 
 // GetLocation is a utility method from google.cloud.location.Locations.
 func (c *messagingRESTClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -1811,6 +1902,9 @@ func (c *messagingRESTClient) GetLocation(ctx context.Context, req *locationpb.G
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &locationpb.Location{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -1853,7 +1947,10 @@ func (c *messagingRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIa
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	// Build HTTP headers from client and context metadata.
@@ -1861,6 +1958,9 @@ func (c *messagingRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIa
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.Policy{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -1897,7 +1997,10 @@ func (c *messagingRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIa
 
 // GetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
 func (c *messagingRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -1913,6 +2016,9 @@ func (c *messagingRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIa
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.Policy{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -1955,7 +2061,10 @@ func (c *messagingRESTClient) TestIamPermissions(ctx context.Context, req *iampb
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	// Build HTTP headers from client and context metadata.
@@ -1963,6 +2072,9 @@ func (c *messagingRESTClient) TestIamPermissions(ctx context.Context, req *iampb
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.TestIamPermissionsResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -2012,7 +2124,10 @@ func (c *messagingRESTClient) ListOperations(ctx context.Context, req *longrunni
 		} else if pageSize != 0 {
 			req.PageSize = int32(pageSize)
 		}
-		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl, err := url.Parse(c.endpoint)
+		if err != nil {
+			return nil, "", err
+		}
 		baseUrl.Path += fmt.Sprintf("")
 
 		params := url.Values{}
@@ -2034,6 +2149,9 @@ func (c *messagingRESTClient) ListOperations(ctx context.Context, req *longrunni
 		// Build HTTP headers from client and context metadata.
 		headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 		e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			if settings.Path != "" {
+				baseUrl.Path = settings.Path
+			}
 			httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 			if err != nil {
 				return err
@@ -2086,7 +2204,10 @@ func (c *messagingRESTClient) ListOperations(ctx context.Context, req *longrunni
 
 // GetOperation is a utility method from google.longrunning.Operations.
 func (c *messagingRESTClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -2101,6 +2222,9 @@ func (c *messagingRESTClient) GetOperation(ctx context.Context, req *longrunning
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &longrunningpb.Operation{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -2137,7 +2261,10 @@ func (c *messagingRESTClient) GetOperation(ctx context.Context, req *longrunning
 
 // DeleteOperation is a utility method from google.longrunning.Operations.
 func (c *messagingRESTClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -2150,6 +2277,9 @@ func (c *messagingRESTClient) DeleteOperation(ctx context.Context, req *longrunn
 	// Build HTTP headers from client and context metadata.
 	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 	return gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -2171,7 +2301,10 @@ func (c *messagingRESTClient) DeleteOperation(ctx context.Context, req *longrunn
 
 // CancelOperation is a utility method from google.longrunning.Operations.
 func (c *messagingRESTClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -2184,6 +2317,9 @@ func (c *messagingRESTClient) CancelOperation(ctx context.Context, req *longrunn
 	// Build HTTP headers from client and context metadata.
 	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 	return gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err

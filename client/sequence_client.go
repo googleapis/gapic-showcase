@@ -613,7 +613,10 @@ func (c *sequenceRESTClient) CreateSequence(ctx context.Context, req *genprotopb
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/sequences")
 
 	// Build HTTP headers from client and context metadata.
@@ -621,6 +624,9 @@ func (c *sequenceRESTClient) CreateSequence(ctx context.Context, req *genprotopb
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.Sequence{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -657,7 +663,10 @@ func (c *sequenceRESTClient) CreateSequence(ctx context.Context, req *genprotopb
 
 // GetSequenceReport retrieves a sequence.
 func (c *sequenceRESTClient) GetSequenceReport(ctx context.Context, req *genprotopb.GetSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.SequenceReport, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
 	params := url.Values{}
@@ -666,10 +675,15 @@ func (c *sequenceRESTClient) GetSequenceReport(ctx context.Context, req *genprot
 	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.SequenceReport{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("GET", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -712,12 +726,20 @@ func (c *sequenceRESTClient) AttemptSequence(ctx context.Context, req *genprotop
 		return err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return err
+	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	return gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -752,7 +774,10 @@ func (c *sequenceRESTClient) ListLocations(ctx context.Context, req *locationpb.
 		} else if pageSize != 0 {
 			req.PageSize = int32(pageSize)
 		}
-		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl, err := url.Parse(c.endpoint)
+		if err != nil {
+			return nil, "", err
+		}
 		baseUrl.Path += fmt.Sprintf("")
 
 		params := url.Values{}
@@ -774,6 +799,9 @@ func (c *sequenceRESTClient) ListLocations(ctx context.Context, req *locationpb.
 		// Build HTTP headers from client and context metadata.
 		headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 		e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			if settings.Path != "" {
+				baseUrl.Path = settings.Path
+			}
 			httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 			if err != nil {
 				return err
@@ -826,7 +854,10 @@ func (c *sequenceRESTClient) ListLocations(ctx context.Context, req *locationpb.
 
 // GetLocation is a utility method from google.cloud.location.Locations.
 func (c *sequenceRESTClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -841,6 +872,9 @@ func (c *sequenceRESTClient) GetLocation(ctx context.Context, req *locationpb.Ge
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &locationpb.Location{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -883,7 +917,10 @@ func (c *sequenceRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIam
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	// Build HTTP headers from client and context metadata.
@@ -891,6 +928,9 @@ func (c *sequenceRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIam
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.Policy{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -927,7 +967,10 @@ func (c *sequenceRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIam
 
 // GetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
 func (c *sequenceRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -943,6 +986,9 @@ func (c *sequenceRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIam
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.Policy{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -985,7 +1031,10 @@ func (c *sequenceRESTClient) TestIamPermissions(ctx context.Context, req *iampb.
 		return nil, err
 	}
 
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	// Build HTTP headers from client and context metadata.
@@ -993,6 +1042,9 @@ func (c *sequenceRESTClient) TestIamPermissions(ctx context.Context, req *iampb.
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.TestIamPermissionsResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
@@ -1042,7 +1094,10 @@ func (c *sequenceRESTClient) ListOperations(ctx context.Context, req *longrunnin
 		} else if pageSize != 0 {
 			req.PageSize = int32(pageSize)
 		}
-		baseUrl, _ := url.Parse(c.endpoint)
+		baseUrl, err := url.Parse(c.endpoint)
+		if err != nil {
+			return nil, "", err
+		}
 		baseUrl.Path += fmt.Sprintf("")
 
 		params := url.Values{}
@@ -1064,6 +1119,9 @@ func (c *sequenceRESTClient) ListOperations(ctx context.Context, req *longrunnin
 		// Build HTTP headers from client and context metadata.
 		headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 		e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+			if settings.Path != "" {
+				baseUrl.Path = settings.Path
+			}
 			httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 			if err != nil {
 				return err
@@ -1116,7 +1174,10 @@ func (c *sequenceRESTClient) ListOperations(ctx context.Context, req *longrunnin
 
 // GetOperation is a utility method from google.longrunning.Operations.
 func (c *sequenceRESTClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -1131,6 +1192,9 @@ func (c *sequenceRESTClient) GetOperation(ctx context.Context, req *longrunningp
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &longrunningpb.Operation{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -1167,7 +1231,10 @@ func (c *sequenceRESTClient) GetOperation(ctx context.Context, req *longrunningp
 
 // DeleteOperation is a utility method from google.longrunning.Operations.
 func (c *sequenceRESTClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -1180,6 +1247,9 @@ func (c *sequenceRESTClient) DeleteOperation(ctx context.Context, req *longrunni
 	// Build HTTP headers from client and context metadata.
 	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 	return gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err
@@ -1201,7 +1271,10 @@ func (c *sequenceRESTClient) DeleteOperation(ctx context.Context, req *longrunni
 
 // CancelOperation is a utility method from google.longrunning.Operations.
 func (c *sequenceRESTClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
-	baseUrl, _ := url.Parse(c.endpoint)
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return err
+	}
 	baseUrl.Path += fmt.Sprintf("")
 
 	params := url.Values{}
@@ -1214,6 +1287,9 @@ func (c *sequenceRESTClient) CancelOperation(ctx context.Context, req *longrunni
 	// Build HTTP headers from client and context metadata.
 	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
 	return gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
 		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
 		if err != nil {
 			return err
