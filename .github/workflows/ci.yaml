@@ -42,7 +42,7 @@ jobs:
     - name: Prepare regenerated sources
       if: steps.mod.outputs.modified_files
       run: tar czf regen.tgz ${{ steps.mod.outputs.modified_files }}
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       if: steps.mod.outputs.modified_files
       with:
         name: regenerated-sources
@@ -77,7 +77,7 @@ jobs:
       # which would mess up the empty vetting results check.
       run: go mod download && go vet ./server/services 2> govet.txt && ! [ -s govet.txt ]
       if: ${{ always() }}
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       if: ${{ always() }}
       with:
         name: linting-results
