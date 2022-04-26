@@ -3,7 +3,7 @@ module github.com/googleapis/gapic-showcase
 require (
 	cloud.google.com/go v0.101.0
 	github.com/golang/protobuf v1.5.2
-	github.com/google/go-cmp v0.5.7
+	github.com/google/go-cmp v0.5.8
 	github.com/googleapis/gax-go/v2 v2.3.0
 	github.com/googleapis/grpc-fallback-go v0.1.4
 	github.com/gorilla/mux v1.8.0
