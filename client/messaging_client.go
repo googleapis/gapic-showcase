@@ -501,6 +501,11 @@ type messagingRESTClient struct {
 	// The http client.
 	httpClient *http.Client
 
+	// LROClient is used internally to handle long-running operations.
+	// It is exposed so that its CallOptions can be modified if required.
+	// Users should not Close this client.
+	LROClient **lroauto.OperationsClient
+
 	// The x-goog-* metadata to be sent with each request.
 	xGoogMetadata metadata.MD
 }
@@ -523,6 +528,16 @@ func NewMessagingRESTClient(ctx context.Context, opts ...option.ClientOption) (*
 		httpClient: httpClient,
 	}
 	c.setGoogleClientInfo()
+
+	lroOpts := []option.ClientOption{
+		option.WithHTTPClient(httpClient),
+		option.WithEndpoint(endpoint),
+	}
+	opClient, err := lroauto.NewOperationsRESTClient(ctx, lroOpts...)
+	if err != nil {
+		return nil, err
+	}
+	c.LROClient = &opClient
 
 	return &MessagingClient{internalClient: c, CallOptions: &MessagingCallOptions{}}, nil
 }
@@ -884,7 +899,9 @@ func (c *messagingGRPCClient) Connect(ctx context.Context, opts ...gax.CallOptio
 }
 
 func (c *messagingGRPCClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).ListLocations[0:len((*c.CallOptions).ListLocations):len((*c.CallOptions).ListLocations)], opts...)
 	it := &LocationIterator{}
 	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
@@ -927,7 +944,9 @@ func (c *messagingGRPCClient) ListLocations(ctx context.Context, req *locationpb
 }
 
 func (c *messagingGRPCClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).GetLocation[0:len((*c.CallOptions).GetLocation):len((*c.CallOptions).GetLocation)], opts...)
 	var resp *locationpb.Location
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -942,7 +961,9 @@ func (c *messagingGRPCClient) GetLocation(ctx context.Context, req *locationpb.G
 }
 
 func (c *messagingGRPCClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
+
+	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).SetIamPolicy[0:len((*c.CallOptions).SetIamPolicy):len((*c.CallOptions).SetIamPolicy)], opts...)
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -957,7 +978,9 @@ func (c *messagingGRPCClient) SetIamPolicy(ctx context.Context, req *iampb.SetIa
 }
 
 func (c *messagingGRPCClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
+
+	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).GetIamPolicy[0:len((*c.CallOptions).GetIamPolicy):len((*c.CallOptions).GetIamPolicy)], opts...)
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -972,7 +995,9 @@ func (c *messagingGRPCClient) GetIamPolicy(ctx context.Context, req *iampb.GetIa
 }
 
 func (c *messagingGRPCClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
+
+	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).TestIamPermissions[0:len((*c.CallOptions).TestIamPermissions):len((*c.CallOptions).TestIamPermissions)], opts...)
 	var resp *iampb.TestIamPermissionsResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1030,7 +1055,9 @@ func (c *messagingGRPCClient) ListOperations(ctx context.Context, req *longrunni
 }
 
 func (c *messagingGRPCClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).GetOperation[0:len((*c.CallOptions).GetOperation):len((*c.CallOptions).GetOperation)], opts...)
 	var resp *longrunningpb.Operation
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1045,7 +1072,9 @@ func (c *messagingGRPCClient) GetOperation(ctx context.Context, req *longrunning
 }
 
 func (c *messagingGRPCClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).DeleteOperation[0:len((*c.CallOptions).DeleteOperation):len((*c.CallOptions).DeleteOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -1056,7 +1085,9 @@ func (c *messagingGRPCClient) DeleteOperation(ctx context.Context, req *longrunn
 }
 
 func (c *messagingGRPCClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
 	opts = append((*c.CallOptions).CancelOperation[0:len((*c.CallOptions).CancelOperation):len((*c.CallOptions).CancelOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -1672,7 +1703,65 @@ func (c *messagingRESTClient) ListBlurbs(ctx context.Context, req *genprotopb.Li
 // for blurbs containing to words found in the query. Only posts that
 // contain an exact match of a queried word will be returned.
 func (c *messagingRESTClient) SearchBlurbs(ctx context.Context, req *genprotopb.SearchBlurbsRequest, opts ...gax.CallOption) (*SearchBlurbsOperation, error) {
-	return nil, fmt.Errorf("SearchBlurbs not yet supported for REST clients")
+	m := protojson.MarshalOptions{AllowPartial: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
+	baseUrl.Path += fmt.Sprintf("/v1beta1/%v/blurbs:search", req.GetParent())
+
+	// Build HTTP headers from client and context metadata.
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	resp := &longrunningpb.Operation{}
+	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
+		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
+		if err != nil {
+			return err
+		}
+		httpReq = httpReq.WithContext(ctx)
+		httpReq.Header = headers
+
+		httpRsp, err := c.httpClient.Do(httpReq)
+		if err != nil {
+			return err
+		}
+		defer httpRsp.Body.Close()
+
+		if err = googleapi.CheckResponse(httpRsp); err != nil {
+			return err
+		}
+
+		buf, err := ioutil.ReadAll(httpRsp.Body)
+		if err != nil {
+			return err
+		}
+
+		if err := unm.Unmarshal(buf, resp); err != nil {
+			return maybeUnknownEnum(err)
+		}
+
+		return nil
+	}, opts...)
+	if e != nil {
+		return nil, e
+	}
+
+	override := fmt.Sprintf("/v1beta1/%s", resp.GetName())
+	return &SearchBlurbsOperation{
+		lro:      longrunning.InternalNewOperation(*c.LROClient, resp),
+		pollPath: override,
+	}, nil
 }
 
 // StreamBlurbs this returns a stream that emits the blurbs that are created for a
@@ -1808,7 +1897,7 @@ func (c *messagingRESTClient) ListLocations(ctx context.Context, req *locationpb
 		if err != nil {
 			return nil, "", err
 		}
-		baseUrl.Path += fmt.Sprintf("")
+		baseUrl.Path += fmt.Sprintf("/v1beta1/%v/locations", req.GetName())
 
 		params := url.Values{}
 		if req.GetFilter() != "" {
@@ -1832,7 +1921,7 @@ func (c *messagingRESTClient) ListLocations(ctx context.Context, req *locationpb
 			if settings.Path != "" {
 				baseUrl.Path = settings.Path
 			}
-			httpReq, err := http.NewRequest("", baseUrl.String(), nil)
+			httpReq, err := http.NewRequest("GET", baseUrl.String(), nil)
 			if err != nil {
 				return err
 			}
@@ -1888,7 +1977,7 @@ func (c *messagingRESTClient) GetLocation(ctx context.Context, req *locationpb.G
 	if err != nil {
 		return nil, err
 	}
-	baseUrl.Path += fmt.Sprintf("")
+	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
 	params := url.Values{}
 	if req.GetName() != "" {
@@ -1898,14 +1987,16 @@ func (c *messagingRESTClient) GetLocation(ctx context.Context, req *locationpb.G
 	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &locationpb.Location{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		if settings.Path != "" {
 			baseUrl.Path = settings.Path
 		}
-		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
+		httpReq, err := http.NewRequest("GET", baseUrl.String(), nil)
 		if err != nil {
 			return err
 		}
@@ -1951,17 +2042,19 @@ func (c *messagingRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIa
 	if err != nil {
 		return nil, err
 	}
-	baseUrl.Path += fmt.Sprintf("")
+	baseUrl.Path += fmt.Sprintf("/v1beta1/%v:setIamPolicy", req.GetResource())
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.Policy{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		if settings.Path != "" {
 			baseUrl.Path = settings.Path
 		}
-		httpReq, err := http.NewRequest("", baseUrl.String(), bytes.NewReader(jsonReq))
+		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
 		}
@@ -2001,7 +2094,7 @@ func (c *messagingRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIa
 	if err != nil {
 		return nil, err
 	}
-	baseUrl.Path += fmt.Sprintf("")
+	baseUrl.Path += fmt.Sprintf("/v1beta1/%v:getIamPolicy", req.GetResource())
 
 	params := url.Values{}
 	if req.GetOptions().GetRequestedPolicyVersion() != 0 {
@@ -2012,14 +2105,16 @@ func (c *messagingRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIa
 	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.Policy{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		if settings.Path != "" {
 			baseUrl.Path = settings.Path
 		}
-		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
+		httpReq, err := http.NewRequest("GET", baseUrl.String(), nil)
 		if err != nil {
 			return err
 		}
@@ -2065,17 +2160,19 @@ func (c *messagingRESTClient) TestIamPermissions(ctx context.Context, req *iampb
 	if err != nil {
 		return nil, err
 	}
-	baseUrl.Path += fmt.Sprintf("")
+	baseUrl.Path += fmt.Sprintf("/v1beta1/%v:testIamPermissions", req.GetResource())
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.TestIamPermissionsResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		if settings.Path != "" {
 			baseUrl.Path = settings.Path
 		}
-		httpReq, err := http.NewRequest("", baseUrl.String(), bytes.NewReader(jsonReq))
+		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
 		if err != nil {
 			return err
 		}
@@ -2128,7 +2225,7 @@ func (c *messagingRESTClient) ListOperations(ctx context.Context, req *longrunni
 		if err != nil {
 			return nil, "", err
 		}
-		baseUrl.Path += fmt.Sprintf("")
+		baseUrl.Path += fmt.Sprintf("/v1beta1/operations")
 
 		params := url.Values{}
 		if req.GetFilter() != "" {
@@ -2152,7 +2249,7 @@ func (c *messagingRESTClient) ListOperations(ctx context.Context, req *longrunni
 			if settings.Path != "" {
 				baseUrl.Path = settings.Path
 			}
-			httpReq, err := http.NewRequest("", baseUrl.String(), nil)
+			httpReq, err := http.NewRequest("GET", baseUrl.String(), nil)
 			if err != nil {
 				return err
 			}
@@ -2208,7 +2305,7 @@ func (c *messagingRESTClient) GetOperation(ctx context.Context, req *longrunning
 	if err != nil {
 		return nil, err
 	}
-	baseUrl.Path += fmt.Sprintf("")
+	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
 	params := url.Values{}
 	if req.GetName() != "" {
@@ -2218,14 +2315,16 @@ func (c *messagingRESTClient) GetOperation(ctx context.Context, req *longrunning
 	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &longrunningpb.Operation{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		if settings.Path != "" {
 			baseUrl.Path = settings.Path
 		}
-		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
+		httpReq, err := http.NewRequest("GET", baseUrl.String(), nil)
 		if err != nil {
 			return err
 		}
@@ -2265,7 +2364,7 @@ func (c *messagingRESTClient) DeleteOperation(ctx context.Context, req *longrunn
 	if err != nil {
 		return err
 	}
-	baseUrl.Path += fmt.Sprintf("")
+	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
 	params := url.Values{}
 	if req.GetName() != "" {
@@ -2275,12 +2374,14 @@ func (c *messagingRESTClient) DeleteOperation(ctx context.Context, req *longrunn
 	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	return gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		if settings.Path != "" {
 			baseUrl.Path = settings.Path
 		}
-		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
+		httpReq, err := http.NewRequest("DELETE", baseUrl.String(), nil)
 		if err != nil {
 			return err
 		}
@@ -2305,7 +2406,7 @@ func (c *messagingRESTClient) CancelOperation(ctx context.Context, req *longrunn
 	if err != nil {
 		return err
 	}
-	baseUrl.Path += fmt.Sprintf("")
+	baseUrl.Path += fmt.Sprintf("/v1beta1/%v:cancel", req.GetName())
 
 	params := url.Values{}
 	if req.GetName() != "" {
@@ -2315,12 +2416,14 @@ func (c *messagingRESTClient) CancelOperation(ctx context.Context, req *longrunn
 	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
 	return gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		if settings.Path != "" {
 			baseUrl.Path = settings.Path
 		}
-		httpReq, err := http.NewRequest("", baseUrl.String(), nil)
+		httpReq, err := http.NewRequest("POST", baseUrl.String(), nil)
 		if err != nil {
 			return err
 		}
@@ -2341,7 +2444,8 @@ func (c *messagingRESTClient) CancelOperation(ctx context.Context, req *longrunn
 
 // SearchBlurbsOperation manages a long-running operation from SearchBlurbs.
 type SearchBlurbsOperation struct {
-	lro *longrunning.Operation
+	lro      *longrunning.Operation
+	pollPath string
 }
 
 // SearchBlurbsOperation returns a new SearchBlurbsOperation from a given name.
@@ -2355,13 +2459,18 @@ func (c *messagingGRPCClient) SearchBlurbsOperation(name string) *SearchBlurbsOp
 // SearchBlurbsOperation returns a new SearchBlurbsOperation from a given name.
 // The name must be that of a previously created SearchBlurbsOperation, possibly from a different process.
 func (c *messagingRESTClient) SearchBlurbsOperation(name string) *SearchBlurbsOperation {
-	return &SearchBlurbsOperation{}
+	override := fmt.Sprintf("/v1beta1/%s", name)
+	return &SearchBlurbsOperation{
+		lro:      longrunning.InternalNewOperation(*c.LROClient, &longrunningpb.Operation{Name: name}),
+		pollPath: override,
+	}
 }
 
 // Wait blocks until the long-running operation is completed, returning the response and any errors encountered.
 //
 // See documentation of Poll for error-handling information.
 func (op *SearchBlurbsOperation) Wait(ctx context.Context, opts ...gax.CallOption) (*genprotopb.SearchBlurbsResponse, error) {
+	opts = append([]gax.CallOption{gax.WithPath(op.pollPath)}, opts...)
 	var resp genprotopb.SearchBlurbsResponse
 	if err := op.lro.WaitWithInterval(ctx, &resp, time.Minute, opts...); err != nil {
 		return nil, err
@@ -2379,6 +2488,7 @@ func (op *SearchBlurbsOperation) Wait(ctx context.Context, opts ...gax.CallOptio
 // op.Done will return true, and the response of the operation is returned.
 // If Poll succeeds and the operation has not completed, the returned response and error are both nil.
 func (op *SearchBlurbsOperation) Poll(ctx context.Context, opts ...gax.CallOption) (*genprotopb.SearchBlurbsResponse, error) {
+	opts = append([]gax.CallOption{gax.WithPath(op.pollPath)}, opts...)
 	var resp genprotopb.SearchBlurbsResponse
 	if err := op.lro.Poll(ctx, &resp, opts...); err != nil {
 		return nil, err
