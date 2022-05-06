@@ -208,16 +208,14 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				source.P(` streamer := &%s{serverStreamer}`, streamerType)
 
 				source.P(" if err := backend.%sServer.%s(%s, streamer); err != nil {", service.ShortName, handler.GoMethod, handler.RequestVariable)
-				source.P("    // TODO: Properly handle error. Is StatusInternalServerError (500) the right response?")
-				source.P(`    backend.Error(w, http.StatusInternalServerError, "server error: %%s", err.Error())`)
+				source.P("   backend.ReportGRPCError(w, err)")
 				source.P(" }")
 
 			} else { // regular unary call
 				// TODO: In the future, we may want to redirect all REST-endpoint requests to the gRPC endpoint so that the gRPC-registered observers get invoked.
 				source.P("  %s, err := backend.%sServer.%s(context.Background(), %s)", handler.ResponseVariable, service.ShortName, handler.GoMethod, handler.RequestVariable)
 				source.P("  if err != nil {")
-				source.P("    // TODO: Properly handle error. Is StatusInternalServerError (500) the right response?")
-				source.P(`    backend.Error(w, http.StatusInternalServerError, "server error: %%s", err.Error())`)
+				source.P("    backend.ReportGRPCError(w, err)")
 				source.P("    return")
 				source.P("  }")
 				source.P("")
@@ -261,8 +259,10 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	file.P(`   "net/http"`)
 	file.P("")
 	file.P(`   "github.com/googleapis/gapic-showcase/server/services"`)
+	file.P(`   "github.com/googleapis/gapic-showcase/util/genrest/resttools"`)
 	file.P("")
 	file.P(`  gmux "github.com/gorilla/mux"`)
+	file.P(`  "google.golang.org/grpc/status"`)
 	file.P(")")
 	file.P("")
 	file.P("")
@@ -292,8 +292,19 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	file.P("func (backend *RESTBackend) Error(w http.ResponseWriter, status int, format string, args ...interface{}) {")
 	file.P("  message := fmt.Sprintf(format, args...)")
 	file.P("  backend.ErrLog.Print(message)")
-	file.P("  w.WriteHeader(status)")
-	file.P(`  w.Write([]byte("showcase " + message))`)
+	file.P("  resttools.ErrorResponse(w, status, message)")
+	file.P("}")
+
+	file.P("func (backend *RESTBackend) ReportGRPCError(w http.ResponseWriter, err error) {")
+	file.P("  st, ok := status.FromError(err)")
+	file.P("  if !ok {")
+	file.P(`  	backend.Error(w, http.StatusInternalServerError, "server error: %%s", err.Error())`)
+	file.P("    return")
+	file.P("  }")
+	file.P("")
+	file.P("  backend.ErrLog.Print(st.Message())")
+	file.P("  code := resttools.GRPCToHTTP[st.Code()]")
+	file.P("  resttools.ErrorResponse(w, code, st.Message(), st.Details()...)")
 	file.P("}")
 
 	return view, nil
