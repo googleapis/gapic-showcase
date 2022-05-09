@@ -1378,9 +1378,6 @@ func (c *complianceRESTClient) RepeatDataPathResource(ctx context.Context, req *
 	if req.GetInfo().GetFChild().GetFFloat() != 0 {
 		params.Add("info.fChild.fFloat", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFFloat()))
 	}
-	if req.GetInfo().GetFChild().GetFString() != "" {
-		params.Add("info.fChild.fString", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFString()))
-	}
 	if req.GetInfo().GetFChild() != nil && req.GetInfo().GetFChild().PBool != nil {
 		params.Add("info.fChild.pBool", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPBool()))
 	}
@@ -1437,9 +1434,6 @@ func (c *complianceRESTClient) RepeatDataPathResource(ctx context.Context, req *
 	}
 	if req.GetInfo().GetFSint64() != 0 {
 		params.Add("info.fSint64", fmt.Sprintf("%v", req.GetInfo().GetFSint64()))
-	}
-	if req.GetInfo().GetFString() != "" {
-		params.Add("info.fString", fmt.Sprintf("%v", req.GetInfo().GetFString()))
 	}
 	if req.GetInfo().GetFUint32() != 0 {
 		params.Add("info.fUint32", fmt.Sprintf("%v", req.GetInfo().GetFUint32()))
@@ -1617,9 +1611,6 @@ func (c *complianceRESTClient) RepeatDataPathTrailingResource(ctx context.Contex
 	if req.GetInfo().GetFChild().GetFFloat() != 0 {
 		params.Add("info.fChild.fFloat", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFFloat()))
 	}
-	if req.GetInfo().GetFChild().GetFString() != "" {
-		params.Add("info.fChild.fString", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetFString()))
-	}
 	if req.GetInfo().GetFChild() != nil && req.GetInfo().GetFChild().PBool != nil {
 		params.Add("info.fChild.pBool", fmt.Sprintf("%v", req.GetInfo().GetFChild().GetPBool()))
 	}
@@ -1676,9 +1667,6 @@ func (c *complianceRESTClient) RepeatDataPathTrailingResource(ctx context.Contex
 	}
 	if req.GetInfo().GetFSint64() != 0 {
 		params.Add("info.fSint64", fmt.Sprintf("%v", req.GetInfo().GetFSint64()))
-	}
-	if req.GetInfo().GetFString() != "" {
-		params.Add("info.fString", fmt.Sprintf("%v", req.GetInfo().GetFString()))
 	}
 	if req.GetInfo().GetFUint32() != 0 {
 		params.Add("info.fUint32", fmt.Sprintf("%v", req.GetInfo().GetFUint32()))
@@ -1948,9 +1936,6 @@ func (c *complianceRESTClient) ListLocations(ctx context.Context, req *locationp
 		if req.GetFilter() != "" {
 			params.Add("filter", fmt.Sprintf("%v", req.GetFilter()))
 		}
-		if req.GetName() != "" {
-			params.Add("name", fmt.Sprintf("%v", req.GetName()))
-		}
 		if req.GetPageSize() != 0 {
 			params.Add("pageSize", fmt.Sprintf("%v", req.GetPageSize()))
 		}
@@ -2023,13 +2008,6 @@ func (c *complianceRESTClient) GetLocation(ctx context.Context, req *locationpb.
 		return nil, err
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
-
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
@@ -2145,7 +2123,6 @@ func (c *complianceRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetI
 	if req.GetOptions().GetRequestedPolicyVersion() != 0 {
 		params.Add("options.requestedPolicyVersion", fmt.Sprintf("%v", req.GetOptions().GetRequestedPolicyVersion()))
 	}
-	params.Add("resource", fmt.Sprintf("%v", req.GetResource()))
 
 	baseUrl.RawQuery = params.Encode()
 
@@ -2352,13 +2329,6 @@ func (c *complianceRESTClient) GetOperation(ctx context.Context, req *longrunnin
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
-
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
@@ -2411,13 +2381,6 @@ func (c *complianceRESTClient) DeleteOperation(ctx context.Context, req *longrun
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
-
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
@@ -2452,13 +2415,6 @@ func (c *complianceRESTClient) CancelOperation(ctx context.Context, req *longrun
 		return err
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v:cancel", req.GetName())
-
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
