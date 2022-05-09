@@ -1161,11 +1161,6 @@ func (c *messagingRESTClient) GetRoom(ctx context.Context, req *genprotopb.GetRo
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
-	params := url.Values{}
-	params.Add("name", fmt.Sprintf("%v", req.GetName()))
-
-	baseUrl.RawQuery = params.Encode()
-
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
@@ -1275,11 +1270,6 @@ func (c *messagingRESTClient) DeleteRoom(ctx context.Context, req *genprotopb.De
 		return err
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
-
-	params := url.Values{}
-	params.Add("name", fmt.Sprintf("%v", req.GetName()))
-
-	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
@@ -1463,11 +1453,6 @@ func (c *messagingRESTClient) GetBlurb(ctx context.Context, req *genprotopb.GetB
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
-	params := url.Values{}
-	params.Add("name", fmt.Sprintf("%v", req.GetName()))
-
-	baseUrl.RawQuery = params.Encode()
-
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
@@ -1578,11 +1563,6 @@ func (c *messagingRESTClient) DeleteBlurb(ctx context.Context, req *genprotopb.D
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
-	params := url.Values{}
-	params.Add("name", fmt.Sprintf("%v", req.GetName()))
-
-	baseUrl.RawQuery = params.Encode()
-
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
@@ -1639,7 +1619,6 @@ func (c *messagingRESTClient) ListBlurbs(ctx context.Context, req *genprotopb.Li
 		if req.GetPageToken() != "" {
 			params.Add("pageToken", fmt.Sprintf("%v", req.GetPageToken()))
 		}
-		params.Add("parent", fmt.Sprintf("%v", req.GetParent()))
 
 		baseUrl.RawQuery = params.Encode()
 
@@ -1903,9 +1882,6 @@ func (c *messagingRESTClient) ListLocations(ctx context.Context, req *locationpb
 		if req.GetFilter() != "" {
 			params.Add("filter", fmt.Sprintf("%v", req.GetFilter()))
 		}
-		if req.GetName() != "" {
-			params.Add("name", fmt.Sprintf("%v", req.GetName()))
-		}
 		if req.GetPageSize() != 0 {
 			params.Add("pageSize", fmt.Sprintf("%v", req.GetPageSize()))
 		}
@@ -1978,13 +1954,6 @@ func (c *messagingRESTClient) GetLocation(ctx context.Context, req *locationpb.G
 		return nil, err
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
-
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
@@ -2100,7 +2069,6 @@ func (c *messagingRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIa
 	if req.GetOptions().GetRequestedPolicyVersion() != 0 {
 		params.Add("options.requestedPolicyVersion", fmt.Sprintf("%v", req.GetOptions().GetRequestedPolicyVersion()))
 	}
-	params.Add("resource", fmt.Sprintf("%v", req.GetResource()))
 
 	baseUrl.RawQuery = params.Encode()
 
@@ -2307,13 +2275,6 @@ func (c *messagingRESTClient) GetOperation(ctx context.Context, req *longrunning
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
-
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
@@ -2366,13 +2327,6 @@ func (c *messagingRESTClient) DeleteOperation(ctx context.Context, req *longrunn
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
-
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
@@ -2407,13 +2361,6 @@ func (c *messagingRESTClient) CancelOperation(ctx context.Context, req *longrunn
 		return err
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v:cancel", req.GetName())
-
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
