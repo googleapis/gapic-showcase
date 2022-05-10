@@ -76,8 +76,7 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 
 	response, err := backend.MessagingServer.CreateRoom(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -132,8 +131,7 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 
 	response, err := backend.MessagingServer.GetRoom(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -195,8 +193,7 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 
 	response, err := backend.MessagingServer.UpdateRoom(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -251,8 +248,7 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 
 	response, err := backend.MessagingServer.DeleteRoom(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -302,8 +298,7 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 
 	response, err := backend.MessagingServer.ListRooms(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -365,8 +360,7 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 
 	response, err := backend.MessagingServer.CreateBlurb(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -428,8 +422,7 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 
 	response, err := backend.MessagingServer.CreateBlurb(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -484,8 +477,7 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 
 	response, err := backend.MessagingServer.GetBlurb(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -540,8 +532,7 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 
 	response, err := backend.MessagingServer.GetBlurb(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -603,8 +594,7 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 
 	response, err := backend.MessagingServer.UpdateBlurb(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -666,8 +656,7 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 
 	response, err := backend.MessagingServer.UpdateBlurb(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -722,8 +711,7 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 
 	response, err := backend.MessagingServer.DeleteBlurb(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -778,8 +766,7 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 
 	response, err := backend.MessagingServer.DeleteBlurb(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -834,8 +821,7 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 
 	response, err := backend.MessagingServer.ListBlurbs(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -890,8 +876,7 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 
 	response, err := backend.MessagingServer.ListBlurbs(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -953,8 +938,7 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 
 	response, err := backend.MessagingServer.SearchBlurbs(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -1009,8 +993,7 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 
 	response, err := backend.MessagingServer.SearchBlurbs(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -1078,8 +1061,7 @@ func (backend *RESTBackend) HandleStreamBlurbs(w http.ResponseWriter, r *http.Re
 	defer serverStreamer.End()
 	streamer := &Messaging_StreamBlurbsServer{serverStreamer}
 	if err := backend.MessagingServer.StreamBlurbs(request, streamer); err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 	}
 }
 
@@ -1138,8 +1120,7 @@ func (backend *RESTBackend) HandleStreamBlurbs_1(w http.ResponseWriter, r *http.
 	defer serverStreamer.End()
 	streamer := &Messaging_StreamBlurbsServer{serverStreamer}
 	if err := backend.MessagingServer.StreamBlurbs(request, streamer); err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 	}
 }
 

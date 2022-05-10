@@ -86,8 +86,7 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 
 	response, err := backend.SequenceServiceServer.CreateSequence(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -142,8 +141,7 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 
 	response, err := backend.SequenceServiceServer.GetSequenceReport(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -205,8 +203,7 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 
 	response, err := backend.SequenceServiceServer.AttemptSequence(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 

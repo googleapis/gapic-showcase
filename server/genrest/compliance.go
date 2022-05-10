@@ -76,8 +76,7 @@ func (backend *RESTBackend) HandleRepeatDataBody(w http.ResponseWriter, r *http.
 
 	response, err := backend.ComplianceServer.RepeatDataBody(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -149,8 +148,7 @@ func (backend *RESTBackend) HandleRepeatDataBodyInfo(w http.ResponseWriter, r *h
 
 	response, err := backend.ComplianceServer.RepeatDataBodyInfo(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -200,8 +198,7 @@ func (backend *RESTBackend) HandleRepeatDataQuery(w http.ResponseWriter, r *http
 
 	response, err := backend.ComplianceServer.RepeatDataQuery(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -256,8 +253,7 @@ func (backend *RESTBackend) HandleRepeatDataSimplePath(w http.ResponseWriter, r 
 
 	response, err := backend.ComplianceServer.RepeatDataSimplePath(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -312,8 +308,7 @@ func (backend *RESTBackend) HandleRepeatDataPathResource(w http.ResponseWriter, 
 
 	response, err := backend.ComplianceServer.RepeatDataPathResource(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -368,8 +363,7 @@ func (backend *RESTBackend) HandleRepeatDataPathTrailingResource(w http.Response
 
 	response, err := backend.ComplianceServer.RepeatDataPathTrailingResource(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -431,8 +425,7 @@ func (backend *RESTBackend) HandleRepeatDataBodyPut(w http.ResponseWriter, r *ht
 
 	response, err := backend.ComplianceServer.RepeatDataBodyPut(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -494,8 +487,7 @@ func (backend *RESTBackend) HandleRepeatDataBodyPatch(w http.ResponseWriter, r *
 
 	response, err := backend.ComplianceServer.RepeatDataBodyPatch(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 

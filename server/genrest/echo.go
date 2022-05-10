@@ -76,8 +76,7 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 
 	response, err := backend.EchoServer.Echo(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -145,8 +144,7 @@ func (backend *RESTBackend) HandleExpand(w http.ResponseWriter, r *http.Request)
 	defer serverStreamer.End()
 	streamer := &Echo_ExpandServer{serverStreamer}
 	if err := backend.EchoServer.Expand(request, streamer); err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 	}
 }
 
@@ -205,8 +203,7 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 
 	response, err := backend.EchoServer.PagedExpand(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -268,8 +265,7 @@ func (backend *RESTBackend) HandlePagedExpandLegacy(w http.ResponseWriter, r *ht
 
 	response, err := backend.EchoServer.PagedExpandLegacy(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -331,8 +327,7 @@ func (backend *RESTBackend) HandlePagedExpandLegacyMapped(w http.ResponseWriter,
 
 	response, err := backend.EchoServer.PagedExpandLegacyMapped(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -394,8 +389,7 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 
 	response, err := backend.EchoServer.Wait(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -457,8 +451,7 @@ func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) 
 
 	response, err := backend.EchoServer.Block(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
