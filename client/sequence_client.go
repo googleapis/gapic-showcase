@@ -685,11 +685,6 @@ func (c *sequenceRESTClient) GetSequenceReport(ctx context.Context, req *genprot
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
-	params := url.Values{}
-	params.Add("name", fmt.Sprintf("%v", req.GetName()))
-
-	baseUrl.RawQuery = params.Encode()
-
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
@@ -800,9 +795,6 @@ func (c *sequenceRESTClient) ListLocations(ctx context.Context, req *locationpb.
 		if req.GetFilter() != "" {
 			params.Add("filter", fmt.Sprintf("%v", req.GetFilter()))
 		}
-		if req.GetName() != "" {
-			params.Add("name", fmt.Sprintf("%v", req.GetName()))
-		}
 		if req.GetPageSize() != 0 {
 			params.Add("pageSize", fmt.Sprintf("%v", req.GetPageSize()))
 		}
@@ -875,13 +867,6 @@ func (c *sequenceRESTClient) GetLocation(ctx context.Context, req *locationpb.Ge
 		return nil, err
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
-
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
@@ -997,7 +982,6 @@ func (c *sequenceRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIam
 	if req.GetOptions().GetRequestedPolicyVersion() != 0 {
 		params.Add("options.requestedPolicyVersion", fmt.Sprintf("%v", req.GetOptions().GetRequestedPolicyVersion()))
 	}
-	params.Add("resource", fmt.Sprintf("%v", req.GetResource()))
 
 	baseUrl.RawQuery = params.Encode()
 
@@ -1204,13 +1188,6 @@ func (c *sequenceRESTClient) GetOperation(ctx context.Context, req *longrunningp
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
-
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
@@ -1263,13 +1240,6 @@ func (c *sequenceRESTClient) DeleteOperation(ctx context.Context, req *longrunni
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
-
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
@@ -1304,13 +1274,6 @@ func (c *sequenceRESTClient) CancelOperation(ctx context.Context, req *longrunni
 		return err
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v:cancel", req.GetName())
-
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))

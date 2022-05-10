@@ -851,13 +851,6 @@ func (c *testingRESTClient) GetSession(ctx context.Context, req *genprotopb.GetS
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
-
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
@@ -997,13 +990,6 @@ func (c *testingRESTClient) DeleteSession(ctx context.Context, req *genprotopb.D
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
-
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
@@ -1040,13 +1026,6 @@ func (c *testingRESTClient) ReportSession(ctx context.Context, req *genprotopb.R
 		return nil, err
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v:report", req.GetName())
-
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
@@ -1120,9 +1099,6 @@ func (c *testingRESTClient) ListTests(ctx context.Context, req *genprotopb.ListT
 		if req.GetPageToken() != "" {
 			params.Add("pageToken", fmt.Sprintf("%v", req.GetPageToken()))
 		}
-		if req.GetParent() != "" {
-			params.Add("parent", fmt.Sprintf("%v", req.GetParent()))
-		}
 
 		baseUrl.RawQuery = params.Encode()
 
@@ -1195,13 +1171,6 @@ func (c *testingRESTClient) DeleteTest(ctx context.Context, req *genprotopb.Dele
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
-
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
@@ -1246,9 +1215,6 @@ func (c *testingRESTClient) VerifyTest(ctx context.Context, req *genprotopb.Veri
 	}
 	if req.GetAnswers() != nil {
 		params.Add("answers", fmt.Sprintf("%v", req.GetAnswers()))
-	}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
 	}
 
 	baseUrl.RawQuery = params.Encode()
@@ -1322,9 +1288,6 @@ func (c *testingRESTClient) ListLocations(ctx context.Context, req *locationpb.L
 		if req.GetFilter() != "" {
 			params.Add("filter", fmt.Sprintf("%v", req.GetFilter()))
 		}
-		if req.GetName() != "" {
-			params.Add("name", fmt.Sprintf("%v", req.GetName()))
-		}
 		if req.GetPageSize() != 0 {
 			params.Add("pageSize", fmt.Sprintf("%v", req.GetPageSize()))
 		}
@@ -1397,13 +1360,6 @@ func (c *testingRESTClient) GetLocation(ctx context.Context, req *locationpb.Get
 		return nil, err
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
-
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
@@ -1519,7 +1475,6 @@ func (c *testingRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamP
 	if req.GetOptions().GetRequestedPolicyVersion() != 0 {
 		params.Add("options.requestedPolicyVersion", fmt.Sprintf("%v", req.GetOptions().GetRequestedPolicyVersion()))
 	}
-	params.Add("resource", fmt.Sprintf("%v", req.GetResource()))
 
 	baseUrl.RawQuery = params.Encode()
 
@@ -1726,13 +1681,6 @@ func (c *testingRESTClient) GetOperation(ctx context.Context, req *longrunningpb
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
-
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
@@ -1785,13 +1733,6 @@ func (c *testingRESTClient) DeleteOperation(ctx context.Context, req *longrunnin
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
-
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
@@ -1826,13 +1767,6 @@ func (c *testingRESTClient) CancelOperation(ctx context.Context, req *longrunnin
 		return err
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v:cancel", req.GetName())
-
-	params := url.Values{}
-	if req.GetName() != "" {
-		params.Add("name", fmt.Sprintf("%v", req.GetName()))
-	}
-
-	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
