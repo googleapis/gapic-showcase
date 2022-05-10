@@ -22,8 +22,10 @@ import (
 	"net/http"
 
 	"github.com/googleapis/gapic-showcase/server/services"
+	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 
 	gmux "github.com/gorilla/mux"
+	"google.golang.org/grpc/status"
 )
 
 type RESTBackend services.Backend
@@ -90,9 +92,19 @@ func (backend *RESTBackend) catchAllHandler(w http.ResponseWriter, r *http.Reque
 	backend.Error(w, http.StatusBadRequest, "unrecognized request: %s %q", r.Method, r.URL)
 }
 
-func (backend *RESTBackend) Error(w http.ResponseWriter, status int, format string, args ...interface{}) {
+func (backend *RESTBackend) Error(w http.ResponseWriter, httpStatus int, format string, args ...interface{}) {
 	message := fmt.Sprintf(format, args...)
 	backend.ErrLog.Print(message)
-	w.WriteHeader(status)
-	w.Write([]byte("showcase " + message))
+	resttools.ErrorResponse(w, httpStatus, message)
+}
+func (backend *RESTBackend) ReportGRPCError(w http.ResponseWriter, err error) {
+	st, ok := status.FromError(err)
+	if !ok {
+		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		return
+	}
+
+	backend.ErrLog.Print(st.Message())
+	code := resttools.GRPCToHTTP(st.Code())
+	resttools.ErrorResponse(w, code, st.Message(), st.Details()...)
 }

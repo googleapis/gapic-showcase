@@ -86,8 +86,7 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 
 	response, err := backend.TestingServer.CreateSession(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -142,8 +141,7 @@ func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Requ
 
 	response, err := backend.TestingServer.GetSession(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -193,8 +191,7 @@ func (backend *RESTBackend) HandleListSessions(w http.ResponseWriter, r *http.Re
 
 	response, err := backend.TestingServer.ListSessions(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -249,8 +246,7 @@ func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.R
 
 	response, err := backend.TestingServer.DeleteSession(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -305,8 +301,7 @@ func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.R
 
 	response, err := backend.TestingServer.ReportSession(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -361,8 +356,7 @@ func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Reque
 
 	response, err := backend.TestingServer.ListTests(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -417,8 +411,7 @@ func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Requ
 
 	response, err := backend.TestingServer.DeleteTest(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
@@ -473,8 +466,7 @@ func (backend *RESTBackend) HandleVerifyTest(w http.ResponseWriter, r *http.Requ
 
 	response, err := backend.TestingServer.VerifyTest(context.Background(), request)
 	if err != nil {
-		// TODO: Properly handle error. Is StatusInternalServerError (500) the right response?
-		backend.Error(w, http.StatusInternalServerError, "server error: %s", err.Error())
+		backend.ReportGRPCError(w, err)
 		return
 	}
 
