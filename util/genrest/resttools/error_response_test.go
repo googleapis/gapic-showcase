@@ -22,9 +22,11 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/api/googleapi"
+	"google.golang.org/grpc/codes"
 )
 
 func TestErrorResponse(t *testing.T) {
+
 	for _, tst := range []struct {
 		details       []interface{}
 		message, name string
@@ -34,6 +36,7 @@ func TestErrorResponse(t *testing.T) {
 			name:    "internal_server",
 			message: "Had an issue",
 			status:  http.StatusInternalServerError,
+			details: []interface{}{"foo"},
 		},
 		{
 			name:    "bad_request",
@@ -51,11 +54,32 @@ func TestErrorResponse(t *testing.T) {
 		if !errors.As(err, &gerr) {
 			t.Fatalf("%s: Expected response to be a googleapi.Error, but got %v", tst.name, err)
 		}
+
 		if diff := cmp.Diff(gerr.Message, tst.message); diff != "" {
 			t.Errorf("%s: got(-),want(+):%s\n", tst.name, diff)
 		}
 		if diff := cmp.Diff(gerr.Details, tst.details); diff != "" {
 			t.Errorf("%s: got(-),want(+):%s\n", tst.name, diff)
+		}
+	}
+}
+
+func TestGRPCToHTTP(t *testing.T) {
+	for _, tst := range []struct {
+		code codes.Code
+		want int
+	}{
+		{
+			codes.Aborted,
+			http.StatusConflict,
+		},
+		{
+			100,
+			http.StatusInternalServerError,
+		},
+	} {
+		if got := GRPCToHTTP(tst.code); got != tst.want {
+			t.Errorf("got %d, but expected %d", got, tst.want)
 		}
 	}
 }

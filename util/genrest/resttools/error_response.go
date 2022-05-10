@@ -22,8 +22,9 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
-// Derived from internal source: go/http-canonical-mapping.
-var GRPCToHTTP map[codes.Code]int = map[codes.Code]int{
+// gRPCToHTTP status code mapping derived from internal source:
+// go/http-canonical-mapping.
+var gRPCToHTTP map[codes.Code]int = map[codes.Code]int{
 	codes.OK:                 http.StatusOK,
 	codes.Canceled:           499, // There isn't a Go constant ClientClosedConnection
 	codes.Unknown:            http.StatusInternalServerError,
@@ -50,6 +51,20 @@ type googleAPIError struct {
 	Error *googleapi.Error `json:"error"`
 }
 
+// GRPCToHTTP maps the given gRPC Code to the canonical HTTP Status code as
+// defined by the internal source go/http-canonical-mapping.
+func GRPCToHTTP(c codes.Code) int {
+	httpStatus, ok := gRPCToHTTP[c]
+	if !ok {
+		httpStatus = http.StatusInternalServerError
+	}
+
+	return httpStatus
+}
+
+// ErrorResponse is a helper that formats the given response information,
+// including the HTTP Status code, a message, and any error detail types, into
+// a googleAPIError and writes the response as JSON.
 func ErrorResponse(w http.ResponseWriter, status int, message string, details ...interface{}) {
 	googleAPIError := &googleAPIError{
 		Error: &googleapi.Error{
