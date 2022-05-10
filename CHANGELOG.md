@@ -1,5 +1,12 @@
 # Release History
 
+## [0.20.0](https://github.com/googleapis/gapic-showcase/compare/v0.19.5...v0.20.0) (2022-05-10)
+
+
+### Features
+
+* **genrest:** format rest errors as Google Errors ([#1082](https://github.com/googleapis/gapic-showcase/issues/1082)) ([e49f134](https://github.com/googleapis/gapic-showcase/commit/e49f134dc54ae734c716f8649fc3279efd68916f))
+
 ### [0.19.5](https://github.com/googleapis/gapic-showcase/compare/v0.19.4...v0.19.5) (2022-03-08)
 
 
