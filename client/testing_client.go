@@ -788,7 +788,7 @@ func (c *testingGRPCClient) CancelOperation(ctx context.Context, req *longrunnin
 
 // CreateSession creates a new testing session.
 func (c *testingRESTClient) CreateSession(ctx context.Context, req *genprotopb.CreateSessionRequest, opts ...gax.CallOption) (*genprotopb.Session, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	body := req.GetSession()
 	jsonReq, err := m.Marshal(body)
 	if err != nil {
@@ -1407,7 +1407,7 @@ func (c *testingRESTClient) GetLocation(ctx context.Context, req *locationpb.Get
 
 // SetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
 func (c *testingRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -1524,7 +1524,7 @@ func (c *testingRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamP
 
 // TestIamPermissions is a utility method from google.iam.v1.IAMPolicy.
 func (c *testingRESTClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err

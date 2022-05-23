@@ -225,7 +225,11 @@ var WaitPollCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println(fmt.Sprintf("Operation %s not done", op.Name()))
+		if op.Done() {
+			fmt.Println(fmt.Sprintf("Operation %s is done", op.Name()))
+		} else {
+			fmt.Println(fmt.Sprintf("Operation %s not done", op.Name()))
+		}
 
 		return err
 	},

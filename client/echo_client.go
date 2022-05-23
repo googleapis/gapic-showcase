@@ -993,7 +993,7 @@ func (c *echoGRPCClient) CancelOperation(ctx context.Context, req *longrunningpb
 
 // Echo this method simply echoes the request. This method showcases unary RPCs.
 func (c *echoRESTClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, opts ...gax.CallOption) (*genprotopb.EchoResponse, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -1082,7 +1082,7 @@ func (c *echoRESTClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, 
 // Expand this method splits the given content into words and will pass each word back
 // through the stream. This method showcases server-side streaming RPCs.
 func (c *echoRESTClient) Expand(ctx context.Context, req *genprotopb.ExpandRequest, opts ...gax.CallOption) (genprotopb.Echo_ExpandClient, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -1196,7 +1196,7 @@ func (c *echoRESTClient) Chat(ctx context.Context, opts ...gax.CallOption) (genp
 func (c *echoRESTClient) PagedExpand(ctx context.Context, req *genprotopb.PagedExpandRequest, opts ...gax.CallOption) *EchoResponseIterator {
 	it := &EchoResponseIterator{}
 	req = proto.Clone(req).(*genprotopb.PagedExpandRequest)
-	m := protojson.MarshalOptions{AllowPartial: true, UseProtoNames: false}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.EchoResponse, string, error) {
 		resp := &genprotopb.PagedExpandResponse{}
@@ -1281,7 +1281,7 @@ func (c *echoRESTClient) PagedExpand(ctx context.Context, req *genprotopb.PagedE
 func (c *echoRESTClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.PagedExpandLegacyRequest, opts ...gax.CallOption) *EchoResponseIterator {
 	it := &EchoResponseIterator{}
 	req = proto.Clone(req).(*genprotopb.PagedExpandLegacyRequest)
-	m := protojson.MarshalOptions{AllowPartial: true, UseProtoNames: false}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.EchoResponse, string, error) {
 		resp := &genprotopb.PagedExpandResponse{}
@@ -1368,7 +1368,7 @@ func (c *echoRESTClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.
 func (c *echoRESTClient) PagedExpandLegacyMapped(ctx context.Context, req *genprotopb.PagedExpandRequest, opts ...gax.CallOption) *PagedExpandResponseListPairIterator {
 	it := &PagedExpandResponseListPairIterator{}
 	req = proto.Clone(req).(*genprotopb.PagedExpandRequest)
-	m := protojson.MarshalOptions{AllowPartial: true, UseProtoNames: false}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]PagedExpandResponseListPair, string, error) {
 		resp := &genprotopb.PagedExpandLegacyMappedResponse{}
@@ -1457,7 +1457,7 @@ func (c *echoRESTClient) PagedExpandLegacyMapped(ctx context.Context, req *genpr
 // Wait this method will wait for the requested amount of time and then return.
 // This method showcases how a client handles a request timeout.
 func (c *echoRESTClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, opts ...gax.CallOption) (*WaitOperation, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -1520,7 +1520,7 @@ func (c *echoRESTClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, 
 // and then return the response or error.
 // This method showcases how a client handles delays or retries.
 func (c *echoRESTClient) Block(ctx context.Context, req *genprotopb.BlockRequest, opts ...gax.CallOption) (*genprotopb.BlockResponse, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -1718,7 +1718,7 @@ func (c *echoRESTClient) GetLocation(ctx context.Context, req *locationpb.GetLoc
 
 // SetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
 func (c *echoRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -1835,7 +1835,7 @@ func (c *echoRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPoli
 
 // TestIamPermissions is a utility method from google.iam.v1.IAMPolicy.
 func (c *echoRESTClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
