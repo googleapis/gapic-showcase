@@ -731,7 +731,7 @@ func (c *complianceGRPCClient) CancelOperation(ctx context.Context, req *longrun
 // RepeatDataBody this method echoes the ComplianceData request. This method exercises
 // sending the entire request object in the REST body.
 func (c *complianceRESTClient) RepeatDataBody(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -789,7 +789,7 @@ func (c *complianceRESTClient) RepeatDataBody(ctx context.Context, req *genproto
 // sending the a message-type field in the REST body. Per AIP-127, only
 // top-level, non-repeated fields can be sent this way.
 func (c *complianceRESTClient) RepeatDataBodyInfo(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	body := req.GetInfo()
 	jsonReq, err := m.Marshal(body)
 	if err != nil {
@@ -1801,7 +1801,7 @@ func (c *complianceRESTClient) RepeatDataPathTrailingResource(ctx context.Contex
 
 // RepeatDataBodyPut this method echoes the ComplianceData request, using the HTTP PUT method.
 func (c *complianceRESTClient) RepeatDataBodyPut(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -1857,7 +1857,7 @@ func (c *complianceRESTClient) RepeatDataBodyPut(ctx context.Context, req *genpr
 
 // RepeatDataBodyPatch this method echoes the ComplianceData request, using the HTTP PATCH method.
 func (c *complianceRESTClient) RepeatDataBodyPatch(ctx context.Context, req *genprotopb.RepeatRequest, opts ...gax.CallOption) (*genprotopb.RepeatResponse, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -2055,7 +2055,7 @@ func (c *complianceRESTClient) GetLocation(ctx context.Context, req *locationpb.
 
 // SetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
 func (c *complianceRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -2172,7 +2172,7 @@ func (c *complianceRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetI
 
 // TestIamPermissions is a utility method from google.iam.v1.IAMPolicy.
 func (c *complianceRESTClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err

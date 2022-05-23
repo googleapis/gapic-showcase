@@ -622,7 +622,7 @@ func (c *sequenceGRPCClient) CancelOperation(ctx context.Context, req *longrunni
 
 // CreateSequence creates a sequence.
 func (c *sequenceRESTClient) CreateSequence(ctx context.Context, req *genprotopb.CreateSequenceRequest, opts ...gax.CallOption) (*genprotopb.Sequence, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	body := req.GetSequence()
 	jsonReq, err := m.Marshal(body)
 	if err != nil {
@@ -731,7 +731,7 @@ func (c *sequenceRESTClient) GetSequenceReport(ctx context.Context, req *genprot
 
 // AttemptSequence attempts a sequence.
 func (c *sequenceRESTClient) AttemptSequence(ctx context.Context, req *genprotopb.AttemptSequenceRequest, opts ...gax.CallOption) error {
-	m := protojson.MarshalOptions{AllowPartial: true, UseProtoNames: false}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return err
@@ -914,7 +914,7 @@ func (c *sequenceRESTClient) GetLocation(ctx context.Context, req *locationpb.Ge
 
 // SetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
 func (c *sequenceRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -1031,7 +1031,7 @@ func (c *sequenceRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIam
 
 // TestIamPermissions is a utility method from google.iam.v1.IAMPolicy.
 func (c *sequenceRESTClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
