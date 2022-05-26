@@ -47,7 +47,6 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 		file.P("")
 
 		fileImports := map[string]string{
-			"context":  "",
 			"net/http": "",
 			"github.com/googleapis/gapic-showcase/util/genrest/resttools": "",
 			"github.com/gorilla/mux":                               "gmux",
