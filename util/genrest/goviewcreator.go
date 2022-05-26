@@ -47,7 +47,6 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 		file.P("")
 
 		fileImports := map[string]string{
-			"context":  "",
 			"net/http": "",
 			"github.com/googleapis/gapic-showcase/util/genrest/resttools": "",
 			"github.com/gorilla/mux":                               "gmux",
@@ -213,7 +212,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 			} else { // regular unary call
 				// TODO: In the future, we may want to redirect all REST-endpoint requests to the gRPC endpoint so that the gRPC-registered observers get invoked.
-				source.P("  %s, err := backend.%sServer.%s(context.Background(), %s)", handler.ResponseVariable, service.ShortName, handler.GoMethod, handler.RequestVariable)
+				source.P("  %s, err := backend.%sServer.%s(r.Context(), %s)", handler.ResponseVariable, service.ShortName, handler.GoMethod, handler.RequestVariable)
 				source.P("  if err != nil {")
 				source.P("    backend.ReportGRPCError(w, err)")
 				source.P("    return")
