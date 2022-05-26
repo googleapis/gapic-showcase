@@ -705,7 +705,7 @@ func (c *identityGRPCClient) CancelOperation(ctx context.Context, req *longrunni
 
 // CreateUser creates a user.
 func (c *identityRESTClient) CreateUser(ctx context.Context, req *genprotopb.CreateUserRequest, opts ...gax.CallOption) (*genprotopb.User, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -813,7 +813,7 @@ func (c *identityRESTClient) GetUser(ctx context.Context, req *genprotopb.GetUse
 
 // UpdateUser updates a user.
 func (c *identityRESTClient) UpdateUser(ctx context.Context, req *genprotopb.UpdateUserRequest, opts ...gax.CallOption) (*genprotopb.User, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -1135,7 +1135,7 @@ func (c *identityRESTClient) GetLocation(ctx context.Context, req *locationpb.Ge
 
 // SetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
 func (c *identityRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -1252,7 +1252,7 @@ func (c *identityRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIam
 
 // TestIamPermissions is a utility method from google.iam.v1.IAMPolicy.
 func (c *identityRESTClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err

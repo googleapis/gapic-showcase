@@ -1099,7 +1099,7 @@ func (c *messagingGRPCClient) CancelOperation(ctx context.Context, req *longrunn
 
 // CreateRoom creates a room.
 func (c *messagingRESTClient) CreateRoom(ctx context.Context, req *genprotopb.CreateRoomRequest, opts ...gax.CallOption) (*genprotopb.Room, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -1207,7 +1207,7 @@ func (c *messagingRESTClient) GetRoom(ctx context.Context, req *genprotopb.GetRo
 
 // UpdateRoom updates a room.
 func (c *messagingRESTClient) UpdateRoom(ctx context.Context, req *genprotopb.UpdateRoomRequest, opts ...gax.CallOption) (*genprotopb.Room, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -1389,7 +1389,7 @@ func (c *messagingRESTClient) ListRooms(ctx context.Context, req *genprotopb.Lis
 // message in that room. If the parent is a profile, the blurb is understood
 // to be a post on the profile.
 func (c *messagingRESTClient) CreateBlurb(ctx context.Context, req *genprotopb.CreateBlurbRequest, opts ...gax.CallOption) (*genprotopb.Blurb, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -1499,7 +1499,7 @@ func (c *messagingRESTClient) GetBlurb(ctx context.Context, req *genprotopb.GetB
 
 // UpdateBlurb updates a blurb.
 func (c *messagingRESTClient) UpdateBlurb(ctx context.Context, req *genprotopb.UpdateBlurbRequest, opts ...gax.CallOption) (*genprotopb.Blurb, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -1682,7 +1682,7 @@ func (c *messagingRESTClient) ListBlurbs(ctx context.Context, req *genprotopb.Li
 // for blurbs containing to words found in the query. Only posts that
 // contain an exact match of a queried word will be returned.
 func (c *messagingRESTClient) SearchBlurbs(ctx context.Context, req *genprotopb.SearchBlurbsRequest, opts ...gax.CallOption) (*SearchBlurbsOperation, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -1746,7 +1746,7 @@ func (c *messagingRESTClient) SearchBlurbs(ctx context.Context, req *genprotopb.
 // StreamBlurbs this returns a stream that emits the blurbs that are created for a
 // particular chat room or user profile.
 func (c *messagingRESTClient) StreamBlurbs(ctx context.Context, req *genprotopb.StreamBlurbsRequest, opts ...gax.CallOption) (genprotopb.Messaging_StreamBlurbsClient, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -2001,7 +2001,7 @@ func (c *messagingRESTClient) GetLocation(ctx context.Context, req *locationpb.G
 
 // SetIamPolicy is a utility method from google.iam.v1.IAMPolicy.
 func (c *messagingRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -2118,7 +2118,7 @@ func (c *messagingRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIa
 
 // TestIamPermissions is a utility method from google.iam.v1.IAMPolicy.
 func (c *messagingRESTClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
-	m := protojson.MarshalOptions{AllowPartial: true}
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
 		return nil, err
