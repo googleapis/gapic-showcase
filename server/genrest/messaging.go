@@ -19,7 +19,6 @@ package genrest
 
 import (
 	"bytes"
-	"context"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
@@ -74,7 +73,7 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.CreateRoom(context.Background(), request)
+	response, err := backend.MessagingServer.CreateRoom(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -129,7 +128,7 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.GetRoom(context.Background(), request)
+	response, err := backend.MessagingServer.GetRoom(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -191,7 +190,7 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.UpdateRoom(context.Background(), request)
+	response, err := backend.MessagingServer.UpdateRoom(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -246,7 +245,7 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.DeleteRoom(context.Background(), request)
+	response, err := backend.MessagingServer.DeleteRoom(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -296,7 +295,7 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.ListRooms(context.Background(), request)
+	response, err := backend.MessagingServer.ListRooms(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -358,7 +357,7 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.CreateBlurb(context.Background(), request)
+	response, err := backend.MessagingServer.CreateBlurb(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -420,7 +419,7 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.CreateBlurb(context.Background(), request)
+	response, err := backend.MessagingServer.CreateBlurb(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -475,7 +474,7 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.GetBlurb(context.Background(), request)
+	response, err := backend.MessagingServer.GetBlurb(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -530,7 +529,7 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.GetBlurb(context.Background(), request)
+	response, err := backend.MessagingServer.GetBlurb(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -592,7 +591,7 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.UpdateBlurb(context.Background(), request)
+	response, err := backend.MessagingServer.UpdateBlurb(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -654,7 +653,7 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.UpdateBlurb(context.Background(), request)
+	response, err := backend.MessagingServer.UpdateBlurb(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -709,7 +708,7 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.DeleteBlurb(context.Background(), request)
+	response, err := backend.MessagingServer.DeleteBlurb(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -764,7 +763,7 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.DeleteBlurb(context.Background(), request)
+	response, err := backend.MessagingServer.DeleteBlurb(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -819,7 +818,7 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.ListBlurbs(context.Background(), request)
+	response, err := backend.MessagingServer.ListBlurbs(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -874,7 +873,7 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.ListBlurbs(context.Background(), request)
+	response, err := backend.MessagingServer.ListBlurbs(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -936,7 +935,7 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.SearchBlurbs(context.Background(), request)
+	response, err := backend.MessagingServer.SearchBlurbs(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -991,7 +990,7 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.SearchBlurbs(context.Background(), request)
+	response, err := backend.MessagingServer.SearchBlurbs(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return

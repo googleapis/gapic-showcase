@@ -19,7 +19,6 @@ package genrest
 
 import (
 	"bytes"
-	"context"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
@@ -84,7 +83,7 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.TestingServer.CreateSession(context.Background(), request)
+	response, err := backend.TestingServer.CreateSession(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -139,7 +138,7 @@ func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.TestingServer.GetSession(context.Background(), request)
+	response, err := backend.TestingServer.GetSession(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -189,7 +188,7 @@ func (backend *RESTBackend) HandleListSessions(w http.ResponseWriter, r *http.Re
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.TestingServer.ListSessions(context.Background(), request)
+	response, err := backend.TestingServer.ListSessions(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -244,7 +243,7 @@ func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.R
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.TestingServer.DeleteSession(context.Background(), request)
+	response, err := backend.TestingServer.DeleteSession(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -299,7 +298,7 @@ func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.R
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.TestingServer.ReportSession(context.Background(), request)
+	response, err := backend.TestingServer.ReportSession(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -354,7 +353,7 @@ func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Reque
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.TestingServer.ListTests(context.Background(), request)
+	response, err := backend.TestingServer.ListTests(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -409,7 +408,7 @@ func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.TestingServer.DeleteTest(context.Background(), request)
+	response, err := backend.TestingServer.DeleteTest(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -464,7 +463,7 @@ func (backend *RESTBackend) HandleVerifyTest(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.TestingServer.VerifyTest(context.Background(), request)
+	response, err := backend.TestingServer.VerifyTest(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return

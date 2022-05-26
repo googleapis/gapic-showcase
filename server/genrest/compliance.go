@@ -19,7 +19,6 @@ package genrest
 
 import (
 	"bytes"
-	"context"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
@@ -74,7 +73,7 @@ func (backend *RESTBackend) HandleRepeatDataBody(w http.ResponseWriter, r *http.
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.ComplianceServer.RepeatDataBody(context.Background(), request)
+	response, err := backend.ComplianceServer.RepeatDataBody(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -146,7 +145,7 @@ func (backend *RESTBackend) HandleRepeatDataBodyInfo(w http.ResponseWriter, r *h
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.ComplianceServer.RepeatDataBodyInfo(context.Background(), request)
+	response, err := backend.ComplianceServer.RepeatDataBodyInfo(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -196,7 +195,7 @@ func (backend *RESTBackend) HandleRepeatDataQuery(w http.ResponseWriter, r *http
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.ComplianceServer.RepeatDataQuery(context.Background(), request)
+	response, err := backend.ComplianceServer.RepeatDataQuery(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -251,7 +250,7 @@ func (backend *RESTBackend) HandleRepeatDataSimplePath(w http.ResponseWriter, r 
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.ComplianceServer.RepeatDataSimplePath(context.Background(), request)
+	response, err := backend.ComplianceServer.RepeatDataSimplePath(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -306,7 +305,7 @@ func (backend *RESTBackend) HandleRepeatDataPathResource(w http.ResponseWriter, 
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.ComplianceServer.RepeatDataPathResource(context.Background(), request)
+	response, err := backend.ComplianceServer.RepeatDataPathResource(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -361,7 +360,7 @@ func (backend *RESTBackend) HandleRepeatDataPathTrailingResource(w http.Response
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.ComplianceServer.RepeatDataPathTrailingResource(context.Background(), request)
+	response, err := backend.ComplianceServer.RepeatDataPathTrailingResource(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -423,7 +422,7 @@ func (backend *RESTBackend) HandleRepeatDataBodyPut(w http.ResponseWriter, r *ht
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.ComplianceServer.RepeatDataBodyPut(context.Background(), request)
+	response, err := backend.ComplianceServer.RepeatDataBodyPut(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -485,7 +484,7 @@ func (backend *RESTBackend) HandleRepeatDataBodyPatch(w http.ResponseWriter, r *
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.ComplianceServer.RepeatDataBodyPatch(context.Background(), request)
+	response, err := backend.ComplianceServer.RepeatDataBodyPatch(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
