@@ -141,6 +141,59 @@ func defaultEchoCallOptions() *EchoCallOptions {
 	}
 }
 
+func defaultEchoRESTCallOptions() *EchoCallOptions {
+	return &EchoCallOptions{
+		Echo: []gax.CallOption{
+			gax.WithRetry(func() gax.Retryer {
+				return gax.OnHTTPCodes(gax.Backoff{
+					Initial:    100 * time.Millisecond,
+					Max:        3000 * time.Millisecond,
+					Multiplier: 2.00,
+				},
+					http.StatusServiceUnavailable,
+					http.StatusInternalServerError)
+			}),
+		},
+		Expand: []gax.CallOption{
+			gax.WithRetry(func() gax.Retryer {
+				return gax.OnHTTPCodes(gax.Backoff{
+					Initial:    100 * time.Millisecond,
+					Max:        3000 * time.Millisecond,
+					Multiplier: 2.00,
+				},
+					http.StatusServiceUnavailable,
+					http.StatusInternalServerError)
+			}),
+		},
+		Collect: []gax.CallOption{},
+		Chat:    []gax.CallOption{},
+		PagedExpand: []gax.CallOption{
+			gax.WithRetry(func() gax.Retryer {
+				return gax.OnHTTPCodes(gax.Backoff{
+					Initial:    100 * time.Millisecond,
+					Max:        3000 * time.Millisecond,
+					Multiplier: 2.00,
+				},
+					http.StatusServiceUnavailable,
+					http.StatusInternalServerError)
+			}),
+		},
+		PagedExpandLegacy:       []gax.CallOption{},
+		PagedExpandLegacyMapped: []gax.CallOption{},
+		Wait:                    []gax.CallOption{},
+		Block:                   []gax.CallOption{},
+		ListLocations:           []gax.CallOption{},
+		GetLocation:             []gax.CallOption{},
+		SetIamPolicy:            []gax.CallOption{},
+		GetIamPolicy:            []gax.CallOption{},
+		TestIamPermissions:      []gax.CallOption{},
+		ListOperations:          []gax.CallOption{},
+		GetOperation:            []gax.CallOption{},
+		DeleteOperation:         []gax.CallOption{},
+		CancelOperation:         []gax.CallOption{},
+	}
+}
+
 // internalEchoClient is an interface that defines the methods availaible from Client Libraries Showcase API.
 type internalEchoClient interface {
 	Close() error
@@ -449,6 +502,9 @@ type echoRESTClient struct {
 
 	// The x-goog-* metadata to be sent with each request.
 	xGoogMetadata metadata.MD
+
+	// Points back to the CallOptions field of the containing EchoClient
+	CallOptions **EchoCallOptions
 }
 
 // NewEchoRESTClient creates a new echo rest client.
@@ -467,9 +523,11 @@ func NewEchoRESTClient(ctx context.Context, opts ...option.ClientOption) (*EchoC
 		return nil, err
 	}
 
+	callOpts := defaultEchoRESTCallOptions()
 	c := &echoRESTClient{
-		endpoint:   endpoint,
-		httpClient: httpClient,
+		endpoint:    endpoint,
+		httpClient:  httpClient,
+		CallOptions: &callOpts,
 	}
 	c.setGoogleClientInfo()
 
@@ -483,7 +541,7 @@ func NewEchoRESTClient(ctx context.Context, opts ...option.ClientOption) (*EchoC
 	}
 	c.LROClient = &opClient
 
-	return &EchoClient{internalClient: c, CallOptions: &EchoCallOptions{}}, nil
+	return &EchoClient{internalClient: c, CallOptions: callOpts}, nil
 }
 
 func defaultEchoRESTClientOptions() []option.ClientOption {
@@ -1039,6 +1097,7 @@ func (c *echoRESTClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, 
 	md := metadata.Pairs("x-goog-request-params", routingHeaders)
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).Echo[0:len((*c.CallOptions).Echo):len((*c.CallOptions).Echo)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.EchoResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1534,6 +1593,7 @@ func (c *echoRESTClient) Block(ctx context.Context, req *genprotopb.BlockRequest
 
 	// Build HTTP headers from client and context metadata.
 	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).Block[0:len((*c.CallOptions).Block):len((*c.CallOptions).Block)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.BlockResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1676,6 +1736,7 @@ func (c *echoRESTClient) GetLocation(ctx context.Context, req *locationpb.GetLoc
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).GetLocation[0:len((*c.CallOptions).GetLocation):len((*c.CallOptions).GetLocation)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &locationpb.Location{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1734,6 +1795,7 @@ func (c *echoRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPoli
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).SetIamPolicy[0:len((*c.CallOptions).SetIamPolicy):len((*c.CallOptions).SetIamPolicy)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.Policy{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1793,6 +1855,7 @@ func (c *echoRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPoli
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).GetIamPolicy[0:len((*c.CallOptions).GetIamPolicy):len((*c.CallOptions).GetIamPolicy)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.Policy{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1851,6 +1914,7 @@ func (c *echoRESTClient) TestIamPermissions(ctx context.Context, req *iampb.Test
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).TestIamPermissions[0:len((*c.CallOptions).TestIamPermissions):len((*c.CallOptions).TestIamPermissions)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.TestIamPermissionsResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1996,6 +2060,7 @@ func (c *echoRESTClient) GetOperation(ctx context.Context, req *longrunningpb.Ge
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).GetOperation[0:len((*c.CallOptions).GetOperation):len((*c.CallOptions).GetOperation)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &longrunningpb.Operation{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {

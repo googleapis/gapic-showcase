@@ -99,6 +99,28 @@ func defaultTestingCallOptions() *TestingCallOptions {
 	}
 }
 
+func defaultTestingRESTCallOptions() *TestingCallOptions {
+	return &TestingCallOptions{
+		CreateSession:      []gax.CallOption{},
+		GetSession:         []gax.CallOption{},
+		ListSessions:       []gax.CallOption{},
+		DeleteSession:      []gax.CallOption{},
+		ReportSession:      []gax.CallOption{},
+		ListTests:          []gax.CallOption{},
+		DeleteTest:         []gax.CallOption{},
+		VerifyTest:         []gax.CallOption{},
+		ListLocations:      []gax.CallOption{},
+		GetLocation:        []gax.CallOption{},
+		SetIamPolicy:       []gax.CallOption{},
+		GetIamPolicy:       []gax.CallOption{},
+		TestIamPermissions: []gax.CallOption{},
+		ListOperations:     []gax.CallOption{},
+		GetOperation:       []gax.CallOption{},
+		DeleteOperation:    []gax.CallOption{},
+		CancelOperation:    []gax.CallOption{},
+	}
+}
+
 // internalTestingClient is an interface that defines the methods availaible from Client Libraries Showcase API.
 type internalTestingClient interface {
 	Close() error
@@ -353,6 +375,9 @@ type testingRESTClient struct {
 
 	// The x-goog-* metadata to be sent with each request.
 	xGoogMetadata metadata.MD
+
+	// Points back to the CallOptions field of the containing TestingClient
+	CallOptions **TestingCallOptions
 }
 
 // NewTestingRESTClient creates a new testing rest client.
@@ -366,13 +391,15 @@ func NewTestingRESTClient(ctx context.Context, opts ...option.ClientOption) (*Te
 		return nil, err
 	}
 
+	callOpts := defaultTestingRESTCallOptions()
 	c := &testingRESTClient{
-		endpoint:   endpoint,
-		httpClient: httpClient,
+		endpoint:    endpoint,
+		httpClient:  httpClient,
+		CallOptions: &callOpts,
 	}
 	c.setGoogleClientInfo()
 
-	return &TestingClient{internalClient: c, CallOptions: &TestingCallOptions{}}, nil
+	return &TestingClient{internalClient: c, CallOptions: callOpts}, nil
 }
 
 func defaultTestingRESTClientOptions() []option.ClientOption {
@@ -803,6 +830,7 @@ func (c *testingRESTClient) CreateSession(ctx context.Context, req *genprotopb.C
 
 	// Build HTTP headers from client and context metadata.
 	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).CreateSession[0:len((*c.CallOptions).CreateSession):len((*c.CallOptions).CreateSession)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.Session{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -855,6 +883,7 @@ func (c *testingRESTClient) GetSession(ctx context.Context, req *genprotopb.GetS
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).GetSession[0:len((*c.CallOptions).GetSession):len((*c.CallOptions).GetSession)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.Session{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1031,6 +1060,7 @@ func (c *testingRESTClient) ReportSession(ctx context.Context, req *genprotopb.R
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).ReportSession[0:len((*c.CallOptions).ReportSession):len((*c.CallOptions).ReportSession)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.ReportSessionResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1223,6 +1253,7 @@ func (c *testingRESTClient) VerifyTest(ctx context.Context, req *genprotopb.Veri
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).VerifyTest[0:len((*c.CallOptions).VerifyTest):len((*c.CallOptions).VerifyTest)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.VerifyTestResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1365,6 +1396,7 @@ func (c *testingRESTClient) GetLocation(ctx context.Context, req *locationpb.Get
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).GetLocation[0:len((*c.CallOptions).GetLocation):len((*c.CallOptions).GetLocation)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &locationpb.Location{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1423,6 +1455,7 @@ func (c *testingRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamP
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).SetIamPolicy[0:len((*c.CallOptions).SetIamPolicy):len((*c.CallOptions).SetIamPolicy)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.Policy{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1482,6 +1515,7 @@ func (c *testingRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamP
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).GetIamPolicy[0:len((*c.CallOptions).GetIamPolicy):len((*c.CallOptions).GetIamPolicy)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.Policy{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1540,6 +1574,7 @@ func (c *testingRESTClient) TestIamPermissions(ctx context.Context, req *iampb.T
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).TestIamPermissions[0:len((*c.CallOptions).TestIamPermissions):len((*c.CallOptions).TestIamPermissions)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.TestIamPermissionsResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1685,6 +1720,7 @@ func (c *testingRESTClient) GetOperation(ctx context.Context, req *longrunningpb
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).GetOperation[0:len((*c.CallOptions).GetOperation):len((*c.CallOptions).GetOperation)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &longrunningpb.Operation{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {

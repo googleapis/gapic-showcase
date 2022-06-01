@@ -99,6 +99,28 @@ func defaultComplianceCallOptions() *ComplianceCallOptions {
 	}
 }
 
+func defaultComplianceRESTCallOptions() *ComplianceCallOptions {
+	return &ComplianceCallOptions{
+		RepeatDataBody:                 []gax.CallOption{},
+		RepeatDataBodyInfo:             []gax.CallOption{},
+		RepeatDataQuery:                []gax.CallOption{},
+		RepeatDataSimplePath:           []gax.CallOption{},
+		RepeatDataPathResource:         []gax.CallOption{},
+		RepeatDataPathTrailingResource: []gax.CallOption{},
+		RepeatDataBodyPut:              []gax.CallOption{},
+		RepeatDataBodyPatch:            []gax.CallOption{},
+		ListLocations:                  []gax.CallOption{},
+		GetLocation:                    []gax.CallOption{},
+		SetIamPolicy:                   []gax.CallOption{},
+		GetIamPolicy:                   []gax.CallOption{},
+		TestIamPermissions:             []gax.CallOption{},
+		ListOperations:                 []gax.CallOption{},
+		GetOperation:                   []gax.CallOption{},
+		DeleteOperation:                []gax.CallOption{},
+		CancelOperation:                []gax.CallOption{},
+	}
+}
+
 // internalComplianceClient is an interface that defines the methods availaible from Client Libraries Showcase API.
 type internalComplianceClient interface {
 	Close() error
@@ -349,6 +371,9 @@ type complianceRESTClient struct {
 
 	// The x-goog-* metadata to be sent with each request.
 	xGoogMetadata metadata.MD
+
+	// Points back to the CallOptions field of the containing ComplianceClient
+	CallOptions **ComplianceCallOptions
 }
 
 // NewComplianceRESTClient creates a new compliance rest client.
@@ -362,13 +387,15 @@ func NewComplianceRESTClient(ctx context.Context, opts ...option.ClientOption) (
 		return nil, err
 	}
 
+	callOpts := defaultComplianceRESTCallOptions()
 	c := &complianceRESTClient{
-		endpoint:   endpoint,
-		httpClient: httpClient,
+		endpoint:    endpoint,
+		httpClient:  httpClient,
+		CallOptions: &callOpts,
 	}
 	c.setGoogleClientInfo()
 
-	return &ComplianceClient{internalClient: c, CallOptions: &ComplianceCallOptions{}}, nil
+	return &ComplianceClient{internalClient: c, CallOptions: callOpts}, nil
 }
 
 func defaultComplianceRESTClientOptions() []option.ClientOption {
@@ -745,6 +772,7 @@ func (c *complianceRESTClient) RepeatDataBody(ctx context.Context, req *genproto
 
 	// Build HTTP headers from client and context metadata.
 	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).RepeatDataBody[0:len((*c.CallOptions).RepeatDataBody):len((*c.CallOptions).RepeatDataBody)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.RepeatResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -832,6 +860,7 @@ func (c *complianceRESTClient) RepeatDataBodyInfo(ctx context.Context, req *genp
 
 	// Build HTTP headers from client and context metadata.
 	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).RepeatDataBodyInfo[0:len((*c.CallOptions).RepeatDataBodyInfo):len((*c.CallOptions).RepeatDataBodyInfo)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.RepeatResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1070,6 +1099,7 @@ func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprot
 
 	// Build HTTP headers from client and context metadata.
 	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).RepeatDataQuery[0:len((*c.CallOptions).RepeatDataQuery):len((*c.CallOptions).RepeatDataQuery)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.RepeatResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1296,6 +1326,7 @@ func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *ge
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v&%s=%v&%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_int32", req.GetInfo().GetFInt32(), "info.f_double", url.QueryEscape(fmt.Sprintf("%g", req.GetInfo().GetFDouble())), "info.f_bool", req.GetInfo().GetFBool(), "info.f_kingdom", genprotopb.ComplianceData_LifeKingdom_name[int32(req.GetInfo().GetFKingdom())]))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).RepeatDataSimplePath[0:len((*c.CallOptions).RepeatDataSimplePath):len((*c.CallOptions).RepeatDataSimplePath)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.RepeatResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1526,6 +1557,7 @@ func (c *complianceRESTClient) RepeatDataPathResource(ctx context.Context, req *
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_child.f_string", url.QueryEscape(req.GetInfo().GetFChild().GetFString()), "info.f_bool", req.GetInfo().GetFBool()))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).RepeatDataPathResource[0:len((*c.CallOptions).RepeatDataPathResource):len((*c.CallOptions).RepeatDataPathResource)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.RepeatResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1759,6 +1791,7 @@ func (c *complianceRESTClient) RepeatDataPathTrailingResource(ctx context.Contex
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v&%s=%v", "info.f_string", url.QueryEscape(req.GetInfo().GetFString()), "info.f_child.f_string", url.QueryEscape(req.GetInfo().GetFChild().GetFString())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).RepeatDataPathTrailingResource[0:len((*c.CallOptions).RepeatDataPathTrailingResource):len((*c.CallOptions).RepeatDataPathTrailingResource)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.RepeatResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1815,6 +1848,7 @@ func (c *complianceRESTClient) RepeatDataBodyPut(ctx context.Context, req *genpr
 
 	// Build HTTP headers from client and context metadata.
 	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).RepeatDataBodyPut[0:len((*c.CallOptions).RepeatDataBodyPut):len((*c.CallOptions).RepeatDataBodyPut)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.RepeatResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1871,6 +1905,7 @@ func (c *complianceRESTClient) RepeatDataBodyPatch(ctx context.Context, req *gen
 
 	// Build HTTP headers from client and context metadata.
 	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).RepeatDataBodyPatch[0:len((*c.CallOptions).RepeatDataBodyPatch):len((*c.CallOptions).RepeatDataBodyPatch)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.RepeatResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -2013,6 +2048,7 @@ func (c *complianceRESTClient) GetLocation(ctx context.Context, req *locationpb.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).GetLocation[0:len((*c.CallOptions).GetLocation):len((*c.CallOptions).GetLocation)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &locationpb.Location{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -2071,6 +2107,7 @@ func (c *complianceRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetI
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).SetIamPolicy[0:len((*c.CallOptions).SetIamPolicy):len((*c.CallOptions).SetIamPolicy)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.Policy{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -2130,6 +2167,7 @@ func (c *complianceRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetI
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).GetIamPolicy[0:len((*c.CallOptions).GetIamPolicy):len((*c.CallOptions).GetIamPolicy)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.Policy{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -2188,6 +2226,7 @@ func (c *complianceRESTClient) TestIamPermissions(ctx context.Context, req *iamp
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).TestIamPermissions[0:len((*c.CallOptions).TestIamPermissions):len((*c.CallOptions).TestIamPermissions)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.TestIamPermissionsResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -2333,6 +2372,7 @@ func (c *complianceRESTClient) GetOperation(ctx context.Context, req *longrunnin
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
 	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).GetOperation[0:len((*c.CallOptions).GetOperation):len((*c.CallOptions).GetOperation)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &longrunningpb.Operation{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
