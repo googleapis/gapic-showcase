@@ -97,9 +97,15 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			source.P("    return")
 			source.P("  }")
 
+			source.P("  queryParams, systemParameters, err := resttools.ProcessQueryString(r.URL.Query())")
+			source.P("  if err != nil {")
+			source.P(`    backend.Error(w, http.StatusBadRequest, "error in query string: %%s", err)`)
+			source.P("    return")
+			source.P("  }")
+
 			source.P("")
 			source.P("  %s := &%s.%s{}", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
-			switch handler.RequestBodyFieldSpec {
+			switch handler.RequestBodyFieldSpec { // FIXME: what would default mean below?
 			case gomodel.BodyFieldAll:
 				fileImports["bytes"] = ""
 				fileImports["io"] = ""
@@ -123,7 +129,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 				source.P("    return")
 				source.P("  }")
 				source.P("")
-				source.P("  if queryParams := r.URL.Query(); len(queryParams) > 0 {")
+				source.P("  if len(queryParams) > 0 {")
 				source.P(`    backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %%v", queryParams)`)
 				source.P("    return")
 				source.P("  }")
@@ -174,7 +180,6 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 			if handler.RequestBodyFieldSpec != gomodel.BodyFieldAll {
 				source.P("  // TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both")
-				source.P("  queryParams := map[string][]string(r.URL.Query())")
 				if len(excludedQueryParams) > 0 {
 					source.P("  excludedQueryParams := %#v", excludedQueryParams)
 					source.P("  if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {")
@@ -190,6 +195,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			}
 			source.P("")
 			source.P("  marshaler := resttools.ToJSON()")
+			source.P("  marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt")
 			source.P("  requestJSON, _ := marshaler.Marshal(%s)", handler.RequestVariable)
 			source.P(`  backend.StdLog.Printf("  request: %%s", requestJSON)`)
 			source.P("")
