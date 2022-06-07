@@ -75,17 +75,17 @@ func TestProcessQueryString(t *testing.T) {
 		{
 			queryString: "%24alt%3Djson",
 			wantParams: map[string][]string{
-				"$alt=json": {""}, // Need to add to design doc: = sign not escaped
+				"$alt=json": {""},
 			},
 		},
 		{
-			queryString: "$ALT=JSON", // Check system params doc
+			queryString: "$ALT=JSON",
 			wantParams: map[string][]string{
 				"$ALT": {"JSON"},
 			},
 		},
 		{
-			queryString: "%24ALT=JSON", // Check system params doc
+			queryString: "%24ALT=JSON",
 			wantParams: map[string][]string{
 				"$ALT": {"JSON"},
 			},
@@ -93,8 +93,8 @@ func TestProcessQueryString(t *testing.T) {
 
 		// system param by itself
 		{queryString: "alt=json"},
-		{queryString: "$alt=json"},   // Need to add to design doc: = sign not escaped
-		{queryString: "%24alt=json"}, // Need to add to design doc: = sign not escaped
+		{queryString: "$alt=json"},
+		{queryString: "%24alt=json"},
 		{
 			queryString: "alt=json%3Benum-encoding=int",
 			wantInt:     true,
@@ -122,83 +122,83 @@ func TestProcessQueryString(t *testing.T) {
 
 		// system param+query params in front
 		{
-			queryString: "alice=bob&alt=json",
+			queryString: "foo=bar&alt=json",
 			wantParams: map[string][]string{
-				"alice": {"bob"},
+				"foo": {"bar"},
 			},
 		},
 		{
-			queryString: "alice=bob&$alt=json",
+			queryString: "foo=bar&$alt=json",
 			wantParams: map[string][]string{
-				"alice": {"bob"},
+				"foo": {"bar"},
 			},
 		},
 		{
-			queryString: "alice=bob&%24alt=json",
+			queryString: "foo=bar&%24alt=json",
 			wantParams: map[string][]string{
-				"alice": {"bob"},
+				"foo": {"bar"},
 			},
 		},
 		{
-			queryString: "alice=bob&alt=json%3Benum-encoding=int",
+			queryString: "foo=bar&alt=json%3Benum-encoding=int",
 			wantInt:     true,
 			wantParams: map[string][]string{
-				"alice": {"bob"},
+				"foo": {"bar"},
 			},
 		},
 		{
-			queryString: "alice=bob&$alt=json%3Benum-encoding=int",
+			queryString: "foo=bar&$alt=json%3Benum-encoding=int",
 			wantInt:     true,
 			wantParams: map[string][]string{
-				"alice": {"bob"},
+				"foo": {"bar"},
 			},
 		},
 		{
-			queryString: "alice=bob&%24alt=json%3Benum-encoding=int",
+			queryString: "foo=bar&%24alt=json%3Benum-encoding=int",
 			wantInt:     true,
 			wantParams: map[string][]string{
-				"alice": {"bob"},
+				"foo": {"bar"},
 			},
 		},
 
 		// system param+query params in rear
 		{
-			queryString: "alt=json&alice=bob",
+			queryString: "alt=json&foo=bar",
 			wantParams: map[string][]string{
-				"alice": {"bob"},
+				"foo": {"bar"},
 			},
 		},
 		{
-			queryString: "$alt=json&alice=bob",
+			queryString: "$alt=json&foo=bar",
 			wantParams: map[string][]string{
-				"alice": {"bob"},
+				"foo": {"bar"},
 			},
 		},
 		{
-			queryString: "%24alt=json&alice=bob",
+			queryString: "%24alt=json&foo=bar",
 			wantParams: map[string][]string{
-				"alice": {"bob"},
+				"foo": {"bar"},
 			},
 		},
 		{
-			queryString: "alt=json%3Benum-encoding=int&alice=bob",
+			queryString: "alt=json%3Benum-encoding=int&foo=bar",
 			wantInt:     true,
 			wantParams: map[string][]string{
-				"alice": {"bob"},
+				"foo": {"bar"},
 			},
 		},
 		{
-			queryString: "$alt=json%3Benum-encoding=int&alice=bob",
+			queryString: "$alt=json%3Benum-encoding=int&foo=bar",
 			wantInt:     true,
 			wantParams: map[string][]string{
-				"alice": {"bob"},
+				"foo": {"bar"},
 			},
 		},
 		{
-			queryString: "%24alt=json%3Benum-encoding=int&alice=bob",
+			queryString: "%24alt=json%3Benum-encoding=int&foo=bar",
 			wantInt:     true,
 			wantParams: map[string][]string{
-				"alice": {"bob"},
+				"foo": {"bar"},
 			},
 		},
 
@@ -212,7 +212,7 @@ func TestProcessQueryString(t *testing.T) {
 			wantError:   true,
 		},
 		{
-			queryString: "$alt=JSON", // Check system params doc
+			queryString: "$alt=JSON",
 			wantError:   true,
 		},
 		{
@@ -227,10 +227,14 @@ func TestProcessQueryString(t *testing.T) {
 			queryString: "$alt=json%3Benum-encoding=INT",
 			wantError:   true,
 		},
+		{
+			queryString: "foo&$alt=json&bar&alt=json", // repeated
+			wantError:   true,
+		},
 	} {
 		label := fmt.Sprintf("[%2d %q]", idx, testCase.queryString)
 
-		queryParams, systemParams, err := processQueryString(testCase.queryString)
+		systemParams, queryParams, err := processQueryString(testCase.queryString)
 
 		if got, want := (err != nil), testCase.wantError; got != want {
 			t.Errorf("%s: error condition not met: want error: %v, got error:%v", label, testCase.wantError, err)

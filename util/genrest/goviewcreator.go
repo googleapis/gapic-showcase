@@ -97,15 +97,20 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			source.P("    return")
 			source.P("  }")
 
-			source.P("  queryParams, systemParameters, err := resttools.GetSystemParams(r)")
+			source.P("")
+			source.P("  systemParameters, queryParams, err := resttools.GetSystemParameters(r)")
 			source.P("  if err != nil {")
 			source.P(`    backend.Error(w, http.StatusBadRequest, "error in query string: %%s", err)`)
 			source.P("    return")
 			source.P("  }")
+			// TODO: Fail with an error if numeric enums are not set as GAPICs should
+			// always request numeric enums. Make this change once we know that it won't
+			// break existing usages of Showcase for generators not yet implementing the
+			// feature.
 
 			source.P("")
 			source.P("  %s := &%s.%s{}", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
-			switch handler.RequestBodyFieldSpec { // FIXME: what would default mean below?
+			switch handler.RequestBodyFieldSpec {
 			case gomodel.BodyFieldAll:
 				fileImports["bytes"] = ""
 				fileImports["io"] = ""
