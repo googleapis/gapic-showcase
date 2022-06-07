@@ -16,6 +16,7 @@ package resttools
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 )
 
@@ -23,25 +24,38 @@ type SystemParameters struct {
 	EnumEncodingAsInt bool
 }
 
-func ProcessQueryString(pairs url.Values) (queryParams map[string][]string, systemParams *SystemParameters, err error) {
-	// If and when we support additional system parameters that could be specified in request headers,
-	// we can make this a package-private function called from a m re general entry point
-	// `GetSystemParameters(http.Request) (queryParams, systemParams)`.
+func GetSystemParams(request *http.Request) (queryParams map[string][]string, systemParams *SystemParameters, err error) {
+	return processQueryString(request.URL.RawQuery)
+
+}
+func processQueryString(queryString string) (queryParams map[string][]string, systemParams *SystemParameters, err error) {
+	// If and when we support additional system parameters that could be specified in request
+	// headers, we can make this a package-private function called from a m re general entry
+	// point `GetSystemParameters(http.Request) (queryParams, systemParams)`.
 
 	// TODO: Run https://pkg.go.dev/net/url#ParseQuery to check for un-encoded ampersands
-	// Justification: Since semicolons can be valid query string delimiters (cf https://github.com/golang/go/issues/25192,
-	// https://en.wikipedia.org/wiki/Query_string#Web_forms), we insist on URL-encoded system parameters
+	// Justification: Since semicolons can be valid query string delimiters (cf
+	// https://github.com/golang/go/issues/25192,
+	// https://en.wikipedia.org/wiki/Query_string#Web_forms), we insist on URL-encoded system
+	// parameters
 
-	queryParams = map[string][]string(pairs)
+	// We parse the raw query string manually rather than relying on request.URL.Query() so that
+	// we can error out in the case of malformed strings (e.g. unencoded ampersands), rather
+	// than having them ignored with potentially incorrect results.
+	queryPairs, err := url.ParseQuery(queryString)
+	if err != nil {
+		return nil, nil, err
+	}
+	queryParams = map[string][]string(queryPairs)
 	systemParams = &SystemParameters{}
-	for param, values := range queryParams {
+	for param, values := range queryPairs {
 		switch param {
-		case "alt", "$alt", "%24alt":
+		case "alt", "$alt":
 			for _, val := range values {
 				switch val {
 				case "json":
 					// no op
-				case "json;enum-encoding=int":
+				case "json;enum-encoding=int": // already URL-decoded
 					systemParams.EnumEncodingAsInt = true
 				default:
 					return queryParams, systemParams, fmt.Errorf("unhandled value %q for system parameter %q", val, param)

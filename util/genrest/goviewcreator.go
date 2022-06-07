@@ -97,7 +97,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			source.P("    return")
 			source.P("  }")
 
-			source.P("  queryParams, systemParameters, err := resttools.ProcessQueryString(r.URL.Query())")
+			source.P("  queryParams, systemParameters, err := resttools.GetSystemParams(r)")
 			source.P("  if err != nil {")
 			source.P(`    backend.Error(w, http.StatusBadRequest, "error in query string: %%s", err)`)
 			source.P("    return")
