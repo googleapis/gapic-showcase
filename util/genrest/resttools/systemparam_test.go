@@ -16,8 +16,9 @@ package resttools
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestProcessQueryString(t *testing.T) {
@@ -248,7 +249,7 @@ func TestProcessQueryString(t *testing.T) {
 		if wantParams == nil {
 			wantParams = map[string][]string{}
 		}
-		if got, want := queryParams, wantParams; !reflect.DeepEqual(got, want) {
+		if got, want := queryParams, wantParams; !cmp.Equal(got, want) {
 			t.Errorf("%s: query params: want %#v, got %#v", label, want, got)
 		}
 
