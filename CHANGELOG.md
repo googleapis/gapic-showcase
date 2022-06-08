@@ -1,5 +1,17 @@
 # Release History
 
+## [0.21.0](https://github.com/googleapis/gapic-showcase/compare/v0.20.0...v0.21.0) (2022-06-08)
+
+
+### Features
+
+* respond to requests specifying response enum values be JSON-encoded as ints ([#1111](https://github.com/googleapis/gapic-showcase/issues/1111)) ([5389bd1](https://github.com/googleapis/gapic-showcase/commit/5389bd17aedb7f0c8a8de562421222e703589823))
+
+
+### Bug Fixes
+
+* **genrest:** pass http request context to service handler ([#1088](https://github.com/googleapis/gapic-showcase/issues/1088)) ([bad9b6b](https://github.com/googleapis/gapic-showcase/commit/bad9b6b89b0f75d3ec8408610d329068775703e5))
+
 ## [0.20.0](https://github.com/googleapis/gapic-showcase/compare/v0.19.5...v0.20.0) (2022-05-10)
 
 
