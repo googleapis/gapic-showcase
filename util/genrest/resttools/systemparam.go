@@ -32,7 +32,6 @@ type SystemParameters struct {
 // the request's query string that are not themselves system parameters.
 func GetSystemParameters(request *http.Request) (systemParams *SystemParameters, queryParams map[string][]string, err error) {
 	return processQueryString(request.URL.RawQuery)
-
 }
 
 // processQueryString returns the SystemParameters encoded in queryString, and the query parameters in
