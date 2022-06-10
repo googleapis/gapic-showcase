@@ -72,6 +72,17 @@ func CompileProtos(version string) {
 	}
 	Execute(append(command, files...)...)
 
+	// Run protoc
+	genRestCmd := []string{
+		"protoc",
+		"--experimental_allow_proto3_optional",
+		"--proto_path=schema/api-common-protos",
+		"--proto_path=schema",
+		"--go_rest_server_out=" + filepath.Join("server", "genrest"),
+	}
+	files = append(files, "schema/api-common-protos/google/longrunning/operations.proto")
+	Execute(append(genRestCmd, files...)...)
+
 	// Copy generated code back into repo.
 	tempClient := filepath.Join(outDir, "github.com", "googleapis", "gapic-showcase", "client")
 	tempServer := filepath.Join(outDir, "github.com", "googleapis", "gapic-showcase", "server")

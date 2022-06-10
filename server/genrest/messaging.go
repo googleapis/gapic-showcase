@@ -13,12 +13,13 @@
 // limitations under the License.
 
 // DO NOT EDIT. This is an auto-generated file containing the REST handlers
-// for service #3: "Messaging" (.google.showcase.v1beta1.Messaging).
+// for service #4: "Messaging" (.google.showcase.v1beta1.Messaging).
 
 package genrest
 
 import (
 	"bytes"
+	"context"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
@@ -37,12 +38,6 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
-		return
-	}
-
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
 		return
 	}
 
@@ -66,7 +61,7 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if len(queryParams) > 0 {
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -76,11 +71,10 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.CreateRoom(r.Context(), request)
+	response, err := backend.MessagingServer.CreateRoom(context.Background(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -109,12 +103,6 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
-		return
-	}
-
 	request := &genprotopb.GetRoomRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -126,6 +114,7 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -137,11 +126,10 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.GetRoom(r.Context(), request)
+	response, err := backend.MessagingServer.GetRoom(context.Background(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -170,12 +158,6 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
-		return
-	}
-
 	request := &genprotopb.UpdateRoomRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
@@ -196,7 +178,7 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if len(queryParams) > 0 {
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -206,11 +188,10 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.UpdateRoom(r.Context(), request)
+	response, err := backend.MessagingServer.UpdateRoom(context.Background(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -239,12 +220,6 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
-		return
-	}
-
 	request := &genprotopb.DeleteRoomRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -256,6 +231,7 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -267,11 +243,10 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.DeleteRoom(r.Context(), request)
+	response, err := backend.MessagingServer.DeleteRoom(context.Background(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -300,12 +275,6 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
-		return
-	}
-
 	request := &genprotopb.ListRoomsRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -317,17 +286,17 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	queryParams := map[string][]string(r.URL.Query())
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.ListRooms(r.Context(), request)
+	response, err := backend.MessagingServer.ListRooms(context.Background(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -356,12 +325,6 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
-		return
-	}
-
 	request := &genprotopb.CreateBlurbRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
@@ -382,7 +345,7 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	if len(queryParams) > 0 {
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -392,11 +355,10 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.CreateBlurb(r.Context(), request)
+	response, err := backend.MessagingServer.CreateBlurb(context.Background(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -425,12 +387,6 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
-		return
-	}
-
 	request := &genprotopb.CreateBlurbRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
@@ -451,7 +407,7 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if len(queryParams) > 0 {
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -461,11 +417,10 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.CreateBlurb(r.Context(), request)
+	response, err := backend.MessagingServer.CreateBlurb(context.Background(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -494,12 +449,6 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
-		return
-	}
-
 	request := &genprotopb.GetBlurbRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -511,6 +460,7 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -522,11 +472,10 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.GetBlurb(r.Context(), request)
+	response, err := backend.MessagingServer.GetBlurb(context.Background(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -555,12 +504,6 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
-		return
-	}
-
 	request := &genprotopb.GetBlurbRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -572,6 +515,7 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -583,11 +527,10 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.GetBlurb(r.Context(), request)
+	response, err := backend.MessagingServer.GetBlurb(context.Background(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -616,12 +559,6 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
-		return
-	}
-
 	request := &genprotopb.UpdateBlurbRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
@@ -642,7 +579,7 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	if len(queryParams) > 0 {
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -652,11 +589,10 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.UpdateBlurb(r.Context(), request)
+	response, err := backend.MessagingServer.UpdateBlurb(context.Background(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -685,12 +621,6 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
-		return
-	}
-
 	request := &genprotopb.UpdateBlurbRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
@@ -711,7 +641,7 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if len(queryParams) > 0 {
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -721,11 +651,10 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.UpdateBlurb(r.Context(), request)
+	response, err := backend.MessagingServer.UpdateBlurb(context.Background(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -754,12 +683,6 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
-		return
-	}
-
 	request := &genprotopb.DeleteBlurbRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -771,6 +694,7 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -782,11 +706,10 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.DeleteBlurb(r.Context(), request)
+	response, err := backend.MessagingServer.DeleteBlurb(context.Background(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -815,12 +738,6 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
-		return
-	}
-
 	request := &genprotopb.DeleteBlurbRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -832,6 +749,7 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -843,11 +761,10 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.DeleteBlurb(r.Context(), request)
+	response, err := backend.MessagingServer.DeleteBlurb(context.Background(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -876,12 +793,6 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
-		return
-	}
-
 	request := &genprotopb.ListBlurbsRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -893,6 +804,7 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"parent"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -904,11 +816,10 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.ListBlurbs(r.Context(), request)
+	response, err := backend.MessagingServer.ListBlurbs(context.Background(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -937,12 +848,6 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
-		return
-	}
-
 	request := &genprotopb.ListBlurbsRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -954,6 +859,7 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"parent"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -965,11 +871,10 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.ListBlurbs(r.Context(), request)
+	response, err := backend.MessagingServer.ListBlurbs(context.Background(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -998,12 +903,6 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
-		return
-	}
-
 	request := &genprotopb.SearchBlurbsRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
@@ -1024,7 +923,7 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	if len(queryParams) > 0 {
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -1034,11 +933,10 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.SearchBlurbs(r.Context(), request)
+	response, err := backend.MessagingServer.SearchBlurbs(context.Background(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -1067,12 +965,6 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 		return
 	}
 
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
-		return
-	}
-
 	request := &genprotopb.SearchBlurbsRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -1084,6 +976,7 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"parent"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -1095,11 +988,10 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.MessagingServer.SearchBlurbs(r.Context(), request)
+	response, err := backend.MessagingServer.SearchBlurbs(context.Background(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -1128,12 +1020,6 @@ func (backend *RESTBackend) HandleStreamBlurbs(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
-		return
-	}
-
 	request := &genprotopb.StreamBlurbsRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
@@ -1154,7 +1040,7 @@ func (backend *RESTBackend) HandleStreamBlurbs(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	if len(queryParams) > 0 {
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -1164,7 +1050,6 @@ func (backend *RESTBackend) HandleStreamBlurbs(w http.ResponseWriter, r *http.Re
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
@@ -1194,12 +1079,6 @@ func (backend *RESTBackend) HandleStreamBlurbs_1(w http.ResponseWriter, r *http.
 		return
 	}
 
-	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
-	if err != nil {
-		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
-		return
-	}
-
 	request := &genprotopb.StreamBlurbsRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
@@ -1220,7 +1099,7 @@ func (backend *RESTBackend) HandleStreamBlurbs_1(w http.ResponseWriter, r *http.
 		return
 	}
 
-	if len(queryParams) > 0 {
+	if queryParams := r.URL.Query(); len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -1230,7 +1109,6 @@ func (backend *RESTBackend) HandleStreamBlurbs_1(w http.ResponseWriter, r *http.
 	}
 
 	marshaler := resttools.ToJSON()
-	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
