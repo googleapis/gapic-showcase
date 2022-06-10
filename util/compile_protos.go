@@ -45,10 +45,18 @@ func CompileProtos(version string) {
 	}
 	defer os.RemoveAll(outDir)
 
-	protos := filepath.Join("schema", "google", "showcase", version, "*.proto")
-	files, err := filepath.Glob(protos)
-	if err != nil {
-		log.Fatal("Error: failed to find protos in " + protos)
+	files := []string{}
+	for _, dir := range [][]string{
+		{"schema", "google", "showcase", version, "*.proto"},
+		// TODO: Do we want to include all the common protos?
+		{"schema", "api-common-protos", "google", "longrunning", "operations.proto"},
+	} {
+		protos := filepath.Join(dir...)
+		newFiles, err := filepath.Glob(protos)
+		if err != nil {
+			log.Fatal("Error: failed to find protos in " + protos)
+		}
+		files = append(files, newFiles...)
 	}
 
 	// Run protoc
