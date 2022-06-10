@@ -18,25 +18,23 @@
 package genrest
 
 import (
-	"bytes"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
-	"io"
 	"net/http"
 )
 
 // HandleListOperations translates REST requests/responses on the wire to internal proto messages for ListOperations
-//    Generated for HTTP binding pattern: "/v1/{name=operations}"
+//    Generated for HTTP binding pattern: "/v1beta1/operations"
 func (backend *RESTBackend) HandleListOperations(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received %s request matching '/v1/{name=operations}': %q", r.Method, r.URL)
-	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/operations': %q", r.Method, r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 
-	if numUrlPathParams != 1 {
-		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
+	if numUrlPathParams != 0 {
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
 	}
 
@@ -57,11 +55,6 @@ func (backend *RESTBackend) HandleListOperations(w http.ResponseWriter, r *http.
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	excludedQueryParams := []string{"name"}
-	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
-		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
-		return
-	}
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
@@ -88,12 +81,12 @@ func (backend *RESTBackend) HandleListOperations(w http.ResponseWriter, r *http.
 }
 
 // HandleGetOperation translates REST requests/responses on the wire to internal proto messages for GetOperation
-//    Generated for HTTP binding pattern: "/v1/{name=operations/**}"
+//    Generated for HTTP binding pattern: "/v1beta1/{name=operations/**}"
 func (backend *RESTBackend) HandleGetOperation(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received %s request matching '/v1/{name=operations/**}': %q", r.Method, r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=operations/**}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -149,12 +142,12 @@ func (backend *RESTBackend) HandleGetOperation(w http.ResponseWriter, r *http.Re
 }
 
 // HandleDeleteOperation translates REST requests/responses on the wire to internal proto messages for DeleteOperation
-//    Generated for HTTP binding pattern: "/v1/{name=operations/**}"
+//    Generated for HTTP binding pattern: "/v1beta1/{name=operations/**}:delete"
 func (backend *RESTBackend) HandleDeleteOperation(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received %s request matching '/v1/{name=operations/**}': %q", r.Method, r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=operations/**}:delete': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -210,12 +203,12 @@ func (backend *RESTBackend) HandleDeleteOperation(w http.ResponseWriter, r *http
 }
 
 // HandleCancelOperation translates REST requests/responses on the wire to internal proto messages for CancelOperation
-//    Generated for HTTP binding pattern: "/v1/{name=operations/**}:cancel"
+//    Generated for HTTP binding pattern: "/v1beta1/{name=operations/**}:cancel"
 func (backend *RESTBackend) HandleCancelOperation(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received %s request matching '/v1/{name=operations/**}:cancel': %q", r.Method, r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=operations/**}:cancel': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -230,31 +223,23 @@ func (backend *RESTBackend) HandleCancelOperation(w http.ResponseWriter, r *http
 	}
 
 	request := &longrunningpb.CancelOperationRequest{}
-	// Intentional: Field values in the URL path override those set in the body.
-	var jsonReader bytes.Buffer
-	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
-		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
-		return
-	}
-
-	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
-		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
-		return
-	}
-
-	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
-		return
-	}
-
-	if len(queryParams) > 0 {
-		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
+		return
+	}
+
+	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	excludedQueryParams := []string{"name"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
+		return
+	}
+	if err := resttools.PopulateFields(request, queryParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
