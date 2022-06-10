@@ -19,7 +19,6 @@ package genrest
 
 import (
 	"bytes"
-	"context"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
@@ -38,6 +37,12 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
+		return
+	}
+
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
 		return
 	}
 
@@ -69,7 +74,6 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"session"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -81,10 +85,11 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.TestingServer.CreateSession(context.Background(), request)
+	response, err := backend.TestingServer.CreateSession(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -113,6 +118,12 @@ func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.GetSessionRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -124,7 +135,6 @@ func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Requ
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -136,10 +146,11 @@ func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Requ
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.TestingServer.GetSession(context.Background(), request)
+	response, err := backend.TestingServer.GetSession(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -168,6 +179,12 @@ func (backend *RESTBackend) HandleListSessions(w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.ListSessionsRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -179,17 +196,17 @@ func (backend *RESTBackend) HandleListSessions(w http.ResponseWriter, r *http.Re
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	queryParams := map[string][]string(r.URL.Query())
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.TestingServer.ListSessions(context.Background(), request)
+	response, err := backend.TestingServer.ListSessions(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -218,6 +235,12 @@ func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.DeleteSessionRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -229,7 +252,6 @@ func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.R
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -241,10 +263,11 @@ func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.R
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.TestingServer.DeleteSession(context.Background(), request)
+	response, err := backend.TestingServer.DeleteSession(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -273,6 +296,12 @@ func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.ReportSessionRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -284,7 +313,6 @@ func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.R
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -296,10 +324,11 @@ func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.R
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.TestingServer.ReportSession(context.Background(), request)
+	response, err := backend.TestingServer.ReportSession(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -328,6 +357,12 @@ func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.ListTestsRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -339,7 +374,6 @@ func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Reque
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"parent"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -351,10 +385,11 @@ func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Reque
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.TestingServer.ListTests(context.Background(), request)
+	response, err := backend.TestingServer.ListTests(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -383,6 +418,12 @@ func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.DeleteTestRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -394,7 +435,6 @@ func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Requ
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -406,10 +446,11 @@ func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Requ
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.TestingServer.DeleteTest(context.Background(), request)
+	response, err := backend.TestingServer.DeleteTest(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -438,6 +479,12 @@ func (backend *RESTBackend) HandleVerifyTest(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.VerifyTestRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -449,7 +496,6 @@ func (backend *RESTBackend) HandleVerifyTest(w http.ResponseWriter, r *http.Requ
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -461,10 +507,11 @@ func (backend *RESTBackend) HandleVerifyTest(w http.ResponseWriter, r *http.Requ
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.TestingServer.VerifyTest(context.Background(), request)
+	response, err := backend.TestingServer.VerifyTest(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return

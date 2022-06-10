@@ -19,7 +19,6 @@ package genrest
 
 import (
 	"bytes"
-	"context"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
@@ -38,6 +37,12 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
+		return
+	}
+
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
 		return
 	}
 
@@ -61,7 +66,7 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+	if len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -71,10 +76,11 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.EchoServer.Echo(context.Background(), request)
+	response, err := backend.EchoServer.Echo(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -103,6 +109,12 @@ func (backend *RESTBackend) HandleExpand(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.ExpandRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
@@ -123,7 +135,7 @@ func (backend *RESTBackend) HandleExpand(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+	if len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -133,6 +145,7 @@ func (backend *RESTBackend) HandleExpand(w http.ResponseWriter, r *http.Request)
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
@@ -168,6 +181,12 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.PagedExpandRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
@@ -188,7 +207,7 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+	if len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -198,10 +217,11 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.EchoServer.PagedExpand(context.Background(), request)
+	response, err := backend.EchoServer.PagedExpand(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -230,6 +250,12 @@ func (backend *RESTBackend) HandlePagedExpandLegacy(w http.ResponseWriter, r *ht
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.PagedExpandLegacyRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
@@ -250,7 +276,7 @@ func (backend *RESTBackend) HandlePagedExpandLegacy(w http.ResponseWriter, r *ht
 		return
 	}
 
-	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+	if len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -260,10 +286,11 @@ func (backend *RESTBackend) HandlePagedExpandLegacy(w http.ResponseWriter, r *ht
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.EchoServer.PagedExpandLegacy(context.Background(), request)
+	response, err := backend.EchoServer.PagedExpandLegacy(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -292,6 +319,12 @@ func (backend *RESTBackend) HandlePagedExpandLegacyMapped(w http.ResponseWriter,
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.PagedExpandRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
@@ -312,7 +345,7 @@ func (backend *RESTBackend) HandlePagedExpandLegacyMapped(w http.ResponseWriter,
 		return
 	}
 
-	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+	if len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -322,10 +355,11 @@ func (backend *RESTBackend) HandlePagedExpandLegacyMapped(w http.ResponseWriter,
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.EchoServer.PagedExpandLegacyMapped(context.Background(), request)
+	response, err := backend.EchoServer.PagedExpandLegacyMapped(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -354,6 +388,12 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.WaitRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
@@ -374,7 +414,7 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+	if len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -384,10 +424,11 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.EchoServer.Wait(context.Background(), request)
+	response, err := backend.EchoServer.Wait(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -416,6 +457,12 @@ func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.BlockRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
@@ -436,7 +483,7 @@ func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+	if len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -446,10 +493,11 @@ func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) 
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.EchoServer.Block(context.Background(), request)
+	response, err := backend.EchoServer.Block(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return

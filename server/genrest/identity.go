@@ -19,7 +19,6 @@ package genrest
 
 import (
 	"bytes"
-	"context"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
@@ -38,6 +37,12 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
+		return
+	}
+
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
 		return
 	}
 
@@ -61,7 +66,7 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+	if len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -71,10 +76,11 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.IdentityServer.CreateUser(context.Background(), request)
+	response, err := backend.IdentityServer.CreateUser(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -103,6 +109,12 @@ func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.GetUserRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -114,7 +126,6 @@ func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -126,10 +137,11 @@ func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.IdentityServer.GetUser(context.Background(), request)
+	response, err := backend.IdentityServer.GetUser(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -158,6 +170,12 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.UpdateUserRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
@@ -178,7 +196,7 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+	if len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -188,10 +206,11 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.IdentityServer.UpdateUser(context.Background(), request)
+	response, err := backend.IdentityServer.UpdateUser(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -220,6 +239,12 @@ func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.DeleteUserRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -231,7 +256,6 @@ func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Requ
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -243,10 +267,11 @@ func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Requ
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.IdentityServer.DeleteUser(context.Background(), request)
+	response, err := backend.IdentityServer.DeleteUser(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -275,6 +300,12 @@ func (backend *RESTBackend) HandleListUsers(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.ListUsersRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -286,17 +317,17 @@ func (backend *RESTBackend) HandleListUsers(w http.ResponseWriter, r *http.Reque
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	queryParams := map[string][]string(r.URL.Query())
 	if err := resttools.PopulateFields(request, queryParams); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.IdentityServer.ListUsers(context.Background(), request)
+	response, err := backend.IdentityServer.ListUsers(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return

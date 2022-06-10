@@ -19,7 +19,6 @@ package genrest
 
 import (
 	"bytes"
-	"context"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
@@ -38,6 +37,12 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
+		return
+	}
+
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
 		return
 	}
 
@@ -69,7 +74,6 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"sequence"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -81,10 +85,11 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.SequenceServiceServer.CreateSequence(context.Background(), request)
+	response, err := backend.SequenceServiceServer.CreateSequence(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -113,6 +118,12 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.GetSequenceReportRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
@@ -124,7 +135,6 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	queryParams := map[string][]string(r.URL.Query())
 	excludedQueryParams := []string{"name"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
@@ -136,10 +146,11 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.SequenceServiceServer.GetSequenceReport(context.Background(), request)
+	response, err := backend.SequenceServiceServer.GetSequenceReport(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -168,6 +179,12 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 		return
 	}
 
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
 	request := &genprotopb.AttemptSequenceRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
@@ -188,7 +205,7 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 		return
 	}
 
-	if queryParams := r.URL.Query(); len(queryParams) > 0 {
+	if len(queryParams) > 0 {
 		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
 		return
 	}
@@ -198,10 +215,11 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 	}
 
 	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.SequenceServiceServer.AttemptSequence(context.Background(), request)
+	response, err := backend.SequenceServiceServer.AttemptSequence(r.Context(), request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
