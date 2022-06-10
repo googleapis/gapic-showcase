@@ -49,8 +49,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 		fileImports := map[string]string{
 			"net/http": "",
 			"github.com/googleapis/gapic-showcase/util/genrest/resttools": "",
-			"github.com/gorilla/mux":                               "gmux",
-			"github.com/googleapis/gapic-showcase/server/genproto": "genprotopb",
+			"github.com/gorilla/mux": "gmux",
 		}
 
 		// TODO: Properly deal with import strings. They may need to be taken out of the gomodel
@@ -110,6 +109,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 			source.P("")
 			source.P("  %s := &%s.%s{}", handler.RequestVariable, handler.RequestTypePackage, handler.RequestType)
+			fileImports[handler.RequestTypeImport] = handler.RequestTypePackage
 			switch handler.RequestBodyFieldSpec {
 			case gomodel.BodyFieldAll:
 				fileImports["bytes"] = ""

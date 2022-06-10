@@ -112,6 +112,7 @@ func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 				GoMethod:                  protoMethodDesc.GetName(),
 				RequestType:               inGoType,
 				RequestTypePackage:        inImports.Name,
+				RequestTypeImport:         inImports.Path,
 				RequestVariable:           "request",
 				RequestBodyFieldSpec:      bodyFieldSpec,
 				RequestBodyFieldProtoName: binding.BodyField,

@@ -120,6 +120,15 @@ func CompileProtos(version string) {
 	// TODO: Remove this once the CLI generator supports mapped pagination responses.
 	Execute("rm", "-f", "cmd/gapic-showcase/paged-expand-legacy.go")
 
+	// TODO: Remove this if and when we decide to support operation as a CLI command.
+	Execute("rm", "-f",
+		"cmd/gapic-showcase/operations_service.go",
+		"cmd/gapic-showcase/cancel-operation.go",
+		"cmd/gapic-showcase/delete-operation.go",
+		"cmd/gapic-showcase/get-operation.go",
+		"cmd/gapic-showcase/wait-operation.go",
+		"cmd/gapic-showcase/list-operations.go")
+
 	// Format generated output
 	Execute("go", "fmt", "./...")
 }

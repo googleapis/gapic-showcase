@@ -19,9 +19,9 @@ package genrest
 
 import (
 	"bytes"
-	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
+	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	"io"
 	"net/http"
 )
