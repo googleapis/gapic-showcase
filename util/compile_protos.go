@@ -45,18 +45,10 @@ func CompileProtos(version string) {
 	}
 	defer os.RemoveAll(outDir)
 
-	files := []string{}
-	for _, dir := range [][]string{
-		{"schema", "google", "showcase", version, "*.proto"},
-		// TODO: Do we want to include all the common protos?
-		// {"schema", "api-common-protos", "google", "longrunning", "operations.proto"},
-	} {
-		protos := filepath.Join(dir...)
-		newFiles, err := filepath.Glob(protos)
-		if err != nil {
-			log.Fatal("Error: failed to find protos in " + protos)
-		}
-		files = append(files, newFiles...)
+	protos := filepath.Join("schema", "google", "showcase", version, "*.proto")
+	files, err := filepath.Glob(protos)
+	if err != nil {
+		log.Fatal("Error: failed to find protos in " + protos)
 	}
 
 	// Run protoc
@@ -119,15 +111,6 @@ func CompileProtos(version string) {
 
 	// TODO: Remove this once the CLI generator supports mapped pagination responses.
 	Execute("rm", "-f", "cmd/gapic-showcase/paged-expand-legacy.go")
-
-	// TODO: Remove this if and when we decide to support operation as a CLI command.
-	Execute("rm", "-f",
-		"cmd/gapic-showcase/operations_service.go",
-		"cmd/gapic-showcase/cancel-operation.go",
-		"cmd/gapic-showcase/delete-operation.go",
-		"cmd/gapic-showcase/get-operation.go",
-		"cmd/gapic-showcase/wait-operation.go",
-		"cmd/gapic-showcase/list-operations.go")
 
 	// Format generated output
 	Execute("go", "fmt", "./...")
