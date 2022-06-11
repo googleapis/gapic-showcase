@@ -6,7 +6,6 @@ google/showcase/v1beta1/identity.proto
 google/showcase/v1beta1/messaging.proto
 google/showcase/v1beta1/sequence.proto
 google/showcase/v1beta1/testing.proto
-google/longrunning/operations.proto
 
 Proto Model:
 Compliance (.google.showcase.v1beta1.Compliance):
@@ -18,13 +17,6 @@ Compliance (.google.showcase.v1beta1.Compliance):
   .google.showcase.v1beta1.Compliance.RepeatDataPathTrailingResource[0] : GET: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/**}:pathtrailingresource"
   .google.showcase.v1beta1.Compliance.RepeatDataBodyPut[0] : PUT: "/v1beta1/repeat:bodyput"
   .google.showcase.v1beta1.Compliance.RepeatDataBodyPatch[0] : PATCH: "/v1beta1/repeat:bodypatch"
-
-Operations (.google.longrunning.Operations):
-  .google.longrunning.Operations.ListOperations[0] : GET: "/v1beta1/operations"
-  .google.longrunning.Operations.GetOperation[0] : GET: "/v1beta1/{name=operations/**}"
-  .google.longrunning.Operations.DeleteOperation[0] : DELETE: "/v1beta1/{name=operations/**}:delete"
-  .google.longrunning.Operations.CancelOperation[0] : POST: "/v1beta1/{name=operations/**}:cancel"
-  .google.longrunning.Operations.WaitOperation[0] : GET: "/v1/{name=operations/**}:wait"
 
 Echo (.google.showcase.v1beta1.Echo):
   .google.showcase.v1beta1.Echo.Echo[0] : POST: "/v1beta1/echo:echo"
@@ -81,6 +73,12 @@ Testing (.google.showcase.v1beta1.Testing):
   .google.showcase.v1beta1.Testing.DeleteTest[0] : DELETE: "/v1beta1/{name=sessions/*/tests/*}"
   .google.showcase.v1beta1.Testing.VerifyTest[0] : POST: "/v1beta1/{name=sessions/*/tests/*}:check"
 
+Operations (.google.longrunning.Operations):
+  .google.longrunning.Operations.ListOperations[0] : GET: "/v1beta1/operations"
+  .google.longrunning.Operations.GetOperation[0] : GET: "/v1beta1/{name=operations/**}"
+  .google.longrunning.Operations.DeleteOperation[0] : DELETE: "/v1beta1/{name=operations/**}:delete"
+  .google.longrunning.Operations.CancelOperation[0] : POST: "/v1beta1/{name=operations/**}:cancel"
+
 
 
 GoModel
@@ -112,27 +110,6 @@ Shim "Compliance" (.google.showcase.v1beta1.Compliance)
 
        PATCH                          /v1beta1/repeat:bodypatch func RepeatDataBodyPatch(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
 ["/" "v1beta1" "/" "repeat" ":" "bodypatch"]
-
-----------------------------------------
-Shim "Operations" (.google.longrunning.Operations)
-  Imports:
-    emptypb: "github.com/golang/protobuf/ptypes/empty" "github.com/golang/protobuf/ptypes/empty"
-    longrunningpb: "google.golang.org/genproto/googleapis/longrunning" "google.golang.org/genproto/googleapis/longrunning"
-  Handlers (5):
-         GET                                /v1beta1/operations func ListOperations(request longrunningpb.ListOperationsRequest) (response longrunningpb.ListOperationsResponse) {}
-["/" "v1beta1" "/" "operations"]
-
-         GET                      /v1/{name=operations/**}:wait func WaitOperation(request longrunningpb.WaitOperationRequest) (response longrunningpb.Operation) {}
-["/" "v1" "/" {name = ["operations" "/" **]} ":" "wait"]
-
-         GET                      /v1beta1/{name=operations/**} func GetOperation(request longrunningpb.GetOperationRequest) (response longrunningpb.Operation) {}
-["/" "v1beta1" "/" {name = ["operations" "/" **]}]
-
-        POST               /v1beta1/{name=operations/**}:cancel func CancelOperation(request longrunningpb.CancelOperationRequest) (response emptypb.Empty) {}
-["/" "v1beta1" "/" {name = ["operations" "/" **]} ":" "cancel"]
-
-      DELETE               /v1beta1/{name=operations/**}:delete func DeleteOperation(request longrunningpb.DeleteOperationRequest) (response emptypb.Empty) {}
-["/" "v1beta1" "/" {name = ["operations" "/" **]} ":" "delete"]
 
 ----------------------------------------
 Shim "Echo" (.google.showcase.v1beta1.Echo)
@@ -299,4 +276,22 @@ Shim "Testing" (.google.showcase.v1beta1.Testing)
 
       DELETE                 /v1beta1/{name=sessions/*/tests/*} func DeleteTest(request genprotopb.DeleteTestRequest) (response emptypb.Empty) {}
 ["/" "v1beta1" "/" {name = ["sessions" "/" * "/" "tests" "/" *]}]
+
+----------------------------------------
+Shim "Operations" (.google.longrunning.Operations)
+  Imports:
+    emptypb: "github.com/golang/protobuf/ptypes/empty" "github.com/golang/protobuf/ptypes/empty"
+    longrunningpb: "google.golang.org/genproto/googleapis/longrunning" "google.golang.org/genproto/googleapis/longrunning"
+  Handlers (4):
+         GET                                /v1beta1/operations func ListOperations(request longrunningpb.ListOperationsRequest) (response longrunningpb.ListOperationsResponse) {}
+["/" "v1beta1" "/" "operations"]
+
+         GET                      /v1beta1/{name=operations/**} func GetOperation(request longrunningpb.GetOperationRequest) (response longrunningpb.Operation) {}
+["/" "v1beta1" "/" {name = ["operations" "/" **]}]
+
+        POST               /v1beta1/{name=operations/**}:cancel func CancelOperation(request longrunningpb.CancelOperationRequest) (response emptypb.Empty) {}
+["/" "v1beta1" "/" {name = ["operations" "/" **]} ":" "cancel"]
+
+      DELETE               /v1beta1/{name=operations/**}:delete func DeleteOperation(request longrunningpb.DeleteOperationRequest) (response emptypb.Empty) {}
+["/" "v1beta1" "/" {name = ["operations" "/" **]} ":" "delete"]
 

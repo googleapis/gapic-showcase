@@ -25,9 +25,11 @@ import (
 	"github.com/googleapis/gapic-showcase/util/genrest/protomodel"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/genproto/googleapis/api/serviceconfig"
+	"google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protodesc"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
 
@@ -40,8 +42,6 @@ func NewProtoModel(plugin *protogen.Plugin) (*protomodel.Model, error) {
 	if err != nil {
 		return nil, err
 	}
-	bindingOverrides := GetBindingOverrides(serviceConfig)
-
 	protoFiles := plugin.Request.GetProtoFile()
 	protoModel := &protomodel.Model{
 		ProtoInfo: pbinfo.Of(protoFiles),
@@ -61,31 +61,39 @@ func NewProtoModel(plugin *protogen.Plugin) (*protomodel.Model, error) {
 		for _, svc := range protoFile.GetService() {
 			serviceModel := protoModel.AddService(NewService(protoPackage, svc))
 			for _, method := range svc.GetMethod() {
-				options := method.GetOptions()
-				if options == nil {
-					continue
-				}
+				addBindingsForMethod(protoModel, serviceModel, method)
+			}
+		}
+	}
 
-				fqn := fmt.Sprintf("%s.%s.%s", protoFile.GetPackage(), svc.GetName(), method.GetName())
-				var http *annotations.HttpRule
-				if rule, found := bindingOverrides[fqn]; found && rule != nil {
-					http = rule
-				} else {
-					eHTTP /*, err*/ := proto.GetExtension(method.GetOptions(), annotations.E_Http)
-					http = eHTTP.(*annotations.HttpRule)
-				}
-
-				rules := []*annotations.HttpRule{http}
-				rules = append(rules, http.GetAdditionalBindings()...)
-				for idxRule, oneRule := range rules {
-					protoModel.AccumulateError(NewServiceBinding(serviceModel, method, oneRule, idxRule))
-				}
-
+	mixins := collectMixins(serviceConfig)
+	for _, mixinFile := range mixins {
+		protoPackage := *mixinFile.file.Package
+		for _, mixinService := range mixinFile.services {
+			svc := mixinService.service
+			serviceModel := protoModel.AddService(NewService(protoPackage, svc))
+			for _, method := range mixinService.methods {
+				addBindingsForMethod(protoModel, serviceModel, method)
 			}
 		}
 	}
 
 	return protoModel, protoModel.Error()
+}
+
+func addBindingsForMethod(protoModel *protomodel.Model, serviceModel *protomodel.Service, method *descriptor.MethodDescriptorProto) {
+	options := method.GetOptions()
+	if options == nil {
+		return
+	}
+
+	eHTTP /*, err*/ := proto.GetExtension(method.GetOptions(), annotations.E_Http)
+	http := eHTTP.(*annotations.HttpRule)
+	rules := []*annotations.HttpRule{http}
+	rules = append(rules, http.GetAdditionalBindings()...)
+	for idxRule, oneRule := range rules {
+		protoModel.AccumulateError(NewServiceBinding(serviceModel, method, oneRule, idxRule))
+	}
 }
 
 ////////////////////////////////////////
@@ -165,7 +173,9 @@ func NewRESTRequestPattern(rule *annotations.HttpRule) (*protomodel.RESTRequestP
 
 // GetServiceConfig reads and returns the specified service config file.
 func GetServiceConfig(plugin *protogen.Plugin) (*serviceconfig.Service, error) {
-	// FIXME: Get this from plugin options
+	// TODO: Consider getting this from the plugin options. On the
+	// other hand, there's only one copy of this file, so maybe
+	// hard-coding this location isn't terrible.
 	serviceConfigPath := "schema/google/showcase/v1beta1/showcase_v1beta1.yaml"
 	_ = plugin
 
@@ -193,11 +203,72 @@ func GetServiceConfig(plugin *protogen.Plugin) (*serviceconfig.Service, error) {
 	return serviceConfig, nil
 }
 
-// GetBindingOverrides obtains and returns from the service config a map of fully qualified method names to their HTTP bindings.
-func GetBindingOverrides(serviceConfig *serviceconfig.Service) (overrides map[string]*annotations.HttpRule) {
-	overrides = map[string]*annotations.HttpRule{}
+var mixinFiles map[string][]*descriptor.FileDescriptorProto
+
+type MixinFile struct {
+	file     *descriptor.FileDescriptorProto
+	services []*MixinService
+}
+
+type MixinService struct {
+	service *descriptor.ServiceDescriptorProto
+	methods []*descriptor.MethodDescriptorProto
+}
+
+type Mixins []*MixinFile
+
+type indexedRules map[string]*annotations.HttpRule
+
+// collectMixins collects the configured mixin APIs from the Service config and
+// gathers the appropriately configured mixin methods to generate for each.
+func collectMixins(serviceConfig *serviceconfig.Service) Mixins {
+	mixinRules := indexedRules{}
 	for _, rule := range serviceConfig.GetHttp().GetRules() {
-		overrides[rule.GetSelector()] = rule
+		mixinRules[rule.GetSelector()] = rule
 	}
-	return overrides
+	mixins := Mixins{}
+	for _, api := range serviceConfig.GetApis() {
+		if _, ok := mixinFiles[api.GetName()]; ok {
+			mixins = append(mixins, collectMixinMethods(mixinRules, api.GetName())...)
+		}
+	}
+	return mixins
+}
+
+func collectMixinMethods(mixinRules indexedRules, api string) Mixins {
+	files := Mixins{}
+	// methodsToGenerate := []*descriptor.MethodDescriptorProto{}
+
+	// Note: Triple nested loops are nasty, but this is tightly bound and really
+	// the only way to traverse proto descriptors that are backed by slices.
+	for _, file := range mixinFiles[api] {
+		fileToAdd := &MixinFile{
+			file: file,
+		}
+		files = append(files, fileToAdd)
+		for _, service := range file.GetService() {
+			serviceToAdd := &MixinService{
+				service: service,
+			}
+			fileToAdd.services = append(fileToAdd.services, serviceToAdd)
+			for _, method := range service.GetMethod() {
+				fqn := fmt.Sprintf("%s.%s.%s", file.GetPackage(), service.GetName(), method.GetName())
+
+				if rule := mixinRules[fqn]; rule != nil {
+					proto.SetExtension(method.Options, annotations.E_Http, rule)
+					serviceToAdd.methods = append(serviceToAdd.methods, method)
+
+				}
+			}
+		}
+	}
+	return files
+}
+
+func init() {
+	mixinFiles = map[string][]*descriptor.FileDescriptorProto{
+		"google.longrunning.Operations": {
+			protodesc.ToFileDescriptorProto(longrunning.File_google_longrunning_operations_proto),
+		},
+	}
 }

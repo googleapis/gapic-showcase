@@ -49,7 +49,7 @@ func CompileProtos(version string) {
 	for _, dir := range [][]string{
 		{"schema", "google", "showcase", version, "*.proto"},
 		// TODO: Do we want to include all the common protos?
-		{"schema", "api-common-protos", "google", "longrunning", "operations.proto"},
+		// {"schema", "api-common-protos", "google", "longrunning", "operations.proto"},
 	} {
 		protos := filepath.Join(dir...)
 		newFiles, err := filepath.Glob(protos)
