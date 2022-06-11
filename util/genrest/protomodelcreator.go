@@ -38,10 +38,6 @@ import (
 
 // NewProtoModel uses the information in `plugin` to create a new protomodel.Model.
 func NewProtoModel(plugin *protogen.Plugin) (*protomodel.Model, error) {
-	serviceConfig, err := GetServiceConfig(plugin)
-	if err != nil {
-		return nil, err
-	}
 	protoFiles := plugin.Request.GetProtoFile()
 	protoModel := &protomodel.Model{
 		ProtoInfo: pbinfo.Of(protoFiles),
@@ -66,6 +62,10 @@ func NewProtoModel(plugin *protogen.Plugin) (*protomodel.Model, error) {
 		}
 	}
 
+	serviceConfig, err := GetServiceConfig(plugin)
+	if err != nil {
+		return nil, err
+	}
 	mixins := collectMixins(serviceConfig)
 	for _, mixinFile := range mixins {
 		protoPackage := *mixinFile.file.Package
@@ -203,20 +203,22 @@ func GetServiceConfig(plugin *protogen.Plugin) (*serviceconfig.Service, error) {
 	return serviceConfig, nil
 }
 
-var mixinFiles map[string][]*descriptor.FileDescriptorProto
+// Mixins is the collection of files containing methods to be mixed in.
+type Mixins []*MixinFile
 
+// MixinFile describes a single file containins methods to be mixed in.
 type MixinFile struct {
 	file     *descriptor.FileDescriptorProto
 	services []*MixinService
 }
 
+// MixinService describes a single service containing methods to be filled in
 type MixinService struct {
 	service *descriptor.ServiceDescriptorProto
 	methods []*descriptor.MethodDescriptorProto
 }
 
-type Mixins []*MixinFile
-
+// indexedRules keys HTTP rules by their selectors
 type indexedRules map[string]*annotations.HttpRule
 
 // collectMixins collects the configured mixin APIs from the Service config and
@@ -228,7 +230,7 @@ func collectMixins(serviceConfig *serviceconfig.Service) Mixins {
 	}
 	mixins := Mixins{}
 	for _, api := range serviceConfig.GetApis() {
-		if _, ok := mixinFiles[api.GetName()]; ok {
+		if _, ok := mixinDescriptors[api.GetName()]; ok {
 			mixins = append(mixins, collectMixinMethods(mixinRules, api.GetName())...)
 		}
 	}
@@ -241,7 +243,7 @@ func collectMixinMethods(mixinRules indexedRules, api string) Mixins {
 
 	// Note: Triple nested loops are nasty, but this is tightly bound and really
 	// the only way to traverse proto descriptors that are backed by slices.
-	for _, file := range mixinFiles[api] {
+	for _, file := range mixinDescriptors[api] {
 		fileToAdd := &MixinFile{
 			file: file,
 		}
@@ -265,8 +267,10 @@ func collectMixinMethods(mixinRules indexedRules, api string) Mixins {
 	return files
 }
 
+var mixinDescriptors map[string][]*descriptor.FileDescriptorProto
+
 func init() {
-	mixinFiles = map[string][]*descriptor.FileDescriptorProto{
+	mixinDescriptors = map[string][]*descriptor.FileDescriptorProto{
 		"google.longrunning.Operations": {
 			protodesc.ToFileDescriptorProto(longrunning.File_google_longrunning_operations_proto),
 		},
