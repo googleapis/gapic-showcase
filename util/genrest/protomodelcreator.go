@@ -238,11 +238,10 @@ func collectMixins(serviceConfig *serviceconfig.Service) Mixins {
 }
 
 func collectMixinMethods(mixinRules indexedRules, api string) Mixins {
-	files := Mixins{}
-	// methodsToGenerate := []*descriptor.MethodDescriptorProto{}
+	// This method was adapted from gapic-generator-go:
+	// https://github.com/googleapis/gapic-generator-go/blob/c9e3ce74af160bf72a8d140f2d4ecb167d35df25/internal/gengapic/mixins.go#L66
 
-	// Note: Triple nested loops are nasty, but this is tightly bound and really
-	// the only way to traverse proto descriptors that are backed by slices.
+	files := Mixins{}
 	for _, file := range mixinDescriptors[api] {
 		fileToAdd := &MixinFile{
 			file: file,
