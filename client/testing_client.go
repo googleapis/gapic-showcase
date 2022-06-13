@@ -1767,7 +1767,7 @@ func (c *testingRESTClient) DeleteOperation(ctx context.Context, req *longrunnin
 	if err != nil {
 		return err
 	}
-	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
+	baseUrl.Path += fmt.Sprintf("/v1beta1/%v:delete", req.GetName())
 
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
