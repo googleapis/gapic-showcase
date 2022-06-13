@@ -80,6 +80,6 @@ http:
   - selector: google.longrunning.Operations.GetOperation
     get: '/v1beta1/{name=operations/**}'
   - selector: google.longrunning.Operations.DeleteOperation
-    delete: '/v1beta1/{name=operations/**}:delete'
+    delete: '/v1beta1/{name=operations/**}'
   - selector: google.longrunning.Operations.CancelOperation
     post: '/v1beta1/{name=operations/**}:cancel'

@@ -266,6 +266,7 @@ func collectMixinMethods(mixinRules indexedRules, api string) Mixins {
 var mixinDescriptors map[string][]*descriptor.FileDescriptorProto
 
 func init() {
+	// TODO(noahdietz): Figure out how to add Locations and IAMPolicy to this list.
 	mixinDescriptors = map[string][]*descriptor.FileDescriptorProto{
 		"google.longrunning.Operations": {
 			protodesc.ToFileDescriptorProto(longrunning.File_google_longrunning_operations_proto),
