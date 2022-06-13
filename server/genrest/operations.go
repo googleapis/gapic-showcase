@@ -142,12 +142,12 @@ func (backend *RESTBackend) HandleGetOperation(w http.ResponseWriter, r *http.Re
 }
 
 // HandleDeleteOperation translates REST requests/responses on the wire to internal proto messages for DeleteOperation
-//    Generated for HTTP binding pattern: "/v1beta1/{name=operations/**}:delete"
+//    Generated for HTTP binding pattern: "/v1beta1/{name=operations/**}"
 func (backend *RESTBackend) HandleDeleteOperation(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=operations/**}:delete': %q", r.Method, r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=operations/**}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
