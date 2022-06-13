@@ -85,6 +85,10 @@ func RegisterHandlers(router *gmux.Router, backend *services.Backend) {
 	router.HandleFunc("/v1beta1/{parent:sessions/.+}/tests", rest.HandleListTests).Methods("GET")
 	router.HandleFunc("/v1beta1/{name:sessions/.+/tests/.+}", rest.HandleDeleteTest).Methods("DELETE")
 	router.HandleFunc("/v1beta1/{name:sessions/.+/tests/.+}:check", rest.HandleVerifyTest).Methods("POST")
+	router.HandleFunc("/v1beta1/operations", rest.HandleListOperations).Methods("GET")
+	router.HandleFunc("/v1beta1/{name:operations/.+}", rest.HandleGetOperation).Methods("GET")
+	router.HandleFunc("/v1beta1/{name:operations/.+}:delete", rest.HandleDeleteOperation).Methods("DELETE")
+	router.HandleFunc("/v1beta1/{name:operations/.+}:cancel", rest.HandleCancelOperation).Methods("POST")
 	router.PathPrefix("/").HandlerFunc(rest.catchAllHandler)
 }
 
