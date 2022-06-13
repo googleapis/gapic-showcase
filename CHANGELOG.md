@@ -1,5 +1,12 @@
 # Release History
 
+## [0.22.0](https://github.com/googleapis/gapic-showcase/compare/v0.21.0...v0.22.0) (2022-06-13)
+
+
+### Features
+
+* Support LRO mixins over REST ([#1118](https://github.com/googleapis/gapic-showcase/issues/1118)) ([5ca6fe1](https://github.com/googleapis/gapic-showcase/commit/5ca6fe1b8ea7e5645e87718e84b1198ad8ce9c63))
+
 ## [0.21.0](https://github.com/googleapis/gapic-showcase/compare/v0.20.0...v0.21.0) (2022-06-08)
 
 
