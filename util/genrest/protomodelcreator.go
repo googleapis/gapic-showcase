@@ -62,7 +62,7 @@ func NewProtoModel(plugin *protogen.Plugin) (*protomodel.Model, error) {
 		}
 	}
 
-	serviceConfig, err := GetServiceConfig(plugin)
+	serviceConfig, err := GetServiceConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -171,13 +171,14 @@ func NewRESTRequestPattern(rule *annotations.HttpRule) (*protomodel.RESTRequestP
 ////////////////////////////////////////
 // Mixins
 
-// GetServiceConfig reads and returns the specified service config file.
-func GetServiceConfig(plugin *protogen.Plugin) (*serviceconfig.Service, error) {
+// Note: much of the code below is a modified copy of the mixin code in gapic-generator-go.
+
+// GetServiceConfig reads and returns the Showcase service config file.
+func GetServiceConfig() (*serviceconfig.Service, error) {
 	// TODO: Consider getting this from the plugin options. On the
 	// other hand, there's only one copy of this file, so maybe
 	// hard-coding this location isn't terrible.
 	serviceConfigPath := "schema/google/showcase/v1beta1/showcase_v1beta1.yaml"
-	_ = plugin
 
 	y, err := ioutil.ReadFile(serviceConfigPath)
 	if err != nil {
@@ -221,8 +222,8 @@ type MixinService struct {
 // indexedRules keys HTTP rules by their selectors
 type indexedRules map[string]*annotations.HttpRule
 
-// collectMixins collects the configured mixin APIs from the Service config and
-// gathers the appropriately configured mixin methods to generate for each.
+// collectMixins collects the configured mixin APIs from the service config and
+// returns the appropriately configured mixin `MethodDescriptorProto`s to generate for each.
 func collectMixins(serviceConfig *serviceconfig.Service) Mixins {
 	mixinRules := indexedRules{}
 	for _, rule := range serviceConfig.GetHttp().GetRules() {
@@ -230,14 +231,15 @@ func collectMixins(serviceConfig *serviceconfig.Service) Mixins {
 	}
 	mixins := Mixins{}
 	for _, api := range serviceConfig.GetApis() {
-		if _, ok := mixinDescriptors[api.GetName()]; ok {
-			mixins = append(mixins, collectMixinMethods(mixinRules, api.GetName())...)
-		}
+		mixins = append(mixins, getMixinsForAPI(mixinRules, api.GetName())...)
 	}
 	return mixins
 }
 
-func collectMixinMethods(mixinRules indexedRules, api string) Mixins {
+// getMixinsForAPI returns the appropriately configured mixin `MethodDescriptorProto`s
+// corresponding to the `mixinRules` that refer to `api`. The method descriptors are taken from the
+// package-global `mixinDescriptors`.
+func getMixinsForAPI(mixinRules indexedRules, api string) Mixins {
 	files := Mixins{}
 	for _, file := range mixinDescriptors[api] {
 		fileToAdd := &MixinFile{
@@ -255,7 +257,6 @@ func collectMixinMethods(mixinRules indexedRules, api string) Mixins {
 				if rule := mixinRules[fqn]; rule != nil {
 					proto.SetExtension(method.Options, annotations.E_Http, rule)
 					serviceToAdd.methods = append(serviceToAdd.methods, method)
-
 				}
 			}
 		}
@@ -263,6 +264,8 @@ func collectMixinMethods(mixinRules indexedRules, api string) Mixins {
 	return files
 }
 
+// mixinDescriptors maps fully qualified proto service names of mixins implemented by Showcase to a
+// list of FileDescriptors containing the definitions needed for that service.
 var mixinDescriptors map[string][]*descriptor.FileDescriptorProto
 
 func init() {
