@@ -129,7 +129,7 @@ func defaultSequenceRESTCallOptions() *SequenceCallOptions {
 	}
 }
 
-// internalSequenceClient is an interface that defines the methods availaible from Client Libraries Showcase API.
+// internalSequenceClient is an interface that defines the methods available from Client Libraries Showcase API.
 type internalSequenceClient interface {
 	Close() error
 	setGoogleClientInfo(...string)

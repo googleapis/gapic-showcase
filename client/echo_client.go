@@ -194,7 +194,7 @@ func defaultEchoRESTCallOptions() *EchoCallOptions {
 	}
 }
 
-// internalEchoClient is an interface that defines the methods availaible from Client Libraries Showcase API.
+// internalEchoClient is an interface that defines the methods available from Client Libraries Showcase API.
 type internalEchoClient interface {
 	Close() error
 	setGoogleClientInfo(...string)

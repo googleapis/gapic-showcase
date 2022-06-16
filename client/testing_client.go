@@ -121,7 +121,7 @@ func defaultTestingRESTCallOptions() *TestingCallOptions {
 	}
 }
 
-// internalTestingClient is an interface that defines the methods availaible from Client Libraries Showcase API.
+// internalTestingClient is an interface that defines the methods available from Client Libraries Showcase API.
 type internalTestingClient interface {
 	Close() error
 	setGoogleClientInfo(...string)
