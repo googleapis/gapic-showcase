@@ -73,6 +73,12 @@ Testing (.google.showcase.v1beta1.Testing):
   .google.showcase.v1beta1.Testing.DeleteTest[0] : DELETE: "/v1beta1/{name=sessions/*/tests/*}"
   .google.showcase.v1beta1.Testing.VerifyTest[0] : POST: "/v1beta1/{name=sessions/*/tests/*}:check"
 
+Operations (.google.longrunning.Operations):
+  .google.longrunning.Operations.ListOperations[0] : GET: "/v1beta1/operations"
+  .google.longrunning.Operations.GetOperation[0] : GET: "/v1beta1/{name=operations/**}"
+  .google.longrunning.Operations.DeleteOperation[0] : DELETE: "/v1beta1/{name=operations/**}"
+  .google.longrunning.Operations.CancelOperation[0] : POST: "/v1beta1/{name=operations/**}:cancel"
+
 
 
 GoModel
@@ -270,4 +276,22 @@ Shim "Testing" (.google.showcase.v1beta1.Testing)
 
       DELETE                 /v1beta1/{name=sessions/*/tests/*} func DeleteTest(request genprotopb.DeleteTestRequest) (response emptypbpb.Empty) {}
 ["/" "v1beta1" "/" {name = ["sessions" "/" * "/" "tests" "/" *]}]
+
+----------------------------------------
+Shim "Operations" (.google.longrunning.Operations)
+  Imports:
+    emptypbpb: "google.golang.org/protobuf/types/known/emptypb" "google.golang.org/protobuf/types/known/emptypb"
+    longrunningpb: "google.golang.org/genproto/googleapis/longrunning" "google.golang.org/genproto/googleapis/longrunning"
+  Handlers (4):
+         GET                                /v1beta1/operations func ListOperations(request longrunningpb.ListOperationsRequest) (response longrunningpb.ListOperationsResponse) {}
+["/" "v1beta1" "/" "operations"]
+
+         GET                      /v1beta1/{name=operations/**} func GetOperation(request longrunningpb.GetOperationRequest) (response longrunningpb.Operation) {}
+["/" "v1beta1" "/" {name = ["operations" "/" **]}]
+
+        POST               /v1beta1/{name=operations/**}:cancel func CancelOperation(request longrunningpb.CancelOperationRequest) (response emptypbpb.Empty) {}
+["/" "v1beta1" "/" {name = ["operations" "/" **]} ":" "cancel"]
+
+      DELETE                      /v1beta1/{name=operations/**} func DeleteOperation(request longrunningpb.DeleteOperationRequest) (response emptypbpb.Empty) {}
+["/" "v1beta1" "/" {name = ["operations" "/" **]}]
 

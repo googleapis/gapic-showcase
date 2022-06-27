@@ -156,7 +156,7 @@ func defaultIdentityRESTCallOptions() *IdentityCallOptions {
 	}
 }
 
-// internalIdentityClient is an interface that defines the methods availaible from Client Libraries Showcase API.
+// internalIdentityClient is an interface that defines the methods available from Client Libraries Showcase API.
 type internalIdentityClient interface {
 	Close() error
 	setGoogleClientInfo(...string)

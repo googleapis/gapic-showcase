@@ -121,7 +121,7 @@ func defaultComplianceRESTCallOptions() *ComplianceCallOptions {
 	}
 }
 
-// internalComplianceClient is an interface that defines the methods availaible from Client Libraries Showcase API.
+// internalComplianceClient is an interface that defines the methods available from Client Libraries Showcase API.
 type internalComplianceClient interface {
 	Close() error
 	setGoogleClientInfo(...string)

@@ -269,7 +269,7 @@ func defaultMessagingRESTCallOptions() *MessagingCallOptions {
 	}
 }
 
-// internalMessagingClient is an interface that defines the methods availaible from Client Libraries Showcase API.
+// internalMessagingClient is an interface that defines the methods available from Client Libraries Showcase API.
 type internalMessagingClient interface {
 	Close() error
 	setGoogleClientInfo(...string)

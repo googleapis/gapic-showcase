@@ -175,6 +175,7 @@ type RESTHandler struct {
 	GoMethod                  string
 	RequestType               string
 	RequestTypePackage        string
+	RequestTypeImport         string
 	RequestVariable           string
 	RequestBodyFieldSpec      BodyFieldSpec
 	RequestBodyFieldProtoName string
