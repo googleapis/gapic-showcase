@@ -132,24 +132,24 @@ func TestBindingComplianceSuiteRequests(t *testing.T) {
 		},
 	}
 
-	noUriVerifyRequest := &pb.RepeatRequest{
+	noURIVerifyRequest := &pb.RepeatRequest{
 		Name:         "Binding testing baseline no Uri verification", // matches a name in compliance_suite.json
 		Info:         info,
 		ServerVerify: true,
 	}
-	wrongBindingUri := "/foo/{id=bar/*}"
+	wrongBindingURI := "/foo/{id=bar/*}"
 
-	if got := server.requestMatchesExpectation(noUriVerifyRequest, wrongBindingUri); got != nil {
+	if got := server.requestMatchesExpectation(noURIVerifyRequest, wrongBindingURI); got != nil {
 		t.Errorf("expected request to match when intended Uri is not set on server. Got error: %s", got)
 	}
 
 	// realBindingUri matches the value in compliance_suite.json
-	realBindingUri := "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/*}/bool/{info.f_bool}:pathresource"
+	realBindingURI := "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/*}/bool/{info.f_bool}:pathresource"
 	uriVerifyRequest := &pb.RepeatRequest{
 		Name:               "Binding testing first binding", // matches a name in compliance_suite.json
 		Info:               info,
 		ServerVerify:       true,
-		IntendedBindingUri: &realBindingUri,
+		IntendedBindingUri: &realBindingURI,
 	}
 
 	// There are three sources of binding Uri:
@@ -166,7 +166,7 @@ func TestBindingComplianceSuiteRequests(t *testing.T) {
 	// In this case the request is simulated to get bound to a wrong Uri
 	// (the second parameter of the `requestMatchesExpectation` method),
 	// therefore actualUri will differ from serverUri.
-	if err := server.requestMatchesExpectation(uriVerifyRequest, wrongBindingUri); err == nil {
+	if err := server.requestMatchesExpectation(uriVerifyRequest, wrongBindingURI); err == nil {
 		t.Errorf("expected request that got bound to a wrong uri to not match")
 	} else {
 		if got, want := err.Error(), "(ComplianceSuiteWrongBindingError)"; !strings.Contains(got, want) {
@@ -177,8 +177,8 @@ func TestBindingComplianceSuiteRequests(t *testing.T) {
 	// In this case the actualUri is set to the correct value
 	// (matching the serverUri), but the clientUri is set to the wrong value,
 	// simulating a corrupt or outdated client testing suite.
-	uriVerifyRequest.IntendedBindingUri = &wrongBindingUri
-	if err := server.requestMatchesExpectation(uriVerifyRequest, realBindingUri); err == nil {
+	uriVerifyRequest.IntendedBindingUri = &wrongBindingURI
+	if err := server.requestMatchesExpectation(uriVerifyRequest, realBindingURI); err == nil {
 		t.Errorf("expected request with an incorrect bindingUri to not match")
 	} else {
 		if got, want := err.Error(), "(ComplianceSuiteRequestBindingMismatchError)"; !strings.Contains(got, want) {
@@ -186,8 +186,8 @@ func TestBindingComplianceSuiteRequests(t *testing.T) {
 		}
 	}
 
-	uriVerifyRequest.IntendedBindingUri = &realBindingUri
-	if got := server.requestMatchesExpectation(uriVerifyRequest, realBindingUri); got != nil {
+	uriVerifyRequest.IntendedBindingUri = &realBindingURI
+	if got := server.requestMatchesExpectation(uriVerifyRequest, realBindingURI); got != nil {
 		t.Errorf("expected request to match when binding Uri is same everywhere. Got error: %s", got)
 	}
 }

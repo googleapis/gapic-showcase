@@ -57,7 +57,7 @@ func (csi *complianceServerImpl) requestMatchesExpectation(received *pb.RepeatRe
 	if expectedRequest.IntendedBindingUri != nil {
 		intendedBinding := expectedRequest.GetIntendedBindingUri()
 		if intendedBinding != binding {
-			return fmt.Errorf("(ComplianceSuiteWrongBindingError) request %q was transcoded to the wrong binding (expected: %s; actual %s).", name, intendedBinding, binding)
+			return fmt.Errorf("(ComplianceSuiteWrongBindingError) request %q was transcoded to the wrong binding (expected: %s; actual %s)", name, intendedBinding, binding)
 		}
 	}
 
@@ -77,16 +77,16 @@ func (csi *complianceServerImpl) requestMatchesExpectation(received *pb.RepeatRe
 func (csi *complianceServerImpl) Repeat(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
 	echoTrailers(ctx)
 
-	bindingUri, ok := ctx.Value(resttools.BindingURIKey("bindingUri")).(string)
+	bindingURI, ok := ctx.Value(resttools.BindingURIKey("bindingUri")).(string)
 	if !ok {
-		bindingUri = ""
+		bindingURI = ""
 	}
 
-	if err := csi.requestMatchesExpectation(in, bindingUri); err != nil {
+	if err := csi.requestMatchesExpectation(in, bindingURI); err != nil {
 		return nil, err
 	}
 
-	return &pb.RepeatResponse{Request: in, BindingUri: bindingUri}, nil
+	return &pb.RepeatResponse{Request: in, BindingUri: bindingURI}, nil
 }
 
 func (csi *complianceServerImpl) RepeatDataBody(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
