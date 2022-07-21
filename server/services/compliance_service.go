@@ -22,6 +22,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
+	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
@@ -37,10 +38,11 @@ type complianceServerImpl struct {
 
 // requestMatchesExpectations returns an error iff the received request asks for server verification and its
 // contents do not match a known suite testing request with the same name.
-func (csi *complianceServerImpl) requestMatchesExpectation(received *pb.RepeatRequest) error {
+func (csi *complianceServerImpl) requestMatchesExpectation(received *pb.RepeatRequest, binding string) error {
 	if !received.GetServerVerify() {
 		return nil
 	}
+
 	if ComplianceSuiteStatus == ComplianceSuiteError {
 		return fmt.Errorf(ComplianceSuiteStatusMessage)
 	}
@@ -49,6 +51,20 @@ func (csi *complianceServerImpl) requestMatchesExpectation(received *pb.RepeatRe
 	expectedRequest, ok := ComplianceSuiteRequests[name]
 	if !ok {
 		return fmt.Errorf("(ComplianceSuiteRequestNotFoundError) compliance suite does not contain a request %q", name)
+	}
+
+	// Checking that the binding in the test suite matches actual binding used.
+	if expectedRequest.IntendedBindingUri != nil {
+		intendedBinding := expectedRequest.GetIntendedBindingUri()
+		if intendedBinding != "" && intendedBinding != binding {
+			return fmt.Errorf("(ComplianceSuiteWrongBindingError) request %q was transcoded to the wrong binding (expected: %s; actual %s) ", name, intendedBinding, binding)
+		}
+	}
+
+	// Separately checking that the binding in the client request matches binding in the test suite.
+	// This guards against the test suite file being wrong on the client.
+	if diff := cmp.Diff(received.IntendedBindingUri, expectedRequest.IntendedBindingUri, cmp.Comparer(proto.Equal)); diff != "" {
+		return fmt.Errorf("(ComplianceSuiteRequestBindingMismatchError) intended binding of request %q do not match test suite", name)
 	}
 
 	if diff := cmp.Diff(received.GetInfo(), expectedRequest.GetInfo(), cmp.Comparer(proto.Equal)); diff != "" {
@@ -60,10 +76,14 @@ func (csi *complianceServerImpl) requestMatchesExpectation(received *pb.RepeatRe
 
 func (csi *complianceServerImpl) Repeat(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
 	echoTrailers(ctx)
-	if err := csi.requestMatchesExpectation(in); err != nil {
+
+	bindingUri := ctx.Value(resttools.BindingURIKey("bindingUri")).(string)
+
+	if err := csi.requestMatchesExpectation(in, bindingUri); err != nil {
 		return nil, err
 	}
-	return &pb.RepeatResponse{Request: in}, nil
+
+	return &pb.RepeatResponse{Request: in, BindingUri: bindingUri}, nil
 }
 
 func (csi *complianceServerImpl) RepeatDataBody(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
