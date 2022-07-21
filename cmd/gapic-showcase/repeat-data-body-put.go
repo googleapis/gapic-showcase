@@ -62,6 +62,8 @@ var repeatDataBodyPutInputPInt64 int64
 
 var repeatDataBodyPutInputPDouble float64
 
+var repeatDataBodyPutInputIntendedBindingUri string
+
 func init() {
 	ComplianceServiceCmd.AddCommand(RepeatDataBodyPutCmd)
 
@@ -201,6 +203,8 @@ func init() {
 
 	RepeatDataBodyPutCmd.Flags().Float64Var(&repeatDataBodyPutInputPDouble, "p_double", 0.0, "")
 
+	RepeatDataBodyPutCmd.Flags().StringVar(&repeatDataBodyPutInputIntendedBindingUri, "intended_binding_uri", "", "")
+
 	RepeatDataBodyPutCmd.Flags().StringVar(&RepeatDataBodyPutFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
 }
@@ -306,6 +310,10 @@ var RepeatDataBodyPutCmd = &cobra.Command{
 
 			if cmd.Flags().Changed("p_double") {
 				RepeatDataBodyPutInput.PDouble = &repeatDataBodyPutInputPDouble
+			}
+
+			if cmd.Flags().Changed("intended_binding_uri") {
+				RepeatDataBodyPutInput.IntendedBindingUri = &repeatDataBodyPutInputIntendedBindingUri
 			}
 
 		}

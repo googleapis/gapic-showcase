@@ -62,6 +62,8 @@ var repeatDataPathResourceInputPInt64 int64
 
 var repeatDataPathResourceInputPDouble float64
 
+var repeatDataPathResourceInputIntendedBindingUri string
+
 func init() {
 	ComplianceServiceCmd.AddCommand(RepeatDataPathResourceCmd)
 
@@ -201,6 +203,8 @@ func init() {
 
 	RepeatDataPathResourceCmd.Flags().Float64Var(&repeatDataPathResourceInputPDouble, "p_double", 0.0, "")
 
+	RepeatDataPathResourceCmd.Flags().StringVar(&repeatDataPathResourceInputIntendedBindingUri, "intended_binding_uri", "", "")
+
 	RepeatDataPathResourceCmd.Flags().StringVar(&RepeatDataPathResourceFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
 }
@@ -306,6 +310,10 @@ var RepeatDataPathResourceCmd = &cobra.Command{
 
 			if cmd.Flags().Changed("p_double") {
 				RepeatDataPathResourceInput.PDouble = &repeatDataPathResourceInputPDouble
+			}
+
+			if cmd.Flags().Changed("intended_binding_uri") {
+				RepeatDataPathResourceInput.IntendedBindingUri = &repeatDataPathResourceInputIntendedBindingUri
 			}
 
 		}

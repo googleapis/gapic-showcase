@@ -62,6 +62,8 @@ var repeatDataQueryInputPInt64 int64
 
 var repeatDataQueryInputPDouble float64
 
+var repeatDataQueryInputIntendedBindingUri string
+
 func init() {
 	ComplianceServiceCmd.AddCommand(RepeatDataQueryCmd)
 
@@ -201,6 +203,8 @@ func init() {
 
 	RepeatDataQueryCmd.Flags().Float64Var(&repeatDataQueryInputPDouble, "p_double", 0.0, "")
 
+	RepeatDataQueryCmd.Flags().StringVar(&repeatDataQueryInputIntendedBindingUri, "intended_binding_uri", "", "")
+
 	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
 }
@@ -306,6 +310,10 @@ var RepeatDataQueryCmd = &cobra.Command{
 
 			if cmd.Flags().Changed("p_double") {
 				RepeatDataQueryInput.PDouble = &repeatDataQueryInputPDouble
+			}
+
+			if cmd.Flags().Changed("intended_binding_uri") {
+				RepeatDataQueryInput.IntendedBindingUri = &repeatDataQueryInputIntendedBindingUri
 			}
 
 		}
