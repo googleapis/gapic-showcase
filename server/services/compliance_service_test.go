@@ -82,12 +82,12 @@ func TestMatchingComplianceSuiteRequests(t *testing.T) {
 		Info: info,
 	}
 
-	if got := server.requestMatchesExpectation(request); got != nil {
+	if got := server.requestMatchesExpectation(request, ""); got != nil {
 		t.Errorf("expected request to trivially match when serverVerify unset. Got error: %s", got)
 	}
 
 	request.ServerVerify = true
-	if err := server.requestMatchesExpectation(request); err == nil {
+	if err := server.requestMatchesExpectation(request, ""); err == nil {
 		t.Errorf("expected verified request with differing data to not match")
 	} else {
 		if got, want := err.Error(), "(ComplianceSuiteRequestMismatchError)"; !strings.Contains(got, want) {
@@ -99,7 +99,7 @@ func TestMatchingComplianceSuiteRequests(t *testing.T) {
 	}
 
 	request.Name = "non-existent case"
-	if err := server.requestMatchesExpectation(request); err == nil {
+	if err := server.requestMatchesExpectation(request, ""); err == nil {
 		t.Errorf("expected verified request with unmatched name to cause an error")
 	} else {
 		if got, want := err.Error(), "(ComplianceSuiteRequestNotFoundError)"; !strings.Contains(got, want) {
@@ -111,11 +111,84 @@ func TestMatchingComplianceSuiteRequests(t *testing.T) {
 	}
 
 	request = ComplianceSuiteRequests["Basic data types"] // matches a name in compliance_suite.json
-	if got := server.requestMatchesExpectation(request); got != nil {
+	if got := server.requestMatchesExpectation(request, ""); got != nil {
 		t.Errorf("expected test suite case to match. Got error: %s", got)
 	}
 	if _, got := server.Repeat(context.Background(), request); got != nil {
 		t.Errorf("expected Repeat() to succeed with verified request, but got error: %s", got)
+	}
+}
+
+// Tests for the binding verification parts of the request verification
+// in the compliance service.
+func TestBindingComplianceSuiteRequests(t *testing.T) {
+	server := &complianceServerImpl{}
+
+	info := &pb.ComplianceData{
+		FString: "first/hello",
+		PBool:   &[]bool{true}[0],
+		FChild: &pb.ComplianceDataChild{
+			FString: "second/greetings",
+		},
+	}
+
+	noUriVerifyRequest := &pb.RepeatRequest{
+		Name:         "Binding testing baseline no Uri verification", // matches a name in compliance_suite.json
+		Info:         info,
+		ServerVerify: true,
+	}
+	wrongBindingUri := "/foo/{id=bar/*}"
+
+	if got := server.requestMatchesExpectation(noUriVerifyRequest, wrongBindingUri); got != nil {
+		t.Errorf("expected request to match when intended Uri is not set on server. Got error: %s", got)
+	}
+
+	// realBindingUri matches the value in compliance_suite.json
+	realBindingUri := "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/*}/bool/{info.f_bool}:pathresource"
+	uriVerifyRequest := &pb.RepeatRequest{
+		Name:               "Binding testing first binding", // matches a name in compliance_suite.json
+		Info:               info,
+		ServerVerify:       true,
+		IntendedBindingUri: &realBindingUri,
+	}
+
+	// There are three sources of binding Uri:
+	// - actualUri: what actual Uri the request was bound to in runtime
+	//   (the second parameter of the `requestMatchesExpectation` method)
+	// - serverUri: what server thinks the binding Uri should be
+	//   (in the server-side json testing suite data's `IntendedBindingUri` field)
+	// - clientUri: what client thinks the binding Uri should be
+	//   (in the client-side json testing suite data `IntendedBindingUri` field)
+	// The `requestMatchesExpectation` method verifies
+	// 	- actualUri <- vs -> serverUri (looking for incorrect runtime binding)
+	//  - clientUri <- vs -> serverUri (looking for wrong client test suite)
+
+	// In this case the request is simulated to get bound to a wrong Uri
+	// (the second parameter of the `requestMatchesExpectation` method),
+	// therefore actualUri will differ from serverUri.
+	if err := server.requestMatchesExpectation(uriVerifyRequest, wrongBindingUri); err == nil {
+		t.Errorf("expected request that got bound to a wrong uri to not match")
+	} else {
+		if got, want := err.Error(), "(ComplianceSuiteWrongBindingError)"; !strings.Contains(got, want) {
+			t.Errorf("error message does not contain expected substring: want: %q  got %q", want, got)
+		}
+	}
+
+	// In this case the actualUri is set to the correct value
+	// (matching the serverUri), but the clientUri is set to the wrong value,
+	// simulating a corrupt or outdated client testing suite.
+	uriVerifyRequest.IntendedBindingUri = &wrongBindingUri
+	if err := server.requestMatchesExpectation(uriVerifyRequest, realBindingUri); err == nil {
+		t.Errorf("expected request with an incorrect bindingUri to not match")
+	} else {
+		if got, want := err.Error(), "(ComplianceSuiteRequestBindingMismatchError)"; !strings.Contains(got, want) {
+			t.Errorf("error message does not contain expected substring: want: %q  got %q", want, got)
+		}
+	}
+
+	uriVerifyRequest.IntendedBindingUri = &realBindingUri
+	if got := server.requestMatchesExpectation(uriVerifyRequest, realBindingUri); got != nil {
+		t.Errorf("expected request to match when binding Uri is same everywhere. Got error: %s", got)
 	}
 }
 
@@ -162,7 +235,7 @@ func TestIndexingComplianceSuite(t *testing.T) {
 		Name:         "Basic data types", // matches a name in compliance_suite.json
 		ServerVerify: true,
 	}
-	if err := server.requestMatchesExpectation(request); err == nil {
+	if err := server.requestMatchesExpectation(request, ""); err == nil {
 		t.Errorf("expected verified request with differing data to not match")
 	} else {
 		if got, want := err.Error(), "(ComplianceServiceSetupError)"; !strings.Contains(got, want) {
