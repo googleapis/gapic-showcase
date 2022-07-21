@@ -162,6 +162,50 @@
       ]
     },
     {
+      "name": "Binding selection",
+      "rpcs": ["Compliance.RepeatDataPathResource"],
+      "requests": [
+        {
+          "name": "regular binding no Uri verification",
+          "serverVerify": true,
+          "info": {
+            "fString": "first/hello",
+            "pBool": true,
+
+            "fChild": {
+              "fString": "second/greetings"
+            }
+          }
+        },
+        {
+          "name": "regular binding",
+          "serverVerify": true,
+          "info": {
+            "fString": "first/hello",
+            "pBool": true,
+
+            "fChild": {
+              "fString": "second/greetings"
+            }
+          },
+          "intendedBindingUri": "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/*}/bool/{info.f_bool}:pathresource"
+        },
+        {
+          "name": "childfirst additional binding",
+          "serverVerify": true,
+          "info": {
+            "fString": "second/greetings",
+            "pBool": true,
+
+            "fChild": {
+              "fString": "first/hello"
+            }
+          },
+          "intendedBindingUri": "/v1beta1/repeat/{info.f_child.f_string=first/*}/{info.f_string=second/*}/bool/{info.f_bool}:childfirstpathresource"
+        }
+      ]
+    },
+    {
       "name": "Cases that apply to non-path requests",
       "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataBodyPut", "Compliance.RepeatDataBodyPatch", "Compliance.RepeatDataQuery"],
       "requests": [
