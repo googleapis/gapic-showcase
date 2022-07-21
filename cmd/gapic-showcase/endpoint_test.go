@@ -54,12 +54,12 @@ func TestRESTCalls(t *testing.T) {
 			verb: "POST",
 			path: "/v1beta1/repeat:body",
 			body: `{"info":{"fString":"jonas^ mila"}}`,
-			want: `{"request":{"info":{"fString":"jonas^ mila"}}}`,
+			want: `{"request":{"info":{"fString":"jonas^ mila"}}, "bindingUri":"/v1beta1/repeat:body"}`,
 		},
 		{
 			verb: "GET",
 			path: "/v1beta1/repeat:query?info.fString=jonas+mila",
-			want: `{"request":{"info":{"fString":"jonas mila"}}}`,
+			want: `{"request":{"info":{"fString":"jonas mila"}}, "bindingUri":"/v1beta1/repeat:query"}`,
 		},
 		{
 			verb: "GET",
@@ -67,7 +67,7 @@ func TestRESTCalls(t *testing.T) {
 
 			// TODO: Fix so that this returns an error, because `^` is not URL-escaped
 			statusCode: 200,
-			want:       `{"request":{"info":{"fString":"jonas^mila"}}}`,
+			want:       `{"request":{"info":{"fString":"jonas^mila"}}, "bindingUri":"/v1beta1/repeat:query"}`,
 		},
 		{
 			verb:       "GET",
@@ -127,7 +127,8 @@ func TestRESTCalls(t *testing.T) {
                             "fInt32": 0,
                             "fInt64": "0",
                             "fDouble": 0
-                          }
+                          },
+                          "bindingUri":"/v1beta1/repeat:body"
                         }
                       `,
 		},
@@ -174,7 +175,7 @@ func TestRESTCalls(t *testing.T) {
 			log.Fatal(err)
 		}
 		if got, want := string(body), testCase.want; noSpace(got) != noSpace(want) {
-			t.Errorf("testcase %2d: body: got `%s`, want %s", idx, got, want)
+			t.Errorf("testcase %2d: body: got `%s`, want `%s`", idx, noSpace(got), noSpace(want))
 			t.Errorf("  request: %v", request)
 		}
 		jsonOptions.Restore()
