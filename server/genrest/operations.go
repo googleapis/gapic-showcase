@@ -18,6 +18,7 @@
 package genrest
 
 import (
+	"context"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
 	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
@@ -65,7 +66,8 @@ func (backend *RESTBackend) HandleListOperations(w http.ResponseWriter, r *http.
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.OperationsServer.ListOperations(r.Context(), request)
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/operations")
+	response, err := backend.OperationsServer.ListOperations(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -126,7 +128,8 @@ func (backend *RESTBackend) HandleGetOperation(w http.ResponseWriter, r *http.Re
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.OperationsServer.GetOperation(r.Context(), request)
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=operations/**}")
+	response, err := backend.OperationsServer.GetOperation(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -187,7 +190,8 @@ func (backend *RESTBackend) HandleDeleteOperation(w http.ResponseWriter, r *http
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.OperationsServer.DeleteOperation(r.Context(), request)
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=operations/**}")
+	response, err := backend.OperationsServer.DeleteOperation(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -248,7 +252,8 @@ func (backend *RESTBackend) HandleCancelOperation(w http.ResponseWriter, r *http
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.OperationsServer.CancelOperation(r.Context(), request)
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=operations/**}:cancel")
+	response, err := backend.OperationsServer.CancelOperation(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
