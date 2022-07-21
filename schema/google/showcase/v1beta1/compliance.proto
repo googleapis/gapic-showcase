@@ -116,10 +116,13 @@ message RepeatRequest {
   optional int32 p_int32 = 7;
   optional int64 p_int64 = 8;
   optional double p_double = 9;
+
+  optional string intended_binding_uri = 10;
 }
 
 message RepeatResponse {
   RepeatRequest request = 1;
+  string binding_uri = 2;
 }
 
 // ComplianceSuite contains a set of requests that microgenerators should issue
