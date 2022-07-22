@@ -81,7 +81,7 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/users")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/users")
 	response, err := backend.IdentityServer.CreateUser(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -143,7 +143,7 @@ func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=users/*}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=users/*}")
 	response, err := backend.IdentityServer.GetUser(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -213,7 +213,7 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{user.name=users/*}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{user.name=users/*}")
 	response, err := backend.IdentityServer.UpdateUser(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -275,7 +275,7 @@ func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=users/*}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=users/*}")
 	response, err := backend.IdentityServer.DeleteUser(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -332,7 +332,7 @@ func (backend *RESTBackend) HandleListUsers(w http.ResponseWriter, r *http.Reque
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/users")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/users")
 	response, err := backend.IdentityServer.ListUsers(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)

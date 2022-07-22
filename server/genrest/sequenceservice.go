@@ -90,7 +90,7 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/sequences")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/sequences")
 	response, err := backend.SequenceServiceServer.CreateSequence(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -152,7 +152,7 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=sequences/*/sequenceReport}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=sequences/*/sequenceReport}")
 	response, err := backend.SequenceServiceServer.GetSequenceReport(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -222,7 +222,7 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=sequences/*}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=sequences/*}")
 	response, err := backend.SequenceServiceServer.AttemptSequence(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)

@@ -224,7 +224,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 			} else { // regular unary call
 				// TODO: In the future, we may want to redirect all REST-endpoint requests to the gRPC endpoint so that the gRPC-registered observers get invoked.
-				source.P("  ctx := context.WithValue(r.Context(), resttools.BindingURIKey(\"bindingUri\"), \"%s\")", handler.URIPattern)
+				source.P("  ctx := context.WithValue(r.Context(), resttools.BindingURIKey, \"%s\")", handler.URIPattern)
 				source.P("  %s, err := backend.%sServer.%s(ctx, %s)", handler.ResponseVariable, service.ShortName, handler.GoMethod, handler.RequestVariable)
 				source.P("  if err != nil {")
 				source.P("    backend.ReportGRPCError(w, err)")

@@ -81,7 +81,7 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/rooms")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/rooms")
 	response, err := backend.MessagingServer.CreateRoom(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -143,7 +143,7 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=rooms/*}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=rooms/*}")
 	response, err := backend.MessagingServer.GetRoom(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -213,7 +213,7 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{room.name=rooms/*}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{room.name=rooms/*}")
 	response, err := backend.MessagingServer.UpdateRoom(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -275,7 +275,7 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=rooms/*}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=rooms/*}")
 	response, err := backend.MessagingServer.DeleteRoom(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -332,7 +332,7 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/rooms")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/rooms")
 	response, err := backend.MessagingServer.ListRooms(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -402,7 +402,7 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{parent=rooms/*}/blurbs")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{parent=rooms/*}/blurbs")
 	response, err := backend.MessagingServer.CreateBlurb(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -472,7 +472,7 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{parent=users/*/profile}/blurbs")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{parent=users/*/profile}/blurbs")
 	response, err := backend.MessagingServer.CreateBlurb(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -534,7 +534,7 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=rooms/*/blurbs/*}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=rooms/*/blurbs/*}")
 	response, err := backend.MessagingServer.GetBlurb(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -596,7 +596,7 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=users/*/profile/blurbs/*}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=users/*/profile/blurbs/*}")
 	response, err := backend.MessagingServer.GetBlurb(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -666,7 +666,7 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{blurb.name=rooms/*/blurbs/*}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{blurb.name=rooms/*/blurbs/*}")
 	response, err := backend.MessagingServer.UpdateBlurb(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -736,7 +736,7 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{blurb.name=users/*/profile/blurbs/*}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{blurb.name=users/*/profile/blurbs/*}")
 	response, err := backend.MessagingServer.UpdateBlurb(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -798,7 +798,7 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=rooms/*/blurbs/*}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=rooms/*/blurbs/*}")
 	response, err := backend.MessagingServer.DeleteBlurb(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -860,7 +860,7 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=users/*/profile/blurbs/*}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=users/*/profile/blurbs/*}")
 	response, err := backend.MessagingServer.DeleteBlurb(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -922,7 +922,7 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{parent=rooms/*}/blurbs")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{parent=rooms/*}/blurbs")
 	response, err := backend.MessagingServer.ListBlurbs(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -984,7 +984,7 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{parent=users/*/profile}/blurbs")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{parent=users/*/profile}/blurbs")
 	response, err := backend.MessagingServer.ListBlurbs(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -1054,7 +1054,7 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{parent=rooms/*}/blurbs:search")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{parent=rooms/*}/blurbs:search")
 	response, err := backend.MessagingServer.SearchBlurbs(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -1116,7 +1116,7 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{parent=users/*/profile}/blurbs:search")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{parent=users/*/profile}/blurbs:search")
 	response, err := backend.MessagingServer.SearchBlurbs(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)

@@ -175,7 +175,7 @@ func TestRESTCalls(t *testing.T) {
 			log.Fatal(err)
 		}
 		if got, want := string(body), testCase.want; noSpace(got) != noSpace(want) {
-			t.Errorf("testcase %2d: body: got `%s`, want `%s`", idx, noSpace(got), noSpace(want))
+			t.Errorf("testcase %2d: body: got %q, want %q", idx, noSpace(got), noSpace(want))
 			t.Errorf("  request: %v", request)
 		}
 		jsonOptions.Restore()

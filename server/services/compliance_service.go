@@ -77,7 +77,7 @@ func (csi *complianceServerImpl) requestMatchesExpectation(received *pb.RepeatRe
 func (csi *complianceServerImpl) Repeat(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
 	echoTrailers(ctx)
 
-	bindingURI, ok := ctx.Value(resttools.BindingURIKey("bindingUri")).(string)
+	bindingURI, ok := ctx.Value(resttools.BindingURIKey).(string)
 	if !ok {
 		bindingURI = ""
 	}

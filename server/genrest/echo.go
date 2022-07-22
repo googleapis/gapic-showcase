@@ -81,7 +81,7 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/echo:echo")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/echo:echo")
 	response, err := backend.EchoServer.Echo(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -223,7 +223,7 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/echo:pagedExpand")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/echo:pagedExpand")
 	response, err := backend.EchoServer.PagedExpand(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -293,7 +293,7 @@ func (backend *RESTBackend) HandlePagedExpandLegacy(w http.ResponseWriter, r *ht
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/echo:pagedExpandLegacy")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/echo:pagedExpandLegacy")
 	response, err := backend.EchoServer.PagedExpandLegacy(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -363,7 +363,7 @@ func (backend *RESTBackend) HandlePagedExpandLegacyMapped(w http.ResponseWriter,
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/echo:pagedExpandLegacyMapped")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/echo:pagedExpandLegacyMapped")
 	response, err := backend.EchoServer.PagedExpandLegacyMapped(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -433,7 +433,7 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/echo:wait")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/echo:wait")
 	response, err := backend.EchoServer.Wait(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -503,7 +503,7 @@ func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) 
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/echo:block")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/echo:block")
 	response, err := backend.EchoServer.Block(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)

@@ -90,7 +90,7 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/sessions")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/sessions")
 	response, err := backend.TestingServer.CreateSession(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -152,7 +152,7 @@ func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=sessions/*}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=sessions/*}")
 	response, err := backend.TestingServer.GetSession(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -209,7 +209,7 @@ func (backend *RESTBackend) HandleListSessions(w http.ResponseWriter, r *http.Re
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/sessions")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/sessions")
 	response, err := backend.TestingServer.ListSessions(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -271,7 +271,7 @@ func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.R
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=sessions/*}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=sessions/*}")
 	response, err := backend.TestingServer.DeleteSession(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -333,7 +333,7 @@ func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.R
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=sessions/*}:report")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=sessions/*}:report")
 	response, err := backend.TestingServer.ReportSession(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -395,7 +395,7 @@ func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Reque
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{parent=sessions/*}/tests")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{parent=sessions/*}/tests")
 	response, err := backend.TestingServer.ListTests(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -457,7 +457,7 @@ func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=sessions/*/tests/*}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=sessions/*/tests/*}")
 	response, err := backend.TestingServer.DeleteTest(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -519,7 +519,7 @@ func (backend *RESTBackend) HandleVerifyTest(w http.ResponseWriter, r *http.Requ
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=sessions/*/tests/*}:check")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=sessions/*/tests/*}:check")
 	response, err := backend.TestingServer.VerifyTest(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)

@@ -66,7 +66,7 @@ func (backend *RESTBackend) HandleListOperations(w http.ResponseWriter, r *http.
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/operations")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/operations")
 	response, err := backend.OperationsServer.ListOperations(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -128,7 +128,7 @@ func (backend *RESTBackend) HandleGetOperation(w http.ResponseWriter, r *http.Re
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=operations/**}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=operations/**}")
 	response, err := backend.OperationsServer.GetOperation(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -190,7 +190,7 @@ func (backend *RESTBackend) HandleDeleteOperation(w http.ResponseWriter, r *http
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=operations/**}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=operations/**}")
 	response, err := backend.OperationsServer.DeleteOperation(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -252,7 +252,7 @@ func (backend *RESTBackend) HandleCancelOperation(w http.ResponseWriter, r *http
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey("bindingUri"), "/v1beta1/{name=operations/**}:cancel")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=operations/**}:cancel")
 	response, err := backend.OperationsServer.CancelOperation(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)

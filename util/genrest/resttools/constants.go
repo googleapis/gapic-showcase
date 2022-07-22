@@ -58,4 +58,6 @@ func init() {
 }
 
 // A key-type for storing binding URI value in the Context
-type BindingURIKey string
+type BindingURIKeyType string
+
+const BindingURIKey BindingURIKeyType = BindingURIKeyType("BindingURIKey")
