@@ -56,13 +56,13 @@ var repeatDataBodyInputInfoPChildPBool bool
 
 var RepeatDataBodyInputInfoPChildPContinent string
 
+var repeatDataBodyInputIntendedBindingUri string
+
 var repeatDataBodyInputPInt32 int32
 
 var repeatDataBodyInputPInt64 int64
 
 var repeatDataBodyInputPDouble float64
-
-var repeatDataBodyInputIntendedBindingUri string
 
 func init() {
 	ComplianceServiceCmd.AddCommand(RepeatDataBodyCmd)
@@ -191,6 +191,8 @@ func init() {
 
 	RepeatDataBodyCmd.Flags().BoolVar(&RepeatDataBodyInput.ServerVerify, "server_verify", false, "If true, the server will verify that the received...")
 
+	RepeatDataBodyCmd.Flags().StringVar(&repeatDataBodyInputIntendedBindingUri, "intended_binding_uri", "", "The URI template this request is expected to be...")
+
 	RepeatDataBodyCmd.Flags().Int32Var(&RepeatDataBodyInput.FInt32, "f_int32", 0, "Some top level fields, to test that these are...")
 
 	RepeatDataBodyCmd.Flags().Int64Var(&RepeatDataBodyInput.FInt64, "f_int64", 0, "")
@@ -202,8 +204,6 @@ func init() {
 	RepeatDataBodyCmd.Flags().Int64Var(&repeatDataBodyInputPInt64, "p_int64", 0, "")
 
 	RepeatDataBodyCmd.Flags().Float64Var(&repeatDataBodyInputPDouble, "p_double", 0.0, "")
-
-	RepeatDataBodyCmd.Flags().StringVar(&repeatDataBodyInputIntendedBindingUri, "intended_binding_uri", "", "")
 
 	RepeatDataBodyCmd.Flags().StringVar(&RepeatDataBodyFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -300,6 +300,10 @@ var RepeatDataBodyCmd = &cobra.Command{
 				RepeatDataBodyInput.Info.PChild.PBool = &repeatDataBodyInputInfoPChildPBool
 			}
 
+			if cmd.Flags().Changed("intended_binding_uri") {
+				RepeatDataBodyInput.IntendedBindingUri = &repeatDataBodyInputIntendedBindingUri
+			}
+
 			if cmd.Flags().Changed("p_int32") {
 				RepeatDataBodyInput.PInt32 = &repeatDataBodyInputPInt32
 			}
@@ -310,10 +314,6 @@ var RepeatDataBodyCmd = &cobra.Command{
 
 			if cmd.Flags().Changed("p_double") {
 				RepeatDataBodyInput.PDouble = &repeatDataBodyInputPDouble
-			}
-
-			if cmd.Flags().Changed("intended_binding_uri") {
-				RepeatDataBodyInput.IntendedBindingUri = &repeatDataBodyInputIntendedBindingUri
 			}
 
 		}

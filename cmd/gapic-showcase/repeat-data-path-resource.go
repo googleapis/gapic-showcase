@@ -56,13 +56,13 @@ var repeatDataPathResourceInputInfoPChildPBool bool
 
 var RepeatDataPathResourceInputInfoPChildPContinent string
 
+var repeatDataPathResourceInputIntendedBindingUri string
+
 var repeatDataPathResourceInputPInt32 int32
 
 var repeatDataPathResourceInputPInt64 int64
 
 var repeatDataPathResourceInputPDouble float64
-
-var repeatDataPathResourceInputIntendedBindingUri string
 
 func init() {
 	ComplianceServiceCmd.AddCommand(RepeatDataPathResourceCmd)
@@ -191,6 +191,8 @@ func init() {
 
 	RepeatDataPathResourceCmd.Flags().BoolVar(&RepeatDataPathResourceInput.ServerVerify, "server_verify", false, "If true, the server will verify that the received...")
 
+	RepeatDataPathResourceCmd.Flags().StringVar(&repeatDataPathResourceInputIntendedBindingUri, "intended_binding_uri", "", "The URI template this request is expected to be...")
+
 	RepeatDataPathResourceCmd.Flags().Int32Var(&RepeatDataPathResourceInput.FInt32, "f_int32", 0, "Some top level fields, to test that these are...")
 
 	RepeatDataPathResourceCmd.Flags().Int64Var(&RepeatDataPathResourceInput.FInt64, "f_int64", 0, "")
@@ -202,8 +204,6 @@ func init() {
 	RepeatDataPathResourceCmd.Flags().Int64Var(&repeatDataPathResourceInputPInt64, "p_int64", 0, "")
 
 	RepeatDataPathResourceCmd.Flags().Float64Var(&repeatDataPathResourceInputPDouble, "p_double", 0.0, "")
-
-	RepeatDataPathResourceCmd.Flags().StringVar(&repeatDataPathResourceInputIntendedBindingUri, "intended_binding_uri", "", "")
 
 	RepeatDataPathResourceCmd.Flags().StringVar(&RepeatDataPathResourceFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -300,6 +300,10 @@ var RepeatDataPathResourceCmd = &cobra.Command{
 				RepeatDataPathResourceInput.Info.PChild.PBool = &repeatDataPathResourceInputInfoPChildPBool
 			}
 
+			if cmd.Flags().Changed("intended_binding_uri") {
+				RepeatDataPathResourceInput.IntendedBindingUri = &repeatDataPathResourceInputIntendedBindingUri
+			}
+
 			if cmd.Flags().Changed("p_int32") {
 				RepeatDataPathResourceInput.PInt32 = &repeatDataPathResourceInputPInt32
 			}
@@ -310,10 +314,6 @@ var RepeatDataPathResourceCmd = &cobra.Command{
 
 			if cmd.Flags().Changed("p_double") {
 				RepeatDataPathResourceInput.PDouble = &repeatDataPathResourceInputPDouble
-			}
-
-			if cmd.Flags().Changed("intended_binding_uri") {
-				RepeatDataPathResourceInput.IntendedBindingUri = &repeatDataPathResourceInputIntendedBindingUri
 			}
 
 		}

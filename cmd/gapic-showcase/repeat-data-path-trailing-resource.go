@@ -56,13 +56,13 @@ var repeatDataPathTrailingResourceInputInfoPChildPBool bool
 
 var RepeatDataPathTrailingResourceInputInfoPChildPContinent string
 
+var repeatDataPathTrailingResourceInputIntendedBindingUri string
+
 var repeatDataPathTrailingResourceInputPInt32 int32
 
 var repeatDataPathTrailingResourceInputPInt64 int64
 
 var repeatDataPathTrailingResourceInputPDouble float64
-
-var repeatDataPathTrailingResourceInputIntendedBindingUri string
 
 func init() {
 	ComplianceServiceCmd.AddCommand(RepeatDataPathTrailingResourceCmd)
@@ -191,6 +191,8 @@ func init() {
 
 	RepeatDataPathTrailingResourceCmd.Flags().BoolVar(&RepeatDataPathTrailingResourceInput.ServerVerify, "server_verify", false, "If true, the server will verify that the received...")
 
+	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&repeatDataPathTrailingResourceInputIntendedBindingUri, "intended_binding_uri", "", "The URI template this request is expected to be...")
+
 	RepeatDataPathTrailingResourceCmd.Flags().Int32Var(&RepeatDataPathTrailingResourceInput.FInt32, "f_int32", 0, "Some top level fields, to test that these are...")
 
 	RepeatDataPathTrailingResourceCmd.Flags().Int64Var(&RepeatDataPathTrailingResourceInput.FInt64, "f_int64", 0, "")
@@ -202,8 +204,6 @@ func init() {
 	RepeatDataPathTrailingResourceCmd.Flags().Int64Var(&repeatDataPathTrailingResourceInputPInt64, "p_int64", 0, "")
 
 	RepeatDataPathTrailingResourceCmd.Flags().Float64Var(&repeatDataPathTrailingResourceInputPDouble, "p_double", 0.0, "")
-
-	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&repeatDataPathTrailingResourceInputIntendedBindingUri, "intended_binding_uri", "", "")
 
 	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&RepeatDataPathTrailingResourceFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -300,6 +300,10 @@ var RepeatDataPathTrailingResourceCmd = &cobra.Command{
 				RepeatDataPathTrailingResourceInput.Info.PChild.PBool = &repeatDataPathTrailingResourceInputInfoPChildPBool
 			}
 
+			if cmd.Flags().Changed("intended_binding_uri") {
+				RepeatDataPathTrailingResourceInput.IntendedBindingUri = &repeatDataPathTrailingResourceInputIntendedBindingUri
+			}
+
 			if cmd.Flags().Changed("p_int32") {
 				RepeatDataPathTrailingResourceInput.PInt32 = &repeatDataPathTrailingResourceInputPInt32
 			}
@@ -310,10 +314,6 @@ var RepeatDataPathTrailingResourceCmd = &cobra.Command{
 
 			if cmd.Flags().Changed("p_double") {
 				RepeatDataPathTrailingResourceInput.PDouble = &repeatDataPathTrailingResourceInputPDouble
-			}
-
-			if cmd.Flags().Changed("intended_binding_uri") {
-				RepeatDataPathTrailingResourceInput.IntendedBindingUri = &repeatDataPathTrailingResourceInputIntendedBindingUri
 			}
 
 		}

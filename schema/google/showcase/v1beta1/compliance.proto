@@ -110,6 +110,9 @@ message RepeatRequest {
   // the request with the same name in the compliance test suite.
   bool server_verify = 3;
 
+  // The URI template this request is expected to be bound to server-side.
+  optional string intended_binding_uri = 10;
+
   // Some top level fields, to test that these are encoded correctly
   // in query params.
   int32 f_int32 = 4;
@@ -119,12 +122,12 @@ message RepeatRequest {
   optional int32 p_int32 = 7;
   optional int64 p_int64 = 8;
   optional double p_double = 9;
-
-  optional string intended_binding_uri = 10;
 }
 
 message RepeatResponse {
   RepeatRequest request = 1;
+
+  // The URI template the request was bound to server-side.
   string binding_uri = 2;
 }
 

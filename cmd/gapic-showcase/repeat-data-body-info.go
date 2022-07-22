@@ -56,13 +56,13 @@ var repeatDataBodyInfoInputInfoPChildPBool bool
 
 var RepeatDataBodyInfoInputInfoPChildPContinent string
 
+var repeatDataBodyInfoInputIntendedBindingUri string
+
 var repeatDataBodyInfoInputPInt32 int32
 
 var repeatDataBodyInfoInputPInt64 int64
 
 var repeatDataBodyInfoInputPDouble float64
-
-var repeatDataBodyInfoInputIntendedBindingUri string
 
 func init() {
 	ComplianceServiceCmd.AddCommand(RepeatDataBodyInfoCmd)
@@ -191,6 +191,8 @@ func init() {
 
 	RepeatDataBodyInfoCmd.Flags().BoolVar(&RepeatDataBodyInfoInput.ServerVerify, "server_verify", false, "If true, the server will verify that the received...")
 
+	RepeatDataBodyInfoCmd.Flags().StringVar(&repeatDataBodyInfoInputIntendedBindingUri, "intended_binding_uri", "", "The URI template this request is expected to be...")
+
 	RepeatDataBodyInfoCmd.Flags().Int32Var(&RepeatDataBodyInfoInput.FInt32, "f_int32", 0, "Some top level fields, to test that these are...")
 
 	RepeatDataBodyInfoCmd.Flags().Int64Var(&RepeatDataBodyInfoInput.FInt64, "f_int64", 0, "")
@@ -202,8 +204,6 @@ func init() {
 	RepeatDataBodyInfoCmd.Flags().Int64Var(&repeatDataBodyInfoInputPInt64, "p_int64", 0, "")
 
 	RepeatDataBodyInfoCmd.Flags().Float64Var(&repeatDataBodyInfoInputPDouble, "p_double", 0.0, "")
-
-	RepeatDataBodyInfoCmd.Flags().StringVar(&repeatDataBodyInfoInputIntendedBindingUri, "intended_binding_uri", "", "")
 
 	RepeatDataBodyInfoCmd.Flags().StringVar(&RepeatDataBodyInfoFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -300,6 +300,10 @@ var RepeatDataBodyInfoCmd = &cobra.Command{
 				RepeatDataBodyInfoInput.Info.PChild.PBool = &repeatDataBodyInfoInputInfoPChildPBool
 			}
 
+			if cmd.Flags().Changed("intended_binding_uri") {
+				RepeatDataBodyInfoInput.IntendedBindingUri = &repeatDataBodyInfoInputIntendedBindingUri
+			}
+
 			if cmd.Flags().Changed("p_int32") {
 				RepeatDataBodyInfoInput.PInt32 = &repeatDataBodyInfoInputPInt32
 			}
@@ -310,10 +314,6 @@ var RepeatDataBodyInfoCmd = &cobra.Command{
 
 			if cmd.Flags().Changed("p_double") {
 				RepeatDataBodyInfoInput.PDouble = &repeatDataBodyInfoInputPDouble
-			}
-
-			if cmd.Flags().Changed("intended_binding_uri") {
-				RepeatDataBodyInfoInput.IntendedBindingUri = &repeatDataBodyInfoInputIntendedBindingUri
 			}
 
 		}

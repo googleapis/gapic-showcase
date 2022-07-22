@@ -56,13 +56,13 @@ var repeatDataBodyPatchInputInfoPChildPBool bool
 
 var RepeatDataBodyPatchInputInfoPChildPContinent string
 
+var repeatDataBodyPatchInputIntendedBindingUri string
+
 var repeatDataBodyPatchInputPInt32 int32
 
 var repeatDataBodyPatchInputPInt64 int64
 
 var repeatDataBodyPatchInputPDouble float64
-
-var repeatDataBodyPatchInputIntendedBindingUri string
 
 func init() {
 	ComplianceServiceCmd.AddCommand(RepeatDataBodyPatchCmd)
@@ -191,6 +191,8 @@ func init() {
 
 	RepeatDataBodyPatchCmd.Flags().BoolVar(&RepeatDataBodyPatchInput.ServerVerify, "server_verify", false, "If true, the server will verify that the received...")
 
+	RepeatDataBodyPatchCmd.Flags().StringVar(&repeatDataBodyPatchInputIntendedBindingUri, "intended_binding_uri", "", "The URI template this request is expected to be...")
+
 	RepeatDataBodyPatchCmd.Flags().Int32Var(&RepeatDataBodyPatchInput.FInt32, "f_int32", 0, "Some top level fields, to test that these are...")
 
 	RepeatDataBodyPatchCmd.Flags().Int64Var(&RepeatDataBodyPatchInput.FInt64, "f_int64", 0, "")
@@ -202,8 +204,6 @@ func init() {
 	RepeatDataBodyPatchCmd.Flags().Int64Var(&repeatDataBodyPatchInputPInt64, "p_int64", 0, "")
 
 	RepeatDataBodyPatchCmd.Flags().Float64Var(&repeatDataBodyPatchInputPDouble, "p_double", 0.0, "")
-
-	RepeatDataBodyPatchCmd.Flags().StringVar(&repeatDataBodyPatchInputIntendedBindingUri, "intended_binding_uri", "", "")
 
 	RepeatDataBodyPatchCmd.Flags().StringVar(&RepeatDataBodyPatchFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -300,6 +300,10 @@ var RepeatDataBodyPatchCmd = &cobra.Command{
 				RepeatDataBodyPatchInput.Info.PChild.PBool = &repeatDataBodyPatchInputInfoPChildPBool
 			}
 
+			if cmd.Flags().Changed("intended_binding_uri") {
+				RepeatDataBodyPatchInput.IntendedBindingUri = &repeatDataBodyPatchInputIntendedBindingUri
+			}
+
 			if cmd.Flags().Changed("p_int32") {
 				RepeatDataBodyPatchInput.PInt32 = &repeatDataBodyPatchInputPInt32
 			}
@@ -310,10 +314,6 @@ var RepeatDataBodyPatchCmd = &cobra.Command{
 
 			if cmd.Flags().Changed("p_double") {
 				RepeatDataBodyPatchInput.PDouble = &repeatDataBodyPatchInputPDouble
-			}
-
-			if cmd.Flags().Changed("intended_binding_uri") {
-				RepeatDataBodyPatchInput.IntendedBindingUri = &repeatDataBodyPatchInputIntendedBindingUri
 			}
 
 		}
