@@ -37,6 +37,7 @@ func RegisterHandlers(router *gmux.Router, backend *services.Backend) {
 	router.HandleFunc("/v1beta1/repeat:query", rest.HandleRepeatDataQuery).Methods("GET")
 	router.HandleFunc("/v1beta1/repeat/{info.fString:.+}/{info.fInt32:.+}/{info.fDouble:.+}/{info.fBool:.+}/{info.fKingdom:.+}:simplepath", rest.HandleRepeatDataSimplePath).Methods("GET")
 	router.HandleFunc("/v1beta1/repeat/{info.fString:first/.+}/{info.fChild.fString:second/.+}/bool/{info.fBool:.+}:pathresource", rest.HandleRepeatDataPathResource).Methods("GET")
+	router.HandleFunc("/v1beta1/repeat/{info.fChild.fString:first/.+}/{info.fString:second/.+}/bool/{info.fBool:.+}:childfirstpathresource", rest.HandleRepeatDataPathResource_1).Methods("GET")
 	router.HandleFunc("/v1beta1/repeat/{info.fString:first/.+}/{info.fChild.fString:second/.+}:pathtrailingresource", rest.HandleRepeatDataPathTrailingResource).Methods("GET")
 	router.HandleFunc("/v1beta1/repeat:bodyput", rest.HandleRepeatDataBodyPut).Methods("PUT")
 	router.HandleFunc("/v1beta1/repeat:bodypatch", rest.HandleRepeatDataBodyPatch).Methods("PATCH")

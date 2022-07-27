@@ -56,6 +56,8 @@ var repeatDataQueryInputInfoPChildPBool bool
 
 var RepeatDataQueryInputInfoPChildPContinent string
 
+var repeatDataQueryInputIntendedBindingUri string
+
 var repeatDataQueryInputPInt32 int32
 
 var repeatDataQueryInputPInt64 int64
@@ -189,6 +191,8 @@ func init() {
 
 	RepeatDataQueryCmd.Flags().BoolVar(&RepeatDataQueryInput.ServerVerify, "server_verify", false, "If true, the server will verify that the received...")
 
+	RepeatDataQueryCmd.Flags().StringVar(&repeatDataQueryInputIntendedBindingUri, "intended_binding_uri", "", "The URI template this request is expected to be...")
+
 	RepeatDataQueryCmd.Flags().Int32Var(&RepeatDataQueryInput.FInt32, "f_int32", 0, "Some top level fields, to test that these are...")
 
 	RepeatDataQueryCmd.Flags().Int64Var(&RepeatDataQueryInput.FInt64, "f_int64", 0, "")
@@ -294,6 +298,10 @@ var RepeatDataQueryCmd = &cobra.Command{
 
 			if cmd.Flags().Changed("info.p_child.p_bool") {
 				RepeatDataQueryInput.Info.PChild.PBool = &repeatDataQueryInputInfoPChildPBool
+			}
+
+			if cmd.Flags().Changed("intended_binding_uri") {
+				RepeatDataQueryInput.IntendedBindingUri = &repeatDataQueryInputIntendedBindingUri
 			}
 
 			if cmd.Flags().Changed("p_int32") {
