@@ -99,7 +99,8 @@ func TestRESTCalls(t *testing.T) {
                             "info":{
                               "pKingdom":"ARCHAEBACTERIA"
                              }
-                            }
+                            },
+                          "bindingUri":"/v1beta1/repeat:query"
                           }`,
 		},
 		{
@@ -112,7 +113,8 @@ func TestRESTCalls(t *testing.T) {
                             "info":{
                               "pKingdom":"ARCHAEBACTERIA"
                              }
-                            }
+                            },
+                          "bindingUri":"/v1beta1/repeat:body"
                           }`,
 		},
 		{
