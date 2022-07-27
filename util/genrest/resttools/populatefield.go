@@ -158,7 +158,7 @@ func PopulateOneField(protoMessage proto.Message, fieldPath string, fieldValues 
 			} else {
 				enum := fieldDescriptor.Enum().Values().ByName(protoreflect.Name(value))
 				if enum == nil {
-					return fmt.Errorf("(UnknownEnumStringError) unknown enum symbol %q for field path %q", value, fieldPath) // FIXME(vchudnov): add tests
+					return fmt.Errorf("(UnknownEnumStringError) unknown enum symbol %q for field path %q", value, fieldPath)
 				}
 				parsedValue = enum.Number()
 			}
