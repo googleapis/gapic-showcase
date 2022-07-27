@@ -145,7 +145,7 @@
     },
     {
       "name": "Fully working conversions, resources",
-      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataBodyPut", "Compliance.RepeatDataBodyPatch", "Compliance.RepeatDataQuery", "Compliance.RepeatDataSimplePath", "Compliance.RepeatDataPathResource", "Compliance.RepeatDataPathTrailingResource"],
+      "rpcs": ["Compliance.RepeatDataBody", "Compliance.RepeatDataBodyPut", "Compliance.RepeatDataBodyPatch", "Compliance.RepeatDataQuery"],
       "requests": [
         {
           "name": "Strings with slashes and values that resemble subsequent resource templates",
