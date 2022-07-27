@@ -64,7 +64,7 @@ func (csi *complianceServerImpl) requestMatchesExpectation(received *pb.RepeatRe
 	// Separately checking that the binding in the client request matches binding in the test suite.
 	// This guards against the test suite file being wrong on the client.
 	if expectedRequest.GetIntendedBindingUri() != received.GetIntendedBindingUri() {
-		return fmt.Errorf("(ComplianceSuiteRequestBindingMismatchError) intended binding of request %q do not match test suite (expected: %s, received: %s)", name, expectedRequest.GetIntendedBindingUri(), received.GetIntendedBindingUri())
+		return fmt.Errorf("(ComplianceSuiteRequestBindingMismatchError) intended binding of request %q does not match test suite (expected: %s, received: %s)", name, expectedRequest.GetIntendedBindingUri(), received.GetIntendedBindingUri())
 	}
 
 	if diff := cmp.Diff(received.GetInfo(), expectedRequest.GetInfo(), cmp.Comparer(proto.Equal)); diff != "" {
