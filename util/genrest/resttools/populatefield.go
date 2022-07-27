@@ -152,10 +152,16 @@ func PopulateOneField(protoMessage proto.Message, fieldPath string, fieldValues 
 			parseError, protoValue = err, protoreflect.ValueOfBool(parsedValue)
 
 		case protoreflect.EnumKind:
-			if _, parseError = strconv.ParseFloat(value, 32); parseError == nil {
-				return fmt.Errorf("(EnumValueNotStringError) enum value %q for field path %q appears to be a number rather than an identifier", fieldName, fieldPath)
+			var parsedValue protoreflect.EnumNumber
+			if numericValue, err := strconv.ParseFloat(value, 32); err == nil {
+				parsedValue = protoreflect.EnumNumber(numericValue)
+			} else {
+				enum := fieldDescriptor.Enum().Values().ByName(protoreflect.Name(value))
+				if enum == nil {
+					return fmt.Errorf("(UnknownEnumStringError) unknown enum symbol %q for field path %q", value, fieldPath) // FIXME(vchudnov): add tests
+				}
+				parsedValue = enum.Number()
 			}
-			parsedValue := fieldDescriptor.Enum().Values().ByName(protoreflect.Name(value)).Number()
 			parseError, protoValue = nil, protoreflect.ValueOfEnum(parsedValue)
 
 		default:
