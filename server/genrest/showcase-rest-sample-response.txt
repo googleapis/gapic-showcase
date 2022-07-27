@@ -14,6 +14,7 @@ Compliance (.google.showcase.v1beta1.Compliance):
   .google.showcase.v1beta1.Compliance.RepeatDataQuery[0] : GET: "/v1beta1/repeat:query"
   .google.showcase.v1beta1.Compliance.RepeatDataSimplePath[0] : GET: "/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}/{info.f_kingdom}:simplepath"
   .google.showcase.v1beta1.Compliance.RepeatDataPathResource[0] : GET: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/*}/bool/{info.f_bool}:pathresource"
+  .google.showcase.v1beta1.Compliance.RepeatDataPathResource[1] : GET: "/v1beta1/repeat/{info.f_child.f_string=first/*}/{info.f_string=second/*}/bool/{info.f_bool}:childfirstpathresource"
   .google.showcase.v1beta1.Compliance.RepeatDataPathTrailingResource[0] : GET: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/**}:pathtrailingresource"
   .google.showcase.v1beta1.Compliance.RepeatDataBodyPut[0] : PUT: "/v1beta1/repeat:bodyput"
   .google.showcase.v1beta1.Compliance.RepeatDataBodyPatch[0] : PATCH: "/v1beta1/repeat:bodypatch"
@@ -86,9 +87,12 @@ GoModel
 Shim "Compliance" (.google.showcase.v1beta1.Compliance)
   Imports:
     genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
-  Handlers (8):
+  Handlers (9):
          GET                              /v1beta1/repeat:query func RepeatDataQuery(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
 ["/" "v1beta1" "/" "repeat" ":" "query"]
+
+         GET /v1beta1/repeat/{info.f_child.f_string=first/*}/{info.f_string=second/*}/bool/{info.f_bool}:childfirstpathresource func RepeatDataPathResource(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
+["/" "v1beta1" "/" "repeat" "/" {info.f_child.f_string = ["first" "/" *]} "/" {info.f_string = ["second" "/" *]} "/" "bool" "/" {info.f_bool = []} ":" "childfirstpathresource"]
 
          GET /v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/**}:pathtrailingresource func RepeatDataPathTrailingResource(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
 ["/" "v1beta1" "/" "repeat" "/" {info.f_string = ["first" "/" *]} "/" {info.f_child.f_string = ["second" "/" **]} ":" "pathtrailingresource"]

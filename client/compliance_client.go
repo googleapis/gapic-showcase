@@ -840,6 +840,9 @@ func (c *complianceRESTClient) RepeatDataBodyInfo(ctx context.Context, req *genp
 	if req.GetFInt64() != 0 {
 		params.Add("fInt64", fmt.Sprintf("%v", req.GetFInt64()))
 	}
+	if req != nil && req.IntendedBindingUri != nil {
+		params.Add("intendedBindingUri", fmt.Sprintf("%v", req.GetIntendedBindingUri()))
+	}
 	if req.GetName() != "" {
 		params.Add("name", fmt.Sprintf("%v", req.GetName()))
 	}
@@ -1079,6 +1082,9 @@ func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprot
 	if req.GetInfo() != nil && req.GetInfo().PString != nil {
 		params.Add("info.pString", fmt.Sprintf("%v", req.GetInfo().GetPString()))
 	}
+	if req != nil && req.IntendedBindingUri != nil {
+		params.Add("intendedBindingUri", fmt.Sprintf("%v", req.GetIntendedBindingUri()))
+	}
 	if req.GetName() != "" {
 		params.Add("name", fmt.Sprintf("%v", req.GetName()))
 	}
@@ -1303,6 +1309,9 @@ func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *ge
 	}
 	if req.GetInfo() != nil && req.GetInfo().PString != nil {
 		params.Add("info.pString", fmt.Sprintf("%v", req.GetInfo().GetPString()))
+	}
+	if req != nil && req.IntendedBindingUri != nil {
+		params.Add("intendedBindingUri", fmt.Sprintf("%v", req.GetIntendedBindingUri()))
 	}
 	if req.GetName() != "" {
 		params.Add("name", fmt.Sprintf("%v", req.GetName()))
@@ -1534,6 +1543,9 @@ func (c *complianceRESTClient) RepeatDataPathResource(ctx context.Context, req *
 	}
 	if req.GetInfo() != nil && req.GetInfo().PString != nil {
 		params.Add("info.pString", fmt.Sprintf("%v", req.GetInfo().GetPString()))
+	}
+	if req != nil && req.IntendedBindingUri != nil {
+		params.Add("intendedBindingUri", fmt.Sprintf("%v", req.GetIntendedBindingUri()))
 	}
 	if req.GetName() != "" {
 		params.Add("name", fmt.Sprintf("%v", req.GetName()))
@@ -1768,6 +1780,9 @@ func (c *complianceRESTClient) RepeatDataPathTrailingResource(ctx context.Contex
 	}
 	if req.GetInfo() != nil && req.GetInfo().PString != nil {
 		params.Add("info.pString", fmt.Sprintf("%v", req.GetInfo().GetPString()))
+	}
+	if req != nil && req.IntendedBindingUri != nil {
+		params.Add("intendedBindingUri", fmt.Sprintf("%v", req.GetIntendedBindingUri()))
 	}
 	if req.GetName() != "" {
 		params.Add("name", fmt.Sprintf("%v", req.GetName()))

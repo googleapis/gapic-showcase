@@ -56,6 +56,8 @@ var repeatDataPathTrailingResourceInputInfoPChildPBool bool
 
 var RepeatDataPathTrailingResourceInputInfoPChildPContinent string
 
+var repeatDataPathTrailingResourceInputIntendedBindingUri string
+
 var repeatDataPathTrailingResourceInputPInt32 int32
 
 var repeatDataPathTrailingResourceInputPInt64 int64
@@ -189,6 +191,8 @@ func init() {
 
 	RepeatDataPathTrailingResourceCmd.Flags().BoolVar(&RepeatDataPathTrailingResourceInput.ServerVerify, "server_verify", false, "If true, the server will verify that the received...")
 
+	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&repeatDataPathTrailingResourceInputIntendedBindingUri, "intended_binding_uri", "", "The URI template this request is expected to be...")
+
 	RepeatDataPathTrailingResourceCmd.Flags().Int32Var(&RepeatDataPathTrailingResourceInput.FInt32, "f_int32", 0, "Some top level fields, to test that these are...")
 
 	RepeatDataPathTrailingResourceCmd.Flags().Int64Var(&RepeatDataPathTrailingResourceInput.FInt64, "f_int64", 0, "")
@@ -294,6 +298,10 @@ var RepeatDataPathTrailingResourceCmd = &cobra.Command{
 
 			if cmd.Flags().Changed("info.p_child.p_bool") {
 				RepeatDataPathTrailingResourceInput.Info.PChild.PBool = &repeatDataPathTrailingResourceInputInfoPChildPBool
+			}
+
+			if cmd.Flags().Changed("intended_binding_uri") {
+				RepeatDataPathTrailingResourceInput.IntendedBindingUri = &repeatDataPathTrailingResourceInputIntendedBindingUri
 			}
 
 			if cmd.Flags().Changed("p_int32") {

@@ -19,6 +19,7 @@ package genrest
 
 import (
 	"bytes"
+	"context"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
@@ -80,7 +81,8 @@ func (backend *RESTBackend) HandleRepeatDataBody(w http.ResponseWriter, r *http.
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.ComplianceServer.RepeatDataBody(r.Context(), request)
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/repeat:body")
+	response, err := backend.ComplianceServer.RepeatDataBody(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -158,7 +160,8 @@ func (backend *RESTBackend) HandleRepeatDataBodyInfo(w http.ResponseWriter, r *h
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.ComplianceServer.RepeatDataBodyInfo(r.Context(), request)
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/repeat:bodyinfo")
+	response, err := backend.ComplianceServer.RepeatDataBodyInfo(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -214,7 +217,8 @@ func (backend *RESTBackend) HandleRepeatDataQuery(w http.ResponseWriter, r *http
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.ComplianceServer.RepeatDataQuery(r.Context(), request)
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/repeat:query")
+	response, err := backend.ComplianceServer.RepeatDataQuery(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -275,7 +279,8 @@ func (backend *RESTBackend) HandleRepeatDataSimplePath(w http.ResponseWriter, r 
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.ComplianceServer.RepeatDataSimplePath(r.Context(), request)
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}/{info.f_kingdom}:simplepath")
+	response, err := backend.ComplianceServer.RepeatDataSimplePath(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -336,7 +341,70 @@ func (backend *RESTBackend) HandleRepeatDataPathResource(w http.ResponseWriter, 
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.ComplianceServer.RepeatDataPathResource(r.Context(), request)
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/*}/bool/{info.f_bool}:pathresource")
+	response, err := backend.ComplianceServer.RepeatDataPathResource(ctx, request)
+	if err != nil {
+		backend.ReportGRPCError(w, err)
+		return
+	}
+
+	json, err := marshaler.Marshal(response)
+	if err != nil {
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
+		return
+	}
+
+	w.Write(json)
+}
+
+// HandleRepeatDataPathResource_1 translates REST requests/responses on the wire to internal proto messages for RepeatDataPathResource
+//    Generated for HTTP binding pattern: "/v1beta1/repeat/{info.f_child.f_string=first/*}/{info.f_string=second/*}/bool/{info.f_bool}:childfirstpathresource"
+func (backend *RESTBackend) HandleRepeatDataPathResource_1(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/repeat/{info.f_child.f_string=first/*}/{info.f_string=second/*}/bool/{info.f_bool}:childfirstpathresource': %q", r.Method, r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 3, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 3 {
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 3, have %d: %#v", numUrlPathParams, urlPathParams)
+		return
+	}
+
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
+	request := &genprotopb.RepeatRequest{}
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
+		return
+	}
+	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
+		return
+	}
+
+	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	excludedQueryParams := []string{"info.f_child.f_string", "info.f_string", "info.f_bool"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
+		return
+	}
+	if err := resttools.PopulateFields(request, queryParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
+		return
+	}
+
+	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
+	requestJSON, _ := marshaler.Marshal(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
+
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/repeat/{info.f_child.f_string=first/*}/{info.f_string=second/*}/bool/{info.f_bool}:childfirstpathresource")
+	response, err := backend.ComplianceServer.RepeatDataPathResource(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -397,7 +465,8 @@ func (backend *RESTBackend) HandleRepeatDataPathTrailingResource(w http.Response
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.ComplianceServer.RepeatDataPathTrailingResource(r.Context(), request)
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/**}:pathtrailingresource")
+	response, err := backend.ComplianceServer.RepeatDataPathTrailingResource(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -466,7 +535,8 @@ func (backend *RESTBackend) HandleRepeatDataBodyPut(w http.ResponseWriter, r *ht
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.ComplianceServer.RepeatDataBodyPut(r.Context(), request)
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/repeat:bodyput")
+	response, err := backend.ComplianceServer.RepeatDataBodyPut(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -535,7 +605,8 @@ func (backend *RESTBackend) HandleRepeatDataBodyPatch(w http.ResponseWriter, r *
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.ComplianceServer.RepeatDataBodyPatch(r.Context(), request)
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/repeat:bodypatch")
+	response, err := backend.ComplianceServer.RepeatDataBodyPatch(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
