@@ -1,5 +1,17 @@
 # Release History
 
+## [0.23.0](https://github.com/googleapis/gapic-showcase/compare/v0.22.0...v0.23.0) (2022-07-27)
+
+
+### Features
+
+* add binding testing and multiple bindings test data to compliance service ([#1150](https://github.com/googleapis/gapic-showcase/issues/1150)) ([9d43ed0](https://github.com/googleapis/gapic-showcase/commit/9d43ed0621e4c9549a3d92a53dedc5dd57e9bec2))
+
+
+### Bug Fixes
+
+* remove broken test cases in compliance ([#1151](https://github.com/googleapis/gapic-showcase/issues/1151)) ([a56df9a](https://github.com/googleapis/gapic-showcase/commit/a56df9ab5ad9cdd6cb0385ba9c74263b95538ad8))
+
 ## [0.22.0](https://github.com/googleapis/gapic-showcase/compare/v0.21.0...v0.22.0) (2022-06-13)
 
 
