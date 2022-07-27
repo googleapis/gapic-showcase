@@ -166,7 +166,7 @@ func (csi *complianceServerImpl) VerifyEnum(ctx context.Context, in *pb.EnumResp
 	}
 
 	if actualEnum := in.GetContinent(); actualEnum != expectedEnum {
-		return nil, fmt.Errorf("(UnexpectedEnumError) enum received (%d) is not the value expected (%d) when new_enum = %t", actualEnum, expectedEnum, usingUnknownEnum)
+		return nil, fmt.Errorf("(UnexpectedEnumError) enum received (%d) is not the value expected (%d) when unknown_enum = %t", actualEnum, expectedEnum, usingUnknownEnum)
 	}
 
 	return in, nil
