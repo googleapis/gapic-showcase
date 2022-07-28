@@ -1,5 +1,12 @@
 # Release History
 
+## [0.24.0](https://github.com/googleapis/gapic-showcase/compare/v0.23.0...v0.24.0) (2022-07-28)
+
+
+### Features
+
+* **regapic:** accept numeric enums, allow testing enum round trips ([#1159](https://github.com/googleapis/gapic-showcase/issues/1159)) ([1e863ae](https://github.com/googleapis/gapic-showcase/commit/1e863ae834ad58453c1d74cf593be1188ff15033))
+
 ## [0.23.0](https://github.com/googleapis/gapic-showcase/compare/v0.22.0...v0.23.0) (2022-07-27)
 
 
