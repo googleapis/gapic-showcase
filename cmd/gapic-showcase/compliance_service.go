@@ -25,6 +25,8 @@ var ComplianceSubCommands []string = []string{
 	"repeat-data-path-trailing-resource",
 	"repeat-data-body-put",
 	"repeat-data-body-patch",
+	"get-enum",
+	"verify-enum",
 }
 
 func init() {
@@ -53,8 +55,8 @@ func init() {
 
 var ComplianceServiceCmd = &cobra.Command{
 	Use:       "compliance",
-	Short:     "This service is used to test that GAPICs can...",
-	Long:      "This service is used to test that GAPICs can transcode proto3 requests to  REST format correctly for various types of HTTP annotations.",
+	Short:     "This service is used to test that GAPICs...",
+	Long:      "This service is used to test that GAPICs implement various REST-related features correctly. This mostly means transcoding proto3 requests to REST...",
 	ValidArgs: ComplianceSubCommands,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
 		var opts []option.ClientOption

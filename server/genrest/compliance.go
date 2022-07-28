@@ -620,3 +620,117 @@ func (backend *RESTBackend) HandleRepeatDataBodyPatch(w http.ResponseWriter, r *
 
 	w.Write(json)
 }
+
+// HandleGetEnum translates REST requests/responses on the wire to internal proto messages for GetEnum
+//    Generated for HTTP binding pattern: "/v1beta1/compliance/enum"
+func (backend *RESTBackend) HandleGetEnum(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/compliance/enum': %q", r.Method, r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 0 {
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
+		return
+	}
+
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
+	request := &genprotopb.EnumRequest{}
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
+		return
+	}
+	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
+		return
+	}
+
+	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	if err := resttools.PopulateFields(request, queryParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
+		return
+	}
+
+	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
+	requestJSON, _ := marshaler.Marshal(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
+
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/compliance/enum")
+	response, err := backend.ComplianceServer.GetEnum(ctx, request)
+	if err != nil {
+		backend.ReportGRPCError(w, err)
+		return
+	}
+
+	json, err := marshaler.Marshal(response)
+	if err != nil {
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
+		return
+	}
+
+	w.Write(json)
+}
+
+// HandleVerifyEnum translates REST requests/responses on the wire to internal proto messages for VerifyEnum
+//    Generated for HTTP binding pattern: "/v1beta1/compliance/enum"
+func (backend *RESTBackend) HandleVerifyEnum(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/compliance/enum': %q", r.Method, r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 0 {
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
+		return
+	}
+
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
+	request := &genprotopb.EnumResponse{}
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
+		return
+	}
+	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
+		return
+	}
+
+	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	if err := resttools.PopulateFields(request, queryParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
+		return
+	}
+
+	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
+	requestJSON, _ := marshaler.Marshal(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
+
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/compliance/enum")
+	response, err := backend.ComplianceServer.VerifyEnum(ctx, request)
+	if err != nil {
+		backend.ReportGRPCError(w, err)
+		return
+	}
+
+	json, err := marshaler.Marshal(response)
+	if err != nil {
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
+		return
+	}
+
+	w.Write(json)
+}

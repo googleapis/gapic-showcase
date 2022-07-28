@@ -20,6 +20,11 @@
                 "DeleteOperation"
               ]
             },
+            "GetEnum": {
+              "methods": [
+                "GetEnum"
+              ]
+            },
             "GetIamPolicy": {
               "methods": [
                 "GetIamPolicy"
@@ -93,6 +98,11 @@
             "TestIamPermissions": {
               "methods": [
                 "TestIamPermissions"
+              ]
+            },
+            "VerifyEnum": {
+              "methods": [
+                "VerifyEnum"
               ]
             }
           }
@@ -110,6 +120,11 @@
                 "DeleteOperation"
               ]
             },
+            "GetEnum": {
+              "methods": [
+                "GetEnum"
+              ]
+            },
             "GetIamPolicy": {
               "methods": [
                 "GetIamPolicy"
@@ -183,6 +198,11 @@
             "TestIamPermissions": {
               "methods": [
                 "TestIamPermissions"
+              ]
+            },
+            "VerifyEnum": {
+              "methods": [
+                "VerifyEnum"
               ]
             }
           }
