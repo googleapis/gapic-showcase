@@ -211,6 +211,46 @@ func ExampleComplianceClient_RepeatDataBodyPatch() {
 	_ = resp
 }
 
+func ExampleComplianceClient_GetEnum() {
+	ctx := context.Background()
+	c, err := client.NewComplianceClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.EnumRequest{
+		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#EnumRequest.
+	}
+	resp, err := c.GetEnum(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
+func ExampleComplianceClient_VerifyEnum() {
+	ctx := context.Background()
+	c, err := client.NewComplianceClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.EnumResponse{
+		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#EnumResponse.
+	}
+	resp, err := c.VerifyEnum(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
 func ExampleComplianceClient_ListLocations() {
 	ctx := context.Background()
 	c, err := client.NewComplianceClient(ctx)
