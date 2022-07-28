@@ -18,6 +18,8 @@ Compliance (.google.showcase.v1beta1.Compliance):
   .google.showcase.v1beta1.Compliance.RepeatDataPathTrailingResource[0] : GET: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/**}:pathtrailingresource"
   .google.showcase.v1beta1.Compliance.RepeatDataBodyPut[0] : PUT: "/v1beta1/repeat:bodyput"
   .google.showcase.v1beta1.Compliance.RepeatDataBodyPatch[0] : PATCH: "/v1beta1/repeat:bodypatch"
+  .google.showcase.v1beta1.Compliance.GetEnum[0] : GET: "/v1beta1/compliance/enum"
+  .google.showcase.v1beta1.Compliance.VerifyEnum[0] : POST: "/v1beta1/compliance/enum"
 
 Echo (.google.showcase.v1beta1.Echo):
   .google.showcase.v1beta1.Echo.Echo[0] : POST: "/v1beta1/echo:echo"
@@ -87,9 +89,12 @@ GoModel
 Shim "Compliance" (.google.showcase.v1beta1.Compliance)
   Imports:
     genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
-  Handlers (9):
+  Handlers (11):
          GET                              /v1beta1/repeat:query func RepeatDataQuery(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
 ["/" "v1beta1" "/" "repeat" ":" "query"]
+
+         GET                           /v1beta1/compliance/enum func GetEnum(request genprotopb.EnumRequest) (response genprotopb.EnumResponse) {}
+["/" "v1beta1" "/" "compliance" "/" "enum"]
 
          GET /v1beta1/repeat/{info.f_child.f_string=first/*}/{info.f_string=second/*}/bool/{info.f_bool}:childfirstpathresource func RepeatDataPathResource(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
 ["/" "v1beta1" "/" "repeat" "/" {info.f_child.f_string = ["first" "/" *]} "/" {info.f_string = ["second" "/" *]} "/" "bool" "/" {info.f_bool = []} ":" "childfirstpathresource"]
@@ -108,6 +113,9 @@ Shim "Compliance" (.google.showcase.v1beta1.Compliance)
 
         POST                               /v1beta1/repeat:body func RepeatDataBody(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
 ["/" "v1beta1" "/" "repeat" ":" "body"]
+
+        POST                           /v1beta1/compliance/enum func VerifyEnum(request genprotopb.EnumResponse) (response genprotopb.EnumResponse) {}
+["/" "v1beta1" "/" "compliance" "/" "enum"]
 
         POST                           /v1beta1/repeat:bodyinfo func RepeatDataBodyInfo(request genprotopb.RepeatRequest) (response genprotopb.RepeatResponse) {}
 ["/" "v1beta1" "/" "repeat" ":" "bodyinfo"]
