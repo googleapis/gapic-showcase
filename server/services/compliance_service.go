@@ -18,6 +18,7 @@ import (
 	"context"
 	_ "embed" // for storing compliance suite data, used to verify  incoming requests
 	"fmt"
+	"os"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/gapic-showcase/server"
@@ -123,8 +124,55 @@ func (csi *complianceServerImpl) RepeatDataBodyPatch(ctx context.Context, in *pb
 
 // complianceSuiteBytes contains the contents of the compliance suite JSON file. This requires Go
 // 1.16. Note that embedding can only be applied to global variables at package scope.
+//
 //go:embed compliance_suite.json
 var complianceSuiteBytes []byte
+
+//// Enum support testing.
+
+// These enums are not part of the current compliance suite because they don't
+// have the server echo the client's request.
+var existingEnumValue, unknownEnumValue pb.Continent
+
+// storeEnumTestValues stores the values for known and unknown enums used in GetEnum() and
+// VerifyEnum() in this session. This function should be run from init()
+func storeEnumTestValues() {
+	deterministicInt := os.Getpid()
+	unknownEnumValue = pb.Continent(-deterministicInt)
+	existingEnumValue = pb.Continent(deterministicInt%(len(pb.Continent_name)-1) + 1)
+
+}
+
+func (csi *complianceServerImpl) GetEnum(ctx context.Context, in *pb.EnumRequest) (*pb.EnumResponse, error) {
+	response := &pb.EnumResponse{
+		Request: in,
+	}
+
+	if in.GetUnknownEnum() {
+		response.Continent = unknownEnumValue
+	} else {
+		response.Continent = existingEnumValue
+	}
+
+	return response, nil
+}
+
+func (csi *complianceServerImpl) VerifyEnum(ctx context.Context, in *pb.EnumResponse) (*pb.EnumResponse, error) {
+	usingUnknownEnum := in.Request.GetUnknownEnum()
+
+	expectedEnum := existingEnumValue
+	if usingUnknownEnum {
+		expectedEnum = unknownEnumValue
+	}
+
+	if actualEnum := in.GetContinent(); actualEnum != expectedEnum {
+		return nil, fmt.Errorf("(UnexpectedEnumError) enum received (%d) is not the value expected (%d) when unknown_enum = %t", actualEnum, expectedEnum, usingUnknownEnum)
+	}
+
+	return in, nil
+}
+
+//// Compliance suite support.
 
 // ComplianceSuiteInitStatus contains the status result of loading the compliance test suite
 type ComplianceSuiteInitStatus int
@@ -201,4 +249,5 @@ func indexTestingRequests(suiteBytes []byte) (err error) {
 
 func init() {
 	indexTestingRequests(complianceSuiteBytes)
+	storeEnumTestValues()
 }

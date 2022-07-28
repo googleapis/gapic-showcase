@@ -24,8 +24,9 @@ option java_package = "com.google.showcase.v1beta1";
 option java_multiple_files = true;
 option ruby_package = "Google::Showcase::V1beta1";
 
-// This service is used to test that GAPICs can transcode proto3 requests to
-// REST format correctly for various types of HTTP annotations.
+// This service is used to test that GAPICs implement various REST-related features correctly. This mostly means transcoding proto3 requests to REST format
+// correctly for various types of HTTP annotations, but it also includes verifying that unknown (numeric) enums received by clients can be round-tripped
+// correctly.
 service Compliance {
   // This service is meant to only run locally on the port 7469 (keypad digits
   // for "show").
@@ -97,6 +98,30 @@ service Compliance {
     option (google.api.http) = {
       patch: "/v1beta1/repeat:bodypatch"
       body: "*"
+    };
+  }
+
+  // This method requests an enum value from the server. Depending on the contents of EnumRequest, the enum value returned will be a known enum declared in the
+  // .proto file, or a made-up enum value the is unknown to the client. To verify that clients can round-trip unknown enum vaues they receive, use the
+  // response from this RPC as the request to VerifyEnum()
+  //
+  // The values of enums sent by the server when a known or unknown value is requested will be the same within a single Showcase server run (this is needed for
+  // VerifyEnum() to work) but are not guaranteed to be the same across separate Showcase server runs.
+  rpc GetEnum(EnumRequest) returns (EnumResponse) {
+    option (google.api.http) = {
+      get: "/v1beta1/compliance/enum"
+    };
+  }
+
+  // This method is used to verify that clients can round-trip enum values, which is particularly important for unknown enum values over REST. VerifyEnum()
+  // verifies that its request, which is presumably the response that the client previously got to a GetEnum(), contains the correct data. If so, it responds
+  // with the same EnumResponse; otherwise, the RPC errors.
+  //
+  // This works because the values of enums sent by the server when a known or unknown value is requested will be the same within a single Showcase server run,
+  // although they are not guaranteed to be the same across separate Showcase server runs.
+  rpc VerifyEnum(EnumResponse) returns (EnumResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/compliance/enum"
     };
   }
 
@@ -227,4 +252,18 @@ enum Continent {
   ANTARTICA = 3;
   AUSTRALIA = 4;
   EUROPE = 5;
+}
+
+
+message EnumRequest {
+  // Whether the client is requesting a new, unknown enum value or a known enum value already declard in this proto file.
+  bool unknown_enum = 1;
+}
+
+message EnumResponse {
+  // The original request for a known or unknown enum from the server.
+  EnumRequest request = 1;
+
+  // The actual enum the server provided.
+  Continent continent = 2;
 }

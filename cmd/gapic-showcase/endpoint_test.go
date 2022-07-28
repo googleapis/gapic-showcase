@@ -76,8 +76,8 @@ func TestRESTCalls(t *testing.T) {
 		},
 		{
 			verb:       "GET",
-			path:       "/v1beta1/repeat:query?info.pKingdom=1",
-			statusCode: 400, // numeric value for enum
+			path:       "/v1beta1/repeat:query?info.p_kingdom=EXTRATERRESTRIAL",
+			statusCode: 400, // unknown enum value symbol
 		},
 		{
 			verb:       "GET",
@@ -90,6 +90,33 @@ func TestRESTCalls(t *testing.T) {
 			statusCode: 400, // non-lower-camel-cased field name
 		},
 
+		{
+			// Test sending an enum as a number in the query parameter
+			verb: "GET",
+			path: "/v1beta1/repeat:query?info.pKingdom=1",
+			want: `{
+                          "request":{
+                            "info":{
+                              "pKingdom":"ARCHAEBACTERIA"
+                             }
+                            },
+                          "bindingUri":"/v1beta1/repeat:query"
+                          }`,
+		},
+		{
+			// Test sending an enum as a number in the body
+			verb: "POST",
+			path: "/v1beta1/repeat:body",
+			body: `{"info":{"pKingdom": 1}}`,
+			want: `{
+                          "request":{
+                            "info":{
+                              "pKingdom":"ARCHAEBACTERIA"
+                             }
+                            },
+                          "bindingUri":"/v1beta1/repeat:body"
+                          }`,
+		},
 		{
 			// Test responses:
 			//   1. unset optional field absent
