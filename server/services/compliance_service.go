@@ -18,10 +18,12 @@ import (
 	"context"
 	_ "embed" // for storing compliance suite data, used to verify  incoming requests
 	"fmt"
+	"os"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
+	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
@@ -37,10 +39,11 @@ type complianceServerImpl struct {
 
 // requestMatchesExpectations returns an error iff the received request asks for server verification and its
 // contents do not match a known suite testing request with the same name.
-func (csi *complianceServerImpl) requestMatchesExpectation(received *pb.RepeatRequest) error {
+func (csi *complianceServerImpl) requestMatchesExpectation(received *pb.RepeatRequest, binding string) error {
 	if !received.GetServerVerify() {
 		return nil
 	}
+
 	if ComplianceSuiteStatus == ComplianceSuiteError {
 		return fmt.Errorf(ComplianceSuiteStatusMessage)
 	}
@@ -49,6 +52,20 @@ func (csi *complianceServerImpl) requestMatchesExpectation(received *pb.RepeatRe
 	expectedRequest, ok := ComplianceSuiteRequests[name]
 	if !ok {
 		return fmt.Errorf("(ComplianceSuiteRequestNotFoundError) compliance suite does not contain a request %q", name)
+	}
+
+	// Checking that the binding in the test suite matches actual binding used.
+	if expectedRequest.IntendedBindingUri != nil {
+		intendedBinding := expectedRequest.GetIntendedBindingUri()
+		if intendedBinding != binding {
+			return fmt.Errorf("(ComplianceSuiteWrongBindingError) request %q was transcoded to the wrong binding (expected: %s; actual %s)", name, intendedBinding, binding)
+		}
+	}
+
+	// Separately checking that the binding in the client request matches binding in the test suite.
+	// This guards against the test suite file being wrong on the client.
+	if expectedRequest.GetIntendedBindingUri() != received.GetIntendedBindingUri() {
+		return fmt.Errorf("(ComplianceSuiteRequestBindingMismatchError) intended binding of request %q does not match test suite (expected: %s, received: %s)", name, expectedRequest.GetIntendedBindingUri(), received.GetIntendedBindingUri())
 	}
 
 	if diff := cmp.Diff(received.GetInfo(), expectedRequest.GetInfo(), cmp.Comparer(proto.Equal)); diff != "" {
@@ -60,10 +77,17 @@ func (csi *complianceServerImpl) requestMatchesExpectation(received *pb.RepeatRe
 
 func (csi *complianceServerImpl) Repeat(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
 	echoTrailers(ctx)
-	if err := csi.requestMatchesExpectation(in); err != nil {
+
+	bindingURI, ok := ctx.Value(resttools.BindingURIKey).(string)
+	if !ok {
+		bindingURI = ""
+	}
+
+	if err := csi.requestMatchesExpectation(in, bindingURI); err != nil {
 		return nil, err
 	}
-	return &pb.RepeatResponse{Request: in}, nil
+
+	return &pb.RepeatResponse{Request: in, BindingUri: bindingURI}, nil
 }
 
 func (csi *complianceServerImpl) RepeatDataBody(ctx context.Context, in *pb.RepeatRequest) (*pb.RepeatResponse, error) {
@@ -100,8 +124,55 @@ func (csi *complianceServerImpl) RepeatDataBodyPatch(ctx context.Context, in *pb
 
 // complianceSuiteBytes contains the contents of the compliance suite JSON file. This requires Go
 // 1.16. Note that embedding can only be applied to global variables at package scope.
+//
 //go:embed compliance_suite.json
 var complianceSuiteBytes []byte
+
+//// Enum support testing.
+
+// These enums are not part of the current compliance suite because they don't
+// have the server echo the client's request.
+var existingEnumValue, unknownEnumValue pb.Continent
+
+// storeEnumTestValues stores the values for known and unknown enums used in GetEnum() and
+// VerifyEnum() in this session. This function should be run from init()
+func storeEnumTestValues() {
+	deterministicInt := os.Getpid()
+	unknownEnumValue = pb.Continent(-deterministicInt)
+	existingEnumValue = pb.Continent(deterministicInt%(len(pb.Continent_name)-1) + 1)
+
+}
+
+func (csi *complianceServerImpl) GetEnum(ctx context.Context, in *pb.EnumRequest) (*pb.EnumResponse, error) {
+	response := &pb.EnumResponse{
+		Request: in,
+	}
+
+	if in.GetUnknownEnum() {
+		response.Continent = unknownEnumValue
+	} else {
+		response.Continent = existingEnumValue
+	}
+
+	return response, nil
+}
+
+func (csi *complianceServerImpl) VerifyEnum(ctx context.Context, in *pb.EnumResponse) (*pb.EnumResponse, error) {
+	usingUnknownEnum := in.Request.GetUnknownEnum()
+
+	expectedEnum := existingEnumValue
+	if usingUnknownEnum {
+		expectedEnum = unknownEnumValue
+	}
+
+	if actualEnum := in.GetContinent(); actualEnum != expectedEnum {
+		return nil, fmt.Errorf("(UnexpectedEnumError) enum received (%d) is not the value expected (%d) when unknown_enum = %t", actualEnum, expectedEnum, usingUnknownEnum)
+	}
+
+	return in, nil
+}
+
+//// Compliance suite support.
 
 // ComplianceSuiteInitStatus contains the status result of loading the compliance test suite
 type ComplianceSuiteInitStatus int
@@ -178,4 +249,5 @@ func indexTestingRequests(suiteBytes []byte) (err error) {
 
 func init() {
 	indexTestingRequests(complianceSuiteBytes)
+	storeEnumTestValues()
 }

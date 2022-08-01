@@ -54,6 +54,8 @@ type ComplianceCallOptions struct {
 	RepeatDataPathTrailingResource []gax.CallOption
 	RepeatDataBodyPut              []gax.CallOption
 	RepeatDataBodyPatch            []gax.CallOption
+	GetEnum                        []gax.CallOption
+	VerifyEnum                     []gax.CallOption
 	ListLocations                  []gax.CallOption
 	GetLocation                    []gax.CallOption
 	SetIamPolicy                   []gax.CallOption
@@ -87,6 +89,8 @@ func defaultComplianceCallOptions() *ComplianceCallOptions {
 		RepeatDataPathTrailingResource: []gax.CallOption{},
 		RepeatDataBodyPut:              []gax.CallOption{},
 		RepeatDataBodyPatch:            []gax.CallOption{},
+		GetEnum:                        []gax.CallOption{},
+		VerifyEnum:                     []gax.CallOption{},
 		ListLocations:                  []gax.CallOption{},
 		GetLocation:                    []gax.CallOption{},
 		SetIamPolicy:                   []gax.CallOption{},
@@ -109,6 +113,8 @@ func defaultComplianceRESTCallOptions() *ComplianceCallOptions {
 		RepeatDataPathTrailingResource: []gax.CallOption{},
 		RepeatDataBodyPut:              []gax.CallOption{},
 		RepeatDataBodyPatch:            []gax.CallOption{},
+		GetEnum:                        []gax.CallOption{},
+		VerifyEnum:                     []gax.CallOption{},
 		ListLocations:                  []gax.CallOption{},
 		GetLocation:                    []gax.CallOption{},
 		SetIamPolicy:                   []gax.CallOption{},
@@ -134,6 +140,8 @@ type internalComplianceClient interface {
 	RepeatDataPathTrailingResource(context.Context, *genprotopb.RepeatRequest, ...gax.CallOption) (*genprotopb.RepeatResponse, error)
 	RepeatDataBodyPut(context.Context, *genprotopb.RepeatRequest, ...gax.CallOption) (*genprotopb.RepeatResponse, error)
 	RepeatDataBodyPatch(context.Context, *genprotopb.RepeatRequest, ...gax.CallOption) (*genprotopb.RepeatResponse, error)
+	GetEnum(context.Context, *genprotopb.EnumRequest, ...gax.CallOption) (*genprotopb.EnumResponse, error)
+	VerifyEnum(context.Context, *genprotopb.EnumResponse, ...gax.CallOption) (*genprotopb.EnumResponse, error)
 	ListLocations(context.Context, *locationpb.ListLocationsRequest, ...gax.CallOption) *LocationIterator
 	GetLocation(context.Context, *locationpb.GetLocationRequest, ...gax.CallOption) (*locationpb.Location, error)
 	SetIamPolicy(context.Context, *iampb.SetIamPolicyRequest, ...gax.CallOption) (*iampb.Policy, error)
@@ -148,8 +156,9 @@ type internalComplianceClient interface {
 // ComplianceClient is a client for interacting with Client Libraries Showcase API.
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 //
-// This service is used to test that GAPICs can transcode proto3 requests to
-// REST format correctly for various types of HTTP annotations.
+// This service is used to test that GAPICs implement various REST-related features correctly. This mostly means transcoding proto3 requests to REST format
+// correctly for various types of HTTP annotations, but it also includes verifying that unknown (numeric) enums received by clients can be round-tripped
+// correctly.
 type ComplianceClient struct {
 	// The internal transport-dependent client.
 	internalClient internalComplianceClient
@@ -226,6 +235,26 @@ func (c *ComplianceClient) RepeatDataBodyPatch(ctx context.Context, req *genprot
 	return c.internalClient.RepeatDataBodyPatch(ctx, req, opts...)
 }
 
+// GetEnum this method requests an enum value from the server. Depending on the contents of EnumRequest, the enum value returned will be a known enum declared in the
+// .proto file, or a made-up enum value the is unknown to the client. To verify that clients can round-trip unknown enum vaues they receive, use the
+// response from this RPC as the request to VerifyEnum()
+//
+// The values of enums sent by the server when a known or unknown value is requested will be the same within a single Showcase server run (this is needed for
+// VerifyEnum() to work) but are not guaranteed to be the same across separate Showcase server runs.
+func (c *ComplianceClient) GetEnum(ctx context.Context, req *genprotopb.EnumRequest, opts ...gax.CallOption) (*genprotopb.EnumResponse, error) {
+	return c.internalClient.GetEnum(ctx, req, opts...)
+}
+
+// VerifyEnum this method is used to verify that clients can round-trip enum values, which is particularly important for unknown enum values over REST. VerifyEnum()
+// verifies that its request, which is presumably the response that the client previously got to a GetEnum(), contains the correct data. If so, it responds
+// with the same EnumResponse; otherwise, the RPC errors.
+//
+// This works because the values of enums sent by the server when a known or unknown value is requested will be the same within a single Showcase server run,
+// although they are not guaranteed to be the same across separate Showcase server runs.
+func (c *ComplianceClient) VerifyEnum(ctx context.Context, req *genprotopb.EnumResponse, opts ...gax.CallOption) (*genprotopb.EnumResponse, error) {
+	return c.internalClient.VerifyEnum(ctx, req, opts...)
+}
+
 // ListLocations is a utility method from google.cloud.location.Locations.
 func (c *ComplianceClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
 	return c.internalClient.ListLocations(ctx, req, opts...)
@@ -300,8 +329,9 @@ type complianceGRPCClient struct {
 // NewComplianceClient creates a new compliance client based on gRPC.
 // The returned client must be Closed when it is done being used to clean up its underlying connections.
 //
-// This service is used to test that GAPICs can transcode proto3 requests to
-// REST format correctly for various types of HTTP annotations.
+// This service is used to test that GAPICs implement various REST-related features correctly. This mostly means transcoding proto3 requests to REST format
+// correctly for various types of HTTP annotations, but it also includes verifying that unknown (numeric) enums received by clients can be round-tripped
+// correctly.
 func NewComplianceClient(ctx context.Context, opts ...option.ClientOption) (*ComplianceClient, error) {
 	clientOpts := defaultComplianceGRPCClientOptions()
 	if newComplianceClientHook != nil {
@@ -378,8 +408,9 @@ type complianceRESTClient struct {
 
 // NewComplianceRESTClient creates a new compliance rest client.
 //
-// This service is used to test that GAPICs can transcode proto3 requests to
-// REST format correctly for various types of HTTP annotations.
+// This service is used to test that GAPICs implement various REST-related features correctly. This mostly means transcoding proto3 requests to REST format
+// correctly for various types of HTTP annotations, but it also includes verifying that unknown (numeric) enums received by clients can be round-tripped
+// correctly.
 func NewComplianceRESTClient(ctx context.Context, opts ...option.ClientOption) (*ComplianceClient, error) {
 	clientOpts := append(defaultComplianceRESTClientOptions(), opts...)
 	httpClient, endpoint, err := httptransport.NewClient(ctx, clientOpts...)
@@ -548,6 +579,36 @@ func (c *complianceGRPCClient) RepeatDataBodyPatch(ctx context.Context, req *gen
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		resp, err = c.complianceClient.RepeatDataBodyPatch(ctx, req, settings.GRPC...)
+		return err
+	}, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (c *complianceGRPCClient) GetEnum(ctx context.Context, req *genprotopb.EnumRequest, opts ...gax.CallOption) (*genprotopb.EnumResponse, error) {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).GetEnum[0:len((*c.CallOptions).GetEnum):len((*c.CallOptions).GetEnum)], opts...)
+	var resp *genprotopb.EnumResponse
+	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		var err error
+		resp, err = c.complianceClient.GetEnum(ctx, req, settings.GRPC...)
+		return err
+	}, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (c *complianceGRPCClient) VerifyEnum(ctx context.Context, req *genprotopb.EnumResponse, opts ...gax.CallOption) (*genprotopb.EnumResponse, error) {
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).VerifyEnum[0:len((*c.CallOptions).VerifyEnum):len((*c.CallOptions).VerifyEnum)], opts...)
+	var resp *genprotopb.EnumResponse
+	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		var err error
+		resp, err = c.complianceClient.VerifyEnum(ctx, req, settings.GRPC...)
 		return err
 	}, opts...)
 	if err != nil {
@@ -840,6 +901,9 @@ func (c *complianceRESTClient) RepeatDataBodyInfo(ctx context.Context, req *genp
 	if req.GetFInt64() != 0 {
 		params.Add("fInt64", fmt.Sprintf("%v", req.GetFInt64()))
 	}
+	if req != nil && req.IntendedBindingUri != nil {
+		params.Add("intendedBindingUri", fmt.Sprintf("%v", req.GetIntendedBindingUri()))
+	}
 	if req.GetName() != "" {
 		params.Add("name", fmt.Sprintf("%v", req.GetName()))
 	}
@@ -1079,6 +1143,9 @@ func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprot
 	if req.GetInfo() != nil && req.GetInfo().PString != nil {
 		params.Add("info.pString", fmt.Sprintf("%v", req.GetInfo().GetPString()))
 	}
+	if req != nil && req.IntendedBindingUri != nil {
+		params.Add("intendedBindingUri", fmt.Sprintf("%v", req.GetIntendedBindingUri()))
+	}
 	if req.GetName() != "" {
 		params.Add("name", fmt.Sprintf("%v", req.GetName()))
 	}
@@ -1303,6 +1370,9 @@ func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *ge
 	}
 	if req.GetInfo() != nil && req.GetInfo().PString != nil {
 		params.Add("info.pString", fmt.Sprintf("%v", req.GetInfo().GetPString()))
+	}
+	if req != nil && req.IntendedBindingUri != nil {
+		params.Add("intendedBindingUri", fmt.Sprintf("%v", req.GetIntendedBindingUri()))
 	}
 	if req.GetName() != "" {
 		params.Add("name", fmt.Sprintf("%v", req.GetName()))
@@ -1534,6 +1604,9 @@ func (c *complianceRESTClient) RepeatDataPathResource(ctx context.Context, req *
 	}
 	if req.GetInfo() != nil && req.GetInfo().PString != nil {
 		params.Add("info.pString", fmt.Sprintf("%v", req.GetInfo().GetPString()))
+	}
+	if req != nil && req.IntendedBindingUri != nil {
+		params.Add("intendedBindingUri", fmt.Sprintf("%v", req.GetIntendedBindingUri()))
 	}
 	if req.GetName() != "" {
 		params.Add("name", fmt.Sprintf("%v", req.GetName()))
@@ -1769,6 +1842,9 @@ func (c *complianceRESTClient) RepeatDataPathTrailingResource(ctx context.Contex
 	if req.GetInfo() != nil && req.GetInfo().PString != nil {
 		params.Add("info.pString", fmt.Sprintf("%v", req.GetInfo().GetPString()))
 	}
+	if req != nil && req.IntendedBindingUri != nil {
+		params.Add("intendedBindingUri", fmt.Sprintf("%v", req.GetIntendedBindingUri()))
+	}
 	if req.GetName() != "" {
 		params.Add("name", fmt.Sprintf("%v", req.GetName()))
 	}
@@ -1913,6 +1989,135 @@ func (c *complianceRESTClient) RepeatDataBodyPatch(ctx context.Context, req *gen
 			baseUrl.Path = settings.Path
 		}
 		httpReq, err := http.NewRequest("PATCH", baseUrl.String(), bytes.NewReader(jsonReq))
+		if err != nil {
+			return err
+		}
+		httpReq = httpReq.WithContext(ctx)
+		httpReq.Header = headers
+
+		httpRsp, err := c.httpClient.Do(httpReq)
+		if err != nil {
+			return err
+		}
+		defer httpRsp.Body.Close()
+
+		if err = googleapi.CheckResponse(httpRsp); err != nil {
+			return err
+		}
+
+		buf, err := ioutil.ReadAll(httpRsp.Body)
+		if err != nil {
+			return err
+		}
+
+		if err := unm.Unmarshal(buf, resp); err != nil {
+			return maybeUnknownEnum(err)
+		}
+
+		return nil
+	}, opts...)
+	if e != nil {
+		return nil, e
+	}
+	return resp, nil
+}
+
+// GetEnum this method requests an enum value from the server. Depending on the contents of EnumRequest, the enum value returned will be a known enum declared in the
+// .proto file, or a made-up enum value the is unknown to the client. To verify that clients can round-trip unknown enum vaues they receive, use the
+// response from this RPC as the request to VerifyEnum()
+//
+// The values of enums sent by the server when a known or unknown value is requested will be the same within a single Showcase server run (this is needed for
+// VerifyEnum() to work) but are not guaranteed to be the same across separate Showcase server runs.
+func (c *complianceRESTClient) GetEnum(ctx context.Context, req *genprotopb.EnumRequest, opts ...gax.CallOption) (*genprotopb.EnumResponse, error) {
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
+	baseUrl.Path += fmt.Sprintf("/v1beta1/compliance/enum")
+
+	params := url.Values{}
+	if req.GetUnknownEnum() {
+		params.Add("unknownEnum", fmt.Sprintf("%v", req.GetUnknownEnum()))
+	}
+
+	baseUrl.RawQuery = params.Encode()
+
+	// Build HTTP headers from client and context metadata.
+	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).GetEnum[0:len((*c.CallOptions).GetEnum):len((*c.CallOptions).GetEnum)], opts...)
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	resp := &genprotopb.EnumResponse{}
+	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
+		httpReq, err := http.NewRequest("GET", baseUrl.String(), nil)
+		if err != nil {
+			return err
+		}
+		httpReq = httpReq.WithContext(ctx)
+		httpReq.Header = headers
+
+		httpRsp, err := c.httpClient.Do(httpReq)
+		if err != nil {
+			return err
+		}
+		defer httpRsp.Body.Close()
+
+		if err = googleapi.CheckResponse(httpRsp); err != nil {
+			return err
+		}
+
+		buf, err := ioutil.ReadAll(httpRsp.Body)
+		if err != nil {
+			return err
+		}
+
+		if err := unm.Unmarshal(buf, resp); err != nil {
+			return maybeUnknownEnum(err)
+		}
+
+		return nil
+	}, opts...)
+	if e != nil {
+		return nil, e
+	}
+	return resp, nil
+}
+
+// VerifyEnum this method is used to verify that clients can round-trip enum values, which is particularly important for unknown enum values over REST. VerifyEnum()
+// verifies that its request, which is presumably the response that the client previously got to a GetEnum(), contains the correct data. If so, it responds
+// with the same EnumResponse; otherwise, the RPC errors.
+//
+// This works because the values of enums sent by the server when a known or unknown value is requested will be the same within a single Showcase server run,
+// although they are not guaranteed to be the same across separate Showcase server runs.
+func (c *complianceRESTClient) VerifyEnum(ctx context.Context, req *genprotopb.EnumResponse, opts ...gax.CallOption) (*genprotopb.EnumResponse, error) {
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
+	baseUrl.Path += fmt.Sprintf("/v1beta1/compliance/enum")
+
+	params := url.Values{}
+	if req.GetContinent() != 0 {
+		params.Add("continent", fmt.Sprintf("%v", req.GetContinent()))
+	}
+	if req.GetRequest().GetUnknownEnum() {
+		params.Add("request.unknownEnum", fmt.Sprintf("%v", req.GetRequest().GetUnknownEnum()))
+	}
+
+	baseUrl.RawQuery = params.Encode()
+
+	// Build HTTP headers from client and context metadata.
+	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).VerifyEnum[0:len((*c.CallOptions).VerifyEnum):len((*c.CallOptions).VerifyEnum)], opts...)
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	resp := &genprotopb.EnumResponse{}
+	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
+		httpReq, err := http.NewRequest("POST", baseUrl.String(), nil)
 		if err != nil {
 			return err
 		}

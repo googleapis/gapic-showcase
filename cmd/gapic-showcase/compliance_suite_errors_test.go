@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"strings"
 	"testing"
 
@@ -47,11 +46,8 @@ func TestComplianceSuiteErrors(t *testing.T) {
 			prepRepeatDataBodyInfoNegativeTestSnakeCasedFieldNames,
 		},
 		"Compliance.RepeatDataQuery": {
-			prepRepeatDataQueryNegativeTestNumericEnums,
-			prepRepeatDataQueryNegativeTestNumericOptionalEnums,
 			prepRepeatDataQueryNegativeTestSnakeCasedFieldNames,
 		},
-		"Compliance.RepeatDataSimplePath": {prepRepeatDataSimplePathNegativeTestEnum},
 	}
 
 	for groupIdx, group := range masterSuite.GetGroup() {
@@ -271,63 +267,6 @@ func prepRepeatDataQueryNegativeTestSnakeCasedFieldNames(request *genproto.Repea
 	return name, "GET", "/v1beta1/repeat:query" + queryString, body, "(QueryParameterNameIncorrectlyCasedError)", err
 }
 
-func prepRepeatDataQueryNegativeTestNumericEnums(request *genproto.RepeatRequest) (verb string, name string, path string, body string, expect string, err error) {
-	name = "Compliance.RepeatDataQuery#NegativeTestNumericEnums"
-	info := request.GetInfo()
-	badQueryParam := fmt.Sprintf("info.fKingdom=%d", info.GetFKingdom()) // purposefully use a number, which should cause an error
-
-	// We clear the field so we don't set the same query param correctly below. This change
-	// modifies the request, but since these tests only check that calls fail, we never need to
-	// refer back to the request proto after constructing the REST query.
-	info.FKingdom = pb.ComplianceData_LIFE_KINGDOM_UNSPECIFIED
-	queryParams := append(prepRepeatDataTestsQueryParams(request, nil, queryStringLowerCamelCaser), badQueryParam)
-
-	queryString := prepQueryString(queryParams)
-	return name, "GET", "/v1beta1/repeat:query" + queryString, body, "(EnumValueNotStringError)", err
-}
-
-func prepRepeatDataQueryNegativeTestNumericOptionalEnums(request *genproto.RepeatRequest) (verb string, name string, path string, body string, expect string, err error) {
-	name = "Compliance.RepeatDataQuery#NegativeTestNumericOptionalEnums"
-	info := request.GetInfo()
-	badQueryParam := fmt.Sprintf("info.pKingdom=%d", info.GetPKingdom()) // purposefully use a number, which should cause an error
-
-	// We clear the field so we don't set the same query param correctly below. This change
-	// modifies the request, but since these tests only check that calls fail, we never need to
-	// refer back to the request proto after constructing the REST query.
-	info.PKingdom = nil
-	queryParams := append(prepRepeatDataTestsQueryParams(request, nil, queryStringLowerCamelCaser), badQueryParam)
-
-	queryString := prepQueryString(queryParams)
-	return name, "GET", "/v1beta1/repeat:query" + queryString, body, "(EnumValueNotStringError)", err
-}
-
-func prepRepeatDataSimplePathNegativeTestEnum(request *genproto.RepeatRequest) (verb string, name string, path string, body string, expect string, err error) {
-	name = "Compliance.RepeatDataSimplePath#NegativeTestNumericEnum"
-	info := request.GetInfo()
-
-	pathParts := []string{}
-	nonQueryParamNames := map[string]bool{}
-
-	for _, part := range []struct {
-		name   string
-		format string
-		value  interface{}
-	}{
-		{"f_string", "%s", info.GetFString()},
-		{"f_int32", "%d", info.GetFInt32()},
-		{"f_double", "%g", info.GetFDouble()},
-		{"f_bool", "%t", info.GetFBool()},
-		{"f_kingdom", "%d", info.GetFKingdom()}, // purposefully use a number, which should cause an error
-	} {
-		pathParts = append(pathParts, url.PathEscape(fmt.Sprintf(part.format, part.value)))
-		nonQueryParamNames["info."+part.name] = true
-	}
-	path = fmt.Sprintf("/v1beta1/repeat/%s:simplepath", strings.Join(pathParts, "/"))
-
-	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
-	return name, "GET", path + queryString, body, "(EnumValueNotStringError)", err
-}
-
 // checkExpectedFailure issues a request using the specified verb, URL, and request body. It expects
 // a failing HTTP code and a response message containing the substring in `failure`. Test errors are
 // reported using the given errorPrefix and the name prepName of the prepping function.
@@ -364,5 +303,5 @@ func checkExpectedFailure(t *testing.T, verb, url, requestBody, failure, errorPr
 
 }
 
-//requestModifer is a function that modifies a request in-place.
+// requestModifer is a function that modifies a request in-place.
 type requestModifier func(*pb.RepeatRequest)

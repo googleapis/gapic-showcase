@@ -19,6 +19,7 @@ package genrest
 
 import (
 	"bytes"
+	"context"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
@@ -89,7 +90,8 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.SequenceServiceServer.CreateSequence(r.Context(), request)
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/sequences")
+	response, err := backend.SequenceServiceServer.CreateSequence(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -150,7 +152,8 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.SequenceServiceServer.GetSequenceReport(r.Context(), request)
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=sequences/*/sequenceReport}")
+	response, err := backend.SequenceServiceServer.GetSequenceReport(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return
@@ -219,7 +222,8 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	response, err := backend.SequenceServiceServer.AttemptSequence(r.Context(), request)
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=sequences/*}")
+	response, err := backend.SequenceServiceServer.AttemptSequence(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return

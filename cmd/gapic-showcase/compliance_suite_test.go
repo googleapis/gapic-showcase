@@ -217,6 +217,16 @@ func prepRepeatDataPathResourceTest(request *genproto.RepeatRequest) (verb strin
 	name = "Compliance.RepeatDataPathResource"
 	info := request.GetInfo()
 
+	if strings.HasPrefix(info.GetFString(), "first/") {
+		return prepRepeatDataPathResourceTestFirstBinding(request)
+	} else {
+		return prepRepeatDataPathResourceTestSecondBinding(request)
+	}
+}
+
+func prepRepeatDataPathResourceTestFirstBinding(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
+	name = "Compliance.RepeatDataPathResource"
+	info := request.GetInfo()
 	pathParts := []string{}
 	nonQueryParamNames := map[string]bool{}
 
@@ -238,6 +248,35 @@ func prepRepeatDataPathResourceTest(request *genproto.RepeatRequest) (verb strin
 		nonQueryParamNames["info."+part.name] = true
 	}
 	path = fmt.Sprintf("/v1beta1/repeat/%s:pathresource", strings.Join(pathParts, "/"))
+
+	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
+	return "GET", name, path + queryString, body, err
+}
+
+func prepRepeatDataPathResourceTestSecondBinding(request *genproto.RepeatRequest) (verb string, name string, path string, body string, err error) {
+	name = "Compliance.RepeatDataPathResource"
+	info := request.GetInfo()
+	pathParts := []string{}
+	nonQueryParamNames := map[string]bool{}
+
+	for _, part := range []struct {
+		name           string
+		format         string
+		value          interface{}
+		requiredPrefix string
+	}{
+		{"f_child.f_string", "%s", info.GetFChild().GetFString(), "first/"},
+		{"f_string", "%s", info.GetFString(), "second/"},
+		{"f_bool", "bool/%t", info.GetFBool(), ""},
+	} {
+		if len(part.requiredPrefix) > 0 && !strings.HasPrefix(part.value.(string), part.requiredPrefix) {
+			err = fmt.Errorf("expected value of %q to begin with %q; got %q", part.name, part.requiredPrefix, part.value)
+			return
+		}
+		pathParts = append(pathParts, url.PathEscape(fmt.Sprintf(part.format, part.value)))
+		nonQueryParamNames["info."+part.name] = true
+	}
+	path = fmt.Sprintf("/v1beta1/repeat/%s:childfirstpathresource", strings.Join(pathParts, "/"))
 
 	queryString := prepRepeatDataTestsQueryString(request, nonQueryParamNames)
 	return "GET", name, path + queryString, body, err
@@ -294,6 +333,7 @@ func prepRepeatDataTestsQueryParams(request *genproto.RepeatRequest, exclude map
 	// Top-level fields
 	addParam("server_verify", request.GetServerVerify(), "true")
 	addParam("name", len(request.GetName()) > 0, url.QueryEscape(request.GetName()))
+	addParam("intended_binding_uri", request.IntendedBindingUri != nil, url.QueryEscape(request.GetIntendedBindingUri()))
 
 	addParam("f_int32", request.GetFInt32() != 0, fmt.Sprintf("%d", request.GetFInt32()))
 	addParam("f_int64", request.GetFInt64() != 0, fmt.Sprintf("%d", request.GetFInt64()))

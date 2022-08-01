@@ -54,12 +54,12 @@ func TestRESTCalls(t *testing.T) {
 			verb: "POST",
 			path: "/v1beta1/repeat:body",
 			body: `{"info":{"fString":"jonas^ mila"}}`,
-			want: `{"request":{"info":{"fString":"jonas^ mila"}}}`,
+			want: `{"request":{"info":{"fString":"jonas^ mila"}}, "bindingUri":"/v1beta1/repeat:body"}`,
 		},
 		{
 			verb: "GET",
 			path: "/v1beta1/repeat:query?info.fString=jonas+mila",
-			want: `{"request":{"info":{"fString":"jonas mila"}}}`,
+			want: `{"request":{"info":{"fString":"jonas mila"}}, "bindingUri":"/v1beta1/repeat:query"}`,
 		},
 		{
 			verb: "GET",
@@ -67,7 +67,7 @@ func TestRESTCalls(t *testing.T) {
 
 			// TODO: Fix so that this returns an error, because `^` is not URL-escaped
 			statusCode: 200,
-			want:       `{"request":{"info":{"fString":"jonas^mila"}}}`,
+			want:       `{"request":{"info":{"fString":"jonas^mila"}}, "bindingUri":"/v1beta1/repeat:query"}`,
 		},
 		{
 			verb:       "GET",
@@ -76,8 +76,8 @@ func TestRESTCalls(t *testing.T) {
 		},
 		{
 			verb:       "GET",
-			path:       "/v1beta1/repeat:query?info.pKingdom=1",
-			statusCode: 400, // numeric value for enum
+			path:       "/v1beta1/repeat:query?info.p_kingdom=EXTRATERRESTRIAL",
+			statusCode: 400, // unknown enum value symbol
 		},
 		{
 			verb:       "GET",
@@ -90,6 +90,33 @@ func TestRESTCalls(t *testing.T) {
 			statusCode: 400, // non-lower-camel-cased field name
 		},
 
+		{
+			// Test sending an enum as a number in the query parameter
+			verb: "GET",
+			path: "/v1beta1/repeat:query?info.pKingdom=1",
+			want: `{
+                          "request":{
+                            "info":{
+                              "pKingdom":"ARCHAEBACTERIA"
+                             }
+                            },
+                          "bindingUri":"/v1beta1/repeat:query"
+                          }`,
+		},
+		{
+			// Test sending an enum as a number in the body
+			verb: "POST",
+			path: "/v1beta1/repeat:body",
+			body: `{"info":{"pKingdom": 1}}`,
+			want: `{
+                          "request":{
+                            "info":{
+                              "pKingdom":"ARCHAEBACTERIA"
+                             }
+                            },
+                          "bindingUri":"/v1beta1/repeat:body"
+                          }`,
+		},
 		{
 			// Test responses:
 			//   1. unset optional field absent
@@ -127,7 +154,8 @@ func TestRESTCalls(t *testing.T) {
                             "fInt32": 0,
                             "fInt64": "0",
                             "fDouble": 0
-                          }
+                          },
+                          "bindingUri":"/v1beta1/repeat:body"
                         }
                       `,
 		},
@@ -174,7 +202,7 @@ func TestRESTCalls(t *testing.T) {
 			log.Fatal(err)
 		}
 		if got, want := string(body), testCase.want; noSpace(got) != noSpace(want) {
-			t.Errorf("testcase %2d: body: got `%s`, want %s", idx, got, want)
+			t.Errorf("testcase %2d: body: got %q, want %q", idx, noSpace(got), noSpace(want))
 			t.Errorf("  request: %v", request)
 		}
 		jsonOptions.Restore()

@@ -56,3 +56,8 @@ func init() {
 
 	RegexLiteral = fmt.Sprintf(`^[%s]+`, CharsLiteral)
 }
+
+// A key-type for storing binding URI value in the Context
+type BindingURIKeyType string
+
+const BindingURIKey BindingURIKeyType = BindingURIKeyType("BindingURIKey")
