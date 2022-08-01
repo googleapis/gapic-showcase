@@ -14,7 +14,7 @@ require (
 	github.com/spf13/viper v1.12.0
 	golang.org/x/oauth2 v0.0.0-20220722155238-128564f6959c
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
-	google.golang.org/api v0.89.0
+	google.golang.org/api v0.90.0
 	google.golang.org/genproto v0.0.0-20220801145646-83ce21fca29f
 	google.golang.org/grpc v1.48.0
 	google.golang.org/protobuf v1.28.1
