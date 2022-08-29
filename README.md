@@ -176,7 +176,24 @@ if err != nil {
     log.Fatal(err)
 }
 ```
+Example for Java:
 
+```
+EchoSettings echoSettings = EchoSettings.newBuilder()
+    .setCredentialsProvider(NoCredentialsProvider.create())
+    .setTransportChannelProvider(
+        InstantiatingGrpcChannelProvider.newBuilder()
+            .setChannelConfigurator(
+                new ApiFunction<ManagedChannelBuilder, ManagedChannelBuilder>() {
+                  @Override
+                  public ManagedChannelBuilder apply(ManagedChannelBuilder input) {
+                    return input.usePlaintext();
+                  }
+                })
+            .build())
+    .build();
+EchoClient echoClient = EchoClient.create(echoSettings);
+```
 ## Released Artifacts
 GAPIC Showcase releases three main artifacts, a CLI tool, the gapic-showcase
 service protobuf files staged alongside its dependencies, and a protocol buffer
