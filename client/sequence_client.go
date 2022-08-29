@@ -175,7 +175,8 @@ func (c *SequenceClient) setGoogleClientInfo(keyval ...string) {
 
 // Connection returns a connection to the API service.
 //
-// Deprecated.
+// Deprecated: Connections are now pooled so this method does not always
+// return the same resource.
 func (c *SequenceClient) Connection() *grpc.ClientConn {
 	return c.internalClient.Connection()
 }
@@ -307,7 +308,8 @@ func NewSequenceClient(ctx context.Context, opts ...option.ClientOption) (*Seque
 
 // Connection returns a connection to the API service.
 //
-// Deprecated.
+// Deprecated: Connections are now pooled so this method does not always
+// return the same resource.
 func (c *sequenceGRPCClient) Connection() *grpc.ClientConn {
 	return c.connPool.Conn()
 }
@@ -389,7 +391,7 @@ func (c *sequenceRESTClient) Close() error {
 
 // Connection returns a connection to the API service.
 //
-// Deprecated.
+// Deprecated: This method always returns nil.
 func (c *sequenceRESTClient) Connection() *grpc.ClientConn {
 	return nil
 }
