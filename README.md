@@ -50,7 +50,7 @@ $ docker run \
 
 ### Binary
 ```sh
-$ export GAPIC_SHOWCASE_VERSION=0.19.0
+$ export GAPIC_SHOWCASE_VERSION=0.24.0
 $ export OS=linux
 $ export ARCH=amd64
 $ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${GAPIC_SHOWCASE_VERSION}-${OS}-${ARCH}.tar.gz | sudo tar -zx --directory /usr/local/bin/

@@ -31,12 +31,12 @@ func init() {
 	flag.StringVar(&version, "version", "", "the version tag [required]")
 }
 
-// This script is ran in CI when a new version tag is pushed to main. This script
-// places the compiled proto descriptor set, a tarball of showcase-protos alongside it's
+// This script is run in CI when a new version tag is pushed to main. This script
+// places the compiled proto descriptor set, a tarball of showcase-protos alongside its
 // dependencies, and the compiled executables of the gapic-showcase cli tool inside the
 // directory "dist"
 //
-// This script must be ran from the root directory of the gapic-showcase repository.
+// This script must be run from the root directory of the gapic-showcase repository.
 //
 // Usage: go run ./util/cmd/release -version vX.Y.Z
 func main() {
