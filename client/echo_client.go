@@ -260,7 +260,8 @@ func (c *EchoClient) setGoogleClientInfo(keyval ...string) {
 
 // Connection returns a connection to the API service.
 //
-// Deprecated.
+// Deprecated: Connections are now pooled so this method does not always
+// return the same resource.
 func (c *EchoClient) Connection() *grpc.ClientConn {
 	return c.internalClient.Connection()
 }
@@ -467,7 +468,8 @@ func NewEchoClient(ctx context.Context, opts ...option.ClientOption) (*EchoClien
 
 // Connection returns a connection to the API service.
 //
-// Deprecated.
+// Deprecated: Connections are now pooled so this method does not always
+// return the same resource.
 func (c *echoGRPCClient) Connection() *grpc.ClientConn {
 	return c.connPool.Conn()
 }
@@ -572,7 +574,7 @@ func (c *echoRESTClient) Close() error {
 
 // Connection returns a connection to the API service.
 //
-// Deprecated.
+// Deprecated: This method always returns nil.
 func (c *echoRESTClient) Connection() *grpc.ClientConn {
 	return nil
 }

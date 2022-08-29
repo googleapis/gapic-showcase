@@ -206,7 +206,8 @@ func (c *IdentityClient) setGoogleClientInfo(keyval ...string) {
 
 // Connection returns a connection to the API service.
 //
-// Deprecated.
+// Deprecated: Connections are now pooled so this method does not always
+// return the same resource.
 func (c *IdentityClient) Connection() *grpc.ClientConn {
 	return c.internalClient.Connection()
 }
@@ -350,7 +351,8 @@ func NewIdentityClient(ctx context.Context, opts ...option.ClientOption) (*Ident
 
 // Connection returns a connection to the API service.
 //
-// Deprecated.
+// Deprecated: Connections are now pooled so this method does not always
+// return the same resource.
 func (c *identityGRPCClient) Connection() *grpc.ClientConn {
 	return c.connPool.Conn()
 }
@@ -434,7 +436,7 @@ func (c *identityRESTClient) Close() error {
 
 // Connection returns a connection to the API service.
 //
-// Deprecated.
+// Deprecated: This method always returns nil.
 func (c *identityRESTClient) Connection() *grpc.ClientConn {
 	return nil
 }
