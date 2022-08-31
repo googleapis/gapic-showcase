@@ -114,12 +114,12 @@ func (s *identityServerImpl) UpdateUser(_ context.Context, in *pb.UpdateUserRequ
 	mask := in.GetUpdateMask()
 	u := in.GetUser()
 	i, ok := s.keys[u.GetName()]
-	entry := s.users[i]
-	if !ok || entry.deleted {
+	if !ok || s.users[i].deleted {
 		return nil, status.Errorf(
 			codes.NotFound,
 			"A user with name %s not found.", u.GetName())
 	}
+	entry := s.users[i]
 
 	err := s.validate(u)
 	if err != nil {

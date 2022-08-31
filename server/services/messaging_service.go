@@ -171,13 +171,12 @@ func (s *messagingServerImpl) UpdateRoom(ctx context.Context, in *pb.UpdateRoomR
 	}
 	i, ok := s.roomKeys[r.GetName()]
 
-	entry := s.rooms[i]
-	if !ok || entry.deleted {
+	if !ok || s.rooms[i].deleted {
 		return nil, status.Errorf(
 			codes.NotFound,
 			"A room with name %s not found.", r.GetName())
 	}
-	existing := entry.room
+	existing := s.rooms[i].room
 
 	// Validate Unique Fields.
 	uniqName := func(x *pb.Room) bool {
@@ -350,12 +349,12 @@ func (s *messagingServerImpl) UpdateBlurb(ctx context.Context, in *pb.UpdateBlur
 	mask := in.GetUpdateMask()
 	b := in.GetBlurb()
 	i, ok := s.blurbKeys[b.GetName()]
-	entry := s.blurbs[i.row][i.col]
-	if !ok || entry.deleted {
+	if !ok || s.blurbs[i.row][i.col].deleted {
 		return nil, status.Errorf(
 			codes.NotFound,
 			"A blurb with name %s not found.", b.GetName())
 	}
+	entry := s.blurbs[i.row][i.col]
 
 	if err := validateBlurb(b); err != nil {
 		return nil, err
