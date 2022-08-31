@@ -119,7 +119,6 @@ func (s *identityServerImpl) UpdateUser(_ context.Context, in *pb.UpdateUserRequ
 			codes.NotFound,
 			"A user with name %s not found.", u.GetName())
 	}
-	entry := s.users[i]
 
 	err := s.validate(u)
 	if err != nil {
@@ -127,7 +126,7 @@ func (s *identityServerImpl) UpdateUser(_ context.Context, in *pb.UpdateUserRequ
 	}
 
 	// Update store.
-	existing := entry.user
+	existing := s.users[i].user
 	updated := proto.Clone(existing).(*pb.User)
 	applyFieldMask(u.ProtoReflect(), updated.ProtoReflect(), mask.GetPaths())
 	updated.CreateTime = existing.GetCreateTime()

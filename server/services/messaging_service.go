@@ -354,13 +354,12 @@ func (s *messagingServerImpl) UpdateBlurb(ctx context.Context, in *pb.UpdateBlur
 			codes.NotFound,
 			"A blurb with name %s not found.", b.GetName())
 	}
-	entry := s.blurbs[i.row][i.col]
 
 	if err := validateBlurb(b); err != nil {
 		return nil, err
 	}
 	// Update store.
-	existing := entry.blurb
+	existing := s.blurbs[i.row][i.col].blurb
 	updated := proto.Clone(existing).(*pb.Blurb)
 	applyFieldMask(b.ProtoReflect(), updated.ProtoReflect(), mask.GetPaths())
 	updated.CreateTime = existing.GetCreateTime()
