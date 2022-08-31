@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/googleapis/gapic-showcase/server"
@@ -107,19 +108,14 @@ func (s *identityServerImpl) GetUser(_ context.Context, in *pb.GetUserRequest) (
 
 // Updates a user.
 func (s *identityServerImpl) UpdateUser(_ context.Context, in *pb.UpdateUserRequest) (*pb.User, error) {
-	mask := in.GetUpdateMask()
-	if mask != nil && len(mask.GetPaths()) > 0 {
-		return nil, status.Error(
-			codes.Unimplemented,
-			"Field masks are currently not supported.")
-	}
-
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	mask := in.GetUpdateMask()
 	u := in.GetUser()
 	i, ok := s.keys[u.GetName()]
-	if !ok || s.users[i].deleted {
+	entry := s.users[i]
+	if !ok || entry.deleted {
 		return nil, status.Errorf(
 			codes.NotFound,
 			"A user with name %s not found.", u.GetName())
@@ -129,36 +125,13 @@ func (s *identityServerImpl) UpdateUser(_ context.Context, in *pb.UpdateUserRequ
 	if err != nil {
 		return nil, err
 	}
-	entry := s.users[i]
-	// Update store.
-	updated := &pb.User{
-		Name:                u.GetName(),
-		DisplayName:         u.GetDisplayName(),
-		Email:               u.GetEmail(),
-		CreateTime:          entry.user.GetCreateTime(),
-		UpdateTime:          ptypes.TimestampNow(),
-		Age:                 entry.user.Age,
-		EnableNotifications: entry.user.EnableNotifications,
-		HeightFeet:          entry.user.HeightFeet,
-		Nickname:            entry.user.Nickname,
-	}
 
-	// Use direct field access to avoid unwrapping and rewrapping the pointer value.
-	//
-	// TODO: if field_mask is implemented, do a direct update if included,
-	// regardless of if the optional field is nil.
-	if u.Age != nil {
-		updated.Age = u.Age
-	}
-	if u.EnableNotifications != nil {
-		updated.EnableNotifications = u.EnableNotifications
-	}
-	if u.HeightFeet != nil {
-		updated.HeightFeet = u.HeightFeet
-	}
-	if u.Nickname != nil {
-		updated.Nickname = u.Nickname
-	}
+	// Update store.
+	existing := entry.user
+	updated := proto.Clone(existing).(*pb.User)
+	applyFieldMask(u.ProtoReflect(), updated.ProtoReflect(), mask.GetPaths())
+	updated.CreateTime = existing.GetCreateTime()
+	updated.UpdateTime = ptypes.TimestampNow()
 
 	s.users[i] = userEntry{user: updated}
 	return updated, nil

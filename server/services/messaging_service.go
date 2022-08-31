@@ -159,13 +159,8 @@ func (s *messagingServerImpl) GetRoom(ctx context.Context, in *pb.GetRoomRequest
 
 // Updates a room.
 func (s *messagingServerImpl) UpdateRoom(ctx context.Context, in *pb.UpdateRoomRequest) (*pb.Room, error) {
-	f := in.GetUpdateMask()
+	mask := in.GetUpdateMask()
 	r := in.GetRoom()
-	if f != nil && len(f.GetPaths()) > 0 {
-		return nil, status.Error(
-			codes.Unimplemented,
-			"Field masks are currently not supported.")
-	}
 
 	s.roomMu.Lock()
 	defer s.roomMu.Unlock()
@@ -176,16 +171,17 @@ func (s *messagingServerImpl) UpdateRoom(ctx context.Context, in *pb.UpdateRoomR
 	}
 	i, ok := s.roomKeys[r.GetName()]
 
-	if !ok || s.rooms[i].deleted {
+	entry := s.rooms[i]
+	if !ok || entry.deleted {
 		return nil, status.Errorf(
 			codes.NotFound,
 			"A room with name %s not found.", r.GetName())
 	}
+	existing := entry.room
 
-	entry := s.rooms[i]
 	// Validate Unique Fields.
 	uniqName := func(x *pb.Room) bool {
-		return x != entry.room && (r.GetDisplayName() == x.GetDisplayName())
+		return x != existing && (r.GetDisplayName() == x.GetDisplayName())
 	}
 	if s.anyRoom(uniqName) {
 		return nil, status.Errorf(
@@ -195,13 +191,11 @@ func (s *messagingServerImpl) UpdateRoom(ctx context.Context, in *pb.UpdateRoomR
 	}
 
 	// Update store.
-	updated := &pb.Room{
-		Name:        r.GetName(),
-		DisplayName: r.GetDisplayName(),
-		Description: r.GetDescription(),
-		CreateTime:  entry.room.GetCreateTime(),
-		UpdateTime:  ptypes.TimestampNow(),
-	}
+	updated := proto.Clone(existing).(*pb.Room)
+	applyFieldMask(r.ProtoReflect(), updated.ProtoReflect(), mask.GetPaths())
+	updated.CreateTime = existing.GetCreateTime()
+	updated.UpdateTime = ptypes.TimestampNow()
+
 	s.rooms[i] = roomEntry{room: updated}
 	return updated, nil
 }
@@ -350,18 +344,14 @@ func (s *messagingServerImpl) GetBlurb(ctx context.Context, in *pb.GetBlurbReque
 
 // Updates a blurb.
 func (s *messagingServerImpl) UpdateBlurb(ctx context.Context, in *pb.UpdateBlurbRequest) (*pb.Blurb, error) {
-	if in.GetUpdateMask() != nil && len(in.GetUpdateMask().GetPaths()) > 0 {
-		return nil, status.Error(
-			codes.Unimplemented,
-			"Field masks are currently not supported.")
-	}
-
 	s.blurbMu.Lock()
 	defer s.blurbMu.Unlock()
 
+	mask := in.GetUpdateMask()
 	b := in.GetBlurb()
 	i, ok := s.blurbKeys[b.GetName()]
-	if !ok || s.blurbs[i.row][i.col].deleted {
+	entry := s.blurbs[i.row][i.col]
+	if !ok || entry.deleted {
 		return nil, status.Errorf(
 			codes.NotFound,
 			"A blurb with name %s not found.", b.GetName())
@@ -371,7 +361,10 @@ func (s *messagingServerImpl) UpdateBlurb(ctx context.Context, in *pb.UpdateBlur
 		return nil, err
 	}
 	// Update store.
-	updated := proto.Clone(b).(*pb.Blurb)
+	existing := entry.blurb
+	updated := proto.Clone(existing).(*pb.Blurb)
+	applyFieldMask(b.ProtoReflect(), updated.ProtoReflect(), mask.GetPaths())
+	updated.CreateTime = existing.GetCreateTime()
 	updated.UpdateTime = ptypes.TimestampNow()
 	s.blurbs[i.row][i.col] = blurbEntry{blurb: updated}
 
