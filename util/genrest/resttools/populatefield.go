@@ -19,9 +19,30 @@ import (
 	"strconv"
 	"strings"
 
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
+
+var wellKnownTypes = map[string]bool{
+	// == The following are the only three common types used in this API ==
+	"google.protobuf.FieldMask": true,
+	"google.protobuf.Timestamp": true,
+	"google.protobuf.Duration":  true,
+	// == End utilized types ==
+	"google.protobuf.DoubleValue": true,
+	"google.protobuf.FloatValue":  true,
+	"google.protobuf.Int64Value":  true,
+	"google.protobuf.UInt64Value": true,
+	"google.protobuf.Int32Value":  true,
+	"google.protobuf.UInt32Value": true,
+	"google.protobuf.BoolValue":   true,
+	"google.protobuf.StringValue": true,
+	"google.protobuf.BytesValue":  true,
+	// TODO: Determine if the following are even viable as query params.
+	"google.protobuf.Value":     true,
+	"google.protobuf.ListValue": true,
+}
 
 // PopulateSingularFields sets the fields within protoMessage to the values provided in
 // fieldValues. The fields and values are provided as a map of field paths to the string
@@ -113,8 +134,14 @@ func PopulateOneField(protoMessage proto.Message, fieldPath string, fieldValues 
 		kind := fieldDescriptor.Kind()
 		switch kind {
 		case protoreflect.MessageKind:
-			parseError = fmt.Errorf("terminal field %q of field path %q in message %q is a message type",
-				fieldName, fieldPath, messageFullName)
+			if pval, err := parseWellKnownType(message, fieldDescriptor, value); err != nil {
+				parseError = err
+			} else if pval != nil {
+				protoValue = *pval
+			} else {
+				parseError = fmt.Errorf("terminal field %q of field path %q in message %q is a message type",
+					fieldName, fieldPath, messageFullName)
+			}
 
 		// reference for proto scalar types:
 		// https://developers.google.com/protocol-buffers/docs/proto3#scalar
@@ -213,4 +240,23 @@ func findProtoFieldByJSONName(fieldName string, fields protoreflect.FieldDescrip
 		}
 	}
 	return result, nil
+}
+
+func parseWellKnownType(message protoreflect.Message, fieldDescriptor protoreflect.FieldDescriptor, value string) (*protoreflect.Value, error) {
+	messageFieldTypes := message.Type().(protoreflect.MessageFieldTypes)
+	fieldMsg := messageFieldTypes.Message(fieldDescriptor.Index())
+	fullName := string(fieldMsg.Descriptor().FullName())
+	if !wellKnownTypes[fullName] {
+		return nil, nil
+	}
+
+	msgValue := fieldMsg.New()
+	err := protojson.Unmarshal([]byte(value), msgValue.Interface())
+	if err != nil {
+		return nil, fmt.Errorf("unable to unmarshal field %q in message %q: %w",
+			string(fieldDescriptor.Name()), string(message.Descriptor().FullName()), err)
+	}
+
+	v := protoreflect.ValueOfMessage(msgValue)
+	return &v, nil
 }

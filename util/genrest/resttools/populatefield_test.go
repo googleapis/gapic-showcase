@@ -17,10 +17,62 @@ package resttools
 import (
 	"reflect"
 	"testing"
+	"time"
 
+	"github.com/google/go-cmp/cmp"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/encoding/prototext"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
+
+func TestParseWellKnownType(t *testing.T) {
+	for _, tst := range []struct {
+		name  string
+		msg   protoreflect.Message
+		field protoreflect.Name
+		want  proto.Message
+	}{
+		{
+			"google.protobuf.FieldMask",
+			(&genprotopb.UpdateUserRequest{}).ProtoReflect(),
+			"update_mask",
+			&fieldmaskpb.FieldMask{Paths: []string{"foo", "bar", "baz"}},
+		},
+		{
+			"google.protobuf.Timestamp",
+			(&genprotopb.User{}).ProtoReflect(),
+			"create_time",
+			timestamppb.Now(),
+		},
+		{
+			"google.protobuf.Duration",
+			(&genprotopb.Sequence_Response{}).ProtoReflect(),
+			"delay",
+			durationpb.New(5 * time.Second),
+		},
+	} {
+		data, _ := protojson.Marshal(tst.want)
+		value := string(data)
+		fd := tst.msg.Descriptor().Fields().ByName(tst.field)
+
+		gotp, err := parseWellKnownType(tst.msg, fd, value)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if gotp == nil {
+			t.Fatal("expected non-nil value from parsing")
+		}
+		got := gotp.Message().Interface()
+		if diff := cmp.Diff(got, tst.want, cmp.Comparer(proto.Equal)); diff != "" {
+			t.Fatalf("%s: got(-),want(+):\n%s", "FieldMask", diff)
+		}
+	}
+}
 
 func TestPopulateOneFieldError(t *testing.T) {
 	for idx, testCase := range []struct {
