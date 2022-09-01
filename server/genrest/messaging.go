@@ -181,6 +181,7 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 
 	request := &genprotopb.UpdateRoomRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
+	var bodyField genprotopb.Room
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes := make([]byte, r.ContentLength)
@@ -189,8 +190,8 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
-		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+	if err := resttools.FromJSON().Unmarshal(rBytes, &bodyField); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading body into request field 'room': %s", err)
 		return
 	}
 
@@ -198,13 +199,21 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
+	request.Room = &bodyField
 
-	if len(queryParams) > 0 {
-		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
-		return
-	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
+		return
+	}
+
+	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	excludedQueryParams := []string{"room", "room.name"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
+		return
+	}
+	if err := resttools.PopulateFields(request, queryParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -634,6 +643,7 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 
 	request := &genprotopb.UpdateBlurbRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
+	var bodyField genprotopb.Blurb
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes := make([]byte, r.ContentLength)
@@ -642,8 +652,8 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
-		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+	if err := resttools.FromJSON().Unmarshal(rBytes, &bodyField); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading body into request field 'blurb': %s", err)
 		return
 	}
 
@@ -651,13 +661,21 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
+	request.Blurb = &bodyField
 
-	if len(queryParams) > 0 {
-		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
-		return
-	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
+		return
+	}
+
+	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	excludedQueryParams := []string{"blurb", "blurb.name"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
+		return
+	}
+	if err := resttools.PopulateFields(request, queryParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
@@ -704,6 +722,7 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 
 	request := &genprotopb.UpdateBlurbRequest{}
 	// Intentional: Field values in the URL path override those set in the body.
+	var bodyField genprotopb.Blurb
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes := make([]byte, r.ContentLength)
@@ -712,8 +731,8 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
-		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+	if err := resttools.FromJSON().Unmarshal(rBytes, &bodyField); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading body into request field 'blurb': %s", err)
 		return
 	}
 
@@ -721,13 +740,21 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
+	request.Blurb = &bodyField
 
-	if len(queryParams) > 0 {
-		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
-		return
-	}
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
+		return
+	}
+
+	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	excludedQueryParams := []string{"blurb", "blurb.name"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
+		return
+	}
+	if err := resttools.PopulateFields(request, queryParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
 		return
 	}
 
