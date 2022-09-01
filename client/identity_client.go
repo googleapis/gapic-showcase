@@ -862,7 +862,8 @@ func (c *identityRESTClient) GetUser(ctx context.Context, req *genprotopb.GetUse
 // UpdateUser updates a user.
 func (c *identityRESTClient) UpdateUser(ctx context.Context, req *genprotopb.UpdateUserRequest, opts ...gax.CallOption) (*genprotopb.User, error) {
 	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
-	jsonReq, err := m.Marshal(req)
+	body := req.GetUser()
+	jsonReq, err := m.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
@@ -872,6 +873,13 @@ func (c *identityRESTClient) UpdateUser(ctx context.Context, req *genprotopb.Upd
 		return nil, err
 	}
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetUser().GetName())
+
+	params := url.Values{}
+	if req.GetUpdateMask().GetPaths() != nil {
+		params.Add("updateMask.paths", fmt.Sprintf("%v", req.GetUpdateMask().GetPaths()))
+	}
+
+	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "user.name", url.QueryEscape(req.GetUser().GetName())))
