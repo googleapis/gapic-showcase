@@ -243,7 +243,10 @@ func findProtoFieldByJSONName(fieldName string, fields protoreflect.FieldDescrip
 }
 
 func parseWellKnownType(message protoreflect.Message, fieldDescriptor protoreflect.FieldDescriptor, value string) (*protoreflect.Value, error) {
-	messageFieldTypes := message.Type().(protoreflect.MessageFieldTypes)
+	messageFieldTypes, ok := message.Type().(protoreflect.MessageFieldTypes)
+	if !ok {
+		return nil, fmt.Errorf("expected message to implement protoreflect.MessageFieldTypes but it did not")
+	}
 	fieldMsg := messageFieldTypes.Message(fieldDescriptor.Index())
 	fullName := string(fieldMsg.Descriptor().FullName())
 	if !wellKnownTypes[fullName] {
