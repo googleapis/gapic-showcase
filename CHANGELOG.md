@@ -1,5 +1,17 @@
 # Release History
 
+## [0.25.0](https://github.com/googleapis/gapic-showcase/compare/v0.24.0...v0.25.0) (2022-09-01)
+
+
+### Features
+
+* Support FieldMask in Updates ([#1197](https://github.com/googleapis/gapic-showcase/issues/1197)) ([cdb4ce6](https://github.com/googleapis/gapic-showcase/commit/cdb4ce63778a8ea6bcef0006c1e4c4a50da45a6c))
+
+
+### Bug Fixes
+
+* Use resource field in http body for Updates ([#1198](https://github.com/googleapis/gapic-showcase/issues/1198)) ([48a2632](https://github.com/googleapis/gapic-showcase/commit/48a2632b5f25af24b239216f1ff079ed60de2a61))
+
 ## [0.24.0](https://github.com/googleapis/gapic-showcase/compare/v0.23.0...v0.24.0) (2022-07-28)
 
 
