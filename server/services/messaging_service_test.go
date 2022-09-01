@@ -27,12 +27,13 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"golang.org/x/sync/errgroup"
-	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 func Test_Room_lifecycle(t *testing.T) {
@@ -208,19 +209,27 @@ func Test_GetRoom_deleted(t *testing.T) {
 }
 
 func Test_UpdateRoom_fieldmask(t *testing.T) {
+	first := &pb.Room{DisplayName: "Living Room"}
+	second := &pb.Room{DisplayName: "Dining Room"}
+	paths := []string{"display_name"}
 	s := NewMessagingServer(NewIdentityServer())
-	_, err := s.UpdateRoom(
+	created, err := s.CreateRoom(
+		context.Background(),
+		&pb.CreateRoomRequest{Room: first})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
+	}
+	second.Name = created.GetName()
+	got, err := s.UpdateRoom(
 		context.Background(),
 		&pb.UpdateRoomRequest{
-			Room:       nil,
-			UpdateMask: &field_mask.FieldMask{Paths: []string{"email"}},
-		})
-	status, _ := status.FromError(err)
-	if status.Code() != codes.Unimplemented {
-		t.Errorf(
-			"Update: Want error code %d got %d",
-			codes.Unimplemented,
-			status.Code())
+			Room:       second,
+			UpdateMask: &fieldmaskpb.FieldMask{Paths: paths}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diff := cmp.Diff(got.GetDisplayName(), second.GetDisplayName()); diff != "" {
+		t.Errorf("Using update_mask %s, got(-),want(+):\n%s", strings.Join(paths, ","), diff)
 	}
 }
 
@@ -579,19 +588,31 @@ func Test_GetBlurb_deleted(t *testing.T) {
 }
 
 func Test_UpdateBlurb_fieldmask(t *testing.T) {
-	s := NewMessagingServer(NewIdentityServer())
-	_, err := s.UpdateBlurb(
+	first := &pb.Blurb{
+		User:    "users/rumble",
+		Content: &pb.Blurb_Text{Text: "woof"},
+	}
+	second := &pb.Blurb{
+		Content: &pb.Blurb_Text{Text: "bark"},
+	}
+	paths := []string{"text"}
+	s := NewMessagingServer(&mockIdentityServer{})
+	created, err := s.CreateBlurb(
 		context.Background(),
-		&pb.UpdateBlurbRequest{
-			Blurb:      nil,
-			UpdateMask: &field_mask.FieldMask{Paths: []string{"email"}},
-		})
-	status, _ := status.FromError(err)
-	if status.Code() != codes.Unimplemented {
-		t.Errorf(
-			"Update: Want error code %d got %d",
-			codes.Unimplemented,
-			status.Code())
+		&pb.CreateBlurbRequest{Blurb: first})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
+	}
+	second.Name = created.GetName()
+	second.User = created.GetUser()
+	got, err := s.UpdateBlurb(
+		context.Background(),
+		&pb.UpdateBlurbRequest{Blurb: second, UpdateMask: &fieldmaskpb.FieldMask{Paths: paths}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diff := cmp.Diff(got.GetText(), second.GetText()); diff != "" {
+		t.Errorf("Using update_mask %s, got(-),want(+):\n%s", strings.Join(paths, ","), diff)
 	}
 }
 

@@ -17,14 +17,16 @@ package services
 import (
 	"context"
 	"encoding/base64"
+	"strings"
 	"testing"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
-	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 func Test_User_lifecycle(t *testing.T) {
@@ -257,19 +259,26 @@ func Test_Get_deleted(t *testing.T) {
 }
 
 func Test_Update_fieldmask(t *testing.T) {
+	first := &pb.User{DisplayName: "Ekko", Email: "ekko@example.com"}
+	second := &pb.User{DisplayName: "Foo", Email: "ekko@example.com"}
+	paths := []string{"display_name"}
 	s := NewIdentityServer()
-	_, err := s.UpdateUser(
+	created, err := s.CreateUser(
 		context.Background(),
-		&pb.UpdateUserRequest{
-			User:       nil,
-			UpdateMask: &field_mask.FieldMask{Paths: []string{"email"}},
-		})
-	status, _ := status.FromError(err)
-	if status.Code() != codes.Unimplemented {
-		t.Errorf(
-			"Update: Want error code %d got %d",
-			codes.Unimplemented,
-			status.Code())
+		&pb.CreateUserRequest{User: first})
+	if err != nil {
+		t.Errorf("Create: unexpected err %+v", err)
+	}
+	second.Name = created.GetName()
+
+	got, err := s.UpdateUser(
+		context.Background(),
+		&pb.UpdateUserRequest{User: second, UpdateMask: &fieldmaskpb.FieldMask{Paths: paths}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diff := cmp.Diff(got.GetDisplayName(), second.GetDisplayName()); diff != "" {
+		t.Errorf("Using update_mask %s, got(-),want(+):\n%s", strings.Join(paths, ","), diff)
 	}
 }
 
