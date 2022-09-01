@@ -77,7 +77,7 @@ func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 				if bodyFieldDesc == nil {
 					goModel.AccumulateError(fmt.Errorf("could not find body field %q in %q", binding.BodyField, inProtoType.GetName()))
 				}
-				bodyFieldTypeDesc, ok := protoInfo.Type[*bodyFieldDesc.TypeName]
+				bodyFieldTypeDesc, ok := protoInfo.Type[bodyFieldDesc.GetTypeName()]
 				if !ok {
 					goModel.AccumulateError(fmt.Errorf("could not read protoInfo[%q]", inProtoType))
 				}

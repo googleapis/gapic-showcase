@@ -61,7 +61,7 @@ service Messaging {
   rpc UpdateRoom(UpdateRoomRequest) returns (Room) {
     option (google.api.http) = {
       patch: "/v1beta1/{room.name=rooms/*}"
-      body: "*"
+      body: "room"
     };
   }
 
@@ -109,10 +109,10 @@ service Messaging {
   rpc UpdateBlurb(UpdateBlurbRequest) returns (Blurb) {
     option (google.api.http) = {
       patch: "/v1beta1/{blurb.name=rooms/*/blurbs/*}"
-      body: "*"
+      body: "blurb"
       additional_bindings: {
         patch: "/v1beta1/{blurb.name=users/*/profile/blurbs/*}"
-        body: "*"
+        body: "blurb"
       }
     };
   }

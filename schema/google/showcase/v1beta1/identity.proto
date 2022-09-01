@@ -58,7 +58,7 @@ service Identity {
   rpc UpdateUser(UpdateUserRequest) returns (User) {
     option (google.api.http) = {
       patch: "/v1beta1/{user.name=users/*}"
-      body: "*"
+      body: "user"
     };
   }
 
