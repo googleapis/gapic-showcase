@@ -875,8 +875,12 @@ func (c *identityRESTClient) UpdateUser(ctx context.Context, req *genprotopb.Upd
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetUser().GetName())
 
 	params := url.Values{}
-	if req.GetUpdateMask().GetPaths() != nil {
-		params.Add("updateMask.paths", fmt.Sprintf("%v", req.GetUpdateMask().GetPaths()))
+	if req.GetUpdateMask() != nil {
+		updateMask, err := protojson.Marshal(req.GetUpdateMask())
+		if err != nil {
+			return nil, err
+		}
+		params.Add("updateMask", string(updateMask))
 	}
 
 	baseUrl.RawQuery = params.Encode()
