@@ -30,6 +30,11 @@ import (
 
 func ExampleNewEchoClient() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -42,6 +47,11 @@ func ExampleNewEchoClient() {
 
 func ExampleNewEchoRESTClient() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewEchoRESTClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -54,6 +64,11 @@ func ExampleNewEchoRESTClient() {
 
 func ExampleEchoClient_Echo() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -74,6 +89,11 @@ func ExampleEchoClient_Echo() {
 
 func ExampleEchoClient_Chat() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -109,6 +129,11 @@ func ExampleEchoClient_Chat() {
 
 func ExampleEchoClient_PagedExpand() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -135,6 +160,11 @@ func ExampleEchoClient_PagedExpand() {
 
 func ExampleEchoClient_PagedExpandLegacy() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -161,6 +191,11 @@ func ExampleEchoClient_PagedExpandLegacy() {
 
 func ExampleEchoClient_PagedExpandLegacyMapped() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -187,6 +222,11 @@ func ExampleEchoClient_PagedExpandLegacyMapped() {
 
 func ExampleEchoClient_Wait() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -212,6 +252,11 @@ func ExampleEchoClient_Wait() {
 
 func ExampleEchoClient_Block() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -232,6 +277,11 @@ func ExampleEchoClient_Block() {
 
 func ExampleEchoClient_ListLocations() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -258,6 +308,11 @@ func ExampleEchoClient_ListLocations() {
 
 func ExampleEchoClient_GetLocation() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -278,6 +333,11 @@ func ExampleEchoClient_GetLocation() {
 
 func ExampleEchoClient_SetIamPolicy() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -298,6 +358,11 @@ func ExampleEchoClient_SetIamPolicy() {
 
 func ExampleEchoClient_GetIamPolicy() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -318,6 +383,11 @@ func ExampleEchoClient_GetIamPolicy() {
 
 func ExampleEchoClient_TestIamPermissions() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -338,6 +408,11 @@ func ExampleEchoClient_TestIamPermissions() {
 
 func ExampleEchoClient_ListOperations() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -364,6 +439,11 @@ func ExampleEchoClient_ListOperations() {
 
 func ExampleEchoClient_GetOperation() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -384,6 +464,11 @@ func ExampleEchoClient_GetOperation() {
 
 func ExampleEchoClient_DeleteOperation() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -402,6 +487,11 @@ func ExampleEchoClient_DeleteOperation() {
 
 func ExampleEchoClient_CancelOperation() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewEchoClient(ctx)
 	if err != nil {
 		// TODO: Handle error.

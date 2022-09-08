@@ -30,6 +30,11 @@ import (
 
 func ExampleNewMessagingClient() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -42,6 +47,11 @@ func ExampleNewMessagingClient() {
 
 func ExampleNewMessagingRESTClient() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingRESTClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -54,6 +64,11 @@ func ExampleNewMessagingRESTClient() {
 
 func ExampleMessagingClient_CreateRoom() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -74,6 +89,11 @@ func ExampleMessagingClient_CreateRoom() {
 
 func ExampleMessagingClient_GetRoom() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -94,6 +114,11 @@ func ExampleMessagingClient_GetRoom() {
 
 func ExampleMessagingClient_UpdateRoom() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -114,6 +139,11 @@ func ExampleMessagingClient_UpdateRoom() {
 
 func ExampleMessagingClient_DeleteRoom() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -132,6 +162,11 @@ func ExampleMessagingClient_DeleteRoom() {
 
 func ExampleMessagingClient_ListRooms() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -158,6 +193,11 @@ func ExampleMessagingClient_ListRooms() {
 
 func ExampleMessagingClient_CreateBlurb() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -178,6 +218,11 @@ func ExampleMessagingClient_CreateBlurb() {
 
 func ExampleMessagingClient_GetBlurb() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -198,6 +243,11 @@ func ExampleMessagingClient_GetBlurb() {
 
 func ExampleMessagingClient_UpdateBlurb() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -218,6 +268,11 @@ func ExampleMessagingClient_UpdateBlurb() {
 
 func ExampleMessagingClient_DeleteBlurb() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -236,6 +291,11 @@ func ExampleMessagingClient_DeleteBlurb() {
 
 func ExampleMessagingClient_ListBlurbs() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -262,6 +322,11 @@ func ExampleMessagingClient_ListBlurbs() {
 
 func ExampleMessagingClient_SearchBlurbs() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -287,6 +352,11 @@ func ExampleMessagingClient_SearchBlurbs() {
 
 func ExampleMessagingClient_Connect() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -322,6 +392,11 @@ func ExampleMessagingClient_Connect() {
 
 func ExampleMessagingClient_ListLocations() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -348,6 +423,11 @@ func ExampleMessagingClient_ListLocations() {
 
 func ExampleMessagingClient_GetLocation() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -368,6 +448,11 @@ func ExampleMessagingClient_GetLocation() {
 
 func ExampleMessagingClient_SetIamPolicy() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -388,6 +473,11 @@ func ExampleMessagingClient_SetIamPolicy() {
 
 func ExampleMessagingClient_GetIamPolicy() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -408,6 +498,11 @@ func ExampleMessagingClient_GetIamPolicy() {
 
 func ExampleMessagingClient_TestIamPermissions() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -428,6 +523,11 @@ func ExampleMessagingClient_TestIamPermissions() {
 
 func ExampleMessagingClient_ListOperations() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -454,6 +554,11 @@ func ExampleMessagingClient_ListOperations() {
 
 func ExampleMessagingClient_GetOperation() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -474,6 +579,11 @@ func ExampleMessagingClient_GetOperation() {
 
 func ExampleMessagingClient_DeleteOperation() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.
@@ -492,6 +602,11 @@ func ExampleMessagingClient_DeleteOperation() {
 
 func ExampleMessagingClient_CancelOperation() {
 	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
 	c, err := client.NewMessagingClient(ctx)
 	if err != nil {
 		// TODO: Handle error.

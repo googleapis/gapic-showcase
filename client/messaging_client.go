@@ -1318,8 +1318,12 @@ func (c *messagingRESTClient) UpdateRoom(ctx context.Context, req *genprotopb.Up
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetRoom().GetName())
 
 	params := url.Values{}
-	if req.GetUpdateMask().GetPaths() != nil {
-		params.Add("updateMask.paths", fmt.Sprintf("%v", req.GetUpdateMask().GetPaths()))
+	if req.GetUpdateMask() != nil {
+		updateMask, err := protojson.Marshal(req.GetUpdateMask())
+		if err != nil {
+			return nil, err
+		}
+		params.Add("updateMask", string(updateMask))
 	}
 
 	baseUrl.RawQuery = params.Encode()
@@ -1621,8 +1625,12 @@ func (c *messagingRESTClient) UpdateBlurb(ctx context.Context, req *genprotopb.U
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetBlurb().GetName())
 
 	params := url.Values{}
-	if req.GetUpdateMask().GetPaths() != nil {
-		params.Add("updateMask.paths", fmt.Sprintf("%v", req.GetUpdateMask().GetPaths()))
+	if req.GetUpdateMask() != nil {
+		updateMask, err := protojson.Marshal(req.GetUpdateMask())
+		if err != nil {
+			return nil, err
+		}
+		params.Add("updateMask", string(updateMask))
 	}
 
 	baseUrl.RawQuery = params.Encode()
