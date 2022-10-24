@@ -12,7 +12,6 @@ jobs:
     outputs:
       modified_files: ${{ steps.mod.outputs.modified_files }}
     steps:
-    - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
         go-version: '1.19.2'
@@ -26,6 +25,7 @@ jobs:
         go install github.com/golang/protobuf/protoc-gen-go
         go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli
         go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic
+    - uses: actions/checkout@v3
     - name: Install REST server generator
       run: go install ./util/cmd/protoc-gen-go_rest_server
     - name: Regenerate sources
