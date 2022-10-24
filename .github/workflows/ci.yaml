@@ -19,9 +19,9 @@ jobs:
       uses: arduino/setup-protoc@v1
     - name: Install external generators
       run: |
-        go install github.com/golang/protobuf/protoc-gen-go
-        go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli
-        go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic
+        go install github.com/golang/protobuf/protoc-gen-go@latest
+        go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli@latest
+        go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic@latest
     - uses: actions/checkout@v3
     - name: Checkout common protos
       run: git submodule init && git submodule update
