@@ -26,12 +26,14 @@ import (
 // https://cloud.google.com/endpoints/docs/grpc-service-config/reference/rpc/google.api#path-template-syntax
 //
 // Grammar:
-//    Template = "/" Segments [ Verb ] ;
-//    Segments = Segment { "/" Segment } ;
-//    Segment  = "*" | "**" | LITERAL | Variable ;
-//    Variable = "{" FieldPath [ "=" Segments ] "}" ;
-//    FieldPath = IDENT { "." IDENT } ;
-//    Verb     = ":" LITERAL ;
+//
+//	Template = "/" Segments [ Verb ] ;
+//	Segments = Segment { "/" Segment } ;
+//	Segment  = "*" | "**" | LITERAL | Variable ;
+//	Variable = "{" FieldPath [ "=" Segments ] "}" ;
+//	FieldPath = IDENT { "." IDENT } ;
+//	Verb     = ":" LITERAL ;
+//
 // with "**" matching the last part of the path template string except for the Verb.
 func ParseTemplate(template string) (parsed PathTemplate, err error) {
 	return NewParser(template).parse()

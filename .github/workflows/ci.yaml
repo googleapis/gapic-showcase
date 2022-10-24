@@ -12,24 +12,21 @@ jobs:
     outputs:
       modified_files: ${{ steps.mod.outputs.modified_files }}
     steps:
-    - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
-        go-version: '1.16.3'
-    - name: Checkout common protos
-      run: git submodule init && git submodule update
-    - name: Install protoc
-      run: |
-        mkdir protobuf
-        curl -sSL https://github.com/protocolbuffers/protobuf/releases/download/v3.15.0/protoc-3.15.0-linux-x86_64.zip > protobuf/protoc.zip
-        unzip -d protobuf protobuf/protoc.zip
-        echo "./protobuf/bin" >> $GITHUB_PATH
+        go-version: '1.19.2'
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v1
     - name: Install external generators
       run: |
-        go mod download
-        go install github.com/golang/protobuf/protoc-gen-go
-        go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli
-        go get github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic
+        go install github.com/golang/protobuf/protoc-gen-go@latest
+        go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli@latest
+        go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic@latest
+    - uses: actions/checkout@v3
+    - name: Checkout common protos
+      run: git submodule init && git submodule update
+    - name: Download go deps
+      run: go mod download
     - name: Install REST server generator
       run: go install ./util/cmd/protoc-gen-go_rest_server
     - name: Regenerate sources
@@ -51,10 +48,12 @@ jobs:
     needs: regenerate
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
-        go-version: '1.16.3'
+        go-version: '1.19.2'
+    - name: Install golint
+      run: go install golang.org/x/lint/golint@latest
+    - uses: actions/checkout@v3
     - uses: actions/download-artifact@v3
       if: needs.regenerate.outputs.modified_files
       with:
@@ -65,9 +64,7 @@ jobs:
         tar xvzf regen.tgz
         rm regen.tgz
     - name: Check formatting
-      run: gofmt -l ./ > gofmt.txt && ! [ -s gofmt.txt ]
-    - name: Install golint
-      run: go get -u golang.org/x/lint/golint
+      run: gofmt -l ./server/services > gofmt.txt && ! [ -s gofmt.txt ]
       if: ${{ always() }}
     - name: Lint service implementations
       run: golint ./server/services >> golint.txt && ! [ -s golint.txt ]
@@ -92,7 +89,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
-        go-version: '1.16.3'
+        go-version: '1.19.2'
     - uses: actions/download-artifact@v3
       if: needs.regenerate.outputs.modified_files
       with:
@@ -118,7 +115,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
-        go-version: '1.16.3'
+        go-version: '1.19.2'
     - uses: actions/download-artifact@v3
       if: needs.regenerate.outputs.modified_files
       with:
