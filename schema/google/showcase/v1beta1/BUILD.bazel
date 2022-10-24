@@ -21,7 +21,7 @@ load ("@rules_proto//proto:defs.bzl",
 
 # This is an API workspace, having public visibility by default makes perfect sense.
 package(default_visibility = ["//visibility:public"])
-exports_files(glob(["*.json"]))
+exports_files(glob(["*.json"]) + glob(["*.yaml"]))
 
 ##
 # the proto files wrapped with dependencies
