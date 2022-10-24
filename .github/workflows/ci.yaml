@@ -18,12 +18,8 @@ jobs:
         go-version: '1.19.2'
     - name: Checkout common protos
       run: git submodule init && git submodule update
-    - name: Install protoc
-      run: |
-        mkdir protobuf
-        curl -sSL https://github.com/protocolbuffers/protobuf/releases/download/v3.15.0/protoc-3.15.0-linux-x86_64.zip > protobuf/protoc.zip
-        unzip -d protobuf protobuf/protoc.zip
-        echo "./protobuf/bin" >> $GITHUB_PATH
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v1
     - name: Install external generators
       run: |
         go mod download
