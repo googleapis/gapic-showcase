@@ -48,8 +48,10 @@ jobs:
     needs: regenerate
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
+    - name: Install golint
+      run: go install golang.org/x/lint/golint@latest
+    - uses: actions/checkout@v3
       with:
         go-version: '1.19.2'
     - uses: actions/download-artifact@v3
@@ -63,8 +65,6 @@ jobs:
         rm regen.tgz
     - name: Check formatting
       run: gofmt -l ./server/services > gofmt.txt && ! [ -s gofmt.txt ]
-    - name: Install golint
-      run: go get -u golang.org/x/lint/golint
       if: ${{ always() }}
     - name: Lint service implementations
       run: golint ./server/services >> golint.txt && ! [ -s golint.txt ]
