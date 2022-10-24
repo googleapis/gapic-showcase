@@ -21,8 +21,9 @@ import "strings"
 // identical, or (b) when any element of `lookFor` is a prefix of the `examine` key and is followed
 // by a period. For example:
 // KeysMatchPath(map[string][]string{"loc": nil, "loc.lat": nil, "location":nil},
-//              []string{"loc"})
-//     == []string{"loc","loc.lat"}
+//
+//	         []string{"loc"})
+//	== []string{"loc","loc.lat"}
 func KeysMatchPath(examine map[string][]string, lookFor []string) []string {
 	matchingKeys := []string{}
 	for key, _ := range examine {

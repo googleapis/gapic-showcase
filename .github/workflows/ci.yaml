@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
-        go-version: '1.16.3'
+        go-version: '1.19.2'
     - name: Checkout common protos
       run: git submodule init && git submodule update
     - name: Install protoc
@@ -54,7 +54,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
-        go-version: '1.16.3'
+        go-version: '1.19.2'
     - uses: actions/download-artifact@v3
       if: needs.regenerate.outputs.modified_files
       with:
@@ -65,7 +65,7 @@ jobs:
         tar xvzf regen.tgz
         rm regen.tgz
     - name: Check formatting
-      run: gofmt -l ./ > gofmt.txt && ! [ -s gofmt.txt ]
+      run: gofmt -l ./server/services > gofmt.txt && ! [ -s gofmt.txt ]
     - name: Install golint
       run: go get -u golang.org/x/lint/golint
       if: ${{ always() }}
@@ -92,7 +92,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
-        go-version: '1.16.3'
+        go-version: '1.19.2'
     - uses: actions/download-artifact@v3
       if: needs.regenerate.outputs.modified_files
       with:
@@ -118,7 +118,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
-        go-version: '1.16.3'
+        go-version: '1.19.2'
     - uses: actions/download-artifact@v3
       if: needs.regenerate.outputs.modified_files
       with:
