@@ -49,11 +49,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/setup-go@v3
+      with:
+        go-version: '1.19.2'
     - name: Install golint
       run: go install golang.org/x/lint/golint@latest
     - uses: actions/checkout@v3
-      with:
-        go-version: '1.19.2'
     - uses: actions/download-artifact@v3
       if: needs.regenerate.outputs.modified_files
       with:
