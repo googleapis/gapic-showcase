@@ -13,7 +13,7 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.13.0
 	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783
-	golang.org/x/sync v0.0.0-20220819030929-7fc1605a5dde
+	golang.org/x/sync v0.1.0
 	google.golang.org/api v0.98.0
 	google.golang.org/genproto v0.0.0-20221024183307-1bc688fe9f3e
 	google.golang.org/grpc v1.50.1
