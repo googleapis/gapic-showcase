@@ -28,7 +28,8 @@ import (
 )
 
 // HandleCreateSequence translates REST requests/responses on the wire to internal proto messages for CreateSequence
-//    Generated for HTTP binding pattern: "/v1beta1/sequences"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/sequences"
 func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -107,7 +108,8 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 }
 
 // HandleGetSequenceReport translates REST requests/responses on the wire to internal proto messages for GetSequenceReport
-//    Generated for HTTP binding pattern: "/v1beta1/{name=sequences/*/sequenceReport}"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/{name=sequences/*/sequenceReport}"
 func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -169,7 +171,8 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 }
 
 // HandleAttemptSequence translates REST requests/responses on the wire to internal proto messages for AttemptSequence
-//    Generated for HTTP binding pattern: "/v1beta1/{name=sequences/*}"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/{name=sequences/*}"
 func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
