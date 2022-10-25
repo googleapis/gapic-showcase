@@ -28,7 +28,8 @@ import (
 )
 
 // HandleEcho translates REST requests/responses on the wire to internal proto messages for Echo
-//    Generated for HTTP binding pattern: "/v1beta1/echo:echo"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/echo:echo"
 func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -98,7 +99,8 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleExpand translates REST requests/responses on the wire to internal proto messages for Expand
-//    Generated for HTTP binding pattern: "/v1beta1/echo:expand"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/echo:expand"
 func (backend *RESTBackend) HandleExpand(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -164,13 +166,15 @@ func (backend *RESTBackend) HandleExpand(w http.ResponseWriter, r *http.Request)
 }
 
 // HandleCollect translates REST requests/responses on the wire to internal proto messages for Collect
-//    Generated for HTTP binding pattern: "/v1beta1/echo:collect"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/echo:collect"
 func (backend *RESTBackend) HandleCollect(w http.ResponseWriter, r *http.Request) {
 	backend.Error(w, http.StatusNotImplemented, "client-streaming methods not implemented yet (request matched '/v1beta1/echo:collect': %q)", r.URL)
 }
 
 // HandlePagedExpand translates REST requests/responses on the wire to internal proto messages for PagedExpand
-//    Generated for HTTP binding pattern: "/v1beta1/echo:pagedExpand"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/echo:pagedExpand"
 func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -240,7 +244,8 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 }
 
 // HandlePagedExpandLegacy translates REST requests/responses on the wire to internal proto messages for PagedExpandLegacy
-//    Generated for HTTP binding pattern: "/v1beta1/echo:pagedExpandLegacy"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/echo:pagedExpandLegacy"
 func (backend *RESTBackend) HandlePagedExpandLegacy(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -310,7 +315,8 @@ func (backend *RESTBackend) HandlePagedExpandLegacy(w http.ResponseWriter, r *ht
 }
 
 // HandlePagedExpandLegacyMapped translates REST requests/responses on the wire to internal proto messages for PagedExpandLegacyMapped
-//    Generated for HTTP binding pattern: "/v1beta1/echo:pagedExpandLegacyMapped"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/echo:pagedExpandLegacyMapped"
 func (backend *RESTBackend) HandlePagedExpandLegacyMapped(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -380,7 +386,8 @@ func (backend *RESTBackend) HandlePagedExpandLegacyMapped(w http.ResponseWriter,
 }
 
 // HandleWait translates REST requests/responses on the wire to internal proto messages for Wait
-//    Generated for HTTP binding pattern: "/v1beta1/echo:wait"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/echo:wait"
 func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -450,7 +457,8 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleBlock translates REST requests/responses on the wire to internal proto messages for Block
-//    Generated for HTTP binding pattern: "/v1beta1/echo:block"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/echo:block"
 func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
