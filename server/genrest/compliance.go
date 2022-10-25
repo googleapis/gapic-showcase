@@ -28,7 +28,8 @@ import (
 )
 
 // HandleRepeatDataBody translates REST requests/responses on the wire to internal proto messages for RepeatDataBody
-//    Generated for HTTP binding pattern: "/v1beta1/repeat:body"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/repeat:body"
 func (backend *RESTBackend) HandleRepeatDataBody(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -98,7 +99,8 @@ func (backend *RESTBackend) HandleRepeatDataBody(w http.ResponseWriter, r *http.
 }
 
 // HandleRepeatDataBodyInfo translates REST requests/responses on the wire to internal proto messages for RepeatDataBodyInfo
-//    Generated for HTTP binding pattern: "/v1beta1/repeat:bodyinfo"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/repeat:bodyinfo"
 func (backend *RESTBackend) HandleRepeatDataBodyInfo(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -177,7 +179,8 @@ func (backend *RESTBackend) HandleRepeatDataBodyInfo(w http.ResponseWriter, r *h
 }
 
 // HandleRepeatDataQuery translates REST requests/responses on the wire to internal proto messages for RepeatDataQuery
-//    Generated for HTTP binding pattern: "/v1beta1/repeat:query"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/repeat:query"
 func (backend *RESTBackend) HandleRepeatDataQuery(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -234,7 +237,8 @@ func (backend *RESTBackend) HandleRepeatDataQuery(w http.ResponseWriter, r *http
 }
 
 // HandleRepeatDataSimplePath translates REST requests/responses on the wire to internal proto messages for RepeatDataSimplePath
-//    Generated for HTTP binding pattern: "/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}/{info.f_kingdom}:simplepath"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}/{info.f_kingdom}:simplepath"
 func (backend *RESTBackend) HandleRepeatDataSimplePath(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -296,7 +300,8 @@ func (backend *RESTBackend) HandleRepeatDataSimplePath(w http.ResponseWriter, r 
 }
 
 // HandleRepeatDataPathResource translates REST requests/responses on the wire to internal proto messages for RepeatDataPathResource
-//    Generated for HTTP binding pattern: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/*}/bool/{info.f_bool}:pathresource"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/*}/bool/{info.f_bool}:pathresource"
 func (backend *RESTBackend) HandleRepeatDataPathResource(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -358,7 +363,8 @@ func (backend *RESTBackend) HandleRepeatDataPathResource(w http.ResponseWriter, 
 }
 
 // HandleRepeatDataPathResource_1 translates REST requests/responses on the wire to internal proto messages for RepeatDataPathResource
-//    Generated for HTTP binding pattern: "/v1beta1/repeat/{info.f_child.f_string=first/*}/{info.f_string=second/*}/bool/{info.f_bool}:childfirstpathresource"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/repeat/{info.f_child.f_string=first/*}/{info.f_string=second/*}/bool/{info.f_bool}:childfirstpathresource"
 func (backend *RESTBackend) HandleRepeatDataPathResource_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -420,7 +426,8 @@ func (backend *RESTBackend) HandleRepeatDataPathResource_1(w http.ResponseWriter
 }
 
 // HandleRepeatDataPathTrailingResource translates REST requests/responses on the wire to internal proto messages for RepeatDataPathTrailingResource
-//    Generated for HTTP binding pattern: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/**}:pathtrailingresource"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/repeat/{info.f_string=first/*}/{info.f_child.f_string=second/**}:pathtrailingresource"
 func (backend *RESTBackend) HandleRepeatDataPathTrailingResource(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -482,7 +489,8 @@ func (backend *RESTBackend) HandleRepeatDataPathTrailingResource(w http.Response
 }
 
 // HandleRepeatDataBodyPut translates REST requests/responses on the wire to internal proto messages for RepeatDataBodyPut
-//    Generated for HTTP binding pattern: "/v1beta1/repeat:bodyput"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/repeat:bodyput"
 func (backend *RESTBackend) HandleRepeatDataBodyPut(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -552,7 +560,8 @@ func (backend *RESTBackend) HandleRepeatDataBodyPut(w http.ResponseWriter, r *ht
 }
 
 // HandleRepeatDataBodyPatch translates REST requests/responses on the wire to internal proto messages for RepeatDataBodyPatch
-//    Generated for HTTP binding pattern: "/v1beta1/repeat:bodypatch"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/repeat:bodypatch"
 func (backend *RESTBackend) HandleRepeatDataBodyPatch(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -622,7 +631,8 @@ func (backend *RESTBackend) HandleRepeatDataBodyPatch(w http.ResponseWriter, r *
 }
 
 // HandleGetEnum translates REST requests/responses on the wire to internal proto messages for GetEnum
-//    Generated for HTTP binding pattern: "/v1beta1/compliance/enum"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/compliance/enum"
 func (backend *RESTBackend) HandleGetEnum(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -679,7 +689,8 @@ func (backend *RESTBackend) HandleGetEnum(w http.ResponseWriter, r *http.Request
 }
 
 // HandleVerifyEnum translates REST requests/responses on the wire to internal proto messages for VerifyEnum
-//    Generated for HTTP binding pattern: "/v1beta1/compliance/enum"
+//
+//	Generated for HTTP binding pattern: "/v1beta1/compliance/enum"
 func (backend *RESTBackend) HandleVerifyEnum(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)

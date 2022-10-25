@@ -1245,8 +1245,10 @@ func (c *testingRESTClient) VerifyTest(ctx context.Context, req *genprotopb.Veri
 	if req.GetAnswer() != nil {
 		params.Add("answer", fmt.Sprintf("%v", req.GetAnswer()))
 	}
-	if req.GetAnswers() != nil {
-		params.Add("answers", fmt.Sprintf("%v", req.GetAnswers()))
+	if items := req.GetAnswers(); len(items) > 0 {
+		for _, item := range items {
+			params.Add("answers", fmt.Sprintf("%v", item))
+		}
 	}
 
 	baseUrl.RawQuery = params.Encode()
