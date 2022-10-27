@@ -35,9 +35,9 @@ switched_rules_by_language(name = "com_google_googleapis_imports", grpc = True)
 #
 http_archive(
   name = "com_google_protobuf",
-  sha256 = "3d76fb2f9401124a29879b3673464767427ad17c9ef57b15c0d7962824e83ac7",
-  urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.21.8.zip"],
-  strip_prefix = "protobuf-3.21.8",
+  sha256 = "f66073dee0bc159157b0bd7f502d7d1ee0bc76b3c1eac9836927511bdc4b3fc1",
+  urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.21.9.zip"],
+  strip_prefix = "protobuf-3.21.9",
 )
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 protobuf_deps()
