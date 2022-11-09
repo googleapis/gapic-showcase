@@ -417,6 +417,8 @@ func (c *MessagingClient) StreamBlurbs(ctx context.Context, req *genprotopb.Stre
 
 // SendBlurbs this is a stream to create multiple blurbs. If an invalid blurb is
 // requested to be created, the stream will close with an error.
+//
+// This method is not supported for the REST transport.
 func (c *MessagingClient) SendBlurbs(ctx context.Context, opts ...gax.CallOption) (genprotopb.Messaging_SendBlurbsClient, error) {
 	return c.internalClient.SendBlurbs(ctx, opts...)
 }
@@ -425,6 +427,8 @@ func (c *MessagingClient) SendBlurbs(ctx context.Context, opts ...gax.CallOption
 // are being created after the stream has started and sends requests to create
 // blurbs. If an invalid blurb is requested to be created, the stream will
 // close with an error.
+//
+// This method is not supported for the REST transport.
 func (c *MessagingClient) Connect(ctx context.Context, opts ...gax.CallOption) (genprotopb.Messaging_ConnectClient, error) {
 	return c.internalClient.Connect(ctx, opts...)
 }
@@ -1970,6 +1974,8 @@ func (c *streamBlurbsRESTClient) RecvMsg(m interface{}) error {
 
 // SendBlurbs this is a stream to create multiple blurbs. If an invalid blurb is
 // requested to be created, the stream will close with an error.
+//
+// This method is not supported for the REST transport.
 func (c *messagingRESTClient) SendBlurbs(ctx context.Context, opts ...gax.CallOption) (genprotopb.Messaging_SendBlurbsClient, error) {
 	return nil, fmt.Errorf("SendBlurbs not yet supported for REST clients")
 }
@@ -1978,6 +1984,8 @@ func (c *messagingRESTClient) SendBlurbs(ctx context.Context, opts ...gax.CallOp
 // are being created after the stream has started and sends requests to create
 // blurbs. If an invalid blurb is requested to be created, the stream will
 // close with an error.
+//
+// This method is not supported for the REST transport.
 func (c *messagingRESTClient) Connect(ctx context.Context, opts ...gax.CallOption) (genprotopb.Messaging_ConnectClient, error) {
 	return nil, fmt.Errorf("Connect not yet supported for REST clients")
 }

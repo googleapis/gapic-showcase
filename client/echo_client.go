@@ -280,6 +280,8 @@ func (c *EchoClient) Expand(ctx context.Context, req *genprotopb.ExpandRequest, 
 // Collect this method will collect the words given to it. When the stream is closed
 // by the client, this method will return the a concatenation of the strings
 // passed to it. This method showcases client-side streaming RPCs.
+//
+// This method is not supported for the REST transport.
 func (c *EchoClient) Collect(ctx context.Context, opts ...gax.CallOption) (genprotopb.Echo_CollectClient, error) {
 	return c.internalClient.Collect(ctx, opts...)
 }
@@ -287,6 +289,8 @@ func (c *EchoClient) Collect(ctx context.Context, opts ...gax.CallOption) (genpr
 // Chat this method, upon receiving a request on the stream, will pass the same
 // content back on the stream. This method showcases bidirectional
 // streaming RPCs.
+//
+// This method is not supported for the REST transport.
 func (c *EchoClient) Chat(ctx context.Context, opts ...gax.CallOption) (genprotopb.Echo_ChatClient, error) {
 	return c.internalClient.Chat(ctx, opts...)
 }
@@ -1241,6 +1245,8 @@ func (c *expandRESTClient) RecvMsg(m interface{}) error {
 // Collect this method will collect the words given to it. When the stream is closed
 // by the client, this method will return the a concatenation of the strings
 // passed to it. This method showcases client-side streaming RPCs.
+//
+// This method is not supported for the REST transport.
 func (c *echoRESTClient) Collect(ctx context.Context, opts ...gax.CallOption) (genprotopb.Echo_CollectClient, error) {
 	return nil, fmt.Errorf("Collect not yet supported for REST clients")
 }
@@ -1248,6 +1254,8 @@ func (c *echoRESTClient) Collect(ctx context.Context, opts ...gax.CallOption) (g
 // Chat this method, upon receiving a request on the stream, will pass the same
 // content back on the stream. This method showcases bidirectional
 // streaming RPCs.
+//
+// This method is not supported for the REST transport.
 func (c *echoRESTClient) Chat(ctx context.Context, opts ...gax.CallOption) (genprotopb.Echo_ChatClient, error) {
 	return nil, fmt.Errorf("Chat not yet supported for REST clients")
 }
