@@ -176,7 +176,7 @@ if err != nil {
     log.Fatal(err)
 }
 ```
-Example for Java:
+Example for Java(gRPC):
 
 ```
 EchoSettings echoSettings = EchoSettings.newBuilder()
@@ -191,6 +191,16 @@ EchoSettings echoSettings = EchoSettings.newBuilder()
                   }
                 })
             .build())
+    .build();
+EchoClient echoClient = EchoClient.create(echoSettings);
+```
+Example for Java(httpJson):
+```
+EchoSettings echoSettings = EchoSettings.newHttpJsonBuilder()
+    .setTransportChannelProvider(EchoSettings.defaultHttpJsonTransportProviderBuilder()
+        .setHttpTransport(new NetHttpTransport.Builder().doNotValidateCertificate().build())
+        .setEndpoint("http://localhost:7469")
+        .build())
     .build();
 EchoClient echoClient = EchoClient.create(echoSettings);
 ```
