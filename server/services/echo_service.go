@@ -229,7 +229,7 @@ func (s *echoServerImpl) Block(ctx context.Context, in *pb.BlockRequest) (*pb.Bl
 	return in.GetSuccess(), nil
 }
 
-//echo any provided headers in the metadata
+// echo any provided headers in the metadata
 func echoHeaders(ctx context.Context) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
