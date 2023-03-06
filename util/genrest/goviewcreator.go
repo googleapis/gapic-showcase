@@ -290,11 +290,11 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	// add '\n' to the "ExtremeValues" ComplianceGroup in compliance_suite.json.
 
 	for _, handler := range registered {
-		// Java's PATCH requests are sent as POST requests with `x-http-methods-override` header
+		file.P(`  router.HandleFunc(%q, rest.%s).Methods(%q)`, handler.pattern, handler.function, handler.verb)
+		// Java's PATCH requests are sent as POST requests with a `X-HTTP-Method-Override` header
 		if handler.verb == "PATCH" {
-			file.P(`  router.HandleFunc(%q, rest.%s).Methods(%q, %q)`, handler.pattern, handler.function, handler.verb, "POST")
-		} else {
-			file.P(`  router.HandleFunc(%q, rest.%s).Methods(%q)`, handler.pattern, handler.function, handler.verb)
+			// HeadersRegexp is used to match for both POST Http Verb and the Header value
+			file.P(`  router.HandleFunc(%q, rest.%s).HeadersRegexp("X-HTTP-Method-Override", "^PATCH$").Methods("POST")`, handler.pattern, handler.function)
 		}
 	}
 	file.P(`  router.PathPrefix("/").HandlerFunc(rest.catchAllHandler)`)
