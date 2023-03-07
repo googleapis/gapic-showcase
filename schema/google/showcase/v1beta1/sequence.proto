@@ -60,6 +60,15 @@ service SequenceService {
     };
     option (google.api.method_signature) = "name";
   };
+
+    // Attempts a streaming sequence.
+    rpc AttemptStreamingSequence(AttemptStreamingSequenceRequest) returns (google.protobuf.Empty) {
+      option (google.api.http) = {
+        post: "/v1beta1/{name=sequences/*}"
+        body: "*"
+      };
+      option (google.api.method_signature) = "name";
+    };
 }
 
 message Sequence {
@@ -121,6 +130,13 @@ message CreateSequenceRequest {
 }
 
 message AttemptSequenceRequest {
+  string name = 1 [
+    (google.api.resource_reference).type = "showcase.googleapis.com/Sequence",
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+
+message AttemptStreamingSequenceRequest {
   string name = 1 [
     (google.api.resource_reference).type = "showcase.googleapis.com/Sequence",
     (google.api.field_behavior) = REQUIRED
