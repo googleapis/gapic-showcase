@@ -61,14 +61,14 @@ service SequenceService {
     option (google.api.method_signature) = "name";
   };
 
-    // Attempts a streaming sequence.
-    rpc AttemptStreamingSequence(AttemptStreamingSequenceRequest) returns (google.protobuf.Empty) {
-      option (google.api.http) = {
-      post: "/v1beta1/{name=sequences/*}:stream"
-        body: "*"
-      };
-      option (google.api.method_signature) = "name";
+  // Attempts a streaming sequence.
+  rpc AttemptStreamingSequence(AttemptStreamingSequenceRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+    post: "/v1beta1/{name=sequences/*}:stream"
+      body: "*"
     };
+    option (google.api.method_signature) = "name";
+  };
 }
 
 message Sequence {
