@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ func RegisterHandlers(router *gmux.Router, backend *services.Backend) {
 	router.HandleFunc("/v1beta1/repeat/{info.fString:first/.+}/{info.fChild.fString:second/.+}:pathtrailingresource", rest.HandleRepeatDataPathTrailingResource).Methods("GET")
 	router.HandleFunc("/v1beta1/repeat:bodyput", rest.HandleRepeatDataBodyPut).Methods("PUT")
 	router.HandleFunc("/v1beta1/repeat:bodypatch", rest.HandleRepeatDataBodyPatch).Methods("PATCH")
+	router.HandleFunc("/v1beta1/repeat:bodypatch", rest.HandleRepeatDataBodyPatch).HeadersRegexp("X-HTTP-Method-Override", "^PATCH$").Methods("POST")
 	router.HandleFunc("/v1beta1/compliance/enum", rest.HandleGetEnum).Methods("GET")
 	router.HandleFunc("/v1beta1/compliance/enum", rest.HandleVerifyEnum).Methods("POST")
 	router.HandleFunc("/v1beta1/echo:echo", rest.HandleEcho).Methods("POST")
@@ -54,11 +55,13 @@ func RegisterHandlers(router *gmux.Router, backend *services.Backend) {
 	router.HandleFunc("/v1beta1/users", rest.HandleCreateUser).Methods("POST")
 	router.HandleFunc("/v1beta1/{name:users/.+}", rest.HandleGetUser).Methods("GET")
 	router.HandleFunc("/v1beta1/{user.name:users/.+}", rest.HandleUpdateUser).Methods("PATCH")
+	router.HandleFunc("/v1beta1/{user.name:users/.+}", rest.HandleUpdateUser).HeadersRegexp("X-HTTP-Method-Override", "^PATCH$").Methods("POST")
 	router.HandleFunc("/v1beta1/{name:users/.+}", rest.HandleDeleteUser).Methods("DELETE")
 	router.HandleFunc("/v1beta1/users", rest.HandleListUsers).Methods("GET")
 	router.HandleFunc("/v1beta1/rooms", rest.HandleCreateRoom).Methods("POST")
 	router.HandleFunc("/v1beta1/{name:rooms/.+}", rest.HandleGetRoom).Methods("GET")
 	router.HandleFunc("/v1beta1/{room.name:rooms/.+}", rest.HandleUpdateRoom).Methods("PATCH")
+	router.HandleFunc("/v1beta1/{room.name:rooms/.+}", rest.HandleUpdateRoom).HeadersRegexp("X-HTTP-Method-Override", "^PATCH$").Methods("POST")
 	router.HandleFunc("/v1beta1/{name:rooms/.+}", rest.HandleDeleteRoom).Methods("DELETE")
 	router.HandleFunc("/v1beta1/rooms", rest.HandleListRooms).Methods("GET")
 	router.HandleFunc("/v1beta1/{parent:rooms/.+}/blurbs", rest.HandleCreateBlurb).Methods("POST")
@@ -66,7 +69,9 @@ func RegisterHandlers(router *gmux.Router, backend *services.Backend) {
 	router.HandleFunc("/v1beta1/{name:rooms/.+/blurbs/.+}", rest.HandleGetBlurb).Methods("GET")
 	router.HandleFunc("/v1beta1/{name:users/.+/profile/blurbs/.+}", rest.HandleGetBlurb_1).Methods("GET")
 	router.HandleFunc("/v1beta1/{blurb.name:rooms/.+/blurbs/.+}", rest.HandleUpdateBlurb).Methods("PATCH")
+	router.HandleFunc("/v1beta1/{blurb.name:rooms/.+/blurbs/.+}", rest.HandleUpdateBlurb).HeadersRegexp("X-HTTP-Method-Override", "^PATCH$").Methods("POST")
 	router.HandleFunc("/v1beta1/{blurb.name:users/.+/profile/blurbs/.+}", rest.HandleUpdateBlurb_1).Methods("PATCH")
+	router.HandleFunc("/v1beta1/{blurb.name:users/.+/profile/blurbs/.+}", rest.HandleUpdateBlurb_1).HeadersRegexp("X-HTTP-Method-Override", "^PATCH$").Methods("POST")
 	router.HandleFunc("/v1beta1/{name:rooms/.+/blurbs/.+}", rest.HandleDeleteBlurb).Methods("DELETE")
 	router.HandleFunc("/v1beta1/{name:users/.+/profile/blurbs/.+}", rest.HandleDeleteBlurb_1).Methods("DELETE")
 	router.HandleFunc("/v1beta1/{parent:rooms/.+}/blurbs", rest.HandleListBlurbs).Methods("GET")
