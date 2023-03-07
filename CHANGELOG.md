@@ -1,5 +1,20 @@
 # Release History
 
+## [0.26.0](https://github.com/googleapis/gapic-showcase/compare/v0.25.0...v0.26.0) (2023-03-07)
+
+
+### Features
+
+* **go:** Update Go version to 1.19 ([#1225](https://github.com/googleapis/gapic-showcase/issues/1225)) ([d4b108e](https://github.com/googleapis/gapic-showcase/commit/d4b108e16dc91c0ea6d4dec3dca4d3270d3bf47a))
+
+
+### Bug Fixes
+
+* Build assets for darwin/arm64 ([#1267](https://github.com/googleapis/gapic-showcase/issues/1267)) ([0833a57](https://github.com/googleapis/gapic-showcase/commit/0833a579131c14582b053f26698fdfe93e465d87))
+* Export showcase_v1beta1.yaml from BUILD.bazel to support external GAPIC generation ([#1223](https://github.com/googleapis/gapic-showcase/issues/1223)) ([5076348](https://github.com/googleapis/gapic-showcase/commit/507634898e208b7ff88784e4ec5f0efd22bff9ab))
+* Handle x-http-method-override for PATCH as POST ([#1262](https://github.com/googleapis/gapic-showcase/issues/1262)) ([4070ce3](https://github.com/googleapis/gapic-showcase/commit/4070ce331bd5e852ccb2f4f2267dce80a9dda9c4))
+* Use quotes around extreme int64 values ([#1206](https://github.com/googleapis/gapic-showcase/issues/1206)) ([c9d9ff1](https://github.com/googleapis/gapic-showcase/commit/c9d9ff191bfd72fe8563625be4074fe4659585d6)), closes [#1205](https://github.com/googleapis/gapic-showcase/issues/1205)
+
 ## [0.25.0](https://github.com/googleapis/gapic-showcase/compare/v0.24.0...v0.25.0) (2022-09-01)
 
 
