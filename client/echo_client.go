@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -636,6 +636,7 @@ func (c *echoGRPCClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, 
 
 func (c *echoGRPCClient) Expand(ctx context.Context, req *genprotopb.ExpandRequest, opts ...gax.CallOption) (genprotopb.Echo_ExpandClient, error) {
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).Expand[0:len((*c.CallOptions).Expand):len((*c.CallOptions).Expand)], opts...)
 	var resp genprotopb.Echo_ExpandClient
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
