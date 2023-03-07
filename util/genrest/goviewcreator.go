@@ -291,6 +291,11 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 	for _, handler := range registered {
 		file.P(`  router.HandleFunc(%q, rest.%s).Methods(%q)`, handler.pattern, handler.function, handler.verb)
+		// Java's PATCH requests are sent as POST requests with a `X-HTTP-Method-Override` header
+		if handler.verb == "PATCH" {
+			// HeadersRegexp is used to match for both POST Http Verb and the Header value
+			file.P(`  router.HandleFunc(%q, rest.%s).HeadersRegexp("X-HTTP-Method-Override", "^PATCH$").Methods("POST")`, handler.pattern, handler.function)
+		}
 	}
 	file.P(`  router.PathPrefix("/").HandlerFunc(rest.catchAllHandler)`)
 	file.P(`}`)

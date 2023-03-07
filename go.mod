@@ -12,21 +12,22 @@ require (
 	github.com/soheilhy/cmux v0.1.5
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
-	golang.org/x/oauth2 v0.2.0
+	golang.org/x/oauth2 v0.5.0
 	golang.org/x/sync v0.1.0
-	google.golang.org/api v0.103.0
-	google.golang.org/genproto v0.0.0-20221114212237-e4508ebdbee1
-	google.golang.org/grpc v1.50.1
+	google.golang.org/api v0.111.0
+	google.golang.org/genproto v0.0.0-20230223222841-637eb2293923
+	google.golang.org/grpc v1.53.0
 	google.golang.org/protobuf v1.28.1
 )
 
 require (
-	cloud.google.com/go v0.105.0 // indirect
-	cloud.google.com/go/compute v1.12.1 // indirect
-	cloud.google.com/go/compute/metadata v0.2.1 // indirect
+	cloud.google.com/go v0.107.0 // indirect
+	cloud.google.com/go/compute v1.18.0 // indirect
+	cloud.google.com/go/compute/metadata v0.2.3 // indirect
+	cloud.google.com/go/iam v0.11.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/googleapis/enterprise-certificate-proxy v0.2.0 // indirect
+	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
