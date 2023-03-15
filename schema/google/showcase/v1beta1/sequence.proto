@@ -62,7 +62,7 @@ service SequenceService {
   };
 
   // Attempts a streaming sequence.
-  rpc AttemptStreamingSequence(AttemptStreamingSequenceRequest) returns (google.protobuf.Empty) {
+  rpc AttemptStreamingSequence(AttemptStreamingSequenceRequest) returns (stream Sequence) {
     option (google.api.http) = {
     post: "/v1beta1/{name=sequences/*}:stream"
       body: "*"
