@@ -12,7 +12,7 @@ jobs:
     outputs:
       modified_files: ${{ steps.mod.outputs.modified_files }}
     steps:
-    - uses: actions/setup-go@v3
+    - uses: actions/setup-go@v4
       with:
         go-version: '1.19.2'
     - name: Install Protoc
@@ -48,7 +48,7 @@ jobs:
     needs: regenerate
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/setup-go@v3
+    - uses: actions/setup-go@v4
       with:
         go-version: '1.19.2'
     - name: Install golint
@@ -87,7 +87,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-go@v3
+    - uses: actions/setup-go@v4
       with:
         go-version: '1.19.2'
     - uses: actions/download-artifact@v3
@@ -113,7 +113,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-go@v3
+    - uses: actions/setup-go@v4
       with:
         go-version: '1.19.2'
     - uses: actions/download-artifact@v3
