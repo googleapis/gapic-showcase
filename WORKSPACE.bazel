@@ -47,11 +47,11 @@ protobuf_deps()
 #
 http_archive(
   name = "rules_proto",
-  sha256 = "56314b567d59daf64cb0379dd86dbb9de170b18d47fe378d5451e08f407c36bf",
-  strip_prefix = "rules_proto-70b42485395e0fa376f32b9e7f4012a70d6121d2",
+  sha256 = "1357c68ef1c3644cafad6ae1822d99c06b94ef2cd8e01c783968703f61373d18",
+  strip_prefix = "rules_proto-71c4fc69900946093ac5c82d81efd19fa522d060",
   urls = [
-    "https://mirror.bazel.build/github.com/bazelbuild/rules_proto/archive/70b42485395e0fa376f32b9e7f4012a70d6121d2.tar.gz",
-    "https://github.com/bazelbuild/rules_proto/archive/70b42485395e0fa376f32b9e7f4012a70d6121d2.tar.gz",
+    "https://mirror.bazel.build/github.com/bazelbuild/rules_proto/archive/71c4fc69900946093ac5c82d81efd19fa522d060.tar.gz",
+    "https://github.com/bazelbuild/rules_proto/archive/71c4fc69900946093ac5c82d81efd19fa522d060.tar.gz",
   ],
 )
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
