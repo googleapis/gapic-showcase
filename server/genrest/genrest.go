@@ -85,6 +85,7 @@ func RegisterHandlers(router *gmux.Router, backend *services.Backend) {
 	router.HandleFunc("/v1beta1/sequences", rest.HandleCreateSequence).Methods("POST")
 	router.HandleFunc("/v1beta1/{name:sequences/.+/sequenceReport}", rest.HandleGetSequenceReport).Methods("GET")
 	router.HandleFunc("/v1beta1/{name:sequences/.+}", rest.HandleAttemptSequence).Methods("POST")
+	router.HandleFunc("/v1beta1/{name:sequences/.+}:stream", rest.HandleAttemptStreamingSequence).Methods("POST")
 	router.HandleFunc("/v1beta1/sessions", rest.HandleCreateSession).Methods("POST")
 	router.HandleFunc("/v1beta1/{name:sessions/.+}", rest.HandleGetSession).Methods("GET")
 	router.HandleFunc("/v1beta1/sessions", rest.HandleListSessions).Methods("GET")

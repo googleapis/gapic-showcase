@@ -62,12 +62,12 @@ service SequenceService {
   };
 
   // Attempts a streaming sequence.
-  rpc AttemptStreamingSequence(AttemptStreamingSequenceRequest) returns (stream Sequence) {
+  rpc AttemptStreamingSequence(AttemptStreamingSequenceRequest) returns  (stream AttemptStreamingSequenceResponse) {
     option (google.api.http) = {
     post: "/v1beta1/{name=sequences/*}:stream"
       body: "*"
     };
-    option (google.api.method_signature) = "name";
+    option (google.api.method_signature) = "name,content,error";
   };
 }
 
@@ -141,6 +141,19 @@ message AttemptStreamingSequenceRequest {
     (google.api.resource_reference).type = "showcase.googleapis.com/Sequence",
     (google.api.field_behavior) = REQUIRED
   ];
+
+  // The content that will be split into words and returned on the stream.
+  string content = 2;
+
+  // The error that is thrown after all words are sent on the stream.
+  google.rpc.Status error = 3;
+}
+
+// The response message for the Echo methods.
+message AttemptStreamingSequenceResponse {
+  // The content specified in the request.
+  string content = 1;
+
 }
 
 message GetSequenceReportRequest {

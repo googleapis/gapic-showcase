@@ -20,6 +20,7 @@ var SequenceSubCommands []string = []string{
 	"create-sequence",
 	"get-sequence-report",
 	"attempt-sequence",
+	"attempt-streaming-sequence",
 }
 
 func init() {

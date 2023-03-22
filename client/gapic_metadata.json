@@ -811,6 +811,11 @@
                 "AttemptSequence"
               ]
             },
+            "AttemptStreamingSequence": {
+              "methods": [
+                "AttemptStreamingSequence"
+              ]
+            },
             "CancelOperation": {
               "methods": [
                 "CancelOperation"
@@ -874,6 +879,11 @@
             "AttemptSequence": {
               "methods": [
                 "AttemptSequence"
+              ]
+            },
+            "AttemptStreamingSequence": {
+              "methods": [
+                "AttemptStreamingSequence"
               ]
             },
             "CancelOperation": {

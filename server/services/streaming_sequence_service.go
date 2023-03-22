@@ -17,36 +17,18 @@ package services
 import (
 	"context"
 	"fmt"
-	"sync"
+	"strconv"
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/duration"
-	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-// NewSequenceServer returns a new SequenceServer for the Showcase API.
-func NewSequenceServer() pb.SequenceServiceServer {
-	return &sequenceServerImpl{
-		token:     server.NewTokenGenerator(),
-		sequences: sync.Map{},
-		reports:   sync.Map{},
-	}
-}
 
-type sequenceServerImpl struct {
-	uid   server.UniqID
-	token server.TokenGenerator
-
-	sequences sync.Map
-	reports   sync.Map
-}
-
-func (s *sequenceServerImpl) CreateSequence(ctx context.Context, in *pb.CreateSequenceRequest) (*pb.Sequence, error) {
+func (s *sequenceServerImpl) CreateStreamingSequence(ctx context.Context, in *pb.CreateSequenceRequest) (*pb.Sequence, error) {
 	seq := clone(in.GetSequence())
 
 	// Assign Name.
@@ -62,11 +44,11 @@ func (s *sequenceServerImpl) CreateSequence(ctx context.Context, in *pb.CreateSe
 	return seq, nil
 }
 
-func (s *sequenceServerImpl) AttemptSequence(ctx context.Context, in *pb.AttemptSequenceRequest) (*empty.Empty, error) {
+func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSequenceRequest, stream pb.SequenceService_AttemptStreamingSequenceServer) error {
 	received := time.Now()
 	name := in.GetName()
 	if name == "" {
-		return nil, status.Errorf(
+		return status.Errorf(
 			codes.InvalidArgument,
 			"The field `name` is required.")
 	}
@@ -74,7 +56,7 @@ func (s *sequenceServerImpl) AttemptSequence(ctx context.Context, in *pb.Attempt
 	// Retrieve Sequence and associated SequenceReport.
 	i, ok := s.sequences.Load(name)
 	if !ok {
-		return nil, status.Errorf(
+		return status.Errorf(
 			codes.NotFound,
 			"The Sequence with %q does not exist.",
 			name,
@@ -84,16 +66,6 @@ func (s *sequenceServerImpl) AttemptSequence(ctx context.Context, in *pb.Attempt
 
 	i, _ = s.reports.Load(report(name))
 	rep, _ := i.(*pb.SequenceReport)
-
-	// Retrieve the attempt deadline.
-	deadline, _ := ctx.Deadline()
-	dpb, err := ptypes.TimestampProto(deadline)
-	if err != nil {
-		return nil, status.Errorf(
-			codes.Internal,
-			err.Error(),
-		)
-	}
 
 	// Get the number of attempts, which coincides with this attempt's number.
 	n := len(rep.Attempts)
@@ -110,9 +82,27 @@ func (s *sequenceServerImpl) AttemptSequence(ctx context.Context, in *pb.Attempt
 		st = status.New(codes.OutOfRange, "Attempt exceeded predefined responses")
 	}
 
-	// A delay of 0 returns immediately.
-	time.Sleep(delay)
+	r, _ := strconv.Atoi(in.GetContent())
 
+	for end := time.Now().Add(delay*time.Nanosecond); ; {
+		if time.Now().After(end) {
+			break
+		}
+
+		for number := 0; number < r; number++ {
+			err := stream.Send(&pb.AttemptStreamingSequenceResponse{Content: strconv.Itoa(number)})
+			time.Sleep(delay)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	echoStreamingHeaders(stream)
+	echoStreamingTrailers(stream)
+
+	time.Sleep(delay)
+	
 	// Calculate the perceived delay since the last RPC attempt.
 	attDelay := &duration.Duration{}
 	if n > 0 {
@@ -126,25 +116,23 @@ func (s *sequenceServerImpl) AttemptSequence(ctx context.Context, in *pb.Attempt
 	responseTime := time.Now()
 	rpb, err := ptypes.TimestampProto(responseTime)
 	if err != nil {
-		return nil, status.Errorf(
+		return status.Errorf(
 			codes.Internal,
 			err.Error(),
 		)
 	}
 
 	rep.Attempts = append(rep.Attempts, &pb.SequenceReport_Attempt{
-		AttemptNumber:   int32(n),
-		AttemptDeadline: dpb,
-		ResponseTime:    rpb,
-		AttemptDelay:    attDelay,
-		Status:          st.Proto(),
+		AttemptNumber: int32(n),
+		ResponseTime:  rpb,
+		AttemptDelay:  attDelay,
+		Status:        st.Proto(),
 	})
 
-	return &empty.Empty{}, st.Err()
+	return st.Err()
 }
 
-
-func (s *sequenceServerImpl) GetSequenceReport(ctx context.Context, in *pb.GetSequenceReportRequest) (*pb.SequenceReport, error) {
+func (s *sequenceServerImpl) GetStreamingSequenceReport(ctx context.Context, in *pb.GetSequenceReportRequest) (*pb.SequenceReport, error) {
 	name := in.GetName()
 	if name == "" {
 		return nil, status.Errorf(
@@ -164,16 +152,3 @@ func (s *sequenceServerImpl) GetSequenceReport(ctx context.Context, in *pb.GetSe
 	return report.(*pb.SequenceReport), nil
 }
 
-func report(n string) string {
-	return fmt.Sprintf("%s/sequenceReport", n)
-}
-
-func clone(s *pb.Sequence) *pb.Sequence {
-	r := make([]*pb.Sequence_Response, len(s.GetResponses()))
-	copy(r, s.GetResponses())
-
-	return &pb.Sequence{
-		Name:      s.GetName(),
-		Responses: r,
-	}
-}

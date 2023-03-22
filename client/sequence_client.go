@@ -48,18 +48,19 @@ var newSequenceClientHook clientHook
 
 // SequenceCallOptions contains the retry settings for each method of SequenceClient.
 type SequenceCallOptions struct {
-	CreateSequence     []gax.CallOption
-	GetSequenceReport  []gax.CallOption
-	AttemptSequence    []gax.CallOption
-	ListLocations      []gax.CallOption
-	GetLocation        []gax.CallOption
-	SetIamPolicy       []gax.CallOption
-	GetIamPolicy       []gax.CallOption
-	TestIamPermissions []gax.CallOption
-	ListOperations     []gax.CallOption
-	GetOperation       []gax.CallOption
-	DeleteOperation    []gax.CallOption
-	CancelOperation    []gax.CallOption
+	CreateSequence           []gax.CallOption
+	GetSequenceReport        []gax.CallOption
+	AttemptSequence          []gax.CallOption
+	AttemptStreamingSequence []gax.CallOption
+	ListLocations            []gax.CallOption
+	GetLocation              []gax.CallOption
+	SetIamPolicy             []gax.CallOption
+	GetIamPolicy             []gax.CallOption
+	TestIamPermissions       []gax.CallOption
+	ListOperations           []gax.CallOption
+	GetOperation             []gax.CallOption
+	DeleteOperation          []gax.CallOption
+	CancelOperation          []gax.CallOption
 }
 
 func defaultSequenceGRPCClientOptions() []option.ClientOption {
@@ -90,15 +91,16 @@ func defaultSequenceCallOptions() *SequenceCallOptions {
 				})
 			}),
 		},
-		ListLocations:      []gax.CallOption{},
-		GetLocation:        []gax.CallOption{},
-		SetIamPolicy:       []gax.CallOption{},
-		GetIamPolicy:       []gax.CallOption{},
-		TestIamPermissions: []gax.CallOption{},
-		ListOperations:     []gax.CallOption{},
-		GetOperation:       []gax.CallOption{},
-		DeleteOperation:    []gax.CallOption{},
-		CancelOperation:    []gax.CallOption{},
+		AttemptStreamingSequence: []gax.CallOption{},
+		ListLocations:            []gax.CallOption{},
+		GetLocation:              []gax.CallOption{},
+		SetIamPolicy:             []gax.CallOption{},
+		GetIamPolicy:             []gax.CallOption{},
+		TestIamPermissions:       []gax.CallOption{},
+		ListOperations:           []gax.CallOption{},
+		GetOperation:             []gax.CallOption{},
+		DeleteOperation:          []gax.CallOption{},
+		CancelOperation:          []gax.CallOption{},
 	}
 }
 
@@ -117,15 +119,16 @@ func defaultSequenceRESTCallOptions() *SequenceCallOptions {
 					http.StatusInternalServerError)
 			}),
 		},
-		ListLocations:      []gax.CallOption{},
-		GetLocation:        []gax.CallOption{},
-		SetIamPolicy:       []gax.CallOption{},
-		GetIamPolicy:       []gax.CallOption{},
-		TestIamPermissions: []gax.CallOption{},
-		ListOperations:     []gax.CallOption{},
-		GetOperation:       []gax.CallOption{},
-		DeleteOperation:    []gax.CallOption{},
-		CancelOperation:    []gax.CallOption{},
+		AttemptStreamingSequence: []gax.CallOption{},
+		ListLocations:            []gax.CallOption{},
+		GetLocation:              []gax.CallOption{},
+		SetIamPolicy:             []gax.CallOption{},
+		GetIamPolicy:             []gax.CallOption{},
+		TestIamPermissions:       []gax.CallOption{},
+		ListOperations:           []gax.CallOption{},
+		GetOperation:             []gax.CallOption{},
+		DeleteOperation:          []gax.CallOption{},
+		CancelOperation:          []gax.CallOption{},
 	}
 }
 
@@ -137,6 +140,7 @@ type internalSequenceClient interface {
 	CreateSequence(context.Context, *genprotopb.CreateSequenceRequest, ...gax.CallOption) (*genprotopb.Sequence, error)
 	GetSequenceReport(context.Context, *genprotopb.GetSequenceReportRequest, ...gax.CallOption) (*genprotopb.SequenceReport, error)
 	AttemptSequence(context.Context, *genprotopb.AttemptSequenceRequest, ...gax.CallOption) error
+	AttemptStreamingSequence(context.Context, *genprotopb.AttemptStreamingSequenceRequest, ...gax.CallOption) (genprotopb.SequenceService_AttemptStreamingSequenceClient, error)
 	ListLocations(context.Context, *locationpb.ListLocationsRequest, ...gax.CallOption) *LocationIterator
 	GetLocation(context.Context, *locationpb.GetLocationRequest, ...gax.CallOption) (*locationpb.Location, error)
 	SetIamPolicy(context.Context, *iampb.SetIamPolicyRequest, ...gax.CallOption) (*iampb.Policy, error)
@@ -194,6 +198,11 @@ func (c *SequenceClient) GetSequenceReport(ctx context.Context, req *genprotopb.
 // AttemptSequence attempts a sequence.
 func (c *SequenceClient) AttemptSequence(ctx context.Context, req *genprotopb.AttemptSequenceRequest, opts ...gax.CallOption) error {
 	return c.internalClient.AttemptSequence(ctx, req, opts...)
+}
+
+// AttemptStreamingSequence attempts a streaming sequence.
+func (c *SequenceClient) AttemptStreamingSequence(ctx context.Context, req *genprotopb.AttemptStreamingSequenceRequest, opts ...gax.CallOption) (genprotopb.SequenceService_AttemptStreamingSequenceClient, error) {
+	return c.internalClient.AttemptStreamingSequence(ctx, req, opts...)
 }
 
 // ListLocations is a utility method from google.cloud.location.Locations.
@@ -453,6 +462,23 @@ func (c *sequenceGRPCClient) AttemptSequence(ctx context.Context, req *genprotop
 		return err
 	}, opts...)
 	return err
+}
+
+func (c *sequenceGRPCClient) AttemptStreamingSequence(ctx context.Context, req *genprotopb.AttemptStreamingSequenceRequest, opts ...gax.CallOption) (genprotopb.SequenceService_AttemptStreamingSequenceClient, error) {
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append((*c.CallOptions).AttemptStreamingSequence[0:len((*c.CallOptions).AttemptStreamingSequence):len((*c.CallOptions).AttemptStreamingSequence)], opts...)
+	var resp genprotopb.SequenceService_AttemptStreamingSequenceClient
+	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		var err error
+		resp, err = c.sequenceClient.AttemptStreamingSequence(ctx, req, settings.GRPC...)
+		return err
+	}, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
 func (c *sequenceGRPCClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
@@ -804,6 +830,105 @@ func (c *sequenceRESTClient) AttemptSequence(ctx context.Context, req *genprotop
 		// the response code and body into a non-nil error
 		return googleapi.CheckResponse(httpRsp)
 	}, opts...)
+}
+
+// AttemptStreamingSequence attempts a streaming sequence.
+func (c *sequenceRESTClient) AttemptStreamingSequence(ctx context.Context, req *genprotopb.AttemptStreamingSequenceRequest, opts ...gax.CallOption) (genprotopb.SequenceService_AttemptStreamingSequenceClient, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
+	baseUrl.Path += fmt.Sprintf("/v1beta1/%v:stream", req.GetName())
+
+	// Build HTTP headers from client and context metadata.
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	var streamClient *attemptStreamingSequenceRESTClient
+	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
+		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
+		if err != nil {
+			return err
+		}
+		httpReq = httpReq.WithContext(ctx)
+		httpReq.Header = headers
+
+		httpRsp, err := c.httpClient.Do(httpReq)
+		if err != nil {
+			return err
+		}
+
+		if err = googleapi.CheckResponse(httpRsp); err != nil {
+			return err
+		}
+
+		streamClient = &attemptStreamingSequenceRESTClient{
+			ctx:    ctx,
+			md:     metadata.MD(httpRsp.Header),
+			stream: gax.NewProtoJSONStreamReader(httpRsp.Body, (&genprotopb.AttemptStreamingSequenceResponse{}).ProtoReflect().Type()),
+		}
+		return nil
+	}, opts...)
+
+	return streamClient, e
+}
+
+// attemptStreamingSequenceRESTClient is the stream client used to consume the server stream created by
+// the REST implementation of AttemptStreamingSequence.
+type attemptStreamingSequenceRESTClient struct {
+	ctx    context.Context
+	md     metadata.MD
+	stream *gax.ProtoJSONStream
+}
+
+func (c *attemptStreamingSequenceRESTClient) Recv() (*genprotopb.AttemptStreamingSequenceResponse, error) {
+	if err := c.ctx.Err(); err != nil {
+		defer c.stream.Close()
+		return nil, err
+	}
+	msg, err := c.stream.Recv()
+	if err != nil {
+		defer c.stream.Close()
+		return nil, err
+	}
+	res := msg.(*genprotopb.AttemptStreamingSequenceResponse)
+	return res, nil
+}
+
+func (c *attemptStreamingSequenceRESTClient) Header() (metadata.MD, error) {
+	return c.md, nil
+}
+
+func (c *attemptStreamingSequenceRESTClient) Trailer() metadata.MD {
+	return c.md
+}
+
+func (c *attemptStreamingSequenceRESTClient) CloseSend() error {
+	// This is a no-op to fulfill the interface.
+	return fmt.Errorf("this method is not implemented for a server-stream")
+}
+
+func (c *attemptStreamingSequenceRESTClient) Context() context.Context {
+	return c.ctx
+}
+
+func (c *attemptStreamingSequenceRESTClient) SendMsg(m interface{}) error {
+	// This is a no-op to fulfill the interface.
+	return fmt.Errorf("this method is not implemented for a server-stream")
+}
+
+func (c *attemptStreamingSequenceRESTClient) RecvMsg(m interface{}) error {
+	// This is a no-op to fulfill the interface.
+	return fmt.Errorf("this method is not implemented, use Recv")
 }
 
 // ListLocations is a utility method from google.cloud.location.Locations.

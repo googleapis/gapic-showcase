@@ -65,6 +65,7 @@ SequenceService (.google.showcase.v1beta1.SequenceService):
   .google.showcase.v1beta1.SequenceService.CreateSequence[0] : POST: "/v1beta1/sequences"
   .google.showcase.v1beta1.SequenceService.GetSequenceReport[0] : GET: "/v1beta1/{name=sequences/*/sequenceReport}"
   .google.showcase.v1beta1.SequenceService.AttemptSequence[0] : POST: "/v1beta1/{name=sequences/*}"
+  .google.showcase.v1beta1.SequenceService.AttemptStreamingSequence[0] : POST: "/v1beta1/{name=sequences/*}:stream"
 
 Testing (.google.showcase.v1beta1.Testing):
   .google.showcase.v1beta1.Testing.CreateSession[0] : POST: "/v1beta1/sessions"
@@ -249,7 +250,7 @@ Shim "SequenceService" (.google.showcase.v1beta1.SequenceService)
   Imports:
     emptypbpb: "google.golang.org/protobuf/types/known/emptypb" "google.golang.org/protobuf/types/known/emptypb"
     genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
-  Handlers (3):
+  Handlers (4):
          GET         /v1beta1/{name=sequences/*/sequenceReport} func GetSequenceReport(request genprotopb.GetSequenceReportRequest) (response genprotopb.SequenceReport) {}
 ["/" "v1beta1" "/" {name = ["sequences" "/" * "/" "sequenceReport"]}]
 
@@ -258,6 +259,9 @@ Shim "SequenceService" (.google.showcase.v1beta1.SequenceService)
 
         POST                        /v1beta1/{name=sequences/*} func AttemptSequence(request genprotopb.AttemptSequenceRequest) (response emptypbpb.Empty) {}
 ["/" "v1beta1" "/" {name = ["sequences" "/" *]}]
+
+        POST                 /v1beta1/{name=sequences/*}:stream func AttemptStreamingSequence(request genprotopb.AttemptStreamingSequenceRequest) (response genprotopb.AttemptStreamingSequenceResponse) {}
+["/" "v1beta1" "/" {name = ["sequences" "/" *]} ":" "stream"]
 
 ----------------------------------------
 Shim "Testing" (.google.showcase.v1beta1.Testing)

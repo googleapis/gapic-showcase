@@ -240,3 +240,81 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 
 	w.Write(json)
 }
+
+// HandleAttemptStreamingSequence translates REST requests/responses on the wire to internal proto messages for AttemptStreamingSequence
+//
+//	Generated for HTTP binding pattern: "/v1beta1/{name=sequences/*}:stream"
+func (backend *RESTBackend) HandleAttemptStreamingSequence(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=sequences/*}:stream': %q", r.Method, r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
+		return
+	}
+
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
+	request := &genprotopb.AttemptStreamingSequenceRequest{}
+	// Intentional: Field values in the URL path override those set in the body.
+	var jsonReader bytes.Buffer
+	bodyReader := io.TeeReader(r.Body, &jsonReader)
+	rBytes := make([]byte, r.ContentLength)
+	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
+		return
+	}
+
+	if len(queryParams) > 0 {
+		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
+		return
+	}
+	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
+		return
+	}
+
+	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
+	requestJSON, _ := marshaler.Marshal(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
+
+	serverStreamer, err := resttools.NewServerStreamer(w, resttools.ServerStreamingChunkSize)
+	if err != nil {
+		backend.Error(w, http.StatusInternalServerError, "server error: could not construct server streamer: %s", err.Error())
+		return
+	}
+	defer serverStreamer.End()
+	streamer := &SequenceService_AttemptStreamingSequenceServer{serverStreamer}
+	if err := backend.SequenceServiceServer.AttemptStreamingSequence(request, streamer); err != nil {
+		backend.ReportGRPCError(w, err)
+	}
+}
+
+// SequenceService_AttemptStreamingSequenceServer implements genprotopb.SequenceService_AttemptStreamingSequenceServer to provide server-side streaming over REST, returning all the
+// individual responses as part of a long JSON list.
+type SequenceService_AttemptStreamingSequenceServer struct {
+	*resttools.ServerStreamer
+}
+
+// Send accumulates a response to be fetched later as part of response list returned over REST.
+func (streamer *SequenceService_AttemptStreamingSequenceServer) Send(response *genprotopb.AttemptStreamingSequenceResponse) error {
+	return streamer.ServerStreamer.Send(response)
+}
