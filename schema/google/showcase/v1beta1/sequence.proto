@@ -117,7 +117,7 @@ message StreamingSequence {
   };
 
   string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
-  string content = 2 [(google.api.field_behavior) = OUTPUT_ONLY];
+  string content = 2;
 
   // A server response to an RPC Attempt in a sequence.
   message Response {
@@ -220,9 +220,6 @@ message AttemptStreamingSequenceRequest {
     (google.api.resource_reference).type = "showcase.googleapis.com/StreamingSequence",
     (google.api.field_behavior) = REQUIRED
   ];
-
-  // The content that will be split into words and returned on the stream.
-  string content = 2;
 
   // The error that is thrown after all words are sent on the stream.
   google.rpc.Status error = 3;

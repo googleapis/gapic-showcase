@@ -33,8 +33,6 @@ func init() {
 
 	AttemptStreamingSequenceCmd.Flags().StringVar(&AttemptStreamingSequenceInput.Name, "name", "", "Required. ")
 
-	AttemptStreamingSequenceCmd.Flags().StringVar(&AttemptStreamingSequenceInput.Content, "content", "", "The content that will be split into words and...")
-
 	AttemptStreamingSequenceCmd.Flags().Int32Var(&AttemptStreamingSequenceInput.Error.Code, "error.code", 0, "The status code, which should be an enum value of...")
 
 	AttemptStreamingSequenceCmd.Flags().StringVar(&AttemptStreamingSequenceInput.Error.Message, "error.message", "", "A developer-facing error message, which should be...")

@@ -17,7 +17,6 @@ package services
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -85,49 +84,48 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 	contentSent := ""
 	for end := time.Now().Add(delay * time.Nanosecond); ; {
 		if time.Now().After(end) {
-			break
+
+			echoStreamingHeaders(stream)
+			echoStreamingTrailers(stream)
+
+			// Calculate the perceived delay since the last RPC attempt.
+			attDelay := &duration.Duration{}
+			if n > 0 {
+				prev := rep.GetAttempts()[n-1]
+				respTime := prev.GetResponseTime()
+				d := received.Sub(respTime.AsTime())
+				attDelay = ptypes.DurationProto(d)
+			}
+
+			// Clock the time that the server is sending the response
+			responseTime := time.Now()
+			rpb, err := ptypes.TimestampProto(responseTime)
+			if err != nil {
+				return status.Errorf(
+					codes.Internal,
+					err.Error(),
+				)
+			}
+
+			rep.Attempts = append(rep.Attempts, &pb.StreamingSequenceReport_Attempt{
+				AttemptNumber: int32(n),
+				ResponseTime:  rpb,
+				AttemptDelay:  attDelay,
+				Status:        st.Proto(),
+				ContentSent:   contentSent,
+			})
+
+			return st.Err()
 		}
 
-		for _, word := range strings.Fields(in.GetContent()) {
-			contentSent += word
+		for _, word := range strings.Fields(seq.GetContent()) {
+			contentSent += word + " "
 			err := stream.Send(&pb.AttemptStreamingSequenceResponse{Content: word})
 			if err != nil {
 				return err
 			}
 		}
 	}
-
-	echoStreamingHeaders(stream)
-	echoStreamingTrailers(stream)
-
-	// Calculate the perceived delay since the last RPC attempt.
-	attDelay := &duration.Duration{}
-	if n > 0 {
-		prev := rep.GetAttempts()[n-1]
-		respTime := prev.GetResponseTime()
-		d := received.Sub(respTime.AsTime())
-		attDelay = ptypes.DurationProto(d)
-	}
-
-	// Clock the time that the server is sending the response
-	responseTime := time.Now()
-	rpb, err := ptypes.TimestampProto(responseTime)
-	if err != nil {
-		return status.Errorf(
-			codes.Internal,
-			err.Error(),
-		)
-	}
-
-	rep.Attempts = append(rep.Attempts, &pb.StreamingSequenceReport_Attempt{
-		AttemptNumber: int32(n),
-		ResponseTime:  rpb,
-		AttemptDelay:  attDelay,
-		Status:        st.Proto(),
-		ContentSent: contentSent,
-	})
-
-	return st.Err()
 }
 
 func (s *sequenceServerImpl) GetStreamingSequenceReport(ctx context.Context, in *pb.GetStreamingSequenceReportRequest) (*pb.StreamingSequenceReport, error) {
