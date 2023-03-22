@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
@@ -81,16 +82,15 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 		st = status.New(codes.OutOfRange, "Attempt exceeded predefined responses")
 	}
 
-	r, _ := strconv.Atoi(in.GetContent())
-
+	contentSent := ""
 	for end := time.Now().Add(delay * time.Nanosecond); ; {
 		if time.Now().After(end) {
 			break
 		}
 
-		for number := 0; number < r; number++ {
-			err := stream.Send(&pb.AttemptStreamingSequenceResponse{Content: strconv.Itoa(number)})
-			time.Sleep(delay)
+		for _, word := range strings.Fields(in.GetContent()) {
+			contentSent += word
+			err := stream.Send(&pb.AttemptStreamingSequenceResponse{Content: word})
 			if err != nil {
 				return err
 			}
@@ -99,8 +99,6 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 
 	echoStreamingHeaders(stream)
 	echoStreamingTrailers(stream)
-
-	time.Sleep(delay)
 
 	// Calculate the perceived delay since the last RPC attempt.
 	attDelay := &duration.Duration{}
@@ -126,6 +124,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 		ResponseTime:  rpb,
 		AttemptDelay:  attDelay,
 		Status:        st.Proto(),
+		ContentSent: contentSent,
 	})
 
 	return st.Err()
