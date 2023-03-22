@@ -107,6 +107,86 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 	w.Write(json)
 }
 
+// HandleCreateStreamingSequence translates REST requests/responses on the wire to internal proto messages for CreateStreamingSequence
+//
+//	Generated for HTTP binding pattern: "/v1beta1/streamingsequences"
+func (backend *RESTBackend) HandleCreateStreamingSequence(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/streamingsequences': %q", r.Method, r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 0 {
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
+		return
+	}
+
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
+	request := &genprotopb.CreateStreamingSequenceRequest{}
+	// Intentional: Field values in the URL path override those set in the body.
+	var bodyField genprotopb.StreamingSequence
+	var jsonReader bytes.Buffer
+	bodyReader := io.TeeReader(r.Body, &jsonReader)
+	rBytes := make([]byte, r.ContentLength)
+	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, &bodyField); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading body into request field 'streamingsequence': %s", err)
+		return
+	}
+
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
+		return
+	}
+	request.Streamingsequence = &bodyField
+
+	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
+		return
+	}
+
+	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	excludedQueryParams := []string{"streamingsequence"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
+		return
+	}
+	if err := resttools.PopulateFields(request, queryParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
+		return
+	}
+
+	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
+	requestJSON, _ := marshaler.Marshal(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
+
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/streamingsequences")
+	response, err := backend.SequenceServiceServer.CreateStreamingSequence(ctx, request)
+	if err != nil {
+		backend.ReportGRPCError(w, err)
+		return
+	}
+
+	json, err := marshaler.Marshal(response)
+	if err != nil {
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
+		return
+	}
+
+	w.Write(json)
+}
+
 // HandleGetSequenceReport translates REST requests/responses on the wire to internal proto messages for GetSequenceReport
 //
 //	Generated for HTTP binding pattern: "/v1beta1/{name=sequences/*/sequenceReport}"
@@ -156,6 +236,69 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 
 	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=sequences/*/sequenceReport}")
 	response, err := backend.SequenceServiceServer.GetSequenceReport(ctx, request)
+	if err != nil {
+		backend.ReportGRPCError(w, err)
+		return
+	}
+
+	json, err := marshaler.Marshal(response)
+	if err != nil {
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
+		return
+	}
+
+	w.Write(json)
+}
+
+// HandleGetStreamingSequenceReport translates REST requests/responses on the wire to internal proto messages for GetStreamingSequenceReport
+//
+//	Generated for HTTP binding pattern: "/v1beta1/{name=streamingsequences/*/streamingSequenceReport}"
+func (backend *RESTBackend) HandleGetStreamingSequenceReport(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=streamingsequences/*/streamingSequenceReport}': %q", r.Method, r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+
+	if numUrlPathParams != 1 {
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
+		return
+	}
+
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
+	request := &genprotopb.GetStreamingSequenceReportRequest{}
+	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
+		return
+	}
+	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
+		return
+	}
+
+	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
+	excludedQueryParams := []string{"name"}
+	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
+		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
+		return
+	}
+	if err := resttools.PopulateFields(request, queryParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading query params: %s", err)
+		return
+	}
+
+	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
+	requestJSON, _ := marshaler.Marshal(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
+
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=streamingsequences/*/streamingSequenceReport}")
+	response, err := backend.SequenceServiceServer.GetStreamingSequenceReport(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
 		return

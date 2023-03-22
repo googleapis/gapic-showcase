@@ -32,9 +32,11 @@ import (
 // NewSequenceServer returns a new SequenceServer for the Showcase API.
 func NewSequenceServer() pb.SequenceServiceServer {
 	return &sequenceServerImpl{
-		token:     server.NewTokenGenerator(),
-		sequences: sync.Map{},
-		reports:   sync.Map{},
+		token:              server.NewTokenGenerator(),
+		sequences:          sync.Map{},
+		reports:            sync.Map{},
+		streamingsequences: sync.Map{},
+		streamingreports:   sync.Map{},
 	}
 }
 
@@ -44,6 +46,9 @@ type sequenceServerImpl struct {
 
 	sequences sync.Map
 	reports   sync.Map
+
+	streamingsequences sync.Map
+	streamingreports   sync.Map
 }
 
 func (s *sequenceServerImpl) CreateSequence(ctx context.Context, in *pb.CreateSequenceRequest) (*pb.Sequence, error) {
@@ -142,7 +147,6 @@ func (s *sequenceServerImpl) AttemptSequence(ctx context.Context, in *pb.Attempt
 
 	return &empty.Empty{}, st.Err()
 }
-
 
 func (s *sequenceServerImpl) GetSequenceReport(ctx context.Context, in *pb.GetSequenceReportRequest) (*pb.SequenceReport, error) {
 	name := in.GetName()

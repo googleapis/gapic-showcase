@@ -18,7 +18,9 @@ var SequenceConfig *viper.Viper
 var SequenceClient *gapic.SequenceClient
 var SequenceSubCommands []string = []string{
 	"create-sequence",
+	"create-streaming-sequence",
 	"get-sequence-report",
+	"get-streaming-sequence-report",
 	"attempt-sequence",
 	"attempt-streaming-sequence",
 }

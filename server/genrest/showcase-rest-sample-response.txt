@@ -63,7 +63,9 @@ Messaging (.google.showcase.v1beta1.Messaging):
 
 SequenceService (.google.showcase.v1beta1.SequenceService):
   .google.showcase.v1beta1.SequenceService.CreateSequence[0] : POST: "/v1beta1/sequences"
+  .google.showcase.v1beta1.SequenceService.CreateStreamingSequence[0] : POST: "/v1beta1/streamingsequences"
   .google.showcase.v1beta1.SequenceService.GetSequenceReport[0] : GET: "/v1beta1/{name=sequences/*/sequenceReport}"
+  .google.showcase.v1beta1.SequenceService.GetStreamingSequenceReport[0] : GET: "/v1beta1/{name=streamingsequences/*/streamingSequenceReport}"
   .google.showcase.v1beta1.SequenceService.AttemptSequence[0] : POST: "/v1beta1/{name=sequences/*}"
   .google.showcase.v1beta1.SequenceService.AttemptStreamingSequence[0] : POST: "/v1beta1/{name=sequences/*}:stream"
 
@@ -250,12 +252,18 @@ Shim "SequenceService" (.google.showcase.v1beta1.SequenceService)
   Imports:
     emptypbpb: "google.golang.org/protobuf/types/known/emptypb" "google.golang.org/protobuf/types/known/emptypb"
     genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
-  Handlers (4):
+  Handlers (6):
          GET         /v1beta1/{name=sequences/*/sequenceReport} func GetSequenceReport(request genprotopb.GetSequenceReportRequest) (response genprotopb.SequenceReport) {}
 ["/" "v1beta1" "/" {name = ["sequences" "/" * "/" "sequenceReport"]}]
 
+         GET /v1beta1/{name=streamingsequences/*/streamingSequenceReport} func GetStreamingSequenceReport(request genprotopb.GetStreamingSequenceReportRequest) (response genprotopb.StreamingSequenceReport) {}
+["/" "v1beta1" "/" {name = ["streamingsequences" "/" * "/" "streamingSequenceReport"]}]
+
         POST                                 /v1beta1/sequences func CreateSequence(request genprotopb.CreateSequenceRequest) (response genprotopb.Sequence) {}
 ["/" "v1beta1" "/" "sequences"]
+
+        POST                        /v1beta1/streamingsequences func CreateStreamingSequence(request genprotopb.CreateStreamingSequenceRequest) (response genprotopb.StreamingSequence) {}
+["/" "v1beta1" "/" "streamingsequences"]
 
         POST                        /v1beta1/{name=sequences/*} func AttemptSequence(request genprotopb.AttemptSequenceRequest) (response emptypbpb.Empty) {}
 ["/" "v1beta1" "/" {name = ["sequences" "/" *]}]

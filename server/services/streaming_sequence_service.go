@@ -27,19 +27,18 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-
-func (s *sequenceServerImpl) CreateStreamingSequence(ctx context.Context, in *pb.CreateSequenceRequest) (*pb.Sequence, error) {
-	seq := clone(in.GetSequence())
+func (s *sequenceServerImpl) CreateStreamingSequence(ctx context.Context, in *pb.CreateStreamingSequenceRequest) (*pb.StreamingSequence, error) {
+	seq := clone_streamingSequence(in.GetStreamingsequence())
 
 	// Assign Name.
 	id := s.uid.Next()
-	seq.Name = fmt.Sprintf("sequences/%d", id)
-	report := &pb.SequenceReport{
+	seq.Name = fmt.Sprintf("streamingsequences/%d", id)
+	report := &pb.StreamingSequenceReport{
 		Name: report(seq.GetName()),
 	}
 
-	s.sequences.Store(seq.GetName(), seq)
-	s.reports.Store(report.GetName(), report)
+	s.streamingsequences.Store(seq.GetName(), seq)
+	s.streamingreports.Store(report.GetName(), report)
 
 	return seq, nil
 }
@@ -54,7 +53,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 	}
 
 	// Retrieve Sequence and associated SequenceReport.
-	i, ok := s.sequences.Load(name)
+	i, ok := s.streamingsequences.Load(name)
 	if !ok {
 		return status.Errorf(
 			codes.NotFound,
@@ -62,10 +61,10 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 			name,
 		)
 	}
-	seq := i.(*pb.Sequence)
+	seq := i.(*pb.StreamingSequence)
 
-	i, _ = s.reports.Load(report(name))
-	rep, _ := i.(*pb.SequenceReport)
+	i, _ = s.streamingreports.Load(report(name))
+	rep, _ := i.(*pb.StreamingSequenceReport)
 
 	// Get the number of attempts, which coincides with this attempt's number.
 	n := len(rep.Attempts)
@@ -84,7 +83,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 
 	r, _ := strconv.Atoi(in.GetContent())
 
-	for end := time.Now().Add(delay*time.Nanosecond); ; {
+	for end := time.Now().Add(delay * time.Nanosecond); ; {
 		if time.Now().After(end) {
 			break
 		}
@@ -102,7 +101,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 	echoStreamingTrailers(stream)
 
 	time.Sleep(delay)
-	
+
 	// Calculate the perceived delay since the last RPC attempt.
 	attDelay := &duration.Duration{}
 	if n > 0 {
@@ -122,7 +121,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 		)
 	}
 
-	rep.Attempts = append(rep.Attempts, &pb.SequenceReport_Attempt{
+	rep.Attempts = append(rep.Attempts, &pb.StreamingSequenceReport_Attempt{
 		AttemptNumber: int32(n),
 		ResponseTime:  rpb,
 		AttemptDelay:  attDelay,
@@ -132,7 +131,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 	return st.Err()
 }
 
-func (s *sequenceServerImpl) GetStreamingSequenceReport(ctx context.Context, in *pb.GetSequenceReportRequest) (*pb.SequenceReport, error) {
+func (s *sequenceServerImpl) GetStreamingSequenceReport(ctx context.Context, in *pb.GetStreamingSequenceReportRequest) (*pb.StreamingSequenceReport, error) {
 	name := in.GetName()
 	if name == "" {
 		return nil, status.Errorf(
@@ -140,7 +139,7 @@ func (s *sequenceServerImpl) GetStreamingSequenceReport(ctx context.Context, in 
 			"The field `name` is required.")
 	}
 
-	report, ok := s.reports.Load(name)
+	report, ok := s.streamingreports.Load(name)
 	if !ok {
 		return nil, status.Errorf(
 			codes.NotFound,
@@ -149,6 +148,16 @@ func (s *sequenceServerImpl) GetStreamingSequenceReport(ctx context.Context, in 
 		)
 	}
 
-	return report.(*pb.SequenceReport), nil
+	return report.(*pb.StreamingSequenceReport), nil
 }
 
+func clone_streamingSequence(s *pb.StreamingSequence) *pb.StreamingSequence {
+	r := make([]*pb.StreamingSequence_Response, len(s.GetResponses()))
+	copy(r, s.GetResponses())
+
+	return &pb.StreamingSequence{
+		Name:      s.GetName(),
+		Content:   s.GetContent(),
+		Responses: r,
+	}
+}

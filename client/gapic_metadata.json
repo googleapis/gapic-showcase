@@ -826,6 +826,11 @@
                 "CreateSequence"
               ]
             },
+            "CreateStreamingSequence": {
+              "methods": [
+                "CreateStreamingSequence"
+              ]
+            },
             "DeleteOperation": {
               "methods": [
                 "DeleteOperation"
@@ -849,6 +854,11 @@
             "GetSequenceReport": {
               "methods": [
                 "GetSequenceReport"
+              ]
+            },
+            "GetStreamingSequenceReport": {
+              "methods": [
+                "GetStreamingSequenceReport"
               ]
             },
             "ListLocations": {
@@ -896,6 +906,11 @@
                 "CreateSequence"
               ]
             },
+            "CreateStreamingSequence": {
+              "methods": [
+                "CreateStreamingSequence"
+              ]
+            },
             "DeleteOperation": {
               "methods": [
                 "DeleteOperation"
@@ -919,6 +934,11 @@
             "GetSequenceReport": {
               "methods": [
                 "GetSequenceReport"
+              ]
+            },
+            "GetStreamingSequenceReport": {
+              "methods": [
+                "GetStreamingSequenceReport"
               ]
             },
             "ListLocations": {

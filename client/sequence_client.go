@@ -48,19 +48,21 @@ var newSequenceClientHook clientHook
 
 // SequenceCallOptions contains the retry settings for each method of SequenceClient.
 type SequenceCallOptions struct {
-	CreateSequence           []gax.CallOption
-	GetSequenceReport        []gax.CallOption
-	AttemptSequence          []gax.CallOption
-	AttemptStreamingSequence []gax.CallOption
-	ListLocations            []gax.CallOption
-	GetLocation              []gax.CallOption
-	SetIamPolicy             []gax.CallOption
-	GetIamPolicy             []gax.CallOption
-	TestIamPermissions       []gax.CallOption
-	ListOperations           []gax.CallOption
-	GetOperation             []gax.CallOption
-	DeleteOperation          []gax.CallOption
-	CancelOperation          []gax.CallOption
+	CreateSequence             []gax.CallOption
+	CreateStreamingSequence    []gax.CallOption
+	GetSequenceReport          []gax.CallOption
+	GetStreamingSequenceReport []gax.CallOption
+	AttemptSequence            []gax.CallOption
+	AttemptStreamingSequence   []gax.CallOption
+	ListLocations              []gax.CallOption
+	GetLocation                []gax.CallOption
+	SetIamPolicy               []gax.CallOption
+	GetIamPolicy               []gax.CallOption
+	TestIamPermissions         []gax.CallOption
+	ListOperations             []gax.CallOption
+	GetOperation               []gax.CallOption
+	DeleteOperation            []gax.CallOption
+	CancelOperation            []gax.CallOption
 }
 
 func defaultSequenceGRPCClientOptions() []option.ClientOption {
@@ -77,8 +79,10 @@ func defaultSequenceGRPCClientOptions() []option.ClientOption {
 
 func defaultSequenceCallOptions() *SequenceCallOptions {
 	return &SequenceCallOptions{
-		CreateSequence:    []gax.CallOption{},
-		GetSequenceReport: []gax.CallOption{},
+		CreateSequence:             []gax.CallOption{},
+		CreateStreamingSequence:    []gax.CallOption{},
+		GetSequenceReport:          []gax.CallOption{},
+		GetStreamingSequenceReport: []gax.CallOption{},
 		AttemptSequence: []gax.CallOption{
 			gax.WithRetry(func() gax.Retryer {
 				return gax.OnCodes([]codes.Code{
@@ -106,8 +110,10 @@ func defaultSequenceCallOptions() *SequenceCallOptions {
 
 func defaultSequenceRESTCallOptions() *SequenceCallOptions {
 	return &SequenceCallOptions{
-		CreateSequence:    []gax.CallOption{},
-		GetSequenceReport: []gax.CallOption{},
+		CreateSequence:             []gax.CallOption{},
+		CreateStreamingSequence:    []gax.CallOption{},
+		GetSequenceReport:          []gax.CallOption{},
+		GetStreamingSequenceReport: []gax.CallOption{},
 		AttemptSequence: []gax.CallOption{
 			gax.WithRetry(func() gax.Retryer {
 				return gax.OnHTTPCodes(gax.Backoff{
@@ -138,7 +144,9 @@ type internalSequenceClient interface {
 	setGoogleClientInfo(...string)
 	Connection() *grpc.ClientConn
 	CreateSequence(context.Context, *genprotopb.CreateSequenceRequest, ...gax.CallOption) (*genprotopb.Sequence, error)
+	CreateStreamingSequence(context.Context, *genprotopb.CreateStreamingSequenceRequest, ...gax.CallOption) (*genprotopb.StreamingSequence, error)
 	GetSequenceReport(context.Context, *genprotopb.GetSequenceReportRequest, ...gax.CallOption) (*genprotopb.SequenceReport, error)
+	GetStreamingSequenceReport(context.Context, *genprotopb.GetStreamingSequenceReportRequest, ...gax.CallOption) (*genprotopb.StreamingSequenceReport, error)
 	AttemptSequence(context.Context, *genprotopb.AttemptSequenceRequest, ...gax.CallOption) error
 	AttemptStreamingSequence(context.Context, *genprotopb.AttemptStreamingSequenceRequest, ...gax.CallOption) (genprotopb.SequenceService_AttemptStreamingSequenceClient, error)
 	ListLocations(context.Context, *locationpb.ListLocationsRequest, ...gax.CallOption) *LocationIterator
@@ -190,9 +198,19 @@ func (c *SequenceClient) CreateSequence(ctx context.Context, req *genprotopb.Cre
 	return c.internalClient.CreateSequence(ctx, req, opts...)
 }
 
+// CreateStreamingSequence creates a sequence.
+func (c *SequenceClient) CreateStreamingSequence(ctx context.Context, req *genprotopb.CreateStreamingSequenceRequest, opts ...gax.CallOption) (*genprotopb.StreamingSequence, error) {
+	return c.internalClient.CreateStreamingSequence(ctx, req, opts...)
+}
+
 // GetSequenceReport retrieves a sequence.
 func (c *SequenceClient) GetSequenceReport(ctx context.Context, req *genprotopb.GetSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.SequenceReport, error) {
 	return c.internalClient.GetSequenceReport(ctx, req, opts...)
+}
+
+// GetStreamingSequenceReport retrieves a sequence.
+func (c *SequenceClient) GetStreamingSequenceReport(ctx context.Context, req *genprotopb.GetStreamingSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.StreamingSequenceReport, error) {
+	return c.internalClient.GetStreamingSequenceReport(ctx, req, opts...)
 }
 
 // AttemptSequence attempts a sequence.
@@ -424,6 +442,26 @@ func (c *sequenceGRPCClient) CreateSequence(ctx context.Context, req *genprotopb
 	return resp, nil
 }
 
+func (c *sequenceGRPCClient) CreateStreamingSequence(ctx context.Context, req *genprotopb.CreateStreamingSequenceRequest, opts ...gax.CallOption) (*genprotopb.StreamingSequence, error) {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
+	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	opts = append((*c.CallOptions).CreateStreamingSequence[0:len((*c.CallOptions).CreateStreamingSequence):len((*c.CallOptions).CreateStreamingSequence)], opts...)
+	var resp *genprotopb.StreamingSequence
+	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		var err error
+		resp, err = c.sequenceClient.CreateStreamingSequence(ctx, req, settings.GRPC...)
+		return err
+	}, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
 func (c *sequenceGRPCClient) GetSequenceReport(ctx context.Context, req *genprotopb.GetSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.SequenceReport, error) {
 	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
 		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
@@ -438,6 +476,28 @@ func (c *sequenceGRPCClient) GetSequenceReport(ctx context.Context, req *genprot
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		resp, err = c.sequenceClient.GetSequenceReport(ctx, req, settings.GRPC...)
+		return err
+	}, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (c *sequenceGRPCClient) GetStreamingSequenceReport(ctx context.Context, req *genprotopb.GetStreamingSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.StreamingSequenceReport, error) {
+	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
+		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
+		defer cancel()
+		ctx = cctx
+	}
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	opts = append((*c.CallOptions).GetStreamingSequenceReport[0:len((*c.CallOptions).GetStreamingSequenceReport):len((*c.CallOptions).GetStreamingSequenceReport)], opts...)
+	var resp *genprotopb.StreamingSequenceReport
+	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		var err error
+		resp, err = c.sequenceClient.GetStreamingSequenceReport(ctx, req, settings.GRPC...)
 		return err
 	}, opts...)
 	if err != nil {
@@ -738,6 +798,64 @@ func (c *sequenceRESTClient) CreateSequence(ctx context.Context, req *genprotopb
 	return resp, nil
 }
 
+// CreateStreamingSequence creates a sequence.
+func (c *sequenceRESTClient) CreateStreamingSequence(ctx context.Context, req *genprotopb.CreateStreamingSequenceRequest, opts ...gax.CallOption) (*genprotopb.StreamingSequence, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
+	body := req.GetStreamingsequence()
+	jsonReq, err := m.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
+	baseUrl.Path += fmt.Sprintf("/v1beta1/streamingsequences")
+
+	// Build HTTP headers from client and context metadata.
+	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).CreateStreamingSequence[0:len((*c.CallOptions).CreateStreamingSequence):len((*c.CallOptions).CreateStreamingSequence)], opts...)
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	resp := &genprotopb.StreamingSequence{}
+	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
+		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
+		if err != nil {
+			return err
+		}
+		httpReq = httpReq.WithContext(ctx)
+		httpReq.Header = headers
+
+		httpRsp, err := c.httpClient.Do(httpReq)
+		if err != nil {
+			return err
+		}
+		defer httpRsp.Body.Close()
+
+		if err = googleapi.CheckResponse(httpRsp); err != nil {
+			return err
+		}
+
+		buf, err := ioutil.ReadAll(httpRsp.Body)
+		if err != nil {
+			return err
+		}
+
+		if err := unm.Unmarshal(buf, resp); err != nil {
+			return maybeUnknownEnum(err)
+		}
+
+		return nil
+	}, opts...)
+	if e != nil {
+		return nil, e
+	}
+	return resp, nil
+}
+
 // GetSequenceReport retrieves a sequence.
 func (c *sequenceRESTClient) GetSequenceReport(ctx context.Context, req *genprotopb.GetSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.SequenceReport, error) {
 	baseUrl, err := url.Parse(c.endpoint)
@@ -753,6 +871,59 @@ func (c *sequenceRESTClient) GetSequenceReport(ctx context.Context, req *genprot
 	opts = append((*c.CallOptions).GetSequenceReport[0:len((*c.CallOptions).GetSequenceReport):len((*c.CallOptions).GetSequenceReport)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.SequenceReport{}
+	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
+		httpReq, err := http.NewRequest("GET", baseUrl.String(), nil)
+		if err != nil {
+			return err
+		}
+		httpReq = httpReq.WithContext(ctx)
+		httpReq.Header = headers
+
+		httpRsp, err := c.httpClient.Do(httpReq)
+		if err != nil {
+			return err
+		}
+		defer httpRsp.Body.Close()
+
+		if err = googleapi.CheckResponse(httpRsp); err != nil {
+			return err
+		}
+
+		buf, err := ioutil.ReadAll(httpRsp.Body)
+		if err != nil {
+			return err
+		}
+
+		if err := unm.Unmarshal(buf, resp); err != nil {
+			return maybeUnknownEnum(err)
+		}
+
+		return nil
+	}, opts...)
+	if e != nil {
+		return nil, e
+	}
+	return resp, nil
+}
+
+// GetStreamingSequenceReport retrieves a sequence.
+func (c *sequenceRESTClient) GetStreamingSequenceReport(ctx context.Context, req *genprotopb.GetStreamingSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.StreamingSequenceReport, error) {
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
+	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
+
+	// Build HTTP headers from client and context metadata.
+	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+
+	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	opts = append((*c.CallOptions).GetStreamingSequenceReport[0:len((*c.CallOptions).GetStreamingSequenceReport):len((*c.CallOptions).GetStreamingSequenceReport)], opts...)
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	resp := &genprotopb.StreamingSequenceReport{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		if settings.Path != "" {
 			baseUrl.Path = settings.Path
