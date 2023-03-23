@@ -71,61 +71,75 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 
 	// Prepare the attempt response defined by the Sequence.
 	st := status.New(codes.OK, "Successful attempt")
+	sendStatusAtIndex := 0
 	var delay time.Duration
 	responses := seq.GetResponses()
+	content := strings.Fields(seq.GetContent())
 	if l := len(responses); l > 0 && n < l {
 		resp := responses[n]
 		delay = resp.GetDelay().AsDuration()
 		st = status.FromProto(resp.GetStatus())
+		sendStatusAtIndex = int(resp.SendStatusAtIndex)
+
+		if s.sent_content != "" {
+			words_written := strings.Fields(s.sent_content)
+			content = content[len(words_written):]
+		}
+		
 	} else if n > l {
 		st = status.New(codes.OutOfRange, "Attempt exceeded predefined responses")
 	}
 
-	contentSent := ""
-	for end := time.Now().Add(delay * time.Nanosecond); ; {
-		if time.Now().After(end) {
-
-			echoStreamingHeaders(stream)
-			echoStreamingTrailers(stream)
-
-			// Calculate the perceived delay since the last RPC attempt.
-			attDelay := &duration.Duration{}
-			if n > 0 {
-				prev := rep.GetAttempts()[n-1]
-				respTime := prev.GetResponseTime()
-				d := received.Sub(respTime.AsTime())
-				attDelay = ptypes.DurationProto(d)
-			}
-
-			// Clock the time that the server is sending the response
-			responseTime := time.Now()
-			rpb, err := ptypes.TimestampProto(responseTime)
-			if err != nil {
-				return status.Errorf(
-					codes.Internal,
-					err.Error(),
-				)
-			}
-
-			rep.Attempts = append(rep.Attempts, &pb.StreamingSequenceReport_Attempt{
-				AttemptNumber: int32(n),
-				ResponseTime:  rpb,
-				AttemptDelay:  attDelay,
-				Status:        st.Proto(),
-				ContentSent:   contentSent,
-			})
-
-			return st.Err()
+	for idx, word := range content {
+		if (idx >= sendStatusAtIndex){
+			break
 		}
-
-		for _, word := range strings.Fields(seq.GetContent()) {
-			contentSent += word + " "
-			err := stream.Send(&pb.AttemptStreamingSequenceResponse{Content: word})
-			if err != nil {
-				return err
-			}
+		s.sent_content += word + " "
+		err := stream.Send(&pb.AttemptStreamingSequenceResponse{Content: word})
+		if err != nil {
+			return err
 		}
 	}
+
+	echoStreamingHeaders(stream)
+
+	echoStreamingTrailers(stream)
+
+	time.Sleep(delay)
+
+	// Calculate the perceived delay since the last RPC attempt.
+	attDelay := &duration.Duration{}
+	if n > 0 {
+		prev := rep.GetAttempts()[n-1]
+		respTime := prev.GetResponseTime()
+		d := received.Sub(respTime.AsTime())
+		attDelay = ptypes.DurationProto(d)
+	}
+
+	// Clock the time that the server is sending the response
+	responseTime := time.Now()
+	rpb, err := ptypes.TimestampProto(responseTime)
+	if err != nil {
+		return status.Errorf(
+			codes.Internal,
+			err.Error(),
+		)
+	}
+
+	rep.Attempts = append(rep.Attempts, &pb.StreamingSequenceReport_Attempt{
+		AttemptNumber: int32(n),
+		ResponseTime:  rpb,
+		AttemptDelay:  attDelay,
+		Status:        st.Proto(),
+		ContentSent:   s.sent_content,
+	})
+
+	if(n+1 >= len(responses)){
+		s.sent_content = ""
+	}
+
+	return st.Err()
+
 }
 
 func (s *sequenceServerImpl) GetStreamingSequenceReport(ctx context.Context, in *pb.GetStreamingSequenceReportRequest) (*pb.StreamingSequenceReport, error) {

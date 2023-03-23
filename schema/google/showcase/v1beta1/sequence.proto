@@ -126,6 +126,9 @@ message StreamingSequence {
 
     // The amount of time to delay sending the response.
     google.protobuf.Duration delay = 2;
+
+    // The index that the status should be sent
+    int32 sendStatusAtIndex = 3;
   }
 
   // Sequence of responses to return in order for each attempt. If empty, the

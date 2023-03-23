@@ -49,6 +49,7 @@ type sequenceServerImpl struct {
 
 	streamingsequences sync.Map
 	streamingreports   sync.Map
+	sent_content       string
 }
 
 func (s *sequenceServerImpl) CreateSequence(ctx context.Context, in *pb.CreateSequenceRequest) (*pb.Sequence, error) {
