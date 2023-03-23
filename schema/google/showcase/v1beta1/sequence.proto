@@ -140,7 +140,7 @@ message StreamingSequence {
 message StreamingSequenceReport {
   option (google.api.resource) = {
     type: "showcase.googleapis.com/StreamingSequenceReport"
-    pattern: "streamingsequences/{sequence}/StreamingSequenceReport"
+    pattern: "streamingsequences/{sequence}/streamingSequenceReport"
   };
 
   string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];

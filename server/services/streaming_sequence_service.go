@@ -34,7 +34,7 @@ func (s *sequenceServerImpl) CreateStreamingSequence(ctx context.Context, in *pb
 	id := s.uid.Next()
 	seq.Name = fmt.Sprintf("streamingsequences/%d", id)
 	report := &pb.StreamingSequenceReport{
-		Name: report(seq.GetName()),
+		Name: streaming_report(seq.GetName()),
 	}
 
 	s.streamingsequences.Store(seq.GetName(), seq)
@@ -63,7 +63,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 	}
 	seq := i.(*pb.StreamingSequence)
 
-	i, _ = s.streamingreports.Load(report(name))
+	i, _ = s.streamingreports.Load(streaming_report(name))
 	rep, _ := i.(*pb.StreamingSequenceReport)
 
 	// Get the number of attempts, which coincides with this attempt's number.
@@ -79,19 +79,19 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 		resp := responses[n]
 		delay = resp.GetDelay().AsDuration()
 		st = status.FromProto(resp.GetStatus())
-		sendStatusAtIndex = int(resp.SendStatusAtIndex)
+		sendStatusAtIndex = int(resp.SendStatusAtIndex) - len(strings.Fields(s.sent_content))
 
 		if s.sent_content != "" {
 			words_written := strings.Fields(s.sent_content)
 			content = content[len(words_written):]
 		}
-		
+
 	} else if n > l {
 		st = status.New(codes.OutOfRange, "Attempt exceeded predefined responses")
 	}
 
 	for idx, word := range content {
-		if (idx >= sendStatusAtIndex){
+		if idx >= sendStatusAtIndex {
 			break
 		}
 		s.sent_content += word + " "
@@ -134,7 +134,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 		ContentSent:   s.sent_content,
 	})
 
-	if(n+1 >= len(responses)){
+	if n+1 >= len(responses) {
 		s.sent_content = ""
 	}
 
@@ -171,4 +171,8 @@ func clone_streamingSequence(s *pb.StreamingSequence) *pb.StreamingSequence {
 		Content:   s.GetContent(),
 		Responses: r,
 	}
+}
+
+func streaming_report(n string) string {
+	return fmt.Sprintf("%s/streamingSequenceReport", n)
 }
