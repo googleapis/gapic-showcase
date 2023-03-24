@@ -24,43 +24,31 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-type valueTransform func(string) (string, error)
-
-func ensureQuotedValue(pre string) (string, error) {
-	hasStartQuote := strings.HasPrefix(pre, `"`)
-	hasEndQuote := strings.HasSuffix(pre, `"`)
-	if hasStartQuote != hasEndQuote {
-		return "", fmt.Errorf("unbalanced quotes in value %q", pre)
-	}
-	if hasStartQuote {
-		return pre, nil
-	}
-	return fmt.Sprintf(`"%s"`, pre), nil
-}
-
-var wellKnownTypes = map[string]valueTransform{
-	// testing various types in https://go.dev/play/p/rNhsXY364qQ
-
+// wellKnownTypes has a key for every well-known type message which JSON-encodes to an atomic symbol
+// (like a number or a string) as opposed to a structured object. The value for each key is true iff
+// the JSON encoding for the type is a string. We need both these data for well-known types so that
+// we can properly decode them in URL paths and query strings.
+var wellKnownTypes = map[string]bool{
 	// == The following are the only three common types used in this API ==
-	"google.protobuf.FieldMask": ensureQuotedValue,
-	"google.protobuf.Timestamp": ensureQuotedValue,
-	"google.protobuf.Duration":  ensureQuotedValue,
+	"google.protobuf.FieldMask": true,
+	"google.protobuf.Timestamp": true,
+	"google.protobuf.Duration":  true,
 	// == End utilized types ==
-	// TODO: When the following start being used int he Showcase API, add tests for their use as
-	// (unquoted) query params. These types are defined in
+	// TODO: When the following start being used in the Showcase API, add tests for each of
+	// these. These types are defined in
 	// https://github.com/protocolbuffers/protobuf/blob/main/src/google/protobuf/wrappers.proto
-	"google.protobuf.DoubleValue": nil,
-	"google.protobuf.FloatValue":  nil,
-	"google.protobuf.Int64Value":  ensureQuotedValue,
-	"google.protobuf.UInt64Value": ensureQuotedValue,
-	"google.protobuf.Int32Value":  nil,
-	"google.protobuf.UInt32Value": nil,
-	"google.protobuf.BoolValue":   nil,
-	"google.protobuf.StringValue": ensureQuotedValue,
-	"google.protobuf.BytesValue":  ensureQuotedValue,
+	"google.protobuf.DoubleValue": false,
+	"google.protobuf.FloatValue":  false,
+	"google.protobuf.Int64Value":  true,
+	"google.protobuf.UInt64Value": true,
+	"google.protobuf.Int32Value":  false,
+	"google.protobuf.UInt32Value": false,
+	"google.protobuf.BoolValue":   false,
+	"google.protobuf.StringValue": true,
+	"google.protobuf.BytesValue":  true,
 	// TODO: Determine if the following are even viable as query params.
-	"google.protobuf.Value":     nil,
-	"google.protobuf.ListValue": nil,
+	"google.protobuf.Value":     false,
+	"google.protobuf.ListValue": false,
 }
 
 // PopulateSingularFields sets the fields within protoMessage to the values provided in
@@ -153,6 +141,12 @@ func PopulateOneField(protoMessage proto.Message, fieldPath string, fieldValues 
 		kind := fieldDescriptor.Kind()
 		switch kind {
 		case protoreflect.MessageKind:
+			// The only `MessageKind`s we accept in URL paths and query params are
+			// well-known types where the message as a whole encodes into a format
+			// similar to a regular terminal field. Normal messages conveyed via URL
+			// paths or query params must be non-repeated and are represented by listing
+			// their terminal primitive fields, which will trigger the other cases
+			// below instead of this one.
 			if pval, err := parseWellKnownType(message, fieldDescriptor, value); err != nil {
 				parseError = err
 			} else if pval != nil {
@@ -268,17 +262,13 @@ func parseWellKnownType(message protoreflect.Message, fieldDescriptor protorefle
 	}
 	fieldMsg := messageFieldTypes.Message(fieldDescriptor.Index())
 	fullName := string(fieldMsg.Descriptor().FullName())
-	transform, isWellKnown := wellKnownTypes[fullName]
+	stringEncoded, isWellKnown := wellKnownTypes[fullName]
 	if !isWellKnown {
 		return nil, nil
 	}
 
-	if transform != nil {
-		var err error
-		if value, err = transform(value); err != nil {
-			return nil, err
-		}
-
+	if stringEncoded {
+		value = fmt.Sprintf(`"%s"`, value)
 	}
 
 	msgValue := fieldMsg.New()
