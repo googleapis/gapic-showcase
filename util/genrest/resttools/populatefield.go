@@ -24,24 +24,43 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-var wellKnownTypes = map[string]bool{
+type valueTransform func(string) (string, error)
+
+func ensureQuotedValue(pre string) (string, error) {
+	hasStartQuote := strings.HasPrefix(pre, `"`)
+	hasEndQuote := strings.HasSuffix(pre, `"`)
+	if hasStartQuote != hasEndQuote {
+		return "", fmt.Errorf("unbalanced quotes in value %q", pre)
+	}
+	if hasStartQuote {
+		return pre, nil
+	}
+	return fmt.Sprintf(`"%s"`, pre), nil
+}
+
+var wellKnownTypes = map[string]valueTransform{
+	// testing various types in https://go.dev/play/p/rNhsXY364qQ
+
 	// == The following are the only three common types used in this API ==
-	"google.protobuf.FieldMask": true,
-	"google.protobuf.Timestamp": true,
-	"google.protobuf.Duration":  true,
+	"google.protobuf.FieldMask": ensureQuotedValue,
+	"google.protobuf.Timestamp": ensureQuotedValue,
+	"google.protobuf.Duration":  ensureQuotedValue,
 	// == End utilized types ==
-	"google.protobuf.DoubleValue": true,
-	"google.protobuf.FloatValue":  true,
-	"google.protobuf.Int64Value":  true,
-	"google.protobuf.UInt64Value": true,
-	"google.protobuf.Int32Value":  true,
-	"google.protobuf.UInt32Value": true,
-	"google.protobuf.BoolValue":   true,
-	"google.protobuf.StringValue": true,
-	"google.protobuf.BytesValue":  true,
+	// TODO: When the following start being used int he Showcase API, add tests for their use as
+	// (unquoted) query params. These types are defined in
+	// https://github.com/protocolbuffers/protobuf/blob/main/src/google/protobuf/wrappers.proto
+	"google.protobuf.DoubleValue": nil,
+	"google.protobuf.FloatValue":  nil,
+	"google.protobuf.Int64Value":  ensureQuotedValue,
+	"google.protobuf.UInt64Value": ensureQuotedValue,
+	"google.protobuf.Int32Value":  nil,
+	"google.protobuf.UInt32Value": nil,
+	"google.protobuf.BoolValue":   nil,
+	"google.protobuf.StringValue": ensureQuotedValue,
+	"google.protobuf.BytesValue":  ensureQuotedValue,
 	// TODO: Determine if the following are even viable as query params.
-	"google.protobuf.Value":     true,
-	"google.protobuf.ListValue": true,
+	"google.protobuf.Value":     nil,
+	"google.protobuf.ListValue": nil,
 }
 
 // PopulateSingularFields sets the fields within protoMessage to the values provided in
@@ -249,8 +268,17 @@ func parseWellKnownType(message protoreflect.Message, fieldDescriptor protorefle
 	}
 	fieldMsg := messageFieldTypes.Message(fieldDescriptor.Index())
 	fullName := string(fieldMsg.Descriptor().FullName())
-	if !wellKnownTypes[fullName] {
+	transform, isWellKnown := wellKnownTypes[fullName]
+	if !isWellKnown {
 		return nil, nil
+	}
+
+	if transform != nil {
+		var err error
+		if value, err = transform(value); err != nil {
+			return nil, err
+		}
+
 	}
 
 	msgValue := fieldMsg.New()
