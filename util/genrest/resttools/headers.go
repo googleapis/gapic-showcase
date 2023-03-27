@@ -56,7 +56,8 @@ func CheckContentType(header http.Header) error {
 func CheckAPIClientHeader(header http.Header) error {
 	content, ok := header[headerNameAPIClient]
 	if !ok || len(content) != 1 {
-		return fmt.Errorf("(HeaderAPIClientError) did not find expected HTTP header %q: %q", headerNameAPIClient, headerValueTransportRESTPrefix)
+		return fmt.Errorf("(HeaderAPIClientError) did not find expected HTTP header %q: %q\n                found: %q",
+			headerNameAPIClient, headerValueTransportRESTPrefix, header)
 	}
 
 	var haveREST, haveGAPIC bool

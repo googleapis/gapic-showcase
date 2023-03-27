@@ -75,7 +75,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 			source.P("")
 			source.P("// %s translates REST requests/responses on the wire to internal proto messages for %s", handlerName, handler.GoMethod)
-			source.P("//    Generated for HTTP binding pattern: %q", handler.URIPattern)
+			source.P("//    Generated for HTTP binding pattern: %s %q", handler.HTTPMethod, handler.URIPattern)
 			source.P("func (backend *RESTBackend) %s(w http.ResponseWriter, r *http.Request) {", handlerName)
 			if handler.StreamingClient {
 				source.P(`  backend.Error(w, http.StatusNotImplemented, "client-streaming methods not implemented yet (request matched '%s': %%q)", r.URL)`, handler.URIPattern)

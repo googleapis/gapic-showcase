@@ -21,7 +21,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/encoding/prototext"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -31,45 +30,54 @@ import (
 )
 
 func TestParseWellKnownType(t *testing.T) {
+	// TODO: Test the other well-known types as the Showcase API
+	// starts incorporating them.
 	for _, tst := range []struct {
 		name  string
 		msg   protoreflect.Message
 		field protoreflect.Name
+		value string
 		want  proto.Message
 	}{
 		{
 			"google.protobuf.FieldMask",
 			(&genprotopb.UpdateUserRequest{}).ProtoReflect(),
 			"update_mask",
+			"foo,bar,baz",
 			&fieldmaskpb.FieldMask{Paths: []string{"foo", "bar", "baz"}},
 		},
+
 		{
 			"google.protobuf.Timestamp",
 			(&genprotopb.User{}).ProtoReflect(),
 			"create_time",
-			timestamppb.Now(),
+			"2023-03-21T12:01:02.000000003Z",
+			timestamppb.New(time.Date(2023, 03, 21, 12, 1, 2, 3, time.UTC)),
 		},
+
 		{
 			"google.protobuf.Duration",
 			(&genprotopb.Sequence_Response{}).ProtoReflect(),
 			"delay",
+			"5s",
 			durationpb.New(5 * time.Second),
 		},
 	} {
-		data, _ := protojson.Marshal(tst.want)
-		value := string(data)
 		fd := tst.msg.Descriptor().Fields().ByName(tst.field)
 
-		gotp, err := parseWellKnownType(tst.msg, fd, value)
+		gotp, err := parseWellKnownType(tst.msg, fd, tst.value)
 		if err != nil {
-			t.Fatal(err)
+			t.Errorf("parsing %q led to error %s", tst.value, err)
+			continue
 		}
 		if gotp == nil {
-			t.Fatal("expected non-nil value from parsing")
+			t.Errorf("expected non-nil value from parsing: %s", tst.value)
+			continue
 		}
 		got := gotp.Message().Interface()
 		if diff := cmp.Diff(got, tst.want, cmp.Comparer(proto.Equal)); diff != "" {
-			t.Fatalf("%s: got(-),want(+):\n%s", "FieldMask", diff)
+			t.Errorf("%s: got(-),want(+):\n%s", "FieldMask", diff)
+			continue
 		}
 	}
 }
