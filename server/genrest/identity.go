@@ -29,7 +29,7 @@ import (
 
 // HandleCreateUser translates REST requests/responses on the wire to internal proto messages for CreateUser
 //
-//	Generated for HTTP binding pattern: "/v1beta1/users"
+//	Generated for HTTP binding pattern: POST "/v1beta1/users"
 func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -100,7 +100,7 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 
 // HandleGetUser translates REST requests/responses on the wire to internal proto messages for GetUser
 //
-//	Generated for HTTP binding pattern: "/v1beta1/{name=users/*}"
+//	Generated for HTTP binding pattern: GET "/v1beta1/{name=users/*}"
 func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -163,7 +163,7 @@ func (backend *RESTBackend) HandleGetUser(w http.ResponseWriter, r *http.Request
 
 // HandleUpdateUser translates REST requests/responses on the wire to internal proto messages for UpdateUser
 //
-//	Generated for HTTP binding pattern: "/v1beta1/{user.name=users/*}"
+//	Generated for HTTP binding pattern: PATCH "/v1beta1/{user.name=users/*}"
 func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -243,7 +243,7 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 
 // HandleDeleteUser translates REST requests/responses on the wire to internal proto messages for DeleteUser
 //
-//	Generated for HTTP binding pattern: "/v1beta1/{name=users/*}"
+//	Generated for HTTP binding pattern: DELETE "/v1beta1/{name=users/*}"
 func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -306,7 +306,7 @@ func (backend *RESTBackend) HandleDeleteUser(w http.ResponseWriter, r *http.Requ
 
 // HandleListUsers translates REST requests/responses on the wire to internal proto messages for ListUsers
 //
-//	Generated for HTTP binding pattern: "/v1beta1/users"
+//	Generated for HTTP binding pattern: GET "/v1beta1/users"
 func (backend *RESTBackend) HandleListUsers(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
