@@ -268,7 +268,7 @@ func parseWellKnownType(message protoreflect.Message, fieldDescriptor protorefle
 	}
 
 	if stringEncoded {
-		value = fmt.Sprintf(`"%s"`, value)
+		value = fmt.Sprintf("%q", value)
 	}
 
 	msgValue := fieldMsg.New()
