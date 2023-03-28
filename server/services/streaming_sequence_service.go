@@ -28,13 +28,13 @@ import (
 )
 
 func (s *sequenceServerImpl) CreateStreamingSequence(ctx context.Context, in *pb.CreateStreamingSequenceRequest) (*pb.StreamingSequence, error) {
-	seq := clone_streamingSequence(in.GetStreamingsequence())
+	seq := cloneStreamingSequence(in.GetStreamingsequence())
 
 	// Assign Name.
 	id := s.uid.Next()
 	seq.Name = fmt.Sprintf("streamingsequences/%d", id)
 	report := &pb.StreamingSequenceReport{
-		Name: streaming_report(seq.GetName()),
+		Name: streamingReport(seq.GetName()),
 	}
 
 	s.streamingsequences.Store(seq.GetName(), seq)
@@ -63,7 +63,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 	}
 	seq := i.(*pb.StreamingSequence)
 
-	i, _ = s.streamingreports.Load(streaming_report(name))
+	i, _ = s.streamingreports.Load(streamingReport(name))
 	rep, _ := i.(*pb.StreamingSequenceReport)
 
 	// Get the number of attempts, which coincides with this attempt's number.
@@ -162,7 +162,7 @@ func (s *sequenceServerImpl) GetStreamingSequenceReport(ctx context.Context, in 
 	return report.(*pb.StreamingSequenceReport), nil
 }
 
-func clone_streamingSequence(s *pb.StreamingSequence) *pb.StreamingSequence {
+func cloneStreamingSequence(s *pb.StreamingSequence) *pb.StreamingSequence {
 	r := make([]*pb.StreamingSequence_Response, len(s.GetResponses()))
 	copy(r, s.GetResponses())
 
@@ -173,6 +173,6 @@ func clone_streamingSequence(s *pb.StreamingSequence) *pb.StreamingSequence {
 	}
 }
 
-func streaming_report(n string) string {
+func streamingReport(n string) string {
 	return fmt.Sprintf("%s/streamingSequenceReport", n)
 }
