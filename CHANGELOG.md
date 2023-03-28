@@ -1,5 +1,12 @@
 # Release History
 
+## [0.26.1](https://github.com/googleapis/gapic-showcase/compare/v0.26.0...v0.26.1) (2023-03-28)
+
+
+### Bug Fixes
+
+* **rest:** Properly handle string-encoded well-known types in URLs ([#1282](https://github.com/googleapis/gapic-showcase/issues/1282)) ([579fe72](https://github.com/googleapis/gapic-showcase/commit/579fe729c0b506cdf48cd834beb14a8ffb4b5994))
+
 ## [0.26.0](https://github.com/googleapis/gapic-showcase/compare/v0.25.0...v0.26.0) (2023-03-07)
 
 
