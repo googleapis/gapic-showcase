@@ -16,6 +16,7 @@ package services
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -221,5 +222,23 @@ func TestAttemptSequenceMissingName(t *testing.T) {
 	_, err := s.AttemptSequence(context.Background(), &pb.AttemptSequenceRequest{Name: ""})
 	if c := status.Code(err); c != codes.InvalidArgument {
 		t.Errorf("%s: expected error to be %s but was %s", t.Name(), codes.InvalidArgument, c)
+	}
+}
+
+type mockStreamSequence struct {
+	exp   []string
+	head  []string
+	trail []string
+	t     *testing.T
+	pb.SequenceService_AttemptStreamingSequenceServer
+}
+
+func TestAttemptStreamingSequence(t *testing.T) {
+	s := NewSequenceServer()
+	stream := &mockStreamSequence{exp: strings.Fields("10"), t: t}
+	attemptRequest := &pb.AttemptStreamingSequenceRequest{Name: "sequences/0"}
+	err := s.AttemptStreamingSequence(attemptRequest, stream)
+	if c := status.Code(err); c != codes.NotFound {
+		t.Errorf("%s: expected error to be %s but was %s", t.Name(), codes.NotFound, c)
 	}
 }
