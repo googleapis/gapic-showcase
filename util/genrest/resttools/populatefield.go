@@ -24,24 +24,31 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
+// wellKnownTypes has a key for every well-known type message which JSON-encodes to an atomic symbol
+// (like a number or a string) as opposed to a structured object. The value for each key is true iff
+// the JSON encoding for the type is a string. We need both these data for well-known types so that
+// we can properly decode them in URL paths and query strings.
 var wellKnownTypes = map[string]bool{
 	// == The following are the only three common types used in this API ==
 	"google.protobuf.FieldMask": true,
 	"google.protobuf.Timestamp": true,
 	"google.protobuf.Duration":  true,
 	// == End utilized types ==
-	"google.protobuf.DoubleValue": true,
-	"google.protobuf.FloatValue":  true,
+	// TODO: When the following start being used in the Showcase API, add tests for each of
+	// these. These types are defined in
+	// https://github.com/protocolbuffers/protobuf/blob/main/src/google/protobuf/wrappers.proto
+	"google.protobuf.DoubleValue": false,
+	"google.protobuf.FloatValue":  false,
 	"google.protobuf.Int64Value":  true,
 	"google.protobuf.UInt64Value": true,
-	"google.protobuf.Int32Value":  true,
-	"google.protobuf.UInt32Value": true,
-	"google.protobuf.BoolValue":   true,
+	"google.protobuf.Int32Value":  false,
+	"google.protobuf.UInt32Value": false,
+	"google.protobuf.BoolValue":   false,
 	"google.protobuf.StringValue": true,
 	"google.protobuf.BytesValue":  true,
 	// TODO: Determine if the following are even viable as query params.
-	"google.protobuf.Value":     true,
-	"google.protobuf.ListValue": true,
+	"google.protobuf.Value":     false,
+	"google.protobuf.ListValue": false,
 }
 
 // PopulateSingularFields sets the fields within protoMessage to the values provided in
@@ -134,6 +141,12 @@ func PopulateOneField(protoMessage proto.Message, fieldPath string, fieldValues 
 		kind := fieldDescriptor.Kind()
 		switch kind {
 		case protoreflect.MessageKind:
+			// The only `MessageKind`s we accept in URL paths and query params are
+			// well-known types where the message as a whole encodes into a format
+			// similar to a regular terminal field. Normal messages conveyed via URL
+			// paths or query params must be non-repeated and are represented by listing
+			// their terminal primitive fields, which will trigger the other cases
+			// below instead of this one.
 			if pval, err := parseWellKnownType(message, fieldDescriptor, value); err != nil {
 				parseError = err
 			} else if pval != nil {
@@ -249,8 +262,13 @@ func parseWellKnownType(message protoreflect.Message, fieldDescriptor protorefle
 	}
 	fieldMsg := messageFieldTypes.Message(fieldDescriptor.Index())
 	fullName := string(fieldMsg.Descriptor().FullName())
-	if !wellKnownTypes[fullName] {
+	stringEncoded, isWellKnown := wellKnownTypes[fullName]
+	if !isWellKnown {
 		return nil, nil
+	}
+
+	if stringEncoded {
+		value = fmt.Sprintf("%q", value)
 	}
 
 	msgValue := fieldMsg.New()
