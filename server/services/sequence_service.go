@@ -50,7 +50,7 @@ type sequenceServerImpl struct {
 
 	streamingsequences sync.Map
 	streamingreports   sync.Map
-	sent_content       string
+	sentContent       string
 }
 
 func (s *sequenceServerImpl) CreateSequence(ctx context.Context, in *pb.CreateSequenceRequest) (*pb.Sequence, error) {
@@ -236,11 +236,11 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 		resp := responses[n]
 		delay = resp.GetDelay().AsDuration()
 		st = status.FromProto(resp.GetStatus())
-		sendStatusAtIndex = int(resp.SendStatusAtIndex) - len(strings.Fields(s.sent_content))
+		sendStatusAtIndex = int(resp.SendStatusAtIndex) - len(strings.Fields(s.sentContent))
 
-		if s.sent_content != "" {
-			words_written := strings.Fields(s.sent_content)
-			content = content[len(words_written):]
+		if s.sentContent != "" {
+			wordsWritten := strings.Fields(s.sentContent)
+			content = content[len(wordsWritten):]
 		}
 
 	} else if n > l {
@@ -251,7 +251,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 		if idx >= sendStatusAtIndex {
 			break
 		}
-		s.sent_content += word + " "
+		s.sentContent += word + " "
 		err := stream.Send(&pb.AttemptStreamingSequenceResponse{Content: word})
 		if err != nil {
 			return err
@@ -288,11 +288,11 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 		ResponseTime:  rpb,
 		AttemptDelay:  attDelay,
 		Status:        st.Proto(),
-		ContentSent:   s.sent_content,
+		ContentSent:   s.sentContent,
 	})
 
 	if n+1 >= len(responses) {
-		s.sent_content = ""
+		s.sentContent = ""
 	}
 
 	return st.Err()
