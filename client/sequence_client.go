@@ -811,7 +811,7 @@ func (c *sequenceRESTClient) CreateStreamingSequence(ctx context.Context, req *g
 	if err != nil {
 		return nil, err
 	}
-	baseUrl.Path += fmt.Sprintf("/v1beta1/streamingsequences")
+	baseUrl.Path += fmt.Sprintf("/v1beta1/streamingSequences")
 
 	// Build HTTP headers from client and context metadata.
 	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))

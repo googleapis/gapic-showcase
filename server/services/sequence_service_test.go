@@ -306,7 +306,7 @@ func TestStreamingSequenceRetry(t *testing.T) {
 	}
 
 	seq, err := s.CreateStreamingSequence(context.Background(), &pb.CreateStreamingSequenceRequest{
-		Streamingsequence: &pb.StreamingSequence{Responses: responses, Content: "Hello World"},
+		StreamingSequence: &pb.StreamingSequence{Responses: responses, Content: "Hello World"},
 	})
 	if err != nil {
 		t.Errorf("CreateSequence(retry): unexpected err %+v", err)

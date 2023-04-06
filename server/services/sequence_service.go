@@ -36,8 +36,8 @@ func NewSequenceServer() pb.SequenceServiceServer {
 		token:              server.NewTokenGenerator(),
 		sequences:          sync.Map{},
 		reports:            sync.Map{},
-		streamingsequences: sync.Map{},
-		streamingreports:   sync.Map{},
+		streamingSequences: sync.Map{},
+		streamingReports:   sync.Map{},
 	}
 }
 
@@ -48,8 +48,8 @@ type sequenceServerImpl struct {
 	sequences sync.Map
 	reports   sync.Map
 
-	streamingsequences sync.Map
-	streamingreports   sync.Map
+	streamingSequences sync.Map
+	streamingReports   sync.Map
 	sentContent        string
 }
 
@@ -185,17 +185,17 @@ func clone(s *pb.Sequence) *pb.Sequence {
 }
 
 func (s *sequenceServerImpl) CreateStreamingSequence(ctx context.Context, in *pb.CreateStreamingSequenceRequest) (*pb.StreamingSequence, error) {
-	seq := cloneStreamingSequence(in.GetStreamingsequence())
+	seq := cloneStreamingSequence(in.GetStreamingSequence())
 
 	// Assign Name.
 	id := s.uid.Next()
-	seq.Name = fmt.Sprintf("streamingsequences/%d", id)
+	seq.Name = fmt.Sprintf("streamingSequences/%d", id)
 	report := &pb.StreamingSequenceReport{
 		Name: streamingReport(seq.GetName()),
 	}
 
-	s.streamingsequences.Store(seq.GetName(), seq)
-	s.streamingreports.Store(report.GetName(), report)
+	s.streamingSequences.Store(seq.GetName(), seq)
+	s.streamingReports.Store(report.GetName(), report)
 
 	return seq, nil
 }
@@ -210,7 +210,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 	}
 
 	// Retrieve Sequence and associated SequenceReport.
-	i, ok := s.streamingsequences.Load(name)
+	i, ok := s.streamingSequences.Load(name)
 	if !ok {
 		return status.Errorf(
 			codes.NotFound,
@@ -220,7 +220,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 	}
 	seq := i.(*pb.StreamingSequence)
 
-	i, _ = s.streamingreports.Load(streamingReport(name))
+	i, _ = s.streamingReports.Load(streamingReport(name))
 	rep, _ := i.(*pb.StreamingSequenceReport)
 
 	// Get the number of attempts, which coincides with this attempt's number.
@@ -228,7 +228,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 
 	// Prepare the attempt response defined by the Sequence.
 	st := status.New(codes.OK, "Successful attempt")
-	sendStatusAtIndex := 0
+	resp_index := 0
 	var delay time.Duration
 	responses := seq.GetResponses()
 	content := strings.Fields(seq.GetContent())
@@ -236,7 +236,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 		resp := responses[n]
 		delay = resp.GetDelay().AsDuration()
 		st = status.FromProto(resp.GetStatus())
-		sendStatusAtIndex = int(resp.SendStatusAtIndex) - len(strings.Fields(s.sentContent))
+		resp_index = int(resp.ResponseIndex) - len(strings.Fields(s.sentContent))
 
 		if s.sentContent != "" {
 			wordsWritten := strings.Fields(s.sentContent)
@@ -248,7 +248,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 	}
 
 	for idx, word := range content {
-		if idx >= sendStatusAtIndex {
+		if idx >= resp_index {
 			break
 		}
 		s.sentContent += word + " "
@@ -307,7 +307,7 @@ func (s *sequenceServerImpl) GetStreamingSequenceReport(ctx context.Context, in 
 			"The field `name` is required.")
 	}
 
-	report, ok := s.streamingreports.Load(name)
+	report, ok := s.streamingReports.Load(name)
 	if !ok {
 		return nil, status.Errorf(
 			codes.NotFound,

@@ -109,12 +109,12 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 
 // HandleCreateStreamingSequence translates REST requests/responses on the wire to internal proto messages for CreateStreamingSequence
 //
-//	Generated for HTTP binding pattern: "/v1beta1/streamingsequences"
+//	Generated for HTTP binding pattern: POST "/v1beta1/streamingSequences"
 func (backend *RESTBackend) HandleCreateStreamingSequence(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received %s request matching '/v1beta1/streamingsequences': %q", r.Method, r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/streamingSequences': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 0 {
@@ -140,7 +140,7 @@ func (backend *RESTBackend) HandleCreateStreamingSequence(w http.ResponseWriter,
 	}
 
 	if err := resttools.FromJSON().Unmarshal(rBytes, &bodyField); err != nil {
-		backend.Error(w, http.StatusBadRequest, "error reading body into request field 'streamingsequence': %s", err)
+		backend.Error(w, http.StatusBadRequest, "error reading body into request field 'streamingSequence': %s", err)
 		return
 	}
 
@@ -148,7 +148,7 @@ func (backend *RESTBackend) HandleCreateStreamingSequence(w http.ResponseWriter,
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
-	request.Streamingsequence = &bodyField
+	request.StreamingSequence = &bodyField
 
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
@@ -156,7 +156,7 @@ func (backend *RESTBackend) HandleCreateStreamingSequence(w http.ResponseWriter,
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	excludedQueryParams := []string{"streamingsequence"}
+	excludedQueryParams := []string{"streamingSequence"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
 		return
@@ -171,7 +171,7 @@ func (backend *RESTBackend) HandleCreateStreamingSequence(w http.ResponseWriter,
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/streamingsequences")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/streamingSequences")
 	response, err := backend.SequenceServiceServer.CreateStreamingSequence(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -252,12 +252,12 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 
 // HandleGetStreamingSequenceReport translates REST requests/responses on the wire to internal proto messages for GetStreamingSequenceReport
 //
-//	Generated for HTTP binding pattern: "/v1beta1/{name=streamingsequences/*/streamingSequenceReport}"
+//	Generated for HTTP binding pattern: GET "/v1beta1/{name=streamingSequences/*/streamingSequenceReport}"
 func (backend *RESTBackend) HandleGetStreamingSequenceReport(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=streamingsequences/*/streamingSequenceReport}': %q", r.Method, r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=streamingSequences/*/streamingSequenceReport}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {
@@ -297,7 +297,7 @@ func (backend *RESTBackend) HandleGetStreamingSequenceReport(w http.ResponseWrit
 	requestJSON, _ := marshaler.Marshal(request)
 	backend.StdLog.Printf("  request: %s", requestJSON)
 
-	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=streamingsequences/*/streamingSequenceReport}")
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/{name=streamingSequences/*/streamingSequenceReport}")
 	response, err := backend.SequenceServiceServer.GetStreamingSequenceReport(ctx, request)
 	if err != nil {
 		backend.ReportGRPCError(w, err)
@@ -386,12 +386,12 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 
 // HandleAttemptStreamingSequence translates REST requests/responses on the wire to internal proto messages for AttemptStreamingSequence
 //
-//	Generated for HTTP binding pattern: "/v1beta1/{name=sequences/*}:stream"
+//	Generated for HTTP binding pattern: POST "/v1beta1/{name=streamingSequences/*}:stream"
 func (backend *RESTBackend) HandleAttemptStreamingSequence(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
 
-	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=sequences/*}:stream': %q", r.Method, r.URL)
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=streamingSequences/*}:stream': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
 
 	if numUrlPathParams != 1 {

@@ -18,16 +18,16 @@ var CreateStreamingSequenceInput genprotopb.CreateStreamingSequenceRequest
 
 var CreateStreamingSequenceFromFile string
 
-var CreateStreamingSequenceInputStreamingsequenceResponses []string
+var CreateStreamingSequenceInputStreamingSequenceResponses []string
 
 func init() {
 	SequenceServiceCmd.AddCommand(CreateStreamingSequenceCmd)
 
-	CreateStreamingSequenceInput.Streamingsequence = new(genprotopb.StreamingSequence)
+	CreateStreamingSequenceInput.StreamingSequence = new(genprotopb.StreamingSequence)
 
-	CreateStreamingSequenceCmd.Flags().StringVar(&CreateStreamingSequenceInput.Streamingsequence.Content, "streamingsequence.content", "", "")
+	CreateStreamingSequenceCmd.Flags().StringVar(&CreateStreamingSequenceInput.StreamingSequence.Content, "streamingSequence.content", "", "The Content that the stream will send")
 
-	CreateStreamingSequenceCmd.Flags().StringArrayVar(&CreateStreamingSequenceInputStreamingsequenceResponses, "streamingsequence.responses", []string{}, "Sequence of responses to return in order for each...")
+	CreateStreamingSequenceCmd.Flags().StringArrayVar(&CreateStreamingSequenceInputStreamingSequenceResponses, "streamingSequence.responses", []string{}, "Sequence of responses to return in order for each...")
 
 	CreateStreamingSequenceCmd.Flags().StringVar(&CreateStreamingSequenceFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -62,14 +62,14 @@ var CreateStreamingSequenceCmd = &cobra.Command{
 		}
 
 		// unmarshal JSON strings into slice of structs
-		for _, item := range CreateStreamingSequenceInputStreamingsequenceResponses {
+		for _, item := range CreateStreamingSequenceInputStreamingSequenceResponses {
 			tmp := genprotopb.StreamingSequence_Response{}
 			err = jsonpb.UnmarshalString(item, &tmp)
 			if err != nil {
 				return
 			}
 
-			CreateStreamingSequenceInput.Streamingsequence.Responses = append(CreateStreamingSequenceInput.Streamingsequence.Responses, &tmp)
+			CreateStreamingSequenceInput.StreamingSequence.Responses = append(CreateStreamingSequenceInput.StreamingSequence.Responses, &tmp)
 		}
 
 		if Verbose {
