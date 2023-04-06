@@ -210,7 +210,7 @@ message CreateSequenceRequest {
 }
 
 message CreateStreamingSequenceRequest {
-  StreamingSequence streamingSequence = 1;
+  StreamingSequence streaming_sequence = 1;
 }
 
 message AttemptSequenceRequest {
