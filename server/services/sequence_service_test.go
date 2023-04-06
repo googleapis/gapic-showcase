@@ -259,7 +259,7 @@ func (m *mockStreamSequence) verify(expectHeadersAndTrailers bool) {
 
 func TestStreamingSequenceEmpty(t *testing.T) {
 	s := NewSequenceServer()
-	
+
 	seq, err := s.CreateStreamingSequence(context.Background(), &pb.CreateStreamingSequenceRequest{})
 	if err != nil {
 		t.Errorf("CreateSequence(empty): unexpected err %+v", err)
@@ -271,7 +271,7 @@ func TestStreamingSequenceEmpty(t *testing.T) {
 	_, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	err = s.AttemptStreamingSequence(&pb.AttemptStreamingSequenceRequest{Name: seq.GetName()},stream)
+	err = s.AttemptStreamingSequence(&pb.AttemptStreamingSequenceRequest{Name: seq.GetName()}, stream)
 	if err != nil {
 		t.Errorf("AttemptSequence(empty): unexpected err %+v", err)
 	}
@@ -288,8 +288,6 @@ func TestStreamingSequenceEmpty(t *testing.T) {
 		t.Errorf("%s: expected number of attempts to be 1 but was %d", t.Name(), len(attempts))
 	}
 }
-
-
 
 func TestStreamingSequenceRetry(t *testing.T) {
 	s := NewSequenceServer()
@@ -308,7 +306,7 @@ func TestStreamingSequenceRetry(t *testing.T) {
 	}
 
 	seq, err := s.CreateStreamingSequence(context.Background(), &pb.CreateStreamingSequenceRequest{
-		Streamingsequence: &pb.StreamingSequence{Responses: responses,Content: "Hello World"},
+		Streamingsequence: &pb.StreamingSequence{Responses: responses, Content: "Hello World"},
 	})
 	if err != nil {
 		t.Errorf("CreateSequence(retry): unexpected err %+v", err)
@@ -356,7 +354,6 @@ func TestStreamingSequenceRetry(t *testing.T) {
 	}
 }
 
-
 func TestStreamingSequenceOutOfRange(t *testing.T) {
 	s := NewSequenceServer()
 
@@ -371,7 +368,7 @@ func TestStreamingSequenceOutOfRange(t *testing.T) {
 	_, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	err = s.AttemptStreamingSequence(&pb.AttemptStreamingSequenceRequest{Name: seq.GetName()},stream)
+	err = s.AttemptStreamingSequence(&pb.AttemptStreamingSequenceRequest{Name: seq.GetName()}, stream)
 	if err != nil {
 		t.Errorf("AttemptSequence(out_of_range): unexpected err %+v", err)
 	}
@@ -397,7 +394,6 @@ func TestStreamingSequenceOutOfRange(t *testing.T) {
 		t.Errorf("%s: expected number of attempts to be 3 but was %d", t.Name(), len(attempts))
 	}
 }
-
 
 func TestAttemptStreamingSequenceNotFound(t *testing.T) {
 	s := NewSequenceServer()
