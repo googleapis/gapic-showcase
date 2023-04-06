@@ -47,10 +47,10 @@ service SequenceService {
     // Creates a sequence.
   rpc CreateStreamingSequence(CreateStreamingSequenceRequest) returns (StreamingSequence) {
     option (google.api.http) = {
-      post: "/v1beta1/streamingsequences"
+      post: "/v1beta1/streamingSequences"
       body: "streamingsequence"
     };
-    option (google.api.method_signature) = "streamingsequence";
+    option (google.api.method_signature) = "streaming_sequence";
   };
 
   // Retrieves a sequence.
@@ -64,7 +64,7 @@ service SequenceService {
   // Retrieves a sequence.
   rpc GetStreamingSequenceReport(GetStreamingSequenceReportRequest) returns (StreamingSequenceReport) {
     option (google.api.http) = {
-      get: "/v1beta1/{name=streamingsequences/*/streamingSequenceReport}"
+      get: "/v1beta1/{name=streamingSequences/*/streamingSequenceReport}"
     };
     option (google.api.method_signature) = "name";
   };
@@ -81,7 +81,7 @@ service SequenceService {
   // Attempts a streaming sequence.
   rpc AttemptStreamingSequence(AttemptStreamingSequenceRequest) returns  (stream AttemptStreamingSequenceResponse) {
     option (google.api.http) = {
-    post: "/v1beta1/{name=sequences/*}:stream"
+    post: "/v1beta1/{name=streamingSequences/*}:stream"
       body: "*"
     };
     option (google.api.method_signature) = "name,content,error";
@@ -113,7 +113,7 @@ message Sequence {
 message StreamingSequence {
   option (google.api.resource) = {
     type: "showcase.googleapis.com/StreamingSequence"
-    pattern: "streamingsequences/{sequence}"
+    pattern: "streamingSequences/{streaming_sequence}"
   };
 
   string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
@@ -140,7 +140,7 @@ message StreamingSequence {
 message StreamingSequenceReport {
   option (google.api.resource) = {
     type: "showcase.googleapis.com/StreamingSequenceReport"
-    pattern: "streamingsequences/{sequence}/streamingSequenceReport"
+    pattern: "streamingSequences/{streaming_sequence}/streamingSequenceReport"
   };
 
   string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
@@ -208,7 +208,7 @@ message CreateSequenceRequest {
 }
 
 message CreateStreamingSequenceRequest {
-  StreamingSequence streamingsequence = 1;
+  StreamingSequence streaming_sequence = 1;
 }
 
 message AttemptSequenceRequest {
