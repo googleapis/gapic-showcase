@@ -48,9 +48,9 @@ service SequenceService {
   rpc CreateStreamingSequence(CreateStreamingSequenceRequest) returns (StreamingSequence) {
     option (google.api.http) = {
       post: "/v1beta1/streamingSequences"
-      body: "streamingSequence"
+      body: "streaming_sequence"
     };
-    option (google.api.method_signature) = "streamingSequence";
+    option (google.api.method_signature) = "streaming_sequence";
   };
 
   // Retrieves a sequence.
@@ -113,7 +113,7 @@ message Sequence {
 message StreamingSequence {
   option (google.api.resource) = {
     type: "showcase.googleapis.com/StreamingSequence"
-    pattern: "streamingSequences/{streamingSequence}"
+    pattern: "streamingSequences/{streaming_sequence}"
   };
 
   string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
@@ -142,7 +142,7 @@ message StreamingSequence {
 message StreamingSequenceReport {
   option (google.api.resource) = {
     type: "showcase.googleapis.com/StreamingSequenceReport"
-    pattern: "streamingSequences/{streamingSequence}/streamingSequenceReport"
+    pattern: "streamingSequences/{streaming_sequence}/streamingSequenceReport"
   };
 
   string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
@@ -210,7 +210,7 @@ message CreateSequenceRequest {
 }
 
 message CreateStreamingSequenceRequest {
-  StreamingSequence streamingSequence = 1;
+  StreamingSequence streaming_sequence = 1;
 }
 
 message AttemptSequenceRequest {

@@ -25,9 +25,9 @@ func init() {
 
 	CreateStreamingSequenceInput.StreamingSequence = new(genprotopb.StreamingSequence)
 
-	CreateStreamingSequenceCmd.Flags().StringVar(&CreateStreamingSequenceInput.StreamingSequence.Content, "streamingSequence.content", "", "The Content that the stream will send")
+	CreateStreamingSequenceCmd.Flags().StringVar(&CreateStreamingSequenceInput.StreamingSequence.Content, "streaming_sequence.content", "", "The Content that the stream will send")
 
-	CreateStreamingSequenceCmd.Flags().StringArrayVar(&CreateStreamingSequenceInputStreamingSequenceResponses, "streamingSequence.responses", []string{}, "Sequence of responses to return in order for each...")
+	CreateStreamingSequenceCmd.Flags().StringArrayVar(&CreateStreamingSequenceInputStreamingSequenceResponses, "streaming_sequence.responses", []string{}, "Sequence of responses to return in order for each...")
 
 	CreateStreamingSequenceCmd.Flags().StringVar(&CreateStreamingSequenceFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

@@ -140,7 +140,7 @@ func (backend *RESTBackend) HandleCreateStreamingSequence(w http.ResponseWriter,
 	}
 
 	if err := resttools.FromJSON().Unmarshal(rBytes, &bodyField); err != nil {
-		backend.Error(w, http.StatusBadRequest, "error reading body into request field 'streamingSequence': %s", err)
+		backend.Error(w, http.StatusBadRequest, "error reading body into request field 'streaming_sequence': %s", err)
 		return
 	}
 
@@ -148,7 +148,7 @@ func (backend *RESTBackend) HandleCreateStreamingSequence(w http.ResponseWriter,
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
-	request.StreamingSequence = &bodyField
+	request.Streaming_sequence = &bodyField
 
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
@@ -156,7 +156,7 @@ func (backend *RESTBackend) HandleCreateStreamingSequence(w http.ResponseWriter,
 	}
 
 	// TODO: Decide whether query-param value or URL-path value takes precedence when a field appears in both
-	excludedQueryParams := []string{"streamingSequence"}
+	excludedQueryParams := []string{"streaming_sequence"}
 	if duplicates := resttools.KeysMatchPath(queryParams, excludedQueryParams); len(duplicates) > 0 {
 		backend.Error(w, http.StatusBadRequest, "(QueryParamsInvalidFieldError) found keys that should not appear in query params: %v", duplicates)
 		return
