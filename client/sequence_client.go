@@ -801,7 +801,7 @@ func (c *sequenceRESTClient) CreateSequence(ctx context.Context, req *genprotopb
 // CreateStreamingSequence creates a sequence.
 func (c *sequenceRESTClient) CreateStreamingSequence(ctx context.Context, req *genprotopb.CreateStreamingSequenceRequest, opts ...gax.CallOption) (*genprotopb.StreamingSequence, error) {
 	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
-	body := req.GetStreamingsequence()
+	body := req.GetStreamingSequence()
 	jsonReq, err := m.Marshal(body)
 	if err != nil {
 		return nil, err
