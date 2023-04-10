@@ -228,7 +228,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 
 	// Prepare the attempt response defined by the Sequence.
 	st := status.New(codes.OK, "Successful attempt")
-	resp_index := 0
+	respIndex := 0
 	var delay time.Duration
 	responses := seq.GetResponses()
 	content := strings.Fields(seq.GetContent())
@@ -236,7 +236,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 		resp := responses[n]
 		delay = resp.GetDelay().AsDuration()
 		st = status.FromProto(resp.GetStatus())
-		resp_index = int(resp.ResponseIndex) - len(strings.Fields(s.sentContent))
+		respIndex = int(resp.ResponseIndex) - len(strings.Fields(s.sentContent))
 
 		if s.sentContent != "" {
 			wordsWritten := strings.Fields(s.sentContent)
@@ -248,7 +248,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 	}
 
 	for idx, word := range content {
-		if idx >= resp_index {
+		if idx >= respIndex {
 			break
 		}
 		s.sentContent += word + " "
