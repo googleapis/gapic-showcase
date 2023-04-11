@@ -148,7 +148,7 @@ func (backend *RESTBackend) HandleCreateStreamingSequence(w http.ResponseWriter,
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
 	}
-	request.Streaming_sequence = &bodyField
+	request.StreamingSequence = &bodyField
 
 	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
