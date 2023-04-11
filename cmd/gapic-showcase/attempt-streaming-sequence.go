@@ -24,20 +24,20 @@ var AttemptStreamingSequenceInput genprotopb.AttemptStreamingSequenceRequest
 
 var AttemptStreamingSequenceFromFile string
 
-var AttemptStreamingSequenceInputErrorDetails []string
+var AttemptStreamingSequenceInputAttemptStatusDetails []string
 
 func init() {
 	SequenceServiceCmd.AddCommand(AttemptStreamingSequenceCmd)
 
-	AttemptStreamingSequenceInput.Error = new(statuspb.Status)
+	AttemptStreamingSequenceInput.AttemptStatus = new(statuspb.Status)
 
 	AttemptStreamingSequenceCmd.Flags().StringVar(&AttemptStreamingSequenceInput.Name, "name", "", "Required. ")
 
-	AttemptStreamingSequenceCmd.Flags().Int32Var(&AttemptStreamingSequenceInput.Error.Code, "error.code", 0, "The status code, which should be an enum value of...")
+	AttemptStreamingSequenceCmd.Flags().Int32Var(&AttemptStreamingSequenceInput.AttemptStatus.Code, "attempt_status.code", 0, "The status code, which should be an enum value of...")
 
-	AttemptStreamingSequenceCmd.Flags().StringVar(&AttemptStreamingSequenceInput.Error.Message, "error.message", "", "A developer-facing error message, which should be...")
+	AttemptStreamingSequenceCmd.Flags().StringVar(&AttemptStreamingSequenceInput.AttemptStatus.Message, "attempt_status.message", "", "A developer-facing error message, which should be...")
 
-	AttemptStreamingSequenceCmd.Flags().StringArrayVar(&AttemptStreamingSequenceInputErrorDetails, "error.details", []string{}, "A list of messages that carry the error details. ...")
+	AttemptStreamingSequenceCmd.Flags().StringArrayVar(&AttemptStreamingSequenceInputAttemptStatusDetails, "attempt_status.details", []string{}, "A list of messages that carry the error details. ...")
 
 	AttemptStreamingSequenceCmd.Flags().StringVar(&AttemptStreamingSequenceFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
@@ -74,14 +74,14 @@ var AttemptStreamingSequenceCmd = &cobra.Command{
 		}
 
 		// unmarshal JSON strings into slice of structs
-		for _, item := range AttemptStreamingSequenceInputErrorDetails {
+		for _, item := range AttemptStreamingSequenceInputAttemptStatusDetails {
 			tmp := anypb.Any{}
 			err = jsonpb.UnmarshalString(item, &tmp)
 			if err != nil {
 				return
 			}
 
-			AttemptStreamingSequenceInput.Error.Details = append(AttemptStreamingSequenceInput.Error.Details, &tmp)
+			AttemptStreamingSequenceInput.AttemptStatus.Details = append(AttemptStreamingSequenceInput.AttemptStatus.Details, &tmp)
 		}
 
 		if Verbose {

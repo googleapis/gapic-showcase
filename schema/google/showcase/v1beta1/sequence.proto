@@ -227,7 +227,7 @@ message AttemptStreamingSequenceRequest {
   ];
 
   // The error that is thrown after all words are sent on the stream.
-  google.rpc.Status error = 3;
+  google.rpc.Status attempt_status = 3;
 }
 
 // The response message for the Echo methods.
