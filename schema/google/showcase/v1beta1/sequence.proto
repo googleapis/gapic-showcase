@@ -226,7 +226,7 @@ message AttemptStreamingSequenceRequest {
     (google.api.field_behavior) = REQUIRED
   ];
 
-  // The error that is thrown after all words are sent on the stream.
+  // The status that is thrown after all words are sent on the stream.
   google.rpc.Status attempt_status = 3;
 }
 
