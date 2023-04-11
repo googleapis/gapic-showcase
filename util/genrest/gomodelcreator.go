@@ -16,12 +16,12 @@ package genrest
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
 	"github.com/googleapis/gapic-showcase/util/genrest/gomodel"
 	"github.com/googleapis/gapic-showcase/util/genrest/internal/pbinfo"
 	"github.com/googleapis/gapic-showcase/util/genrest/protomodel"
+	"github.com/iancoleman/strcase"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
 
@@ -84,7 +84,7 @@ func NewGoModel(protoModel *protomodel.Model) (*gomodel.Model, error) {
 				requestBodyFieldType, bodyFieldImports, err = protoInfo.NameSpec(bodyFieldTypeDesc)
 				// TODO: test for HTTP body encoding a single field whose names is different than its type
 				// TODO: Test for HTTP body encoding a single field that is a scalar, not a message
-				requestBodyFieldName = strings.Title(bodyFieldDesc.GetName())
+				requestBodyFieldName = strcase.ToCamel(bodyFieldDesc.GetName())
 				goModel.AccumulateError(err)
 			}
 
