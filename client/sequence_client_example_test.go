@@ -86,6 +86,31 @@ func ExampleSequenceClient_CreateSequence() {
 	_ = resp
 }
 
+func ExampleSequenceClient_CreateStreamingSequence() {
+	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
+	c, err := client.NewSequenceClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.CreateStreamingSequenceRequest{
+		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#CreateStreamingSequenceRequest.
+	}
+	resp, err := c.CreateStreamingSequence(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
 func ExampleSequenceClient_GetSequenceReport() {
 	ctx := context.Background()
 	// This snippet has been automatically generated and should be regarded as a code template only.
@@ -104,6 +129,31 @@ func ExampleSequenceClient_GetSequenceReport() {
 		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#GetSequenceReportRequest.
 	}
 	resp, err := c.GetSequenceReport(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
+func ExampleSequenceClient_GetStreamingSequenceReport() {
+	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
+	c, err := client.NewSequenceClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.GetStreamingSequenceReportRequest{
+		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#GetStreamingSequenceReportRequest.
+	}
+	resp, err := c.GetStreamingSequenceReport(ctx, req)
 	if err != nil {
 		// TODO: Handle error.
 	}

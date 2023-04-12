@@ -17,6 +17,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -32,9 +33,11 @@ import (
 // NewSequenceServer returns a new SequenceServer for the Showcase API.
 func NewSequenceServer() pb.SequenceServiceServer {
 	return &sequenceServerImpl{
-		token:     server.NewTokenGenerator(),
-		sequences: sync.Map{},
-		reports:   sync.Map{},
+		token:              server.NewTokenGenerator(),
+		sequences:          sync.Map{},
+		reports:            sync.Map{},
+		streamingSequences: sync.Map{},
+		streamingReports:   sync.Map{},
 	}
 }
 
@@ -44,6 +47,10 @@ type sequenceServerImpl struct {
 
 	sequences sync.Map
 	reports   sync.Map
+
+	streamingSequences sync.Map
+	streamingReports   sync.Map
+	sentContent        string
 }
 
 func (s *sequenceServerImpl) CreateSequence(ctx context.Context, in *pb.CreateSequenceRequest) (*pb.Sequence, error) {
@@ -175,4 +182,154 @@ func clone(s *pb.Sequence) *pb.Sequence {
 		Name:      s.GetName(),
 		Responses: r,
 	}
+}
+
+func (s *sequenceServerImpl) CreateStreamingSequence(ctx context.Context, in *pb.CreateStreamingSequenceRequest) (*pb.StreamingSequence, error) {
+	seq := cloneStreamingSequence(in.GetStreamingSequence())
+
+	// Assign Name.
+	id := s.uid.Next()
+	seq.Name = fmt.Sprintf("streamingSequences/%d", id)
+	report := &pb.StreamingSequenceReport{
+		Name: streamingReport(seq.GetName()),
+	}
+
+	s.streamingSequences.Store(seq.GetName(), seq)
+	s.streamingReports.Store(report.GetName(), report)
+
+	return seq, nil
+}
+
+func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSequenceRequest, stream pb.SequenceService_AttemptStreamingSequenceServer) error {
+	received := time.Now()
+	name := in.GetName()
+	if name == "" {
+		return status.Errorf(
+			codes.InvalidArgument,
+			"The field `name` is required.")
+	}
+
+	// Retrieve Sequence and associated SequenceReport.
+	i, ok := s.streamingSequences.Load(name)
+	if !ok {
+		return status.Errorf(
+			codes.NotFound,
+			"The Sequence with %q does not exist.",
+			name,
+		)
+	}
+	seq := i.(*pb.StreamingSequence)
+
+	i, _ = s.streamingReports.Load(streamingReport(name))
+	rep, _ := i.(*pb.StreamingSequenceReport)
+
+	// Get the number of attempts, which coincides with this attempt's number.
+	n := len(rep.Attempts)
+
+	// Prepare the attempt response defined by the Sequence.
+	st := status.New(codes.OK, "Successful attempt")
+	respIndex := 0
+	var delay time.Duration
+	responses := seq.GetResponses()
+	content := strings.Fields(seq.GetContent())
+	if l := len(responses); l > 0 && n < l {
+		resp := responses[n]
+		delay = resp.GetDelay().AsDuration()
+		st = status.FromProto(resp.GetStatus())
+		respIndex = int(resp.ResponseIndex) - len(strings.Fields(s.sentContent))
+
+		if s.sentContent != "" {
+			wordsWritten := strings.Fields(s.sentContent)
+			content = content[len(wordsWritten):]
+		}
+
+	} else if n > l {
+		st = status.New(codes.OutOfRange, "Attempt exceeded predefined responses")
+	}
+
+	for idx, word := range content {
+		if idx >= respIndex {
+			break
+		}
+		s.sentContent += word + " "
+		err := stream.Send(&pb.AttemptStreamingSequenceResponse{Content: word})
+		if err != nil {
+			return err
+		}
+	}
+
+	echoStreamingHeaders(stream)
+
+	echoStreamingTrailers(stream)
+
+	time.Sleep(delay)
+
+	// Calculate the perceived delay since the last RPC attempt.
+	attDelay := &duration.Duration{}
+	if n > 0 {
+		prev := rep.GetAttempts()[n-1]
+		respTime := prev.GetResponseTime()
+		d := received.Sub(respTime.AsTime())
+		attDelay = ptypes.DurationProto(d)
+	}
+
+	// Clock the time that the server is sending the response
+	responseTime := time.Now()
+	rpb, err := ptypes.TimestampProto(responseTime)
+	if err != nil {
+		return status.Errorf(
+			codes.Internal,
+			err.Error(),
+		)
+	}
+
+	rep.Attempts = append(rep.Attempts, &pb.StreamingSequenceReport_Attempt{
+		AttemptNumber: int32(n),
+		ResponseTime:  rpb,
+		AttemptDelay:  attDelay,
+		Status:        st.Proto(),
+		ContentSent:   s.sentContent,
+	})
+
+	if n+1 >= len(responses) {
+		s.sentContent = ""
+	}
+
+	return st.Err()
+
+}
+
+func (s *sequenceServerImpl) GetStreamingSequenceReport(ctx context.Context, in *pb.GetStreamingSequenceReportRequest) (*pb.StreamingSequenceReport, error) {
+	name := in.GetName()
+	if name == "" {
+		return nil, status.Errorf(
+			codes.InvalidArgument,
+			"The field `name` is required.")
+	}
+
+	report, ok := s.streamingReports.Load(name)
+	if !ok {
+		return nil, status.Errorf(
+			codes.NotFound,
+			"The sequence report with %q does not exist.",
+			name,
+		)
+	}
+
+	return report.(*pb.StreamingSequenceReport), nil
+}
+
+func cloneStreamingSequence(s *pb.StreamingSequence) *pb.StreamingSequence {
+	r := make([]*pb.StreamingSequence_Response, len(s.GetResponses()))
+	copy(r, s.GetResponses())
+
+	return &pb.StreamingSequence{
+		Name:      s.GetName(),
+		Content:   s.GetContent(),
+		Responses: r,
+	}
+}
+
+func streamingReport(n string) string {
+	return fmt.Sprintf("%s/streamingSequenceReport", n)
 }
