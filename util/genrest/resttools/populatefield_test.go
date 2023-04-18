@@ -62,6 +62,14 @@ func TestParseWellKnownType(t *testing.T) {
 			"5s",
 			durationpb.New(5 * time.Second),
 		},
+
+		{
+			"google.protobuf.FieldMask",
+			(&genprotopb.UpdateUserRequest{}).ProtoReflect(),
+			"update_mask",
+			"\"foo,bar,baz\"",
+			&fieldmaskpb.FieldMask{Paths: []string{"foo", "bar", "baz"}},
+		},
 	} {
 		fd := tst.msg.Descriptor().Fields().ByName(tst.field)
 
