@@ -79,6 +79,24 @@ Testing (.google.showcase.v1beta1.Testing):
   .google.showcase.v1beta1.Testing.DeleteTest[0] : DELETE: "/v1beta1/{name=sessions/*/tests/*}"
   .google.showcase.v1beta1.Testing.VerifyTest[0] : POST: "/v1beta1/{name=sessions/*/tests/*}:check"
 
+Locations (.google.cloud.location.Locations):
+  .google.cloud.location.Locations.ListLocations[0] : GET: "/v1beta1/{name=projects/*}/locations"
+  .google.cloud.location.Locations.GetLocation[0] : GET: "/v1beta1/{name=projects/*/locations/*}"
+
+IAMPolicy (.google.iam.v1.IAMPolicy):
+  .google.iam.v1.IAMPolicy.SetIamPolicy[0] : POST: "/v1beta1/{resource=users/*}:setIamPolicy"
+  .google.iam.v1.IAMPolicy.SetIamPolicy[1] : POST: "/v1beta1/{resource=rooms/*}:setIamPolicy"
+  .google.iam.v1.IAMPolicy.SetIamPolicy[2] : POST: "/v1beta1/{resource=rooms/*/blurbs/*}:setIamPolicy"
+  .google.iam.v1.IAMPolicy.SetIamPolicy[3] : POST: "/v1beta1/{resource=sequences/*}:setIamPolicy"
+  .google.iam.v1.IAMPolicy.GetIamPolicy[0] : GET: "/v1beta1/{resource=users/*}:getIamPolicy"
+  .google.iam.v1.IAMPolicy.GetIamPolicy[1] : GET: "/v1beta1/{resource=rooms/*}:getIamPolicy"
+  .google.iam.v1.IAMPolicy.GetIamPolicy[2] : GET: "/v1beta1/{resource=rooms/*/blurbs/*}:getIamPolicy"
+  .google.iam.v1.IAMPolicy.GetIamPolicy[3] : GET: "/v1beta1/{resource=sequences/*}:getIamPolicy"
+  .google.iam.v1.IAMPolicy.TestIamPermissions[0] : POST: "/v1beta1/{resource=users/*}:testIamPermissions"
+  .google.iam.v1.IAMPolicy.TestIamPermissions[1] : POST: "/v1beta1/{resource=rooms/*}:testIamPermissions"
+  .google.iam.v1.IAMPolicy.TestIamPermissions[2] : POST: "/v1beta1/{resource=rooms/*/blurbs/*}:testIamPermissions"
+  .google.iam.v1.IAMPolicy.TestIamPermissions[3] : POST: "/v1beta1/{resource=sequences/*}:testIamPermissions"
+
 Operations (.google.longrunning.Operations):
   .google.longrunning.Operations.ListOperations[0] : GET: "/v1beta1/operations"
   .google.longrunning.Operations.GetOperation[0] : GET: "/v1beta1/{name=operations/**}"
@@ -300,6 +318,58 @@ Shim "Testing" (.google.showcase.v1beta1.Testing)
 
       DELETE                 /v1beta1/{name=sessions/*/tests/*} func DeleteTest(request genprotopb.DeleteTestRequest) (response emptypbpb.Empty) {}
 ["/" "v1beta1" "/" {name = ["sessions" "/" * "/" "tests" "/" *]}]
+
+----------------------------------------
+Shim "Locations" (.google.cloud.location.Locations)
+  Imports:
+    locationpb: "google.golang.org/genproto/googleapis/cloud/location" "google.golang.org/genproto/googleapis/cloud/location"
+  Handlers (2):
+         GET               /v1beta1/{name=projects/*}/locations func ListLocations(request locationpb.ListLocationsRequest) (response locationpb.ListLocationsResponse) {}
+["/" "v1beta1" "/" {name = ["projects" "/" *]} "/" "locations"]
+
+         GET             /v1beta1/{name=projects/*/locations/*} func GetLocation(request locationpb.GetLocationRequest) (response locationpb.Location) {}
+["/" "v1beta1" "/" {name = ["projects" "/" * "/" "locations" "/" *]}]
+
+----------------------------------------
+Shim "IAMPolicy" (.google.iam.v1.IAMPolicy)
+  Imports:
+    iampbpb: "cloud.google.com/go/iam/apiv1/iampb" "cloud.google.com/go/iam/apiv1/iampb"
+  Handlers (12):
+         GET           /v1beta1/{resource=rooms/*}:getIamPolicy func GetIamPolicy(request iampbpb.GetIamPolicyRequest) (response iampbpb.Policy) {}
+["/" "v1beta1" "/" {resource = ["rooms" "/" *]} ":" "getIamPolicy"]
+
+         GET           /v1beta1/{resource=users/*}:getIamPolicy func GetIamPolicy(request iampbpb.GetIamPolicyRequest) (response iampbpb.Policy) {}
+["/" "v1beta1" "/" {resource = ["users" "/" *]} ":" "getIamPolicy"]
+
+         GET       /v1beta1/{resource=sequences/*}:getIamPolicy func GetIamPolicy(request iampbpb.GetIamPolicyRequest) (response iampbpb.Policy) {}
+["/" "v1beta1" "/" {resource = ["sequences" "/" *]} ":" "getIamPolicy"]
+
+         GET  /v1beta1/{resource=rooms/*/blurbs/*}:getIamPolicy func GetIamPolicy(request iampbpb.GetIamPolicyRequest) (response iampbpb.Policy) {}
+["/" "v1beta1" "/" {resource = ["rooms" "/" * "/" "blurbs" "/" *]} ":" "getIamPolicy"]
+
+        POST           /v1beta1/{resource=rooms/*}:setIamPolicy func SetIamPolicy(request iampbpb.SetIamPolicyRequest) (response iampbpb.Policy) {}
+["/" "v1beta1" "/" {resource = ["rooms" "/" *]} ":" "setIamPolicy"]
+
+        POST           /v1beta1/{resource=users/*}:setIamPolicy func SetIamPolicy(request iampbpb.SetIamPolicyRequest) (response iampbpb.Policy) {}
+["/" "v1beta1" "/" {resource = ["users" "/" *]} ":" "setIamPolicy"]
+
+        POST       /v1beta1/{resource=sequences/*}:setIamPolicy func SetIamPolicy(request iampbpb.SetIamPolicyRequest) (response iampbpb.Policy) {}
+["/" "v1beta1" "/" {resource = ["sequences" "/" *]} ":" "setIamPolicy"]
+
+        POST     /v1beta1/{resource=rooms/*}:testIamPermissions func TestIamPermissions(request iampbpb.TestIamPermissionsRequest) (response iampbpb.TestIamPermissionsResponse) {}
+["/" "v1beta1" "/" {resource = ["rooms" "/" *]} ":" "testIamPermissions"]
+
+        POST     /v1beta1/{resource=users/*}:testIamPermissions func TestIamPermissions(request iampbpb.TestIamPermissionsRequest) (response iampbpb.TestIamPermissionsResponse) {}
+["/" "v1beta1" "/" {resource = ["users" "/" *]} ":" "testIamPermissions"]
+
+        POST  /v1beta1/{resource=rooms/*/blurbs/*}:setIamPolicy func SetIamPolicy(request iampbpb.SetIamPolicyRequest) (response iampbpb.Policy) {}
+["/" "v1beta1" "/" {resource = ["rooms" "/" * "/" "blurbs" "/" *]} ":" "setIamPolicy"]
+
+        POST /v1beta1/{resource=rooms/*/blurbs/*}:testIamPermissions func TestIamPermissions(request iampbpb.TestIamPermissionsRequest) (response iampbpb.TestIamPermissionsResponse) {}
+["/" "v1beta1" "/" {resource = ["rooms" "/" * "/" "blurbs" "/" *]} ":" "testIamPermissions"]
+
+        POST /v1beta1/{resource=sequences/*}:testIamPermissions func TestIamPermissions(request iampbpb.TestIamPermissionsRequest) (response iampbpb.TestIamPermissionsResponse) {}
+["/" "v1beta1" "/" {resource = ["sequences" "/" *]} ":" "testIamPermissions"]
 
 ----------------------------------------
 Shim "Operations" (.google.longrunning.Operations)
