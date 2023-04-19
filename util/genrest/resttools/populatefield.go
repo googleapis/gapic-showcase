@@ -267,7 +267,8 @@ func parseWellKnownType(message protoreflect.Message, fieldDescriptor protorefle
 		return nil, nil
 	}
 
-	if stringEncoded {
+	quoted := value[0] == '"' && value[len(value)-1] == '"'
+	if stringEncoded && !quoted {
 		value = fmt.Sprintf("%q", value)
 	}
 
