@@ -1,5 +1,18 @@
 # Release History
 
+## [0.27.0](https://github.com/googleapis/gapic-showcase/compare/v0.26.1...v0.27.0) (2023-04-19)
+
+
+### Features
+
+* Add iam and location mixin rest handlers ([#1300](https://github.com/googleapis/gapic-showcase/issues/1300)) ([6adab7b](https://github.com/googleapis/gapic-showcase/commit/6adab7bb4e7c979f90441a37cde36ecda0bee68f))
+* Add proto + logic for streaming sequence ([#1266](https://github.com/googleapis/gapic-showcase/issues/1266)) ([82814d8](https://github.com/googleapis/gapic-showcase/commit/82814d8a8ada26bf9a831497b667183edf1f0e4f))
+
+
+### Bug Fixes
+
+* Handle already quoted protojson wkt ([#1294](https://github.com/googleapis/gapic-showcase/issues/1294)) ([f74f03d](https://github.com/googleapis/gapic-showcase/commit/f74f03d50ea8aa5832f830a6f92e16e99fb3e623))
+
 ## [0.26.1](https://github.com/googleapis/gapic-showcase/compare/v0.26.0...v0.26.1) (2023-03-28)
 
 
