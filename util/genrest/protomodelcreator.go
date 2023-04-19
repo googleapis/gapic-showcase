@@ -19,13 +19,15 @@ import (
 	"io/ioutil"
 	"os"
 
+	"cloud.google.com/go/iam/apiv1/iampb"
+	"cloud.google.com/go/longrunning/autogen/longrunningpb"
 	"github.com/ghodss/yaml"
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
 	"github.com/googleapis/gapic-showcase/util/genrest/internal/pbinfo"
 	"github.com/googleapis/gapic-showcase/util/genrest/protomodel"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/genproto/googleapis/api/serviceconfig"
-	"google.golang.org/genproto/googleapis/longrunning"
+	"google.golang.org/genproto/googleapis/cloud/location"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
@@ -38,7 +40,7 @@ import (
 
 // NewProtoModel uses the information in `plugin` to create a new protomodel.Model.
 func NewProtoModel(plugin *protogen.Plugin) (*protomodel.Model, error) {
-	protoFiles := plugin.Request.GetProtoFile()
+	protoFiles := append(plugin.Request.GetProtoFile(), getMixinFiles()...)
 	protoModel := &protomodel.Model{
 		ProtoInfo: pbinfo.Of(protoFiles),
 		Services:  make([]*protomodel.Service, 0, len(protoFiles)),
@@ -264,15 +266,29 @@ func getMixinsForAPI(mixinRules indexedRules, api string) Mixins {
 	return files
 }
 
+func getMixinFiles() (files []*descriptor.FileDescriptorProto) {
+	for _, descriptors := range mixinDescriptors {
+		files = append(files, descriptors...)
+	}
+	return
+}
+
 // mixinDescriptors maps fully qualified proto service names of mixins implemented by Showcase to a
 // list of FileDescriptors containing the definitions needed for that service.
 var mixinDescriptors map[string][]*descriptor.FileDescriptorProto
 
 func init() {
-	// TODO(noahdietz): Figure out how to add Locations and IAMPolicy to this list.
 	mixinDescriptors = map[string][]*descriptor.FileDescriptorProto{
 		"google.longrunning.Operations": {
-			protodesc.ToFileDescriptorProto(longrunning.File_google_longrunning_operations_proto),
+			protodesc.ToFileDescriptorProto(longrunningpb.File_google_longrunning_operations_proto),
+		},
+		"google.cloud.location.Locations": {
+			protodesc.ToFileDescriptorProto(location.File_google_cloud_location_locations_proto),
+		},
+		"google.iam.v1.IAMPolicy": {
+			protodesc.ToFileDescriptorProto(iampb.File_google_iam_v1_iam_policy_proto),
+			protodesc.ToFileDescriptorProto(iampb.File_google_iam_v1_policy_proto),
+			protodesc.ToFileDescriptorProto(iampb.File_google_iam_v1_options_proto),
 		},
 	}
 }
