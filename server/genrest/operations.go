@@ -26,8 +26,7 @@ import (
 )
 
 // HandleListOperations translates REST requests/responses on the wire to internal proto messages for ListOperations
-//
-//	Generated for HTTP binding pattern: GET "/v1beta1/operations"
+//    Generated for HTTP binding pattern: GET "/v1beta1/operations"
 func (backend *RESTBackend) HandleListOperations(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -84,8 +83,7 @@ func (backend *RESTBackend) HandleListOperations(w http.ResponseWriter, r *http.
 }
 
 // HandleGetOperation translates REST requests/responses on the wire to internal proto messages for GetOperation
-//
-//	Generated for HTTP binding pattern: GET "/v1beta1/{name=operations/**}"
+//    Generated for HTTP binding pattern: GET "/v1beta1/{name=operations/**}"
 func (backend *RESTBackend) HandleGetOperation(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -147,8 +145,7 @@ func (backend *RESTBackend) HandleGetOperation(w http.ResponseWriter, r *http.Re
 }
 
 // HandleDeleteOperation translates REST requests/responses on the wire to internal proto messages for DeleteOperation
-//
-//	Generated for HTTP binding pattern: DELETE "/v1beta1/{name=operations/**}"
+//    Generated for HTTP binding pattern: DELETE "/v1beta1/{name=operations/**}"
 func (backend *RESTBackend) HandleDeleteOperation(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -210,8 +207,7 @@ func (backend *RESTBackend) HandleDeleteOperation(w http.ResponseWriter, r *http
 }
 
 // HandleCancelOperation translates REST requests/responses on the wire to internal proto messages for CancelOperation
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{name=operations/**}:cancel"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{name=operations/**}:cancel"
 func (backend *RESTBackend) HandleCancelOperation(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)

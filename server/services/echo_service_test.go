@@ -185,6 +185,21 @@ func TestExpand(t *testing.T) {
 	}
 }
 
+func TestExpandWithWaitTime(t *testing.T) {
+	server := NewEchoServer()
+
+	//This stream should take at least 300ms to complete because there are 7 messages, and we wait 50ms between sending each message.
+	content := "This stream should take 300ms to complete"
+	stream := &mockExpandStream{exp: strings.Fields(content), t: t}
+	start := time.Now()
+	err := server.Expand(&pb.ExpandRequest{Content: content, StreamWaitTime: 50}, stream)
+
+	if time.Since(start).Milliseconds() < 300 {
+		t.Error("Expand stream should take more at least 300ms to complete")
+	}
+	stream.verify(err == nil)
+}
+
 type errorExpandStream struct {
 	err error
 	pb.Echo_ExpandServer

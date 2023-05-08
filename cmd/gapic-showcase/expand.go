@@ -39,6 +39,8 @@ func init() {
 
 	ExpandCmd.Flags().StringArrayVar(&ExpandInputErrorDetails, "error.details", []string{}, "A list of messages that carry the error details. ...")
 
+	ExpandCmd.Flags().Int32Var(&ExpandInput.StreamWaitTime, "stream_wait_time", 0, "The wait time between each server streaming...")
+
 	ExpandCmd.Flags().StringVar(&ExpandFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
 }

@@ -28,8 +28,7 @@ import (
 )
 
 // HandleCreateSequence translates REST requests/responses on the wire to internal proto messages for CreateSequence
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/sequences"
+//    Generated for HTTP binding pattern: POST "/v1beta1/sequences"
 func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -108,8 +107,7 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 }
 
 // HandleCreateStreamingSequence translates REST requests/responses on the wire to internal proto messages for CreateStreamingSequence
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/streamingSequences"
+//    Generated for HTTP binding pattern: POST "/v1beta1/streamingSequences"
 func (backend *RESTBackend) HandleCreateStreamingSequence(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -188,8 +186,7 @@ func (backend *RESTBackend) HandleCreateStreamingSequence(w http.ResponseWriter,
 }
 
 // HandleGetSequenceReport translates REST requests/responses on the wire to internal proto messages for GetSequenceReport
-//
-//	Generated for HTTP binding pattern: GET "/v1beta1/{name=sequences/*/sequenceReport}"
+//    Generated for HTTP binding pattern: GET "/v1beta1/{name=sequences/*/sequenceReport}"
 func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -251,8 +248,7 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 }
 
 // HandleGetStreamingSequenceReport translates REST requests/responses on the wire to internal proto messages for GetStreamingSequenceReport
-//
-//	Generated for HTTP binding pattern: GET "/v1beta1/{name=streamingSequences/*/streamingSequenceReport}"
+//    Generated for HTTP binding pattern: GET "/v1beta1/{name=streamingSequences/*/streamingSequenceReport}"
 func (backend *RESTBackend) HandleGetStreamingSequenceReport(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -314,8 +310,7 @@ func (backend *RESTBackend) HandleGetStreamingSequenceReport(w http.ResponseWrit
 }
 
 // HandleAttemptSequence translates REST requests/responses on the wire to internal proto messages for AttemptSequence
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{name=sequences/*}"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{name=sequences/*}"
 func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -385,8 +380,7 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 }
 
 // HandleAttemptStreamingSequence translates REST requests/responses on the wire to internal proto messages for AttemptStreamingSequence
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{name=streamingSequences/*}:stream"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{name=streamingSequences/*}:stream"
 func (backend *RESTBackend) HandleAttemptStreamingSequence(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)

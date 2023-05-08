@@ -57,6 +57,7 @@ func (s *echoServerImpl) Expand(in *pb.ExpandRequest, stream pb.Echo_ExpandServe
 		if err != nil {
 			return err
 		}
+		time.Sleep(time.Duration(in.GetStreamWaitTime()) * time.Millisecond)
 	}
 	echoStreamingHeaders(stream)
 	if in.GetError() != nil {
