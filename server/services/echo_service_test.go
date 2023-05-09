@@ -19,7 +19,6 @@ import (
 	"errors"
 	"io"
 	"reflect"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -198,9 +197,9 @@ func TestExpandWithWaitTime(t *testing.T) {
 	err := server.Expand(&pb.ExpandRequest{Content: content, StreamWaitTime: streamWaitTime}, stream)
 
 	actualTimeSpent := int(time.Since(start).Milliseconds())
-	expectedTimeSent := 300
-	if actualTimeSpent < expectedTimeSent {
-		t.Errorf("Expand stream should take at least %d ms to complete, but it only took %d ms", expectedTimeSent, actualTimeSpent)
+	expectedTimeSpent := 300
+	if actualTimeSpent < expectedTimeSpent {
+		t.Errorf("Expand stream should take at least %d ms to complete, but it only took %d ms", expectedTimeSpent, actualTimeSpent)
 	}
 	stream.verify(err == nil)
 }
