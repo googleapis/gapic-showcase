@@ -200,7 +200,7 @@ func TestExpandWithWaitTime(t *testing.T) {
 	actualTimeSpent := int(time.Since(start).Milliseconds())
 	expectedTimeSent := 300
 	if actualTimeSpent < expectedTimeSent {
-		t.Error("Expand stream should take at least " + strconv.Itoa(expectedTimeSent) + "ms to complete, but it only took " + strconv.Itoa(actualTimeSpent) + "ms")
+		t.Errorf("Expand stream should take at least %d ms to complete, but it only took %d ms", expectedTimeSent, actualTimeSpent)
 	}
 	stream.verify(err == nil)
 }
