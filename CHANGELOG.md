@@ -1,5 +1,12 @@
 # Release History
 
+## [0.28.0](https://github.com/googleapis/gapic-showcase/compare/v0.27.0...v0.28.0) (2023-05-09)
+
+
+### Features
+
+* Add a configurable wait time between messages sent for server streaming RPCs ([#1309](https://github.com/googleapis/gapic-showcase/issues/1309)) ([dd11687](https://github.com/googleapis/gapic-showcase/commit/dd1168792054cfccb16e53753764cda3431d6170))
+
 ## [0.27.0](https://github.com/googleapis/gapic-showcase/compare/v0.26.1...v0.27.0) (2023-04-19)
 
 
