@@ -32,6 +32,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	durationpb "google.golang.org/protobuf/types/known/durationpb"
 )
 
 func TestEcho_success(t *testing.T) {
@@ -183,6 +184,24 @@ func TestExpand(t *testing.T) {
 			stream.verify(e == nil)
 		}
 	}
+}
+
+func TestExpandWithWaitTime(t *testing.T) {
+	server := NewEchoServer()
+	//This stream should take at least 300ms to complete because there are 7 messages, and we wait 50ms between sending each message.
+	content := "This stream should take 300ms to complete"
+	stream := &mockExpandStream{exp: strings.Fields(content), t: t}
+	streamWaitTime := durationpb.New(time.Duration(50) * time.Millisecond)
+	start := time.Now()
+
+	err := server.Expand(&pb.ExpandRequest{Content: content, StreamWaitTime: streamWaitTime}, stream)
+
+	actualTimeSpent := int(time.Since(start).Milliseconds())
+	expectedTimeSpent := 300
+	if actualTimeSpent < expectedTimeSpent {
+		t.Errorf("Expand stream should take at least %d ms to complete, but it only took %d ms", expectedTimeSpent, actualTimeSpent)
+	}
+	stream.verify(err == nil)
 }
 
 type errorExpandStream struct {

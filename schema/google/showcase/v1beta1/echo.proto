@@ -213,6 +213,9 @@ message ExpandRequest {
 
   // The error that is thrown after all words are sent on the stream.
   google.rpc.Status error = 2;
+
+  //The wait time between each server streaming messages
+  google.protobuf.Duration stream_wait_time = 3;
 }
 
 // The request for the PagedExpand method.

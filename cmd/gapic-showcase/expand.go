@@ -7,6 +7,8 @@ import (
 
 	anypb "google.golang.org/protobuf/types/known/anypb"
 
+	durationpb "google.golang.org/protobuf/types/known/durationpb"
+
 	"fmt"
 
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
@@ -31,6 +33,8 @@ func init() {
 
 	ExpandInput.Error = new(statuspb.Status)
 
+	ExpandInput.StreamWaitTime = new(durationpb.Duration)
+
 	ExpandCmd.Flags().StringVar(&ExpandInput.Content, "content", "", "The content that will be split into words and...")
 
 	ExpandCmd.Flags().Int32Var(&ExpandInput.Error.Code, "error.code", 0, "The status code, which should be an enum value of...")
@@ -38,6 +42,10 @@ func init() {
 	ExpandCmd.Flags().StringVar(&ExpandInput.Error.Message, "error.message", "", "A developer-facing error message, which should be...")
 
 	ExpandCmd.Flags().StringArrayVar(&ExpandInputErrorDetails, "error.details", []string{}, "A list of messages that carry the error details. ...")
+
+	ExpandCmd.Flags().Int64Var(&ExpandInput.StreamWaitTime.Seconds, "stream_wait_time.seconds", 0, "Signed seconds of the span of time. Must be from...")
+
+	ExpandCmd.Flags().Int32Var(&ExpandInput.StreamWaitTime.Nanos, "stream_wait_time.nanos", 0, "Signed fractions of a second at nanosecond...")
 
 	ExpandCmd.Flags().StringVar(&ExpandFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

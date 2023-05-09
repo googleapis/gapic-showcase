@@ -28,8 +28,7 @@ import (
 )
 
 // HandleCreateRoom translates REST requests/responses on the wire to internal proto messages for CreateRoom
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/rooms"
+//    Generated for HTTP binding pattern: POST "/v1beta1/rooms"
 func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -99,8 +98,7 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 }
 
 // HandleGetRoom translates REST requests/responses on the wire to internal proto messages for GetRoom
-//
-//	Generated for HTTP binding pattern: GET "/v1beta1/{name=rooms/*}"
+//    Generated for HTTP binding pattern: GET "/v1beta1/{name=rooms/*}"
 func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -162,8 +160,7 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 }
 
 // HandleUpdateRoom translates REST requests/responses on the wire to internal proto messages for UpdateRoom
-//
-//	Generated for HTTP binding pattern: PATCH "/v1beta1/{room.name=rooms/*}"
+//    Generated for HTTP binding pattern: PATCH "/v1beta1/{room.name=rooms/*}"
 func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -242,8 +239,7 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 }
 
 // HandleDeleteRoom translates REST requests/responses on the wire to internal proto messages for DeleteRoom
-//
-//	Generated for HTTP binding pattern: DELETE "/v1beta1/{name=rooms/*}"
+//    Generated for HTTP binding pattern: DELETE "/v1beta1/{name=rooms/*}"
 func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -305,8 +301,7 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 }
 
 // HandleListRooms translates REST requests/responses on the wire to internal proto messages for ListRooms
-//
-//	Generated for HTTP binding pattern: GET "/v1beta1/rooms"
+//    Generated for HTTP binding pattern: GET "/v1beta1/rooms"
 func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -363,8 +358,7 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 }
 
 // HandleCreateBlurb translates REST requests/responses on the wire to internal proto messages for CreateBlurb
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{parent=rooms/*}/blurbs"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{parent=rooms/*}/blurbs"
 func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -434,8 +428,7 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 }
 
 // HandleCreateBlurb_1 translates REST requests/responses on the wire to internal proto messages for CreateBlurb
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{parent=users/*/profile}/blurbs"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{parent=users/*/profile}/blurbs"
 func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -505,8 +498,7 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 }
 
 // HandleGetBlurb translates REST requests/responses on the wire to internal proto messages for GetBlurb
-//
-//	Generated for HTTP binding pattern: GET "/v1beta1/{name=rooms/*/blurbs/*}"
+//    Generated for HTTP binding pattern: GET "/v1beta1/{name=rooms/*/blurbs/*}"
 func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -568,8 +560,7 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 }
 
 // HandleGetBlurb_1 translates REST requests/responses on the wire to internal proto messages for GetBlurb
-//
-//	Generated for HTTP binding pattern: GET "/v1beta1/{name=users/*/profile/blurbs/*}"
+//    Generated for HTTP binding pattern: GET "/v1beta1/{name=users/*/profile/blurbs/*}"
 func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -631,8 +622,7 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 }
 
 // HandleUpdateBlurb translates REST requests/responses on the wire to internal proto messages for UpdateBlurb
-//
-//	Generated for HTTP binding pattern: PATCH "/v1beta1/{blurb.name=rooms/*/blurbs/*}"
+//    Generated for HTTP binding pattern: PATCH "/v1beta1/{blurb.name=rooms/*/blurbs/*}"
 func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -711,8 +701,7 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 }
 
 // HandleUpdateBlurb_1 translates REST requests/responses on the wire to internal proto messages for UpdateBlurb
-//
-//	Generated for HTTP binding pattern: PATCH "/v1beta1/{blurb.name=users/*/profile/blurbs/*}"
+//    Generated for HTTP binding pattern: PATCH "/v1beta1/{blurb.name=users/*/profile/blurbs/*}"
 func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -791,8 +780,7 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 }
 
 // HandleDeleteBlurb translates REST requests/responses on the wire to internal proto messages for DeleteBlurb
-//
-//	Generated for HTTP binding pattern: DELETE "/v1beta1/{name=rooms/*/blurbs/*}"
+//    Generated for HTTP binding pattern: DELETE "/v1beta1/{name=rooms/*/blurbs/*}"
 func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -854,8 +842,7 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 }
 
 // HandleDeleteBlurb_1 translates REST requests/responses on the wire to internal proto messages for DeleteBlurb
-//
-//	Generated for HTTP binding pattern: DELETE "/v1beta1/{name=users/*/profile/blurbs/*}"
+//    Generated for HTTP binding pattern: DELETE "/v1beta1/{name=users/*/profile/blurbs/*}"
 func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -917,8 +904,7 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 }
 
 // HandleListBlurbs translates REST requests/responses on the wire to internal proto messages for ListBlurbs
-//
-//	Generated for HTTP binding pattern: GET "/v1beta1/{parent=rooms/*}/blurbs"
+//    Generated for HTTP binding pattern: GET "/v1beta1/{parent=rooms/*}/blurbs"
 func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -980,8 +966,7 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 }
 
 // HandleListBlurbs_1 translates REST requests/responses on the wire to internal proto messages for ListBlurbs
-//
-//	Generated for HTTP binding pattern: GET "/v1beta1/{parent=users/*/profile}/blurbs"
+//    Generated for HTTP binding pattern: GET "/v1beta1/{parent=users/*/profile}/blurbs"
 func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -1043,8 +1028,7 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 }
 
 // HandleSearchBlurbs translates REST requests/responses on the wire to internal proto messages for SearchBlurbs
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{parent=rooms/*}/blurbs:search"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{parent=rooms/*}/blurbs:search"
 func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -1114,8 +1098,7 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 }
 
 // HandleSearchBlurbs_1 translates REST requests/responses on the wire to internal proto messages for SearchBlurbs
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{parent=users/*/profile}/blurbs:search"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{parent=users/*/profile}/blurbs:search"
 func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -1177,8 +1160,7 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 }
 
 // HandleStreamBlurbs translates REST requests/responses on the wire to internal proto messages for StreamBlurbs
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{name=rooms/*}/blurbs:stream"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{name=rooms/*}/blurbs:stream"
 func (backend *RESTBackend) HandleStreamBlurbs(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -1244,8 +1226,7 @@ func (backend *RESTBackend) HandleStreamBlurbs(w http.ResponseWriter, r *http.Re
 }
 
 // HandleStreamBlurbs_1 translates REST requests/responses on the wire to internal proto messages for StreamBlurbs
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{name=users/*/profile}/blurbs:stream"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{name=users/*/profile}/blurbs:stream"
 func (backend *RESTBackend) HandleStreamBlurbs_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -1311,15 +1292,13 @@ func (backend *RESTBackend) HandleStreamBlurbs_1(w http.ResponseWriter, r *http.
 }
 
 // HandleSendBlurbs translates REST requests/responses on the wire to internal proto messages for SendBlurbs
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{parent=rooms/*}/blurbs:send"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{parent=rooms/*}/blurbs:send"
 func (backend *RESTBackend) HandleSendBlurbs(w http.ResponseWriter, r *http.Request) {
 	backend.Error(w, http.StatusNotImplemented, "client-streaming methods not implemented yet (request matched '/v1beta1/{parent=rooms/*}/blurbs:send': %q)", r.URL)
 }
 
 // HandleSendBlurbs_1 translates REST requests/responses on the wire to internal proto messages for SendBlurbs
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{parent=users/*/profile}/blurbs:send"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{parent=users/*/profile}/blurbs:send"
 func (backend *RESTBackend) HandleSendBlurbs_1(w http.ResponseWriter, r *http.Request) {
 	backend.Error(w, http.StatusNotImplemented, "client-streaming methods not implemented yet (request matched '/v1beta1/{parent=users/*/profile}/blurbs:send': %q)", r.URL)
 }
