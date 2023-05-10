@@ -84,7 +84,7 @@ service SequenceService {
     post: "/v1beta1/{name=streamingSequences/*}:stream"
       body: "*"
     };
-    option (google.api.method_signature) = "name,content,error";
+    option (google.api.method_signature) = "name";
   };
 }
 
