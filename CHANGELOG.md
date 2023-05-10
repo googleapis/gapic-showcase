@@ -1,5 +1,12 @@
 # Release History
 
+## [0.28.1](https://github.com/googleapis/gapic-showcase/compare/v0.28.0...v0.28.1) (2023-05-10)
+
+
+### Bug Fixes
+
+* Remove non-exist fields from method signature in sequence.proto ([#1315](https://github.com/googleapis/gapic-showcase/issues/1315)) ([a7c8ffc](https://github.com/googleapis/gapic-showcase/commit/a7c8ffca1fec5f25b630ac1d2aa83bc3db0fe521))
+
 ## [0.28.0](https://github.com/googleapis/gapic-showcase/compare/v0.27.0...v0.28.0) (2023-05-09)
 
 
