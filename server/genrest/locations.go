@@ -26,8 +26,7 @@ import (
 )
 
 // HandleListLocations translates REST requests/responses on the wire to internal proto messages for ListLocations
-//
-//	Generated for HTTP binding pattern: GET "/v1beta1/{name=projects/*}/locations"
+//    Generated for HTTP binding pattern: GET "/v1beta1/{name=projects/*}/locations"
 func (backend *RESTBackend) HandleListLocations(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -89,8 +88,7 @@ func (backend *RESTBackend) HandleListLocations(w http.ResponseWriter, r *http.R
 }
 
 // HandleGetLocation translates REST requests/responses on the wire to internal proto messages for GetLocation
-//
-//	Generated for HTTP binding pattern: GET "/v1beta1/{name=projects/*/locations/*}"
+//    Generated for HTTP binding pattern: GET "/v1beta1/{name=projects/*/locations/*}"
 func (backend *RESTBackend) HandleGetLocation(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
