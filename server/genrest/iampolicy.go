@@ -28,8 +28,7 @@ import (
 )
 
 // HandleSetIamPolicy translates REST requests/responses on the wire to internal proto messages for SetIamPolicy
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{resource=users/*}:setIamPolicy"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{resource=users/*}:setIamPolicy"
 func (backend *RESTBackend) HandleSetIamPolicy(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -99,8 +98,7 @@ func (backend *RESTBackend) HandleSetIamPolicy(w http.ResponseWriter, r *http.Re
 }
 
 // HandleSetIamPolicy_1 translates REST requests/responses on the wire to internal proto messages for SetIamPolicy
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{resource=rooms/*}:setIamPolicy"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{resource=rooms/*}:setIamPolicy"
 func (backend *RESTBackend) HandleSetIamPolicy_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -170,8 +168,7 @@ func (backend *RESTBackend) HandleSetIamPolicy_1(w http.ResponseWriter, r *http.
 }
 
 // HandleSetIamPolicy_2 translates REST requests/responses on the wire to internal proto messages for SetIamPolicy
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{resource=rooms/*/blurbs/*}:setIamPolicy"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{resource=rooms/*/blurbs/*}:setIamPolicy"
 func (backend *RESTBackend) HandleSetIamPolicy_2(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -241,8 +238,7 @@ func (backend *RESTBackend) HandleSetIamPolicy_2(w http.ResponseWriter, r *http.
 }
 
 // HandleSetIamPolicy_3 translates REST requests/responses on the wire to internal proto messages for SetIamPolicy
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{resource=sequences/*}:setIamPolicy"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{resource=sequences/*}:setIamPolicy"
 func (backend *RESTBackend) HandleSetIamPolicy_3(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -312,8 +308,7 @@ func (backend *RESTBackend) HandleSetIamPolicy_3(w http.ResponseWriter, r *http.
 }
 
 // HandleGetIamPolicy translates REST requests/responses on the wire to internal proto messages for GetIamPolicy
-//
-//	Generated for HTTP binding pattern: GET "/v1beta1/{resource=users/*}:getIamPolicy"
+//    Generated for HTTP binding pattern: GET "/v1beta1/{resource=users/*}:getIamPolicy"
 func (backend *RESTBackend) HandleGetIamPolicy(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -375,8 +370,7 @@ func (backend *RESTBackend) HandleGetIamPolicy(w http.ResponseWriter, r *http.Re
 }
 
 // HandleGetIamPolicy_1 translates REST requests/responses on the wire to internal proto messages for GetIamPolicy
-//
-//	Generated for HTTP binding pattern: GET "/v1beta1/{resource=rooms/*}:getIamPolicy"
+//    Generated for HTTP binding pattern: GET "/v1beta1/{resource=rooms/*}:getIamPolicy"
 func (backend *RESTBackend) HandleGetIamPolicy_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -438,8 +432,7 @@ func (backend *RESTBackend) HandleGetIamPolicy_1(w http.ResponseWriter, r *http.
 }
 
 // HandleGetIamPolicy_2 translates REST requests/responses on the wire to internal proto messages for GetIamPolicy
-//
-//	Generated for HTTP binding pattern: GET "/v1beta1/{resource=rooms/*/blurbs/*}:getIamPolicy"
+//    Generated for HTTP binding pattern: GET "/v1beta1/{resource=rooms/*/blurbs/*}:getIamPolicy"
 func (backend *RESTBackend) HandleGetIamPolicy_2(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -501,8 +494,7 @@ func (backend *RESTBackend) HandleGetIamPolicy_2(w http.ResponseWriter, r *http.
 }
 
 // HandleGetIamPolicy_3 translates REST requests/responses on the wire to internal proto messages for GetIamPolicy
-//
-//	Generated for HTTP binding pattern: GET "/v1beta1/{resource=sequences/*}:getIamPolicy"
+//    Generated for HTTP binding pattern: GET "/v1beta1/{resource=sequences/*}:getIamPolicy"
 func (backend *RESTBackend) HandleGetIamPolicy_3(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -564,8 +556,7 @@ func (backend *RESTBackend) HandleGetIamPolicy_3(w http.ResponseWriter, r *http.
 }
 
 // HandleTestIamPermissions translates REST requests/responses on the wire to internal proto messages for TestIamPermissions
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{resource=users/*}:testIamPermissions"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{resource=users/*}:testIamPermissions"
 func (backend *RESTBackend) HandleTestIamPermissions(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -635,8 +626,7 @@ func (backend *RESTBackend) HandleTestIamPermissions(w http.ResponseWriter, r *h
 }
 
 // HandleTestIamPermissions_1 translates REST requests/responses on the wire to internal proto messages for TestIamPermissions
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{resource=rooms/*}:testIamPermissions"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{resource=rooms/*}:testIamPermissions"
 func (backend *RESTBackend) HandleTestIamPermissions_1(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -706,8 +696,7 @@ func (backend *RESTBackend) HandleTestIamPermissions_1(w http.ResponseWriter, r 
 }
 
 // HandleTestIamPermissions_2 translates REST requests/responses on the wire to internal proto messages for TestIamPermissions
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{resource=rooms/*/blurbs/*}:testIamPermissions"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{resource=rooms/*/blurbs/*}:testIamPermissions"
 func (backend *RESTBackend) HandleTestIamPermissions_2(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
@@ -777,8 +766,7 @@ func (backend *RESTBackend) HandleTestIamPermissions_2(w http.ResponseWriter, r 
 }
 
 // HandleTestIamPermissions_3 translates REST requests/responses on the wire to internal proto messages for TestIamPermissions
-//
-//	Generated for HTTP binding pattern: POST "/v1beta1/{resource=sequences/*}:testIamPermissions"
+//    Generated for HTTP binding pattern: POST "/v1beta1/{resource=sequences/*}:testIamPermissions"
 func (backend *RESTBackend) HandleTestIamPermissions_3(w http.ResponseWriter, r *http.Request) {
 	urlPathParams := gmux.Vars(r)
 	numUrlPathParams := len(urlPathParams)
