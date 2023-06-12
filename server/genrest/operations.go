@@ -18,10 +18,10 @@
 package genrest
 
 import (
+	longrunningpbpb "cloud.google.com/go/longrunning/autogen/longrunningpb"
 	"context"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	gmux "github.com/gorilla/mux"
-	longrunningpb "google.golang.org/genproto/googleapis/longrunning"
 	"net/http"
 )
 
@@ -46,7 +46,7 @@ func (backend *RESTBackend) HandleListOperations(w http.ResponseWriter, r *http.
 		return
 	}
 
-	request := &longrunningpb.ListOperationsRequest{}
+	request := &longrunningpbpb.ListOperationsRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
@@ -104,7 +104,7 @@ func (backend *RESTBackend) HandleGetOperation(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	request := &longrunningpb.GetOperationRequest{}
+	request := &longrunningpbpb.GetOperationRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
@@ -167,7 +167,7 @@ func (backend *RESTBackend) HandleDeleteOperation(w http.ResponseWriter, r *http
 		return
 	}
 
-	request := &longrunningpb.DeleteOperationRequest{}
+	request := &longrunningpbpb.DeleteOperationRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return
@@ -230,7 +230,7 @@ func (backend *RESTBackend) HandleCancelOperation(w http.ResponseWriter, r *http
 		return
 	}
 
-	request := &longrunningpb.CancelOperationRequest{}
+	request := &longrunningpbpb.CancelOperationRequest{}
 	if err := resttools.CheckRequestFormat(nil, r, request.ProtoReflect()); err != nil {
 		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
 		return

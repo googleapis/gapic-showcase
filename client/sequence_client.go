@@ -79,11 +79,20 @@ func defaultSequenceGRPCClientOptions() []option.ClientOption {
 
 func defaultSequenceCallOptions() *SequenceCallOptions {
 	return &SequenceCallOptions{
-		CreateSequence:             []gax.CallOption{},
-		CreateStreamingSequence:    []gax.CallOption{},
-		GetSequenceReport:          []gax.CallOption{},
-		GetStreamingSequenceReport: []gax.CallOption{},
+		CreateSequence: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
+		CreateStreamingSequence: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
+		GetSequenceReport: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
+		GetStreamingSequenceReport: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
 		AttemptSequence: []gax.CallOption{
+			gax.WithTimeout(10000 * time.Millisecond),
 			gax.WithRetry(func() gax.Retryer {
 				return gax.OnCodes([]codes.Code{
 					codes.Unavailable,
@@ -110,11 +119,20 @@ func defaultSequenceCallOptions() *SequenceCallOptions {
 
 func defaultSequenceRESTCallOptions() *SequenceCallOptions {
 	return &SequenceCallOptions{
-		CreateSequence:             []gax.CallOption{},
-		CreateStreamingSequence:    []gax.CallOption{},
-		GetSequenceReport:          []gax.CallOption{},
-		GetStreamingSequenceReport: []gax.CallOption{},
+		CreateSequence: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
+		CreateStreamingSequence: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
+		GetSequenceReport: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
+		GetStreamingSequenceReport: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
 		AttemptSequence: []gax.CallOption{
+			gax.WithTimeout(10000 * time.Millisecond),
 			gax.WithRetry(func() gax.Retryer {
 				return gax.OnHTTPCodes(gax.Backoff{
 					Initial:    100 * time.Millisecond,
@@ -125,16 +143,18 @@ func defaultSequenceRESTCallOptions() *SequenceCallOptions {
 					http.StatusInternalServerError)
 			}),
 		},
-		AttemptStreamingSequence: []gax.CallOption{},
-		ListLocations:            []gax.CallOption{},
-		GetLocation:              []gax.CallOption{},
-		SetIamPolicy:             []gax.CallOption{},
-		GetIamPolicy:             []gax.CallOption{},
-		TestIamPermissions:       []gax.CallOption{},
-		ListOperations:           []gax.CallOption{},
-		GetOperation:             []gax.CallOption{},
-		DeleteOperation:          []gax.CallOption{},
-		CancelOperation:          []gax.CallOption{},
+		AttemptStreamingSequence: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
+		ListLocations:      []gax.CallOption{},
+		GetLocation:        []gax.CallOption{},
+		SetIamPolicy:       []gax.CallOption{},
+		GetIamPolicy:       []gax.CallOption{},
+		TestIamPermissions: []gax.CallOption{},
+		ListOperations:     []gax.CallOption{},
+		GetOperation:       []gax.CallOption{},
+		DeleteOperation:    []gax.CallOption{},
+		CancelOperation:    []gax.CallOption{},
 	}
 }
 
@@ -275,9 +295,6 @@ type sequenceGRPCClient struct {
 	// Connection pool of gRPC connections to the service.
 	connPool gtransport.ConnPool
 
-	// flag to opt out of default deadlines via GOOGLE_API_GO_EXPERIMENTAL_DISABLE_DEFAULT_DEADLINE
-	disableDeadlines bool
-
 	// Points back to the CallOptions field of the containing SequenceClient
 	CallOptions **SequenceCallOptions
 
@@ -306,11 +323,6 @@ func NewSequenceClient(ctx context.Context, opts ...option.ClientOption) (*Seque
 		clientOpts = append(clientOpts, hookOpts...)
 	}
 
-	disableDeadlines, err := checkDisableDeadlines()
-	if err != nil {
-		return nil, err
-	}
-
 	connPool, err := gtransport.DialPool(ctx, append(clientOpts, opts...)...)
 	if err != nil {
 		return nil, err
@@ -319,7 +331,6 @@ func NewSequenceClient(ctx context.Context, opts ...option.ClientOption) (*Seque
 
 	c := &sequenceGRPCClient{
 		connPool:         connPool,
-		disableDeadlines: disableDeadlines,
 		sequenceClient:   genprotopb.NewSequenceServiceClient(connPool),
 		CallOptions:      &client.CallOptions,
 		operationsClient: longrunningpb.NewOperationsClient(connPool),
@@ -423,11 +434,6 @@ func (c *sequenceRESTClient) Connection() *grpc.ClientConn {
 	return nil
 }
 func (c *sequenceGRPCClient) CreateSequence(ctx context.Context, req *genprotopb.CreateSequenceRequest, opts ...gax.CallOption) (*genprotopb.Sequence, error) {
-	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
-		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
-		defer cancel()
-		ctx = cctx
-	}
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append((*c.CallOptions).CreateSequence[0:len((*c.CallOptions).CreateSequence):len((*c.CallOptions).CreateSequence)], opts...)
 	var resp *genprotopb.Sequence
@@ -443,11 +449,6 @@ func (c *sequenceGRPCClient) CreateSequence(ctx context.Context, req *genprotopb
 }
 
 func (c *sequenceGRPCClient) CreateStreamingSequence(ctx context.Context, req *genprotopb.CreateStreamingSequenceRequest, opts ...gax.CallOption) (*genprotopb.StreamingSequence, error) {
-	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
-		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
-		defer cancel()
-		ctx = cctx
-	}
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append((*c.CallOptions).CreateStreamingSequence[0:len((*c.CallOptions).CreateStreamingSequence):len((*c.CallOptions).CreateStreamingSequence)], opts...)
 	var resp *genprotopb.StreamingSequence
@@ -463,11 +464,6 @@ func (c *sequenceGRPCClient) CreateStreamingSequence(ctx context.Context, req *g
 }
 
 func (c *sequenceGRPCClient) GetSequenceReport(ctx context.Context, req *genprotopb.GetSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.SequenceReport, error) {
-	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
-		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
-		defer cancel()
-		ctx = cctx
-	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
@@ -485,11 +481,6 @@ func (c *sequenceGRPCClient) GetSequenceReport(ctx context.Context, req *genprot
 }
 
 func (c *sequenceGRPCClient) GetStreamingSequenceReport(ctx context.Context, req *genprotopb.GetStreamingSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.StreamingSequenceReport, error) {
-	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
-		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
-		defer cancel()
-		ctx = cctx
-	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
@@ -507,11 +498,6 @@ func (c *sequenceGRPCClient) GetStreamingSequenceReport(ctx context.Context, req
 }
 
 func (c *sequenceGRPCClient) AttemptSequence(ctx context.Context, req *genprotopb.AttemptSequenceRequest, opts ...gax.CallOption) error {
-	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
-		cctx, cancel := context.WithTimeout(ctx, 10000*time.Millisecond)
-		defer cancel()
-		ctx = cctx
-	}
 	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
 
 	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
