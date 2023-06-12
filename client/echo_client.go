@@ -88,6 +88,7 @@ func defaultEchoGRPCClientOptions() []option.ClientOption {
 func defaultEchoCallOptions() *EchoCallOptions {
 	return &EchoCallOptions{
 		Echo: []gax.CallOption{
+			gax.WithTimeout(10000 * time.Millisecond),
 			gax.WithRetry(func() gax.Retryer {
 				return gax.OnCodes([]codes.Code{
 					codes.Unavailable,
@@ -114,6 +115,7 @@ func defaultEchoCallOptions() *EchoCallOptions {
 		Collect: []gax.CallOption{},
 		Chat:    []gax.CallOption{},
 		PagedExpand: []gax.CallOption{
+			gax.WithTimeout(10000 * time.Millisecond),
 			gax.WithRetry(func() gax.Retryer {
 				return gax.OnCodes([]codes.Code{
 					codes.Unavailable,
@@ -125,25 +127,34 @@ func defaultEchoCallOptions() *EchoCallOptions {
 				})
 			}),
 		},
-		PagedExpandLegacy:       []gax.CallOption{},
-		PagedExpandLegacyMapped: []gax.CallOption{},
-		Wait:                    []gax.CallOption{},
-		Block:                   []gax.CallOption{},
-		ListLocations:           []gax.CallOption{},
-		GetLocation:             []gax.CallOption{},
-		SetIamPolicy:            []gax.CallOption{},
-		GetIamPolicy:            []gax.CallOption{},
-		TestIamPermissions:      []gax.CallOption{},
-		ListOperations:          []gax.CallOption{},
-		GetOperation:            []gax.CallOption{},
-		DeleteOperation:         []gax.CallOption{},
-		CancelOperation:         []gax.CallOption{},
+		PagedExpandLegacy: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
+		PagedExpandLegacyMapped: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
+		Wait: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
+		Block: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
+		ListLocations:      []gax.CallOption{},
+		GetLocation:        []gax.CallOption{},
+		SetIamPolicy:       []gax.CallOption{},
+		GetIamPolicy:       []gax.CallOption{},
+		TestIamPermissions: []gax.CallOption{},
+		ListOperations:     []gax.CallOption{},
+		GetOperation:       []gax.CallOption{},
+		DeleteOperation:    []gax.CallOption{},
+		CancelOperation:    []gax.CallOption{},
 	}
 }
 
 func defaultEchoRESTCallOptions() *EchoCallOptions {
 	return &EchoCallOptions{
 		Echo: []gax.CallOption{
+			gax.WithTimeout(10000 * time.Millisecond),
 			gax.WithRetry(func() gax.Retryer {
 				return gax.OnHTTPCodes(gax.Backoff{
 					Initial:    100 * time.Millisecond,
@@ -155,6 +166,7 @@ func defaultEchoRESTCallOptions() *EchoCallOptions {
 			}),
 		},
 		Expand: []gax.CallOption{
+			gax.WithTimeout(10000 * time.Millisecond),
 			gax.WithRetry(func() gax.Retryer {
 				return gax.OnHTTPCodes(gax.Backoff{
 					Initial:    100 * time.Millisecond,
@@ -165,9 +177,14 @@ func defaultEchoRESTCallOptions() *EchoCallOptions {
 					http.StatusInternalServerError)
 			}),
 		},
-		Collect: []gax.CallOption{},
-		Chat:    []gax.CallOption{},
+		Collect: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
+		Chat: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
 		PagedExpand: []gax.CallOption{
+			gax.WithTimeout(10000 * time.Millisecond),
 			gax.WithRetry(func() gax.Retryer {
 				return gax.OnHTTPCodes(gax.Backoff{
 					Initial:    100 * time.Millisecond,
@@ -178,19 +195,27 @@ func defaultEchoRESTCallOptions() *EchoCallOptions {
 					http.StatusInternalServerError)
 			}),
 		},
-		PagedExpandLegacy:       []gax.CallOption{},
-		PagedExpandLegacyMapped: []gax.CallOption{},
-		Wait:                    []gax.CallOption{},
-		Block:                   []gax.CallOption{},
-		ListLocations:           []gax.CallOption{},
-		GetLocation:             []gax.CallOption{},
-		SetIamPolicy:            []gax.CallOption{},
-		GetIamPolicy:            []gax.CallOption{},
-		TestIamPermissions:      []gax.CallOption{},
-		ListOperations:          []gax.CallOption{},
-		GetOperation:            []gax.CallOption{},
-		DeleteOperation:         []gax.CallOption{},
-		CancelOperation:         []gax.CallOption{},
+		PagedExpandLegacy: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
+		PagedExpandLegacyMapped: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
+		Wait: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
+		Block: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
+		ListLocations:      []gax.CallOption{},
+		GetLocation:        []gax.CallOption{},
+		SetIamPolicy:       []gax.CallOption{},
+		GetIamPolicy:       []gax.CallOption{},
+		TestIamPermissions: []gax.CallOption{},
+		ListOperations:     []gax.CallOption{},
+		GetOperation:       []gax.CallOption{},
+		DeleteOperation:    []gax.CallOption{},
+		CancelOperation:    []gax.CallOption{},
 	}
 }
 
@@ -388,9 +413,6 @@ type echoGRPCClient struct {
 	// Connection pool of gRPC connections to the service.
 	connPool gtransport.ConnPool
 
-	// flag to opt out of default deadlines via GOOGLE_API_GO_EXPERIMENTAL_DISABLE_DEFAULT_DEADLINE
-	disableDeadlines bool
-
 	// Points back to the CallOptions field of the containing EchoClient
 	CallOptions **EchoCallOptions
 
@@ -432,11 +454,6 @@ func NewEchoClient(ctx context.Context, opts ...option.ClientOption) (*EchoClien
 		clientOpts = append(clientOpts, hookOpts...)
 	}
 
-	disableDeadlines, err := checkDisableDeadlines()
-	if err != nil {
-		return nil, err
-	}
-
 	connPool, err := gtransport.DialPool(ctx, append(clientOpts, opts...)...)
 	if err != nil {
 		return nil, err
@@ -445,7 +462,6 @@ func NewEchoClient(ctx context.Context, opts ...option.ClientOption) (*EchoClien
 
 	c := &echoGRPCClient{
 		connPool:         connPool,
-		disableDeadlines: disableDeadlines,
 		echoClient:       genprotopb.NewEchoClient(connPool),
 		CallOptions:      &client.CallOptions,
 		operationsClient: longrunningpb.NewOperationsClient(connPool),
@@ -583,11 +599,6 @@ func (c *echoRESTClient) Connection() *grpc.ClientConn {
 	return nil
 }
 func (c *echoGRPCClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, opts ...gax.CallOption) (*genprotopb.EchoResponse, error) {
-	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
-		cctx, cancel := context.WithTimeout(ctx, 10000*time.Millisecond)
-		defer cancel()
-		ctx = cctx
-	}
 	routingHeaders := ""
 	routingHeadersMap := make(map[string]string)
 	if reg := regexp.MustCompile("(.*)"); reg.MatchString(req.GetHeader()) && len(url.QueryEscape(reg.FindStringSubmatch(req.GetHeader())[1])) > 0 {
@@ -816,11 +827,6 @@ func (c *echoGRPCClient) PagedExpandLegacyMapped(ctx context.Context, req *genpr
 }
 
 func (c *echoGRPCClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, opts ...gax.CallOption) (*WaitOperation, error) {
-	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
-		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
-		defer cancel()
-		ctx = cctx
-	}
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append((*c.CallOptions).Wait[0:len((*c.CallOptions).Wait):len((*c.CallOptions).Wait)], opts...)
 	var resp *longrunningpb.Operation
@@ -838,11 +844,6 @@ func (c *echoGRPCClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, 
 }
 
 func (c *echoGRPCClient) Block(ctx context.Context, req *genprotopb.BlockRequest, opts ...gax.CallOption) (*genprotopb.BlockResponse, error) {
-	if _, ok := ctx.Deadline(); !ok && !c.disableDeadlines {
-		cctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
-		defer cancel()
-		ctx = cctx
-	}
 	ctx = insertMetadata(ctx, c.xGoogMetadata)
 	opts = append((*c.CallOptions).Block[0:len((*c.CallOptions).Block):len((*c.CallOptions).Block)], opts...)
 	var resp *genprotopb.BlockResponse

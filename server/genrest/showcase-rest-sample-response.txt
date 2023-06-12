@@ -148,12 +148,12 @@ Shim "Compliance" (.google.showcase.v1beta1.Compliance)
 Shim "Echo" (.google.showcase.v1beta1.Echo)
   Imports:
     genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
-    longrunningpb: "google.golang.org/genproto/googleapis/longrunning" "google.golang.org/genproto/googleapis/longrunning"
+    longrunningpbpb: "cloud.google.com/go/longrunning/autogen/longrunningpb" "cloud.google.com/go/longrunning/autogen/longrunningpb"
   Handlers (8):
         POST                                 /v1beta1/echo:echo func Echo(request genprotopb.EchoRequest) (response genprotopb.EchoResponse) {}
 ["/" "v1beta1" "/" "echo" ":" "echo"]
 
-        POST                                 /v1beta1/echo:wait func Wait(request genprotopb.WaitRequest) (response longrunningpb.Operation) {}
+        POST                                 /v1beta1/echo:wait func Wait(request genprotopb.WaitRequest) (response longrunningpbpb.Operation) {}
 ["/" "v1beta1" "/" "echo" ":" "wait"]
 
         POST                                /v1beta1/echo:block func Block(request genprotopb.BlockRequest) (response genprotopb.BlockResponse) {}
@@ -200,7 +200,7 @@ Shim "Messaging" (.google.showcase.v1beta1.Messaging)
   Imports:
     emptypbpb: "google.golang.org/protobuf/types/known/emptypb" "google.golang.org/protobuf/types/known/emptypb"
     genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
-    longrunningpb: "google.golang.org/genproto/googleapis/longrunning" "google.golang.org/genproto/googleapis/longrunning"
+    longrunningpbpb: "cloud.google.com/go/longrunning/autogen/longrunningpb" "cloud.google.com/go/longrunning/autogen/longrunningpb"
   Handlers (21):
          GET                                     /v1beta1/rooms func ListRooms(request genprotopb.ListRoomsRequest) (response genprotopb.ListRoomsResponse) {}
 ["/" "v1beta1" "/" "rooms"]
@@ -232,7 +232,7 @@ Shim "Messaging" (.google.showcase.v1beta1.Messaging)
         POST              /v1beta1/{parent=rooms/*}/blurbs:send func SendBlurbs(request genprotopb.CreateBlurbRequest) (response genprotopb.SendBlurbsResponse) {}
 ["/" "v1beta1" "/" {parent = ["rooms" "/" *]} "/" "blurbs" ":" "send"]
 
-        POST            /v1beta1/{parent=rooms/*}/blurbs:search func SearchBlurbs(request genprotopb.SearchBlurbsRequest) (response longrunningpb.Operation) {}
+        POST            /v1beta1/{parent=rooms/*}/blurbs:search func SearchBlurbs(request genprotopb.SearchBlurbsRequest) (response longrunningpbpb.Operation) {}
 ["/" "v1beta1" "/" {parent = ["rooms" "/" *]} "/" "blurbs" ":" "search"]
 
         POST           /v1beta1/{parent=users/*/profile}/blurbs func CreateBlurb(request genprotopb.CreateBlurbRequest) (response genprotopb.Blurb) {}
@@ -244,7 +244,7 @@ Shim "Messaging" (.google.showcase.v1beta1.Messaging)
         POST      /v1beta1/{parent=users/*/profile}/blurbs:send func SendBlurbs(request genprotopb.CreateBlurbRequest) (response genprotopb.SendBlurbsResponse) {}
 ["/" "v1beta1" "/" {parent = ["users" "/" * "/" "profile"]} "/" "blurbs" ":" "send"]
 
-        POST    /v1beta1/{parent=users/*/profile}/blurbs:search func SearchBlurbs(request genprotopb.SearchBlurbsRequest) (response longrunningpb.Operation) {}
+        POST    /v1beta1/{parent=users/*/profile}/blurbs:search func SearchBlurbs(request genprotopb.SearchBlurbsRequest) (response longrunningpbpb.Operation) {}
 ["/" "v1beta1" "/" {parent = ["users" "/" * "/" "profile"]} "/" "blurbs" ":" "search"]
 
        PATCH                       /v1beta1/{room.name=rooms/*} func UpdateRoom(request genprotopb.UpdateRoomRequest) (response genprotopb.Room) {}
@@ -375,17 +375,17 @@ Shim "IAMPolicy" (.google.iam.v1.IAMPolicy)
 Shim "Operations" (.google.longrunning.Operations)
   Imports:
     emptypbpb: "google.golang.org/protobuf/types/known/emptypb" "google.golang.org/protobuf/types/known/emptypb"
-    longrunningpb: "google.golang.org/genproto/googleapis/longrunning" "google.golang.org/genproto/googleapis/longrunning"
+    longrunningpbpb: "cloud.google.com/go/longrunning/autogen/longrunningpb" "cloud.google.com/go/longrunning/autogen/longrunningpb"
   Handlers (4):
-         GET                                /v1beta1/operations func ListOperations(request longrunningpb.ListOperationsRequest) (response longrunningpb.ListOperationsResponse) {}
+         GET                                /v1beta1/operations func ListOperations(request longrunningpbpb.ListOperationsRequest) (response longrunningpbpb.ListOperationsResponse) {}
 ["/" "v1beta1" "/" "operations"]
 
-         GET                      /v1beta1/{name=operations/**} func GetOperation(request longrunningpb.GetOperationRequest) (response longrunningpb.Operation) {}
+         GET                      /v1beta1/{name=operations/**} func GetOperation(request longrunningpbpb.GetOperationRequest) (response longrunningpbpb.Operation) {}
 ["/" "v1beta1" "/" {name = ["operations" "/" **]}]
 
-        POST               /v1beta1/{name=operations/**}:cancel func CancelOperation(request longrunningpb.CancelOperationRequest) (response emptypbpb.Empty) {}
+        POST               /v1beta1/{name=operations/**}:cancel func CancelOperation(request longrunningpbpb.CancelOperationRequest) (response emptypbpb.Empty) {}
 ["/" "v1beta1" "/" {name = ["operations" "/" **]} ":" "cancel"]
 
-      DELETE                      /v1beta1/{name=operations/**} func DeleteOperation(request longrunningpb.DeleteOperationRequest) (response emptypbpb.Empty) {}
+      DELETE                      /v1beta1/{name=operations/**} func DeleteOperation(request longrunningpbpb.DeleteOperationRequest) (response emptypbpb.Empty) {}
 ["/" "v1beta1" "/" {name = ["operations" "/" **]}]
 
