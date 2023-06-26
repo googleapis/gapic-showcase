@@ -36,7 +36,7 @@ func TestMatchingPath(t *testing.T) {
 		},
 		{
 			template:    "/aa/{bb}/cc/{dd=ee/*/gg}/{hh=ii/jj/*/kk/**}",
-			expectMatch: "/aa/{bb:.+}/cc/{dd:ee/.+/gg}/{hh:ii/jj/.+/kk/.+}",
+			expectMatch: "/aa/{bb:[^:\\/]+}/cc/{dd:ee/[^:\\/]+/gg}/{hh:ii/jj/[^:\\/]+/kk/[^:]+}",
 			expectVars:  []string{"bb", "dd", "hh"},
 		},
 	} {
