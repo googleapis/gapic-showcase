@@ -26,7 +26,7 @@ const (
 	// RegexURLPathSingleSegmentValue contains the regex expression for matching a single URL
 	// path segment (i.e. `/` is not allowed). Since gorilla/mux hands uses the decoded paths to
 	// match, we can just accept any characters.
-	RegexURLPathSingleSegmentValue = "[^:\\/]+"
+	RegexURLPathSingleSegmentValue = "[^:]+"
 
 	// RegexURLPathSingleSegmentValue contains the regex expression for matching multiple URL
 	// path segments (i.e. `/` is allowed). Since gorilla/mux hands uses the decoded paths to
