@@ -1,5 +1,12 @@
 # Release History
 
+## [0.28.2](https://github.com/googleapis/gapic-showcase/compare/v0.28.1...v0.28.2) (2023-07-05)
+
+
+### Bug Fixes
+
+* Update HttpJson regex for URL paths ([#1340](https://github.com/googleapis/gapic-showcase/issues/1340)) ([4110fee](https://github.com/googleapis/gapic-showcase/commit/4110fee63a22f8d32cae7f8ba318919bee94e752))
+
 ## [0.28.1](https://github.com/googleapis/gapic-showcase/compare/v0.28.0...v0.28.1) (2023-05-10)
 
 
