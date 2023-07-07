@@ -50,7 +50,6 @@ type sequenceServerImpl struct {
 
 	streamingSequences sync.Map
 	streamingReports   sync.Map
-	sentContent        string
 }
 
 func (s *sequenceServerImpl) CreateSequence(ctx context.Context, in *pb.CreateSequenceRequest) (*pb.Sequence, error) {
@@ -236,12 +235,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 		resp := responses[n]
 		delay = resp.GetDelay().AsDuration()
 		st = status.FromProto(resp.GetStatus())
-		respIndex = int(resp.ResponseIndex) - len(strings.Fields(s.sentContent))
-
-		if s.sentContent != "" {
-			wordsWritten := strings.Fields(s.sentContent)
-			content = content[len(wordsWritten):]
-		}
+		respIndex = int(resp.ResponseIndex)
 
 	} else if n > l {
 		st = status.New(codes.OutOfRange, "Attempt exceeded predefined responses")
@@ -251,7 +245,6 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 		if idx >= respIndex {
 			break
 		}
-		s.sentContent += word + " "
 		err := stream.Send(&pb.AttemptStreamingSequenceResponse{Content: word})
 		if err != nil {
 			return err
@@ -288,12 +281,8 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 		ResponseTime:  rpb,
 		AttemptDelay:  attDelay,
 		Status:        st.Proto(),
-		ContentSent:   s.sentContent,
 	})
 
-	if n+1 >= len(responses) {
-		s.sentContent = ""
-	}
 
 	return st.Err()
 
