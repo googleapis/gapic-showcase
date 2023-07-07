@@ -1,5 +1,12 @@
 # Release History
 
+## [0.28.3](https://github.com/googleapis/gapic-showcase/compare/v0.28.2...v0.28.3) (2023-07-07)
+
+
+### Bug Fixes
+
+* Remove content_sent from StreamingSequences ([#1351](https://github.com/googleapis/gapic-showcase/issues/1351)) ([ae910cc](https://github.com/googleapis/gapic-showcase/commit/ae910cca182787fb5babbfe1005b086d4f2f8c4b))
+
 ## [0.28.2](https://github.com/googleapis/gapic-showcase/compare/v0.28.1...v0.28.2) (2023-07-05)
 
 
