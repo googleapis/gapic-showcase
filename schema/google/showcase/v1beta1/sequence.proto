@@ -166,7 +166,6 @@ message StreamingSequenceReport {
     // The status returned to the attempt.
     google.rpc.Status status = 5;
 
-    string content_sent = 6;
   }
 
   // The set of RPC attempts received by the server for a Sequence.
