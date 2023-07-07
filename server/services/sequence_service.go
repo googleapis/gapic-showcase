@@ -283,7 +283,6 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 		Status:        st.Proto(),
 	})
 
-
 	return st.Err()
 
 }
