@@ -217,6 +217,7 @@ message AttemptSequenceRequest {
     (google.api.resource_reference).type = "showcase.googleapis.com/Sequence",
     (google.api.field_behavior) = REQUIRED
   ];
+
 }
 
 message AttemptStreamingSequenceRequest {
@@ -224,7 +225,11 @@ message AttemptStreamingSequenceRequest {
     (google.api.resource_reference).type = "showcase.googleapis.com/StreamingSequence",
     (google.api.field_behavior) = REQUIRED
   ];
-
+  
+  int32 fail_index = 2 [
+    (google.api.resource_reference).type = "showcase.googleapis.com/Sequence",
+    (google.api.field_behavior) = OPTIONAL
+  ];
 }
 
 // The response message for the Echo methods.
