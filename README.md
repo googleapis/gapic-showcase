@@ -212,21 +212,21 @@ EchoClient echoClient = EchoClient.create(echoSettings);
 
 ```python
 from google import showcase_v1beta1
-from  google.showcase_v1beta1.services.compliance.transports import ComplianceTransport
 from google.auth import credentials
+
 import grpc
 
 # ...
 
 if do_grpc:
-    transport_cls = showcase_v1beta1.ComplianceClient.get_transport_class("grpc")
+    transport_cls = showcase_v1beta1.EchoClient.get_transport_class("grpc")
     transport = transport_cls(
         credentials=credentials.AnonymousCredentials(),
         channel=grpc.insecure_channel("localhost:7469"),
         host="localhost:7469",
     )
 else:
-    transport_cls = showcase_v1beta1.ComplianceClient.get_transport_class("rest")
+    transport_cls = showcase_v1beta1.EchoClient.get_transport_class("rest")
     transport = transport_cls(
         credentials=credentials.AnonymousCredentials(),
         host="localhost:7469",
