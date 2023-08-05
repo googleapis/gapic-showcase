@@ -155,7 +155,7 @@ must be used since the server does not implement auth. Client library generators
 Showcase-based integration tests need to provide the insecure channel to the client library
 in the tests._**
 
-Example for Node.js:
+#### Example for Node.js:
 
 ```js
 const grpc = require('@grpc/grpc-js');
@@ -163,7 +163,7 @@ const showcase = require('showcase');
 const client = new showcase.EchoClient({ grpc, sslCreds: grpc.credentials.createInsecure() });
 ```
 
-Example for Go:
+#### Example for Go:
 
 ```go
 conn, err := grpc.Dial("localhost:7469", grpc.WithInsecure())
@@ -176,9 +176,10 @@ if err != nil {
     log.Fatal(err)
 }
 ```
-Example for Java(gRPC):
 
-```
+#### Example for Java (gRPC):
+
+```java
 EchoSettings echoSettings = EchoSettings.newBuilder()
     .setCredentialsProvider(NoCredentialsProvider.create())
     .setTransportChannelProvider(
@@ -194,8 +195,10 @@ EchoSettings echoSettings = EchoSettings.newBuilder()
     .build();
 EchoClient echoClient = EchoClient.create(echoSettings);
 ```
-Example for Java(httpJson):
-```
+
+#### Example for Java (httpJson):
+
+```java
 EchoSettings echoSettings = EchoSettings.newHttpJsonBuilder()
     .setTransportChannelProvider(EchoSettings.defaultHttpJsonTransportProviderBuilder()
         .setHttpTransport(new NetHttpTransport.Builder().doNotValidateCertificate().build())
@@ -204,6 +207,34 @@ EchoSettings echoSettings = EchoSettings.newHttpJsonBuilder()
     .build();
 EchoClient echoClient = EchoClient.create(echoSettings);
 ```
+
+#### Example for Python
+
+```python
+from google import showcase_v1beta1
+from google.auth import credentials
+
+import grpc
+
+# ...
+
+if do_grpc:
+    transport_cls = showcase_v1beta1.EchoClient.get_transport_class("grpc")
+    transport = transport_cls(
+        credentials=credentials.AnonymousCredentials(),
+        channel=grpc.insecure_channel("localhost:7469"),
+        host="localhost:7469",
+    )
+else:
+    transport_cls = showcase_v1beta1.EchoClient.get_transport_class("rest")
+    transport = transport_cls(
+        credentials=credentials.AnonymousCredentials(),
+        host="localhost:7469",
+        url_scheme="http",
+    )
+
+```
+
 ## Released Artifacts
 GAPIC Showcase releases three main artifacts, a CLI tool, the gapic-showcase
 service protobuf files staged alongside its dependencies, and a protocol buffer
