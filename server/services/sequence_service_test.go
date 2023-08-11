@@ -354,6 +354,73 @@ func TestStreamingSequenceRetry(t *testing.T) {
 	}
 }
 
+func TestStreamingSequenceWithFailIndex(t *testing.T) {
+	s := NewSequenceServer()
+	responses := []*pb.StreamingSequence_Response{
+		{
+			Status: status.New(codes.Unavailable, "Unavailable").Proto(),
+			Delay:  ptypes.DurationProto(1 * time.Second),
+		},
+		{
+			Status: status.New(codes.Unavailable, "Unavailable").Proto(),
+			Delay:  ptypes.DurationProto(2 * time.Second),
+		},
+		{
+			Status: status.New(codes.OK, "OK").Proto(),
+		},
+	}
+
+	seq, err := s.CreateStreamingSequence(context.Background(), &pb.CreateStreamingSequenceRequest{
+		StreamingSequence: &pb.StreamingSequence{Responses: responses, Content: "Hello World, nice to see you"},
+	})
+	if err != nil {
+		t.Errorf("CreateSequence(retry): unexpected err %+v", err)
+	}
+
+	timeout := 5 * time.Second
+	_, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	delay := 100 * time.Millisecond
+	stream := &mockStreamSequence{}
+
+	for n, r := range responses {
+		res := status.FromProto(r.GetStatus())
+		// by passing the FailIndex as 3, we force the response to be the 3rd index of content, which is "to"
+		// the number of responses will still be the same though - the length of the sequence
+		err = s.AttemptStreamingSequence(&pb.AttemptStreamingSequenceRequest{Name: seq.GetName(), FailIndex: 3}, stream)
+		if c := status.Code(err); c != res.Code() {
+			t.Errorf("%s: status #%d was %v wanted %v", t.Name(), n, c, res.Code())
+		}
+
+		if n != len(responses)-1 {
+			time.Sleep(delay)
+			delay *= 2
+		}
+	}
+
+	r := streamingReport(seq.GetName())
+	report, err := s.GetStreamingSequenceReport(context.Background(), &pb.GetStreamingSequenceReportRequest{Name: r})
+	if err != nil {
+		t.Errorf("GetSequenceReport(retry): unexpected err %+v", err)
+	}
+
+	attempts := report.GetAttempts()
+	if len(attempts) != len(responses) {
+		t.Errorf("%s: expected number of attempts to be %d but was %d", t.Name(), len(responses), len(attempts))
+	}
+
+	for n, a := range attempts {
+		if got, want := a.GetAttemptNumber(), int32(n); got != want {
+			t.Errorf("%s: expected attempt #%d but was #%d", t.Name(), want, got)
+		}
+
+		if got, want := a.GetStatus().GetCode(), responses[n].GetStatus().GetCode(); got != want {
+			t.Errorf("%s: expected response %v but was %v", t.Name(), want, got)
+		}
+	}
+}
+
 func TestStreamingSequenceOutOfRange(t *testing.T) {
 	s := NewSequenceServer()
 
