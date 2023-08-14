@@ -1,5 +1,12 @@
 # Release History
 
+## [0.28.4](https://github.com/googleapis/gapic-showcase/compare/v0.28.3...v0.28.4) (2023-08-14)
+
+
+### Bug Fixes
+
+* Add fail index to streaming sequence ([#1364](https://github.com/googleapis/gapic-showcase/issues/1364)) ([567e756](https://github.com/googleapis/gapic-showcase/commit/567e7567600a0c3cb369a98ac25351f10000fcec))
+
 ## [0.28.3](https://github.com/googleapis/gapic-showcase/compare/v0.28.2...v0.28.3) (2023-07-07)
 
 
