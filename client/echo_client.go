@@ -431,7 +431,7 @@ type echoGRPCClient struct {
 	locationsClient locationpb.LocationsClient
 
 	// The x-goog-* metadata to be sent with each request.
-	xGoogMetadata metadata.MD
+	xGoogHeaders []string
 }
 
 // NewEchoClient creates a new echo client based on gRPC.
@@ -500,7 +500,7 @@ func (c *echoGRPCClient) Connection() *grpc.ClientConn {
 func (c *echoGRPCClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", gax.GoVersion}, keyval...)
 	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "grpc", grpc.Version)
-	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
+	c.xGoogHeaders = []string{"x-goog-api-client", gax.XGoogHeader(kv...)}
 }
 
 // Close closes the connection to the API service. The user should invoke this when
@@ -522,8 +522,8 @@ type echoRESTClient struct {
 	// Users should not Close this client.
 	LROClient **lroauto.OperationsClient
 
-	// The x-goog-* metadata to be sent with each request.
-	xGoogMetadata metadata.MD
+	// The x-goog-* headers to be sent with each request.
+	xGoogHeaders []string
 
 	// Points back to the CallOptions field of the containing EchoClient
 	CallOptions **EchoCallOptions
@@ -581,7 +581,7 @@ func defaultEchoRESTClientOptions() []option.ClientOption {
 func (c *echoRESTClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", gax.GoVersion}, keyval...)
 	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "rest", "UNKNOWN")
-	c.xGoogMetadata = metadata.Pairs("x-goog-api-client", gax.XGoogHeader(kv...))
+	c.xGoogHeaders = []string{"x-goog-api-client", gax.XGoogHeader(kv...)}
 }
 
 // Close closes the connection to the API service. The user should invoke this when
@@ -629,9 +629,10 @@ func (c *echoGRPCClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, 
 		routingHeaders = fmt.Sprintf("%s%s=%s&", routingHeaders, headerName, headerValue)
 	}
 	routingHeaders = strings.TrimSuffix(routingHeaders, "&")
-	md := metadata.Pairs("x-goog-request-params", routingHeaders)
+	hds := []string{"x-goog-request-params", routingHeaders}
 
-	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	hds = append(c.xGoogHeaders, hds...)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).Echo[0:len((*c.CallOptions).Echo):len((*c.CallOptions).Echo)], opts...)
 	var resp *genprotopb.EchoResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -646,7 +647,7 @@ func (c *echoGRPCClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, 
 }
 
 func (c *echoGRPCClient) Expand(ctx context.Context, req *genprotopb.ExpandRequest, opts ...gax.CallOption) (genprotopb.Echo_ExpandClient, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).Expand[0:len((*c.CallOptions).Expand):len((*c.CallOptions).Expand)], opts...)
 	var resp genprotopb.Echo_ExpandClient
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -661,7 +662,7 @@ func (c *echoGRPCClient) Expand(ctx context.Context, req *genprotopb.ExpandReque
 }
 
 func (c *echoGRPCClient) Collect(ctx context.Context, opts ...gax.CallOption) (genprotopb.Echo_CollectClient, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	var resp genprotopb.Echo_CollectClient
 	opts = append((*c.CallOptions).Collect[0:len((*c.CallOptions).Collect):len((*c.CallOptions).Collect)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -676,7 +677,7 @@ func (c *echoGRPCClient) Collect(ctx context.Context, opts ...gax.CallOption) (g
 }
 
 func (c *echoGRPCClient) Chat(ctx context.Context, opts ...gax.CallOption) (genprotopb.Echo_ChatClient, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	var resp genprotopb.Echo_ChatClient
 	opts = append((*c.CallOptions).Chat[0:len((*c.CallOptions).Chat):len((*c.CallOptions).Chat)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -691,7 +692,7 @@ func (c *echoGRPCClient) Chat(ctx context.Context, opts ...gax.CallOption) (genp
 }
 
 func (c *echoGRPCClient) PagedExpand(ctx context.Context, req *genprotopb.PagedExpandRequest, opts ...gax.CallOption) *EchoResponseIterator {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).PagedExpand[0:len((*c.CallOptions).PagedExpand):len((*c.CallOptions).PagedExpand)], opts...)
 	it := &EchoResponseIterator{}
 	req = proto.Clone(req).(*genprotopb.PagedExpandRequest)
@@ -734,7 +735,7 @@ func (c *echoGRPCClient) PagedExpand(ctx context.Context, req *genprotopb.PagedE
 }
 
 func (c *echoGRPCClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.PagedExpandLegacyRequest, opts ...gax.CallOption) *EchoResponseIterator {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).PagedExpandLegacy[0:len((*c.CallOptions).PagedExpandLegacy):len((*c.CallOptions).PagedExpandLegacy)], opts...)
 	it := &EchoResponseIterator{}
 	req = proto.Clone(req).(*genprotopb.PagedExpandLegacyRequest)
@@ -777,7 +778,7 @@ func (c *echoGRPCClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.
 }
 
 func (c *echoGRPCClient) PagedExpandLegacyMapped(ctx context.Context, req *genprotopb.PagedExpandRequest, opts ...gax.CallOption) *PagedExpandResponseListPairIterator {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).PagedExpandLegacyMapped[0:len((*c.CallOptions).PagedExpandLegacyMapped):len((*c.CallOptions).PagedExpandLegacyMapped)], opts...)
 	it := &PagedExpandResponseListPairIterator{}
 	req = proto.Clone(req).(*genprotopb.PagedExpandRequest)
@@ -827,7 +828,7 @@ func (c *echoGRPCClient) PagedExpandLegacyMapped(ctx context.Context, req *genpr
 }
 
 func (c *echoGRPCClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, opts ...gax.CallOption) (*WaitOperation, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).Wait[0:len((*c.CallOptions).Wait):len((*c.CallOptions).Wait)], opts...)
 	var resp *longrunningpb.Operation
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -844,7 +845,7 @@ func (c *echoGRPCClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, 
 }
 
 func (c *echoGRPCClient) Block(ctx context.Context, req *genprotopb.BlockRequest, opts ...gax.CallOption) (*genprotopb.BlockResponse, error) {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).Block[0:len((*c.CallOptions).Block):len((*c.CallOptions).Block)], opts...)
 	var resp *genprotopb.BlockResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -859,9 +860,10 @@ func (c *echoGRPCClient) Block(ctx context.Context, req *genprotopb.BlockRequest
 }
 
 func (c *echoGRPCClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName()))}
 
-	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	hds = append(c.xGoogHeaders, hds...)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).ListLocations[0:len((*c.CallOptions).ListLocations):len((*c.CallOptions).ListLocations)], opts...)
 	it := &LocationIterator{}
 	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
@@ -904,9 +906,10 @@ func (c *echoGRPCClient) ListLocations(ctx context.Context, req *locationpb.List
 }
 
 func (c *echoGRPCClient) GetLocation(ctx context.Context, req *locationpb.GetLocationRequest, opts ...gax.CallOption) (*locationpb.Location, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName()))}
 
-	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	hds = append(c.xGoogHeaders, hds...)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).GetLocation[0:len((*c.CallOptions).GetLocation):len((*c.CallOptions).GetLocation)], opts...)
 	var resp *locationpb.Location
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -921,9 +924,10 @@ func (c *echoGRPCClient) GetLocation(ctx context.Context, req *locationpb.GetLoc
 }
 
 func (c *echoGRPCClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
+	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource()))}
 
-	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	hds = append(c.xGoogHeaders, hds...)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).SetIamPolicy[0:len((*c.CallOptions).SetIamPolicy):len((*c.CallOptions).SetIamPolicy)], opts...)
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -938,9 +942,10 @@ func (c *echoGRPCClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPoli
 }
 
 func (c *echoGRPCClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
+	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource()))}
 
-	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	hds = append(c.xGoogHeaders, hds...)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).GetIamPolicy[0:len((*c.CallOptions).GetIamPolicy):len((*c.CallOptions).GetIamPolicy)], opts...)
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -955,9 +960,10 @@ func (c *echoGRPCClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPoli
 }
 
 func (c *echoGRPCClient) TestIamPermissions(ctx context.Context, req *iampb.TestIamPermissionsRequest, opts ...gax.CallOption) (*iampb.TestIamPermissionsResponse, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
+	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource()))}
 
-	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	hds = append(c.xGoogHeaders, hds...)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).TestIamPermissions[0:len((*c.CallOptions).TestIamPermissions):len((*c.CallOptions).TestIamPermissions)], opts...)
 	var resp *iampb.TestIamPermissionsResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -972,7 +978,7 @@ func (c *echoGRPCClient) TestIamPermissions(ctx context.Context, req *iampb.Test
 }
 
 func (c *echoGRPCClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
-	ctx = insertMetadata(ctx, c.xGoogMetadata)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).ListOperations[0:len((*c.CallOptions).ListOperations):len((*c.CallOptions).ListOperations)], opts...)
 	it := &OperationIterator{}
 	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
@@ -1015,9 +1021,10 @@ func (c *echoGRPCClient) ListOperations(ctx context.Context, req *longrunningpb.
 }
 
 func (c *echoGRPCClient) GetOperation(ctx context.Context, req *longrunningpb.GetOperationRequest, opts ...gax.CallOption) (*longrunningpb.Operation, error) {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName()))}
 
-	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	hds = append(c.xGoogHeaders, hds...)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).GetOperation[0:len((*c.CallOptions).GetOperation):len((*c.CallOptions).GetOperation)], opts...)
 	var resp *longrunningpb.Operation
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1032,9 +1039,10 @@ func (c *echoGRPCClient) GetOperation(ctx context.Context, req *longrunningpb.Ge
 }
 
 func (c *echoGRPCClient) DeleteOperation(ctx context.Context, req *longrunningpb.DeleteOperationRequest, opts ...gax.CallOption) error {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName()))}
 
-	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	hds = append(c.xGoogHeaders, hds...)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).DeleteOperation[0:len((*c.CallOptions).DeleteOperation):len((*c.CallOptions).DeleteOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -1045,9 +1053,10 @@ func (c *echoGRPCClient) DeleteOperation(ctx context.Context, req *longrunningpb
 }
 
 func (c *echoGRPCClient) CancelOperation(ctx context.Context, req *longrunningpb.CancelOperationRequest, opts ...gax.CallOption) error {
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName()))}
 
-	ctx = insertMetadata(ctx, c.xGoogMetadata, md)
+	hds = append(c.xGoogHeaders, hds...)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).CancelOperation[0:len((*c.CallOptions).CancelOperation):len((*c.CallOptions).CancelOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
@@ -1102,9 +1111,11 @@ func (c *echoRESTClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, 
 		routingHeaders = fmt.Sprintf("%s%s=%s&", routingHeaders, headerName, headerValue)
 	}
 	routingHeaders = strings.TrimSuffix(routingHeaders, "&")
-	md := metadata.Pairs("x-goog-request-params", routingHeaders)
+	hds := []string{"x-goog-request-params", routingHeaders}
 
-	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	hds = append(c.xGoogHeaders, hds...)
+	hds = append(hds, "Content-Type", "application/json")
+	headers := gax.BuildHeaders(ctx, hds...)
 	opts = append((*c.CallOptions).Echo[0:len((*c.CallOptions).Echo):len((*c.CallOptions).Echo)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.EchoResponse{}
@@ -1162,7 +1173,8 @@ func (c *echoRESTClient) Expand(ctx context.Context, req *genprotopb.ExpandReque
 	baseUrl.Path += fmt.Sprintf("/v1beta1/echo:expand")
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	hds := append(c.xGoogHeaders, "Content-Type", "application/json")
+	headers := gax.BuildHeaders(ctx, hds...)
 	var streamClient *expandRESTClient
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		if settings.Path != "" {
@@ -1291,7 +1303,8 @@ func (c *echoRESTClient) PagedExpand(ctx context.Context, req *genprotopb.PagedE
 		baseUrl.Path += fmt.Sprintf("/v1beta1/echo:pagedExpand")
 
 		// Build HTTP headers from client and context metadata.
-		headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+		hds := append(c.xGoogHeaders, "Content-Type", "application/json")
+		headers := gax.BuildHeaders(ctx, hds...)
 		e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			if settings.Path != "" {
 				baseUrl.Path = settings.Path
@@ -1376,7 +1389,8 @@ func (c *echoRESTClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.
 		baseUrl.Path += fmt.Sprintf("/v1beta1/echo:pagedExpandLegacy")
 
 		// Build HTTP headers from client and context metadata.
-		headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+		hds := append(c.xGoogHeaders, "Content-Type", "application/json")
+		headers := gax.BuildHeaders(ctx, hds...)
 		e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			if settings.Path != "" {
 				baseUrl.Path = settings.Path
@@ -1463,7 +1477,8 @@ func (c *echoRESTClient) PagedExpandLegacyMapped(ctx context.Context, req *genpr
 		baseUrl.Path += fmt.Sprintf("/v1beta1/echo:pagedExpandLegacyMapped")
 
 		// Build HTTP headers from client and context metadata.
-		headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+		hds := append(c.xGoogHeaders, "Content-Type", "application/json")
+		headers := gax.BuildHeaders(ctx, hds...)
 		e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			if settings.Path != "" {
 				baseUrl.Path = settings.Path
@@ -1541,7 +1556,8 @@ func (c *echoRESTClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, 
 	baseUrl.Path += fmt.Sprintf("/v1beta1/echo:wait")
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	hds := append(c.xGoogHeaders, "Content-Type", "application/json")
+	headers := gax.BuildHeaders(ctx, hds...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &longrunningpb.Operation{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1604,7 +1620,8 @@ func (c *echoRESTClient) Block(ctx context.Context, req *genprotopb.BlockRequest
 	baseUrl.Path += fmt.Sprintf("/v1beta1/echo:block")
 
 	// Build HTTP headers from client and context metadata.
-	headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+	hds := append(c.xGoogHeaders, "Content-Type", "application/json")
+	headers := gax.BuildHeaders(ctx, hds...)
 	opts = append((*c.CallOptions).Block[0:len((*c.CallOptions).Block):len((*c.CallOptions).Block)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.BlockResponse{}
@@ -1681,7 +1698,8 @@ func (c *echoRESTClient) ListLocations(ctx context.Context, req *locationpb.List
 		baseUrl.RawQuery = params.Encode()
 
 		// Build HTTP headers from client and context metadata.
-		headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+		hds := append(c.xGoogHeaders, "Content-Type", "application/json")
+		headers := gax.BuildHeaders(ctx, hds...)
 		e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			if settings.Path != "" {
 				baseUrl.Path = settings.Path
@@ -1745,9 +1763,11 @@ func (c *echoRESTClient) GetLocation(ctx context.Context, req *locationpb.GetLoc
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
 	// Build HTTP headers from client and context metadata.
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName()))}
 
-	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	hds = append(c.xGoogHeaders, hds...)
+	hds = append(hds, "Content-Type", "application/json")
+	headers := gax.BuildHeaders(ctx, hds...)
 	opts = append((*c.CallOptions).GetLocation[0:len((*c.CallOptions).GetLocation):len((*c.CallOptions).GetLocation)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &locationpb.Location{}
@@ -1804,9 +1824,11 @@ func (c *echoRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPoli
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v:setIamPolicy", req.GetResource())
 
 	// Build HTTP headers from client and context metadata.
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
+	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource()))}
 
-	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	hds = append(c.xGoogHeaders, hds...)
+	hds = append(hds, "Content-Type", "application/json")
+	headers := gax.BuildHeaders(ctx, hds...)
 	opts = append((*c.CallOptions).SetIamPolicy[0:len((*c.CallOptions).SetIamPolicy):len((*c.CallOptions).SetIamPolicy)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.Policy{}
@@ -1864,9 +1886,11 @@ func (c *echoRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPoli
 	baseUrl.RawQuery = params.Encode()
 
 	// Build HTTP headers from client and context metadata.
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
+	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource()))}
 
-	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	hds = append(c.xGoogHeaders, hds...)
+	hds = append(hds, "Content-Type", "application/json")
+	headers := gax.BuildHeaders(ctx, hds...)
 	opts = append((*c.CallOptions).GetIamPolicy[0:len((*c.CallOptions).GetIamPolicy):len((*c.CallOptions).GetIamPolicy)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.Policy{}
@@ -1923,9 +1947,11 @@ func (c *echoRESTClient) TestIamPermissions(ctx context.Context, req *iampb.Test
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v:testIamPermissions", req.GetResource())
 
 	// Build HTTP headers from client and context metadata.
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource())))
+	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "resource", url.QueryEscape(req.GetResource()))}
 
-	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	hds = append(c.xGoogHeaders, hds...)
+	hds = append(hds, "Content-Type", "application/json")
+	headers := gax.BuildHeaders(ctx, hds...)
 	opts = append((*c.CallOptions).TestIamPermissions[0:len((*c.CallOptions).TestIamPermissions):len((*c.CallOptions).TestIamPermissions)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &iampb.TestIamPermissionsResponse{}
@@ -2005,7 +2031,8 @@ func (c *echoRESTClient) ListOperations(ctx context.Context, req *longrunningpb.
 		baseUrl.RawQuery = params.Encode()
 
 		// Build HTTP headers from client and context metadata.
-		headers := buildHeaders(ctx, c.xGoogMetadata, metadata.Pairs("Content-Type", "application/json"))
+		hds := append(c.xGoogHeaders, "Content-Type", "application/json")
+		headers := gax.BuildHeaders(ctx, hds...)
 		e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			if settings.Path != "" {
 				baseUrl.Path = settings.Path
@@ -2069,9 +2096,11 @@ func (c *echoRESTClient) GetOperation(ctx context.Context, req *longrunningpb.Ge
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
 	// Build HTTP headers from client and context metadata.
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName()))}
 
-	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	hds = append(c.xGoogHeaders, hds...)
+	hds = append(hds, "Content-Type", "application/json")
+	headers := gax.BuildHeaders(ctx, hds...)
 	opts = append((*c.CallOptions).GetOperation[0:len((*c.CallOptions).GetOperation):len((*c.CallOptions).GetOperation)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &longrunningpb.Operation{}
@@ -2122,9 +2151,11 @@ func (c *echoRESTClient) DeleteOperation(ctx context.Context, req *longrunningpb
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v", req.GetName())
 
 	// Build HTTP headers from client and context metadata.
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName()))}
 
-	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	hds = append(c.xGoogHeaders, hds...)
+	hds = append(hds, "Content-Type", "application/json")
+	headers := gax.BuildHeaders(ctx, hds...)
 	return gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		if settings.Path != "" {
 			baseUrl.Path = settings.Path
@@ -2157,9 +2188,11 @@ func (c *echoRESTClient) CancelOperation(ctx context.Context, req *longrunningpb
 	baseUrl.Path += fmt.Sprintf("/v1beta1/%v:cancel", req.GetName())
 
 	// Build HTTP headers from client and context metadata.
-	md := metadata.Pairs("x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName())))
+	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "name", url.QueryEscape(req.GetName()))}
 
-	headers := buildHeaders(ctx, c.xGoogMetadata, md, metadata.Pairs("Content-Type", "application/json"))
+	hds = append(c.xGoogHeaders, hds...)
+	hds = append(hds, "Content-Type", "application/json")
+	headers := gax.BuildHeaders(ctx, hds...)
 	return gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		if settings.Path != "" {
 			baseUrl.Path = settings.Path
