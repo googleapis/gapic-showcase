@@ -226,7 +226,9 @@ message AttemptStreamingSequenceRequest {
     (google.api.field_behavior) = REQUIRED
   ];
   
-  int32 fail_index = 2 [
+  // used to send the index of the last failed message
+  // needed for stream resumption logic testing
+  int32 last_fail_index = 2 [
     (google.api.resource_reference).type = "showcase.googleapis.com/Sequence",
     (google.api.field_behavior) = OPTIONAL
   ];

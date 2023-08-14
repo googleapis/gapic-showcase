@@ -202,7 +202,7 @@ func (s *sequenceServerImpl) CreateStreamingSequence(ctx context.Context, in *pb
 func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSequenceRequest, stream pb.SequenceService_AttemptStreamingSequenceServer) error {
 	received := time.Now()
 	name := in.GetName()
-	failIndex := in.GetFailIndex()
+	lastFailIndex := in.GetLastFailIndex()
 	if name == "" {
 		return status.Errorf(
 			codes.InvalidArgument,
@@ -242,11 +242,11 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 		st = status.New(codes.OutOfRange, "Attempt exceeded predefined responses")
 	}
 
-	if failIndex < 0 {
-		failIndex = 0
+	if lastFailIndex < 0 {
+		lastFailIndex = 0
 	}
 
-	for idx, word := range content[failIndex:] {
+	for idx, word := range content[lastFailIndex:] {
 		if idx >= respIndex {
 			break
 		}

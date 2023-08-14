@@ -354,7 +354,7 @@ func TestStreamingSequenceRetry(t *testing.T) {
 	}
 }
 
-func TestStreamingSequenceWithFailIndex(t *testing.T) {
+func TestStreamingSequenceWithLastFailIndex(t *testing.T) {
 	s := NewSequenceServer()
 	responses := []*pb.StreamingSequence_Response{
 		{
@@ -386,7 +386,7 @@ func TestStreamingSequenceWithFailIndex(t *testing.T) {
 
 	for n, r := range responses {
 		res := status.FromProto(r.GetStatus())
-		// by passing the FailIndex as 3, we force the response to be the 3rd index of content, which is "to"
+		// by passing the LastFailIndex as 3, we force the response to be the 3rd index of content, which is "to"
 		// the number of responses will still be the same though - the length of the sequence
 		err = s.AttemptStreamingSequence(&pb.AttemptStreamingSequenceRequest{Name: seq.GetName(), FailIndex: 3}, stream)
 		if c := status.Code(err); c != res.Code() {
