@@ -217,6 +217,7 @@ message AttemptSequenceRequest {
     (google.api.resource_reference).type = "showcase.googleapis.com/Sequence",
     (google.api.field_behavior) = REQUIRED
   ];
+
 }
 
 message AttemptStreamingSequenceRequest {
@@ -224,7 +225,13 @@ message AttemptStreamingSequenceRequest {
     (google.api.resource_reference).type = "showcase.googleapis.com/StreamingSequence",
     (google.api.field_behavior) = REQUIRED
   ];
-
+  
+  // used to send the index of the last failed message
+  // in the string "content" of an AttemptStreamingSequenceResponse
+  // needed for stream resumption logic testing
+  int32 last_fail_index = 2 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 }
 
 // The response message for the Echo methods.
