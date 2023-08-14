@@ -388,7 +388,7 @@ func TestStreamingSequenceWithLastFailIndex(t *testing.T) {
 		res := status.FromProto(r.GetStatus())
 		// by passing the LastFailIndex as 3, we force the response to be the 3rd index of content, which is "to"
 		// the number of responses will still be the same though - the length of the sequence
-		err = s.AttemptStreamingSequence(&pb.AttemptStreamingSequenceRequest{Name: seq.GetName(), FailIndex: 3}, stream)
+		err = s.AttemptStreamingSequence(&pb.AttemptStreamingSequenceRequest{Name: seq.GetName(), LastFailIndex: 3}, stream)
 		if c := status.Code(err); c != res.Code() {
 			t.Errorf("%s: status #%d was %v wanted %v", t.Name(), n, c, res.Code())
 		}
