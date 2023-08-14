@@ -25,8 +25,6 @@ func init() {
 
 	AttemptStreamingSequenceCmd.Flags().StringVar(&AttemptStreamingSequenceInput.Name, "name", "", "Required. ")
 
-	AttemptStreamingSequenceCmd.Flags().Int32Var(&AttemptStreamingSequenceInput.FailIndex, "fail_index", 0, "")
-
 	AttemptStreamingSequenceCmd.Flags().StringVar(&AttemptStreamingSequenceFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
 }
