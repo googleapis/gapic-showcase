@@ -60,7 +60,7 @@ func (s *echoServerImpl) EchoErrorDetails(ctx context.Context, in *pb.EchoErrorD
 		errorInfo := &errdetails.ErrorInfo{
 			Reason: text,
 		}
-		marshalledError, err := ptypes.MarshalAny(errorInfo)
+		marshalledError, err := anypb.New(errorInfo)
 		if err != nil {
 			return nil, fmt.Errorf("failure in EchoErrorDetails[%d]: %w", idx, err)
 		}
@@ -81,7 +81,7 @@ func (s *echoServerImpl) EchoErrorSingleDetail(ctx context.Context, in *pb.EchoE
 	errorInfo := &errdetails.ErrorInfo{
 		Reason: in.GetText(),
 	}
-	marshalledError, err := ptypes.MarshalAny(errorInfo)
+	marshalledError, err := anypb.New(errorInfo)
 	if err != nil {
 		return nil, fmt.Errorf("failure in EchoErrorSingleDetail: %w", err)
 	}
