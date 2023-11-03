@@ -411,11 +411,7 @@ func TestEchoErrorDetails(t *testing.T) {
 		{
 			[]string{"rain", "snow", "hail", "sleet", "fog"},
 			[]*errdetails.ErrorInfo{
-				{
-					Reason:   "rain",
-					Domain:   "",
-					Metadata: map[string]string{},
-				},
+				{Reason: "rain"},
 				{Reason: "snow"},
 				{Reason: "hail"},
 				{Reason: "sleet"},

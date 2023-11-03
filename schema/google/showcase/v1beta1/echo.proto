@@ -87,7 +87,7 @@ service Echo {
   // This method returns error details in a repeated "google.protobuf.Any"
   // field. This method showcases handling errors thus encoded, particularly
   // over REST transport. Note that GAPICs only allow the type
-  // "google.protobuf.Any" for field paths ending in "error.details", and at
+  // "google.protobuf.Any" for field paths ending in "error.details", and, at
   // run-time, the actual types for these fields must be one of the types in
   // google/rpc/error_details.proto.
   rpc EchoErrorDetails(EchoErrorDetailsRequest) returns (EchoErrorDetailsResponse) {
@@ -100,7 +100,7 @@ service Echo {
   // This method returns error details in a singular "google.protobuf.Any"
   // field. This method showcases handling errors thus encoded, particularly
   // over REST transport. Note that GAPICs only allow the type
-  // "google.protobuf.Any" for field paths ending in "error.details", and at
+  // "google.protobuf.Any" for field paths ending in "error.details", and, at
   // run-time, the actual types for these fields must be one of the types in
   // google/rpc/error_details.proto.
   rpc EchoErrorSingleDetail(EchoErrorSingleDetailRequest) returns (EchoErrorSingleDetailResponse) {
