@@ -27,6 +27,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	durpb "github.com/golang/protobuf/ptypes/duration"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -400,6 +401,45 @@ func TestChat(t *testing.T) {
 		}
 		mockStream.verify(test.err == nil)
 	}
+}
+
+func TestEchoErrorSingleDetail(t *testing.T) {
+	tests := []struct {
+		text     string
+		expected *errdetails.ErrorInfo
+	}{
+		{"Spanish rain", &errdetails.ErrorInfo{Reason: "Spanish rain"}},
+		{"", &errdetails.ErrorInfo{Reason: ""}},
+	}
+
+	server := NewEchoServer()
+	for idx, test := range tests {
+		request := &pb.EchoErrorSingleDetailRequest{Text: test.text}
+		out, err := server.EchoErrorSingleDetail(context.Background(), request)
+		if err != nil {
+			t.Errorf("[%d] error calling EchoErrorSingleDetail(): %v", idx, err)
+			continue
+		}
+		if out.Error == nil {
+			t.Errorf("[%d] no Error returned", idx)
+			continue
+		}
+		if out.Error.Details == nil {
+			t.Errorf("[%d] no Error.Details returned", idx)
+			continue
+		}
+		if got, want := out.Error.Details.TypeUrl, "type.googleapis.com/google.rpc.ErrorInfo"; got != want {
+			t.Errorf("[%d] expected type URL %q; got %q ", idx, want, got)
+		}
+		unmarshalledError := &errdetails.ErrorInfo{}
+		if err := out.Error.Details.UnmarshalTo(unmarshalledError); err != nil {
+			t.Errorf("[%d] error unmarshalling to ErrorInfo: %v", idx, err)
+		}
+		if got, want := unmarshalledError, test.expected; !proto.Equal(got, want) {
+			t.Errorf("[%d] expected ErrorInfo %v; got %v ", idx, want, got)
+		}
+	}
+
 }
 
 type errorChatStream struct {
