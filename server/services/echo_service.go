@@ -55,6 +55,19 @@ func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.Echo
 }
 
 func (s *echoServerImpl) EchoErrorDetails(ctx context.Context, in *pb.EchoErrorDetailsRequest) (*pb.EchoErrorDetailsResponse, error) {
+	var singleDetailError *pb.EchoErrorDetailsResponse_SingleDetail
+	singleDetailText := in.GetSingleDetailText()
+	if len(singleDetailText) > 0 {
+		singleErrorInfo := &errdetails.ErrorInfo{Reason: singleDetailText}
+		singleMarshalledError, err := anypb.New(singleErrorInfo)
+		if err != nil {
+			return nil, fmt.Errorf("failure with single error detail in EchoErrorDetails: %w", err)
+		}
+		singleDetailError = &pb.EchoErrorDetailsResponse_SingleDetail{
+			Error: &pb.ErrorWithSingleDetail{Details: singleMarshalledError},
+		}
+	}
+
 	var multipleDetailsError *pb.EchoErrorDetailsResponse_MultipleDetails
 	multipleDetailText := in.GetMultiDetailText()
 	if len(multipleDetailText) > 0 {
@@ -76,40 +89,13 @@ func (s *echoServerImpl) EchoErrorDetails(ctx context.Context, in *pb.EchoErrorD
 		}
 	}
 
-	var singleDetailError *pb.EchoErrorDetailsResponse_SingleDetail
-	singleDetailText := in.GetSingleDetailText()
-	if len(singleDetailText) > 0 {
-		singleErrorInfo := &errdetails.ErrorInfo{Reason: singleDetailText}
-		singleMarshalledError, err := anypb.New(singleErrorInfo)
-		if err != nil {
-			return nil, fmt.Errorf("failure with single error detail in EchoErrorDetails: %w", err)
-		}
-		singleDetailError = &pb.EchoErrorDetailsResponse_SingleDetail{
-			Error: &pb.ErrorWithSingleDetail{Details: singleMarshalledError},
-		}
-	}
-
 	echoHeaders(ctx)
 	echoTrailers(ctx)
-	return &pb.EchoErrorDetailsResponse{
-		MultipleDetails: multipleDetailsError,
+	response := &pb.EchoErrorDetailsResponse{
 		SingleDetail:    singleDetailError,
-	}, nil
-}
-
-func (s *echoServerImpl) EchoErrorSingleDetail(ctx context.Context, in *pb.EchoErrorSingleDetailRequest) (*pb.EchoErrorSingleDetailResponse, error) {
-	errorInfo := &errdetails.ErrorInfo{
-		Reason: in.GetText(),
+		MultipleDetails: multipleDetailsError,
 	}
-	marshalledError, err := anypb.New(errorInfo)
-	if err != nil {
-		return nil, fmt.Errorf("failure in EchoErrorSingleDetail: %w", err)
-	}
-	detailedError := &pb.ErrorWithSingleDetail{Details: marshalledError}
-
-	echoHeaders(ctx)
-	echoTrailers(ctx)
-	return &pb.EchoErrorSingleDetailResponse{Error: detailedError}, nil
+	return response, nil
 }
 
 func (s *echoServerImpl) Expand(in *pb.ExpandRequest, stream pb.Echo_ExpandServer) error {

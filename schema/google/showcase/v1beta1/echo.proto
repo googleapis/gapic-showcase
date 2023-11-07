@@ -97,19 +97,6 @@ service Echo {
     };
   }
 
-  // This method returns error details in a singular "google.protobuf.Any"
-  // field. This method showcases handling errors thus encoded, particularly
-  // over REST transport. Note that GAPICs only allow the type
-  // "google.protobuf.Any" for field paths ending in "error.details", and, at
-  // run-time, the actual types for these fields must be one of the types in
-  // google/rpc/error_details.proto.
-  rpc EchoErrorSingleDetail(EchoErrorSingleDetailRequest) returns (EchoErrorSingleDetailResponse) {
-    option (google.api.http) = {
-      post: "/v1beta1/echo:error-single-detail"
-      body: "*"
-    };
-  }
-
   // This method splits the given content into words and will pass each word back
   // through the stream. This method showcases server-side streaming RPCs.
   rpc Expand(ExpandRequest) returns (stream EchoResponse) {
@@ -235,41 +222,36 @@ message EchoResponse {
 
 // The request message used for the EchoErrorDetails method.
 message EchoErrorDetailsRequest {
-  repeated string text = 1;
-  string single_detail_text = 2;
-  repeated string multi_detail_text = 3;
+  // Content to return in a singular `*.error.details` field of type
+  // `google.protobuf.Any`
+  string single_detail_text = 1;
+
+  // Content to return in a repeated `*.error.details` field of type
+  // `google.protobuf.Any`
+  repeated string multi_detail_text = 2;
 }
+
 // The response message used for the EchoErrorDetails method.
 message EchoErrorDetailsResponse {
+
   message SingleDetail {
     ErrorWithSingleDetail error = 1;
   }
+
   message MultipleDetails {
-    ErrorWithMultipleDetails error = 1;    
+    ErrorWithMultipleDetails error = 1;
   }
-  ErrorWithMultipleDetails error = 1;
-  SingleDetail single_detail = 2;
-  MultipleDetails multiple_details = 3;
-}
 
-message ErrorWithMultipleDetails {
-  repeated google.protobuf.Any details=1;
-}
-
-// *** DELETE
-// The request message used for the EchoErrorSingleDetail method.
-message EchoErrorSingleDetailRequest { 
-  string text = 1;
-}
-
-// *** DELETE
-// The response message used for the EchoErrorSingleDetail method.
-message EchoErrorSingleDetailResponse {
-  ErrorWithSingleDetail error = 1;
+  SingleDetail single_detail = 1;
+  MultipleDetails multiple_details = 2;
 }
 
 message ErrorWithSingleDetail {
-  google.protobuf.Any details=1;
+  google.protobuf.Any details = 1;
+}
+
+message ErrorWithMultipleDetails {
+  repeated google.protobuf.Any details = 1;
 }
 
 // The request message for the Expand method.

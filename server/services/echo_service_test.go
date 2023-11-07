@@ -403,7 +403,58 @@ func TestChat(t *testing.T) {
 	}
 }
 
-func TestEchoErrorDetails(t *testing.T) {
+func TestEchoErrorDetails_single(t *testing.T) {
+	tests := []struct {
+		text     string
+		expected *errdetails.ErrorInfo
+	}{
+		{"Spanish rain", &errdetails.ErrorInfo{Reason: "Spanish rain"}},
+		{"", &errdetails.ErrorInfo{Reason: ""}},
+	}
+
+	server := NewEchoServer()
+	for idx, test := range tests {
+		request := &pb.EchoErrorDetailsRequest{SingleDetailText: test.text}
+		out, err := server.EchoErrorDetails(context.Background(), request)
+		if err != nil {
+			t.Errorf("[%d] error calling EchoErrorSingleDetail(): %v", idx, err)
+			continue
+		}
+		if out.MultipleDetails != nil {
+			t.Errorf("[%d] expected no MultipleDetails, but got: %#v", idx, out.MultipleDetails)
+		}
+		if len(test.text) == 0 {
+			if out.SingleDetail != nil {
+				t.Errorf("[%d] expected no SingleDetail, but got: %#v", idx, out.SingleDetail)
+			}
+			continue
+		}
+		if out.SingleDetail == nil {
+			t.Errorf("[%d] no SingleDetail returned", idx)
+			continue
+		}
+		if out.SingleDetail.Error == nil {
+			t.Errorf("[%d] no SingleDetail.Error returned", idx)
+			continue
+		}
+		if out.SingleDetail.Error.Details == nil {
+			t.Errorf("[%d] no SingleDetail.Error.Details returned", idx)
+			continue
+		}
+		if got, want := out.SingleDetail.Error.Details.TypeUrl, "type.googleapis.com/google.rpc.ErrorInfo"; got != want {
+			t.Errorf("[%d] expected type URL %q; got %q ", idx, want, got)
+		}
+		unmarshalledError := &errdetails.ErrorInfo{}
+		if err := out.SingleDetail.Error.Details.UnmarshalTo(unmarshalledError); err != nil {
+			t.Errorf("[%d] error unmarshalling to ErrorInfo: %v", idx, err)
+		}
+		if got, want := unmarshalledError, test.expected; !proto.Equal(got, want) {
+			t.Errorf("[%d] expected ErrorInfo %v; got %v ", idx, want, got)
+		}
+	}
+}
+
+func TestEchoErrorDetails_multiple(t *testing.T) {
 	tests := []struct {
 		text     []string
 		expected []*errdetails.ErrorInfo
@@ -426,12 +477,15 @@ func TestEchoErrorDetails(t *testing.T) {
 		request := &pb.EchoErrorDetailsRequest{MultiDetailText: test.text}
 		out, err := server.EchoErrorDetails(context.Background(), request)
 		if err != nil {
-			t.Errorf("[%d] error calling EchoErrorSingleDetail(): %v", idx, err)
+			t.Errorf("[%d] error calling EchoErrorDetails(): %v", idx, err)
 			continue
+		}
+		if out.SingleDetail != nil {
+			t.Errorf("[%d] expected no SingleDetail, but got: %#v", idx, out.SingleDetail)
 		}
 		if len(test.text) == 0 {
 			if out.MultipleDetails != nil {
-				t.Errorf("[%d] expected no MultipleDetails, but got %#v", idx, out.Error)
+				t.Errorf("[%d] expected no MultipleDetails, but got %#v", idx, out.MultipleDetails)
 			}
 			continue
 		}
@@ -463,96 +517,6 @@ func TestEchoErrorDetails(t *testing.T) {
 			}
 		}
 	}
-}
-
-func TestEchoErrorSingleDetail(t *testing.T) { // DELETE
-	tests := []struct {
-		text     string
-		expected *errdetails.ErrorInfo
-	}{
-		{"Spanish rain", &errdetails.ErrorInfo{Reason: "Spanish rain"}},
-		{"", &errdetails.ErrorInfo{Reason: ""}},
-	}
-
-	server := NewEchoServer()
-	for idx, test := range tests {
-		request := &pb.EchoErrorDetailsRequest{SingleDetailText: test.text}
-		out, err := server.EchoErrorDetails(context.Background(), request)
-		if err != nil {
-			t.Errorf("[%d] error calling EchoErrorSingleDetail(): %v", idx, err)
-			continue
-		}
-		if out.Error != nil {
-			t.Errorf("[%d] expected no MultipleDetail, but got: %#v", idx, out.Error)
-		}
-		if len(test.text) == 0 {
-			if out.SingleDetail != nil {
-				t.Errorf("[%d] expected no SingleDetail, but got: %#v", idx, out.SingleDetail)
-			}
-			continue
-		}
-		if out.SingleDetail == nil {
-			t.Errorf("[%d] no SingleDetail returned", idx)
-			continue
-		}
-		if out.SingleDetail.Error == nil {
-			t.Errorf("[%d] no SingleDetail.Error returned", idx)
-			continue
-		}
-		if out.SingleDetail.Error.Details == nil {
-			t.Errorf("[%d] no SingleDetail.Error.Details returned", idx)
-			continue
-		}
-		if got, want := out.SingleDetail.Error.Details.TypeUrl, "type.googleapis.com/google.rpc.ErrorInfo"; got != want {
-			t.Errorf("[%d] expected type URL %q; got %q ", idx, want, got)
-		}
-		unmarshalledError := &errdetails.ErrorInfo{}
-		if err := out.SingleDetail.Error.Details.UnmarshalTo(unmarshalledError); err != nil {
-			t.Errorf("[%d] error unmarshalling to ErrorInfo: %v", idx, err)
-		}
-		if got, want := unmarshalledError, test.expected; !proto.Equal(got, want) {
-			t.Errorf("[%d] expected ErrorInfo %v; got %v ", idx, want, got)
-		}
-	}
-
-}
-func TestEchoErrorSingleDetailOLD(t *testing.T) { // DELETE
-	tests := []struct {
-		text     string
-		expected *errdetails.ErrorInfo
-	}{
-		{"Spanish rain", &errdetails.ErrorInfo{Reason: "Spanish rain"}},
-		{"", &errdetails.ErrorInfo{Reason: ""}},
-	}
-
-	server := NewEchoServer()
-	for idx, test := range tests {
-		request := &pb.EchoErrorSingleDetailRequest{Text: test.text}
-		out, err := server.EchoErrorSingleDetail(context.Background(), request)
-		if err != nil {
-			t.Errorf("[%d] error calling EchoErrorSingleDetail(): %v", idx, err)
-			continue
-		}
-		if out.Error == nil {
-			t.Errorf("[%d] no Error returned", idx)
-			continue
-		}
-		if out.Error.Details == nil {
-			t.Errorf("[%d] no Error.Details returned", idx)
-			continue
-		}
-		if got, want := out.Error.Details.TypeUrl, "type.googleapis.com/google.rpc.ErrorInfo"; got != want {
-			t.Errorf("[%d] expected type URL %q; got %q ", idx, want, got)
-		}
-		unmarshalledError := &errdetails.ErrorInfo{}
-		if err := out.Error.Details.UnmarshalTo(unmarshalledError); err != nil {
-			t.Errorf("[%d] error unmarshalling to ErrorInfo: %v", idx, err)
-		}
-		if got, want := unmarshalledError, test.expected; !proto.Equal(got, want) {
-			t.Errorf("[%d] expected ErrorInfo %v; got %v ", idx, want, got)
-		}
-	}
-
 }
 
 type errorChatStream struct {
