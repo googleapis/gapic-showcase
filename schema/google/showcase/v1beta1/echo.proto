@@ -237,14 +237,19 @@ message EchoResponse {
 message EchoErrorDetailsRequest {
   repeated string text = 1;
   string single_detail_text = 2;
+  repeated string multi_detail_text = 3;
 }
 // The response message used for the EchoErrorDetails method.
 message EchoErrorDetailsResponse {
   message SingleDetail {
     ErrorWithSingleDetail error = 1;
   }
+  message MultipleDetails {
+    ErrorWithMultipleDetails error = 1;    
+  }
   ErrorWithMultipleDetails error = 1;
   SingleDetail single_detail = 2;
+  MultipleDetails multiple_details = 3;
 }
 
 message ErrorWithMultipleDetails {

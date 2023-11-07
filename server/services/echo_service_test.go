@@ -423,30 +423,34 @@ func TestEchoErrorDetails(t *testing.T) {
 
 	server := NewEchoServer()
 	for idx, test := range tests {
-		request := &pb.EchoErrorDetailsRequest{Text: test.text}
+		request := &pb.EchoErrorDetailsRequest{MultiDetailText: test.text}
 		out, err := server.EchoErrorDetails(context.Background(), request)
 		if err != nil {
 			t.Errorf("[%d] error calling EchoErrorSingleDetail(): %v", idx, err)
 			continue
 		}
 		if len(test.text) == 0 {
-			if out.Error != nil {
-				t.Errorf("[%d] expected no Error, but got %#v", idx, out.Error)
+			if out.MultipleDetails != nil {
+				t.Errorf("[%d] expected no MultipleDetails, but got %#v", idx, out.Error)
 			}
 			continue
 		}
-		if out.Error == nil {
-			t.Errorf("[%d] no Error returned", idx)
+		if out.MultipleDetails == nil {
+			t.Errorf("[%d] no MultipleDetails returned", idx)
 			continue
 		}
-		if out.Error.Details == nil {
-			t.Errorf("[%d] no Error.Details returned", idx)
+		if out.MultipleDetails.Error == nil {
+			t.Errorf("[%d] no MultipleDetails.Error returned", idx)
 			continue
 		}
-		if got, want := len(out.Error.Details), len(test.expected); got != want {
-			t.Errorf("[%d] expected %d Error.Details, got %d", idx, want, got)
+		if out.MultipleDetails.Error.Details == nil {
+			t.Errorf("[%d] no MultipleDetails.Error.Details returned", idx)
+			continue
 		}
-		for whichDetail, detail := range out.Error.Details {
+		if got, want := len(out.MultipleDetails.Error.Details), len(test.expected); got != want {
+			t.Errorf("[%d] expected %d MultipleDetails.Error.Details, got %d", idx, want, got)
+		}
+		for whichDetail, detail := range out.MultipleDetails.Error.Details {
 			if got, want := detail.TypeUrl, "type.googleapis.com/google.rpc.ErrorInfo"; got != want {
 				t.Errorf("[%d:%d] expected type URL %q; got %q ", idx, whichDetail, want, got)
 			}

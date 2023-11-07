@@ -55,8 +55,8 @@ func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.Echo
 }
 
 func (s *echoServerImpl) EchoErrorDetails(ctx context.Context, in *pb.EchoErrorDetailsRequest) (*pb.EchoErrorDetailsResponse, error) {
-	var errorWithMultipleDetails *pb.ErrorWithMultipleDetails
-	multipleDetailText := in.GetText()
+	var multipleDetailsError *pb.EchoErrorDetailsResponse_MultipleDetails
+	multipleDetailText := in.GetMultiDetailText()
 	if len(multipleDetailText) > 0 {
 		details := []*anypb.Any{}
 		for idx, text := range multipleDetailText {
@@ -71,8 +71,8 @@ func (s *echoServerImpl) EchoErrorDetails(ctx context.Context, in *pb.EchoErrorD
 			details = append(details, marshalledError)
 		}
 
-		errorWithMultipleDetails = &pb.ErrorWithMultipleDetails{
-			Details: details,
+		multipleDetailsError = &pb.EchoErrorDetailsResponse_MultipleDetails{
+			Error: &pb.ErrorWithMultipleDetails{Details: details},
 		}
 	}
 
@@ -92,8 +92,8 @@ func (s *echoServerImpl) EchoErrorDetails(ctx context.Context, in *pb.EchoErrorD
 	echoHeaders(ctx)
 	echoTrailers(ctx)
 	return &pb.EchoErrorDetailsResponse{
-		Error:        errorWithMultipleDetails,
-		SingleDetail: singleDetailError,
+		MultipleDetails: multipleDetailsError,
+		SingleDetail:    singleDetailError,
 	}, nil
 }
 
