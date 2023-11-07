@@ -235,22 +235,29 @@ message EchoResponse {
 
 // The request message used for the EchoErrorDetails method.
 message EchoErrorDetailsRequest {
-  repeated string text = 2;
+  repeated string text = 1;
+  string single_detail_text = 2;
 }
 // The response message used for the EchoErrorDetails method.
 message EchoErrorDetailsResponse {
+  message SingleDetail {
+    ErrorWithSingleDetail error = 1;
+  }
   ErrorWithMultipleDetails error = 1;
+  SingleDetail single_detail = 2;
 }
 
 message ErrorWithMultipleDetails {
   repeated google.protobuf.Any details=1;
 }
 
+// *** DELETE
 // The request message used for the EchoErrorSingleDetail method.
-message EchoErrorSingleDetailRequest {
+message EchoErrorSingleDetailRequest { 
   string text = 1;
 }
 
+// *** DELETE
 // The response message used for the EchoErrorSingleDetail method.
 message EchoErrorSingleDetailResponse {
   ErrorWithSingleDetail error = 1;

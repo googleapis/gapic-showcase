@@ -55,26 +55,46 @@ func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.Echo
 }
 
 func (s *echoServerImpl) EchoErrorDetails(ctx context.Context, in *pb.EchoErrorDetailsRequest) (*pb.EchoErrorDetailsResponse, error) {
-	details := []*anypb.Any{}
-	for idx, text := range in.GetText() {
-		errorInfo := &errdetails.ErrorInfo{
-			Reason: text,
-		}
-		marshalledError, err := anypb.New(errorInfo)
-		if err != nil {
-			return nil, fmt.Errorf("failure in EchoErrorDetails[%d]: %w", idx, err)
+	var errorWithMultipleDetails *pb.ErrorWithMultipleDetails
+	multipleDetailText := in.GetText()
+	if len(multipleDetailText) > 0 {
+		details := []*anypb.Any{}
+		for idx, text := range multipleDetailText {
+			errorInfo := &errdetails.ErrorInfo{
+				Reason: text,
+			}
+			marshalledError, err := anypb.New(errorInfo)
+			if err != nil {
+				return nil, fmt.Errorf("failure in EchoErrorDetails[%d]: %w", idx, err)
+			}
+
+			details = append(details, marshalledError)
 		}
 
-		details = append(details, marshalledError)
+		errorWithMultipleDetails = &pb.ErrorWithMultipleDetails{
+			Details: details,
+		}
 	}
 
-	errorWithMultipleDetails := &pb.ErrorWithMultipleDetails{
-		Details: details,
+	var singleDetailError *pb.EchoErrorDetailsResponse_SingleDetail
+	singleDetailText := in.GetSingleDetailText()
+	if len(singleDetailText) > 0 {
+		singleErrorInfo := &errdetails.ErrorInfo{Reason: singleDetailText}
+		singleMarshalledError, err := anypb.New(singleErrorInfo)
+		if err != nil {
+			return nil, fmt.Errorf("failure with single error detail in EchoErrorDetails: %w", err)
+		}
+		singleDetailError = &pb.EchoErrorDetailsResponse_SingleDetail{
+			Error: &pb.ErrorWithSingleDetail{Details: singleMarshalledError},
+		}
 	}
 
 	echoHeaders(ctx)
 	echoTrailers(ctx)
-	return &pb.EchoErrorDetailsResponse{Error: errorWithMultipleDetails}, nil
+	return &pb.EchoErrorDetailsResponse{
+		Error:        errorWithMultipleDetails,
+		SingleDetail: singleDetailError,
+	}, nil
 }
 
 func (s *echoServerImpl) EchoErrorSingleDetail(ctx context.Context, in *pb.EchoErrorSingleDetailRequest) (*pb.EchoErrorSingleDetailResponse, error) {
