@@ -68,11 +68,11 @@
 //	}
 //	defer c.Close()
 //
-//	req := &genprotopb.RepeatRequest{
+//	req := &genprotopb.EnumRequest{
 //		// TODO: Fill request struct fields.
-//		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#RepeatRequest.
+//		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#EnumRequest.
 //	}
-//	resp, err := c.RepeatDataBody(ctx, req)
+//	resp, err := c.GetEnum(ctx, req)
 //	if err != nil {
 //		// TODO: Handle error.
 //	}

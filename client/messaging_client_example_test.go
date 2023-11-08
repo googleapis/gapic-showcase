@@ -62,6 +62,71 @@ func ExampleNewMessagingRESTClient() {
 	_ = c
 }
 
+func ExampleMessagingClient_Connect() {
+	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
+	c, err := client.NewMessagingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+	stream, err := c.Connect(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	go func() {
+		reqs := []*genprotopb.ConnectRequest{
+			// TODO: Create requests.
+		}
+		for _, req := range reqs {
+			if err := stream.Send(req); err != nil {
+				// TODO: Handle error.
+			}
+		}
+		stream.CloseSend()
+	}()
+	for {
+		resp, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			// TODO: handle error.
+		}
+		// TODO: Use resp.
+		_ = resp
+	}
+}
+
+func ExampleMessagingClient_CreateBlurb() {
+	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
+	c, err := client.NewMessagingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.CreateBlurbRequest{
+		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#CreateBlurbRequest.
+	}
+	resp, err := c.CreateBlurb(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
 func ExampleMessagingClient_CreateRoom() {
 	ctx := context.Background()
 	// This snippet has been automatically generated and should be regarded as a code template only.
@@ -80,6 +145,77 @@ func ExampleMessagingClient_CreateRoom() {
 		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#CreateRoomRequest.
 	}
 	resp, err := c.CreateRoom(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
+func ExampleMessagingClient_DeleteBlurb() {
+	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
+	c, err := client.NewMessagingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.DeleteBlurbRequest{
+		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#DeleteBlurbRequest.
+	}
+	err = c.DeleteBlurb(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+}
+
+func ExampleMessagingClient_DeleteRoom() {
+	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
+	c, err := client.NewMessagingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.DeleteRoomRequest{
+		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#DeleteRoomRequest.
+	}
+	err = c.DeleteRoom(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+}
+
+func ExampleMessagingClient_GetBlurb() {
+	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
+	c, err := client.NewMessagingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.GetBlurbRequest{
+		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#GetBlurbRequest.
+	}
+	resp, err := c.GetBlurb(ctx, req)
 	if err != nil {
 		// TODO: Handle error.
 	}
@@ -112,7 +248,7 @@ func ExampleMessagingClient_GetRoom() {
 	_ = resp
 }
 
-func ExampleMessagingClient_UpdateRoom() {
+func ExampleMessagingClient_ListBlurbs() {
 	ctx := context.Background()
 	// This snippet has been automatically generated and should be regarded as a code template only.
 	// It will require modifications to work:
@@ -125,38 +261,21 @@ func ExampleMessagingClient_UpdateRoom() {
 	}
 	defer c.Close()
 
-	req := &genprotopb.UpdateRoomRequest{
+	req := &genprotopb.ListBlurbsRequest{
 		// TODO: Fill request struct fields.
-		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#UpdateRoomRequest.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#ListBlurbsRequest.
 	}
-	resp, err := c.UpdateRoom(ctx, req)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	// TODO: Use resp.
-	_ = resp
-}
-
-func ExampleMessagingClient_DeleteRoom() {
-	ctx := context.Background()
-	// This snippet has been automatically generated and should be regarded as a code template only.
-	// It will require modifications to work:
-	// - It may require correct/in-range values for request initialization.
-	// - It may require specifying regional endpoints when creating the service client as shown in:
-	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
-	c, err := client.NewMessagingClient(ctx)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	defer c.Close()
-
-	req := &genprotopb.DeleteRoomRequest{
-		// TODO: Fill request struct fields.
-		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#DeleteRoomRequest.
-	}
-	err = c.DeleteRoom(ctx, req)
-	if err != nil {
-		// TODO: Handle error.
+	it := c.ListBlurbs(ctx, req)
+	for {
+		resp, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			// TODO: Handle error.
+		}
+		// TODO: Use resp.
+		_ = resp
 	}
 }
 
@@ -178,135 +297,6 @@ func ExampleMessagingClient_ListRooms() {
 		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#ListRoomsRequest.
 	}
 	it := c.ListRooms(ctx, req)
-	for {
-		resp, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			// TODO: Handle error.
-		}
-		// TODO: Use resp.
-		_ = resp
-	}
-}
-
-func ExampleMessagingClient_CreateBlurb() {
-	ctx := context.Background()
-	// This snippet has been automatically generated and should be regarded as a code template only.
-	// It will require modifications to work:
-	// - It may require correct/in-range values for request initialization.
-	// - It may require specifying regional endpoints when creating the service client as shown in:
-	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
-	c, err := client.NewMessagingClient(ctx)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	defer c.Close()
-
-	req := &genprotopb.CreateBlurbRequest{
-		// TODO: Fill request struct fields.
-		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#CreateBlurbRequest.
-	}
-	resp, err := c.CreateBlurb(ctx, req)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	// TODO: Use resp.
-	_ = resp
-}
-
-func ExampleMessagingClient_GetBlurb() {
-	ctx := context.Background()
-	// This snippet has been automatically generated and should be regarded as a code template only.
-	// It will require modifications to work:
-	// - It may require correct/in-range values for request initialization.
-	// - It may require specifying regional endpoints when creating the service client as shown in:
-	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
-	c, err := client.NewMessagingClient(ctx)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	defer c.Close()
-
-	req := &genprotopb.GetBlurbRequest{
-		// TODO: Fill request struct fields.
-		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#GetBlurbRequest.
-	}
-	resp, err := c.GetBlurb(ctx, req)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	// TODO: Use resp.
-	_ = resp
-}
-
-func ExampleMessagingClient_UpdateBlurb() {
-	ctx := context.Background()
-	// This snippet has been automatically generated and should be regarded as a code template only.
-	// It will require modifications to work:
-	// - It may require correct/in-range values for request initialization.
-	// - It may require specifying regional endpoints when creating the service client as shown in:
-	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
-	c, err := client.NewMessagingClient(ctx)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	defer c.Close()
-
-	req := &genprotopb.UpdateBlurbRequest{
-		// TODO: Fill request struct fields.
-		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#UpdateBlurbRequest.
-	}
-	resp, err := c.UpdateBlurb(ctx, req)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	// TODO: Use resp.
-	_ = resp
-}
-
-func ExampleMessagingClient_DeleteBlurb() {
-	ctx := context.Background()
-	// This snippet has been automatically generated and should be regarded as a code template only.
-	// It will require modifications to work:
-	// - It may require correct/in-range values for request initialization.
-	// - It may require specifying regional endpoints when creating the service client as shown in:
-	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
-	c, err := client.NewMessagingClient(ctx)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	defer c.Close()
-
-	req := &genprotopb.DeleteBlurbRequest{
-		// TODO: Fill request struct fields.
-		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#DeleteBlurbRequest.
-	}
-	err = c.DeleteBlurb(ctx, req)
-	if err != nil {
-		// TODO: Handle error.
-	}
-}
-
-func ExampleMessagingClient_ListBlurbs() {
-	ctx := context.Background()
-	// This snippet has been automatically generated and should be regarded as a code template only.
-	// It will require modifications to work:
-	// - It may require correct/in-range values for request initialization.
-	// - It may require specifying regional endpoints when creating the service client as shown in:
-	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
-	c, err := client.NewMessagingClient(ctx)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	defer c.Close()
-
-	req := &genprotopb.ListBlurbsRequest{
-		// TODO: Fill request struct fields.
-		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#ListBlurbsRequest.
-	}
-	it := c.ListBlurbs(ctx, req)
 	for {
 		resp, err := it.Next()
 		if err == iterator.Done {
@@ -350,7 +340,7 @@ func ExampleMessagingClient_SearchBlurbs() {
 	_ = resp
 }
 
-func ExampleMessagingClient_Connect() {
+func ExampleMessagingClient_UpdateBlurb() {
 	ctx := context.Background()
 	// This snippet has been automatically generated and should be regarded as a code template only.
 	// It will require modifications to work:
@@ -362,32 +352,42 @@ func ExampleMessagingClient_Connect() {
 		// TODO: Handle error.
 	}
 	defer c.Close()
-	stream, err := c.Connect(ctx)
+
+	req := &genprotopb.UpdateBlurbRequest{
+		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#UpdateBlurbRequest.
+	}
+	resp, err := c.UpdateBlurb(ctx, req)
 	if err != nil {
 		// TODO: Handle error.
 	}
-	go func() {
-		reqs := []*genprotopb.ConnectRequest{
-			// TODO: Create requests.
-		}
-		for _, req := range reqs {
-			if err := stream.Send(req); err != nil {
-				// TODO: Handle error.
-			}
-		}
-		stream.CloseSend()
-	}()
-	for {
-		resp, err := stream.Recv()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			// TODO: handle error.
-		}
-		// TODO: Use resp.
-		_ = resp
+	// TODO: Use resp.
+	_ = resp
+}
+
+func ExampleMessagingClient_UpdateRoom() {
+	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
+	c, err := client.NewMessagingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
 	}
+	defer c.Close()
+
+	req := &genprotopb.UpdateRoomRequest{
+		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#UpdateRoomRequest.
+	}
+	resp, err := c.UpdateRoom(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
 }
 
 func ExampleMessagingClient_ListLocations() {

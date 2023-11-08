@@ -244,6 +244,11 @@
                 "Echo"
               ]
             },
+            "EchoErrorDetails": {
+              "methods": [
+                "EchoErrorDetails"
+              ]
+            },
             "Expand": {
               "methods": [
                 "Expand"
@@ -337,6 +342,11 @@
             "Echo": {
               "methods": [
                 "Echo"
+              ]
+            },
+            "EchoErrorDetails": {
+              "methods": [
+                "EchoErrorDetails"
               ]
             },
             "Expand": {
