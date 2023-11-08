@@ -45,6 +45,7 @@ func RegisterHandlers(router *gmux.Router, backend *services.Backend) {
 	router.HandleFunc("/v1beta1/compliance/enum", rest.HandleGetEnum).Methods("GET")
 	router.HandleFunc("/v1beta1/compliance/enum", rest.HandleVerifyEnum).Methods("POST")
 	router.HandleFunc("/v1beta1/echo:echo", rest.HandleEcho).Methods("POST")
+	router.HandleFunc("/v1beta1/echo:error-details", rest.HandleEchoErrorDetails).Methods("POST")
 	router.HandleFunc("/v1beta1/echo:expand", rest.HandleExpand).Methods("POST")
 	router.HandleFunc("/v1beta1/echo:collect", rest.HandleCollect).Methods("POST")
 	router.HandleFunc("/v1beta1/echo:pagedExpand", rest.HandlePagedExpand).Methods("POST")

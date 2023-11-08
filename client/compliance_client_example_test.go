@@ -61,6 +61,31 @@ func ExampleNewComplianceRESTClient() {
 	_ = c
 }
 
+func ExampleComplianceClient_GetEnum() {
+	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
+	c, err := client.NewComplianceClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.EnumRequest{
+		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#EnumRequest.
+	}
+	resp, err := c.GetEnum(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
 func ExampleComplianceClient_RepeatDataBody() {
 	ctx := context.Background()
 	// This snippet has been automatically generated and should be regarded as a code template only.
@@ -111,7 +136,7 @@ func ExampleComplianceClient_RepeatDataBodyInfo() {
 	_ = resp
 }
 
-func ExampleComplianceClient_RepeatDataQuery() {
+func ExampleComplianceClient_RepeatDataBodyPatch() {
 	ctx := context.Background()
 	// This snippet has been automatically generated and should be regarded as a code template only.
 	// It will require modifications to work:
@@ -128,7 +153,7 @@ func ExampleComplianceClient_RepeatDataQuery() {
 		// TODO: Fill request struct fields.
 		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#RepeatRequest.
 	}
-	resp, err := c.RepeatDataQuery(ctx, req)
+	resp, err := c.RepeatDataBodyPatch(ctx, req)
 	if err != nil {
 		// TODO: Handle error.
 	}
@@ -136,7 +161,7 @@ func ExampleComplianceClient_RepeatDataQuery() {
 	_ = resp
 }
 
-func ExampleComplianceClient_RepeatDataSimplePath() {
+func ExampleComplianceClient_RepeatDataBodyPut() {
 	ctx := context.Background()
 	// This snippet has been automatically generated and should be regarded as a code template only.
 	// It will require modifications to work:
@@ -153,7 +178,7 @@ func ExampleComplianceClient_RepeatDataSimplePath() {
 		// TODO: Fill request struct fields.
 		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#RepeatRequest.
 	}
-	resp, err := c.RepeatDataSimplePath(ctx, req)
+	resp, err := c.RepeatDataBodyPut(ctx, req)
 	if err != nil {
 		// TODO: Handle error.
 	}
@@ -211,7 +236,7 @@ func ExampleComplianceClient_RepeatDataPathTrailingResource() {
 	_ = resp
 }
 
-func ExampleComplianceClient_RepeatDataBodyPut() {
+func ExampleComplianceClient_RepeatDataQuery() {
 	ctx := context.Background()
 	// This snippet has been automatically generated and should be regarded as a code template only.
 	// It will require modifications to work:
@@ -228,7 +253,7 @@ func ExampleComplianceClient_RepeatDataBodyPut() {
 		// TODO: Fill request struct fields.
 		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#RepeatRequest.
 	}
-	resp, err := c.RepeatDataBodyPut(ctx, req)
+	resp, err := c.RepeatDataQuery(ctx, req)
 	if err != nil {
 		// TODO: Handle error.
 	}
@@ -236,7 +261,7 @@ func ExampleComplianceClient_RepeatDataBodyPut() {
 	_ = resp
 }
 
-func ExampleComplianceClient_RepeatDataBodyPatch() {
+func ExampleComplianceClient_RepeatDataSimplePath() {
 	ctx := context.Background()
 	// This snippet has been automatically generated and should be regarded as a code template only.
 	// It will require modifications to work:
@@ -253,32 +278,7 @@ func ExampleComplianceClient_RepeatDataBodyPatch() {
 		// TODO: Fill request struct fields.
 		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#RepeatRequest.
 	}
-	resp, err := c.RepeatDataBodyPatch(ctx, req)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	// TODO: Use resp.
-	_ = resp
-}
-
-func ExampleComplianceClient_GetEnum() {
-	ctx := context.Background()
-	// This snippet has been automatically generated and should be regarded as a code template only.
-	// It will require modifications to work:
-	// - It may require correct/in-range values for request initialization.
-	// - It may require specifying regional endpoints when creating the service client as shown in:
-	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
-	c, err := client.NewComplianceClient(ctx)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	defer c.Close()
-
-	req := &genprotopb.EnumRequest{
-		// TODO: Fill request struct fields.
-		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#EnumRequest.
-	}
-	resp, err := c.GetEnum(ctx, req)
+	resp, err := c.RepeatDataSimplePath(ctx, req)
 	if err != nil {
 		// TODO: Handle error.
 	}
