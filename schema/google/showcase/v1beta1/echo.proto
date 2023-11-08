@@ -19,6 +19,7 @@ import "google/api/client.proto";
 import "google/api/field_behavior.proto";
 import "google/api/routing.proto";
 import "google/longrunning/operations.proto";
+import "google/protobuf/any.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 import "google/rpc/status.proto";
@@ -34,7 +35,7 @@ option ruby_package = "Google::Showcase::V1beta1";
 // side streaming, client side streaming, and bidirectional streaming. This
 // service also exposes methods that explicitly implement server delay, and
 // paginated calls. Set the 'showcase-trailer' metadata key on any method
-// to have the values echoed in the response trailers. Set the 
+// to have the values echoed in the response trailers. Set the
 // 'x-goog-request-params' metadata key on any method to have the values
 // echoed in the response headers.
 service Echo {
@@ -80,6 +81,19 @@ service Echo {
         field: "other_header"
         path_template: "{qux=projects/*}/**"
       }
+    };
+  }
+
+  // This method returns error details in a repeated "google.protobuf.Any"
+  // field. This method showcases handling errors thus encoded, particularly
+  // over REST transport. Note that GAPICs only allow the type
+  // "google.protobuf.Any" for field paths ending in "error.details", and, at
+  // run-time, the actual types for these fields must be one of the types in
+  // google/rpc/error_details.proto.
+  rpc EchoErrorDetails(EchoErrorDetailsRequest) returns (EchoErrorDetailsResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:error-details"
+      body: "*"
     };
   }
 
@@ -204,6 +218,40 @@ message EchoResponse {
 
   // The severity specified in the request.
   Severity severity = 2;
+}
+
+// The request message used for the EchoErrorDetails method.
+message EchoErrorDetailsRequest {
+  // Content to return in a singular `*.error.details` field of type
+  // `google.protobuf.Any`
+  string single_detail_text = 1;
+
+  // Content to return in a repeated `*.error.details` field of type
+  // `google.protobuf.Any`
+  repeated string multi_detail_text = 2;
+}
+
+// The response message used for the EchoErrorDetails method.
+message EchoErrorDetailsResponse {
+
+  message SingleDetail {
+    ErrorWithSingleDetail error = 1;
+  }
+
+  message MultipleDetails {
+    ErrorWithMultipleDetails error = 1;
+  }
+
+  SingleDetail single_detail = 1;
+  MultipleDetails multiple_details = 2;
+}
+
+message ErrorWithSingleDetail {
+  google.protobuf.Any details = 1;
+}
+
+message ErrorWithMultipleDetails {
+  repeated google.protobuf.Any details = 1;
 }
 
 // The request message for the Expand method.

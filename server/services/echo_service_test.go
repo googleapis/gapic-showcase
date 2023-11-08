@@ -27,6 +27,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	durpb "github.com/golang/protobuf/ptypes/duration"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -399,6 +400,122 @@ func TestChat(t *testing.T) {
 			t.Errorf("Chat expected to return status with code %d, but returned %d", expCode, s.Code())
 		}
 		mockStream.verify(test.err == nil)
+	}
+}
+
+func TestEchoErrorDetails_single(t *testing.T) {
+	tests := []struct {
+		text     string
+		expected *errdetails.ErrorInfo
+	}{
+		{"Spanish rain", &errdetails.ErrorInfo{Reason: "Spanish rain"}},
+		{"", &errdetails.ErrorInfo{Reason: ""}},
+	}
+
+	server := NewEchoServer()
+	for idx, test := range tests {
+		request := &pb.EchoErrorDetailsRequest{SingleDetailText: test.text}
+		out, err := server.EchoErrorDetails(context.Background(), request)
+		if err != nil {
+			t.Errorf("[%d] error calling EchoErrorSingleDetail(): %v", idx, err)
+			continue
+		}
+		if out.MultipleDetails != nil {
+			t.Errorf("[%d] expected no MultipleDetails, but got: %#v", idx, out.MultipleDetails)
+		}
+		if len(test.text) == 0 {
+			if out.SingleDetail != nil {
+				t.Errorf("[%d] expected no SingleDetail, but got: %#v", idx, out.SingleDetail)
+			}
+			continue
+		}
+		if out.SingleDetail == nil {
+			t.Errorf("[%d] no SingleDetail returned", idx)
+			continue
+		}
+		if out.SingleDetail.Error == nil {
+			t.Errorf("[%d] no SingleDetail.Error returned", idx)
+			continue
+		}
+		if out.SingleDetail.Error.Details == nil {
+			t.Errorf("[%d] no SingleDetail.Error.Details returned", idx)
+			continue
+		}
+		if got, want := out.SingleDetail.Error.Details.TypeUrl, "type.googleapis.com/google.rpc.ErrorInfo"; got != want {
+			t.Errorf("[%d] expected type URL %q; got %q ", idx, want, got)
+		}
+		unmarshalledError := &errdetails.ErrorInfo{}
+		if err := out.SingleDetail.Error.Details.UnmarshalTo(unmarshalledError); err != nil {
+			t.Errorf("[%d] error unmarshalling to ErrorInfo: %v", idx, err)
+		}
+		if got, want := unmarshalledError, test.expected; !proto.Equal(got, want) {
+			t.Errorf("[%d] expected ErrorInfo %v; got %v ", idx, want, got)
+		}
+	}
+}
+
+func TestEchoErrorDetails_multiple(t *testing.T) {
+	tests := []struct {
+		text     []string
+		expected []*errdetails.ErrorInfo
+	}{
+		{
+			[]string{"rain", "snow", "hail", "sleet", "fog"},
+			[]*errdetails.ErrorInfo{
+				{Reason: "rain"},
+				{Reason: "snow"},
+				{Reason: "hail"},
+				{Reason: "sleet"},
+				{Reason: "fog"},
+			},
+		},
+		{nil, nil},
+	}
+
+	server := NewEchoServer()
+	for idx, test := range tests {
+		request := &pb.EchoErrorDetailsRequest{MultiDetailText: test.text}
+		out, err := server.EchoErrorDetails(context.Background(), request)
+		if err != nil {
+			t.Errorf("[%d] error calling EchoErrorDetails(): %v", idx, err)
+			continue
+		}
+		if out.SingleDetail != nil {
+			t.Errorf("[%d] expected no SingleDetail, but got: %#v", idx, out.SingleDetail)
+		}
+		if len(test.text) == 0 {
+			if out.MultipleDetails != nil {
+				t.Errorf("[%d] expected no MultipleDetails, but got %#v", idx, out.MultipleDetails)
+			}
+			continue
+		}
+		if out.MultipleDetails == nil {
+			t.Errorf("[%d] no MultipleDetails returned", idx)
+			continue
+		}
+		if out.MultipleDetails.Error == nil {
+			t.Errorf("[%d] no MultipleDetails.Error returned", idx)
+			continue
+		}
+		if out.MultipleDetails.Error.Details == nil {
+			t.Errorf("[%d] no MultipleDetails.Error.Details returned", idx)
+			continue
+		}
+		if got, want := len(out.MultipleDetails.Error.Details), len(test.expected); got != want {
+			t.Errorf("[%d] expected %d MultipleDetails.Error.Details, got %d", idx, want, got)
+		}
+		for whichDetail, detail := range out.MultipleDetails.Error.Details {
+			if got, want := detail.TypeUrl, "type.googleapis.com/google.rpc.ErrorInfo"; got != want {
+				t.Errorf("[%d:%d] expected type URL %q; got %q ", idx, whichDetail, want, got)
+			}
+			unmarshalledError := &errdetails.ErrorInfo{}
+			if err := detail.UnmarshalTo(unmarshalledError); err != nil {
+				t.Errorf("[%d:%d] error unmarshalling to ErrorInfo: %v", idx, whichDetail, err)
+			}
+			if got, want := unmarshalledError, test.expected[whichDetail]; !proto.Equal(got, want) {
+				t.Errorf("[%d:%d] expected ErrorInfo %v; got %v ", idx, whichDetail, want, got)
+			}
+		}
 	}
 }
 
