@@ -16,6 +16,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"strconv"
 	"strings"
@@ -26,10 +27,12 @@ import (
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	lropb "google.golang.org/genproto/googleapis/longrunning"
+	errdetails "google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	anypb "google.golang.org/protobuf/types/known/anypb"
 )
 
 // NewEchoServer returns a new EchoServer for the Showcase API.
@@ -49,6 +52,50 @@ func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.Echo
 	echoHeaders(ctx)
 	echoTrailers(ctx)
 	return &pb.EchoResponse{Content: in.GetContent(), Severity: in.GetSeverity()}, nil
+}
+
+func (s *echoServerImpl) EchoErrorDetails(ctx context.Context, in *pb.EchoErrorDetailsRequest) (*pb.EchoErrorDetailsResponse, error) {
+	var singleDetailError *pb.EchoErrorDetailsResponse_SingleDetail
+	singleDetailText := in.GetSingleDetailText()
+	if len(singleDetailText) > 0 {
+		singleErrorInfo := &errdetails.ErrorInfo{Reason: singleDetailText}
+		singleMarshalledError, err := anypb.New(singleErrorInfo)
+		if err != nil {
+			return nil, fmt.Errorf("failure with single error detail in EchoErrorDetails: %w", err)
+		}
+		singleDetailError = &pb.EchoErrorDetailsResponse_SingleDetail{
+			Error: &pb.ErrorWithSingleDetail{Details: singleMarshalledError},
+		}
+	}
+
+	var multipleDetailsError *pb.EchoErrorDetailsResponse_MultipleDetails
+	multipleDetailText := in.GetMultiDetailText()
+	if len(multipleDetailText) > 0 {
+		details := []*anypb.Any{}
+		for idx, text := range multipleDetailText {
+			errorInfo := &errdetails.ErrorInfo{
+				Reason: text,
+			}
+			marshalledError, err := anypb.New(errorInfo)
+			if err != nil {
+				return nil, fmt.Errorf("failure in EchoErrorDetails[%d]: %w", idx, err)
+			}
+
+			details = append(details, marshalledError)
+		}
+
+		multipleDetailsError = &pb.EchoErrorDetailsResponse_MultipleDetails{
+			Error: &pb.ErrorWithMultipleDetails{Details: details},
+		}
+	}
+
+	echoHeaders(ctx)
+	echoTrailers(ctx)
+	response := &pb.EchoErrorDetailsResponse{
+		SingleDetail:    singleDetailError,
+		MultipleDetails: multipleDetailsError,
+	}
+	return response, nil
 }
 
 func (s *echoServerImpl) Expand(in *pb.ExpandRequest, stream pb.Echo_ExpandServer) error {
