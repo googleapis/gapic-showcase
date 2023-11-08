@@ -86,6 +86,52 @@ func ExampleTestingClient_CreateSession() {
 	_ = resp
 }
 
+func ExampleTestingClient_DeleteSession() {
+	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
+	c, err := client.NewTestingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.DeleteSessionRequest{
+		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#DeleteSessionRequest.
+	}
+	err = c.DeleteSession(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+}
+
+func ExampleTestingClient_DeleteTest() {
+	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
+	c, err := client.NewTestingClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.DeleteTestRequest{
+		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#DeleteTestRequest.
+	}
+	err = c.DeleteTest(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+}
+
 func ExampleTestingClient_GetSession() {
 	ctx := context.Background()
 	// This snippet has been automatically generated and should be regarded as a code template only.
@@ -142,54 +188,6 @@ func ExampleTestingClient_ListSessions() {
 	}
 }
 
-func ExampleTestingClient_DeleteSession() {
-	ctx := context.Background()
-	// This snippet has been automatically generated and should be regarded as a code template only.
-	// It will require modifications to work:
-	// - It may require correct/in-range values for request initialization.
-	// - It may require specifying regional endpoints when creating the service client as shown in:
-	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
-	c, err := client.NewTestingClient(ctx)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	defer c.Close()
-
-	req := &genprotopb.DeleteSessionRequest{
-		// TODO: Fill request struct fields.
-		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#DeleteSessionRequest.
-	}
-	err = c.DeleteSession(ctx, req)
-	if err != nil {
-		// TODO: Handle error.
-	}
-}
-
-func ExampleTestingClient_ReportSession() {
-	ctx := context.Background()
-	// This snippet has been automatically generated and should be regarded as a code template only.
-	// It will require modifications to work:
-	// - It may require correct/in-range values for request initialization.
-	// - It may require specifying regional endpoints when creating the service client as shown in:
-	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
-	c, err := client.NewTestingClient(ctx)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	defer c.Close()
-
-	req := &genprotopb.ReportSessionRequest{
-		// TODO: Fill request struct fields.
-		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#ReportSessionRequest.
-	}
-	resp, err := c.ReportSession(ctx, req)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	// TODO: Use resp.
-	_ = resp
-}
-
 func ExampleTestingClient_ListTests() {
 	ctx := context.Background()
 	// This snippet has been automatically generated and should be regarded as a code template only.
@@ -221,7 +219,7 @@ func ExampleTestingClient_ListTests() {
 	}
 }
 
-func ExampleTestingClient_DeleteTest() {
+func ExampleTestingClient_ReportSession() {
 	ctx := context.Background()
 	// This snippet has been automatically generated and should be regarded as a code template only.
 	// It will require modifications to work:
@@ -234,14 +232,16 @@ func ExampleTestingClient_DeleteTest() {
 	}
 	defer c.Close()
 
-	req := &genprotopb.DeleteTestRequest{
+	req := &genprotopb.ReportSessionRequest{
 		// TODO: Fill request struct fields.
-		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#DeleteTestRequest.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#ReportSessionRequest.
 	}
-	err = c.DeleteTest(ctx, req)
+	resp, err := c.ReportSession(ctx, req)
 	if err != nil {
 		// TODO: Handle error.
 	}
+	// TODO: Use resp.
+	_ = resp
 }
 
 func ExampleTestingClient_VerifyTest() {
