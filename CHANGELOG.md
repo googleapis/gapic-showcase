@@ -1,5 +1,12 @@
 # Release History
 
+## [0.29.0](https://github.com/googleapis/gapic-showcase/compare/v0.28.4...v0.29.0) (2023-11-08)
+
+
+### Features
+
+* Add EchoErrorDetails RPC for Any testing ([#1385](https://github.com/googleapis/gapic-showcase/issues/1385)) ([c839a8e](https://github.com/googleapis/gapic-showcase/commit/c839a8ec6973b6c5189c9cba8b6a81f1663b8fd1))
+
 ## [0.28.4](https://github.com/googleapis/gapic-showcase/compare/v0.28.3...v0.28.4) (2023-08-14)
 
 
