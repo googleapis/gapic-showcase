@@ -54,7 +54,7 @@ func init() {
 var TestingServiceCmd = &cobra.Command{
 	Use:       "testing",
 	Short:     "A service to facilitate running discrete sets of...",
-	Long:      "A service to facilitate running discrete sets of tests  against Showcase.",
+	Long:      "A service to facilitate running discrete sets of tests  against Showcase.  Adding this comment with special characters for comment formatting tests: ...",
 	ValidArgs: TestingSubCommands,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
 		var opts []option.ClientOption

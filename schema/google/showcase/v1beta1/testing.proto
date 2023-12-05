@@ -28,12 +28,18 @@ option ruby_package = "Google::Showcase::V1beta1";
 
 // A service to facilitate running discrete sets of tests
 // against Showcase.
+// Adding this comment with special characters for comment formatting tests:
+// 1. (abra->kadabra->alakazam)
+// 2) Resource: `pokemon/*/psychic/*`
 service Testing {
   // This service is meant to only run locally on the port 7469 (keypad digits
   // for "show").
   option (google.api.default_host) = "localhost:7469";
 
   // Creates a new testing session.
+  // Adding this comment with special characters for comment formatting tests:
+  // 1. (abra->kadabra->alakazam)
+  // 2) Resource: `pokemon/*/psychic/*`
   rpc CreateSession(CreateSessionRequest) returns (Session) {
     option (google.api.http) = {
       post: "/v1beta1/sessions"

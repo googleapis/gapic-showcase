@@ -149,6 +149,11 @@ type internalTestingClient interface {
 //
 // A service to facilitate running discrete sets of tests
 // against Showcase.
+// Adding this comment with special characters for comment formatting tests:
+//
+// (abra->kadabra->alakazam)
+//
+// Resource: pokemon/*/psychic/*
 type TestingClient struct {
 	// The internal transport-dependent client.
 	internalClient internalTestingClient
@@ -181,6 +186,11 @@ func (c *TestingClient) Connection() *grpc.ClientConn {
 }
 
 // CreateSession creates a new testing session.
+// Adding this comment with special characters for comment formatting tests:
+//
+// (abra->kadabra->alakazam)
+//
+// Resource: pokemon/*/psychic/*
 func (c *TestingClient) CreateSession(ctx context.Context, req *genprotopb.CreateSessionRequest, opts ...gax.CallOption) (*genprotopb.Session, error) {
 	return c.internalClient.CreateSession(ctx, req, opts...)
 }
@@ -303,6 +313,11 @@ type testingGRPCClient struct {
 //
 // A service to facilitate running discrete sets of tests
 // against Showcase.
+// Adding this comment with special characters for comment formatting tests:
+//
+// (abra->kadabra->alakazam)
+//
+// Resource: pokemon/*/psychic/*
 func NewTestingClient(ctx context.Context, opts ...option.ClientOption) (*TestingClient, error) {
 	clientOpts := defaultTestingGRPCClientOptions()
 	if newTestingClientHook != nil {
@@ -376,6 +391,11 @@ type testingRESTClient struct {
 //
 // A service to facilitate running discrete sets of tests
 // against Showcase.
+// Adding this comment with special characters for comment formatting tests:
+//
+// (abra->kadabra->alakazam)
+//
+// Resource: pokemon/*/psychic/*
 func NewTestingRESTClient(ctx context.Context, opts ...option.ClientOption) (*TestingClient, error) {
 	clientOpts := append(defaultTestingRESTClientOptions(), opts...)
 	httpClient, endpoint, err := httptransport.NewClient(ctx, clientOpts...)
@@ -820,6 +840,11 @@ func (c *testingGRPCClient) CancelOperation(ctx context.Context, req *longrunnin
 }
 
 // CreateSession creates a new testing session.
+// Adding this comment with special characters for comment formatting tests:
+//
+// (abra->kadabra->alakazam)
+//
+// Resource: pokemon/*/psychic/*
 func (c *testingRESTClient) CreateSession(ctx context.Context, req *genprotopb.CreateSessionRequest, opts ...gax.CallOption) (*genprotopb.Session, error) {
 	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	body := req.GetSession()

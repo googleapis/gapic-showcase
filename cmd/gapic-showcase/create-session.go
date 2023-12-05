@@ -37,8 +37,8 @@ func init() {
 
 var CreateSessionCmd = &cobra.Command{
 	Use:   "create-session",
-	Short: "Creates a new testing session.",
-	Long:  "Creates a new testing session.",
+	Short: "Creates a new testing session.  Adding this...",
+	Long:  "Creates a new testing session.  Adding this comment with special characters for comment formatting tests:  1. (abra->kadabra->alakazam)  2) Resource:...",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if CreateSessionFromFile == "" {
