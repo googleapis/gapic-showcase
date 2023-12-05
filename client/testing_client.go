@@ -153,7 +153,7 @@ type internalTestingClient interface {
 //
 // (abra->kadabra->alakazam)
 //
-// Resource: pokemon/*/psychic/*
+// Nonsense: pokemon/*/psychic/*
 type TestingClient struct {
 	// The internal transport-dependent client.
 	internalClient internalTestingClient
@@ -190,7 +190,7 @@ func (c *TestingClient) Connection() *grpc.ClientConn {
 //
 // (abra->kadabra->alakazam)
 //
-// Resource: pokemon/*/psychic/*
+// Nonsense: pokemon/*/psychic/*
 func (c *TestingClient) CreateSession(ctx context.Context, req *genprotopb.CreateSessionRequest, opts ...gax.CallOption) (*genprotopb.Session, error) {
 	return c.internalClient.CreateSession(ctx, req, opts...)
 }
@@ -317,7 +317,7 @@ type testingGRPCClient struct {
 //
 // (abra->kadabra->alakazam)
 //
-// Resource: pokemon/*/psychic/*
+// Nonsense: pokemon/*/psychic/*
 func NewTestingClient(ctx context.Context, opts ...option.ClientOption) (*TestingClient, error) {
 	clientOpts := defaultTestingGRPCClientOptions()
 	if newTestingClientHook != nil {
@@ -395,7 +395,7 @@ type testingRESTClient struct {
 //
 // (abra->kadabra->alakazam)
 //
-// Resource: pokemon/*/psychic/*
+// Nonsense: pokemon/*/psychic/*
 func NewTestingRESTClient(ctx context.Context, opts ...option.ClientOption) (*TestingClient, error) {
 	clientOpts := append(defaultTestingRESTClientOptions(), opts...)
 	httpClient, endpoint, err := httptransport.NewClient(ctx, clientOpts...)
@@ -844,7 +844,7 @@ func (c *testingGRPCClient) CancelOperation(ctx context.Context, req *longrunnin
 //
 // (abra->kadabra->alakazam)
 //
-// Resource: pokemon/*/psychic/*
+// Nonsense: pokemon/*/psychic/*
 func (c *testingRESTClient) CreateSession(ctx context.Context, req *genprotopb.CreateSessionRequest, opts ...gax.CallOption) (*genprotopb.Session, error) {
 	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	body := req.GetSession()

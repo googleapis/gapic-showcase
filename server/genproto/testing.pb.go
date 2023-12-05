@@ -2004,7 +2004,7 @@ type TestingClient interface {
 	// Creates a new testing session.
 	// Adding this comment with special characters for comment formatting tests:
 	// 1. (abra->kadabra->alakazam)
-	// 2) Resource: `pokemon/*/psychic/*`
+	// 2) [Nonsense][]: `pokemon/*/psychic/*`
 	CreateSession(ctx context.Context, in *CreateSessionRequest, opts ...grpc.CallOption) (*Session, error)
 	// Gets a testing session.
 	GetSession(ctx context.Context, in *GetSessionRequest, opts ...grpc.CallOption) (*Session, error)
@@ -2117,7 +2117,7 @@ type TestingServer interface {
 	// Creates a new testing session.
 	// Adding this comment with special characters for comment formatting tests:
 	// 1. (abra->kadabra->alakazam)
-	// 2) Resource: `pokemon/*/psychic/*`
+	// 2) [Nonsense][]: `pokemon/*/psychic/*`
 	CreateSession(context.Context, *CreateSessionRequest) (*Session, error)
 	// Gets a testing session.
 	GetSession(context.Context, *GetSessionRequest) (*Session, error)
