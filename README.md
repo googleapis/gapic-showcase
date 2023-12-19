@@ -70,7 +70,7 @@ hold using this installation method._
 
 ## Schema
 The schema of GAPIC Showcase API can be found in [schema/google/showcase/v1beta1](schema/google/showcase/v1beta1)
-Its dependencies can be found in the [googleapis/api-common-protos](https://github.com/googleapis/api-common-protos)
+Its dependencies can be found in the [googleapis/googleapis](https://github.com/googleapis/googleapis)
 submodule.
 
 ## Development Environment
@@ -80,7 +80,7 @@ To set up this repository for local development, follow these steps:
 or your OS package manager. This API utilizes `proto3_optional`, thus `v3.12.0`
 is the minimum supported version of `protoc`.
 
-1. Initialize the `api-common-protos` submodule:
+1. Initialize the `googleapis` submodule:
     ```sh
     git submodule update --init --recursive
     ```
