@@ -15,7 +15,6 @@ jobs:
     - uses: actions/setup-go@v4
       with:
         go-version: '1.19.2'
-        repo-token: ${{ secrets.YOSHI_CODE_BOT_TOKEN }}
     - name: Install Protoc
       uses: arduino/setup-protoc@v1
     - name: Install external generators
