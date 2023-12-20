@@ -1,3 +1,3 @@
 [submodule "googleapis"]
 	path = schema/googleapis
-	url = git@github.com:googleapis/googleapis.git
+	url = https://yoshi-code-bot:${{ secrets.YOSHI_CODE_BOT_TOKEN }}@github.com/googleapis/googleapis.git
