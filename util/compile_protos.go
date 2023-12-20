@@ -55,7 +55,7 @@ func CompileProtos(version string) {
 	command := []string{
 		"protoc",
 		"--experimental_allow_proto3_optional",
-		"--proto_path=schema/api-common-protos",
+		"--proto_path=schema/googleapis",
 		"--proto_path=schema",
 		"--go_cli_out=" + filepath.Join("cmd", "gapic-showcase"),
 		"--go_cli_opt=root=gapic-showcase",
