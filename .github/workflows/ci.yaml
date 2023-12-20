@@ -24,6 +24,8 @@ jobs:
         go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic@latest
     - uses: actions/checkout@v3
     - name: Checkout common protos
+      with:
+        repo-token: ${{ secrets.YOSHI_CODE_BOT_TOKEN }}
       run: git submodule init && git submodule update
     - name: Download go deps
       run: go mod download
