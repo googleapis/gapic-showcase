@@ -53,6 +53,8 @@ func init() {
 
 	EchoCmd.Flags().StringVar(&EchoInput.OtherHeader, "other_header", "", "Optional. This field can be set to test the...")
 
+	EchoCmd.Flags().StringVar(&EchoInput.RequestId, "request_id", "", "Based on go/client-populate-request-id-design;...")
+
 	EchoCmd.Flags().StringVar(&EchoInputResponse, "response", "", "Choices: content, error")
 
 	EchoCmd.Flags().StringVar(&EchoFromFile, "from_file", "", "Absolute path to JSON file containing request payload")

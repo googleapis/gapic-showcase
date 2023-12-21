@@ -21,9 +21,9 @@
 package genproto
 
 import (
+	longrunningpb "cloud.google.com/go/longrunning/autogen/longrunningpb"
 	context "context"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
-	longrunning "google.golang.org/genproto/googleapis/longrunning"
 	errdetails "google.golang.org/genproto/googleapis/rpc/errdetails"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -1974,7 +1974,7 @@ var file_google_showcase_v1beta1_messaging_proto_goTypes = []interface{}{
 	(*fieldmaskpb.FieldMask)(nil),        // 24: google.protobuf.FieldMask
 	(*errdetails.RetryInfo)(nil),         // 25: google.rpc.RetryInfo
 	(*emptypb.Empty)(nil),                // 26: google.protobuf.Empty
-	(*longrunning.Operation)(nil),        // 27: google.longrunning.Operation
+	(*longrunningpb.Operation)(nil),      // 27: google.longrunning.Operation
 }
 var file_google_showcase_v1beta1_messaging_proto_depIdxs = []int32{
 	23, // 0: google.showcase.v1beta1.Room.create_time:type_name -> google.protobuf.Timestamp
@@ -2371,7 +2371,7 @@ type MessagingClient interface {
 	// This method searches through all blurbs across all rooms and profiles
 	// for blurbs containing to words found in the query. Only posts that
 	// contain an exact match of a queried word will be returned.
-	SearchBlurbs(ctx context.Context, in *SearchBlurbsRequest, opts ...grpc.CallOption) (*longrunning.Operation, error)
+	SearchBlurbs(ctx context.Context, in *SearchBlurbsRequest, opts ...grpc.CallOption) (*longrunningpb.Operation, error)
 	// This returns a stream that emits the blurbs that are created for a
 	// particular chat room or user profile.
 	StreamBlurbs(ctx context.Context, in *StreamBlurbsRequest, opts ...grpc.CallOption) (Messaging_StreamBlurbsClient, error)
@@ -2483,8 +2483,8 @@ func (c *messagingClient) ListBlurbs(ctx context.Context, in *ListBlurbsRequest,
 	return out, nil
 }
 
-func (c *messagingClient) SearchBlurbs(ctx context.Context, in *SearchBlurbsRequest, opts ...grpc.CallOption) (*longrunning.Operation, error) {
-	out := new(longrunning.Operation)
+func (c *messagingClient) SearchBlurbs(ctx context.Context, in *SearchBlurbsRequest, opts ...grpc.CallOption) (*longrunningpb.Operation, error) {
+	out := new(longrunningpb.Operation)
 	err := c.cc.Invoke(ctx, "/google.showcase.v1beta1.Messaging/SearchBlurbs", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -2617,7 +2617,7 @@ type MessagingServer interface {
 	// This method searches through all blurbs across all rooms and profiles
 	// for blurbs containing to words found in the query. Only posts that
 	// contain an exact match of a queried word will be returned.
-	SearchBlurbs(context.Context, *SearchBlurbsRequest) (*longrunning.Operation, error)
+	SearchBlurbs(context.Context, *SearchBlurbsRequest) (*longrunningpb.Operation, error)
 	// This returns a stream that emits the blurbs that are created for a
 	// particular chat room or user profile.
 	StreamBlurbs(*StreamBlurbsRequest, Messaging_StreamBlurbsServer) error
@@ -2665,7 +2665,7 @@ func (*UnimplementedMessagingServer) DeleteBlurb(context.Context, *DeleteBlurbRe
 func (*UnimplementedMessagingServer) ListBlurbs(context.Context, *ListBlurbsRequest) (*ListBlurbsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListBlurbs not implemented")
 }
-func (*UnimplementedMessagingServer) SearchBlurbs(context.Context, *SearchBlurbsRequest) (*longrunning.Operation, error) {
+func (*UnimplementedMessagingServer) SearchBlurbs(context.Context, *SearchBlurbsRequest) (*longrunningpb.Operation, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchBlurbs not implemented")
 }
 func (*UnimplementedMessagingServer) StreamBlurbs(*StreamBlurbsRequest, Messaging_StreamBlurbsServer) error {
