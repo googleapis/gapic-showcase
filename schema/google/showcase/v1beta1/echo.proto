@@ -17,6 +17,7 @@ syntax = "proto3";
 import "google/api/annotations.proto";
 import "google/api/client.proto";
 import "google/api/field_behavior.proto";
+import "google/api/field_info.proto";
 import "google/api/routing.proto";
 import "google/longrunning/operations.proto";
 import "google/protobuf/any.proto";
@@ -209,6 +210,11 @@ message EchoRequest {
 
   // Optional. This field can be set to test the routing annotation on the Echo method.
   string other_header = 5;
+
+  // Based on go/client-populate-request-id-design; subject to change
+  string request_id = 7 [
+    (google.api.field_info).format = UUID4
+  ];
 }
 
 // The response message for the Echo methods.
