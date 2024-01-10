@@ -1,5 +1,13 @@
 # Release History
 
+## [0.30.0](https://github.com/googleapis/gapic-showcase/compare/v0.29.0...v0.30.0) (2024-01-10)
+
+
+### Features
+
+* Add autopopulated request id field to echo ([#1404](https://github.com/googleapis/gapic-showcase/issues/1404)) ([196b665](https://github.com/googleapis/gapic-showcase/commit/196b6650ff01483246d5c3fe67ca2ad29d1a21dc))
+* Replace api-common-protos submodule with googleapis ([#1395](https://github.com/googleapis/gapic-showcase/issues/1395)) ([d72c489](https://github.com/googleapis/gapic-showcase/commit/d72c4899c111e8c870b552cd1721166434096348))
+
 ## [0.29.0](https://github.com/googleapis/gapic-showcase/compare/v0.28.4...v0.29.0) (2023-11-08)
 
 
