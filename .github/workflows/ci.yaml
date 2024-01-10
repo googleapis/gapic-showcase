@@ -22,7 +22,7 @@ jobs:
         go install github.com/golang/protobuf/protoc-gen-go@latest
         go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli@latest
         go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic@latest
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Checkout common protos
       run: git submodule init && git submodule update
     - name: Download go deps
@@ -53,7 +53,7 @@ jobs:
         go-version: '1.19.2'
     - name: Install golint
       run: go install golang.org/x/lint/golint@latest
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/download-artifact@v4
       if: needs.regenerate.outputs.modified_files
       with:
@@ -86,7 +86,7 @@ jobs:
     needs: regenerate
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/setup-go@v4
       with:
         go-version: '1.19.2'
@@ -112,7 +112,7 @@ jobs:
     needs: regenerate
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/setup-go@v4
       with:
         go-version: '1.19.2'
@@ -160,7 +160,7 @@ jobs:
   protobufjs-load-test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/setup-node@v3
       with:
         node-version: '12'
@@ -179,7 +179,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && needs.regenerate.outputs.modified_files
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: main
     - uses: actions/download-artifact@v4
