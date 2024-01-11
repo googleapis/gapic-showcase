@@ -20,10 +20,11 @@ jobs:
     if: ${{ github.event.release.tag_name }}
     run: echo "GITHUB_UPLOAD_URL=${{ github.event.release.upload_url }}" >> $GITHUB_ENV
   get-upload-url-manual:
-    name: Get upload URL for manually triggered releases
     if: ${{ github.event.inputs.tag }}
-    uses: actions/github-script@v7
-    id: get-upload-url
+    steps:
+    - name: Get upload URL for manually triggered releases
+    - uses: actions/github-script@v7
+    - id: get-upload-url
     with:
       script: |
         github.rest.repos.getReleaseByTag({
