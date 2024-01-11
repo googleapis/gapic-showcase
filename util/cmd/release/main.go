@@ -68,12 +68,7 @@ func main() {
 	apiPath := filepath.Join("schema", "googleapis", "google", "api")
 	tmpAPIPath := filepath.Join(tmpProtoPath, "google", "api")
 	os.MkdirAll(tmpAPIPath, 0755)
-	util.Execute("cp", filepath.Join(apiPath, "annotations.proto"), tmpAPIPath)
-	util.Execute("cp", filepath.Join(apiPath, "client.proto"), tmpAPIPath)
-	util.Execute("cp", filepath.Join(apiPath, "field_behavior.proto"), tmpAPIPath)
-	util.Execute("cp", filepath.Join(apiPath, "http.proto"), tmpAPIPath)
-	util.Execute("cp", filepath.Join(apiPath, "resource.proto"), tmpAPIPath)
-	util.Execute("cp", filepath.Join(apiPath, "routing.proto"), tmpAPIPath)
+	util.Execute("cp", filepath.Join(apiPath, "*.proto"), tmpAPIPath)
 
 	longrunningPath := filepath.Join("schema", "googleapis", "google", "longrunning")
 	tmpLongrunningPath := filepath.Join(tmpProtoPath, "google", "longrunning")
