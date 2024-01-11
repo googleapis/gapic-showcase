@@ -22,6 +22,8 @@ jobs:
         with:
           go-version: '1.19.2'
       - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ env.TAG_NAME }}
       - name: Init submodule
         run: git submodule init && git submodule update
       - name: Set raw version
@@ -37,7 +39,7 @@ jobs:
         with:
           repo_token: ${{ github.token }}
           file: ./dist/*
-          tag: ${{ github.event.release.tag_name }}
+          tag: ${{ env.TAG_NAME }}
           overwrite: true
           file_glob: true
   binary-assets:
