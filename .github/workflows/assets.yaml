@@ -15,6 +15,23 @@ env:
   TAG_NAME: ${{ github.event.release.tag_name || github.event.inputs.tag }}
 
 jobs:
+  get-upload-url-release:
+    name: Get upload URL for automated releases
+    if: ${{ github.event.release.tag_name }}
+    run: echo "GITHUB_UPLOAD_URL=${{ github.event.release.upload_url }}" >> $GITHUB_ENV
+  get-upload-url-manual:
+    name: Get upload URL for manually triggered releases
+    if: ${{ github.event.inputs.tag }}
+    uses: actions/github-script@v7
+    id: get-upload-url
+    with:
+      script: |
+        github.rest.repos.getReleaseByTag({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          tag: "${{ github.event.inputs.tag }}"
+        });
+    run: echo "GITHUB_UPLOAD_URL=${{ steps.get-upload-url.outputs.upload_url }}" >> $GITHUB_ENV
   proto-assets:
     runs-on: ubuntu-latest
     steps:
@@ -84,7 +101,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
+          upload_url: ${{ env.GITHUB_UPLOAD_URL }}
           asset_path: ./gapic-showcase.tar.gz
           asset_name: gapic-showcase-${{ steps.raw_tag.outputs.raw_version }}-${{ matrix.osarch.os }}-${{ matrix.osarch.arch }}.tar.gz
           asset_content_type: application/tar+gzip
