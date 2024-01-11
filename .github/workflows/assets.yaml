@@ -32,6 +32,8 @@ jobs:
               repo: context.repo.repo,
               tag: "${{ github.event.inputs.tag }}"
             });
+      - name: Set environment variable
+        if: ${{ github.event.inputs.tag }}
         run: echo "GITHUB_UPLOAD_URL=${{ steps.get-upload-url.outputs.upload_url }}" >> $GITHUB_ENV
   proto-assets:
     runs-on: ubuntu-latest
