@@ -68,7 +68,13 @@ func main() {
 	apiPath := filepath.Join("schema", "googleapis", "google", "api")
 	tmpAPIPath := filepath.Join(tmpProtoPath, "google", "api")
 	os.MkdirAll(tmpAPIPath, 0755)
-	util.Execute("cp", filepath.Join(apiPath, "*.proto"), tmpAPIPath)
+	protoFiles, err := filepath.Glob(filepath.Join(apiPath, "*.proto"))
+	if err != nil {
+		log.Fatal("Failed to find proto files within googleapis/google/api/*")
+	}
+	for _, protoFile := range protoFiles {
+		util.Execute("cp", protoFile, tmpAPIPath)
+	}
 
 	longrunningPath := filepath.Join("schema", "googleapis", "google", "longrunning")
 	tmpLongrunningPath := filepath.Join(tmpProtoPath, "google", "longrunning")
