@@ -36,11 +36,7 @@ jobs:
               repo: context.repo.repo,
               tag: "${{ github.event.inputs.tag }}"
             });
-            console.log(release.data.upload_url);
-            core.setOutput("upload_url", release.data.upload_url);
-      - name: Set Github output
-        if: ${{ github.event.inputs.tag }}
-        run: echo "MANUAL_UPLOAD_URL=${{ steps.manual-upload-url.outputs.upload_url }}" >> "$GITHUB_OUTPUT"
+            core.setOutput("MANUAL_UPLOAD_URL", release.data.upload_url);
   proto-assets:
     runs-on: ubuntu-latest
     steps:
