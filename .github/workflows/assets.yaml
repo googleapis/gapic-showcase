@@ -90,12 +90,12 @@ jobs:
       - name: Determine which upload URL to use
         id: determine_upload_url
         run: |
-          echo "automated URL: ${{ AUTO_UPLOAD_URL }}"
-          echo "manual URL: ${{ MANUAL_UPLOAD_URL }}"
-          if [[ -n "${{ AUTO_UPLOAD_URL }}" ]]; then
-          echo "GITHUB_UPLOAD_URL=${{ AUTO_UPLOAD_URL }}" >> "$GITHUB_OUTPUT"
+          echo "automated URL: $AUTO_UPLOAD_URL"
+          echo "manual URL: $MANUAL_UPLOAD_URL"
+          if [[ -n "$AUTO_UPLOAD_URL" ]]; then
+          echo "GITHUB_UPLOAD_URL=$AUTO_UPLOAD_URL" >> "$GITHUB_OUTPUT"
           else
-          echo "GITHUB_UPLOAD_URL=${{ MANUAL_UPLOAD_URL }}" >> "$GITHUB_OUTPUT"
+          echo "GITHUB_UPLOAD_URL=$MANUAL_UPLOAD_URL" >> "$GITHUB_OUTPUT"
           fi
       - uses: actions/setup-go@v5
         with:
