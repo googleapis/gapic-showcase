@@ -83,15 +83,19 @@ jobs:
           - os: windows
             arch: amd64
     steps:
-      - name: Determine which upload URL to use
+      - env:
+          AUTO_UPLOAD_URL: ${{ needs.get-upload-url.outputs.automated_upload_url }}"
+          MANUAL_UPLOAD_URL: ${{ needs.get-upload-url.outputs.manual_upload_url }}"
+          GITHUB_TOKEN: ${{ github.token }}
+        name: Determine which upload URL to use
         id: determine_upload_url
         run: |
-          echo "automated URL: ${{ needs.get-upload-url.outputs.automated_upload_url }}"
-          echo "manual URL: ${{ needs.get-upload-url.outputs.manual_upload_url }}"
-          if [[ -n "${{ needs.get-upload-url.outputs.automated_upload_url }}" ]]; then
-          echo "GITHUB_UPLOAD_URL=${{ needs.get-upload-url.outputs.automated_upload_url }}" >> $GITHUB_ENV
+          echo "automated URL: ${{ AUTO_UPLOAD_URL }}"
+          echo "manual URL: ${{ MANUAL_UPLOAD_URL }}"
+          if [[ -n "${{ AUTO_UPLOAD_URL }}" ]]; then
+          echo "GITHUB_UPLOAD_URL=${{ AUTO_UPLOAD_URL }}" >> "$GITHUB_OUTPUT"
           else
-          echo "GITHUB_UPLOAD_URL=${{ needs.get-upload-url.outputs.manual_upload_url }}" >> $GITHUB_ENV
+          echo "GITHUB_UPLOAD_URL=${{ MANUAL_UPLOAD_URL }}" >> "$GITHUB_OUTPUT"
           fi
       - uses: actions/setup-go@v5
         with:
@@ -117,11 +121,8 @@ jobs:
           tar cvfz gapic-showcase.tar.gz gapic-showcase*
       - name: Upload the ${{ matrix.osarch.os }}/${{ matrix.osarch.arch }} release.
         uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          GITHUB_UPLOAD_URL: ${{ env.GITHUB_UPLOAD_URL }}
         with:
-          upload_url: ${{ env.GITHUB_UPLOAD_URL }}
+          upload_url: ${{ steps.determine_upload_url.outputs.GITHUB_UPLOAD_URL }}
           asset_path: ./gapic-showcase.tar.gz
           asset_name: gapic-showcase-${{ steps.raw_tag.outputs.raw_version }}-${{ matrix.osarch.os }}-${{ matrix.osarch.arch }}.tar.gz
           asset_content_type: application/tar+gzip
