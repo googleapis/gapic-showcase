@@ -83,6 +83,14 @@ jobs:
           - os: windows
             arch: amd64
     steps:
+      - name: Determine which upload URL to use
+        id: determine_upload_url
+        run: |
+          if [[ -n "${{ needs.get-upload-url.outputs.automated_upload_url }}" ]]; then
+          echo "GITHUB_UPLOAD_URL=${{ needs.get-upload-url.outputs.automated_upload_url }}" >> $GITHUB_ENV
+          else
+          echo "GITHUB_UPLOAD_URL=${{ needs.get-upload-url.outputs.manual_upload_url }}" >> $GITHUB_ENV
+          fi
       - uses: actions/setup-go@v5
         with:
           go-version: '1.19.2'
@@ -109,9 +117,9 @@ jobs:
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          GITHUB_UPLOAD_URL: ${{ if ne(${{ needs.get-upload-url.outputs.automated_upload_url }}, '') }}${{ needs.get-upload-url.outputs.manual_upload_url }}${{ else }}${{ needs.get-upload-url.outputs.automated_upload_url }}${{ endif }}
+          GITHUB_UPLOAD_URL: ${{ env.GITHUB_UPLOAD_URL }}
         with:
-          upload_url: ${{ GITHUB_UPLOAD_URL }}
+          upload_url: ${{ env.GITHUB_UPLOAD_URL }}
           asset_path: ./gapic-showcase.tar.gz
           asset_name: gapic-showcase-${{ steps.raw_tag.outputs.raw_version }}-${{ matrix.osarch.os }}-${{ matrix.osarch.arch }}.tar.gz
           asset_content_type: application/tar+gzip
