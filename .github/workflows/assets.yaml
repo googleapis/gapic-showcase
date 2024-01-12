@@ -84,8 +84,8 @@ jobs:
             arch: amd64
     steps:
       - env:
-          AUTO_UPLOAD_URL: ${{ needs.get-upload-url.outputs.automated_upload_url }}"
-          MANUAL_UPLOAD_URL: ${{ needs.get-upload-url.outputs.manual_upload_url }}"
+          AUTO_UPLOAD_URL: ${{ needs.get-upload-url.outputs.automated_upload_url }}
+          MANUAL_UPLOAD_URL: ${{ needs.get-upload-url.outputs.manual_upload_url }}
           GITHUB_TOKEN: ${{ github.token }}
         name: Determine which upload URL to use
         id: determine_upload_url
