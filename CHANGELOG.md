@@ -1,5 +1,12 @@
 # Release History
 
+## [0.31.0](https://github.com/googleapis/gapic-showcase/compare/v0.30.0...v0.31.0) (2024-02-08)
+
+
+### Features
+
+* Add request id as part of EchoResponse ([#1440](https://github.com/googleapis/gapic-showcase/issues/1440)) ([fe3c90e](https://github.com/googleapis/gapic-showcase/commit/fe3c90eba35a5d94fb419d495178ff90c9bcc795))
+
 ## [0.30.0](https://github.com/googleapis/gapic-showcase/compare/v0.29.0...v0.30.0) (2024-01-10)
 
 
