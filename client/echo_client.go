@@ -77,7 +77,9 @@ type EchoCallOptions struct {
 func defaultEchoGRPCClientOptions() []option.ClientOption {
 	return []option.ClientOption{
 		internaloption.WithDefaultEndpoint("localhost:7469"),
+		internaloption.WithDefaultEndpointTemplate("localhost:7469"),
 		internaloption.WithDefaultMTLSEndpoint("localhost:7469"),
+		internaloption.WithDefaultUniverseDomain("googleapis.com"),
 		internaloption.WithDefaultAudience("https://localhost/"),
 		internaloption.WithDefaultScopes(DefaultAuthScopes()...),
 		internaloption.EnableJwtWithScope(),
@@ -587,7 +589,9 @@ func NewEchoRESTClient(ctx context.Context, opts ...option.ClientOption) (*EchoC
 func defaultEchoRESTClientOptions() []option.ClientOption {
 	return []option.ClientOption{
 		internaloption.WithDefaultEndpoint("https://localhost:7469"),
+		internaloption.WithDefaultEndpointTemplate("https://localhost:7469"),
 		internaloption.WithDefaultMTLSEndpoint("https://localhost:7469"),
+		internaloption.WithDefaultUniverseDomain("googleapis.com"),
 		internaloption.WithDefaultAudience("https://localhost/"),
 		internaloption.WithDefaultScopes(DefaultAuthScopes()...),
 	}
