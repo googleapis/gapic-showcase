@@ -23,9 +23,9 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 #
 http_archive(
   name = "com_google_googleapis",
-  strip_prefix = "googleapis-a9e70676103435b7b58a94339f2dc566f25c2f26",
-  urls = ["https://github.com/googleapis/googleapis/archive/a9e70676103435b7b58a94339f2dc566f25c2f26.zip"],
-  sha256 = "0b8f0ca6ebdcf9d7a1bb3b3fc103bff70606c3538ad0a7836abe1aff31aed959"
+  strip_prefix = "googleapis-8aa881798104f793e79058978bd5aa0147661cee",
+  urls = ["https://github.com/googleapis/googleapis/archive/8aa881798104f793e79058978bd5aa0147661cee.zip"],
+  sha256 = "7be7165c3efe29b53177fb845be42da152056e859631e30b8162a7078af7ad97"
 )
 load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
 switched_rules_by_language(name = "com_google_googleapis_imports", grpc = True)
@@ -35,9 +35,9 @@ switched_rules_by_language(name = "com_google_googleapis_imports", grpc = True)
 #
 http_archive(
   name = "com_google_protobuf",
-  sha256 = "46a67f62eb344ea3a14e08b5ca82de63c1b54bf4a44d03fa8c5143ce76e23c47",
-  urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.25.2.zip"],
-  strip_prefix = "protobuf-3.25.2",
+  sha256 = "ddd0f5271f31b549efc74eb39061e142132653d5d043071fcec265bd571e73c4",
+  urls = ["https://github.com/protocolbuffers/protobuf/archive/v25.2.zip"],
+  strip_prefix = "protobuf-25.2",
 )
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 protobuf_deps()
@@ -47,11 +47,11 @@ protobuf_deps()
 #
 http_archive(
   name = "rules_proto",
-  sha256 = "f5ae0e582238fcd4ea3d0146a3f5f3db9517f8fe24491eab3c105ace53aad1bb",
-  strip_prefix = "rules_proto-f9b0b880d1e10e18daeeb168cef9d0f8316fdcb5",
+  sha256 = "6a0b76595cb8bb97cec085c6b45c24337d30615d636f4941225c05f017690b6f",
+  strip_prefix = "rules_proto-25c8af9d56980df7732b2f8639c5d43ef878a6f7",
   urls = [
-    "https://mirror.bazel.build/github.com/bazelbuild/rules_proto/archive/f9b0b880d1e10e18daeeb168cef9d0f8316fdcb5.tar.gz",
-    "https://github.com/bazelbuild/rules_proto/archive/f9b0b880d1e10e18daeeb168cef9d0f8316fdcb5.tar.gz",
+    "https://mirror.bazel.build/github.com/bazelbuild/rules_proto/archive/25c8af9d56980df7732b2f8639c5d43ef878a6f7.tar.gz",
+    "https://github.com/bazelbuild/rules_proto/archive/25c8af9d56980df7732b2f8639c5d43ef878a6f7.tar.gz",
   ],
 )
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
