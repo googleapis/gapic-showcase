@@ -78,7 +78,9 @@ type MessagingCallOptions struct {
 func defaultMessagingGRPCClientOptions() []option.ClientOption {
 	return []option.ClientOption{
 		internaloption.WithDefaultEndpoint("localhost:7469"),
+		internaloption.WithDefaultEndpointTemplate("localhost:7469"),
 		internaloption.WithDefaultMTLSEndpoint("localhost:7469"),
+		internaloption.WithDefaultUniverseDomain("googleapis.com"),
 		internaloption.WithDefaultAudience("https://localhost/"),
 		internaloption.WithDefaultScopes(DefaultAuthScopes()...),
 		internaloption.EnableJwtWithScope(),
@@ -674,7 +676,9 @@ func NewMessagingRESTClient(ctx context.Context, opts ...option.ClientOption) (*
 func defaultMessagingRESTClientOptions() []option.ClientOption {
 	return []option.ClientOption{
 		internaloption.WithDefaultEndpoint("https://localhost:7469"),
+		internaloption.WithDefaultEndpointTemplate("https://localhost:7469"),
 		internaloption.WithDefaultMTLSEndpoint("https://localhost:7469"),
+		internaloption.WithDefaultUniverseDomain("googleapis.com"),
 		internaloption.WithDefaultAudience("https://localhost/"),
 		internaloption.WithDefaultScopes(DefaultAuthScopes()...),
 	}
