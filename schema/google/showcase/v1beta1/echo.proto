@@ -224,6 +224,9 @@ message EchoResponse {
 
   // The severity specified in the request.
   Severity severity = 2;
+
+  // The request ID specified or autopopulated in the request.
+  string request_id = 3;
 }
 
 // The request message used for the EchoErrorDetails method.
