@@ -176,7 +176,7 @@ service Messaging {
       post: "/v1beta1/{name=rooms/*}/blurbs:streamhttp"
       body: "*"
       additional_bindings: {
-        post: "/v1beta1/{name=users/*/profile}/blurbs:stream"
+        post: "/v1beta1/{name=users/*/profile}/blurbs:streamhttp"
         body: "*"
       }
     };
