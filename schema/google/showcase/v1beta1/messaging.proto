@@ -169,6 +169,18 @@ service Messaging {
     };
   }
 
+  // This returns a stream which is an HTTP payload including HTTP headers:
+  rpc StreamBlurbs(StreamBlurbsRequest) returns (stream google.api.HttpBody) {
+    option (google.api.http) = {
+      post: "/v1beta1/{name=rooms/*}/blurbs:stream"
+      body: "*"
+      additional_bindings: {
+        post: "/v1beta1/{name=users/*/profile}/blurbs:stream"
+        body: "*"
+      }
+    };
+  }
+
   // This is a stream to create multiple blurbs. If an invalid blurb is
   // requested to be created, the stream will close with an error.
   rpc SendBlurbs(stream CreateBlurbRequest) returns (SendBlurbsResponse) {
