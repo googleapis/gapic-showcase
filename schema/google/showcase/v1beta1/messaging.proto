@@ -169,7 +169,7 @@ service Messaging {
     };
   }
 
-  // This returns a stream which is an HTTP payload including HTTP headers:
+  // This returns a stream which is an HTTP payload including HTTP headers.
   rpc StreamBlurbs(StreamBlurbsRequest) returns (stream google.api.HttpBody) {
     option (google.api.http) = {
       post: "/v1beta1/{name=rooms/*}/blurbs:stream"
