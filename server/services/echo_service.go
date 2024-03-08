@@ -33,6 +33,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	anypb "google.golang.org/protobuf/types/known/anypb"
+	durationpb "google.golang.org/protobuf/types/known/durationpb"
 )
 
 // NewEchoServer returns a new EchoServer for the Showcase API.
@@ -44,10 +45,95 @@ type echoServerImpl struct {
 	waiter server.Waiter
 }
 
+func PopulateFakeErrorDetails(grpcStatus *status.Status) (*status.Status, error) {
+	return grpcStatus.WithDetails(
+		&errdetails.ErrorInfo{
+			Reason: "(showcase:ErrorInfo) RPC requested we populate all error details",
+			Domain: "googleapis.com",
+		},
+		&errdetails.RetryInfo{
+			RetryDelay: &durationpb.Duration{
+				Seconds: 3,
+				Nanos:   14159265,
+			},
+		},
+		&errdetails.DebugInfo{
+			StackEntries: []string{"frame 1", "frame 2", "frame3"},
+			Detail:       "(showcase:DebugInfo) sample stack frames",
+		},
+		&errdetails.QuotaFailure{
+			Violations: []*errdetails.QuotaFailure_Violation{
+				{
+					Subject:     "(showcase:QuotaFailure) showcase-testing:fake errors",
+					Description: "This is fake quota error 0",
+				},
+				{
+					Subject:     "(showcase:QuotaFailure) showcase-testing:more fake errors",
+					Description: "This is fake quota error 1",
+				},
+			},
+		},
+		&errdetails.PreconditionFailure{
+			Violations: []*errdetails.PreconditionFailure_Violation{
+				{
+					Type:        "Fake Type 0",
+					Subject:     "(showcase:PreconditionFailure) showcase-testing:fake errors",
+					Description: "This is fake precondition error 0",
+				},
+				{
+					Type:        "Fake Type 1",
+					Subject:     "(showcase:PreconditionFailure) showcase-testing:fake errors",
+					Description: "This is fake precondition error 1",
+				},
+			},
+		},
+		&errdetails.BadRequest{
+			FieldViolations: []*errdetails.BadRequest_FieldViolation{
+				{
+					Field:       "field 0",
+					Description: "(showcase:BadRequest) description 0",
+				},
+				{
+					Field:       "field 1",
+					Description: "(showcase:BadRequest) description 1",
+				},
+			},
+		},
+		&errdetails.Help{
+			Links: []*errdetails.Help_Link{
+				{
+					Description: "(showcase:Help) Description 0",
+					Url:         "URL 0",
+				},
+				{
+					Description: "(showcase:Help) Description 1",
+					Url:         "URL 1",
+				},
+			},
+		},
+		&errdetails.LocalizedMessage{
+			Locale:  "en-US",
+			Message: "(showcase:LocalizedMessage) Some message for the user",
+		},
+	)
+}
+
 func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.EchoResponse, error) {
-	err := status.ErrorProto(in.GetError())
-	if err != nil {
-		return nil, err
+	requestedError := in.GetError()
+	if requestedError != nil {
+		if in.GenerateErrorDetails {
+			returnDetails, err := PopulateFakeErrorDetails(status.FromProto(requestedError))
+			if err != nil {
+				return nil, err
+			}
+			if returnDetails != nil {
+				return nil, returnDetails.Err()
+			}
+		}
+		err := status.ErrorProto(requestedError)
+		if err != nil {
+			return nil, err
+		}
 	}
 	echoHeaders(ctx)
 	echoTrailers(ctx)
