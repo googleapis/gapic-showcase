@@ -33,6 +33,7 @@ import (
 	"cloud.google.com/go/longrunning"
 	lroauto "cloud.google.com/go/longrunning/autogen"
 	longrunningpb "cloud.google.com/go/longrunning/autogen/longrunningpb"
+	"github.com/google/uuid"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	gax "github.com/googleapis/gax-go/v2"
 	"google.golang.org/api/googleapi"
@@ -655,6 +656,9 @@ func (c *echoGRPCClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, 
 
 	hds = append(c.xGoogHeaders, hds...)
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
+	if req != nil && req.GetRequestId() == "" {
+		req.RequestId = uuid.NewString()
+	}
 	opts = append((*c.CallOptions).Echo[0:len((*c.CallOptions).Echo):len((*c.CallOptions).Echo)], opts...)
 	var resp *genprotopb.EchoResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -1105,6 +1109,9 @@ func (c *echoGRPCClient) CancelOperation(ctx context.Context, req *longrunningpb
 
 // Echo this method simply echoes the request. This method showcases unary RPCs.
 func (c *echoRESTClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, opts ...gax.CallOption) (*genprotopb.EchoResponse, error) {
+	if req != nil && req.GetRequestId() == "" {
+		req.RequestId = uuid.NewString()
+	}
 	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
 	if err != nil {
