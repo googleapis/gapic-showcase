@@ -4,7 +4,7 @@ require (
 	cloud.google.com/go/iam v1.1.6
 	cloud.google.com/go/longrunning v0.5.5
 	github.com/ghodss/yaml v1.0.0
-	github.com/golang/protobuf v1.5.3
+	github.com/golang/protobuf v1.5.4
 	github.com/google/go-cmp v0.6.0
 	github.com/googleapis/gax-go/v2 v2.12.0
 	github.com/googleapis/grpc-fallback-go v0.1.4
