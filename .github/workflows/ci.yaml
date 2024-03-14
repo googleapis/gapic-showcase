@@ -99,6 +99,8 @@ jobs:
       run: |
         tar xvzf regen.tgz
         rm regen.tgz
+    - name: Run mod tidy
+      run: go mod tidy
     - name: Run unit tests
       run: go test ./...
     - name: Run server coverage
@@ -125,6 +127,8 @@ jobs:
       run: |
         tar xvzf regen.tgz
         rm regen.tgz
+    - name: Run mod tidy
+      run: go mod tidy
     - name: Install gapic-showcase CLI
       run: go install ./cmd/gapic-showcase
     - name: Probe gRPC and REST servers
