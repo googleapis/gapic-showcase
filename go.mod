@@ -1,7 +1,7 @@
 module github.com/googleapis/gapic-showcase
 
 require (
-	cloud.google.com/go/iam v1.1.6
+	cloud.google.com/go/iam v1.1.7
 	cloud.google.com/go/longrunning v0.5.6
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/protobuf v1.5.4
