@@ -18,7 +18,7 @@ require (
 	golang.org/x/sync v0.6.0
 	google.golang.org/api v0.170.0
 	google.golang.org/genproto v0.0.0-20240213162025-012b6fc9bca9
-	google.golang.org/genproto/googleapis/api v0.0.0-20240311173647-c811ad7063a7
+	google.golang.org/genproto/googleapis/api v0.0.0-20240314234333-6e1732d8331c
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240311173647-c811ad7063a7
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0
