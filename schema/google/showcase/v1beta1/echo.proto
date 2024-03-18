@@ -215,6 +215,11 @@ message EchoRequest {
   string request_id = 7 [
     (google.api.field_info).format = UUID4
   ];
+
+  // If `error` is set, then this flag causes the Showcase server to append
+  // multiple fake error details in the error response. This is useful for
+  // testing client behavior on error responses.
+  bool generate_error_details = 8;
 }
 
 // The response message for the Echo methods.
