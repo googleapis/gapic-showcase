@@ -88,3 +88,4 @@ publishing:
   - selector: google.showcase.v1beta1.Echo.Echo
     auto_populated_fields:
     - request_id
+    - other_request_id
