@@ -51,7 +51,7 @@ func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.Echo
 	}
 	echoHeaders(ctx)
 	echoTrailers(ctx)
-	return &pb.EchoResponse{Content: in.GetContent(), Severity: in.GetSeverity(), RequestId: in.GetRequestId()}, nil
+	return &pb.EchoResponse{Content: in.GetContent(), Severity: in.GetSeverity(), RequestId: in.GetRequestId(), OtherRequestId: in.GetOtherRequestId()}, nil
 }
 
 func (s *echoServerImpl) EchoErrorDetails(ctx context.Context, in *pb.EchoErrorDetailsRequest) (*pb.EchoErrorDetailsResponse, error) {
