@@ -1,5 +1,12 @@
 # Release History
 
+## [0.32.0](https://github.com/googleapis/gapic-showcase/compare/v0.31.0...v0.32.0) (2024-03-20)
+
+
+### Features
+
+* Add autopopulated proto3 optional field to echo ([#1471](https://github.com/googleapis/gapic-showcase/issues/1471)) ([dba317f](https://github.com/googleapis/gapic-showcase/commit/dba317ff2ef63899bcc20de6a29c21f63afc7acc))
+
 ## [0.31.0](https://github.com/googleapis/gapic-showcase/compare/v0.30.0...v0.31.0) (2024-02-08)
 
 
