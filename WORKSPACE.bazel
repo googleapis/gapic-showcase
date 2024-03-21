@@ -57,6 +57,9 @@ bazel_features_deps()
 http_archive(
     name = "rules_proto",
     sha256 = "71fdbed00a0709521ad212058c60d13997b922a5d01dbfd997f0d57d689e7b67",
+    # Using a release candidate because the latest stable release is too old for
+    # our needs, and we want to stay closer to the latest without pinning to a
+    # specific commit.
     strip_prefix = "rules_proto-6.0.0-rc2",
     url = "https://github.com/bazelbuild/rules_proto/releases/download/6.0.0-rc2/rules_proto-6.0.0-rc2.tar.gz",
 )
