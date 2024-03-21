@@ -42,18 +42,25 @@ http_archive(
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 protobuf_deps()
 
+http_archive(
+    name = "bazel_features",
+    sha256 = "06f02b97b6badb3227df2141a4b4622272cdcd2951526f40a888ab5f43897f14",
+    strip_prefix = "bazel_features-1.9.0",
+    url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.9.0/bazel_features-v1.9.0.tar.gz",
+)
+load("@bazel_features//:deps.bzl", "bazel_features_deps")
+bazel_features_deps()
+
 ##
 # rules_proto for the proto_library rule
 #
 http_archive(
     name = "rules_proto",
-    sha256 = "903af49528dc37ad2adbb744b317da520f133bc1cbbecbdd2a6c546c9ead080b",
-    strip_prefix = "rules_proto-6.0.0-rc0",
-    url = "https://github.com/bazelbuild/rules_proto/releases/download/6.0.0-rc0/rules_proto-6.0.0-rc0.tar.gz",
+    sha256 = "71fdbed00a0709521ad212058c60d13997b922a5d01dbfd997f0d57d689e7b67",
+    strip_prefix = "rules_proto-6.0.0-rc2",
+    url = "https://github.com/bazelbuild/rules_proto/releases/download/6.0.0-rc2/rules_proto-6.0.0-rc2.tar.gz",
 )
 
-load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
-
+load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies","rules_proto_toolchains")
 rules_proto_dependencies()
-
 rules_proto_toolchains()
