@@ -54,6 +54,8 @@ http_archive(
     "https://github.com/bazelbuild/rules_proto/archive/25c8af9d56980df7732b2f8639c5d43ef878a6f7.tar.gz",
   ],
 )
-load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
+load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
 rules_proto_dependencies()
+
+load("@rules_proto//proto:toolchains.bzl", "rules_proto_toolchains")
 rules_proto_toolchains()
