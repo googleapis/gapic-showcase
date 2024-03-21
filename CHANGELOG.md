@@ -1,5 +1,12 @@
 # Release History
 
+## [0.32.1](https://github.com/googleapis/gapic-showcase/compare/v0.32.0...v0.32.1) (2024-03-21)
+
+
+### Bug Fixes
+
+* Add missing dependency in bazel rule ([#1477](https://github.com/googleapis/gapic-showcase/issues/1477)) ([f08b26d](https://github.com/googleapis/gapic-showcase/commit/f08b26d62da0a3c3214382915167b33633eb9558))
+
 ## [0.32.0](https://github.com/googleapis/gapic-showcase/compare/v0.31.0...v0.32.0) (2024-03-20)
 
 
