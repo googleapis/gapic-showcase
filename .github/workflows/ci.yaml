@@ -215,6 +215,7 @@ jobs:
   bazel_build_protos:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v4
     - uses: bazel-contrib/setup-bazel@0.8.1
       with:
         # Avoid downloading Bazel every time.
