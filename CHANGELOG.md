@@ -1,5 +1,12 @@
 # Release History
 
+## [0.32.2](https://github.com/googleapis/gapic-showcase/compare/v0.32.1...v0.32.2) (2024-03-22)
+
+
+### Bug Fixes
+
+* **bazel:** Fix bazel build and add presubmit ([#1479](https://github.com/googleapis/gapic-showcase/issues/1479)) ([e446229](https://github.com/googleapis/gapic-showcase/commit/e44622986d706bcbdb5de710484318f40b571c20))
+
 ## [0.32.1](https://github.com/googleapis/gapic-showcase/compare/v0.32.0...v0.32.1) (2024-03-21)
 
 
