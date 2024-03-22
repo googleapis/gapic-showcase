@@ -105,11 +105,6 @@ jobs:
       run: go test ./...
     - name: Run server coverage
       run: go test ./server/... -coverprofile=coverage.txt -covermode=atomic
-    # Disabled indefinitely.
-    # - uses: codecov/codecov-action@v1
-    #   with:
-    #     files: ./coverage.txt
-    #     flags: unittests
   probes:
     needs: regenerate
     runs-on: ubuntu-latest
@@ -217,3 +212,16 @@ jobs:
             repo: context.repo.repo,
             labels: ['automerge']
           })
+  bazel_build_protos:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: bazel-contrib/setup-bazel@0.8.1
+      with:
+        # Avoid downloading Bazel every time.
+        bazelisk-cache: true
+        # Store build cache per workflow.
+        disk-cache: ${{ github.workflow }}
+        # Share repository cache between workflows.
+        repository-cache: true
+    - run: bazelisk build //schema/google/showcase/v1beta1:showcase_proto
