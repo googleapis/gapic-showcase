@@ -2,24 +2,21 @@
   "extends": [
     "config:base",
     ":disableDependencyDashboard",
+    "group:all",
+    "schedule:weekly",
     ":semanticCommitTypeAll(chore)"
   ],
   "pinVersions": false,
+  "bazel": {
+    "managerBranchPrefix": "bazel-"
+  },
   "golang": {
     "postUpdateOptions": [
       "gomodTidy"
-    ]
+    ],
+    "managerBranchPrefix": "golang-"
   },
-  "reviewers": [
-    "noahdietz"
-  ],
   "rebaseWhen": "behind-base-branch",
   "labels": ["automerge"],
-  "packageRules": [
-    {
-      "packageNames": ["google.golang.org/genproto", "com_google_googleapis"],
-      "schedule": "after 12pm on monday"
-    }
-  ],
   "timezone": "America/Los_Angeles"
 }
