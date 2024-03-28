@@ -23,9 +23,9 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 #
 http_archive(
   name = "com_google_googleapis",
-  strip_prefix = "googleapis-2bc2029fdf248f25274fe628c95fe638906f9706",
-  urls = ["https://github.com/googleapis/googleapis/archive/2bc2029fdf248f25274fe628c95fe638906f9706.zip"],
-  sha256 = "d66ab7f92173b18fb8acb58987f5503007c41fbf01ac9425aab82e4d967cd774"
+  strip_prefix = "googleapis-95d0e8c945db9e012b5438f7ef19e7c5c1a124b5",
+  urls = ["https://github.com/googleapis/googleapis/archive/95d0e8c945db9e012b5438f7ef19e7c5c1a124b5.zip"],
+  sha256 = "4f7f0ff93f34b22b104f36050464d39bc2dfe210884482f7b4f2070495d648a5"
 )
 load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
 switched_rules_by_language(name = "com_google_googleapis_imports", grpc = True)
@@ -35,18 +35,18 @@ switched_rules_by_language(name = "com_google_googleapis_imports", grpc = True)
 #
 http_archive(
   name = "com_google_protobuf",
-  sha256 = "ddd0f5271f31b549efc74eb39061e142132653d5d043071fcec265bd571e73c4",
-  urls = ["https://github.com/protocolbuffers/protobuf/archive/v25.2.zip"],
-  strip_prefix = "protobuf-25.2",
+  sha256 = "44d5861127df4f94ae57e249bf494ebafba8dec514779fdd5304a9644119a7c8",
+  urls = ["https://github.com/protocolbuffers/protobuf/archive/v26.1.zip"],
+  strip_prefix = "protobuf-26.1",
 )
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 protobuf_deps()
 
 http_archive(
     name = "bazel_features",
-    sha256 = "06f02b97b6badb3227df2141a4b4622272cdcd2951526f40a888ab5f43897f14",
-    strip_prefix = "bazel_features-1.9.0",
-    url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.9.0/bazel_features-v1.9.0.tar.gz",
+    sha256 = "d7787da289a7fb497352211ad200ec9f698822a9e0757a4976fd9f713ff372b3",
+    strip_prefix = "bazel_features-1.9.1",
+    url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.9.1/bazel_features-v1.9.1.tar.gz",
 )
 load("@bazel_features//:deps.bzl", "bazel_features_deps")
 bazel_features_deps()
