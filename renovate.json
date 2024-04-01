@@ -15,7 +15,7 @@
       "matchPackagePatterns": ["com_google_protobuf"],
       "enabled": false
     }
-  ]
+  ],
   "golang": {
     "postUpdateOptions": [
       "gomodTidy"
