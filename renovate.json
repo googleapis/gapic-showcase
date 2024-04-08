@@ -10,6 +10,12 @@
   "bazel": {
     "managerBranchPrefix": "bazel-"
   },
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["com_google_protobuf"],
+      "enabled": false
+    }
+  ],
   "golang": {
     "postUpdateOptions": [
       "gomodTidy"
