@@ -44,7 +44,7 @@ service Echo {
   // for "show").
   option (google.api.default_host) = "localhost:7469";
   // See https://github.com/aip-dev/google.aip.dev/pull/1331
-  option (google.api.api_version) = "moose";
+  option (google.api.api_version) = "v1_20240408";
 
   // This method simply echoes the request. This method showcases unary RPCs.
   rpc Echo(EchoRequest) returns (EchoResponse) {
