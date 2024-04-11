@@ -91,6 +91,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 			// number of path variables, etc.)
 			source.P(`  backend.StdLog.Printf("Received %%s request matching '%s': %%q", r.Method, r.URL)`, handler.URIPattern)
 			source.P(`  backend.StdLog.Printf("  urlPathParams (expect %d, have %%d): %%q", numUrlPathParams, urlPathParams)`, len(allURLVariables))
+			source.P(`  backend.StdLog.Printf("  urlRequestHeaders:\n%%s", resttools.PrettyPrintHeaders(r, "    "))`)
 			source.P("")
 			source.P("  if numUrlPathParams!=%d {", len(allURLVariables))
 			source.P(`    backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected %d, have %%d: %%#v", numUrlPathParams, urlPathParams)`, len(allURLVariables))
