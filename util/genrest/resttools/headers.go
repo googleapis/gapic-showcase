@@ -83,3 +83,18 @@ func CheckAPIClientHeader(header http.Header) error {
 	}
 	return fmt.Errorf("internal inconsistency")
 }
+
+// PrettyPrintHeaders prints all the HTTP headers in `request` in
+// lines preceded by `indentation`. Each line has one header key and a
+// quoted list of all values for that key.
+func PrettyPrintHeaders(request *http.Request, indentation string) string {
+	lines := []string{}
+	for key, values := range request.Header {
+		newLine := fmt.Sprintf("%s%s:", indentation, key)
+		for _, oneValue := range values {
+			newLine += fmt.Sprintf(" %q", oneValue)
+		}
+		lines = append(lines, newLine)
+	}
+	return strings.Join(lines, "\n")
+}
