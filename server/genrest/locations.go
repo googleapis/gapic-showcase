@@ -34,6 +34,7 @@ func (backend *RESTBackend) HandleListLocations(w http.ResponseWriter, r *http.R
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=projects/*}/locations': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -97,6 +98,7 @@ func (backend *RESTBackend) HandleGetLocation(w http.ResponseWriter, r *http.Req
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=projects/*/locations/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)

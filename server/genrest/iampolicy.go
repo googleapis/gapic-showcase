@@ -36,6 +36,7 @@ func (backend *RESTBackend) HandleSetIamPolicy(w http.ResponseWriter, r *http.Re
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{resource=users/*}:setIamPolicy': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -107,6 +108,7 @@ func (backend *RESTBackend) HandleSetIamPolicy_1(w http.ResponseWriter, r *http.
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{resource=rooms/*}:setIamPolicy': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -178,6 +180,7 @@ func (backend *RESTBackend) HandleSetIamPolicy_2(w http.ResponseWriter, r *http.
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{resource=rooms/*/blurbs/*}:setIamPolicy': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -249,6 +252,7 @@ func (backend *RESTBackend) HandleSetIamPolicy_3(w http.ResponseWriter, r *http.
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{resource=sequences/*}:setIamPolicy': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -320,6 +324,7 @@ func (backend *RESTBackend) HandleGetIamPolicy(w http.ResponseWriter, r *http.Re
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{resource=users/*}:getIamPolicy': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -383,6 +388,7 @@ func (backend *RESTBackend) HandleGetIamPolicy_1(w http.ResponseWriter, r *http.
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{resource=rooms/*}:getIamPolicy': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -446,6 +452,7 @@ func (backend *RESTBackend) HandleGetIamPolicy_2(w http.ResponseWriter, r *http.
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{resource=rooms/*/blurbs/*}:getIamPolicy': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -509,6 +516,7 @@ func (backend *RESTBackend) HandleGetIamPolicy_3(w http.ResponseWriter, r *http.
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{resource=sequences/*}:getIamPolicy': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -572,6 +580,7 @@ func (backend *RESTBackend) HandleTestIamPermissions(w http.ResponseWriter, r *h
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{resource=users/*}:testIamPermissions': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -643,6 +652,7 @@ func (backend *RESTBackend) HandleTestIamPermissions_1(w http.ResponseWriter, r 
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{resource=rooms/*}:testIamPermissions': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -714,6 +724,7 @@ func (backend *RESTBackend) HandleTestIamPermissions_2(w http.ResponseWriter, r 
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{resource=rooms/*/blurbs/*}:testIamPermissions': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -785,6 +796,7 @@ func (backend *RESTBackend) HandleTestIamPermissions_3(w http.ResponseWriter, r 
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{resource=sequences/*}:testIamPermissions': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
