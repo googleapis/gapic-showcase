@@ -252,7 +252,7 @@ func (m *mockStreamSequence) verify(expectHeadersAndTrailers bool) {
 	if len(m.exp) > 0 {
 		m.t.Errorf("Expand did not stream all expected values. %d expected values remaining.", len(m.exp))
 	}
-	if expectHeadersAndTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) && !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head) {
+	if expectHeadersAndTrailers && (!reflect.DeepEqual([]string{"show", "case"}, m.trail) || !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head)) {
 		m.t.Errorf("Expand did not get all expected headers and trailers.\nGot these headers: %+v\nGot these trailers: %+v", m.head, m.trail)
 	}
 }
