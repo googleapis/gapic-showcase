@@ -313,10 +313,11 @@ func echoTrailers(ctx context.Context) {
 		return
 	}
 
-	values := md.Get("showcase-trailer")
-	for _, value := range values {
-		trailer := metadata.Pairs("showcase-trailer", value)
-		grpc.SetTrailer(ctx, trailer)
+	for k, v := range md {
+		for _, value := range v {
+			trailer := metadata.Pairs(k, value)
+			grpc.SetTrailer(ctx, trailer)
+		}
 	}
 }
 
@@ -326,9 +327,10 @@ func echoStreamingTrailers(stream grpc.ServerStream) {
 		return
 	}
 
-	values := md.Get("showcase-trailer")
-	for _, value := range values {
-		trailer := metadata.Pairs("showcase-trailer", value)
-		stream.SetTrailer(trailer)
+	for k, v := range md {
+		for _, value := range v {
+			trailer := metadata.Pairs(k, value)
+			stream.SetTrailer(trailer)
+		}
 	}
 }
