@@ -126,7 +126,7 @@ func (m *mockUnaryStream) SetHeader(md metadata.MD) error {
 	return nil
 }
 func (m *mockUnaryStream) verify(expectHeadersAndTrailers bool) {
-	if expectHeadersAndTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) && !reflect.DeepEqual([]string{"showcaseHeader, anotherHeader"}, m.head) {
+	if expectHeadersAndTrailers && (!reflect.DeepEqual([]string{"show", "case"}, m.trail) || !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head)) {
 		m.t.Errorf("Unary stream did not get all expected headers and trailers.\nGot these headers: %+v\nGot these trailers: %+v", m.head, m.trail)
 	}
 }
@@ -165,7 +165,7 @@ func (m *mockExpandStream) verify(expectHeadersAndTrailers bool) {
 	if len(m.exp) > 0 {
 		m.t.Errorf("Expand did not stream all expected values. %d expected values remaining.", len(m.exp))
 	}
-	if expectHeadersAndTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) && !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head) {
+	if expectHeadersAndTrailers && (!reflect.DeepEqual([]string{"show", "case"}, m.trail) || !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head)) {
 		m.t.Errorf("Expand did not get all expected headers and trailers.\nGot these headers: %+v\nGot these trailers: %+v", m.head, m.trail)
 	}
 }
@@ -271,7 +271,7 @@ func (m *mockCollectStream) SetTrailer(md metadata.MD) {
 }
 
 func (m *mockCollectStream) verify(expectHeadersAndTrailers bool) {
-	if expectHeadersAndTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) && !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head) {
+	if expectHeadersAndTrailers && (!reflect.DeepEqual([]string{"show", "case"}, m.trail) || !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head)) {
 		m.t.Errorf("Collect did not get all expected trailers.\nGot these headers: %+v\nGot these trailers: %+v", m.head, m.trail)
 	}
 }
