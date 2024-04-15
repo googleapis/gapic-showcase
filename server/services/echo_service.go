@@ -50,18 +50,18 @@ func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.Echo
 		return nil, err
 	}
 	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return nil, err
-	}
-	echoHeaders(ctx)
-	echoTrailers(ctx)
 	requestHeaders := make(map[string]*pb.EchoResponse_RepeatedValues)
-	headersToTrack := in.GetHttpRequestHeaderToEcho()
-	for k, v := range md {
-		if strContains(headersToTrack, k) {
-			requestHeaders[k] = &pb.EchoResponse_RepeatedValues{HeaderValues: v}
+	if ok {
+		headersToTrack := in.GetHttpRequestHeaderToEcho()
+		for k, v := range md {
+			if strContains(headersToTrack, k) {
+				requestHeaders[k] = &pb.EchoResponse_RepeatedValues{HeaderValues: v}
+			}
 		}
 	}
+
+	echoHeaders(ctx)
+	echoTrailers(ctx)
 
 	return &pb.EchoResponse{Content: in.GetContent(), Severity: in.GetSeverity(), RequestId: in.GetRequestId(), OtherRequestId: in.GetOtherRequestId(), HttpRequestHeaderValue: requestHeaders}, nil
 }
