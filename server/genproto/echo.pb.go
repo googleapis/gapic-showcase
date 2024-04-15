@@ -121,7 +121,7 @@ type EchoRequest struct {
 	RequestId string `protobuf:"bytes,7,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	// To facilitate testing of https://google.aip.dev/client-libraries/4235
 	OtherRequestId *string `protobuf:"bytes,8,opt,name=other_request_id,json=otherRequestId,proto3,oneof" json:"other_request_id,omitempty"`
-	// Echo http request header as trailing metadata
+	// Http request headers to echo via EchoResponse.http_request_header_value
 	HttpRequestHeaderToEcho []string `protobuf:"bytes,9,rep,name=http_request_header_to_echo,json=httpRequestHeaderToEcho,proto3" json:"http_request_header_to_echo,omitempty"`
 }
 

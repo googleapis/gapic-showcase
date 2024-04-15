@@ -223,7 +223,7 @@ message EchoRequest {
     (google.api.field_info).format = UUID4
   ];
 
-  // Echo http request header as trailing metadata
+  // Http request headers to echo via EchoResponse.http_request_header_value
   repeated string http_request_header_to_echo = 9;
 }
 
