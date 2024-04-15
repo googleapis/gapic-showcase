@@ -1,5 +1,13 @@
 # Release History
 
+## [0.33.0](https://github.com/googleapis/gapic-showcase/compare/v0.32.2...v0.33.0) (2024-04-15)
+
+
+### Features
+
+* Add google.api.api_version annotation to echo.proto ([#1484](https://github.com/googleapis/gapic-showcase/issues/1484)) ([9a2298b](https://github.com/googleapis/gapic-showcase/commit/9a2298b90a90d812c331f2c0d9971b2312ae167d))
+* Log REST request headers ([#1497](https://github.com/googleapis/gapic-showcase/issues/1497)) ([05605c6](https://github.com/googleapis/gapic-showcase/commit/05605c60b41b95be07ca7cf38ae12e2fdbe82094))
+
 ## [0.32.2](https://github.com/googleapis/gapic-showcase/compare/v0.32.1...v0.32.2) (2024-03-22)
 
 
