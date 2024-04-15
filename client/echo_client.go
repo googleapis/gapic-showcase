@@ -19,6 +19,7 @@ package client
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -1352,7 +1353,7 @@ func (c *expandRESTClient) Trailer() metadata.MD {
 
 func (c *expandRESTClient) CloseSend() error {
 	// This is a no-op to fulfill the interface.
-	return fmt.Errorf("this method is not implemented for a server-stream")
+	return errors.New("this method is not implemented for a server-stream")
 }
 
 func (c *expandRESTClient) Context() context.Context {
@@ -1361,12 +1362,12 @@ func (c *expandRESTClient) Context() context.Context {
 
 func (c *expandRESTClient) SendMsg(m interface{}) error {
 	// This is a no-op to fulfill the interface.
-	return fmt.Errorf("this method is not implemented for a server-stream")
+	return errors.New("this method is not implemented for a server-stream")
 }
 
 func (c *expandRESTClient) RecvMsg(m interface{}) error {
 	// This is a no-op to fulfill the interface.
-	return fmt.Errorf("this method is not implemented, use Recv")
+	return errors.New("this method is not implemented, use Recv")
 }
 
 // Collect this method will collect the words given to it. When the stream is closed
@@ -1375,7 +1376,7 @@ func (c *expandRESTClient) RecvMsg(m interface{}) error {
 //
 // This method is not supported for the REST transport.
 func (c *echoRESTClient) Collect(ctx context.Context, opts ...gax.CallOption) (genprotopb.Echo_CollectClient, error) {
-	return nil, fmt.Errorf("Collect not yet supported for REST clients")
+	return nil, errors.New("Collect not yet supported for REST clients")
 }
 
 // Chat this method, upon receiving a request on the stream, will pass the same
@@ -1384,7 +1385,7 @@ func (c *echoRESTClient) Collect(ctx context.Context, opts ...gax.CallOption) (g
 //
 // This method is not supported for the REST transport.
 func (c *echoRESTClient) Chat(ctx context.Context, opts ...gax.CallOption) (genprotopb.Echo_ChatClient, error) {
-	return nil, fmt.Errorf("Chat not yet supported for REST clients")
+	return nil, errors.New("Chat not yet supported for REST clients")
 }
 
 // PagedExpand this is similar to the Expand method but instead of returning a stream of
