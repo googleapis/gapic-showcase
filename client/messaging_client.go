@@ -19,6 +19,7 @@ package client
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -1984,7 +1985,7 @@ func (c *streamBlurbsRESTClient) Trailer() metadata.MD {
 
 func (c *streamBlurbsRESTClient) CloseSend() error {
 	// This is a no-op to fulfill the interface.
-	return fmt.Errorf("this method is not implemented for a server-stream")
+	return errors.New("this method is not implemented for a server-stream")
 }
 
 func (c *streamBlurbsRESTClient) Context() context.Context {
@@ -1993,12 +1994,12 @@ func (c *streamBlurbsRESTClient) Context() context.Context {
 
 func (c *streamBlurbsRESTClient) SendMsg(m interface{}) error {
 	// This is a no-op to fulfill the interface.
-	return fmt.Errorf("this method is not implemented for a server-stream")
+	return errors.New("this method is not implemented for a server-stream")
 }
 
 func (c *streamBlurbsRESTClient) RecvMsg(m interface{}) error {
 	// This is a no-op to fulfill the interface.
-	return fmt.Errorf("this method is not implemented, use Recv")
+	return errors.New("this method is not implemented, use Recv")
 }
 
 // SendBlurbs this is a stream to create multiple blurbs. If an invalid blurb is
@@ -2006,7 +2007,7 @@ func (c *streamBlurbsRESTClient) RecvMsg(m interface{}) error {
 //
 // This method is not supported for the REST transport.
 func (c *messagingRESTClient) SendBlurbs(ctx context.Context, opts ...gax.CallOption) (genprotopb.Messaging_SendBlurbsClient, error) {
-	return nil, fmt.Errorf("SendBlurbs not yet supported for REST clients")
+	return nil, errors.New("SendBlurbs not yet supported for REST clients")
 }
 
 // Connect this method starts a bidirectional stream that receives all blurbs that
@@ -2016,7 +2017,7 @@ func (c *messagingRESTClient) SendBlurbs(ctx context.Context, opts ...gax.CallOp
 //
 // This method is not supported for the REST transport.
 func (c *messagingRESTClient) Connect(ctx context.Context, opts ...gax.CallOption) (genprotopb.Messaging_ConnectClient, error) {
-	return nil, fmt.Errorf("Connect not yet supported for REST clients")
+	return nil, errors.New("Connect not yet supported for REST clients")
 }
 
 // ListLocations is a utility method from google.cloud.location.Locations.

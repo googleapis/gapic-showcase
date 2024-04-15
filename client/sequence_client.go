@@ -19,6 +19,7 @@ package client
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -1097,7 +1098,7 @@ func (c *attemptStreamingSequenceRESTClient) Trailer() metadata.MD {
 
 func (c *attemptStreamingSequenceRESTClient) CloseSend() error {
 	// This is a no-op to fulfill the interface.
-	return fmt.Errorf("this method is not implemented for a server-stream")
+	return errors.New("this method is not implemented for a server-stream")
 }
 
 func (c *attemptStreamingSequenceRESTClient) Context() context.Context {
@@ -1106,12 +1107,12 @@ func (c *attemptStreamingSequenceRESTClient) Context() context.Context {
 
 func (c *attemptStreamingSequenceRESTClient) SendMsg(m interface{}) error {
 	// This is a no-op to fulfill the interface.
-	return fmt.Errorf("this method is not implemented for a server-stream")
+	return errors.New("this method is not implemented for a server-stream")
 }
 
 func (c *attemptStreamingSequenceRESTClient) RecvMsg(m interface{}) error {
 	// This is a no-op to fulfill the interface.
-	return fmt.Errorf("this method is not implemented, use Recv")
+	return errors.New("this method is not implemented, use Recv")
 }
 
 // ListLocations is a utility method from google.cloud.location.Locations.
