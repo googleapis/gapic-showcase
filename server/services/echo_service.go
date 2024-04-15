@@ -49,16 +49,9 @@ func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.Echo
 	if err != nil {
 		return nil, err
 	}
-	md, ok := metadata.FromIncomingContext(ctx)
-	requestHeaders := make(map[string]*pb.EchoResponse_RepeatedValues)
-	if ok {
-		for k, v := range md {
-			requestHeaders[k] = &pb.EchoResponse_RepeatedValues{HeaderValues: v}
-		}
-	}
 	echoHeaders(ctx)
 	echoTrailers(ctx)
-	return &pb.EchoResponse{Content: in.GetContent(), Severity: in.GetSeverity(), RequestId: in.GetRequestId(), OtherRequestId: in.GetOtherRequestId(), HttpRequestHeaderValue: requestHeaders}, nil
+	return &pb.EchoResponse{Content: in.GetContent(), Severity: in.GetSeverity(), RequestId: in.GetRequestId(), OtherRequestId: in.GetOtherRequestId()}, nil
 }
 
 func (s *echoServerImpl) EchoErrorDetails(ctx context.Context, in *pb.EchoErrorDetailsRequest) (*pb.EchoErrorDetailsResponse, error) {
@@ -320,10 +313,11 @@ func echoTrailers(ctx context.Context) {
 		return
 	}
 
-	values := md.Get("showcase-trailer")
-	for _, value := range values {
-		trailer := metadata.Pairs("showcase-trailer", value)
-		grpc.SetTrailer(ctx, trailer)
+	for k, v := range md {
+		for _, value := range v {
+			trailer := metadata.Pairs(k, value)
+			grpc.SetTrailer(ctx, trailer)
+		}
 	}
 }
 
@@ -333,9 +327,10 @@ func echoStreamingTrailers(stream grpc.ServerStream) {
 		return
 	}
 
-	values := md.Get("showcase-trailer")
-	for _, value := range values {
-		trailer := metadata.Pairs("showcase-trailer", value)
-		stream.SetTrailer(trailer)
+	for k, v := range md {
+		for _, value := range v {
+			trailer := metadata.Pairs(k, value)
+			stream.SetTrailer(trailer)
+		}
 	}
 }

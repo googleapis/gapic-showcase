@@ -19,6 +19,7 @@ import (
 	"errors"
 	"io"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -48,9 +49,6 @@ func TestEcho_success(t *testing.T) {
 		mockStream := &mockUnaryStream{t: t}
 		ctx := appendTestOutgoingMetadata(context.Background(), &mockSTS{t: t, stream: mockStream})
 		out, err := server.Echo(ctx, in)
-		if !reflect.DeepEqual(out.HttpRequestHeaderValue["x-goog-api-version"].HeaderValues[0], "apiVersion") {
-			t.Errorf("Did not find apiVersion in response")
-		}
 		if err != nil {
 			t.Error(err)
 		}
@@ -119,13 +117,16 @@ func (m *mockUnaryStream) Send(resp *pb.EchoResponse) error { return nil }
 func (m *mockUnaryStream) Context() context.Context         { return nil }
 func (m *mockUnaryStream) SetTrailer(md metadata.MD) {
 	m.trail = append(m.trail, md.Get("showcase-trailer")...)
+	m.trail = append(m.trail, md.Get("x-goog-api-version")...)
+	// Sort the trailer values as having a guaranteed order will help with array comparison
+	sort.Strings(m.trail)
 }
 func (m *mockUnaryStream) SetHeader(md metadata.MD) error {
 	m.head = append(m.head, md.Get("x-goog-request-params")...)
 	return nil
 }
 func (m *mockUnaryStream) verify(expectHeadersAndTrailers bool) {
-	if expectHeadersAndTrailers && (!reflect.DeepEqual([]string{"show", "case"}, m.trail) || !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head)) {
+	if expectHeadersAndTrailers && (!reflect.DeepEqual([]string{"apiVersion", "case", "show"}, m.trail) || !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head)) {
 		m.t.Errorf("Unary stream did not get all expected headers and trailers.\nGot these headers: %+v\nGot these trailers: %+v", m.head, m.trail)
 	}
 }
