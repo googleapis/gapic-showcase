@@ -59,8 +59,6 @@ func init() {
 
 	EchoCmd.Flags().StringVar(&echoInputOtherRequestId, "other_request_id", "", "To facilitate testing of...")
 
-	EchoCmd.Flags().StringSliceVar(&EchoInput.HttpRequestHeaderToEcho, "http_request_header_to_echo", []string{}, "Http request headers to echo via...")
-
 	EchoCmd.Flags().StringVar(&EchoInputResponse, "response", "", "Choices: content, error")
 
 	EchoCmd.Flags().StringVar(&EchoFromFile, "from_file", "", "Absolute path to JSON file containing request payload")

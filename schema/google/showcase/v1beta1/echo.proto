@@ -222,9 +222,6 @@ message EchoRequest {
   optional string other_request_id = 8 [
     (google.api.field_info).format = UUID4
   ];
-
-  // Http request headers to echo via EchoResponse.http_request_header_value
-  repeated string http_request_header_to_echo = 9;
 }
 
 // The response message for the Echo methods.

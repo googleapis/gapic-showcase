@@ -52,17 +52,12 @@ func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.Echo
 	md, ok := metadata.FromIncomingContext(ctx)
 	requestHeaders := make(map[string]*pb.EchoResponse_RepeatedValues)
 	if ok {
-		headersToTrack := in.GetHttpRequestHeaderToEcho()
 		for k, v := range md {
-			if strContains(headersToTrack, k) {
-				requestHeaders[k] = &pb.EchoResponse_RepeatedValues{HeaderValues: v}
-			}
+			requestHeaders[k] = &pb.EchoResponse_RepeatedValues{HeaderValues: v}
 		}
 	}
-
 	echoHeaders(ctx)
 	echoTrailers(ctx)
-
 	return &pb.EchoResponse{Content: in.GetContent(), Severity: in.GetSeverity(), RequestId: in.GetRequestId(), OtherRequestId: in.GetOtherRequestId(), HttpRequestHeaderValue: requestHeaders}, nil
 }
 
