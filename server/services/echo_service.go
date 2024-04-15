@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -56,7 +55,7 @@ func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.Echo
 	requestHeaders := make(map[string]*pb.EchoResponse_RepeatedValues)
 	headersToTrack := in.GetHttpRequestHeaderToEcho()
 	for k, v := range md {
-		if slices.Contains(headersToTrack, k) {
+		if strContains(headersToTrack, k) {
 			requestHeaders[k] = &pb.EchoResponse_RepeatedValues{HeaderValues: v}
 		}
 	}
