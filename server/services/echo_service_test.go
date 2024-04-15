@@ -42,12 +42,16 @@ func TestEcho_success(t *testing.T) {
 	server := NewEchoServer()
 	for _, val := range table {
 		in := &pb.EchoRequest{
-			Response: &pb.EchoRequest_Content{Content: val},
-			Severity: pb.Severity_CRITICAL,
+			Response:                &pb.EchoRequest_Content{Content: val},
+			Severity:                pb.Severity_CRITICAL,
+			HttpRequestHeaderToEcho: []string{"x-goog-api-version"},
 		}
 		mockStream := &mockUnaryStream{t: t}
 		ctx := appendTestOutgoingMetadata(context.Background(), &mockSTS{t: t, stream: mockStream})
 		out, err := server.Echo(ctx, in)
+		if !reflect.DeepEqual(out.HttpRequestHeaderValue["x-goog-api-version"].HeaderValues[0], "apiVersion") {
+			t.Errorf("Did not find apiVersion in response")
+		}
 		if err != nil {
 			t.Error(err)
 		}
@@ -153,6 +157,7 @@ func (m *mockExpandStream) SetTrailer(md metadata.MD) {
 
 func (m *mockExpandStream) SetHeader(md metadata.MD) error {
 	m.head = append(m.head, md.Get("x-goog-request-params")...)
+	m.head = append(m.head, md.Get("x-goog-api-version")...)
 	return nil
 }
 
@@ -898,6 +903,6 @@ func TestBlockError(t *testing.T) {
 
 func appendTestOutgoingMetadata(ctx context.Context, stream grpc.ServerTransportStream) context.Context {
 	ctx = grpc.NewContextWithServerTransportStream(ctx, stream)
-	ctx = metadata.NewIncomingContext(ctx, metadata.Pairs("showcase-trailer", "show", "showcase-trailer", "case", "trailer", "trail", "x-goog-request-params", "showcaseHeader", "x-goog-request-params", "anotherHeader", "header", "head"))
+	ctx = metadata.NewIncomingContext(ctx, metadata.Pairs("showcase-trailer", "show", "showcase-trailer", "case", "trailer", "trail", "x-goog-request-params", "showcaseHeader", "x-goog-request-params", "anotherHeader", "header", "head", "x-goog-api-version", "apiVersion"))
 	return ctx
 }

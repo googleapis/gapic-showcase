@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -46,12 +47,21 @@ type echoServerImpl struct {
 
 func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.EchoResponse, error) {
 	err := status.ErrorProto(in.GetError())
-	if err != nil {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if err != nil || !ok {
 		return nil, err
 	}
 	echoHeaders(ctx)
 	echoTrailers(ctx)
-	return &pb.EchoResponse{Content: in.GetContent(), Severity: in.GetSeverity(), RequestId: in.GetRequestId(), OtherRequestId: in.GetOtherRequestId()}, nil
+	request_headers := make(map[string]*pb.EchoResponse_RepeatedValues)
+	headers_to_track := in.GetHttpRequestHeaderToEcho()
+	for k, v := range md {
+		if slices.Contains(headers_to_track, k) {
+			request_headers[k] = &pb.EchoResponse_RepeatedValues{HeaderValues: v}
+		}
+	}
+
+	return &pb.EchoResponse{Content: in.GetContent(), Severity: in.GetSeverity(), RequestId: in.GetRequestId(), OtherRequestId: in.GetOtherRequestId(), HttpRequestHeaderValue: request_headers}, nil
 }
 
 func (s *echoServerImpl) EchoErrorDetails(ctx context.Context, in *pb.EchoErrorDetailsRequest) (*pb.EchoErrorDetailsResponse, error) {
