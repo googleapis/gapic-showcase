@@ -53,15 +53,15 @@ func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.Echo
 	}
 	echoHeaders(ctx)
 	echoTrailers(ctx)
-	request_headers := make(map[string]*pb.EchoResponse_RepeatedValues)
-	headers_to_track := in.GetHttpRequestHeaderToEcho()
+	requestHeaders := make(map[string]*pb.EchoResponse_RepeatedValues)
+	headersToTrack := in.GetHttpRequestHeaderToEcho()
 	for k, v := range md {
-		if slices.Contains(headers_to_track, k) {
-			request_headers[k] = &pb.EchoResponse_RepeatedValues{HeaderValues: v}
+		if slices.Contains(headersToTrack, k) {
+			requestHeaders[k] = &pb.EchoResponse_RepeatedValues{HeaderValues: v}
 		}
 	}
 
-	return &pb.EchoResponse{Content: in.GetContent(), Severity: in.GetSeverity(), RequestId: in.GetRequestId(), OtherRequestId: in.GetOtherRequestId(), HttpRequestHeaderValue: request_headers}, nil
+	return &pb.EchoResponse{Content: in.GetContent(), Severity: in.GetSeverity(), RequestId: in.GetRequestId(), OtherRequestId: in.GetOtherRequestId(), HttpRequestHeaderValue: requestHeaders}, nil
 }
 
 func (s *echoServerImpl) EchoErrorDetails(ctx context.Context, in *pb.EchoErrorDetailsRequest) (*pb.EchoErrorDetailsResponse, error) {
