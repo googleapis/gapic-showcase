@@ -141,6 +141,8 @@ func (s *echoServerImpl) Chat(stream pb.Echo_ChatServer) error {
 	for {
 		req, err := stream.Recv()
 		if err == io.EOF {
+			// Echo headers and trailers when the stream ends
+			echoStreamingHeaders(stream)
 			echoStreamingTrailers(stream)
 			return nil
 		}
@@ -152,7 +154,6 @@ func (s *echoServerImpl) Chat(stream pb.Echo_ChatServer) error {
 		if s != nil {
 			return s
 		}
-		echoStreamingHeaders(stream)
 		stream.Send(&pb.EchoResponse{Content: req.GetContent()})
 	}
 }

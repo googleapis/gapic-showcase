@@ -367,7 +367,7 @@ func (m *mockChatStream) SetTrailer(md metadata.MD) {
 }
 
 func (m *mockChatStream) verify(expectHeadersAndTrailers bool) {
-	if expectHeadersAndTrailers && (!reflect.DeepEqual([]string{"show", "case"}, m.trail) || !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader", "showcaseHeader", "anotherHeader"}, m.head)) {
+	if expectHeadersAndTrailers && (!reflect.DeepEqual([]string{"show", "case"}, m.trail) || !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head)) {
 		m.t.Errorf("Chat did not get all expected trailers.\nGot these headers: %+v\nGot these trailers: %+v", m.head, m.trail)
 	}
 }
