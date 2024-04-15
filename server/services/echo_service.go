@@ -46,8 +46,11 @@ type echoServerImpl struct {
 
 func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.EchoResponse, error) {
 	err := status.ErrorProto(in.GetError())
+	if err != nil {
+		return nil, err
+	}
 	md, ok := metadata.FromIncomingContext(ctx)
-	if err != nil || !ok {
+	if !ok {
 		return nil, err
 	}
 	echoHeaders(ctx)
