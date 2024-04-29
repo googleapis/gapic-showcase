@@ -38,6 +38,8 @@ func (backend *RESTBackend) HandleRepeatDataBody(w http.ResponseWriter, r *http.
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
+	resttools.IncludeRequestHeadersInResponse(w, r)
+
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
@@ -109,6 +111,8 @@ func (backend *RESTBackend) HandleRepeatDataBodyInfo(w http.ResponseWriter, r *h
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/repeat:bodyinfo': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -191,6 +195,8 @@ func (backend *RESTBackend) HandleRepeatDataQuery(w http.ResponseWriter, r *http
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
+	resttools.IncludeRequestHeadersInResponse(w, r)
+
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
@@ -249,6 +255,8 @@ func (backend *RESTBackend) HandleRepeatDataSimplePath(w http.ResponseWriter, r 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/repeat/{info.f_string}/{info.f_int32}/{info.f_double}/{info.f_bool}/{info.f_kingdom}:simplepath': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 5, have %d): %q", numUrlPathParams, urlPathParams)
 	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 5 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 5, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -314,6 +322,8 @@ func (backend *RESTBackend) HandleRepeatDataPathResource(w http.ResponseWriter, 
 	backend.StdLog.Printf("  urlPathParams (expect 3, have %d): %q", numUrlPathParams, urlPathParams)
 	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
+	resttools.IncludeRequestHeadersInResponse(w, r)
+
 	if numUrlPathParams != 3 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 3, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
@@ -377,6 +387,8 @@ func (backend *RESTBackend) HandleRepeatDataPathResource_1(w http.ResponseWriter
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/repeat/{info.f_child.f_string=first/*}/{info.f_string=second/*}/bool/{info.f_bool}:childfirstpathresource': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 3, have %d): %q", numUrlPathParams, urlPathParams)
 	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 3 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 3, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -442,6 +454,8 @@ func (backend *RESTBackend) HandleRepeatDataPathTrailingResource(w http.Response
 	backend.StdLog.Printf("  urlPathParams (expect 2, have %d): %q", numUrlPathParams, urlPathParams)
 	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
+	resttools.IncludeRequestHeadersInResponse(w, r)
+
 	if numUrlPathParams != 2 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 2, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
@@ -505,6 +519,8 @@ func (backend *RESTBackend) HandleRepeatDataBodyPut(w http.ResponseWriter, r *ht
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/repeat:bodyput': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -578,6 +594,8 @@ func (backend *RESTBackend) HandleRepeatDataBodyPatch(w http.ResponseWriter, r *
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
+	resttools.IncludeRequestHeadersInResponse(w, r)
+
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
@@ -650,6 +668,8 @@ func (backend *RESTBackend) HandleGetEnum(w http.ResponseWriter, r *http.Request
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
 
+	resttools.IncludeRequestHeadersInResponse(w, r)
+
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
 		return
@@ -708,6 +728,8 @@ func (backend *RESTBackend) HandleVerifyEnum(w http.ResponseWriter, r *http.Requ
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/compliance/enum': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
 	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
