@@ -1,5 +1,19 @@
 # Release History
 
+## [0.35.0](https://github.com/googleapis/gapic-showcase/compare/v0.34.0...v0.35.0) (2024-04-29)
+
+
+### Features
+
+* Echo request headers in response over REST transport ([#1509](https://github.com/googleapis/gapic-showcase/issues/1509)) ([de93c4c](https://github.com/googleapis/gapic-showcase/commit/de93c4c5e33b4e1a8ec3ebbeb7af36143dbc19dd))
+
+## [0.34.0](https://github.com/googleapis/gapic-showcase/compare/v0.33.0...v0.34.0) (2024-04-23)
+
+
+### Features
+
+* Add ability to echo request headers in trailing metadata ([#1501](https://github.com/googleapis/gapic-showcase/issues/1501)) ([48f9b74](https://github.com/googleapis/gapic-showcase/commit/48f9b742970e2199431066807d3f7a5cd2f31728))
+
 ## [0.33.0](https://github.com/googleapis/gapic-showcase/compare/v0.32.2...v0.33.0) (2024-04-15)
 
 
