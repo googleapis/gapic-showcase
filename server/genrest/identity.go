@@ -55,8 +55,8 @@ func (backend *RESTBackend) HandleCreateUser(w http.ResponseWriter, r *http.Requ
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil && err != io.EOF {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -196,8 +196,8 @@ func (backend *RESTBackend) HandleUpdateUser(w http.ResponseWriter, r *http.Requ
 	var bodyField genprotopb.User
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil && err != io.EOF {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}

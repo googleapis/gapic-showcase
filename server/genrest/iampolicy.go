@@ -55,8 +55,8 @@ func (backend *RESTBackend) HandleSetIamPolicy(w http.ResponseWriter, r *http.Re
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil && err != io.EOF {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -129,8 +129,8 @@ func (backend *RESTBackend) HandleSetIamPolicy_1(w http.ResponseWriter, r *http.
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil && err != io.EOF {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -203,8 +203,8 @@ func (backend *RESTBackend) HandleSetIamPolicy_2(w http.ResponseWriter, r *http.
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil && err != io.EOF {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -277,8 +277,8 @@ func (backend *RESTBackend) HandleSetIamPolicy_3(w http.ResponseWriter, r *http.
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil && err != io.EOF {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -615,8 +615,8 @@ func (backend *RESTBackend) HandleTestIamPermissions(w http.ResponseWriter, r *h
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil && err != io.EOF {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -689,8 +689,8 @@ func (backend *RESTBackend) HandleTestIamPermissions_1(w http.ResponseWriter, r 
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil && err != io.EOF {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -763,8 +763,8 @@ func (backend *RESTBackend) HandleTestIamPermissions_2(w http.ResponseWriter, r 
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil && err != io.EOF {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -837,8 +837,8 @@ func (backend *RESTBackend) HandleTestIamPermissions_3(w http.ResponseWriter, r 
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil && err != io.EOF {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
