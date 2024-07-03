@@ -57,7 +57,7 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes, err := io.ReadAll(bodyReader)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}

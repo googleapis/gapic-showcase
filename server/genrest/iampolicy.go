@@ -56,7 +56,7 @@ func (backend *RESTBackend) HandleSetIamPolicy(w http.ResponseWriter, r *http.Re
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes, err := io.ReadAll(bodyReader)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -130,7 +130,7 @@ func (backend *RESTBackend) HandleSetIamPolicy_1(w http.ResponseWriter, r *http.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes, err := io.ReadAll(bodyReader)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -204,7 +204,7 @@ func (backend *RESTBackend) HandleSetIamPolicy_2(w http.ResponseWriter, r *http.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes, err := io.ReadAll(bodyReader)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -278,7 +278,7 @@ func (backend *RESTBackend) HandleSetIamPolicy_3(w http.ResponseWriter, r *http.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes, err := io.ReadAll(bodyReader)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -616,7 +616,7 @@ func (backend *RESTBackend) HandleTestIamPermissions(w http.ResponseWriter, r *h
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes, err := io.ReadAll(bodyReader)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -690,7 +690,7 @@ func (backend *RESTBackend) HandleTestIamPermissions_1(w http.ResponseWriter, r 
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes, err := io.ReadAll(bodyReader)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -764,7 +764,7 @@ func (backend *RESTBackend) HandleTestIamPermissions_2(w http.ResponseWriter, r 
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes, err := io.ReadAll(bodyReader)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -838,7 +838,7 @@ func (backend *RESTBackend) HandleTestIamPermissions_3(w http.ResponseWriter, r 
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes, err := io.ReadAll(bodyReader)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}

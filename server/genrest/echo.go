@@ -56,7 +56,7 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes, err := io.ReadAll(bodyReader)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -130,7 +130,7 @@ func (backend *RESTBackend) HandleEchoErrorDetails(w http.ResponseWriter, r *htt
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes, err := io.ReadAll(bodyReader)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -204,7 +204,7 @@ func (backend *RESTBackend) HandleExpand(w http.ResponseWriter, r *http.Request)
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes, err := io.ReadAll(bodyReader)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -281,7 +281,7 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes, err := io.ReadAll(bodyReader)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -355,7 +355,7 @@ func (backend *RESTBackend) HandlePagedExpandLegacy(w http.ResponseWriter, r *ht
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes, err := io.ReadAll(bodyReader)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -429,7 +429,7 @@ func (backend *RESTBackend) HandlePagedExpandLegacyMapped(w http.ResponseWriter,
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes, err := io.ReadAll(bodyReader)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -503,7 +503,7 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes, err := io.ReadAll(bodyReader)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -577,7 +577,7 @@ func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) 
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
 	rBytes, err := io.ReadAll(bodyReader)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
