@@ -1,5 +1,12 @@
 # Release History
 
+## [0.35.1](https://github.com/googleapis/gapic-showcase/compare/v0.35.0...v0.35.1) (2024-07-08)
+
+
+### Bug Fixes
+
+* Use io.ReadAll ([#1520](https://github.com/googleapis/gapic-showcase/issues/1520)) ([6dddadd](https://github.com/googleapis/gapic-showcase/commit/6dddadd9fcdfed197209271a1201178a57951660))
+
 ## [0.35.0](https://github.com/googleapis/gapic-showcase/compare/v0.34.0...v0.35.0) (2024-04-29)
 
 
