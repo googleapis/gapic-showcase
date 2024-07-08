@@ -23,9 +23,9 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 #
 http_archive(
   name = "com_google_googleapis",
-  strip_prefix = "googleapis-0148e48ace3cf88a50a8c83b06aa7fca3a258762",
-  urls = ["https://github.com/googleapis/googleapis/archive/0148e48ace3cf88a50a8c83b06aa7fca3a258762.zip"],
-  sha256 = "c9b09edc99832da0c3f468fe4d909ca3dd7e433e55e08b05a63a084c789fc84e"
+  strip_prefix = "googleapis-7976ffadc0f21ee9149708c0c97ef000e15de1eb",
+  urls = ["https://github.com/googleapis/googleapis/archive/7976ffadc0f21ee9149708c0c97ef000e15de1eb.zip"],
+  sha256 = "935fb7ebbc65f43e293fac7240471c24d9d52249f5c8bf09c0d04327b2191053"
 )
 load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
 switched_rules_by_language(name = "com_google_googleapis_imports", grpc = True)
@@ -44,9 +44,9 @@ protobuf_deps()
 
 http_archive(
     name = "bazel_features",
-    sha256 = "2cd9e57d4c38675d321731d65c15258f3a66438ad531ae09cb8bb14217dc8572",
-    strip_prefix = "bazel_features-1.11.0",
-    url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.11.0/bazel_features-v1.11.0.tar.gz",
+    sha256 = "5d7e4eb0bb17aee392143cd667b67d9044c270a9345776a5e5a3cccbc44aa4b3",
+    strip_prefix = "bazel_features-1.13.0",
+    url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.13.0/bazel_features-v1.13.0.tar.gz",
 )
 load("@bazel_features//:deps.bzl", "bazel_features_deps")
 bazel_features_deps()
@@ -56,12 +56,12 @@ bazel_features_deps()
 #
 http_archive(
     name = "rules_proto",
-    sha256 = "71fdbed00a0709521ad212058c60d13997b922a5d01dbfd997f0d57d689e7b67",
+    sha256 = "6fb6767d1bef535310547e03247f7518b03487740c11b6c6adb7952033fe1295",
     # Using a release candidate because the latest stable release is too old for
     # our needs, and we want to stay closer to the latest without pinning to a
     # specific commit.
-    strip_prefix = "rules_proto-6.0.0-rc2",
-    url = "https://github.com/bazelbuild/rules_proto/releases/download/6.0.0-rc2/rules_proto-6.0.0-rc2.tar.gz",
+    strip_prefix = "rules_proto-6.0.2",
+    url = "https://github.com/bazelbuild/rules_proto/releases/download/6.0.2/rules_proto-6.0.2.tar.gz",
 )
 
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies","rules_proto_toolchains")
