@@ -1,5 +1,7 @@
 module github.com/googleapis/gapic-showcase
 
+go 1.20
+
 require (
 	cloud.google.com/go/iam v1.1.10
 	cloud.google.com/go/longrunning v0.5.9
@@ -20,7 +22,7 @@ require (
 	google.golang.org/genproto v0.0.0-20240701130421-f6361c86f094
 	google.golang.org/genproto/googleapis/api v0.0.0-20240701130421-f6361c86f094
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240701130421-f6361c86f094
-	google.golang.org/grpc v1.65.0
+	google.golang.org/grpc v1.64.1
 	google.golang.org/protobuf v1.34.2
 )
 
@@ -66,7 +68,3 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-go 1.21
-
-toolchain go1.22.5
