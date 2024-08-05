@@ -23,9 +23,9 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 #
 http_archive(
   name = "com_google_googleapis",
-  strip_prefix = "googleapis-7976ffadc0f21ee9149708c0c97ef000e15de1eb",
-  urls = ["https://github.com/googleapis/googleapis/archive/7976ffadc0f21ee9149708c0c97ef000e15de1eb.zip"],
-  sha256 = "935fb7ebbc65f43e293fac7240471c24d9d52249f5c8bf09c0d04327b2191053"
+  strip_prefix = "googleapis-7314e20f5e3b2550b2e10a8c53f58ae57c511773",
+  urls = ["https://github.com/googleapis/googleapis/archive/7314e20f5e3b2550b2e10a8c53f58ae57c511773.zip"],
+  sha256 = "34fdbb6ecb68763d26e5260ebcde4998f0e5e7ed03c160b066440655269b4618"
 )
 load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
 switched_rules_by_language(name = "com_google_googleapis_imports", grpc = True)
@@ -44,9 +44,9 @@ protobuf_deps()
 
 http_archive(
     name = "bazel_features",
-    sha256 = "5d7e4eb0bb17aee392143cd667b67d9044c270a9345776a5e5a3cccbc44aa4b3",
-    strip_prefix = "bazel_features-1.13.0",
-    url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.13.0/bazel_features-v1.13.0.tar.gz",
+    sha256 = "5ac743bf5f05d88e84962e978811f2524df09602b789c92cf7ae2111ecdeda94",
+    strip_prefix = "bazel_features-1.14.0",
+    url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.14.0/bazel_features-v1.14.0.tar.gz",
 )
 load("@bazel_features//:deps.bzl", "bazel_features_deps")
 bazel_features_deps()
