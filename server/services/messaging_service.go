@@ -24,12 +24,12 @@ import (
 	"sync"
 	"time"
 
+	"cloud.google.com/go/longrunning/autogen/longrunningpb"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
-	"google.golang.org/genproto/googleapis/longrunning"
 	errdetails "google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -454,7 +454,7 @@ func (s *messagingServerImpl) FilteredListBlurbs(ctx context.Context, in *pb.Lis
 // This method searches through all blurbs across all rooms and profiles
 // for blurbs containing to words found in the query. Only posts that
 // contain an exact match of a queried word will be returned.
-func (s *messagingServerImpl) SearchBlurbs(ctx context.Context, in *pb.SearchBlurbsRequest) (*longrunning.Operation, error) {
+func (s *messagingServerImpl) SearchBlurbs(ctx context.Context, in *pb.SearchBlurbsRequest) (*longrunningpb.Operation, error) {
 	if err := s.validateParent(in.GetParent()); err != nil {
 		return nil, err
 	}
@@ -471,7 +471,7 @@ func (s *messagingServerImpl) SearchBlurbs(ctx context.Context, in *pb.SearchBlu
 			},
 		},
 	)
-	return &longrunning.Operation{Name: name, Done: false, Metadata: meta}, nil
+	return &longrunningpb.Operation{Name: name, Done: false, Metadata: meta}, nil
 }
 
 // This returns a stream that emits the blurbs that are created for a
