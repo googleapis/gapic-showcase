@@ -15,7 +15,7 @@
 package genrest
 
 import (
-	"io/ioutil"
+	"os"
 	"reflect"
 	"testing"
 
@@ -144,7 +144,7 @@ func TestConstructStreamingServer(t *testing.T) {
 		actualSources += helperSources[key].Contents() + "\n"
 	}
 
-	expectedSources, err := ioutil.ReadFile("testdata/TestConstructServerStreamer.go.baseline")
+	expectedSources, err := os.ReadFile("testdata/TestConstructServerStreamer.go.baseline")
 	if err != nil {
 		t.Fatalf("could not load file: %s", err)
 	}

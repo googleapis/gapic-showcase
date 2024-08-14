@@ -16,7 +16,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -291,7 +291,7 @@ func checkExpectedFailure(t *testing.T, verb, url, requestBody, failure, errorPr
 		return
 	}
 
-	body, err := ioutil.ReadAll(httpResponse.Body)
+	body, err := io.ReadAll(httpResponse.Body)
 	httpResponse.Body.Close()
 	if err != nil {
 		t.Fatalf("%s could not read response body: %s", errorPrefix, err)

@@ -16,7 +16,6 @@ package util
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -39,7 +38,7 @@ func CompileProtos(version string) {
 		log.Fatalf("Error: unable to get working dir: %+v", err)
 	}
 
-	outDir, err := ioutil.TempDir(os.TempDir(), "gapic-showcase")
+	outDir, err := os.MkdirTemp(os.TempDir(), "gapic-showcase")
 	if err != nil {
 		log.Fatalf("Error: unable to create a temporary dir: %+v\n", err)
 	}

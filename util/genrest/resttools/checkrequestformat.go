@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -45,7 +44,7 @@ func CheckRequestFormat(jsonReader io.Reader, request *http.Request, message pro
 		return err
 	}
 
-	jsonBytes, err := ioutil.ReadAll(jsonReader)
+	jsonBytes, err := io.ReadAll(jsonReader)
 	if err != nil {
 		return err
 	}
