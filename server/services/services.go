@@ -20,9 +20,9 @@ import (
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 
+	iampb "cloud.google.com/go/iam/apiv1/iampb"
 	lropb "cloud.google.com/go/longrunning/autogen/longrunningpb"
 	locpb "google.golang.org/genproto/googleapis/cloud/location"
-	iampb "google.golang.org/genproto/googleapis/iam/v1"
 )
 
 // Backend contains the various service backends that will be
