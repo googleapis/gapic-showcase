@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 )
 
 type unaryTest struct {
