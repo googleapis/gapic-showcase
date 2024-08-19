@@ -9,8 +9,8 @@ import (
 	"os"
 
 	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/proto"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/proto"
 )
 
 var Verbose, OutputJSON bool

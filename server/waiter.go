@@ -20,9 +20,9 @@ import (
 	"time"
 
 	lropb "cloud.google.com/go/longrunning/autogen/longrunningpb"
-	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
+	"google.golang.org/protobuf/proto"
 )
 
 var waiterSingleton Waiter = &waiterImpl{
