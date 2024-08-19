@@ -26,6 +26,8 @@ import (
 	"strings"
 	"sync"
 
+	iampb "cloud.google.com/go/iam/apiv1/iampb"
+	lropb "cloud.google.com/go/longrunning/autogen/longrunningpb"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/server/genrest"
@@ -35,8 +37,6 @@ import (
 	"github.com/soheilhy/cmux"
 	"golang.org/x/sync/errgroup"
 	locpb "google.golang.org/genproto/googleapis/cloud/location"
-	iampb "google.golang.org/genproto/googleapis/iam/v1"
-	lropb "google.golang.org/genproto/googleapis/longrunning"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"

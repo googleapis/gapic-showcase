@@ -18,8 +18,8 @@ import (
 	"context"
 	"sync"
 
+	iampb "cloud.google.com/go/iam/apiv1/iampb"
 	"github.com/golang/protobuf/proto"
-	iampb "google.golang.org/genproto/googleapis/iam/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

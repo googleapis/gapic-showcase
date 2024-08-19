@@ -23,10 +23,10 @@ import (
 	"time"
 	"unicode/utf8"
 
+	lropb "cloud.google.com/go/longrunning/autogen/longrunningpb"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
-	lropb "google.golang.org/genproto/googleapis/longrunning"
 	errdetails "google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
