@@ -19,10 +19,10 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 
@@ -228,7 +228,7 @@ func newEndpointGRPC(lis net.Listener, config RuntimeConfig, backend *services.B
 			log.Fatalf("Failed to load server TLS cert/key with error:%v", err)
 		}
 
-		cert, err := ioutil.ReadFile(config.tlsCaCert)
+		cert, err := os.ReadFile(config.tlsCaCert)
 		if err != nil {
 			log.Fatalf("Failed to load root CA cert file with error:%v", err)
 		}

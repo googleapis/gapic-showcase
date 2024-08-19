@@ -16,7 +16,6 @@ package genrest
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"cloud.google.com/go/iam/apiv1/iampb"
@@ -182,7 +181,7 @@ func GetServiceConfig() (*serviceconfig.Service, error) {
 	// hard-coding this location isn't terrible.
 	serviceConfigPath := "schema/google/showcase/v1beta1/showcase_v1beta1.yaml"
 
-	y, err := ioutil.ReadFile(serviceConfigPath)
+	y, err := os.ReadFile(serviceConfigPath)
 	if err != nil {
 		cwd, _ := os.Getwd()
 		return nil, fmt.Errorf("error reading service config %q (cwd==%q): %v", serviceConfigPath, cwd, err)

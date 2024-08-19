@@ -16,10 +16,11 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -108,7 +109,7 @@ func TestComplianceSuite(t *testing.T) {
 
 				// Unmarshal httpResponse body, interpreted as JSON.
 				// should do this.
-				responseBody, err := ioutil.ReadAll(httpResponse.Body)
+				responseBody, err := io.ReadAll(httpResponse.Body)
 				httpResponse.Body.Close()
 				if err != nil {
 					t.Errorf("%s could not read httpResponse body: %s", errorPrefix, err)
@@ -427,7 +428,7 @@ func loadComplianceSuiteFile() (err error) {
 	// Locate, load
 	_, thisFile, _, _ := runtime.Caller(0)
 	complianceSuiteFileName = filepath.Join(filepath.Dir(thisFile), "../../schema/google/showcase/v1beta1/compliance_suite.json")
-	complianceSuiteJSON, err = ioutil.ReadFile(complianceSuiteFileName)
+	complianceSuiteJSON, err = os.ReadFile(complianceSuiteFileName)
 	if err != nil {
 		return fmt.Errorf("could not open suite file %q", complianceSuiteFileName)
 	}
