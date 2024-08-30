@@ -89,3 +89,8 @@ publishing:
     auto_populated_fields:
     - request_id
     - other_request_id
+  library_settings:
+  - version: google.showcase.v1beta1
+    python_settings:
+      experimental_features:
+        rest_async_io_enabled: true
