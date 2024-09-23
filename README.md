@@ -166,16 +166,33 @@ const client = new showcase.EchoClient({ grpc, sslCreds: grpc.credentials.create
 #### Example for Go:
 
 ```go
-conn, err := grpc.Dial("localhost:7469", grpc.WithInsecure())
-if err != nil {
-    log.Fatal(err)
-}
-opt := option.WithGRPCConn(conn)
-client, err = showcase.NewEchoClient(context.Background(), opt)
-if err != nil {
-    log.Fatal(err)
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/googleapis/gapic-showcase/client"
+	"google.golang.org/api/option"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+)
+
+func main() {
+	conn, err := grpc.Dial("localhost:7469", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal(err)
+	}
+	opt := option.WithGRPCConn(conn)
+	ctx := context.Background()
+	_, err = client.NewEchoClient(ctx, opt)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 ```
+
 
 #### Example for Java (gRPC):
 
