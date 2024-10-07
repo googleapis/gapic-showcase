@@ -180,6 +180,15 @@ service Echo {
       body: "*"
     };
   };
+
+  // This method returns authentication details from the incoming request, including things like
+  // Authorization headers for clients to verify that the correct headers are being sent.
+  rpc EchoAuthentication(EchoAuthenticationRequest) returns (EchoAuthenticationResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:authentication"
+      body: "*"
+    }
+  };
 }
 
 // A severity enum used to test enum capabilities in GAPIC surfaces.
@@ -389,4 +398,15 @@ message BlockResponse {
   // This content can contain anything, the server will not depend on a value
   // here.
   string content = 1;
+}
+
+// The request for EchoAuthentication method.  This is currently empty but
+// is included as a unique message (not Empty) in case we need to add to it
+// later.
+message EchoAuthenticationRequest {
+}
+
+// The response for the EchoAuthentication method.
+message EchoAuthenticationResponse {
+  repeated string headers = 1;
 }
