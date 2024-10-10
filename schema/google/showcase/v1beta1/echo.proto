@@ -32,7 +32,7 @@ option java_package = "com.google.showcase.v1beta1";
 option java_multiple_files = true;
 option ruby_package = "Google::Showcase::V1beta1";
 
-// This service is used showcase the four main types of rpcs - unary, server
+// This service is used showcase the 4 main types of rpcs - unary, server
 // side streaming, client side streaming, and bidirectional streaming. This
 // service also exposes methods that explicitly implement server delay, and
 // paginated calls. Set the 'showcase-trailer' metadata key on any method

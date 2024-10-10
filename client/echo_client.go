@@ -261,7 +261,7 @@ type internalEchoClient interface {
 // EchoClient is a client for interacting with Client Libraries Showcase API.
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
 //
-// This service is used showcase the four main types of rpcs - unary, server
+// This service is used showcase the 4 main types of rpcs - unary, server
 // side streaming, client side streaming, and bidirectional streaming. This
 // service also exposes methods that explicitly implement server delay, and
 // paginated calls. Set the ‘showcase-trailer’ metadata key on any method
@@ -460,7 +460,7 @@ type echoGRPCClient struct {
 // NewEchoClient creates a new echo client based on gRPC.
 // The returned client must be Closed when it is done being used to clean up its underlying connections.
 //
-// This service is used showcase the four main types of rpcs - unary, server
+// This service is used showcase the 4 main types of rpcs - unary, server
 // side streaming, client side streaming, and bidirectional streaming. This
 // service also exposes methods that explicitly implement server delay, and
 // paginated calls. Set the ‘showcase-trailer’ metadata key on any method
@@ -557,7 +557,7 @@ type echoRESTClient struct {
 
 // NewEchoRESTClient creates a new echo rest client.
 //
-// This service is used showcase the four main types of rpcs - unary, server
+// This service is used showcase the 4 main types of rpcs - unary, server
 // side streaming, client side streaming, and bidirectional streaming. This
 // service also exposes methods that explicitly implement server delay, and
 // paginated calls. Set the ‘showcase-trailer’ metadata key on any method

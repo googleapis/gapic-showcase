@@ -56,8 +56,8 @@ func init() {
 
 var EchoServiceCmd = &cobra.Command{
 	Use:       "echo",
-	Short:     "This service is used showcase the four main types...",
-	Long:      "This service is used showcase the four main types of rpcs - unary, server  side streaming, client side streaming, and bidirectional streaming. This ...",
+	Short:     "This service is used showcase the 4 main types of...",
+	Long:      "This service is used showcase the 4 main types of rpcs - unary, server  side streaming, client side streaming, and bidirectional streaming. This ...",
 	ValidArgs: EchoSubCommands,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
 		var opts []option.ClientOption
