@@ -57,6 +57,8 @@ func CompileProtos(version string) {
 		"--descriptor_set_out=test_gapic_showcase.desc",
 		"--proto_path=schema/googleapis",
 		"--proto_path=schema",
+		"--include_imports",
+		"--include_source_info",
 		"--go_cli_out=" + filepath.Join("cmd", "gapic-showcase"),
 		"--go_cli_opt=root=gapic-showcase",
 		"--go_cli_opt=gapic=github.com/googleapis/gapic-showcase/client",
