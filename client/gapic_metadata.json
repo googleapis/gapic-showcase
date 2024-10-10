@@ -244,6 +244,11 @@
                 "Echo"
               ]
             },
+            "EchoAuthentication": {
+              "methods": [
+                "EchoAuthentication"
+              ]
+            },
             "EchoErrorDetails": {
               "methods": [
                 "EchoErrorDetails"
@@ -342,6 +347,11 @@
             "Echo": {
               "methods": [
                 "Echo"
+              ]
+            },
+            "EchoAuthentication": {
+              "methods": [
+                "EchoAuthentication"
               ]
             },
             "EchoErrorDetails": {

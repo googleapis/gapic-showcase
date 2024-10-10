@@ -28,6 +28,7 @@ var EchoSubCommands []string = []string{
 	"paged-expand-legacy-mapped",
 	"wait",
 	"poll-wait", "block",
+	"echo-authentication",
 }
 
 func init() {

@@ -31,6 +31,7 @@ Echo (.google.showcase.v1beta1.Echo):
   .google.showcase.v1beta1.Echo.PagedExpandLegacyMapped[0] : POST: "/v1beta1/echo:pagedExpandLegacyMapped"
   .google.showcase.v1beta1.Echo.Wait[0] : POST: "/v1beta1/echo:wait"
   .google.showcase.v1beta1.Echo.Block[0] : POST: "/v1beta1/echo:block"
+  .google.showcase.v1beta1.Echo.EchoAuthentication[0] : POST: "/v1beta1/echo:authentication"
 
 Identity (.google.showcase.v1beta1.Identity):
   .google.showcase.v1beta1.Identity.CreateUser[0] : POST: "/v1beta1/users"
@@ -150,7 +151,7 @@ Shim "Echo" (.google.showcase.v1beta1.Echo)
   Imports:
     genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
     longrunningpbpb: "cloud.google.com/go/longrunning/autogen/longrunningpb" "cloud.google.com/go/longrunning/autogen/longrunningpb"
-  Handlers (9):
+  Handlers (10):
         POST                                 /v1beta1/echo:echo func Echo(request genprotopb.EchoRequest) (response genprotopb.EchoResponse) {}
 ["/" "v1beta1" "/" "echo" ":" "echo"]
 
@@ -171,6 +172,9 @@ Shim "Echo" (.google.showcase.v1beta1.Echo)
 
         POST                        /v1beta1/echo:error-details func EchoErrorDetails(request genprotopb.EchoErrorDetailsRequest) (response genprotopb.EchoErrorDetailsResponse) {}
 ["/" "v1beta1" "/" "echo" ":" "error-details"]
+
+        POST                       /v1beta1/echo:authentication func EchoAuthentication(request genprotopb.EchoAuthenticationRequest) (response genprotopb.EchoAuthenticationResponse) {}
+["/" "v1beta1" "/" "echo" ":" "authentication"]
 
         POST                    /v1beta1/echo:pagedExpandLegacy func PagedExpandLegacy(request genprotopb.PagedExpandLegacyRequest) (response genprotopb.PagedExpandResponse) {}
 ["/" "v1beta1" "/" "echo" ":" "pagedExpandLegacy"]

@@ -158,6 +158,22 @@ func (s *echoServerImpl) Chat(stream pb.Echo_ChatServer) error {
 	}
 }
 
+func (s *echoServerImpl) EchoAuthentication(ctx context.Context, in *pb.EchoAuthenticationRequest) (*pb.EchoAuthenticationResponse, error) {
+	// Stuff the Authorization header from the context into the response.
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Errorf(codes.InvalidArgument, "missing metadata")
+	}
+	vals := md.Get("Authorization")
+	if len(vals) == 0 {
+		return nil, status.Errorf(codes.Unauthenticated, "missing authorization header")
+	}
+
+	return &pb.EchoAuthenticationResponse{
+		Headers: vals,
+	}, nil
+}
+
 func (s *echoServerImpl) PagedExpandLegacy(ctx context.Context, in *pb.PagedExpandLegacyRequest) (*pb.PagedExpandResponse, error) {
 	req := &pb.PagedExpandRequest{
 		Content:   in.Content,

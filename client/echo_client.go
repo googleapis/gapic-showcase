@@ -65,6 +65,7 @@ type EchoCallOptions struct {
 	PagedExpandLegacyMapped []gax.CallOption
 	Wait                    []gax.CallOption
 	Block                   []gax.CallOption
+	EchoAuthentication      []gax.CallOption
 	ListLocations           []gax.CallOption
 	GetLocation             []gax.CallOption
 	SetIamPolicy            []gax.CallOption
@@ -148,6 +149,9 @@ func defaultEchoCallOptions() *EchoCallOptions {
 		Block: []gax.CallOption{
 			gax.WithTimeout(5000 * time.Millisecond),
 		},
+		EchoAuthentication: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
 		ListLocations:      []gax.CallOption{},
 		GetLocation:        []gax.CallOption{},
 		SetIamPolicy:       []gax.CallOption{},
@@ -219,6 +223,9 @@ func defaultEchoRESTCallOptions() *EchoCallOptions {
 		Block: []gax.CallOption{
 			gax.WithTimeout(5000 * time.Millisecond),
 		},
+		EchoAuthentication: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
 		ListLocations:      []gax.CallOption{},
 		GetLocation:        []gax.CallOption{},
 		SetIamPolicy:       []gax.CallOption{},
@@ -247,6 +254,7 @@ type internalEchoClient interface {
 	Wait(context.Context, *genprotopb.WaitRequest, ...gax.CallOption) (*WaitOperation, error)
 	WaitOperation(name string) *WaitOperation
 	Block(context.Context, *genprotopb.BlockRequest, ...gax.CallOption) (*genprotopb.BlockResponse, error)
+	EchoAuthentication(context.Context, *genprotopb.EchoAuthenticationRequest, ...gax.CallOption) (*genprotopb.EchoAuthenticationResponse, error)
 	ListLocations(context.Context, *locationpb.ListLocationsRequest, ...gax.CallOption) *LocationIterator
 	GetLocation(context.Context, *locationpb.GetLocationRequest, ...gax.CallOption) (*locationpb.Location, error)
 	SetIamPolicy(context.Context, *iampb.SetIamPolicyRequest, ...gax.CallOption) (*iampb.Policy, error)
@@ -382,6 +390,12 @@ func (c *EchoClient) WaitOperation(name string) *WaitOperation {
 // This method showcases how a client handles delays or retries.
 func (c *EchoClient) Block(ctx context.Context, req *genprotopb.BlockRequest, opts ...gax.CallOption) (*genprotopb.BlockResponse, error) {
 	return c.internalClient.Block(ctx, req, opts...)
+}
+
+// EchoAuthentication this method returns authentication details from the incoming request, including things like
+// Authorization headers for clients to verify that the correct headers are being sent.
+func (c *EchoClient) EchoAuthentication(ctx context.Context, req *genprotopb.EchoAuthenticationRequest, opts ...gax.CallOption) (*genprotopb.EchoAuthenticationResponse, error) {
+	return c.internalClient.EchoAuthentication(ctx, req, opts...)
 }
 
 // ListLocations is a utility method from google.cloud.location.Locations.
@@ -904,6 +918,21 @@ func (c *echoGRPCClient) Block(ctx context.Context, req *genprotopb.BlockRequest
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		resp, err = c.echoClient.Block(ctx, req, settings.GRPC...)
+		return err
+	}, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (c *echoGRPCClient) EchoAuthentication(ctx context.Context, req *genprotopb.EchoAuthenticationRequest, opts ...gax.CallOption) (*genprotopb.EchoAuthenticationResponse, error) {
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
+	opts = append((*c.CallOptions).EchoAuthentication[0:len((*c.CallOptions).EchoAuthentication):len((*c.CallOptions).EchoAuthentication)], opts...)
+	var resp *genprotopb.EchoAuthenticationResponse
+	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		var err error
+		resp, err = c.echoClient.EchoAuthentication(ctx, req, settings.GRPC...)
 		return err
 	}, opts...)
 	if err != nil {
@@ -1747,6 +1776,65 @@ func (c *echoRESTClient) Block(ctx context.Context, req *genprotopb.BlockRequest
 	opts = append((*c.CallOptions).Block[0:len((*c.CallOptions).Block):len((*c.CallOptions).Block)], opts...)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	resp := &genprotopb.BlockResponse{}
+	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
+		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
+		if err != nil {
+			return err
+		}
+		httpReq = httpReq.WithContext(ctx)
+		httpReq.Header = headers
+
+		httpRsp, err := c.httpClient.Do(httpReq)
+		if err != nil {
+			return err
+		}
+		defer httpRsp.Body.Close()
+
+		if err = googleapi.CheckResponse(httpRsp); err != nil {
+			return err
+		}
+
+		buf, err := io.ReadAll(httpRsp.Body)
+		if err != nil {
+			return err
+		}
+
+		if err := unm.Unmarshal(buf, resp); err != nil {
+			return err
+		}
+
+		return nil
+	}, opts...)
+	if e != nil {
+		return nil, e
+	}
+	return resp, nil
+}
+
+// EchoAuthentication this method returns authentication details from the incoming request, including things like
+// Authorization headers for clients to verify that the correct headers are being sent.
+func (c *echoRESTClient) EchoAuthentication(ctx context.Context, req *genprotopb.EchoAuthenticationRequest, opts ...gax.CallOption) (*genprotopb.EchoAuthenticationResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
+	baseUrl.Path += fmt.Sprintf("/v1beta1/echo:authentication")
+
+	// Build HTTP headers from client and context metadata.
+	hds := append(c.xGoogHeaders, "Content-Type", "application/json")
+	headers := gax.BuildHeaders(ctx, hds...)
+	opts = append((*c.CallOptions).EchoAuthentication[0:len((*c.CallOptions).EchoAuthentication):len((*c.CallOptions).EchoAuthentication)], opts...)
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	resp := &genprotopb.EchoAuthenticationResponse{}
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		if settings.Path != "" {
 			baseUrl.Path = settings.Path

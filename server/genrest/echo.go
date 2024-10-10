@@ -622,6 +622,80 @@ func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) 
 	w.Write(json)
 }
 
+// HandleEchoAuthentication translates REST requests/responses on the wire to internal proto messages for EchoAuthentication
+//
+//	Generated for HTTP binding pattern: POST "/v1beta1/echo:authentication"
+func (backend *RESTBackend) HandleEchoAuthentication(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/echo:authentication': %q", r.Method, r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
+
+	if numUrlPathParams != 0 {
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
+		return
+	}
+
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
+	request := &genprotopb.EchoAuthenticationRequest{}
+	// Intentional: Field values in the URL path override those set in the body.
+	var jsonReader bytes.Buffer
+	bodyReader := io.TeeReader(r.Body, &jsonReader)
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
+		return
+	}
+
+	if len(queryParams) > 0 {
+		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
+		return
+	}
+	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
+		return
+	}
+
+	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
+	requestJSON, _ := marshaler.Marshal(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
+
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/echo:authentication")
+	response, err := backend.EchoServer.EchoAuthentication(ctx, request)
+	if err != nil {
+		backend.ReportGRPCError(w, err)
+		return
+	}
+
+	json, err := marshaler.Marshal(response)
+	if err != nil {
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
+		return
+	}
+
+	w.Write(json)
+}
+
 // Echo_ExpandServer implements genprotopb.Echo_ExpandServer to provide server-side streaming over REST, returning all the
 // individual responses as part of a long JSON list.
 type Echo_ExpandServer struct {
