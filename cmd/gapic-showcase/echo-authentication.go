@@ -8,10 +8,6 @@ import (
 	"fmt"
 
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
-
-	"github.com/golang/protobuf/jsonpb"
-
-	"os"
 )
 
 var EchoAuthenticationInput genprotopb.EchoAuthenticationRequest
