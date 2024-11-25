@@ -2,7 +2,7 @@ module github.com/googleapis/gapic-showcase
 
 require (
 	cloud.google.com/go/iam v1.2.2
-	cloud.google.com/go/longrunning v0.6.2
+	cloud.google.com/go/longrunning v0.6.3
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/protobuf v1.5.4
 	github.com/google/go-cmp v0.6.0
@@ -16,10 +16,10 @@ require (
 	github.com/spf13/viper v1.19.0
 	golang.org/x/oauth2 v0.24.0
 	golang.org/x/sync v0.9.0
-	google.golang.org/api v0.206.0
-	google.golang.org/genproto v0.0.0-20241113202542-65e8d215514f
-	google.golang.org/genproto/googleapis/api v0.0.0-20241113202542-65e8d215514f
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20241113202542-65e8d215514f
+	google.golang.org/api v0.209.0
+	google.golang.org/genproto v0.0.0-20241118233622-e639e219e697
+	google.golang.org/genproto/googleapis/api v0.0.0-20241118233622-e639e219e697
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20241118233622-e639e219e697
 	google.golang.org/grpc v1.68.0
 	google.golang.org/protobuf v1.35.2
 )
