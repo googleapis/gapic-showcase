@@ -18,9 +18,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/golang/protobuf/proto"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
 )
 
 func TestSessionProto(t *testing.T) {
