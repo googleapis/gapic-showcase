@@ -1,5 +1,12 @@
 # Release History
 
+## [0.35.2](https://github.com/googleapis/gapic-showcase/compare/v0.35.1...v0.35.2) (2024-12-03)
+
+
+### Bug Fixes
+
+* **deps:** Update bazel-contrib/setup-bazel action to v0.9.1 ([#1546](https://github.com/googleapis/gapic-showcase/issues/1546)) ([bc936fb](https://github.com/googleapis/gapic-showcase/commit/bc936fb7c3607853bbc58fcd8f4d0aa7ccbc4a1c))
+
 ## [0.35.1](https://github.com/googleapis/gapic-showcase/compare/v0.35.0...v0.35.1) (2024-07-08)
 
 
