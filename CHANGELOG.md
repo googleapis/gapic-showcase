@@ -1,5 +1,12 @@
 # Release History
 
+## [0.35.3](https://github.com/googleapis/gapic-showcase/compare/v0.35.2...v0.35.3) (2024-12-03)
+
+
+### Bug Fixes
+
+* Downgrade go version to 1.21 ([#1551](https://github.com/googleapis/gapic-showcase/issues/1551)) ([36831cf](https://github.com/googleapis/gapic-showcase/commit/36831cfe255e13e3a5328ad548ddba9c3174434e))
+
 ## [0.35.2](https://github.com/googleapis/gapic-showcase/compare/v0.35.1...v0.35.2) (2024-12-03)
 
 
