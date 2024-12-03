@@ -101,6 +101,8 @@ jobs:
         rm regen.tgz
     - name: Run mod tidy
       run: go mod tidy
+    - name: Build the code
+      run: go build ./...
     - name: Run unit tests
       run: go test ./...
     - name: Run server coverage
