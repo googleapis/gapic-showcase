@@ -23,13 +23,13 @@ import (
 	"time"
 
 	lropb "cloud.google.com/go/longrunning/autogen/longrunningpb"
+	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/proto"
 )
 
 // NewOperationsServer returns a new OperationsServer for the Showcase API.
