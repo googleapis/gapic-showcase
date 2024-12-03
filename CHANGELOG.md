@@ -1,5 +1,12 @@
 # Release History
 
+## [0.35.4](https://github.com/googleapis/gapic-showcase/compare/v0.35.3...v0.35.4) (2024-12-03)
+
+
+### Bug Fixes
+
+* Revert replace use of github.com/golang/protobuf/proto ([#1534](https://github.com/googleapis/gapic-showcase/issues/1534))" ([#1553](https://github.com/googleapis/gapic-showcase/issues/1553)) ([b82e7c5](https://github.com/googleapis/gapic-showcase/commit/b82e7c5d8b63ba11cc21361a4b84d0cb29a59826))
+
 ## [0.35.3](https://github.com/googleapis/gapic-showcase/compare/v0.35.2...v0.35.3) (2024-12-03)
 
 
