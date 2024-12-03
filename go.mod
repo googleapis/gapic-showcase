@@ -20,7 +20,7 @@ require (
 	google.golang.org/genproto v0.0.0-20241118233622-e639e219e697
 	google.golang.org/genproto/googleapis/api v0.0.0-20241118233622-e639e219e697
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241118233622-e639e219e697
-	google.golang.org/grpc v1.68.0
+	google.golang.org/grpc v1.67.1
 	google.golang.org/protobuf v1.35.2
 )
 
@@ -67,4 +67,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-go 1.23
+go 1.21
