@@ -1,7 +1,7 @@
 module github.com/googleapis/gapic-showcase
 
 require (
-	cloud.google.com/go/iam v1.2.2
+	cloud.google.com/go/iam v1.3.0
 	cloud.google.com/go/longrunning v0.6.3
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/protobuf v1.5.4
@@ -15,19 +15,19 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	golang.org/x/oauth2 v0.24.0
-	golang.org/x/sync v0.9.0
-	google.golang.org/api v0.209.0
-	google.golang.org/genproto v0.0.0-20241118233622-e639e219e697
-	google.golang.org/genproto/googleapis/api v0.0.0-20241118233622-e639e219e697
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20241118233622-e639e219e697
+	golang.org/x/sync v0.10.0
+	google.golang.org/api v0.210.0
+	google.golang.org/genproto v0.0.0-20241206012308-a4fef0638583
+	google.golang.org/genproto/googleapis/api v0.0.0-20241206012308-a4fef0638583
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20241206012308-a4fef0638583
 	google.golang.org/grpc v1.67.1
 	google.golang.org/protobuf v1.35.2
 )
 
 require (
 	cloud.google.com/go v0.116.0 // indirect
-	cloud.google.com/go/auth v0.10.2 // indirect
-	cloud.google.com/go/auth/oauth2adapt v0.2.5 // indirect
+	cloud.google.com/go/auth v0.11.0 // indirect
+	cloud.google.com/go/auth/oauth2adapt v0.2.6 // indirect
 	cloud.google.com/go/compute/metadata v0.5.2 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
