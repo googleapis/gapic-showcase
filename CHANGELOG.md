@@ -1,5 +1,12 @@
 # Release History
 
+## [0.35.6](https://github.com/googleapis/gapic-showcase/compare/v0.35.5...v0.35.6) (2024-12-30)
+
+
+### Bug Fixes
+
+* Typos in some proto comments ([#1563](https://github.com/googleapis/gapic-showcase/issues/1563)) ([ae41e96](https://github.com/googleapis/gapic-showcase/commit/ae41e96133b36fa86f8d08c0f839ab9fb12e3e96))
+
 ## [0.35.5](https://github.com/googleapis/gapic-showcase/compare/v0.35.4...v0.35.5) (2024-12-04)
 
 
