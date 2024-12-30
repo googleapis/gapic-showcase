@@ -17,10 +17,10 @@ require (
 	golang.org/x/oauth2 v0.24.0
 	golang.org/x/sync v0.10.0
 	google.golang.org/api v0.214.0
-	google.golang.org/genproto v0.0.0-20241219192143-6b3ec007d9bb
-	google.golang.org/genproto/googleapis/api v0.0.0-20241219192143-6b3ec007d9bb
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20241219192143-6b3ec007d9bb
-	google.golang.org/grpc v1.67.1
+	google.golang.org/genproto v0.0.0-20241223144023-3abc09e42ca8
+	google.golang.org/genproto/googleapis/api v0.0.0-20241223144023-3abc09e42ca8
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20241223144023-3abc09e42ca8
+	google.golang.org/grpc v1.67.3
 	google.golang.org/protobuf v1.36.1
 )
 
