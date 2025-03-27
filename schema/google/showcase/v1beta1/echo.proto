@@ -100,6 +100,14 @@ service Echo {
     };
   }
 
+  rpc FailEchoWithDetails(FailEchoWithDetailsRequest) returns (FailEchoWithDetailsResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:fail-with-details"
+      body: "*"
+    };
+  }
+
+
   // This method splits the given content into words and will pass each word back
   // through the stream. This method showcases server-side streaming RPCs.
   rpc Expand(ExpandRequest) returns (stream EchoResponse) {
@@ -271,6 +279,14 @@ message ErrorWithSingleDetail {
 
 message ErrorWithMultipleDetails {
   repeated google.protobuf.Any details = 1;
+}
+
+message FailEchoWithDetailsRequest {
+  // empty request messages don't ork withthe CLI: https://github.com/googleapis/gapic-generator-go/issues/1616
+  string unused = 1;
+}
+
+message FailEchoWithDetailsResponse {
 }
 
 // The request message for the Expand method.

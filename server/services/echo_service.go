@@ -110,7 +110,7 @@ func (de *DetailedError) GRPCStatus() *status.Status {
 	return de.grpcStatus
 }
 
-func (s *echoServerImpl) FailEchoWithDetails(ctx context.Context, in *pb.EchoErrorDetailsRequest) (*pb.EchoErrorDetailsResponse, error) {
+func (s *echoServerImpl) FailEchoWithDetails(ctx context.Context, in *pb.FailEchoWithDetailsRequest) (*pb.FailEchoWithDetailsResponse, error) {
 	errorInfo := &errdetails.ErrorInfo{
 		Reason: "some reason",
 	}
