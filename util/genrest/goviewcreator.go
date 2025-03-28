@@ -311,18 +311,21 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 	file.P("func (backend *RESTBackend) Error(w http.ResponseWriter, httpStatus int, format string, args ...interface{}) {")
 	file.P("  message := fmt.Sprintf(format, args...)")
-	file.P("  backend.ErrLog.Print(message)")
+	file.P(`  backend.ErrLog.Printf("(RESTBackend) Error(): message = %%s, args = %%#v", message, args)`)
 	file.P("  resttools.ErrorResponse(w, httpStatus, resttools.NoCodeGRPC, message)")
 	file.P("}")
 
 	file.P("func (backend *RESTBackend) ReportGRPCError(w http.ResponseWriter, err error) {")
 	file.P("  st, ok := status.FromError(err)")
 	file.P("  if !ok {")
-	file.P(`  	backend.Error(w, http.StatusInternalServerError, "server error: %%s", err.Error())`)
+	file.P(`    backend.Error(w, http.StatusInternalServerError, "** server error in ReportGRPCError: %%s\n---Error: %%+v\nStatus: %%+v\n", err.Error(), err, st)`)
+	file.P(`    // backend.ErrLog.Print(fmt.Sprintf("server error in ReportGRPCError: %%s\n---Error: %%+v\n-- Status: %%+v", err.Error(), err, st))`)
 	file.P("    return")
 	file.P("  }")
 	file.P("")
 	file.P("  backend.ErrLog.Print(st.Message())")
+	file.P("  code := resttools.GRPCToHTTP(st.Code())")
+	file.P(`  backend.ErrLog.Print(fmt.Sprintf("** ReportGRPCError: server error in ReportGRPCError: %%s\n---Error: %%+v\n-- Status: %%+v\n---Details[0]: %%+v", err.Error(), err, st,st.Details()[0]))`)
 	file.P("  resttools.ErrorResponse(w, resttools.NoCodeHTTP, st.Code(), st.Message(), st.Details()...)")
 	file.P("}")
 
