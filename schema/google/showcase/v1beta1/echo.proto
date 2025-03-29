@@ -281,8 +281,12 @@ message ErrorWithMultipleDetails {
   repeated google.protobuf.Any details = 1;
 }
 
+message PoetryError {
+  string poem = 1;
+}
+
 message FailEchoWithDetailsRequest {
-  // empty request messages don't ork withthe CLI: https://github.com/googleapis/gapic-generator-go/issues/1616
+  // empty request messages don't work with the CLI: https://github.com/googleapis/gapic-generator-go/issues/1616
   string unused = 1;
 }
 
