@@ -45,7 +45,7 @@ func TestErrorResponse(t *testing.T) {
 		},
 	} {
 		got := httptest.NewRecorder()
-		ErrorResponse(got, tst.status, tst.message, tst.details...)
+		ErrorResponse(got, tst.status, NoCodeGRPC, tst.message, tst.details...)
 		if got.Code != tst.status {
 			t.Errorf("%s: Expected %d, but got %d", tst.name, tst.status, got.Code)
 		}
