@@ -15,13 +15,13 @@
 package resttools
 
 import (
-	"errors"
+	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"google.golang.org/api/googleapi"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 )
@@ -32,35 +32,46 @@ func TestErrorResponse(t *testing.T) {
 		details       []interface{}
 		message, name string
 		status        int
+		wantResponse  string
 	}{
 		{
-			name:    "internal_server",
-			message: "Had an issue",
-			status:  http.StatusInternalServerError,
-			details: []interface{}{&errdetails.ErrorInfo{Reason: "foo"}},
+			name:         "internal_server",
+			message:      "Had an issue",
+			status:       http.StatusInternalServerError,
+			details:      []interface{}{&errdetails.ErrorInfo{Reason: "foo"}},
+			wantResponse: `{"error":{"code":500, "message":"Had an issue", "status":"INTERNAL", "details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo", "reason":"foo"}]}}`,
 		},
 		{
-			name:    "bad_request",
-			message: "The request was bad",
-			status:  http.StatusBadRequest,
+			name:         "bad_request",
+			message:      "The request was bad",
+			status:       http.StatusBadRequest,
+			wantResponse: `{"error":{"code":400, "message":"The request was bad", "status":"INVALID_ARGUMENT"}}`,
 		},
 	} {
 		got := httptest.NewRecorder()
 		ErrorResponse(got, tst.status, NoCodeGRPC, tst.message, tst.details...)
 		if got.Code != tst.status {
-			t.Errorf("%s: Expected %d, but got %d", tst.name, tst.status, got.Code)
+			t.Errorf("%s: Expected code %d, but got %d", tst.name, tst.status, got.Code)
 		}
-		err := googleapi.CheckResponse(got.Result())
-		var gerr *googleapi.Error
-		if !errors.As(err, &gerr) {
-			t.Fatalf("%s: Expected response to be a googleapi.Error, but got %v", tst.name, err)
+		gotResponse, err := io.ReadAll(got.Result().Body)
+		if err != nil {
+			t.Fatalf("%s: Error reading response body: %+v", tst.name, err)
+		}
+		var gotJSON interface{}
+		err = json.Unmarshal([]byte(gotResponse), &gotJSON)
+		if err != nil {
+			t.Fatalf("%s: Error parsing actual response body as JSON: %+v", tst.name, err)
 		}
 
-		if diff := cmp.Diff(gerr.Message, tst.message); diff != "" {
-			t.Errorf("%s: got(-),want(+):%s\n", tst.name, diff)
+		var wantJSON interface{}
+		err = json.Unmarshal([]byte(tst.wantResponse), &wantJSON)
+		if err != nil {
+			t.Fatalf("%s: Error parsing expected response body as JSON: %+v", tst.name, err)
 		}
-		if diff := cmp.Diff(gerr.Details, tst.details); diff != "" {
-			// FIXME	t.Errorf("%s: got(-),want(+):%s\n", tst.name, diff)
+
+		if diff := cmp.Diff(gotJSON, wantJSON); diff != "" {
+			t.Errorf("%s: error body: got(-),want(+):%s\n\n---------- Raw JSON: got\n%s\n---------- Raw JSON: want\n%s",
+				tst.name, diff, gotResponse, tst.wantResponse)
 		}
 	}
 }
