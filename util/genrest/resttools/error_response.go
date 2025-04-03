@@ -15,13 +15,17 @@
 package resttools
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
+	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/iancoleman/strcase"
 	"google.golang.org/api/googleapi"
+	code "google.golang.org/genproto/googleapis/rpc/code"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
+	anypb "google.golang.org/protobuf/types/known/anypb"
 )
 
 // gRPCToHTTP is the status code mapping derived from internal source:
@@ -150,12 +154,30 @@ func ErrorResponse(w http.ResponseWriter, httpResponseCode int, grpcStatus codes
 			Code:    httpResponseCode,
 			Message: message,
 			Status:  strcase.ToScreamingSnake(grpcStatus.String()),
-			Details: details,
 		},
 	}
 
+	jsonError := &pb.RestError{
+		Error: &pb.RestError_Status{
+			Code:    int32(httpResponseCode),
+			Message: message,
+			Status:  code.Code(grpcStatus),
+		},
+	}
+
+	for _, oneDetail := range details {
+		detailAsAny, err := anypb.New(oneDetail.(proto.Message))
+		if err != nil {
+			WriteShowcaseRESTImplementationError(w, fmt.Sprintf("could not interpret error detail as a protobuf Any: %+v", oneDetail))
+			return
+		}
+		jsonError.Error.Details = append(jsonError.Error.Details, detailAsAny)
+
+		jsonErrorBody.Error.Details = append(jsonErrorBody.Error.Details, detailAsAny)
+	}
+
 	w.WriteHeader(httpResponseCode)
-	data, _ := json.Marshal(jsonErrorBody)
+	data, _ := protojson.Marshal(jsonError)
 	w.Write(data)
 }
 
