@@ -108,7 +108,7 @@ type JSONErrorInternals struct {
 	// https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto.
 	Status string `json:"status"`
 	// This corresponds to `google.rpc.Status.details`.
-	Details []any `json:"details"`
+	Details []any `json:"details,omitempty"`
 }
 
 type JSONErrorResponseBody struct {
