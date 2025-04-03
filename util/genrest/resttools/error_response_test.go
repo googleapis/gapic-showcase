@@ -47,6 +47,24 @@ func TestErrorResponse(t *testing.T) {
 			status:       http.StatusBadRequest,
 			wantResponse: `{"error":{"code":400, "message":"The request was bad", "status":"INVALID_ARGUMENT"}}`,
 		},
+		{
+			name:    "multiple_issues",
+			message: "Had multiple issues",
+			status:  http.StatusInternalServerError,
+			details: []interface{}{
+				&errdetails.ErrorInfo{Reason: "foo"},
+				&errdetails.BadRequest{
+					FieldViolations: []*errdetails.BadRequest_FieldViolation{
+						{
+							Field:       "an offending field",
+							Description: "a description",
+							Reason:      "a reason",
+						},
+					},
+				},
+			},
+			wantResponse: `{"error":{"code":500, "message":"Had multiple issues", "status":"INTERNAL", "details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo", "reason":"foo"}, {"@type":"type.googleapis.com/google.rpc.BadRequest", "fieldViolations":[{"field":"an offending field", "description":"a description", "reason":"a reason"}]}]}}`,
+		},
 	} {
 		got := httptest.NewRecorder()
 		ErrorResponse(got, tst.status, NoCodeGRPC, tst.message, tst.details...)
