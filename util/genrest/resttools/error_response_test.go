@@ -139,7 +139,7 @@ func TestErrorResponseFromGRPC(t *testing.T) {
 		},
 	} {
 		got := httptest.NewRecorder()
-		ErrorResponse(got, CalculateCodeHTTP, tst.grpcCode, tst.message, tst.details...)
+		ErrorResponse(got, NoCodeHTTP, tst.grpcCode, tst.message, tst.details...)
 		if got.Code != tst.wantHTTPStatus {
 			t.Errorf("%s: Expected code %d, but got %d", tst.name, tst.wantHTTPStatus, got.Code)
 		}

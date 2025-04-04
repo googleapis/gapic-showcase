@@ -323,7 +323,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	file.P("  }")
 	file.P("")
 	file.P("  backend.ErrLog.Print(st.Message())")
-	file.P("  resttools.ErrorResponse(w, resttools.CalculateCodeHTTP, st.Code(), st.Message(), st.Details()...)")
+	file.P("  resttools.ErrorResponse(w, resttools.NoCodeHTTP, st.Code(), st.Message(), st.Details()...)")
 	file.P("}")
 
 	return view, nil
