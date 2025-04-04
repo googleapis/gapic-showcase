@@ -52,8 +52,6 @@ var gRPCToHTTP map[codes.Code]int = map[codes.Code]int{
 // canonical mapping also specifies codes for some HTTP status ranges, so it is imperative to use
 // HTTPToGRPC()
 var httpToGRPC = map[int]codes.Code{
-	http.StatusOK:                           codes.OK,
-	http.StatusMultipleChoices:              codes.Unknown,
 	http.StatusBadRequest:                   codes.InvalidArgument,
 	http.StatusUnauthorized:                 codes.Unauthenticated,
 	http.StatusForbidden:                    codes.PermissionDenied,
@@ -61,6 +59,7 @@ var httpToGRPC = map[int]codes.Code{
 	http.StatusConflict:                     codes.Aborted,
 	http.StatusRequestedRangeNotSatisfiable: codes.OutOfRange,
 	http.StatusTooManyRequests:              codes.ResourceExhausted,
+	499:                                     codes.Canceled, // There isn't a Go constant ClientClosedConnection
 	http.StatusNotImplemented:               codes.Unimplemented,
 	http.StatusServiceUnavailable:           codes.Unavailable,
 	http.StatusGatewayTimeout:               codes.DeadlineExceeded,

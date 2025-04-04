@@ -177,7 +177,29 @@ func TestGRPCToHTTP(t *testing.T) {
 		},
 	} {
 		if got := GRPCToHTTP(tst.code); got != tst.want {
-			t.Errorf("got %d, but expected %d", got, tst.want)
+			t.Errorf("converting %s: got %d, but expected %d", tst.code, got, tst.want)
+		}
+	}
+}
+
+func TestHTTPToGRPC(t *testing.T) {
+	// This test focuses on the ranges of HTTP codes that map to a single gRPC status, as per go/http-canonical-mapping.
+	for _, tst := range []struct {
+		code int
+		want codes.Code
+	}{
+		{200, codes.OK},
+		{299, codes.OK},
+		{350, codes.Unknown},
+		{403, codes.PermissionDenied},
+		{499, codes.Canceled},
+		{498, codes.FailedPrecondition},
+		{503, codes.Unavailable},
+		{599, codes.Internal},
+		{149, codes.Unknown},
+	} {
+		if got := HTTPToGRPC(tst.code); got != tst.want {
+			t.Errorf("converting %d: got %d, but expected %d", tst.code, got, tst.want)
 		}
 	}
 }
