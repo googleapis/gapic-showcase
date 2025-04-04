@@ -27,10 +27,10 @@ jobs:
       run: git submodule init && git submodule update
     - name: Download go deps
       run: go mod download
-    - name: Regenerate sources
-      run: go run ./util/cmd/compile_protos
     - name: Install REST server generator
       run: go install ./util/cmd/protoc-gen-go_rest_server
+    - name: Regenerate sources
+      run: go run ./util/cmd/compile_protos
     - name: Capture modified files
       id: mod
       run: |

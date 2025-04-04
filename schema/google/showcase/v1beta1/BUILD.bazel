@@ -28,7 +28,7 @@ exports_files(glob(["*.json"]) + glob(["*.yaml"]))
 #
 proto_library(
   name = "showcase_proto",
-  srcs = [":compliance.proto", ":echo.proto", ":identity.proto", ":messaging.proto", ":sequence.proto", ":testing.proto" ],
+  srcs = [":compliance.proto", ":echo.proto", ":identity.proto", ":messaging.proto", ":rest_error.proto", ":sequence.proto", ":testing.proto" ],
   deps = [
     "@com_google_googleapis//google/api:annotations_proto",
     "@com_google_googleapis//google/api:client_proto",
