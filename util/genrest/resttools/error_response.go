@@ -102,25 +102,31 @@ func HTTPToGRPC(httpStatus int) codes.Code {
 // Constants to make it obvious when we're not supplying either a gRPC or HTTP status code to
 // ErrorResponse(). The code we're not supplying will be obtained from the one we do supply.
 const (
+	// NoCodeGRPC is an explicit indication when calling ErrorResponse() that we don't know the
+	// gRPC status code and it must be derived from the HTTP response code.
 	NoCodeGRPC codes.Code = 9999
-	NoCodeHTTP int        = -1
+
+	// NoCodeHTTP is an explicit indication when calling ErrorResponse() that we don't know the
+	// HTTP response code and it must be derived from the gRPC status code.
+	NoCodeHTTP int = -1
 )
 
 // ErrorResponse is a helper that formats the given response information, including the HTTP or gRPC
 // status code, a message, and any error detail types, into a RestError proto message and writes the
 // response as JSON.
 func ErrorResponse(w http.ResponseWriter, httpResponseCode int, grpcStatus codes.Code, message string, details ...interface{}) {
+	if httpResponseCode == NoCodeHTTP && grpcStatus == NoCodeGRPC {
+		WriteShowcaseRESTImplementationError(w, "neither HTTP code or gRPC status are provided for ErrorResponse. Exactly one must be provided.")
+		return
+	}
+	if httpResponseCode != NoCodeHTTP && grpcStatus != NoCodeGRPC {
+		WriteShowcaseRESTImplementationError(w, "both HTTP code and gRPC status are provided for ErrorResponse. Exactly one must be provided.")
+		return
+	}
+
 	if httpResponseCode == NoCodeHTTP {
-		if grpcStatus == NoCodeGRPC {
-			WriteShowcaseRESTImplementationError(w, "neither HTTP code or gRPC status are provided for ErrorResponse. Exactly one must be provided.")
-			return
-		}
 		httpResponseCode = GRPCToHTTP(grpcStatus)
 	} else {
-		if grpcStatus != NoCodeGRPC {
-			WriteShowcaseRESTImplementationError(w, "both HTTP code and gRPC status are provided for ErrorResponse. Exactly one must be provided.")
-			return
-		}
 		grpcStatus = HTTPToGRPC(httpResponseCode)
 	}
 
