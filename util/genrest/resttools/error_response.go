@@ -50,7 +50,7 @@ var gRPCToHTTP map[codes.Code]int = map[codes.Code]int{
 // httpToGRPC is the status code mapping derived from the internal source go/http-canonical-mapping.
 // This is not merely the inverse of gRPCToHTTP (which, at any rate, is not injective). The
 // canonical mapping also specifies codes for some HTTP status ranges, so it is imperative to use
-// HTTPToGRPC()
+// HTTPToGRPC().
 var httpToGRPC = map[int]codes.Code{
 	http.StatusBadRequest:                   codes.InvalidArgument,
 	http.StatusUnauthorized:                 codes.Unauthenticated,
@@ -106,9 +106,9 @@ const (
 	NoCodeHTTP int        = -1
 )
 
-// ErrorResponse is a helper that formats the given response information,
-// including the HTTP Status code, a message, and any error detail types, into
-// a googleAPIError and writes the response as JSON.
+// ErrorResponse is a helper that formats the given response information, including the HTTP or gRPC
+// status code, a message, and any error detail types, into a RestError proto message and writes the
+// response as JSON.
 func ErrorResponse(w http.ResponseWriter, httpResponseCode int, grpcStatus codes.Code, message string, details ...interface{}) {
 	if httpResponseCode == NoCodeHTTP {
 		if grpcStatus == NoCodeGRPC {
