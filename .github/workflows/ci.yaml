@@ -172,6 +172,7 @@ jobs:
         node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/echo.proto');"
         node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/identity.proto');"
         node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/messaging.proto');"
+        node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/rest_error.proto');"
         node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/testing.proto');"
         node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/compliance.proto');"
         node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/sequence.proto');"

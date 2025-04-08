@@ -312,7 +312,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	file.P("func (backend *RESTBackend) Error(w http.ResponseWriter, httpStatus int, format string, args ...interface{}) {")
 	file.P("  message := fmt.Sprintf(format, args...)")
 	file.P("  backend.ErrLog.Print(message)")
-	file.P("  resttools.ErrorResponse(w, httpStatus, message)")
+	file.P("  resttools.ErrorResponse(w, httpStatus, resttools.NoCodeGRPC, message)")
 	file.P("}")
 
 	file.P("func (backend *RESTBackend) ReportGRPCError(w http.ResponseWriter, err error) {")
@@ -323,8 +323,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	file.P("  }")
 	file.P("")
 	file.P("  backend.ErrLog.Print(st.Message())")
-	file.P("  code := resttools.GRPCToHTTP(st.Code())")
-	file.P("  resttools.ErrorResponse(w, code, st.Message(), st.Details()...)")
+	file.P("  resttools.ErrorResponse(w, resttools.NoCodeHTTP, st.Code(), st.Message(), st.Details()...)")
 	file.P("}")
 
 	return view, nil
