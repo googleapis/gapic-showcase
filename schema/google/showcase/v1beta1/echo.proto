@@ -295,14 +295,14 @@ message PoetryError {
 
 // The request message used for the FailEchoWithDetails method.
 message FailEchoWithDetailsRequest {
-  // Optional message, since we had to include a field in here anyways, as empty request messages don't work with the CLI: https://github.com/googleapis/gapic-generator-go/issues/1616
+  // Optional message to echo back in the PoetryError. If empty, a value will be
+  // provided.
   string message = 1;
 }
 
 // The response message declared (but never used) for the FailEchoWithDetails
 // method.
-message FailEchoWithDetailsResponse {
-}
+message FailEchoWithDetailsResponse {}
 
 // The request message for the Expand method.
 message ExpandRequest {

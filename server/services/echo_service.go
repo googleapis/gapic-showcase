@@ -126,8 +126,8 @@ func (s *echoServerImpl) FailEchoWithDetails(ctx context.Context, in *pb.FailEch
 		Message: "This LocalizedMessage should be treated specially",
 	}
 
-	poem := in.Message
-	if len(poem) == 0 {
+	poem := in.GetMessage()
+	if poem == "" {
 		poem = "roses are red"
 	}
 	detailPoetry := &pb.PoetryError{
