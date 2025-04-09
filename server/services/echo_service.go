@@ -123,7 +123,7 @@ func (s *echoServerImpl) FailEchoWithDetails(ctx context.Context, in *pb.FailEch
 
 	detailLocalized := &errdetails.LocalizedMessage{
 		Locale:  "fr-CH",
-		Message: "This LocalizedMessage be treated specially",
+		Message: "This LocalizedMessage should be treated specially",
 	}
 
 	detailPoetry := &pb.PoetryError{
