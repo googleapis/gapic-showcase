@@ -126,8 +126,12 @@ func (s *echoServerImpl) FailEchoWithDetails(ctx context.Context, in *pb.FailEch
 		Message: "This LocalizedMessage should be treated specially",
 	}
 
+	poem := in.Message
+	if len(poem) == 0 {
+		poem = "roses are red"
+	}
 	detailPoetry := &pb.PoetryError{
-		Poem: "roses are red",
+		Poem: poem,
 	}
 
 	duration, _ := time.ParseDuration("11s")
