@@ -108,6 +108,9 @@ func (de DetailedError) Error() string {
 	return fmt.Sprintf("DetailedError.Error(): %d: %s [(%d details)]", de.grpcStatus.Code(), de.grpcStatus.Message(), len(de.grpcStatus.Details()))
 }
 
+// GRPCStatus returns the gRPC status associated with the given
+// DetailedError as a way of satisfying the interface defined in
+// https://pkg.go.dev/google.golang.org/grpc/status#FromError
 func (de *DetailedError) GRPCStatus() *status.Status {
 	return de.grpcStatus
 }
