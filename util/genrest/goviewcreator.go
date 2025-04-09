@@ -318,7 +318,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	file.P("func (backend *RESTBackend) ReportGRPCError(w http.ResponseWriter, err error) {")
 	file.P("  st, ok := status.FromError(err)")
 	file.P("  if !ok {")
-	file.P(`    backend.Error(w, http.StatusInternalServerError, "** server error in ReportGRPCError: %%s\n---Error: %%+v\nStatus: %%+v\n", err.Error(), err, st)`)
+	file.P(`    backend.Error(w, http.StatusInternalServerError, "server error: %%s", err.Error())`)
 	// TODO(https://github.com/googleapis/gapic-showcase/issues/1575): Report internal errors as standard gRPC errors
 	file.P("    return")
 	file.P("  }")

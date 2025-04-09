@@ -100,13 +100,15 @@ service Echo {
     };
   }
 
+  // This method always fails with a gRPC error status that contains a series of
+  // error details: the standard ones in error_details.proto plus a custom,
+  // Showcase-defined PoetryError.
   rpc FailEchoWithDetails(FailEchoWithDetailsRequest) returns (FailEchoWithDetailsResponse) {
     option (google.api.http) = {
       post: "/v1beta1/echo:fail-with-details"
       body: "*"
     };
   }
-
 
   // This method splits the given content into words and will pass each word back
   // through the stream. This method showcases server-side streaming RPCs.
@@ -281,15 +283,20 @@ message ErrorWithMultipleDetails {
   repeated google.protobuf.Any details = 1;
 }
 
+// The custom error detail to be included in the error response from the
+// FailEchoWithDetails method.
 message PoetryError {
   string poem = 1;
 }
 
+// The request message used for the FailEchoWithDetails method.
 message FailEchoWithDetailsRequest {
   // empty request messages don't work with the CLI: https://github.com/googleapis/gapic-generator-go/issues/1616
   string unused = 1;
 }
 
+// The response message declared (but never used) for the FailEchoWithDetails
+// method.
 message FailEchoWithDetailsResponse {
 }
 
