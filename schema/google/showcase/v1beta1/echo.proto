@@ -100,9 +100,9 @@ service Echo {
     };
   }
 
-  // This method always fails with a gRPC error status that contains multiple
-  // error details.  These include one instance of each of the standard ones in
-  // error_details.proto
+  // This method always fails with a gRPC "Aborted" error status that contains
+  // multiple error details.  These include one instance of each of the standard
+  // ones in error_details.proto
   // (https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto)
   // plus a custom, Showcase-defined PoetryError. The intent of this RPC is to
   // verify that GAPICs can process these various error details and surface them
