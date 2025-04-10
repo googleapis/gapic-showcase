@@ -524,6 +524,72 @@ func TestEchoErrorDetails_multiple(t *testing.T) {
 	}
 }
 
+func TestFailEchoWithDetails(t *testing.T) {
+	// We only check that all RPC calls to FailEchoWithDetails
+	// return the expected sequence of error detail types. We
+	// don't check the contents of the messages, except for the
+	// PoetryError detail.
+	expectedDetailTypes := []reflect.Type{
+		reflect.TypeOf((*errdetails.ErrorInfo)(nil)),
+		reflect.TypeOf((*errdetails.LocalizedMessage)(nil)),
+		reflect.TypeOf((*pb.PoetryError)(nil)),
+		reflect.TypeOf((*errdetails.RetryInfo)(nil)),
+		reflect.TypeOf((*errdetails.DebugInfo)(nil)),
+		reflect.TypeOf((*errdetails.QuotaFailure)(nil)),
+		reflect.TypeOf((*errdetails.PreconditionFailure)(nil)),
+		reflect.TypeOf((*errdetails.BadRequest)(nil)),
+		reflect.TypeOf((*errdetails.RequestInfo)(nil)),
+		reflect.TypeOf((*errdetails.ResourceInfo)(nil)),
+		reflect.TypeOf((*errdetails.Help)(nil)),
+	}
+
+	tests := []struct{ message string }{
+		{""}, // error response will have a default value
+		{"two paths diverged in a wood"},
+	}
+
+	server := NewEchoServer()
+	for testIdx, oneTest := range tests {
+		request := &pb.FailEchoWithDetailsRequest{}
+		if oneTest.message != "" {
+			request.Message = oneTest.message
+		}
+		response, err := server.FailEchoWithDetails(context.Background(), request)
+		if err == nil {
+			t.Errorf("[%d] expected error upon calling FailEchoWithDetails. Response was: %+v", testIdx, response)
+		}
+		status, _ := status.FromError(err)
+		if got, want := status.Code(), codes.Aborted; got != want {
+			t.Errorf("[%d] unexpected gRPC code: want %v, got %v", testIdx, want, got)
+		}
+		for detailIdx, oneDetail := range status.Details() {
+			if got, want := reflect.TypeOf(oneDetail), expectedDetailTypes[detailIdx]; got != want {
+				t.Errorf("[%d:%d] want detail of type %v, got %v", testIdx, detailIdx, want, got)
+			}
+
+			// In what follows, we check the internals of PoetryError.
+
+			if detailIdx != 2 {
+				continue
+			}
+
+			poetryError, ok := oneDetail.(*pb.PoetryError)
+			if !ok {
+				t.Fatalf("[%d:%d] could not convert detail to a PoetryError", testIdx, detailIdx)
+				continue
+			}
+
+			wantPoem := "roses are red"
+			if oneTest.message != "" {
+				wantPoem = oneTest.message
+			}
+			if got, want := poetryError.Poem, wantPoem; got != want {
+				t.Errorf("[%d:%d] PoetryError.poem: want %q, got %q", testIdx, detailIdx, want, got)
+			}
+		}
+	}
+}
+
 type errorChatStream struct {
 	err error
 	pb.Echo_ChatServer
