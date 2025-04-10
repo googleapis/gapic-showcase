@@ -562,7 +562,11 @@ func TestFailEchoWithDetails(t *testing.T) {
 		if got, want := status.Code(), codes.Aborted; got != want {
 			t.Errorf("[%d] unexpected gRPC code: want %v, got %v", testIdx, want, got)
 		}
-		for detailIdx, oneDetail := range status.Details() {
+		allDetails := status.Details()
+		if got, want := len(allDetails), len(expectedDetailTypes); got != want {
+			t.Errorf("[%d] detail list length: : want %v, got %v", testIdx, want, got)
+		}
+		for detailIdx, oneDetail := range allDetails {
 			if got, want := reflect.TypeOf(oneDetail), expectedDetailTypes[detailIdx]; got != want {
 				t.Errorf("[%d:%d] want detail of type %v, got %v", testIdx, detailIdx, want, got)
 			}
