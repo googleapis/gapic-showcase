@@ -1,5 +1,18 @@
 # Release History
 
+## [0.36.0](https://github.com/googleapis/gapic-showcase/compare/v0.35.5...v0.36.0) (2025-04-10)
+
+
+### Features
+
+* Add Echo.FailEchoWithDetails RPC that always fails with all standard and one custom error detail ([#1576](https://github.com/googleapis/gapic-showcase/issues/1576)) ([709b57d](https://github.com/googleapis/gapic-showcase/commit/709b57d724327abe091965c54f402042155aa178))
+
+
+### Bug Fixes
+
+* Return AIP/193-compliant errors over rest transport ([#1573](https://github.com/googleapis/gapic-showcase/issues/1573)) ([d47045b](https://github.com/googleapis/gapic-showcase/commit/d47045be1ee31f373d5a6ded287cbc9c5b9b605a))
+* Typos in some proto comments ([#1563](https://github.com/googleapis/gapic-showcase/issues/1563)) ([ae41e96](https://github.com/googleapis/gapic-showcase/commit/ae41e96133b36fa86f8d08c0f839ab9fb12e3e96))
+
 ## [0.35.5](https://github.com/googleapis/gapic-showcase/compare/v0.35.4...v0.35.5) (2024-12-04)
 
 
