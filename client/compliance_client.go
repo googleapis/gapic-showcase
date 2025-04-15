@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
+	"log/slog"
 	"math"
 	"net/http"
 	"net/url"
@@ -29,7 +29,6 @@ import (
 	longrunningpb "cloud.google.com/go/longrunning/autogen/longrunningpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	gax "github.com/googleapis/gax-go/v2"
-	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	"google.golang.org/api/option/internaloption"
@@ -239,7 +238,7 @@ func (c *ComplianceClient) RepeatDataBodyPatch(ctx context.Context, req *genprot
 }
 
 // GetEnum this method requests an enum value from the server. Depending on the contents of EnumRequest, the enum value returned will be a known enum declared in the
-// .proto file, or a made-up enum value the is unknown to the client. To verify that clients can round-trip unknown enum vaues they receive, use the
+// .proto file, or a made-up enum value the is unknown to the client. To verify that clients can round-trip unknown enum values they receive, use the
 // response from this RPC as the request to VerifyEnum()
 //
 // The values of enums sent by the server when a known or unknown value is requested will be the same within a single Showcase server run (this is needed for
@@ -324,6 +323,8 @@ type complianceGRPCClient struct {
 
 	// The x-goog-* metadata to be sent with each request.
 	xGoogHeaders []string
+
+	logger *slog.Logger
 }
 
 // NewComplianceClient creates a new compliance client based on gRPC.
@@ -352,6 +353,7 @@ func NewComplianceClient(ctx context.Context, opts ...option.ClientOption) (*Com
 		connPool:         connPool,
 		complianceClient: genprotopb.NewComplianceClient(connPool),
 		CallOptions:      &client.CallOptions,
+		logger:           internaloption.GetLogger(opts),
 		operationsClient: longrunningpb.NewOperationsClient(connPool),
 		iamPolicyClient:  iampb.NewIAMPolicyClient(connPool),
 		locationsClient:  locationpb.NewLocationsClient(connPool),
@@ -401,6 +403,8 @@ type complianceRESTClient struct {
 
 	// Points back to the CallOptions field of the containing ComplianceClient
 	CallOptions **ComplianceCallOptions
+
+	logger *slog.Logger
 }
 
 // NewComplianceRESTClient creates a new compliance rest client.
@@ -420,6 +424,7 @@ func NewComplianceRESTClient(ctx context.Context, opts ...option.ClientOption) (
 		endpoint:    endpoint,
 		httpClient:  httpClient,
 		CallOptions: &callOpts,
+		logger:      internaloption.GetLogger(opts),
 	}
 	c.setGoogleClientInfo()
 
@@ -469,7 +474,7 @@ func (c *complianceGRPCClient) RepeatDataBody(ctx context.Context, req *genproto
 	var resp *genprotopb.RepeatResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.complianceClient.RepeatDataBody(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.complianceClient.RepeatDataBody, req, settings.GRPC, c.logger, "RepeatDataBody")
 		return err
 	}, opts...)
 	if err != nil {
@@ -484,7 +489,7 @@ func (c *complianceGRPCClient) RepeatDataBodyInfo(ctx context.Context, req *genp
 	var resp *genprotopb.RepeatResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.complianceClient.RepeatDataBodyInfo(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.complianceClient.RepeatDataBodyInfo, req, settings.GRPC, c.logger, "RepeatDataBodyInfo")
 		return err
 	}, opts...)
 	if err != nil {
@@ -499,7 +504,7 @@ func (c *complianceGRPCClient) RepeatDataQuery(ctx context.Context, req *genprot
 	var resp *genprotopb.RepeatResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.complianceClient.RepeatDataQuery(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.complianceClient.RepeatDataQuery, req, settings.GRPC, c.logger, "RepeatDataQuery")
 		return err
 	}, opts...)
 	if err != nil {
@@ -517,7 +522,7 @@ func (c *complianceGRPCClient) RepeatDataSimplePath(ctx context.Context, req *ge
 	var resp *genprotopb.RepeatResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.complianceClient.RepeatDataSimplePath(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.complianceClient.RepeatDataSimplePath, req, settings.GRPC, c.logger, "RepeatDataSimplePath")
 		return err
 	}, opts...)
 	if err != nil {
@@ -535,7 +540,7 @@ func (c *complianceGRPCClient) RepeatDataPathResource(ctx context.Context, req *
 	var resp *genprotopb.RepeatResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.complianceClient.RepeatDataPathResource(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.complianceClient.RepeatDataPathResource, req, settings.GRPC, c.logger, "RepeatDataPathResource")
 		return err
 	}, opts...)
 	if err != nil {
@@ -553,7 +558,7 @@ func (c *complianceGRPCClient) RepeatDataPathTrailingResource(ctx context.Contex
 	var resp *genprotopb.RepeatResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.complianceClient.RepeatDataPathTrailingResource(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.complianceClient.RepeatDataPathTrailingResource, req, settings.GRPC, c.logger, "RepeatDataPathTrailingResource")
 		return err
 	}, opts...)
 	if err != nil {
@@ -568,7 +573,7 @@ func (c *complianceGRPCClient) RepeatDataBodyPut(ctx context.Context, req *genpr
 	var resp *genprotopb.RepeatResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.complianceClient.RepeatDataBodyPut(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.complianceClient.RepeatDataBodyPut, req, settings.GRPC, c.logger, "RepeatDataBodyPut")
 		return err
 	}, opts...)
 	if err != nil {
@@ -583,7 +588,7 @@ func (c *complianceGRPCClient) RepeatDataBodyPatch(ctx context.Context, req *gen
 	var resp *genprotopb.RepeatResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.complianceClient.RepeatDataBodyPatch(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.complianceClient.RepeatDataBodyPatch, req, settings.GRPC, c.logger, "RepeatDataBodyPatch")
 		return err
 	}, opts...)
 	if err != nil {
@@ -598,7 +603,7 @@ func (c *complianceGRPCClient) GetEnum(ctx context.Context, req *genprotopb.Enum
 	var resp *genprotopb.EnumResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.complianceClient.GetEnum(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.complianceClient.GetEnum, req, settings.GRPC, c.logger, "GetEnum")
 		return err
 	}, opts...)
 	if err != nil {
@@ -613,7 +618,7 @@ func (c *complianceGRPCClient) VerifyEnum(ctx context.Context, req *genprotopb.E
 	var resp *genprotopb.EnumResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.complianceClient.VerifyEnum(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.complianceClient.VerifyEnum, req, settings.GRPC, c.logger, "VerifyEnum")
 		return err
 	}, opts...)
 	if err != nil {
@@ -642,7 +647,7 @@ func (c *complianceGRPCClient) ListLocations(ctx context.Context, req *locationp
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			var err error
-			resp, err = c.locationsClient.ListLocations(ctx, req, settings.GRPC...)
+			resp, err = executeRPC(ctx, c.locationsClient.ListLocations, req, settings.GRPC, c.logger, "ListLocations")
 			return err
 		}, opts...)
 		if err != nil {
@@ -677,7 +682,7 @@ func (c *complianceGRPCClient) GetLocation(ctx context.Context, req *locationpb.
 	var resp *locationpb.Location
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.locationsClient.GetLocation(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.locationsClient.GetLocation, req, settings.GRPC, c.logger, "GetLocation")
 		return err
 	}, opts...)
 	if err != nil {
@@ -695,7 +700,7 @@ func (c *complianceGRPCClient) SetIamPolicy(ctx context.Context, req *iampb.SetI
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.iamPolicyClient.SetIamPolicy(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.iamPolicyClient.SetIamPolicy, req, settings.GRPC, c.logger, "SetIamPolicy")
 		return err
 	}, opts...)
 	if err != nil {
@@ -713,7 +718,7 @@ func (c *complianceGRPCClient) GetIamPolicy(ctx context.Context, req *iampb.GetI
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.iamPolicyClient.GetIamPolicy(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.iamPolicyClient.GetIamPolicy, req, settings.GRPC, c.logger, "GetIamPolicy")
 		return err
 	}, opts...)
 	if err != nil {
@@ -731,7 +736,7 @@ func (c *complianceGRPCClient) TestIamPermissions(ctx context.Context, req *iamp
 	var resp *iampb.TestIamPermissionsResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.iamPolicyClient.TestIamPermissions(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.iamPolicyClient.TestIamPermissions, req, settings.GRPC, c.logger, "TestIamPermissions")
 		return err
 	}, opts...)
 	if err != nil {
@@ -757,7 +762,7 @@ func (c *complianceGRPCClient) ListOperations(ctx context.Context, req *longrunn
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			var err error
-			resp, err = c.operationsClient.ListOperations(ctx, req, settings.GRPC...)
+			resp, err = executeRPC(ctx, c.operationsClient.ListOperations, req, settings.GRPC, c.logger, "ListOperations")
 			return err
 		}, opts...)
 		if err != nil {
@@ -792,7 +797,7 @@ func (c *complianceGRPCClient) GetOperation(ctx context.Context, req *longrunnin
 	var resp *longrunningpb.Operation
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.operationsClient.GetOperation(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.operationsClient.GetOperation, req, settings.GRPC, c.logger, "GetOperation")
 		return err
 	}, opts...)
 	if err != nil {
@@ -809,7 +814,7 @@ func (c *complianceGRPCClient) DeleteOperation(ctx context.Context, req *longrun
 	opts = append((*c.CallOptions).DeleteOperation[0:len((*c.CallOptions).DeleteOperation):len((*c.CallOptions).DeleteOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		_, err = c.operationsClient.DeleteOperation(ctx, req, settings.GRPC...)
+		_, err = executeRPC(ctx, c.operationsClient.DeleteOperation, req, settings.GRPC, c.logger, "DeleteOperation")
 		return err
 	}, opts...)
 	return err
@@ -823,7 +828,7 @@ func (c *complianceGRPCClient) CancelOperation(ctx context.Context, req *longrun
 	opts = append((*c.CallOptions).CancelOperation[0:len((*c.CallOptions).CancelOperation):len((*c.CallOptions).CancelOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		_, err = c.operationsClient.CancelOperation(ctx, req, settings.GRPC...)
+		_, err = executeRPC(ctx, c.operationsClient.CancelOperation, req, settings.GRPC, c.logger, "CancelOperation")
 		return err
 	}, opts...)
 	return err
@@ -861,17 +866,7 @@ func (c *complianceRESTClient) RepeatDataBody(ctx context.Context, req *genproto
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "RepeatDataBody")
 		if err != nil {
 			return err
 		}
@@ -953,17 +948,7 @@ func (c *complianceRESTClient) RepeatDataBodyInfo(ctx context.Context, req *genp
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "RepeatDataBodyInfo")
 		if err != nil {
 			return err
 		}
@@ -1196,17 +1181,7 @@ func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprot
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "RepeatDataQuery")
 		if err != nil {
 			return err
 		}
@@ -1428,17 +1403,7 @@ func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *ge
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "RepeatDataSimplePath")
 		if err != nil {
 			return err
 		}
@@ -1664,17 +1629,7 @@ func (c *complianceRESTClient) RepeatDataPathResource(ctx context.Context, req *
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "RepeatDataPathResource")
 		if err != nil {
 			return err
 		}
@@ -1903,17 +1858,7 @@ func (c *complianceRESTClient) RepeatDataPathTrailingResource(ctx context.Contex
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "RepeatDataPathTrailingResource")
 		if err != nil {
 			return err
 		}
@@ -1961,17 +1906,7 @@ func (c *complianceRESTClient) RepeatDataBodyPut(ctx context.Context, req *genpr
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "RepeatDataBodyPut")
 		if err != nil {
 			return err
 		}
@@ -2019,17 +1954,7 @@ func (c *complianceRESTClient) RepeatDataBodyPatch(ctx context.Context, req *gen
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "RepeatDataBodyPatch")
 		if err != nil {
 			return err
 		}
@@ -2047,7 +1972,7 @@ func (c *complianceRESTClient) RepeatDataBodyPatch(ctx context.Context, req *gen
 }
 
 // GetEnum this method requests an enum value from the server. Depending on the contents of EnumRequest, the enum value returned will be a known enum declared in the
-// .proto file, or a made-up enum value the is unknown to the client. To verify that clients can round-trip unknown enum vaues they receive, use the
+// .proto file, or a made-up enum value the is unknown to the client. To verify that clients can round-trip unknown enum values they receive, use the
 // response from this RPC as the request to VerifyEnum()
 //
 // The values of enums sent by the server when a known or unknown value is requested will be the same within a single Showcase server run (this is needed for
@@ -2083,17 +2008,7 @@ func (c *complianceRESTClient) GetEnum(ctx context.Context, req *genprotopb.Enum
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "GetEnum")
 		if err != nil {
 			return err
 		}
@@ -2150,17 +2065,7 @@ func (c *complianceRESTClient) VerifyEnum(ctx context.Context, req *genprotopb.E
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "VerifyEnum")
 		if err != nil {
 			return err
 		}
@@ -2224,21 +2129,10 @@ func (c *complianceRESTClient) ListLocations(ctx context.Context, req *locationp
 			}
 			httpReq.Header = headers
 
-			httpRsp, err := c.httpClient.Do(httpReq)
+			buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "ListLocations")
 			if err != nil {
 				return err
 			}
-			defer httpRsp.Body.Close()
-
-			if err = googleapi.CheckResponse(httpRsp); err != nil {
-				return err
-			}
-
-			buf, err := io.ReadAll(httpRsp.Body)
-			if err != nil {
-				return err
-			}
-
 			if err := unm.Unmarshal(buf, resp); err != nil {
 				return err
 			}
@@ -2296,17 +2190,7 @@ func (c *complianceRESTClient) GetLocation(ctx context.Context, req *locationpb.
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "GetLocation")
 		if err != nil {
 			return err
 		}
@@ -2357,17 +2241,7 @@ func (c *complianceRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetI
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "SetIamPolicy")
 		if err != nil {
 			return err
 		}
@@ -2419,17 +2293,7 @@ func (c *complianceRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetI
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "GetIamPolicy")
 		if err != nil {
 			return err
 		}
@@ -2480,17 +2344,7 @@ func (c *complianceRESTClient) TestIamPermissions(ctx context.Context, req *iamp
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "TestIamPermissions")
 		if err != nil {
 			return err
 		}
@@ -2557,21 +2411,10 @@ func (c *complianceRESTClient) ListOperations(ctx context.Context, req *longrunn
 			}
 			httpReq.Header = headers
 
-			httpRsp, err := c.httpClient.Do(httpReq)
+			buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "ListOperations")
 			if err != nil {
 				return err
 			}
-			defer httpRsp.Body.Close()
-
-			if err = googleapi.CheckResponse(httpRsp); err != nil {
-				return err
-			}
-
-			buf, err := io.ReadAll(httpRsp.Body)
-			if err != nil {
-				return err
-			}
-
 			if err := unm.Unmarshal(buf, resp); err != nil {
 				return err
 			}
@@ -2629,17 +2472,7 @@ func (c *complianceRESTClient) GetOperation(ctx context.Context, req *longrunnin
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "GetOperation")
 		if err != nil {
 			return err
 		}
@@ -2681,15 +2514,8 @@ func (c *complianceRESTClient) DeleteOperation(ctx context.Context, req *longrun
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		// Returns nil if there is no error, otherwise wraps
-		// the response code and body into a non-nil error
-		return googleapi.CheckResponse(httpRsp)
+		_, err = executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "DeleteOperation")
+		return err
 	}, opts...)
 }
 
@@ -2718,14 +2544,7 @@ func (c *complianceRESTClient) CancelOperation(ctx context.Context, req *longrun
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		// Returns nil if there is no error, otherwise wraps
-		// the response code and body into a non-nil error
-		return googleapi.CheckResponse(httpRsp)
+		_, err = executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "CancelOperation")
+		return err
 	}, opts...)
 }
