@@ -288,7 +288,8 @@ message ErrorWithMultipleDetails {
 }
 
 // The custom error detail to be included in the error response from the
-// FailEchoWithDetails method.
+// FailEchoWithDetails method. Client libraries should be able to
+// surface this custom error detail.
 message PoetryError {
   string poem = 1;
 }
