@@ -4,6 +4,7 @@ google/showcase/v1beta1/compliance.proto
 google/showcase/v1beta1/echo.proto
 google/showcase/v1beta1/identity.proto
 google/showcase/v1beta1/messaging.proto
+google/showcase/v1beta1/rest_error.proto
 google/showcase/v1beta1/sequence.proto
 google/showcase/v1beta1/testing.proto
 
@@ -24,6 +25,7 @@ Compliance (.google.showcase.v1beta1.Compliance):
 Echo (.google.showcase.v1beta1.Echo):
   .google.showcase.v1beta1.Echo.Echo[0] : POST: "/v1beta1/echo:echo"
   .google.showcase.v1beta1.Echo.EchoErrorDetails[0] : POST: "/v1beta1/echo:error-details"
+  .google.showcase.v1beta1.Echo.FailEchoWithDetails[0] : POST: "/v1beta1/echo:failWithDetails"
   .google.showcase.v1beta1.Echo.Expand[0] : POST: "/v1beta1/echo:expand"
   .google.showcase.v1beta1.Echo.Collect[0] : POST: "/v1beta1/echo:collect"
   .google.showcase.v1beta1.Echo.PagedExpand[0] : POST: "/v1beta1/echo:pagedExpand"
@@ -150,7 +152,7 @@ Shim "Echo" (.google.showcase.v1beta1.Echo)
   Imports:
     genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
     longrunningpbpb: "cloud.google.com/go/longrunning/autogen/longrunningpb" "cloud.google.com/go/longrunning/autogen/longrunningpb"
-  Handlers (9):
+  Handlers (10):
         POST                                 /v1beta1/echo:echo func Echo(request genprotopb.EchoRequest) (response genprotopb.EchoResponse) {}
 ["/" "v1beta1" "/" "echo" ":" "echo"]
 
@@ -171,6 +173,9 @@ Shim "Echo" (.google.showcase.v1beta1.Echo)
 
         POST                        /v1beta1/echo:error-details func EchoErrorDetails(request genprotopb.EchoErrorDetailsRequest) (response genprotopb.EchoErrorDetailsResponse) {}
 ["/" "v1beta1" "/" "echo" ":" "error-details"]
+
+        POST                      /v1beta1/echo:failWithDetails func FailEchoWithDetails(request genprotopb.FailEchoWithDetailsRequest) (response genprotopb.FailEchoWithDetailsResponse) {}
+["/" "v1beta1" "/" "echo" ":" "failWithDetails"]
 
         POST                    /v1beta1/echo:pagedExpandLegacy func PagedExpandLegacy(request genprotopb.PagedExpandLegacyRequest) (response genprotopb.PagedExpandResponse) {}
 ["/" "v1beta1" "/" "echo" ":" "pagedExpandLegacy"]

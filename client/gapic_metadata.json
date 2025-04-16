@@ -254,6 +254,11 @@
                 "Expand"
               ]
             },
+            "FailEchoWithDetails": {
+              "methods": [
+                "FailEchoWithDetails"
+              ]
+            },
             "GetIamPolicy": {
               "methods": [
                 "GetIamPolicy"
@@ -352,6 +357,11 @@
             "Expand": {
               "methods": [
                 "Expand"
+              ]
+            },
+            "FailEchoWithDetails": {
+              "methods": [
+                "FailEchoWithDetails"
               ]
             },
             "GetIamPolicy": {
