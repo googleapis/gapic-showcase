@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
+	"log/slog"
 	"math"
 	"net/http"
 	"net/url"
@@ -37,7 +37,6 @@ import (
 	"github.com/google/uuid"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	gax "github.com/googleapis/gax-go/v2"
-	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	"google.golang.org/api/option/internaloption"
@@ -57,6 +56,7 @@ var newEchoClientHook clientHook
 type EchoCallOptions struct {
 	Echo                    []gax.CallOption
 	EchoErrorDetails        []gax.CallOption
+	FailEchoWithDetails     []gax.CallOption
 	Expand                  []gax.CallOption
 	Collect                 []gax.CallOption
 	Chat                    []gax.CallOption
@@ -107,6 +107,9 @@ func defaultEchoCallOptions() *EchoCallOptions {
 			}),
 		},
 		EchoErrorDetails: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
+		FailEchoWithDetails: []gax.CallOption{
 			gax.WithTimeout(5000 * time.Millisecond),
 		},
 		Expand: []gax.CallOption{
@@ -177,6 +180,9 @@ func defaultEchoRESTCallOptions() *EchoCallOptions {
 		EchoErrorDetails: []gax.CallOption{
 			gax.WithTimeout(5000 * time.Millisecond),
 		},
+		FailEchoWithDetails: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
 		Expand: []gax.CallOption{
 			gax.WithTimeout(10000 * time.Millisecond),
 			gax.WithRetry(func() gax.Retryer {
@@ -238,6 +244,7 @@ type internalEchoClient interface {
 	Connection() *grpc.ClientConn
 	Echo(context.Context, *genprotopb.EchoRequest, ...gax.CallOption) (*genprotopb.EchoResponse, error)
 	EchoErrorDetails(context.Context, *genprotopb.EchoErrorDetailsRequest, ...gax.CallOption) (*genprotopb.EchoErrorDetailsResponse, error)
+	FailEchoWithDetails(context.Context, *genprotopb.FailEchoWithDetailsRequest, ...gax.CallOption) (*genprotopb.FailEchoWithDetailsResponse, error)
 	Expand(context.Context, *genprotopb.ExpandRequest, ...gax.CallOption) (genprotopb.Echo_ExpandClient, error)
 	Collect(context.Context, ...gax.CallOption) (genprotopb.Echo_CollectClient, error)
 	Chat(context.Context, ...gax.CallOption) (genprotopb.Echo_ChatClient, error)
@@ -317,6 +324,17 @@ func (c *EchoClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, opts
 // google/rpc/error_details.proto.
 func (c *EchoClient) EchoErrorDetails(ctx context.Context, req *genprotopb.EchoErrorDetailsRequest, opts ...gax.CallOption) (*genprotopb.EchoErrorDetailsResponse, error) {
 	return c.internalClient.EchoErrorDetails(ctx, req, opts...)
+}
+
+// FailEchoWithDetails this method always fails with a gRPC “Aborted” error status that contains
+// multiple error details.  These include one instance of each of the standard
+// ones in error_details.proto
+// (https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto (at https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto))
+// plus a custom, Showcase-defined PoetryError. The intent of this RPC is to
+// verify that GAPICs can process these various error details and surface them
+// to the user in an idiomatic form.
+func (c *EchoClient) FailEchoWithDetails(ctx context.Context, req *genprotopb.FailEchoWithDetailsRequest, opts ...gax.CallOption) (*genprotopb.FailEchoWithDetailsResponse, error) {
+	return c.internalClient.FailEchoWithDetails(ctx, req, opts...)
 }
 
 // Expand this method splits the given content into words and will pass each word back
@@ -455,6 +473,8 @@ type echoGRPCClient struct {
 
 	// The x-goog-* metadata to be sent with each request.
 	xGoogHeaders []string
+
+	logger *slog.Logger
 }
 
 // NewEchoClient creates a new echo client based on gRPC.
@@ -487,6 +507,7 @@ func NewEchoClient(ctx context.Context, opts ...option.ClientOption) (*EchoClien
 		connPool:         connPool,
 		echoClient:       genprotopb.NewEchoClient(connPool),
 		CallOptions:      &client.CallOptions,
+		logger:           internaloption.GetLogger(opts),
 		operationsClient: longrunningpb.NewOperationsClient(connPool),
 		iamPolicyClient:  iampb.NewIAMPolicyClient(connPool),
 		locationsClient:  locationpb.NewLocationsClient(connPool),
@@ -553,6 +574,8 @@ type echoRESTClient struct {
 
 	// Points back to the CallOptions field of the containing EchoClient
 	CallOptions **EchoCallOptions
+
+	logger *slog.Logger
 }
 
 // NewEchoRESTClient creates a new echo rest client.
@@ -576,6 +599,7 @@ func NewEchoRESTClient(ctx context.Context, opts ...option.ClientOption) (*EchoC
 		endpoint:    endpoint,
 		httpClient:  httpClient,
 		CallOptions: &callOpts,
+		logger:      internaloption.GetLogger(opts),
 	}
 	c.setGoogleClientInfo()
 
@@ -675,7 +699,7 @@ func (c *echoGRPCClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, 
 	var resp *genprotopb.EchoResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.echoClient.Echo(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.echoClient.Echo, req, settings.GRPC, c.logger, "Echo")
 		return err
 	}, opts...)
 	if err != nil {
@@ -690,7 +714,22 @@ func (c *echoGRPCClient) EchoErrorDetails(ctx context.Context, req *genprotopb.E
 	var resp *genprotopb.EchoErrorDetailsResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.echoClient.EchoErrorDetails(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.echoClient.EchoErrorDetails, req, settings.GRPC, c.logger, "EchoErrorDetails")
+		return err
+	}, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (c *echoGRPCClient) FailEchoWithDetails(ctx context.Context, req *genprotopb.FailEchoWithDetailsRequest, opts ...gax.CallOption) (*genprotopb.FailEchoWithDetailsResponse, error) {
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
+	opts = append((*c.CallOptions).FailEchoWithDetails[0:len((*c.CallOptions).FailEchoWithDetails):len((*c.CallOptions).FailEchoWithDetails)], opts...)
+	var resp *genprotopb.FailEchoWithDetailsResponse
+	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		var err error
+		resp, err = executeRPC(ctx, c.echoClient.FailEchoWithDetails, req, settings.GRPC, c.logger, "FailEchoWithDetails")
 		return err
 	}, opts...)
 	if err != nil {
@@ -705,7 +744,9 @@ func (c *echoGRPCClient) Expand(ctx context.Context, req *genprotopb.ExpandReque
 	var resp genprotopb.Echo_ExpandClient
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
+		c.logger.DebugContext(ctx, "api streaming client request", "serviceName", serviceName, "rpcName", "Expand")
 		resp, err = c.echoClient.Expand(ctx, req, settings.GRPC...)
+		c.logger.DebugContext(ctx, "api streaming client response", "serviceName", serviceName, "rpcName", "Expand")
 		return err
 	}, opts...)
 	if err != nil {
@@ -720,7 +761,9 @@ func (c *echoGRPCClient) Collect(ctx context.Context, opts ...gax.CallOption) (g
 	opts = append((*c.CallOptions).Collect[0:len((*c.CallOptions).Collect):len((*c.CallOptions).Collect)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
+		c.logger.DebugContext(ctx, "api streaming client request", "serviceName", serviceName, "rpcName", "Collect")
 		resp, err = c.echoClient.Collect(ctx, settings.GRPC...)
+		c.logger.DebugContext(ctx, "api streaming client response", "serviceName", serviceName, "rpcName", "Collect")
 		return err
 	}, opts...)
 	if err != nil {
@@ -735,7 +778,9 @@ func (c *echoGRPCClient) Chat(ctx context.Context, opts ...gax.CallOption) (genp
 	opts = append((*c.CallOptions).Chat[0:len((*c.CallOptions).Chat):len((*c.CallOptions).Chat)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
+		c.logger.DebugContext(ctx, "api streaming client request", "serviceName", serviceName, "rpcName", "Chat")
 		resp, err = c.echoClient.Chat(ctx, settings.GRPC...)
+		c.logger.DebugContext(ctx, "api streaming client response", "serviceName", serviceName, "rpcName", "Chat")
 		return err
 	}, opts...)
 	if err != nil {
@@ -761,7 +806,7 @@ func (c *echoGRPCClient) PagedExpand(ctx context.Context, req *genprotopb.PagedE
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			var err error
-			resp, err = c.echoClient.PagedExpand(ctx, req, settings.GRPC...)
+			resp, err = executeRPC(ctx, c.echoClient.PagedExpand, req, settings.GRPC, c.logger, "PagedExpand")
 			return err
 		}, opts...)
 		if err != nil {
@@ -804,7 +849,7 @@ func (c *echoGRPCClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			var err error
-			resp, err = c.echoClient.PagedExpandLegacy(ctx, req, settings.GRPC...)
+			resp, err = executeRPC(ctx, c.echoClient.PagedExpandLegacy, req, settings.GRPC, c.logger, "PagedExpandLegacy")
 			return err
 		}, opts...)
 		if err != nil {
@@ -847,7 +892,7 @@ func (c *echoGRPCClient) PagedExpandLegacyMapped(ctx context.Context, req *genpr
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			var err error
-			resp, err = c.echoClient.PagedExpandLegacyMapped(ctx, req, settings.GRPC...)
+			resp, err = executeRPC(ctx, c.echoClient.PagedExpandLegacyMapped, req, settings.GRPC, c.logger, "PagedExpandLegacyMapped")
 			return err
 		}, opts...)
 		if err != nil {
@@ -886,7 +931,7 @@ func (c *echoGRPCClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, 
 	var resp *longrunningpb.Operation
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.echoClient.Wait(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.echoClient.Wait, req, settings.GRPC, c.logger, "Wait")
 		return err
 	}, opts...)
 	if err != nil {
@@ -903,7 +948,7 @@ func (c *echoGRPCClient) Block(ctx context.Context, req *genprotopb.BlockRequest
 	var resp *genprotopb.BlockResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.echoClient.Block(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.echoClient.Block, req, settings.GRPC, c.logger, "Block")
 		return err
 	}, opts...)
 	if err != nil {
@@ -932,7 +977,7 @@ func (c *echoGRPCClient) ListLocations(ctx context.Context, req *locationpb.List
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			var err error
-			resp, err = c.locationsClient.ListLocations(ctx, req, settings.GRPC...)
+			resp, err = executeRPC(ctx, c.locationsClient.ListLocations, req, settings.GRPC, c.logger, "ListLocations")
 			return err
 		}, opts...)
 		if err != nil {
@@ -967,7 +1012,7 @@ func (c *echoGRPCClient) GetLocation(ctx context.Context, req *locationpb.GetLoc
 	var resp *locationpb.Location
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.locationsClient.GetLocation(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.locationsClient.GetLocation, req, settings.GRPC, c.logger, "GetLocation")
 		return err
 	}, opts...)
 	if err != nil {
@@ -985,7 +1030,7 @@ func (c *echoGRPCClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPoli
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.iamPolicyClient.SetIamPolicy(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.iamPolicyClient.SetIamPolicy, req, settings.GRPC, c.logger, "SetIamPolicy")
 		return err
 	}, opts...)
 	if err != nil {
@@ -1003,7 +1048,7 @@ func (c *echoGRPCClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPoli
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.iamPolicyClient.GetIamPolicy(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.iamPolicyClient.GetIamPolicy, req, settings.GRPC, c.logger, "GetIamPolicy")
 		return err
 	}, opts...)
 	if err != nil {
@@ -1021,7 +1066,7 @@ func (c *echoGRPCClient) TestIamPermissions(ctx context.Context, req *iampb.Test
 	var resp *iampb.TestIamPermissionsResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.iamPolicyClient.TestIamPermissions(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.iamPolicyClient.TestIamPermissions, req, settings.GRPC, c.logger, "TestIamPermissions")
 		return err
 	}, opts...)
 	if err != nil {
@@ -1047,7 +1092,7 @@ func (c *echoGRPCClient) ListOperations(ctx context.Context, req *longrunningpb.
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			var err error
-			resp, err = c.operationsClient.ListOperations(ctx, req, settings.GRPC...)
+			resp, err = executeRPC(ctx, c.operationsClient.ListOperations, req, settings.GRPC, c.logger, "ListOperations")
 			return err
 		}, opts...)
 		if err != nil {
@@ -1082,7 +1127,7 @@ func (c *echoGRPCClient) GetOperation(ctx context.Context, req *longrunningpb.Ge
 	var resp *longrunningpb.Operation
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.operationsClient.GetOperation(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.operationsClient.GetOperation, req, settings.GRPC, c.logger, "GetOperation")
 		return err
 	}, opts...)
 	if err != nil {
@@ -1099,7 +1144,7 @@ func (c *echoGRPCClient) DeleteOperation(ctx context.Context, req *longrunningpb
 	opts = append((*c.CallOptions).DeleteOperation[0:len((*c.CallOptions).DeleteOperation):len((*c.CallOptions).DeleteOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		_, err = c.operationsClient.DeleteOperation(ctx, req, settings.GRPC...)
+		_, err = executeRPC(ctx, c.operationsClient.DeleteOperation, req, settings.GRPC, c.logger, "DeleteOperation")
 		return err
 	}, opts...)
 	return err
@@ -1113,7 +1158,7 @@ func (c *echoGRPCClient) CancelOperation(ctx context.Context, req *longrunningpb
 	opts = append((*c.CallOptions).CancelOperation[0:len((*c.CallOptions).CancelOperation):len((*c.CallOptions).CancelOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		_, err = c.operationsClient.CancelOperation(ctx, req, settings.GRPC...)
+		_, err = executeRPC(ctx, c.operationsClient.CancelOperation, req, settings.GRPC, c.logger, "CancelOperation")
 		return err
 	}, opts...)
 	return err
@@ -1189,17 +1234,7 @@ func (c *echoRESTClient) Echo(ctx context.Context, req *genprotopb.EchoRequest, 
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "Echo")
 		if err != nil {
 			return err
 		}
@@ -1252,17 +1287,61 @@ func (c *echoRESTClient) EchoErrorDetails(ctx context.Context, req *genprotopb.E
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "EchoErrorDetails")
 		if err != nil {
 			return err
 		}
-		defer httpRsp.Body.Close()
 
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
+		if err := unm.Unmarshal(buf, resp); err != nil {
 			return err
 		}
 
-		buf, err := io.ReadAll(httpRsp.Body)
+		return nil
+	}, opts...)
+	if e != nil {
+		return nil, e
+	}
+	return resp, nil
+}
+
+// FailEchoWithDetails this method always fails with a gRPC “Aborted” error status that contains
+// multiple error details.  These include one instance of each of the standard
+// ones in error_details.proto
+// (https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto (at https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto))
+// plus a custom, Showcase-defined PoetryError. The intent of this RPC is to
+// verify that GAPICs can process these various error details and surface them
+// to the user in an idiomatic form.
+func (c *echoRESTClient) FailEchoWithDetails(ctx context.Context, req *genprotopb.FailEchoWithDetailsRequest, opts ...gax.CallOption) (*genprotopb.FailEchoWithDetailsResponse, error) {
+	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
+	jsonReq, err := m.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	baseUrl, err := url.Parse(c.endpoint)
+	if err != nil {
+		return nil, err
+	}
+	baseUrl.Path += fmt.Sprintf("/v1beta1/echo:failWithDetails")
+
+	// Build HTTP headers from client and context metadata.
+	hds := append(c.xGoogHeaders, "Content-Type", "application/json")
+	headers := gax.BuildHeaders(ctx, hds...)
+	opts = append((*c.CallOptions).FailEchoWithDetails[0:len((*c.CallOptions).FailEchoWithDetails):len((*c.CallOptions).FailEchoWithDetails)], opts...)
+	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
+	resp := &genprotopb.FailEchoWithDetailsResponse{}
+	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+		if settings.Path != "" {
+			baseUrl.Path = settings.Path
+		}
+		httpReq, err := http.NewRequest("POST", baseUrl.String(), bytes.NewReader(jsonReq))
+		if err != nil {
+			return err
+		}
+		httpReq = httpReq.WithContext(ctx)
+		httpReq.Header = headers
+
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "FailEchoWithDetails")
 		if err != nil {
 			return err
 		}
@@ -1309,12 +1388,8 @@ func (c *echoRESTClient) Expand(ctx context.Context, req *genprotopb.ExpandReque
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
+		httpRsp, err := executeStreamingHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "Expand")
 		if err != nil {
-			return err
-		}
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
 			return err
 		}
 
@@ -1437,21 +1512,10 @@ func (c *echoRESTClient) PagedExpand(ctx context.Context, req *genprotopb.PagedE
 			}
 			httpReq.Header = headers
 
-			httpRsp, err := c.httpClient.Do(httpReq)
+			buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "PagedExpand")
 			if err != nil {
 				return err
 			}
-			defer httpRsp.Body.Close()
-
-			if err = googleapi.CheckResponse(httpRsp); err != nil {
-				return err
-			}
-
-			buf, err := io.ReadAll(httpRsp.Body)
-			if err != nil {
-				return err
-			}
-
 			if err := unm.Unmarshal(buf, resp); err != nil {
 				return err
 			}
@@ -1523,21 +1587,10 @@ func (c *echoRESTClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.
 			}
 			httpReq.Header = headers
 
-			httpRsp, err := c.httpClient.Do(httpReq)
+			buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "PagedExpandLegacy")
 			if err != nil {
 				return err
 			}
-			defer httpRsp.Body.Close()
-
-			if err = googleapi.CheckResponse(httpRsp); err != nil {
-				return err
-			}
-
-			buf, err := io.ReadAll(httpRsp.Body)
-			if err != nil {
-				return err
-			}
-
 			if err := unm.Unmarshal(buf, resp); err != nil {
 				return err
 			}
@@ -1611,21 +1664,10 @@ func (c *echoRESTClient) PagedExpandLegacyMapped(ctx context.Context, req *genpr
 			}
 			httpReq.Header = headers
 
-			httpRsp, err := c.httpClient.Do(httpReq)
+			buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "PagedExpandLegacyMapped")
 			if err != nil {
 				return err
 			}
-			defer httpRsp.Body.Close()
-
-			if err = googleapi.CheckResponse(httpRsp); err != nil {
-				return err
-			}
-
-			buf, err := io.ReadAll(httpRsp.Body)
-			if err != nil {
-				return err
-			}
-
 			if err := unm.Unmarshal(buf, resp); err != nil {
 				return err
 			}
@@ -1693,21 +1735,10 @@ func (c *echoRESTClient) Wait(ctx context.Context, req *genprotopb.WaitRequest, 
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "Wait")
 		if err != nil {
 			return err
 		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
-		if err != nil {
-			return err
-		}
-
 		if err := unm.Unmarshal(buf, resp); err != nil {
 			return err
 		}
@@ -1758,17 +1789,7 @@ func (c *echoRESTClient) Block(ctx context.Context, req *genprotopb.BlockRequest
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "Block")
 		if err != nil {
 			return err
 		}
@@ -1832,21 +1853,10 @@ func (c *echoRESTClient) ListLocations(ctx context.Context, req *locationpb.List
 			}
 			httpReq.Header = headers
 
-			httpRsp, err := c.httpClient.Do(httpReq)
+			buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "ListLocations")
 			if err != nil {
 				return err
 			}
-			defer httpRsp.Body.Close()
-
-			if err = googleapi.CheckResponse(httpRsp); err != nil {
-				return err
-			}
-
-			buf, err := io.ReadAll(httpRsp.Body)
-			if err != nil {
-				return err
-			}
-
 			if err := unm.Unmarshal(buf, resp); err != nil {
 				return err
 			}
@@ -1904,17 +1914,7 @@ func (c *echoRESTClient) GetLocation(ctx context.Context, req *locationpb.GetLoc
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "GetLocation")
 		if err != nil {
 			return err
 		}
@@ -1965,17 +1965,7 @@ func (c *echoRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamPoli
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "SetIamPolicy")
 		if err != nil {
 			return err
 		}
@@ -2027,17 +2017,7 @@ func (c *echoRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamPoli
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "GetIamPolicy")
 		if err != nil {
 			return err
 		}
@@ -2088,17 +2068,7 @@ func (c *echoRESTClient) TestIamPermissions(ctx context.Context, req *iampb.Test
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "TestIamPermissions")
 		if err != nil {
 			return err
 		}
@@ -2165,21 +2135,10 @@ func (c *echoRESTClient) ListOperations(ctx context.Context, req *longrunningpb.
 			}
 			httpReq.Header = headers
 
-			httpRsp, err := c.httpClient.Do(httpReq)
+			buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "ListOperations")
 			if err != nil {
 				return err
 			}
-			defer httpRsp.Body.Close()
-
-			if err = googleapi.CheckResponse(httpRsp); err != nil {
-				return err
-			}
-
-			buf, err := io.ReadAll(httpRsp.Body)
-			if err != nil {
-				return err
-			}
-
 			if err := unm.Unmarshal(buf, resp); err != nil {
 				return err
 			}
@@ -2237,17 +2196,7 @@ func (c *echoRESTClient) GetOperation(ctx context.Context, req *longrunningpb.Ge
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "GetOperation")
 		if err != nil {
 			return err
 		}
@@ -2289,15 +2238,8 @@ func (c *echoRESTClient) DeleteOperation(ctx context.Context, req *longrunningpb
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		// Returns nil if there is no error, otherwise wraps
-		// the response code and body into a non-nil error
-		return googleapi.CheckResponse(httpRsp)
+		_, err = executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "DeleteOperation")
+		return err
 	}, opts...)
 }
 
@@ -2326,15 +2268,8 @@ func (c *echoRESTClient) CancelOperation(ctx context.Context, req *longrunningpb
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		// Returns nil if there is no error, otherwise wraps
-		// the response code and body into a non-nil error
-		return googleapi.CheckResponse(httpRsp)
+		_, err = executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "CancelOperation")
+		return err
 	}, opts...)
 }
 

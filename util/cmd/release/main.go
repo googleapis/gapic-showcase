@@ -86,6 +86,7 @@ func main() {
 	os.MkdirAll(tmpRPCPath, 0755)
 	util.Execute("cp", filepath.Join(rpcPath, "status.proto"), tmpRPCPath)
 	util.Execute("cp", filepath.Join(rpcPath, "error_details.proto"), tmpRPCPath)
+	util.Execute("cp", filepath.Join(rpcPath, "code.proto"), tmpRPCPath)
 
 	// Copy gRPC ServiceConfig as the source of retry config.
 	retrySrc := filepath.Join("schema", "google", "showcase", "v1beta1", "showcase_grpc_service_config.json")

@@ -12,7 +12,9 @@
   },
   "packageRules": [
     {
-      "matchPackagePatterns": ["com_google_protobuf"],
+      "matchPackagePatterns": [
+        "com_google_protobuf"
+      ],
       "enabled": false
     }
   ],
@@ -22,7 +24,12 @@
     ],
     "managerBranchPrefix": "golang-"
   },
+  "ignoreDeps": [
+    "google.golang.org/grpc"
+  ],
   "rebaseWhen": "behind-base-branch",
-  "labels": ["automerge"],
+  "labels": [
+    "automerge"
+  ],
   "timezone": "America/Los_Angeles"
 }

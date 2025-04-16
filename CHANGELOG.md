@@ -1,5 +1,54 @@
 # Release History
 
+## [0.36.1](https://github.com/googleapis/gapic-showcase/compare/v0.36.0...v0.36.1) (2025-04-16)
+
+
+### Bug Fixes
+
+* Update generated files to reflect proto changes ([#1579](https://github.com/googleapis/gapic-showcase/pull/1579)) ([6579d3a](https://github.com/googleapis/gapic-showcase/commit/6579d3aaf4bd541c43d3c2f8e981e94caf446dbe))
+* Expand echo.proto comments ([#1580](https://github.com/googleapis/gapic-showcase/issues/1580)) ([076cb09](https://github.com/googleapis/gapic-showcase/commit/076cb0923e02f60a791ad82e6fc2c94c57e6671f))
+
+## [0.36.0](https://github.com/googleapis/gapic-showcase/compare/v0.35.5...v0.36.0) (2025-04-10)
+
+
+### Features
+
+* Add Echo.FailEchoWithDetails RPC that always fails with all standard and one custom error detail ([#1576](https://github.com/googleapis/gapic-showcase/issues/1576)) ([709b57d](https://github.com/googleapis/gapic-showcase/commit/709b57d724327abe091965c54f402042155aa178))
+
+
+### Bug Fixes
+
+* Return AIP/193-compliant errors over rest transport ([#1573](https://github.com/googleapis/gapic-showcase/issues/1573)) ([d47045b](https://github.com/googleapis/gapic-showcase/commit/d47045be1ee31f373d5a6ded287cbc9c5b9b605a))
+* Typos in some proto comments ([#1563](https://github.com/googleapis/gapic-showcase/issues/1563)) ([ae41e96](https://github.com/googleapis/gapic-showcase/commit/ae41e96133b36fa86f8d08c0f839ab9fb12e3e96))
+
+## [0.35.5](https://github.com/googleapis/gapic-showcase/compare/v0.35.4...v0.35.5) (2024-12-04)
+
+
+### Bug Fixes
+
+* Replace use of github.com/golang/protobuf/proto where possible ([#1557](https://github.com/googleapis/gapic-showcase/issues/1557)) ([0215dd6](https://github.com/googleapis/gapic-showcase/commit/0215dd637e130ca0c0a74adcc74d34d3373060d8)), closes [#1525](https://github.com/googleapis/gapic-showcase/issues/1525)
+
+## [0.35.4](https://github.com/googleapis/gapic-showcase/compare/v0.35.3...v0.35.4) (2024-12-03)
+
+
+### Bug Fixes
+
+* Revert replace use of github.com/golang/protobuf/proto ([#1534](https://github.com/googleapis/gapic-showcase/issues/1534))" ([#1553](https://github.com/googleapis/gapic-showcase/issues/1553)) ([b82e7c5](https://github.com/googleapis/gapic-showcase/commit/b82e7c5d8b63ba11cc21361a4b84d0cb29a59826))
+
+## [0.35.3](https://github.com/googleapis/gapic-showcase/compare/v0.35.2...v0.35.3) (2024-12-03)
+
+
+### Bug Fixes
+
+* Downgrade go version to 1.21 ([#1551](https://github.com/googleapis/gapic-showcase/issues/1551)) ([36831cf](https://github.com/googleapis/gapic-showcase/commit/36831cfe255e13e3a5328ad548ddba9c3174434e))
+
+## [0.35.2](https://github.com/googleapis/gapic-showcase/compare/v0.35.1...v0.35.2) (2024-12-03)
+
+
+### Bug Fixes
+
+* **deps:** Update bazel-contrib/setup-bazel action to v0.9.1 ([#1546](https://github.com/googleapis/gapic-showcase/issues/1546)) ([bc936fb](https://github.com/googleapis/gapic-showcase/commit/bc936fb7c3607853bbc58fcd8f4d0aa7ccbc4a1c))
+
 ## [0.35.1](https://github.com/googleapis/gapic-showcase/compare/v0.35.0...v0.35.1) (2024-07-08)
 
 

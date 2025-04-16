@@ -100,6 +100,20 @@ service Echo {
     };
   }
 
+  // This method always fails with a gRPC "Aborted" error status that contains
+  // multiple error details.  These include one instance of each of the standard
+  // ones in error_details.proto
+  // (https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto)
+  // plus a custom, Showcase-defined PoetryError. The intent of this RPC is to
+  // verify that GAPICs can process these various error details and surface them
+  // to the user in an idiomatic form.
+  rpc FailEchoWithDetails(FailEchoWithDetailsRequest) returns (FailEchoWithDetailsResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:failWithDetails"
+      body: "*"
+    };
+  }
+
   // This method splits the given content into words and will pass each word back
   // through the stream. This method showcases server-side streaming RPCs.
   rpc Expand(ExpandRequest) returns (stream EchoResponse) {
@@ -272,6 +286,24 @@ message ErrorWithSingleDetail {
 message ErrorWithMultipleDetails {
   repeated google.protobuf.Any details = 1;
 }
+
+// The custom error detail to be included in the error response from the
+// FailEchoWithDetails method. Client libraries should be able to
+// surface this custom error detail.
+message PoetryError {
+  string poem = 1;
+}
+
+// The request message used for the FailEchoWithDetails method.
+message FailEchoWithDetailsRequest {
+  // Optional message to echo back in the PoetryError. If empty, a value will be
+  // provided.
+  string message = 1;
+}
+
+// The response message declared (but never used) for the FailEchoWithDetails
+// method.
+message FailEchoWithDetailsResponse {}
 
 // The request message for the Expand method.
 message ExpandRequest {

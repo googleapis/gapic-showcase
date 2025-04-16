@@ -20,6 +20,7 @@ var EchoClient *gapic.EchoClient
 var EchoSubCommands []string = []string{
 	"echo",
 	"echo-error-details",
+	"fail-echo-with-details",
 	"expand",
 	"collect",
 	"chat",
