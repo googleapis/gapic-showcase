@@ -242,6 +242,8 @@ func (c *SequenceClient) AttemptSequence(ctx context.Context, req *genprotopb.At
 }
 
 // AttemptStreamingSequence attempts a streaming sequence.
+// May not function as expected in HTTP mode due to when http statuses are sent
+// See https://github.com/googleapis/gapic-showcase/issues/1377 (at https://github.com/googleapis/gapic-showcase/issues/1377) for more details
 func (c *SequenceClient) AttemptStreamingSequence(ctx context.Context, req *genprotopb.AttemptStreamingSequenceRequest, opts ...gax.CallOption) (genprotopb.SequenceService_AttemptStreamingSequenceClient, error) {
 	return c.internalClient.AttemptStreamingSequence(ctx, req, opts...)
 }
@@ -981,6 +983,8 @@ func (c *sequenceRESTClient) AttemptSequence(ctx context.Context, req *genprotop
 }
 
 // AttemptStreamingSequence attempts a streaming sequence.
+// May not function as expected in HTTP mode due to when http statuses are sent
+// See https://github.com/googleapis/gapic-showcase/issues/1377 (at https://github.com/googleapis/gapic-showcase/issues/1377) for more details
 func (c *sequenceRESTClient) AttemptStreamingSequence(ctx context.Context, req *genprotopb.AttemptStreamingSequenceRequest, opts ...gax.CallOption) (genprotopb.SequenceService_AttemptStreamingSequenceClient, error) {
 	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
