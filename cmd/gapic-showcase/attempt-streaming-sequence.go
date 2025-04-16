@@ -33,8 +33,8 @@ func init() {
 
 var AttemptStreamingSequenceCmd = &cobra.Command{
 	Use:   "attempt-streaming-sequence",
-	Short: "Attempts a streaming sequence.",
-	Long:  "Attempts a streaming sequence.",
+	Short: "Attempts a streaming sequence.  May not function...",
+	Long:  "Attempts a streaming sequence.  May not function as expected in HTTP mode due to when http statuses are sent  See...",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if AttemptStreamingSequenceFromFile == "" {

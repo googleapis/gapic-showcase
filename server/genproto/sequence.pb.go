@@ -1477,6 +1477,8 @@ type SequenceServiceClient interface {
 	// Attempts a sequence.
 	AttemptSequence(ctx context.Context, in *AttemptSequenceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// Attempts a streaming sequence.
+	// May not function as expected in HTTP mode due to when http statuses are sent
+	// See https://github.com/googleapis/gapic-showcase/issues/1377 for more details
 	AttemptStreamingSequence(ctx context.Context, in *AttemptStreamingSequenceRequest, opts ...grpc.CallOption) (SequenceService_AttemptStreamingSequenceClient, error)
 }
 
@@ -1578,6 +1580,8 @@ type SequenceServiceServer interface {
 	// Attempts a sequence.
 	AttemptSequence(context.Context, *AttemptSequenceRequest) (*emptypb.Empty, error)
 	// Attempts a streaming sequence.
+	// May not function as expected in HTTP mode due to when http statuses are sent
+	// See https://github.com/googleapis/gapic-showcase/issues/1377 for more details
 	AttemptStreamingSequence(*AttemptStreamingSequenceRequest, SequenceService_AttemptStreamingSequenceServer) error
 }
 
