@@ -1,5 +1,12 @@
 # Release History
 
+## [0.36.1](https://github.com/googleapis/gapic-showcase/compare/v0.36.0...v0.36.1) (2025-04-16)
+
+
+### Bug Fixes
+
+* Expand echo.proto comments ([#1580](https://github.com/googleapis/gapic-showcase/issues/1580)) ([076cb09](https://github.com/googleapis/gapic-showcase/commit/076cb0923e02f60a791ad82e6fc2c94c57e6671f))
+
 ## [0.36.0](https://github.com/googleapis/gapic-showcase/compare/v0.35.5...v0.36.0) (2025-04-10)
 
 
