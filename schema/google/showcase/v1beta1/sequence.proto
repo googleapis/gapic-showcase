@@ -79,6 +79,8 @@ service SequenceService {
   };
 
   // Attempts a streaming sequence.
+  // May not function as expected in HTTP mode due to when http statuses are sent
+  // See https://github.com/googleapis/gapic-showcase/issues/1377 for more details
   rpc AttemptStreamingSequence(AttemptStreamingSequenceRequest) returns  (stream AttemptStreamingSequenceResponse) {
     option (google.api.http) = {
     post: "/v1beta1/{name=streamingSequences/*}:stream"
