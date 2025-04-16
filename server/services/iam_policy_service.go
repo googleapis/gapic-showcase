@@ -18,10 +18,10 @@ import (
 	"context"
 	"sync"
 
-	"github.com/golang/protobuf/proto"
-	iampb "google.golang.org/genproto/googleapis/iam/v1"
+	iampb "cloud.google.com/go/iam/apiv1/iampb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 )
 
 var missingResource error = status.Error(codes.InvalidArgument, "Missing required argument: resource")

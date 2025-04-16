@@ -18,9 +18,9 @@ import (
 	"context"
 	"testing"
 
+	iampb "cloud.google.com/go/iam/apiv1/iampb"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	iampb "google.golang.org/genproto/googleapis/iam/v1"
 	"google.golang.org/protobuf/proto"
 )
 

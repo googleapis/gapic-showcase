@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,9 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/echo:echo': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -52,8 +55,8 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -98,6 +101,154 @@ func (backend *RESTBackend) HandleEcho(w http.ResponseWriter, r *http.Request) {
 	w.Write(json)
 }
 
+// HandleEchoErrorDetails translates REST requests/responses on the wire to internal proto messages for EchoErrorDetails
+//
+//	Generated for HTTP binding pattern: POST "/v1beta1/echo:error-details"
+func (backend *RESTBackend) HandleEchoErrorDetails(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/echo:error-details': %q", r.Method, r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
+
+	if numUrlPathParams != 0 {
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
+		return
+	}
+
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
+	request := &genprotopb.EchoErrorDetailsRequest{}
+	// Intentional: Field values in the URL path override those set in the body.
+	var jsonReader bytes.Buffer
+	bodyReader := io.TeeReader(r.Body, &jsonReader)
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
+		return
+	}
+
+	if len(queryParams) > 0 {
+		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
+		return
+	}
+	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
+		return
+	}
+
+	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
+	requestJSON, _ := marshaler.Marshal(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
+
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/echo:error-details")
+	response, err := backend.EchoServer.EchoErrorDetails(ctx, request)
+	if err != nil {
+		backend.ReportGRPCError(w, err)
+		return
+	}
+
+	json, err := marshaler.Marshal(response)
+	if err != nil {
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
+		return
+	}
+
+	w.Write(json)
+}
+
+// HandleFailEchoWithDetails translates REST requests/responses on the wire to internal proto messages for FailEchoWithDetails
+//
+//	Generated for HTTP binding pattern: POST "/v1beta1/echo:failWithDetails"
+func (backend *RESTBackend) HandleFailEchoWithDetails(w http.ResponseWriter, r *http.Request) {
+	urlPathParams := gmux.Vars(r)
+	numUrlPathParams := len(urlPathParams)
+
+	backend.StdLog.Printf("Received %s request matching '/v1beta1/echo:failWithDetails': %q", r.Method, r.URL)
+	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
+
+	if numUrlPathParams != 0 {
+		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
+		return
+	}
+
+	systemParameters, queryParams, err := resttools.GetSystemParameters(r)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error in query string: %s", err)
+		return
+	}
+
+	request := &genprotopb.FailEchoWithDetailsRequest{}
+	// Intentional: Field values in the URL path override those set in the body.
+	var jsonReader bytes.Buffer
+	bodyReader := io.TeeReader(r.Body, &jsonReader)
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
+		return
+	}
+
+	if err := resttools.FromJSON().Unmarshal(rBytes, request); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading body params '*': %s", err)
+		return
+	}
+
+	if err := resttools.CheckRequestFormat(&jsonReader, r, request.ProtoReflect()); err != nil {
+		backend.Error(w, http.StatusBadRequest, "REST request failed format check: %s", err)
+		return
+	}
+
+	if len(queryParams) > 0 {
+		backend.Error(w, http.StatusBadRequest, "encountered unexpected query params: %v", queryParams)
+		return
+	}
+	if err := resttools.PopulateSingularFields(request, urlPathParams); err != nil {
+		backend.Error(w, http.StatusBadRequest, "error reading URL path params: %s", err)
+		return
+	}
+
+	marshaler := resttools.ToJSON()
+	marshaler.UseEnumNumbers = systemParameters.EnumEncodingAsInt
+	requestJSON, _ := marshaler.Marshal(request)
+	backend.StdLog.Printf("  request: %s", requestJSON)
+
+	ctx := context.WithValue(r.Context(), resttools.BindingURIKey, "/v1beta1/echo:failWithDetails")
+	response, err := backend.EchoServer.FailEchoWithDetails(ctx, request)
+	if err != nil {
+		backend.ReportGRPCError(w, err)
+		return
+	}
+
+	json, err := marshaler.Marshal(response)
+	if err != nil {
+		backend.Error(w, http.StatusInternalServerError, "error json-encoding response: %s", err.Error())
+		return
+	}
+
+	w.Write(json)
+}
+
 // HandleExpand translates REST requests/responses on the wire to internal proto messages for Expand
 //
 //	Generated for HTTP binding pattern: POST "/v1beta1/echo:expand"
@@ -107,6 +258,9 @@ func (backend *RESTBackend) HandleExpand(w http.ResponseWriter, r *http.Request)
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/echo:expand': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -123,8 +277,8 @@ func (backend *RESTBackend) HandleExpand(w http.ResponseWriter, r *http.Request)
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -181,6 +335,9 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/echo:pagedExpand': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -197,8 +354,8 @@ func (backend *RESTBackend) HandlePagedExpand(w http.ResponseWriter, r *http.Req
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -252,6 +409,9 @@ func (backend *RESTBackend) HandlePagedExpandLegacy(w http.ResponseWriter, r *ht
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/echo:pagedExpandLegacy': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -268,8 +428,8 @@ func (backend *RESTBackend) HandlePagedExpandLegacy(w http.ResponseWriter, r *ht
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -323,6 +483,9 @@ func (backend *RESTBackend) HandlePagedExpandLegacyMapped(w http.ResponseWriter,
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/echo:pagedExpandLegacyMapped': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -339,8 +502,8 @@ func (backend *RESTBackend) HandlePagedExpandLegacyMapped(w http.ResponseWriter,
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -394,6 +557,9 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/echo:wait': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -410,8 +576,8 @@ func (backend *RESTBackend) HandleWait(w http.ResponseWriter, r *http.Request) {
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -465,6 +631,9 @@ func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) 
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/echo:block': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -481,8 +650,8 @@ func (backend *RESTBackend) HandleBlock(w http.ResponseWriter, r *http.Request) 
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}

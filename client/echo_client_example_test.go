@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ func ExampleNewEchoRESTClient() {
 	_ = c
 }
 
-func ExampleEchoClient_Echo() {
+func ExampleEchoClient_Block() {
 	ctx := context.Background()
 	// This snippet has been automatically generated and should be regarded as a code template only.
 	// It will require modifications to work:
@@ -75,11 +75,11 @@ func ExampleEchoClient_Echo() {
 	}
 	defer c.Close()
 
-	req := &genprotopb.EchoRequest{
+	req := &genprotopb.BlockRequest{
 		// TODO: Fill request struct fields.
-		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#EchoRequest.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#BlockRequest.
 	}
-	resp, err := c.Echo(ctx, req)
+	resp, err := c.Block(ctx, req)
 	if err != nil {
 		// TODO: Handle error.
 	}
@@ -127,6 +127,81 @@ func ExampleEchoClient_Chat() {
 	}
 }
 
+func ExampleEchoClient_Echo() {
+	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
+	c, err := client.NewEchoClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.EchoRequest{
+		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#EchoRequest.
+	}
+	resp, err := c.Echo(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
+func ExampleEchoClient_EchoErrorDetails() {
+	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
+	c, err := client.NewEchoClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.EchoErrorDetailsRequest{
+		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#EchoErrorDetailsRequest.
+	}
+	resp, err := c.EchoErrorDetails(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
+func ExampleEchoClient_FailEchoWithDetails() {
+	ctx := context.Background()
+	// This snippet has been automatically generated and should be regarded as a code template only.
+	// It will require modifications to work:
+	// - It may require correct/in-range values for request initialization.
+	// - It may require specifying regional endpoints when creating the service client as shown in:
+	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
+	c, err := client.NewEchoClient(ctx)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	defer c.Close()
+
+	req := &genprotopb.FailEchoWithDetailsRequest{
+		// TODO: Fill request struct fields.
+		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#FailEchoWithDetailsRequest.
+	}
+	resp, err := c.FailEchoWithDetails(ctx, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+	// TODO: Use resp.
+	_ = resp
+}
+
 func ExampleEchoClient_PagedExpand() {
 	ctx := context.Background()
 	// This snippet has been automatically generated and should be regarded as a code template only.
@@ -155,6 +230,12 @@ func ExampleEchoClient_PagedExpand() {
 		}
 		// TODO: Use resp.
 		_ = resp
+
+		// If you need to access the underlying RPC response,
+		// you can do so by casting the `Response` as below.
+		// Otherwise, remove this line. Only populated after
+		// first call to Next(). Not safe for concurrent access.
+		_ = it.Response.(*genprotopb.PagedExpandResponse)
 	}
 }
 
@@ -186,6 +267,12 @@ func ExampleEchoClient_PagedExpandLegacy() {
 		}
 		// TODO: Use resp.
 		_ = resp
+
+		// If you need to access the underlying RPC response,
+		// you can do so by casting the `Response` as below.
+		// Otherwise, remove this line. Only populated after
+		// first call to Next(). Not safe for concurrent access.
+		_ = it.Response.(*genprotopb.PagedExpandResponse)
 	}
 }
 
@@ -217,6 +304,12 @@ func ExampleEchoClient_PagedExpandLegacyMapped() {
 		}
 		// TODO: Use resp.
 		_ = resp
+
+		// If you need to access the underlying RPC response,
+		// you can do so by casting the `Response` as below.
+		// Otherwise, remove this line. Only populated after
+		// first call to Next(). Not safe for concurrent access.
+		_ = it.Response.(*genprotopb.PagedExpandLegacyMappedResponse)
 	}
 }
 
@@ -243,31 +336,6 @@ func ExampleEchoClient_Wait() {
 	}
 
 	resp, err := op.Wait(ctx)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	// TODO: Use resp.
-	_ = resp
-}
-
-func ExampleEchoClient_Block() {
-	ctx := context.Background()
-	// This snippet has been automatically generated and should be regarded as a code template only.
-	// It will require modifications to work:
-	// - It may require correct/in-range values for request initialization.
-	// - It may require specifying regional endpoints when creating the service client as shown in:
-	//   https://pkg.go.dev/cloud.google.com/go#hdr-Client_Options
-	c, err := client.NewEchoClient(ctx)
-	if err != nil {
-		// TODO: Handle error.
-	}
-	defer c.Close()
-
-	req := &genprotopb.BlockRequest{
-		// TODO: Fill request struct fields.
-		// See https://pkg.go.dev/github.com/googleapis/gapic-showcase/server/genproto#BlockRequest.
-	}
-	resp, err := c.Block(ctx, req)
 	if err != nil {
 		// TODO: Handle error.
 	}
@@ -303,6 +371,12 @@ func ExampleEchoClient_ListLocations() {
 		}
 		// TODO: Use resp.
 		_ = resp
+
+		// If you need to access the underlying RPC response,
+		// you can do so by casting the `Response` as below.
+		// Otherwise, remove this line. Only populated after
+		// first call to Next(). Not safe for concurrent access.
+		_ = it.Response.(*locationpb.ListLocationsResponse)
 	}
 }
 
@@ -434,6 +508,12 @@ func ExampleEchoClient_ListOperations() {
 		}
 		// TODO: Use resp.
 		_ = resp
+
+		// If you need to access the underlying RPC response,
+		// you can do so by casting the `Response` as below.
+		// Otherwise, remove this line. Only populated after
+		// first call to Next(). Not safe for concurrent access.
+		_ = it.Response.(*longrunningpb.ListOperationsResponse)
 	}
 }
 

@@ -4,4 +4,4 @@
 # For syntax help see:
 # https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners#codeowners-syntax
 
-* @googleapis/actools @googleapis/cloud-java-team-teamsync
+* @googleapis/core-client-libraries @googleapis/cloud-java-team-teamsync

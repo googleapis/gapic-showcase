@@ -15,7 +15,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -195,7 +195,7 @@ func TestRESTCalls(t *testing.T) {
 			continue
 		}
 
-		body, err := ioutil.ReadAll(response.Body)
+		body, err := io.ReadAll(response.Body)
 		response.Body.Close()
 		if err != nil {
 			jsonOptions.Restore()

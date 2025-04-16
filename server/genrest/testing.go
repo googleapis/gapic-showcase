@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,9 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/sessions': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -53,8 +56,8 @@ func (backend *RESTBackend) HandleCreateSession(w http.ResponseWriter, r *http.R
 	var bodyField genprotopb.Session
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -116,6 +119,9 @@ func (backend *RESTBackend) HandleGetSession(w http.ResponseWriter, r *http.Requ
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=sessions/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -179,6 +185,9 @@ func (backend *RESTBackend) HandleListSessions(w http.ResponseWriter, r *http.Re
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/sessions': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -237,6 +246,9 @@ func (backend *RESTBackend) HandleDeleteSession(w http.ResponseWriter, r *http.R
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=sessions/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -300,6 +312,9 @@ func (backend *RESTBackend) HandleReportSession(w http.ResponseWriter, r *http.R
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=sessions/*}:report': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -363,6 +378,9 @@ func (backend *RESTBackend) HandleListTests(w http.ResponseWriter, r *http.Reque
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{parent=sessions/*}/tests': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -426,6 +444,9 @@ func (backend *RESTBackend) HandleDeleteTest(w http.ResponseWriter, r *http.Requ
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=sessions/*/tests/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -489,6 +510,9 @@ func (backend *RESTBackend) HandleVerifyTest(w http.ResponseWriter, r *http.Requ
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=sessions/*/tests/*}:check': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)

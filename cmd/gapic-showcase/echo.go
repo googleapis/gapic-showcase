@@ -34,6 +34,8 @@ var EchoInputResponseErrorDetails []string
 
 var EchoInputSeverity string
 
+var echoInputOtherRequestId string
+
 func init() {
 	EchoServiceCmd.AddCommand(EchoCmd)
 
@@ -52,6 +54,10 @@ func init() {
 	EchoCmd.Flags().StringVar(&EchoInput.Header, "header", "", "Optional. This field can be set to test the...")
 
 	EchoCmd.Flags().StringVar(&EchoInput.OtherHeader, "other_header", "", "Optional. This field can be set to test the...")
+
+	EchoCmd.Flags().StringVar(&EchoInput.RequestId, "request_id", "", "To facilitate testing of...")
+
+	EchoCmd.Flags().StringVar(&echoInputOtherRequestId, "other_request_id", "", "To facilitate testing of...")
 
 	EchoCmd.Flags().StringVar(&EchoInputResponse, "response", "", "Choices: content, error")
 
@@ -102,6 +108,10 @@ var EchoCmd = &cobra.Command{
 			}
 
 			EchoInput.Severity = genprotopb.Severity(genprotopb.Severity_value[strings.ToUpper(EchoInputSeverity)])
+
+			if cmd.Flags().Changed("other_request_id") {
+				EchoInput.OtherRequestId = &echoInputOtherRequestId
+			}
 
 		}
 

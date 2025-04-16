@@ -15,8 +15,8 @@
 package services
 
 import (
+	lropb "cloud.google.com/go/longrunning/autogen/longrunningpb"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
-	lropb "google.golang.org/genproto/googleapis/longrunning"
 )
 
 // Mock waiter type used in echo_service_test and operations_service_test to

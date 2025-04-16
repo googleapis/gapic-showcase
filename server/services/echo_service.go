@@ -16,20 +16,24 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
 
+	lropb "cloud.google.com/go/longrunning/autogen/longrunningpb"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
-	lropb "google.golang.org/genproto/googleapis/longrunning"
+	errdetails "google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	anypb "google.golang.org/protobuf/types/known/anypb"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 // NewEchoServer returns a new EchoServer for the Showcase API.
@@ -48,7 +52,155 @@ func (s *echoServerImpl) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.Echo
 	}
 	echoHeaders(ctx)
 	echoTrailers(ctx)
-	return &pb.EchoResponse{Content: in.GetContent(), Severity: in.GetSeverity()}, nil
+	return &pb.EchoResponse{Content: in.GetContent(), Severity: in.GetSeverity(), RequestId: in.GetRequestId(), OtherRequestId: in.GetOtherRequestId()}, nil
+}
+
+func (s *echoServerImpl) EchoErrorDetails(ctx context.Context, in *pb.EchoErrorDetailsRequest) (*pb.EchoErrorDetailsResponse, error) {
+	var singleDetailError *pb.EchoErrorDetailsResponse_SingleDetail
+	singleDetailText := in.GetSingleDetailText()
+	if len(singleDetailText) > 0 {
+		singleErrorInfo := &errdetails.ErrorInfo{Reason: singleDetailText}
+		singleMarshalledError, err := anypb.New(singleErrorInfo)
+		if err != nil {
+			return nil, fmt.Errorf("failure with single error detail in EchoErrorDetails: %w", err)
+		}
+		singleDetailError = &pb.EchoErrorDetailsResponse_SingleDetail{
+			Error: &pb.ErrorWithSingleDetail{Details: singleMarshalledError},
+		}
+	}
+
+	var multipleDetailsError *pb.EchoErrorDetailsResponse_MultipleDetails
+	multipleDetailText := in.GetMultiDetailText()
+	if len(multipleDetailText) > 0 {
+		details := []*anypb.Any{}
+		for idx, text := range multipleDetailText {
+			errorInfo := &errdetails.ErrorInfo{
+				Reason: text,
+			}
+			marshalledError, err := anypb.New(errorInfo)
+			if err != nil {
+				return nil, fmt.Errorf("failure in EchoErrorDetails[%d]: %w", idx, err)
+			}
+
+			details = append(details, marshalledError)
+		}
+
+		multipleDetailsError = &pb.EchoErrorDetailsResponse_MultipleDetails{
+			Error: &pb.ErrorWithMultipleDetails{Details: details},
+		}
+	}
+
+	echoHeaders(ctx)
+	echoTrailers(ctx)
+	response := &pb.EchoErrorDetailsResponse{
+		SingleDetail:    singleDetailError,
+		MultipleDetails: multipleDetailsError,
+	}
+	return response, nil
+}
+
+// DetailedError satisfies the interface defined in https://pkg.go.dev/google.golang.org/grpc/status#FromError to convert an error to a status.Status.
+type DetailedError struct {
+	grpcStatus *status.Status
+}
+
+func (de DetailedError) Error() string {
+	return fmt.Sprintf("DetailedError.Error(): %d: %s [(%d details)]", de.grpcStatus.Code(), de.grpcStatus.Message(), len(de.grpcStatus.Details()))
+}
+
+// GRPCStatus returns the gRPC status associated with the given
+// DetailedError as a way of satisfying the interface defined in
+// https://pkg.go.dev/google.golang.org/grpc/status#FromError
+func (de *DetailedError) GRPCStatus() *status.Status {
+	return de.grpcStatus
+}
+
+func (s *echoServerImpl) FailEchoWithDetails(ctx context.Context, in *pb.FailEchoWithDetailsRequest) (*pb.FailEchoWithDetailsResponse, error) {
+
+	detailInfo := &errdetails.ErrorInfo{
+		Reason: "some ErrorInfo reason",
+	}
+
+	detailLocalized := &errdetails.LocalizedMessage{
+		Locale:  "fr-CH",
+		Message: "This LocalizedMessage should be treated specially",
+	}
+
+	poem := in.GetMessage()
+	if poem == "" {
+		poem = "roses are red"
+	}
+	detailPoetry := &pb.PoetryError{
+		Poem: poem,
+	}
+
+	duration, _ := time.ParseDuration("11s")
+	detailRetry := &errdetails.RetryInfo{
+		RetryDelay: durationpb.New(duration),
+	}
+
+	detailDebug := &errdetails.DebugInfo{
+		Detail: "a DebugInfo detail",
+	}
+
+	detailQuotaFailure := &errdetails.QuotaFailure{
+		Violations: []*errdetails.QuotaFailure_Violation{
+			{Description: "First QuotaFailure description"},
+			{Description: "Second QuotaFailure description"},
+		},
+	}
+
+	detailPreconditionFailure := &errdetails.PreconditionFailure{
+		Violations: []*errdetails.PreconditionFailure_Violation{
+			{Description: "First PreconditionFailure description"},
+			{Description: "Second PreconditionFailure description"},
+		},
+	}
+
+	detailBadRequest := &errdetails.BadRequest{
+		FieldViolations: []*errdetails.BadRequest_FieldViolation{
+			{Description: "First BadRequest description"},
+			{Description: "Second BadRequest description"},
+		},
+	}
+
+	detailRequestInfo := &errdetails.RequestInfo{
+		RequestId:   "RequestInfo: showcase-request-id",
+		ServingData: "RequestInfo: showcase serving data",
+	}
+
+	detailResourceInfo := &errdetails.ResourceInfo{
+		ResourceType: "ResourceInfo: showcase resource",
+	}
+
+	detailHelp := &errdetails.Help{
+		Links: []*errdetails.Help_Link{
+			{Description: "Help: first showcase help link"},
+			{Description: "Help: second showcase help link"},
+		},
+	}
+
+	theStatus, err := status.New(codes.Aborted, "This is an error generated by the server").WithDetails(
+		detailInfo,
+		detailLocalized,
+		detailPoetry,
+		detailRetry,
+		detailDebug,
+		detailQuotaFailure,
+		detailPreconditionFailure,
+		detailBadRequest,
+		detailRequestInfo,
+		detailResourceInfo,
+		detailHelp)
+	if err != nil {
+		return nil, fmt.Errorf("failure in FailEchoWithDetails: %w", err)
+	}
+
+	detailedError := &DetailedError{
+		grpcStatus: theStatus,
+	}
+
+	return nil, detailedError
 }
 
 func (s *echoServerImpl) Expand(in *pb.ExpandRequest, stream pb.Echo_ExpandServer) error {
@@ -94,6 +246,8 @@ func (s *echoServerImpl) Chat(stream pb.Echo_ChatServer) error {
 	for {
 		req, err := stream.Recv()
 		if err == io.EOF {
+			// Echo headers and trailers when the stream ends
+			echoStreamingHeaders(stream)
 			echoStreamingTrailers(stream)
 			return nil
 		}
@@ -105,7 +259,6 @@ func (s *echoServerImpl) Chat(stream pb.Echo_ChatServer) error {
 		if s != nil {
 			return s
 		}
-		echoStreamingHeaders(stream)
 		stream.Send(&pb.EchoResponse{Content: req.GetContent()})
 	}
 }
@@ -265,10 +418,11 @@ func echoTrailers(ctx context.Context) {
 		return
 	}
 
-	values := md.Get("showcase-trailer")
-	for _, value := range values {
-		trailer := metadata.Pairs("showcase-trailer", value)
-		grpc.SetTrailer(ctx, trailer)
+	for k, v := range md {
+		for _, value := range v {
+			trailer := metadata.Pairs(k, value)
+			grpc.SetTrailer(ctx, trailer)
+		}
 	}
 }
 
@@ -278,9 +432,10 @@ func echoStreamingTrailers(stream grpc.ServerStream) {
 		return
 	}
 
-	values := md.Get("showcase-trailer")
-	for _, value := range values {
-		trailer := metadata.Pairs("showcase-trailer", value)
-		stream.SetTrailer(trailer)
+	for k, v := range md {
+		for _, value := range v {
+			trailer := metadata.Pairs(k, value)
+			stream.SetTrailer(trailer)
+		}
 	}
 }

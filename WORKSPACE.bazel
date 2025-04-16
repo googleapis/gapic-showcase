@@ -23,9 +23,9 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 #
 http_archive(
   name = "com_google_googleapis",
-  strip_prefix = "googleapis-fdb078e5014c0528fc538f5a779103720d02fc70",
-  urls = ["https://github.com/googleapis/googleapis/archive/fdb078e5014c0528fc538f5a779103720d02fc70.zip"],
-  sha256 = "9a56796ce2b144bdadd302c63fef615475e4861e53036cccc12ca785f6636573"
+  strip_prefix = "googleapis-7976ffadc0f21ee9149708c0c97ef000e15de1eb",
+  urls = ["https://github.com/googleapis/googleapis/archive/7976ffadc0f21ee9149708c0c97ef000e15de1eb.zip"],
+  sha256 = "935fb7ebbc65f43e293fac7240471c24d9d52249f5c8bf09c0d04327b2191053"
 )
 load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
 switched_rules_by_language(name = "com_google_googleapis_imports", grpc = True)
@@ -35,25 +35,35 @@ switched_rules_by_language(name = "com_google_googleapis_imports", grpc = True)
 #
 http_archive(
   name = "com_google_protobuf",
-  sha256 = "e98645295639cc06300877d6770e8c5c14259c10c2d3e9b3fb9a9c15ca5f8300",
-  urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.24.0.zip"],
-  strip_prefix = "protobuf-3.24.0",
+  sha256 = "ddd0f5271f31b549efc74eb39061e142132653d5d043071fcec265bd571e73c4",
+  urls = ["https://github.com/protocolbuffers/protobuf/archive/v25.2.zip"],
+  strip_prefix = "protobuf-25.2",
 )
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 protobuf_deps()
+
+http_archive(
+    name = "bazel_features",
+    sha256 = "5d7e4eb0bb17aee392143cd667b67d9044c270a9345776a5e5a3cccbc44aa4b3",
+    strip_prefix = "bazel_features-1.13.0",
+    url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.13.0/bazel_features-v1.13.0.tar.gz",
+)
+load("@bazel_features//:deps.bzl", "bazel_features_deps")
+bazel_features_deps()
 
 ##
 # rules_proto for the proto_library rule
 #
 http_archive(
-  name = "rules_proto",
-  sha256 = "5d4cd6780634eb2ecafa091df8be8009d395f70a02f722e07e063883dd8af861",
-  strip_prefix = "rules_proto-493169c1199dc21b9da860f7040a4502aa174676",
-  urls = [
-    "https://mirror.bazel.build/github.com/bazelbuild/rules_proto/archive/493169c1199dc21b9da860f7040a4502aa174676.tar.gz",
-    "https://github.com/bazelbuild/rules_proto/archive/493169c1199dc21b9da860f7040a4502aa174676.tar.gz",
-  ],
+    name = "rules_proto",
+    sha256 = "6fb6767d1bef535310547e03247f7518b03487740c11b6c6adb7952033fe1295",
+    # Using a release candidate because the latest stable release is too old for
+    # our needs, and we want to stay closer to the latest without pinning to a
+    # specific commit.
+    strip_prefix = "rules_proto-6.0.2",
+    url = "https://github.com/bazelbuild/rules_proto/releases/download/6.0.2/rules_proto-6.0.2.tar.gz",
 )
-load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
+
+load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies","rules_proto_toolchains")
 rules_proto_dependencies()
 rules_proto_toolchains()

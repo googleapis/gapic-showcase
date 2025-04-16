@@ -19,19 +19,21 @@ import (
 	"errors"
 	"io"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	durpb "github.com/golang/protobuf/ptypes/duration"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 	durationpb "google.golang.org/protobuf/types/known/durationpb"
 )
 
@@ -115,13 +117,16 @@ func (m *mockUnaryStream) Send(resp *pb.EchoResponse) error { return nil }
 func (m *mockUnaryStream) Context() context.Context         { return nil }
 func (m *mockUnaryStream) SetTrailer(md metadata.MD) {
 	m.trail = append(m.trail, md.Get("showcase-trailer")...)
+	m.trail = append(m.trail, md.Get("x-goog-api-version")...)
+	// Sort the trailer values as having a guaranteed order will help with array comparison
+	sort.Strings(m.trail)
 }
 func (m *mockUnaryStream) SetHeader(md metadata.MD) error {
 	m.head = append(m.head, md.Get("x-goog-request-params")...)
 	return nil
 }
 func (m *mockUnaryStream) verify(expectHeadersAndTrailers bool) {
-	if expectHeadersAndTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) && !reflect.DeepEqual([]string{"showcaseHeader, anotherHeader"}, m.head) {
+	if expectHeadersAndTrailers && (!reflect.DeepEqual([]string{"apiVersion", "case", "show"}, m.trail) || !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head)) {
 		m.t.Errorf("Unary stream did not get all expected headers and trailers.\nGot these headers: %+v\nGot these trailers: %+v", m.head, m.trail)
 	}
 }
@@ -152,6 +157,7 @@ func (m *mockExpandStream) SetTrailer(md metadata.MD) {
 
 func (m *mockExpandStream) SetHeader(md metadata.MD) error {
 	m.head = append(m.head, md.Get("x-goog-request-params")...)
+	m.head = append(m.head, md.Get("x-goog-api-version")...)
 	return nil
 }
 
@@ -159,7 +165,7 @@ func (m *mockExpandStream) verify(expectHeadersAndTrailers bool) {
 	if len(m.exp) > 0 {
 		m.t.Errorf("Expand did not stream all expected values. %d expected values remaining.", len(m.exp))
 	}
-	if expectHeadersAndTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) && !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head) {
+	if expectHeadersAndTrailers && (!reflect.DeepEqual([]string{"show", "case"}, m.trail) || !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head)) {
 		m.t.Errorf("Expand did not get all expected headers and trailers.\nGot these headers: %+v\nGot these trailers: %+v", m.head, m.trail)
 	}
 }
@@ -265,7 +271,7 @@ func (m *mockCollectStream) SetTrailer(md metadata.MD) {
 }
 
 func (m *mockCollectStream) verify(expectHeadersAndTrailers bool) {
-	if expectHeadersAndTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) && !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head) {
+	if expectHeadersAndTrailers && (!reflect.DeepEqual([]string{"show", "case"}, m.trail) || !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head)) {
 		m.t.Errorf("Collect did not get all expected trailers.\nGot these headers: %+v\nGot these trailers: %+v", m.head, m.trail)
 	}
 }
@@ -366,7 +372,7 @@ func (m *mockChatStream) SetTrailer(md metadata.MD) {
 }
 
 func (m *mockChatStream) verify(expectHeadersAndTrailers bool) {
-	if expectHeadersAndTrailers && !reflect.DeepEqual([]string{"show", "case"}, m.trail) && !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head) {
+	if expectHeadersAndTrailers && (!reflect.DeepEqual([]string{"show", "case"}, m.trail) || !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head)) {
 		m.t.Errorf("Chat did not get all expected trailers.\nGot these headers: %+v\nGot these trailers: %+v", m.head, m.trail)
 	}
 }
@@ -399,6 +405,192 @@ func TestChat(t *testing.T) {
 			t.Errorf("Chat expected to return status with code %d, but returned %d", expCode, s.Code())
 		}
 		mockStream.verify(test.err == nil)
+	}
+}
+
+func TestEchoErrorDetails_single(t *testing.T) {
+	tests := []struct {
+		text     string
+		expected *errdetails.ErrorInfo
+	}{
+		{"Spanish rain", &errdetails.ErrorInfo{Reason: "Spanish rain"}},
+		{"", &errdetails.ErrorInfo{Reason: ""}},
+	}
+
+	server := NewEchoServer()
+	for idx, test := range tests {
+		request := &pb.EchoErrorDetailsRequest{SingleDetailText: test.text}
+		out, err := server.EchoErrorDetails(context.Background(), request)
+		if err != nil {
+			t.Errorf("[%d] error calling EchoErrorSingleDetail(): %v", idx, err)
+			continue
+		}
+		if out.MultipleDetails != nil {
+			t.Errorf("[%d] expected no MultipleDetails, but got: %#v", idx, out.MultipleDetails)
+		}
+		if len(test.text) == 0 {
+			if out.SingleDetail != nil {
+				t.Errorf("[%d] expected no SingleDetail, but got: %#v", idx, out.SingleDetail)
+			}
+			continue
+		}
+		if out.SingleDetail == nil {
+			t.Errorf("[%d] no SingleDetail returned", idx)
+			continue
+		}
+		if out.SingleDetail.Error == nil {
+			t.Errorf("[%d] no SingleDetail.Error returned", idx)
+			continue
+		}
+		if out.SingleDetail.Error.Details == nil {
+			t.Errorf("[%d] no SingleDetail.Error.Details returned", idx)
+			continue
+		}
+		if got, want := out.SingleDetail.Error.Details.TypeUrl, "type.googleapis.com/google.rpc.ErrorInfo"; got != want {
+			t.Errorf("[%d] expected type URL %q; got %q ", idx, want, got)
+		}
+		unmarshalledError := &errdetails.ErrorInfo{}
+		if err := out.SingleDetail.Error.Details.UnmarshalTo(unmarshalledError); err != nil {
+			t.Errorf("[%d] error unmarshalling to ErrorInfo: %v", idx, err)
+		}
+		if got, want := unmarshalledError, test.expected; !proto.Equal(got, want) {
+			t.Errorf("[%d] expected ErrorInfo %v; got %v ", idx, want, got)
+		}
+	}
+}
+
+func TestEchoErrorDetails_multiple(t *testing.T) {
+	tests := []struct {
+		text     []string
+		expected []*errdetails.ErrorInfo
+	}{
+		{
+			[]string{"rain", "snow", "hail", "sleet", "fog"},
+			[]*errdetails.ErrorInfo{
+				{Reason: "rain"},
+				{Reason: "snow"},
+				{Reason: "hail"},
+				{Reason: "sleet"},
+				{Reason: "fog"},
+			},
+		},
+		{nil, nil},
+	}
+
+	server := NewEchoServer()
+	for idx, test := range tests {
+		request := &pb.EchoErrorDetailsRequest{MultiDetailText: test.text}
+		out, err := server.EchoErrorDetails(context.Background(), request)
+		if err != nil {
+			t.Errorf("[%d] error calling EchoErrorDetails(): %v", idx, err)
+			continue
+		}
+		if out.SingleDetail != nil {
+			t.Errorf("[%d] expected no SingleDetail, but got: %#v", idx, out.SingleDetail)
+		}
+		if len(test.text) == 0 {
+			if out.MultipleDetails != nil {
+				t.Errorf("[%d] expected no MultipleDetails, but got %#v", idx, out.MultipleDetails)
+			}
+			continue
+		}
+		if out.MultipleDetails == nil {
+			t.Errorf("[%d] no MultipleDetails returned", idx)
+			continue
+		}
+		if out.MultipleDetails.Error == nil {
+			t.Errorf("[%d] no MultipleDetails.Error returned", idx)
+			continue
+		}
+		if out.MultipleDetails.Error.Details == nil {
+			t.Errorf("[%d] no MultipleDetails.Error.Details returned", idx)
+			continue
+		}
+		if got, want := len(out.MultipleDetails.Error.Details), len(test.expected); got != want {
+			t.Errorf("[%d] expected %d MultipleDetails.Error.Details, got %d", idx, want, got)
+		}
+		for whichDetail, detail := range out.MultipleDetails.Error.Details {
+			if got, want := detail.TypeUrl, "type.googleapis.com/google.rpc.ErrorInfo"; got != want {
+				t.Errorf("[%d:%d] expected type URL %q; got %q ", idx, whichDetail, want, got)
+			}
+			unmarshalledError := &errdetails.ErrorInfo{}
+			if err := detail.UnmarshalTo(unmarshalledError); err != nil {
+				t.Errorf("[%d:%d] error unmarshalling to ErrorInfo: %v", idx, whichDetail, err)
+			}
+			if got, want := unmarshalledError, test.expected[whichDetail]; !proto.Equal(got, want) {
+				t.Errorf("[%d:%d] expected ErrorInfo %v; got %v ", idx, whichDetail, want, got)
+			}
+		}
+	}
+}
+
+func TestFailEchoWithDetails(t *testing.T) {
+	// We only check that all RPC calls to FailEchoWithDetails
+	// return the expected sequence of error detail types. We
+	// don't check the contents of the messages, except for the
+	// PoetryError detail.
+	expectedDetailTypes := []reflect.Type{
+		reflect.TypeOf((*errdetails.ErrorInfo)(nil)),
+		reflect.TypeOf((*errdetails.LocalizedMessage)(nil)),
+		reflect.TypeOf((*pb.PoetryError)(nil)),
+		reflect.TypeOf((*errdetails.RetryInfo)(nil)),
+		reflect.TypeOf((*errdetails.DebugInfo)(nil)),
+		reflect.TypeOf((*errdetails.QuotaFailure)(nil)),
+		reflect.TypeOf((*errdetails.PreconditionFailure)(nil)),
+		reflect.TypeOf((*errdetails.BadRequest)(nil)),
+		reflect.TypeOf((*errdetails.RequestInfo)(nil)),
+		reflect.TypeOf((*errdetails.ResourceInfo)(nil)),
+		reflect.TypeOf((*errdetails.Help)(nil)),
+	}
+
+	tests := []struct{ message string }{
+		{""}, // error response will have a default value
+		{"two paths diverged in a wood"},
+	}
+
+	server := NewEchoServer()
+	for testIdx, oneTest := range tests {
+		request := &pb.FailEchoWithDetailsRequest{}
+		if oneTest.message != "" {
+			request.Message = oneTest.message
+		}
+		response, err := server.FailEchoWithDetails(context.Background(), request)
+		if err == nil {
+			t.Errorf("[%d] expected error upon calling FailEchoWithDetails. Response was: %+v", testIdx, response)
+		}
+		status, _ := status.FromError(err)
+		if got, want := status.Code(), codes.Aborted; got != want {
+			t.Errorf("[%d] unexpected gRPC code: want %v, got %v", testIdx, want, got)
+		}
+		allDetails := status.Details()
+		if got, want := len(allDetails), len(expectedDetailTypes); got != want {
+			t.Errorf("[%d] detail list length: : want %v, got %v", testIdx, want, got)
+		}
+		for detailIdx, oneDetail := range allDetails {
+			if got, want := reflect.TypeOf(oneDetail), expectedDetailTypes[detailIdx]; got != want {
+				t.Errorf("[%d:%d] want detail of type %v, got %v", testIdx, detailIdx, want, got)
+			}
+
+			// In what follows, we check the internals of PoetryError.
+
+			if detailIdx != 2 {
+				continue
+			}
+
+			poetryError, ok := oneDetail.(*pb.PoetryError)
+			if !ok {
+				t.Fatalf("[%d:%d] could not convert detail to a PoetryError", testIdx, detailIdx)
+				continue
+			}
+
+			wantPoem := "roses are red"
+			if oneTest.message != "" {
+				wantPoem = oneTest.message
+			}
+			if got, want := poetryError.Poem, wantPoem; got != want {
+				t.Errorf("[%d:%d] PoetryError.poem: want %q, got %q", testIdx, detailIdx, want, got)
+			}
+		}
 	}
 }
 
@@ -781,6 +973,6 @@ func TestBlockError(t *testing.T) {
 
 func appendTestOutgoingMetadata(ctx context.Context, stream grpc.ServerTransportStream) context.Context {
 	ctx = grpc.NewContextWithServerTransportStream(ctx, stream)
-	ctx = metadata.NewIncomingContext(ctx, metadata.Pairs("showcase-trailer", "show", "showcase-trailer", "case", "trailer", "trail", "x-goog-request-params", "showcaseHeader", "x-goog-request-params", "anotherHeader", "header", "head"))
+	ctx = metadata.NewIncomingContext(ctx, metadata.Pairs("showcase-trailer", "show", "showcase-trailer", "case", "trailer", "trail", "x-goog-request-params", "showcaseHeader", "x-goog-request-params", "anotherHeader", "header", "head", "x-goog-api-version", "apiVersion"))
 	return ctx
 }

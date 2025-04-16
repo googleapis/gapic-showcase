@@ -1,5 +1,126 @@
 # Release History
 
+## [0.36.1](https://github.com/googleapis/gapic-showcase/compare/v0.36.0...v0.36.1) (2025-04-16)
+
+
+### Bug Fixes
+
+* Update generated files to reflect proto changes ([#1579](https://github.com/googleapis/gapic-showcase/pull/1579)) ([6579d3a](https://github.com/googleapis/gapic-showcase/commit/6579d3aaf4bd541c43d3c2f8e981e94caf446dbe))
+* Expand echo.proto comments ([#1580](https://github.com/googleapis/gapic-showcase/issues/1580)) ([076cb09](https://github.com/googleapis/gapic-showcase/commit/076cb0923e02f60a791ad82e6fc2c94c57e6671f))
+
+## [0.36.0](https://github.com/googleapis/gapic-showcase/compare/v0.35.5...v0.36.0) (2025-04-10)
+
+
+### Features
+
+* Add Echo.FailEchoWithDetails RPC that always fails with all standard and one custom error detail ([#1576](https://github.com/googleapis/gapic-showcase/issues/1576)) ([709b57d](https://github.com/googleapis/gapic-showcase/commit/709b57d724327abe091965c54f402042155aa178))
+
+
+### Bug Fixes
+
+* Return AIP/193-compliant errors over rest transport ([#1573](https://github.com/googleapis/gapic-showcase/issues/1573)) ([d47045b](https://github.com/googleapis/gapic-showcase/commit/d47045be1ee31f373d5a6ded287cbc9c5b9b605a))
+* Typos in some proto comments ([#1563](https://github.com/googleapis/gapic-showcase/issues/1563)) ([ae41e96](https://github.com/googleapis/gapic-showcase/commit/ae41e96133b36fa86f8d08c0f839ab9fb12e3e96))
+
+## [0.35.5](https://github.com/googleapis/gapic-showcase/compare/v0.35.4...v0.35.5) (2024-12-04)
+
+
+### Bug Fixes
+
+* Replace use of github.com/golang/protobuf/proto where possible ([#1557](https://github.com/googleapis/gapic-showcase/issues/1557)) ([0215dd6](https://github.com/googleapis/gapic-showcase/commit/0215dd637e130ca0c0a74adcc74d34d3373060d8)), closes [#1525](https://github.com/googleapis/gapic-showcase/issues/1525)
+
+## [0.35.4](https://github.com/googleapis/gapic-showcase/compare/v0.35.3...v0.35.4) (2024-12-03)
+
+
+### Bug Fixes
+
+* Revert replace use of github.com/golang/protobuf/proto ([#1534](https://github.com/googleapis/gapic-showcase/issues/1534))" ([#1553](https://github.com/googleapis/gapic-showcase/issues/1553)) ([b82e7c5](https://github.com/googleapis/gapic-showcase/commit/b82e7c5d8b63ba11cc21361a4b84d0cb29a59826))
+
+## [0.35.3](https://github.com/googleapis/gapic-showcase/compare/v0.35.2...v0.35.3) (2024-12-03)
+
+
+### Bug Fixes
+
+* Downgrade go version to 1.21 ([#1551](https://github.com/googleapis/gapic-showcase/issues/1551)) ([36831cf](https://github.com/googleapis/gapic-showcase/commit/36831cfe255e13e3a5328ad548ddba9c3174434e))
+
+## [0.35.2](https://github.com/googleapis/gapic-showcase/compare/v0.35.1...v0.35.2) (2024-12-03)
+
+
+### Bug Fixes
+
+* **deps:** Update bazel-contrib/setup-bazel action to v0.9.1 ([#1546](https://github.com/googleapis/gapic-showcase/issues/1546)) ([bc936fb](https://github.com/googleapis/gapic-showcase/commit/bc936fb7c3607853bbc58fcd8f4d0aa7ccbc4a1c))
+
+## [0.35.1](https://github.com/googleapis/gapic-showcase/compare/v0.35.0...v0.35.1) (2024-07-08)
+
+
+### Bug Fixes
+
+* Use io.ReadAll ([#1520](https://github.com/googleapis/gapic-showcase/issues/1520)) ([6dddadd](https://github.com/googleapis/gapic-showcase/commit/6dddadd9fcdfed197209271a1201178a57951660))
+
+## [0.35.0](https://github.com/googleapis/gapic-showcase/compare/v0.34.0...v0.35.0) (2024-04-29)
+
+
+### Features
+
+* Echo request headers in response over REST transport ([#1509](https://github.com/googleapis/gapic-showcase/issues/1509)) ([de93c4c](https://github.com/googleapis/gapic-showcase/commit/de93c4c5e33b4e1a8ec3ebbeb7af36143dbc19dd))
+
+## [0.34.0](https://github.com/googleapis/gapic-showcase/compare/v0.33.0...v0.34.0) (2024-04-23)
+
+
+### Features
+
+* Add ability to echo request headers in trailing metadata ([#1501](https://github.com/googleapis/gapic-showcase/issues/1501)) ([48f9b74](https://github.com/googleapis/gapic-showcase/commit/48f9b742970e2199431066807d3f7a5cd2f31728))
+
+## [0.33.0](https://github.com/googleapis/gapic-showcase/compare/v0.32.2...v0.33.0) (2024-04-15)
+
+
+### Features
+
+* Add google.api.api_version annotation to echo.proto ([#1484](https://github.com/googleapis/gapic-showcase/issues/1484)) ([9a2298b](https://github.com/googleapis/gapic-showcase/commit/9a2298b90a90d812c331f2c0d9971b2312ae167d))
+* Log REST request headers ([#1497](https://github.com/googleapis/gapic-showcase/issues/1497)) ([05605c6](https://github.com/googleapis/gapic-showcase/commit/05605c60b41b95be07ca7cf38ae12e2fdbe82094))
+
+## [0.32.2](https://github.com/googleapis/gapic-showcase/compare/v0.32.1...v0.32.2) (2024-03-22)
+
+
+### Bug Fixes
+
+* **bazel:** Fix bazel build and add presubmit ([#1479](https://github.com/googleapis/gapic-showcase/issues/1479)) ([e446229](https://github.com/googleapis/gapic-showcase/commit/e44622986d706bcbdb5de710484318f40b571c20))
+
+## [0.32.1](https://github.com/googleapis/gapic-showcase/compare/v0.32.0...v0.32.1) (2024-03-21)
+
+
+### Bug Fixes
+
+* Add missing dependency in bazel rule ([#1477](https://github.com/googleapis/gapic-showcase/issues/1477)) ([f08b26d](https://github.com/googleapis/gapic-showcase/commit/f08b26d62da0a3c3214382915167b33633eb9558))
+
+## [0.32.0](https://github.com/googleapis/gapic-showcase/compare/v0.31.0...v0.32.0) (2024-03-20)
+
+
+### Features
+
+* Add autopopulated proto3 optional field to echo ([#1471](https://github.com/googleapis/gapic-showcase/issues/1471)) ([dba317f](https://github.com/googleapis/gapic-showcase/commit/dba317ff2ef63899bcc20de6a29c21f63afc7acc))
+
+## [0.31.0](https://github.com/googleapis/gapic-showcase/compare/v0.30.0...v0.31.0) (2024-02-08)
+
+
+### Features
+
+* Add request id as part of EchoResponse ([#1440](https://github.com/googleapis/gapic-showcase/issues/1440)) ([fe3c90e](https://github.com/googleapis/gapic-showcase/commit/fe3c90eba35a5d94fb419d495178ff90c9bcc795))
+
+## [0.30.0](https://github.com/googleapis/gapic-showcase/compare/v0.29.0...v0.30.0) (2024-01-10)
+
+
+### Features
+
+* Add autopopulated request id field to echo ([#1404](https://github.com/googleapis/gapic-showcase/issues/1404)) ([196b665](https://github.com/googleapis/gapic-showcase/commit/196b6650ff01483246d5c3fe67ca2ad29d1a21dc))
+* Replace api-common-protos submodule with googleapis ([#1395](https://github.com/googleapis/gapic-showcase/issues/1395)) ([d72c489](https://github.com/googleapis/gapic-showcase/commit/d72c4899c111e8c870b552cd1721166434096348))
+
+## [0.29.0](https://github.com/googleapis/gapic-showcase/compare/v0.28.4...v0.29.0) (2023-11-08)
+
+
+### Features
+
+* Add EchoErrorDetails RPC for Any testing ([#1385](https://github.com/googleapis/gapic-showcase/issues/1385)) ([c839a8e](https://github.com/googleapis/gapic-showcase/commit/c839a8ec6973b6c5189c9cba8b6a81f1663b8fd1))
+
 ## [0.28.4](https://github.com/googleapis/gapic-showcase/compare/v0.28.3...v0.28.4) (2023-08-14)
 
 

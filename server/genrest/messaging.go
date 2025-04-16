@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,9 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/rooms': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -52,8 +55,8 @@ func (backend *RESTBackend) HandleCreateRoom(w http.ResponseWriter, r *http.Requ
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -107,6 +110,9 @@ func (backend *RESTBackend) HandleGetRoom(w http.ResponseWriter, r *http.Request
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=rooms/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -170,6 +176,9 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{room.name=rooms/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -187,8 +196,8 @@ func (backend *RESTBackend) HandleUpdateRoom(w http.ResponseWriter, r *http.Requ
 	var bodyField genprotopb.Room
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -250,6 +259,9 @@ func (backend *RESTBackend) HandleDeleteRoom(w http.ResponseWriter, r *http.Requ
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=rooms/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -313,6 +325,9 @@ func (backend *RESTBackend) HandleListRooms(w http.ResponseWriter, r *http.Reque
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/rooms': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -371,6 +386,9 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{parent=rooms/*}/blurbs': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -387,8 +405,8 @@ func (backend *RESTBackend) HandleCreateBlurb(w http.ResponseWriter, r *http.Req
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -442,6 +460,9 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{parent=users/*/profile}/blurbs': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -458,8 +479,8 @@ func (backend *RESTBackend) HandleCreateBlurb_1(w http.ResponseWriter, r *http.R
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -513,6 +534,9 @@ func (backend *RESTBackend) HandleGetBlurb(w http.ResponseWriter, r *http.Reques
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=rooms/*/blurbs/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -576,6 +600,9 @@ func (backend *RESTBackend) HandleGetBlurb_1(w http.ResponseWriter, r *http.Requ
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=users/*/profile/blurbs/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -639,6 +666,9 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{blurb.name=rooms/*/blurbs/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -656,8 +686,8 @@ func (backend *RESTBackend) HandleUpdateBlurb(w http.ResponseWriter, r *http.Req
 	var bodyField genprotopb.Blurb
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -719,6 +749,9 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{blurb.name=users/*/profile/blurbs/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -736,8 +769,8 @@ func (backend *RESTBackend) HandleUpdateBlurb_1(w http.ResponseWriter, r *http.R
 	var bodyField genprotopb.Blurb
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -799,6 +832,9 @@ func (backend *RESTBackend) HandleDeleteBlurb(w http.ResponseWriter, r *http.Req
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=rooms/*/blurbs/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -862,6 +898,9 @@ func (backend *RESTBackend) HandleDeleteBlurb_1(w http.ResponseWriter, r *http.R
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=users/*/profile/blurbs/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -925,6 +964,9 @@ func (backend *RESTBackend) HandleListBlurbs(w http.ResponseWriter, r *http.Requ
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{parent=rooms/*}/blurbs': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -988,6 +1030,9 @@ func (backend *RESTBackend) HandleListBlurbs_1(w http.ResponseWriter, r *http.Re
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{parent=users/*/profile}/blurbs': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -1051,6 +1096,9 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{parent=rooms/*}/blurbs:search': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -1067,8 +1115,8 @@ func (backend *RESTBackend) HandleSearchBlurbs(w http.ResponseWriter, r *http.Re
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -1122,6 +1170,9 @@ func (backend *RESTBackend) HandleSearchBlurbs_1(w http.ResponseWriter, r *http.
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{parent=users/*/profile}/blurbs:search': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -1185,6 +1236,9 @@ func (backend *RESTBackend) HandleStreamBlurbs(w http.ResponseWriter, r *http.Re
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=rooms/*}/blurbs:stream': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -1201,8 +1255,8 @@ func (backend *RESTBackend) HandleStreamBlurbs(w http.ResponseWriter, r *http.Re
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -1252,6 +1306,9 @@ func (backend *RESTBackend) HandleStreamBlurbs_1(w http.ResponseWriter, r *http.
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=users/*/profile}/blurbs:stream': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -1268,8 +1325,8 @@ func (backend *RESTBackend) HandleStreamBlurbs_1(w http.ResponseWriter, r *http.
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}

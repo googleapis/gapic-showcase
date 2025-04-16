@@ -70,7 +70,7 @@ hold using this installation method._
 
 ## Schema
 The schema of GAPIC Showcase API can be found in [schema/google/showcase/v1beta1](schema/google/showcase/v1beta1)
-Its dependencies can be found in the [googleapis/api-common-protos](https://github.com/googleapis/api-common-protos)
+Its dependencies can be found in the [googleapis/googleapis](https://github.com/googleapis/googleapis)
 submodule.
 
 ## Development Environment
@@ -80,7 +80,7 @@ To set up this repository for local development, follow these steps:
 or your OS package manager. This API utilizes `proto3_optional`, thus `v3.12.0`
 is the minimum supported version of `protoc`.
 
-1. Initialize the `api-common-protos` submodule:
+1. Initialize the `googleapis` submodule:
     ```sh
     git submodule update --init --recursive
     ```
@@ -93,9 +93,9 @@ is the minimum supported version of `protoc`.
 
 1. Set up Go protobuf tools:
     ```sh
-    go install github.com/golang/protobuf/protoc-gen-go
-    go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli
-    go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic
+    go install github.com/golang/protobuf/protoc-gen-go@latest
+    go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli@latest
+    go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic@latest
     ```
 
 1. Export the Go binaries to your environment path.
@@ -166,16 +166,33 @@ const client = new showcase.EchoClient({ grpc, sslCreds: grpc.credentials.create
 #### Example for Go:
 
 ```go
-conn, err := grpc.Dial("localhost:7469", grpc.WithInsecure())
-if err != nil {
-    log.Fatal(err)
-}
-opt := option.WithGRPCConn(conn)
-client, err = showcase.NewEchoClient(context.Background(), opt)
-if err != nil {
-    log.Fatal(err)
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/googleapis/gapic-showcase/client"
+	"google.golang.org/api/option"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+)
+
+func main() {
+	conn, err := grpc.Dial("localhost:7469", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal(err)
+	}
+	opt := option.WithGRPCConn(conn)
+	ctx := context.Background()
+	_, err = client.NewEchoClient(ctx, opt)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 ```
+
 
 #### Example for Java (gRPC):
 

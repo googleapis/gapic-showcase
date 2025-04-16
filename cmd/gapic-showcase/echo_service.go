@@ -10,6 +10,7 @@ import (
 	"golang.org/x/oauth2"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	gapic "github.com/googleapis/gapic-showcase/client"
 )
@@ -18,6 +19,8 @@ var EchoConfig *viper.Viper
 var EchoClient *gapic.EchoClient
 var EchoSubCommands []string = []string{
 	"echo",
+	"echo-error-details",
+	"fail-echo-with-details",
 	"expand",
 	"collect",
 	"chat",
@@ -70,7 +73,7 @@ var EchoServiceCmd = &cobra.Command{
 				return fmt.Errorf("Missing address to use with insecure connection")
 			}
 
-			conn, err := grpc.Dial(address, grpc.WithInsecure())
+			conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 			if err != nil {
 				return err
 			}

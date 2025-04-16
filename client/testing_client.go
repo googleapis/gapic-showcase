@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
+	"log/slog"
 	"math"
 	"net/http"
 	"net/url"
@@ -29,7 +29,6 @@ import (
 	longrunningpb "cloud.google.com/go/longrunning/autogen/longrunningpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	gax "github.com/googleapis/gax-go/v2"
-	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	"google.golang.org/api/option/internaloption"
@@ -67,10 +66,13 @@ type TestingCallOptions struct {
 func defaultTestingGRPCClientOptions() []option.ClientOption {
 	return []option.ClientOption{
 		internaloption.WithDefaultEndpoint("localhost:7469"),
+		internaloption.WithDefaultEndpointTemplate("localhost:7469"),
 		internaloption.WithDefaultMTLSEndpoint("localhost:7469"),
+		internaloption.WithDefaultUniverseDomain("googleapis.com"),
 		internaloption.WithDefaultAudience("https://localhost/"),
 		internaloption.WithDefaultScopes(DefaultAuthScopes()...),
 		internaloption.EnableJwtWithScope(),
+		internaloption.EnableNewAuthLibrary(),
 		option.WithGRPCDialOption(grpc.WithDefaultCallOptions(
 			grpc.MaxCallRecvMsgSize(math.MaxInt32))),
 	}
@@ -149,6 +151,11 @@ type internalTestingClient interface {
 //
 // A service to facilitate running discrete sets of tests
 // against Showcase.
+// Adding this comment with special characters for comment formatting tests:
+//
+// (abra->kadabra->alakazam)
+//
+// Nonsense: pokemon/*/psychic/*
 type TestingClient struct {
 	// The internal transport-dependent client.
 	internalClient internalTestingClient
@@ -181,6 +188,11 @@ func (c *TestingClient) Connection() *grpc.ClientConn {
 }
 
 // CreateSession creates a new testing session.
+// Adding this comment with special characters for comment formatting tests:
+//
+// (abra->kadabra->alakazam)
+//
+// Nonsense: pokemon/*/psychic/*
 func (c *TestingClient) CreateSession(ctx context.Context, req *genprotopb.CreateSessionRequest, opts ...gax.CallOption) (*genprotopb.Session, error) {
 	return c.internalClient.CreateSession(ctx, req, opts...)
 }
@@ -296,6 +308,8 @@ type testingGRPCClient struct {
 
 	// The x-goog-* metadata to be sent with each request.
 	xGoogHeaders []string
+
+	logger *slog.Logger
 }
 
 // NewTestingClient creates a new testing client based on gRPC.
@@ -303,6 +317,11 @@ type testingGRPCClient struct {
 //
 // A service to facilitate running discrete sets of tests
 // against Showcase.
+// Adding this comment with special characters for comment formatting tests:
+//
+// (abra->kadabra->alakazam)
+//
+// Nonsense: pokemon/*/psychic/*
 func NewTestingClient(ctx context.Context, opts ...option.ClientOption) (*TestingClient, error) {
 	clientOpts := defaultTestingGRPCClientOptions()
 	if newTestingClientHook != nil {
@@ -323,6 +342,7 @@ func NewTestingClient(ctx context.Context, opts ...option.ClientOption) (*Testin
 		connPool:         connPool,
 		testingClient:    genprotopb.NewTestingClient(connPool),
 		CallOptions:      &client.CallOptions,
+		logger:           internaloption.GetLogger(opts),
 		operationsClient: longrunningpb.NewOperationsClient(connPool),
 		iamPolicyClient:  iampb.NewIAMPolicyClient(connPool),
 		locationsClient:  locationpb.NewLocationsClient(connPool),
@@ -348,7 +368,9 @@ func (c *testingGRPCClient) Connection() *grpc.ClientConn {
 func (c *testingGRPCClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", gax.GoVersion}, keyval...)
 	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "grpc", grpc.Version)
-	c.xGoogHeaders = []string{"x-goog-api-client", gax.XGoogHeader(kv...)}
+	c.xGoogHeaders = []string{
+		"x-goog-api-client", gax.XGoogHeader(kv...),
+	}
 }
 
 // Close closes the connection to the API service. The user should invoke this when
@@ -370,12 +392,19 @@ type testingRESTClient struct {
 
 	// Points back to the CallOptions field of the containing TestingClient
 	CallOptions **TestingCallOptions
+
+	logger *slog.Logger
 }
 
 // NewTestingRESTClient creates a new testing rest client.
 //
 // A service to facilitate running discrete sets of tests
 // against Showcase.
+// Adding this comment with special characters for comment formatting tests:
+//
+// (abra->kadabra->alakazam)
+//
+// Nonsense: pokemon/*/psychic/*
 func NewTestingRESTClient(ctx context.Context, opts ...option.ClientOption) (*TestingClient, error) {
 	clientOpts := append(defaultTestingRESTClientOptions(), opts...)
 	httpClient, endpoint, err := httptransport.NewClient(ctx, clientOpts...)
@@ -388,6 +417,7 @@ func NewTestingRESTClient(ctx context.Context, opts ...option.ClientOption) (*Te
 		endpoint:    endpoint,
 		httpClient:  httpClient,
 		CallOptions: &callOpts,
+		logger:      internaloption.GetLogger(opts),
 	}
 	c.setGoogleClientInfo()
 
@@ -397,9 +427,12 @@ func NewTestingRESTClient(ctx context.Context, opts ...option.ClientOption) (*Te
 func defaultTestingRESTClientOptions() []option.ClientOption {
 	return []option.ClientOption{
 		internaloption.WithDefaultEndpoint("https://localhost:7469"),
+		internaloption.WithDefaultEndpointTemplate("https://localhost:7469"),
 		internaloption.WithDefaultMTLSEndpoint("https://localhost:7469"),
+		internaloption.WithDefaultUniverseDomain("googleapis.com"),
 		internaloption.WithDefaultAudience("https://localhost/"),
 		internaloption.WithDefaultScopes(DefaultAuthScopes()...),
+		internaloption.EnableNewAuthLibrary(),
 	}
 }
 
@@ -409,7 +442,9 @@ func defaultTestingRESTClientOptions() []option.ClientOption {
 func (c *testingRESTClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", gax.GoVersion}, keyval...)
 	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "rest", "UNKNOWN")
-	c.xGoogHeaders = []string{"x-goog-api-client", gax.XGoogHeader(kv...)}
+	c.xGoogHeaders = []string{
+		"x-goog-api-client", gax.XGoogHeader(kv...),
+	}
 }
 
 // Close closes the connection to the API service. The user should invoke this when
@@ -432,7 +467,7 @@ func (c *testingGRPCClient) CreateSession(ctx context.Context, req *genprotopb.C
 	var resp *genprotopb.Session
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.testingClient.CreateSession(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.testingClient.CreateSession, req, settings.GRPC, c.logger, "CreateSession")
 		return err
 	}, opts...)
 	if err != nil {
@@ -450,7 +485,7 @@ func (c *testingGRPCClient) GetSession(ctx context.Context, req *genprotopb.GetS
 	var resp *genprotopb.Session
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.testingClient.GetSession(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.testingClient.GetSession, req, settings.GRPC, c.logger, "GetSession")
 		return err
 	}, opts...)
 	if err != nil {
@@ -476,7 +511,7 @@ func (c *testingGRPCClient) ListSessions(ctx context.Context, req *genprotopb.Li
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			var err error
-			resp, err = c.testingClient.ListSessions(ctx, req, settings.GRPC...)
+			resp, err = executeRPC(ctx, c.testingClient.ListSessions, req, settings.GRPC, c.logger, "ListSessions")
 			return err
 		}, opts...)
 		if err != nil {
@@ -510,7 +545,7 @@ func (c *testingGRPCClient) DeleteSession(ctx context.Context, req *genprotopb.D
 	opts = append((*c.CallOptions).DeleteSession[0:len((*c.CallOptions).DeleteSession):len((*c.CallOptions).DeleteSession)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		_, err = c.testingClient.DeleteSession(ctx, req, settings.GRPC...)
+		_, err = executeRPC(ctx, c.testingClient.DeleteSession, req, settings.GRPC, c.logger, "DeleteSession")
 		return err
 	}, opts...)
 	return err
@@ -525,7 +560,7 @@ func (c *testingGRPCClient) ReportSession(ctx context.Context, req *genprotopb.R
 	var resp *genprotopb.ReportSessionResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.testingClient.ReportSession(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.testingClient.ReportSession, req, settings.GRPC, c.logger, "ReportSession")
 		return err
 	}, opts...)
 	if err != nil {
@@ -554,7 +589,7 @@ func (c *testingGRPCClient) ListTests(ctx context.Context, req *genprotopb.ListT
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			var err error
-			resp, err = c.testingClient.ListTests(ctx, req, settings.GRPC...)
+			resp, err = executeRPC(ctx, c.testingClient.ListTests, req, settings.GRPC, c.logger, "ListTests")
 			return err
 		}, opts...)
 		if err != nil {
@@ -588,7 +623,7 @@ func (c *testingGRPCClient) DeleteTest(ctx context.Context, req *genprotopb.Dele
 	opts = append((*c.CallOptions).DeleteTest[0:len((*c.CallOptions).DeleteTest):len((*c.CallOptions).DeleteTest)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		_, err = c.testingClient.DeleteTest(ctx, req, settings.GRPC...)
+		_, err = executeRPC(ctx, c.testingClient.DeleteTest, req, settings.GRPC, c.logger, "DeleteTest")
 		return err
 	}, opts...)
 	return err
@@ -603,7 +638,7 @@ func (c *testingGRPCClient) VerifyTest(ctx context.Context, req *genprotopb.Veri
 	var resp *genprotopb.VerifyTestResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.testingClient.VerifyTest(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.testingClient.VerifyTest, req, settings.GRPC, c.logger, "VerifyTest")
 		return err
 	}, opts...)
 	if err != nil {
@@ -632,7 +667,7 @@ func (c *testingGRPCClient) ListLocations(ctx context.Context, req *locationpb.L
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			var err error
-			resp, err = c.locationsClient.ListLocations(ctx, req, settings.GRPC...)
+			resp, err = executeRPC(ctx, c.locationsClient.ListLocations, req, settings.GRPC, c.logger, "ListLocations")
 			return err
 		}, opts...)
 		if err != nil {
@@ -667,7 +702,7 @@ func (c *testingGRPCClient) GetLocation(ctx context.Context, req *locationpb.Get
 	var resp *locationpb.Location
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.locationsClient.GetLocation(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.locationsClient.GetLocation, req, settings.GRPC, c.logger, "GetLocation")
 		return err
 	}, opts...)
 	if err != nil {
@@ -685,7 +720,7 @@ func (c *testingGRPCClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamP
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.iamPolicyClient.SetIamPolicy(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.iamPolicyClient.SetIamPolicy, req, settings.GRPC, c.logger, "SetIamPolicy")
 		return err
 	}, opts...)
 	if err != nil {
@@ -703,7 +738,7 @@ func (c *testingGRPCClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamP
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.iamPolicyClient.GetIamPolicy(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.iamPolicyClient.GetIamPolicy, req, settings.GRPC, c.logger, "GetIamPolicy")
 		return err
 	}, opts...)
 	if err != nil {
@@ -721,7 +756,7 @@ func (c *testingGRPCClient) TestIamPermissions(ctx context.Context, req *iampb.T
 	var resp *iampb.TestIamPermissionsResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.iamPolicyClient.TestIamPermissions(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.iamPolicyClient.TestIamPermissions, req, settings.GRPC, c.logger, "TestIamPermissions")
 		return err
 	}, opts...)
 	if err != nil {
@@ -747,7 +782,7 @@ func (c *testingGRPCClient) ListOperations(ctx context.Context, req *longrunning
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			var err error
-			resp, err = c.operationsClient.ListOperations(ctx, req, settings.GRPC...)
+			resp, err = executeRPC(ctx, c.operationsClient.ListOperations, req, settings.GRPC, c.logger, "ListOperations")
 			return err
 		}, opts...)
 		if err != nil {
@@ -782,7 +817,7 @@ func (c *testingGRPCClient) GetOperation(ctx context.Context, req *longrunningpb
 	var resp *longrunningpb.Operation
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.operationsClient.GetOperation(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.operationsClient.GetOperation, req, settings.GRPC, c.logger, "GetOperation")
 		return err
 	}, opts...)
 	if err != nil {
@@ -799,7 +834,7 @@ func (c *testingGRPCClient) DeleteOperation(ctx context.Context, req *longrunnin
 	opts = append((*c.CallOptions).DeleteOperation[0:len((*c.CallOptions).DeleteOperation):len((*c.CallOptions).DeleteOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		_, err = c.operationsClient.DeleteOperation(ctx, req, settings.GRPC...)
+		_, err = executeRPC(ctx, c.operationsClient.DeleteOperation, req, settings.GRPC, c.logger, "DeleteOperation")
 		return err
 	}, opts...)
 	return err
@@ -813,13 +848,18 @@ func (c *testingGRPCClient) CancelOperation(ctx context.Context, req *longrunnin
 	opts = append((*c.CallOptions).CancelOperation[0:len((*c.CallOptions).CancelOperation):len((*c.CallOptions).CancelOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		_, err = c.operationsClient.CancelOperation(ctx, req, settings.GRPC...)
+		_, err = executeRPC(ctx, c.operationsClient.CancelOperation, req, settings.GRPC, c.logger, "CancelOperation")
 		return err
 	}, opts...)
 	return err
 }
 
 // CreateSession creates a new testing session.
+// Adding this comment with special characters for comment formatting tests:
+//
+// (abra->kadabra->alakazam)
+//
+// Nonsense: pokemon/*/psychic/*
 func (c *testingRESTClient) CreateSession(ctx context.Context, req *genprotopb.CreateSessionRequest, opts ...gax.CallOption) (*genprotopb.Session, error) {
 	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	body := req.GetSession()
@@ -851,17 +891,7 @@ func (c *testingRESTClient) CreateSession(ctx context.Context, req *genprotopb.C
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "CreateSession")
 		if err != nil {
 			return err
 		}
@@ -906,17 +936,7 @@ func (c *testingRESTClient) GetSession(ctx context.Context, req *genprotopb.GetS
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "GetSession")
 		if err != nil {
 			return err
 		}
@@ -977,21 +997,10 @@ func (c *testingRESTClient) ListSessions(ctx context.Context, req *genprotopb.Li
 			}
 			httpReq.Header = headers
 
-			httpRsp, err := c.httpClient.Do(httpReq)
+			buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "ListSessions")
 			if err != nil {
 				return err
 			}
-			defer httpRsp.Body.Close()
-
-			if err = googleapi.CheckResponse(httpRsp); err != nil {
-				return err
-			}
-
-			buf, err := io.ReadAll(httpRsp.Body)
-			if err != nil {
-				return err
-			}
-
 			if err := unm.Unmarshal(buf, resp); err != nil {
 				return err
 			}
@@ -1046,15 +1055,8 @@ func (c *testingRESTClient) DeleteSession(ctx context.Context, req *genprotopb.D
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		// Returns nil if there is no error, otherwise wraps
-		// the response code and body into a non-nil error
-		return googleapi.CheckResponse(httpRsp)
+		_, err = executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "DeleteSession")
+		return err
 	}, opts...)
 }
 
@@ -1088,17 +1090,7 @@ func (c *testingRESTClient) ReportSession(ctx context.Context, req *genprotopb.R
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "ReportSession")
 		if err != nil {
 			return err
 		}
@@ -1159,21 +1151,10 @@ func (c *testingRESTClient) ListTests(ctx context.Context, req *genprotopb.ListT
 			}
 			httpReq.Header = headers
 
-			httpRsp, err := c.httpClient.Do(httpReq)
+			buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "ListTests")
 			if err != nil {
 				return err
 			}
-			defer httpRsp.Body.Close()
-
-			if err = googleapi.CheckResponse(httpRsp); err != nil {
-				return err
-			}
-
-			buf, err := io.ReadAll(httpRsp.Body)
-			if err != nil {
-				return err
-			}
-
 			if err := unm.Unmarshal(buf, resp); err != nil {
 				return err
 			}
@@ -1233,15 +1214,8 @@ func (c *testingRESTClient) DeleteTest(ctx context.Context, req *genprotopb.Dele
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		// Returns nil if there is no error, otherwise wraps
-		// the response code and body into a non-nil error
-		return googleapi.CheckResponse(httpRsp)
+		_, err = executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "DeleteTest")
+		return err
 	}, opts...)
 }
 
@@ -1288,17 +1262,7 @@ func (c *testingRESTClient) VerifyTest(ctx context.Context, req *genprotopb.Veri
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "VerifyTest")
 		if err != nil {
 			return err
 		}
@@ -1362,21 +1326,10 @@ func (c *testingRESTClient) ListLocations(ctx context.Context, req *locationpb.L
 			}
 			httpReq.Header = headers
 
-			httpRsp, err := c.httpClient.Do(httpReq)
+			buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "ListLocations")
 			if err != nil {
 				return err
 			}
-			defer httpRsp.Body.Close()
-
-			if err = googleapi.CheckResponse(httpRsp); err != nil {
-				return err
-			}
-
-			buf, err := io.ReadAll(httpRsp.Body)
-			if err != nil {
-				return err
-			}
-
 			if err := unm.Unmarshal(buf, resp); err != nil {
 				return err
 			}
@@ -1434,17 +1387,7 @@ func (c *testingRESTClient) GetLocation(ctx context.Context, req *locationpb.Get
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "GetLocation")
 		if err != nil {
 			return err
 		}
@@ -1495,17 +1438,7 @@ func (c *testingRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIamP
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "SetIamPolicy")
 		if err != nil {
 			return err
 		}
@@ -1557,17 +1490,7 @@ func (c *testingRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIamP
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "GetIamPolicy")
 		if err != nil {
 			return err
 		}
@@ -1618,17 +1541,7 @@ func (c *testingRESTClient) TestIamPermissions(ctx context.Context, req *iampb.T
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "TestIamPermissions")
 		if err != nil {
 			return err
 		}
@@ -1695,21 +1608,10 @@ func (c *testingRESTClient) ListOperations(ctx context.Context, req *longrunning
 			}
 			httpReq.Header = headers
 
-			httpRsp, err := c.httpClient.Do(httpReq)
+			buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "ListOperations")
 			if err != nil {
 				return err
 			}
-			defer httpRsp.Body.Close()
-
-			if err = googleapi.CheckResponse(httpRsp); err != nil {
-				return err
-			}
-
-			buf, err := io.ReadAll(httpRsp.Body)
-			if err != nil {
-				return err
-			}
-
 			if err := unm.Unmarshal(buf, resp); err != nil {
 				return err
 			}
@@ -1767,17 +1669,7 @@ func (c *testingRESTClient) GetOperation(ctx context.Context, req *longrunningpb
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "GetOperation")
 		if err != nil {
 			return err
 		}
@@ -1819,15 +1711,8 @@ func (c *testingRESTClient) DeleteOperation(ctx context.Context, req *longrunnin
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		// Returns nil if there is no error, otherwise wraps
-		// the response code and body into a non-nil error
-		return googleapi.CheckResponse(httpRsp)
+		_, err = executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "DeleteOperation")
+		return err
 	}, opts...)
 }
 
@@ -1856,108 +1741,7 @@ func (c *testingRESTClient) CancelOperation(ctx context.Context, req *longrunnin
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		// Returns nil if there is no error, otherwise wraps
-		// the response code and body into a non-nil error
-		return googleapi.CheckResponse(httpRsp)
+		_, err = executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "CancelOperation")
+		return err
 	}, opts...)
-}
-
-// SessionIterator manages a stream of *genprotopb.Session.
-type SessionIterator struct {
-	items    []*genprotopb.Session
-	pageInfo *iterator.PageInfo
-	nextFunc func() error
-
-	// Response is the raw response for the current page.
-	// It must be cast to the RPC response type.
-	// Calling Next() or InternalFetch() updates this value.
-	Response interface{}
-
-	// InternalFetch is for use by the Google Cloud Libraries only.
-	// It is not part of the stable interface of this package.
-	//
-	// InternalFetch returns results from a single call to the underlying RPC.
-	// The number of results is no greater than pageSize.
-	// If there are no more results, nextPageToken is empty and err is nil.
-	InternalFetch func(pageSize int, pageToken string) (results []*genprotopb.Session, nextPageToken string, err error)
-}
-
-// PageInfo supports pagination. See the google.golang.org/api/iterator package for details.
-func (it *SessionIterator) PageInfo() *iterator.PageInfo {
-	return it.pageInfo
-}
-
-// Next returns the next result. Its second return value is iterator.Done if there are no more
-// results. Once Next returns Done, all subsequent calls will return Done.
-func (it *SessionIterator) Next() (*genprotopb.Session, error) {
-	var item *genprotopb.Session
-	if err := it.nextFunc(); err != nil {
-		return item, err
-	}
-	item = it.items[0]
-	it.items = it.items[1:]
-	return item, nil
-}
-
-func (it *SessionIterator) bufLen() int {
-	return len(it.items)
-}
-
-func (it *SessionIterator) takeBuf() interface{} {
-	b := it.items
-	it.items = nil
-	return b
-}
-
-// TestIterator manages a stream of *genprotopb.Test.
-type TestIterator struct {
-	items    []*genprotopb.Test
-	pageInfo *iterator.PageInfo
-	nextFunc func() error
-
-	// Response is the raw response for the current page.
-	// It must be cast to the RPC response type.
-	// Calling Next() or InternalFetch() updates this value.
-	Response interface{}
-
-	// InternalFetch is for use by the Google Cloud Libraries only.
-	// It is not part of the stable interface of this package.
-	//
-	// InternalFetch returns results from a single call to the underlying RPC.
-	// The number of results is no greater than pageSize.
-	// If there are no more results, nextPageToken is empty and err is nil.
-	InternalFetch func(pageSize int, pageToken string) (results []*genprotopb.Test, nextPageToken string, err error)
-}
-
-// PageInfo supports pagination. See the google.golang.org/api/iterator package for details.
-func (it *TestIterator) PageInfo() *iterator.PageInfo {
-	return it.pageInfo
-}
-
-// Next returns the next result. Its second return value is iterator.Done if there are no more
-// results. Once Next returns Done, all subsequent calls will return Done.
-func (it *TestIterator) Next() (*genprotopb.Test, error) {
-	var item *genprotopb.Test
-	if err := it.nextFunc(); err != nil {
-		return item, err
-	}
-	item = it.items[0]
-	it.items = it.items[1:]
-	return item, nil
-}
-
-func (it *TestIterator) bufLen() int {
-	return len(it.items)
-}
-
-func (it *TestIterator) takeBuf() interface{} {
-	b := it.items
-	it.items = nil
-	return b
 }

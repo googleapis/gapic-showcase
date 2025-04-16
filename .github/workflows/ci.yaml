@@ -5,6 +5,7 @@ on:
     branches:
       - main
   pull_request:
+  workflow_dispatch:
 
 jobs:
   regenerate:
@@ -12,9 +13,9 @@ jobs:
     outputs:
       modified_files: ${{ steps.mod.outputs.modified_files }}
     steps:
-    - uses: actions/setup-go@v4
+    - uses: actions/setup-go@v5
       with:
-        go-version: '1.19.2'
+        go-version: '1.23'
     - name: Install Protoc
       uses: arduino/setup-protoc@v1
     - name: Install external generators
@@ -22,7 +23,7 @@ jobs:
         go install github.com/golang/protobuf/protoc-gen-go@latest
         go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli@latest
         go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic@latest
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Checkout common protos
       run: git submodule init && git submodule update
     - name: Download go deps
@@ -39,7 +40,7 @@ jobs:
     - name: Prepare regenerated sources
       if: steps.mod.outputs.modified_files
       run: tar czf regen.tgz ${{ steps.mod.outputs.modified_files }}
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: steps.mod.outputs.modified_files
       with:
         name: regenerated-sources
@@ -48,13 +49,13 @@ jobs:
     needs: regenerate
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/setup-go@v4
+    - uses: actions/setup-go@v5
       with:
-        go-version: '1.19.2'
+        go-version: '1.23'
     - name: Install golint
       run: go install golang.org/x/lint/golint@latest
-    - uses: actions/checkout@v3
-    - uses: actions/download-artifact@v3
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
       if: needs.regenerate.outputs.modified_files
       with:
         name: regenerated-sources
@@ -74,7 +75,7 @@ jobs:
       # which would mess up the empty vetting results check.
       run: go mod download && go vet ./server/services 2> govet.txt && ! [ -s govet.txt ]
       if: ${{ always() }}
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: ${{ always() }}
       with:
         name: linting-results
@@ -86,11 +87,11 @@ jobs:
     needs: regenerate
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-go@v4
+    - uses: actions/checkout@v4
+    - uses: actions/setup-go@v5
       with:
-        go-version: '1.19.2'
-    - uses: actions/download-artifact@v3
+        go-version: '1.23'
+    - uses: actions/download-artifact@v4
       if: needs.regenerate.outputs.modified_files
       with:
         name: regenerated-sources
@@ -99,24 +100,23 @@ jobs:
       run: |
         tar xvzf regen.tgz
         rm regen.tgz
+    - name: Run mod tidy
+      run: go mod tidy
+    - name: Build the code
+      run: go build ./...
     - name: Run unit tests
       run: go test ./...
     - name: Run server coverage
       run: go test ./server/... -coverprofile=coverage.txt -covermode=atomic
-    # Disabled indefinitely.
-    # - uses: codecov/codecov-action@v1
-    #   with:
-    #     files: ./coverage.txt
-    #     flags: unittests
   probes:
     needs: regenerate
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-go@v4
+    - uses: actions/checkout@v4
+    - uses: actions/setup-go@v5
       with:
-        go-version: '1.19.2'
-    - uses: actions/download-artifact@v3
+        go-version: '1.23'
+    - uses: actions/download-artifact@v4
       if: needs.regenerate.outputs.modified_files
       with:
         name: regenerated-sources
@@ -125,6 +125,8 @@ jobs:
       run: |
         tar xvzf regen.tgz
         rm regen.tgz
+    - name: Run mod tidy
+      run: go mod tidy
     - name: Install gapic-showcase CLI
       run: go install ./cmd/gapic-showcase
     - name: Probe gRPC and REST servers
@@ -160,8 +162,8 @@ jobs:
   protobufjs-load-test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
       with:
         node-version: '12'
     - name: Install protobuf loader
@@ -171,6 +173,7 @@ jobs:
         node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/echo.proto');"
         node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/identity.proto');"
         node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/messaging.proto');"
+        node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/rest_error.proto');"
         node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/testing.proto');"
         node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/compliance.proto');"
         node -e "require('google-proto-files').loadSync('schema/google/showcase/v1beta1/sequence.proto');"
@@ -179,10 +182,10 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && needs.regenerate.outputs.modified_files
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: main
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         name: regenerated-sources
     - name: Expand regen archive
@@ -191,7 +194,7 @@ jobs:
         rm regen.tgz
     - uses: googleapis/code-suggester@v4
       env:
-        ACCESS_TOKEN: ${{ secrets.YOSHI_CODE_BOT_TOKEN }}  
+        ACCESS_TOKEN: ${{ secrets.YOSHI_CODE_BOT_TOKEN }}
       with:
         command: pr
         upstream_owner: googleapis
@@ -204,7 +207,7 @@ jobs:
         git_dir: '.'
         force: true
     - name: Add automerge label to pull request
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           github.rest.issues.addLabels({
@@ -213,3 +216,16 @@ jobs:
             repo: context.repo.repo,
             labels: ['automerge']
           })
+  bazel_build_protos:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: bazel-contrib/setup-bazel@0.13.0
+      with:
+        # Avoid downloading Bazel every time.
+        bazelisk-cache: true
+        # Store build cache per workflow.
+        disk-cache: ${{ github.workflow }}
+        # Share repository cache between workflows.
+        repository-cache: true
+    - run: bazelisk build //schema/google/showcase/v1beta1:showcase_proto

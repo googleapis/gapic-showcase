@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,8 +19,9 @@ package client
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
-	"io"
+	"log/slog"
 	"math"
 	"net/http"
 	"net/url"
@@ -32,7 +33,6 @@ import (
 	longrunningpb "cloud.google.com/go/longrunning/autogen/longrunningpb"
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	gax "github.com/googleapis/gax-go/v2"
-	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	"google.golang.org/api/option/internaloption"
@@ -78,10 +78,13 @@ type MessagingCallOptions struct {
 func defaultMessagingGRPCClientOptions() []option.ClientOption {
 	return []option.ClientOption{
 		internaloption.WithDefaultEndpoint("localhost:7469"),
+		internaloption.WithDefaultEndpointTemplate("localhost:7469"),
 		internaloption.WithDefaultMTLSEndpoint("localhost:7469"),
+		internaloption.WithDefaultUniverseDomain("googleapis.com"),
 		internaloption.WithDefaultAudience("https://localhost/"),
 		internaloption.WithDefaultScopes(DefaultAuthScopes()...),
 		internaloption.EnableJwtWithScope(),
+		internaloption.EnableNewAuthLibrary(),
 		option.WithGRPCDialOption(grpc.WithDefaultCallOptions(
 			grpc.MaxCallRecvMsgSize(math.MaxInt32))),
 	}
@@ -543,6 +546,8 @@ type messagingGRPCClient struct {
 
 	// The x-goog-* metadata to be sent with each request.
 	xGoogHeaders []string
+
+	logger *slog.Logger
 }
 
 // NewMessagingClient creates a new messaging client based on gRPC.
@@ -572,6 +577,7 @@ func NewMessagingClient(ctx context.Context, opts ...option.ClientOption) (*Mess
 		connPool:         connPool,
 		messagingClient:  genprotopb.NewMessagingClient(connPool),
 		CallOptions:      &client.CallOptions,
+		logger:           internaloption.GetLogger(opts),
 		operationsClient: longrunningpb.NewOperationsClient(connPool),
 		iamPolicyClient:  iampb.NewIAMPolicyClient(connPool),
 		locationsClient:  locationpb.NewLocationsClient(connPool),
@@ -608,7 +614,9 @@ func (c *messagingGRPCClient) Connection() *grpc.ClientConn {
 func (c *messagingGRPCClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", gax.GoVersion}, keyval...)
 	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "grpc", grpc.Version)
-	c.xGoogHeaders = []string{"x-goog-api-client", gax.XGoogHeader(kv...)}
+	c.xGoogHeaders = []string{
+		"x-goog-api-client", gax.XGoogHeader(kv...),
+	}
 }
 
 // Close closes the connection to the API service. The user should invoke this when
@@ -635,6 +643,8 @@ type messagingRESTClient struct {
 
 	// Points back to the CallOptions field of the containing MessagingClient
 	CallOptions **MessagingCallOptions
+
+	logger *slog.Logger
 }
 
 // NewMessagingRESTClient creates a new messaging rest client.
@@ -655,6 +665,7 @@ func NewMessagingRESTClient(ctx context.Context, opts ...option.ClientOption) (*
 		endpoint:    endpoint,
 		httpClient:  httpClient,
 		CallOptions: &callOpts,
+		logger:      internaloption.GetLogger(opts),
 	}
 	c.setGoogleClientInfo()
 
@@ -674,9 +685,12 @@ func NewMessagingRESTClient(ctx context.Context, opts ...option.ClientOption) (*
 func defaultMessagingRESTClientOptions() []option.ClientOption {
 	return []option.ClientOption{
 		internaloption.WithDefaultEndpoint("https://localhost:7469"),
+		internaloption.WithDefaultEndpointTemplate("https://localhost:7469"),
 		internaloption.WithDefaultMTLSEndpoint("https://localhost:7469"),
+		internaloption.WithDefaultUniverseDomain("googleapis.com"),
 		internaloption.WithDefaultAudience("https://localhost/"),
 		internaloption.WithDefaultScopes(DefaultAuthScopes()...),
+		internaloption.EnableNewAuthLibrary(),
 	}
 }
 
@@ -686,7 +700,9 @@ func defaultMessagingRESTClientOptions() []option.ClientOption {
 func (c *messagingRESTClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", gax.GoVersion}, keyval...)
 	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "rest", "UNKNOWN")
-	c.xGoogHeaders = []string{"x-goog-api-client", gax.XGoogHeader(kv...)}
+	c.xGoogHeaders = []string{
+		"x-goog-api-client", gax.XGoogHeader(kv...),
+	}
 }
 
 // Close closes the connection to the API service. The user should invoke this when
@@ -709,7 +725,7 @@ func (c *messagingGRPCClient) CreateRoom(ctx context.Context, req *genprotopb.Cr
 	var resp *genprotopb.Room
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.messagingClient.CreateRoom(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.messagingClient.CreateRoom, req, settings.GRPC, c.logger, "CreateRoom")
 		return err
 	}, opts...)
 	if err != nil {
@@ -727,7 +743,7 @@ func (c *messagingGRPCClient) GetRoom(ctx context.Context, req *genprotopb.GetRo
 	var resp *genprotopb.Room
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.messagingClient.GetRoom(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.messagingClient.GetRoom, req, settings.GRPC, c.logger, "GetRoom")
 		return err
 	}, opts...)
 	if err != nil {
@@ -745,7 +761,7 @@ func (c *messagingGRPCClient) UpdateRoom(ctx context.Context, req *genprotopb.Up
 	var resp *genprotopb.Room
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.messagingClient.UpdateRoom(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.messagingClient.UpdateRoom, req, settings.GRPC, c.logger, "UpdateRoom")
 		return err
 	}, opts...)
 	if err != nil {
@@ -762,7 +778,7 @@ func (c *messagingGRPCClient) DeleteRoom(ctx context.Context, req *genprotopb.De
 	opts = append((*c.CallOptions).DeleteRoom[0:len((*c.CallOptions).DeleteRoom):len((*c.CallOptions).DeleteRoom)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		_, err = c.messagingClient.DeleteRoom(ctx, req, settings.GRPC...)
+		_, err = executeRPC(ctx, c.messagingClient.DeleteRoom, req, settings.GRPC, c.logger, "DeleteRoom")
 		return err
 	}, opts...)
 	return err
@@ -785,7 +801,7 @@ func (c *messagingGRPCClient) ListRooms(ctx context.Context, req *genprotopb.Lis
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			var err error
-			resp, err = c.messagingClient.ListRooms(ctx, req, settings.GRPC...)
+			resp, err = executeRPC(ctx, c.messagingClient.ListRooms, req, settings.GRPC, c.logger, "ListRooms")
 			return err
 		}, opts...)
 		if err != nil {
@@ -820,7 +836,7 @@ func (c *messagingGRPCClient) CreateBlurb(ctx context.Context, req *genprotopb.C
 	var resp *genprotopb.Blurb
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.messagingClient.CreateBlurb(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.messagingClient.CreateBlurb, req, settings.GRPC, c.logger, "CreateBlurb")
 		return err
 	}, opts...)
 	if err != nil {
@@ -838,7 +854,7 @@ func (c *messagingGRPCClient) GetBlurb(ctx context.Context, req *genprotopb.GetB
 	var resp *genprotopb.Blurb
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.messagingClient.GetBlurb(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.messagingClient.GetBlurb, req, settings.GRPC, c.logger, "GetBlurb")
 		return err
 	}, opts...)
 	if err != nil {
@@ -856,7 +872,7 @@ func (c *messagingGRPCClient) UpdateBlurb(ctx context.Context, req *genprotopb.U
 	var resp *genprotopb.Blurb
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.messagingClient.UpdateBlurb(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.messagingClient.UpdateBlurb, req, settings.GRPC, c.logger, "UpdateBlurb")
 		return err
 	}, opts...)
 	if err != nil {
@@ -873,7 +889,7 @@ func (c *messagingGRPCClient) DeleteBlurb(ctx context.Context, req *genprotopb.D
 	opts = append((*c.CallOptions).DeleteBlurb[0:len((*c.CallOptions).DeleteBlurb):len((*c.CallOptions).DeleteBlurb)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		_, err = c.messagingClient.DeleteBlurb(ctx, req, settings.GRPC...)
+		_, err = executeRPC(ctx, c.messagingClient.DeleteBlurb, req, settings.GRPC, c.logger, "DeleteBlurb")
 		return err
 	}, opts...)
 	return err
@@ -899,7 +915,7 @@ func (c *messagingGRPCClient) ListBlurbs(ctx context.Context, req *genprotopb.Li
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			var err error
-			resp, err = c.messagingClient.ListBlurbs(ctx, req, settings.GRPC...)
+			resp, err = executeRPC(ctx, c.messagingClient.ListBlurbs, req, settings.GRPC, c.logger, "ListBlurbs")
 			return err
 		}, opts...)
 		if err != nil {
@@ -934,7 +950,7 @@ func (c *messagingGRPCClient) SearchBlurbs(ctx context.Context, req *genprotopb.
 	var resp *longrunningpb.Operation
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.messagingClient.SearchBlurbs(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.messagingClient.SearchBlurbs, req, settings.GRPC, c.logger, "SearchBlurbs")
 		return err
 	}, opts...)
 	if err != nil {
@@ -954,7 +970,9 @@ func (c *messagingGRPCClient) StreamBlurbs(ctx context.Context, req *genprotopb.
 	var resp genprotopb.Messaging_StreamBlurbsClient
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
+		c.logger.DebugContext(ctx, "api streaming client request", "serviceName", serviceName, "rpcName", "StreamBlurbs")
 		resp, err = c.messagingClient.StreamBlurbs(ctx, req, settings.GRPC...)
+		c.logger.DebugContext(ctx, "api streaming client response", "serviceName", serviceName, "rpcName", "StreamBlurbs")
 		return err
 	}, opts...)
 	if err != nil {
@@ -969,7 +987,9 @@ func (c *messagingGRPCClient) SendBlurbs(ctx context.Context, opts ...gax.CallOp
 	opts = append((*c.CallOptions).SendBlurbs[0:len((*c.CallOptions).SendBlurbs):len((*c.CallOptions).SendBlurbs)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
+		c.logger.DebugContext(ctx, "api streaming client request", "serviceName", serviceName, "rpcName", "SendBlurbs")
 		resp, err = c.messagingClient.SendBlurbs(ctx, settings.GRPC...)
+		c.logger.DebugContext(ctx, "api streaming client response", "serviceName", serviceName, "rpcName", "SendBlurbs")
 		return err
 	}, opts...)
 	if err != nil {
@@ -984,7 +1004,9 @@ func (c *messagingGRPCClient) Connect(ctx context.Context, opts ...gax.CallOptio
 	opts = append((*c.CallOptions).Connect[0:len((*c.CallOptions).Connect):len((*c.CallOptions).Connect)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
+		c.logger.DebugContext(ctx, "api streaming client request", "serviceName", serviceName, "rpcName", "Connect")
 		resp, err = c.messagingClient.Connect(ctx, settings.GRPC...)
+		c.logger.DebugContext(ctx, "api streaming client response", "serviceName", serviceName, "rpcName", "Connect")
 		return err
 	}, opts...)
 	if err != nil {
@@ -1013,7 +1035,7 @@ func (c *messagingGRPCClient) ListLocations(ctx context.Context, req *locationpb
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			var err error
-			resp, err = c.locationsClient.ListLocations(ctx, req, settings.GRPC...)
+			resp, err = executeRPC(ctx, c.locationsClient.ListLocations, req, settings.GRPC, c.logger, "ListLocations")
 			return err
 		}, opts...)
 		if err != nil {
@@ -1048,7 +1070,7 @@ func (c *messagingGRPCClient) GetLocation(ctx context.Context, req *locationpb.G
 	var resp *locationpb.Location
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.locationsClient.GetLocation(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.locationsClient.GetLocation, req, settings.GRPC, c.logger, "GetLocation")
 		return err
 	}, opts...)
 	if err != nil {
@@ -1066,7 +1088,7 @@ func (c *messagingGRPCClient) SetIamPolicy(ctx context.Context, req *iampb.SetIa
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.iamPolicyClient.SetIamPolicy(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.iamPolicyClient.SetIamPolicy, req, settings.GRPC, c.logger, "SetIamPolicy")
 		return err
 	}, opts...)
 	if err != nil {
@@ -1084,7 +1106,7 @@ func (c *messagingGRPCClient) GetIamPolicy(ctx context.Context, req *iampb.GetIa
 	var resp *iampb.Policy
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.iamPolicyClient.GetIamPolicy(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.iamPolicyClient.GetIamPolicy, req, settings.GRPC, c.logger, "GetIamPolicy")
 		return err
 	}, opts...)
 	if err != nil {
@@ -1102,7 +1124,7 @@ func (c *messagingGRPCClient) TestIamPermissions(ctx context.Context, req *iampb
 	var resp *iampb.TestIamPermissionsResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.iamPolicyClient.TestIamPermissions(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.iamPolicyClient.TestIamPermissions, req, settings.GRPC, c.logger, "TestIamPermissions")
 		return err
 	}, opts...)
 	if err != nil {
@@ -1128,7 +1150,7 @@ func (c *messagingGRPCClient) ListOperations(ctx context.Context, req *longrunni
 		}
 		err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 			var err error
-			resp, err = c.operationsClient.ListOperations(ctx, req, settings.GRPC...)
+			resp, err = executeRPC(ctx, c.operationsClient.ListOperations, req, settings.GRPC, c.logger, "ListOperations")
 			return err
 		}, opts...)
 		if err != nil {
@@ -1163,7 +1185,7 @@ func (c *messagingGRPCClient) GetOperation(ctx context.Context, req *longrunning
 	var resp *longrunningpb.Operation
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		resp, err = c.operationsClient.GetOperation(ctx, req, settings.GRPC...)
+		resp, err = executeRPC(ctx, c.operationsClient.GetOperation, req, settings.GRPC, c.logger, "GetOperation")
 		return err
 	}, opts...)
 	if err != nil {
@@ -1180,7 +1202,7 @@ func (c *messagingGRPCClient) DeleteOperation(ctx context.Context, req *longrunn
 	opts = append((*c.CallOptions).DeleteOperation[0:len((*c.CallOptions).DeleteOperation):len((*c.CallOptions).DeleteOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		_, err = c.operationsClient.DeleteOperation(ctx, req, settings.GRPC...)
+		_, err = executeRPC(ctx, c.operationsClient.DeleteOperation, req, settings.GRPC, c.logger, "DeleteOperation")
 		return err
 	}, opts...)
 	return err
@@ -1194,7 +1216,7 @@ func (c *messagingGRPCClient) CancelOperation(ctx context.Context, req *longrunn
 	opts = append((*c.CallOptions).CancelOperation[0:len((*c.CallOptions).CancelOperation):len((*c.CallOptions).CancelOperation)], opts...)
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
-		_, err = c.operationsClient.CancelOperation(ctx, req, settings.GRPC...)
+		_, err = executeRPC(ctx, c.operationsClient.CancelOperation, req, settings.GRPC, c.logger, "CancelOperation")
 		return err
 	}, opts...)
 	return err
@@ -1231,17 +1253,7 @@ func (c *messagingRESTClient) CreateRoom(ctx context.Context, req *genprotopb.Cr
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "CreateRoom")
 		if err != nil {
 			return err
 		}
@@ -1286,17 +1298,7 @@ func (c *messagingRESTClient) GetRoom(ctx context.Context, req *genprotopb.GetRo
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "GetRoom")
 		if err != nil {
 			return err
 		}
@@ -1330,11 +1332,11 @@ func (c *messagingRESTClient) UpdateRoom(ctx context.Context, req *genprotopb.Up
 
 	params := url.Values{}
 	if req.GetUpdateMask() != nil {
-		updateMask, err := protojson.Marshal(req.GetUpdateMask())
+		field, err := protojson.Marshal(req.GetUpdateMask())
 		if err != nil {
 			return nil, err
 		}
-		params.Add("updateMask", string(updateMask[1:len(updateMask)-1]))
+		params.Add("updateMask", string(field[1:len(field)-1]))
 	}
 
 	baseUrl.RawQuery = params.Encode()
@@ -1359,17 +1361,7 @@ func (c *messagingRESTClient) UpdateRoom(ctx context.Context, req *genprotopb.Up
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "UpdateRoom")
 		if err != nil {
 			return err
 		}
@@ -1411,15 +1403,8 @@ func (c *messagingRESTClient) DeleteRoom(ctx context.Context, req *genprotopb.De
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		// Returns nil if there is no error, otherwise wraps
-		// the response code and body into a non-nil error
-		return googleapi.CheckResponse(httpRsp)
+		_, err = executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "DeleteRoom")
+		return err
 	}, opts...)
 }
 
@@ -1467,21 +1452,10 @@ func (c *messagingRESTClient) ListRooms(ctx context.Context, req *genprotopb.Lis
 			}
 			httpReq.Header = headers
 
-			httpRsp, err := c.httpClient.Do(httpReq)
+			buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "ListRooms")
 			if err != nil {
 				return err
 			}
-			defer httpRsp.Body.Close()
-
-			if err = googleapi.CheckResponse(httpRsp); err != nil {
-				return err
-			}
-
-			buf, err := io.ReadAll(httpRsp.Body)
-			if err != nil {
-				return err
-			}
-
 			if err := unm.Unmarshal(buf, resp); err != nil {
 				return err
 			}
@@ -1547,17 +1521,7 @@ func (c *messagingRESTClient) CreateBlurb(ctx context.Context, req *genprotopb.C
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "CreateBlurb")
 		if err != nil {
 			return err
 		}
@@ -1602,17 +1566,7 @@ func (c *messagingRESTClient) GetBlurb(ctx context.Context, req *genprotopb.GetB
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "GetBlurb")
 		if err != nil {
 			return err
 		}
@@ -1646,11 +1600,11 @@ func (c *messagingRESTClient) UpdateBlurb(ctx context.Context, req *genprotopb.U
 
 	params := url.Values{}
 	if req.GetUpdateMask() != nil {
-		updateMask, err := protojson.Marshal(req.GetUpdateMask())
+		field, err := protojson.Marshal(req.GetUpdateMask())
 		if err != nil {
 			return nil, err
 		}
-		params.Add("updateMask", string(updateMask[1:len(updateMask)-1]))
+		params.Add("updateMask", string(field[1:len(field)-1]))
 	}
 
 	baseUrl.RawQuery = params.Encode()
@@ -1675,17 +1629,7 @@ func (c *messagingRESTClient) UpdateBlurb(ctx context.Context, req *genprotopb.U
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "UpdateBlurb")
 		if err != nil {
 			return err
 		}
@@ -1727,15 +1671,8 @@ func (c *messagingRESTClient) DeleteBlurb(ctx context.Context, req *genprotopb.D
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		// Returns nil if there is no error, otherwise wraps
-		// the response code and body into a non-nil error
-		return googleapi.CheckResponse(httpRsp)
+		_, err = executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "DeleteBlurb")
+		return err
 	}, opts...)
 }
 
@@ -1784,21 +1721,10 @@ func (c *messagingRESTClient) ListBlurbs(ctx context.Context, req *genprotopb.Li
 			}
 			httpReq.Header = headers
 
-			httpRsp, err := c.httpClient.Do(httpReq)
+			buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "ListBlurbs")
 			if err != nil {
 				return err
 			}
-			defer httpRsp.Body.Close()
-
-			if err = googleapi.CheckResponse(httpRsp); err != nil {
-				return err
-			}
-
-			buf, err := io.ReadAll(httpRsp.Body)
-			if err != nil {
-				return err
-			}
-
 			if err := unm.Unmarshal(buf, resp); err != nil {
 				return err
 			}
@@ -1863,21 +1789,10 @@ func (c *messagingRESTClient) SearchBlurbs(ctx context.Context, req *genprotopb.
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "SearchBlurbs")
 		if err != nil {
 			return err
 		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
-		if err != nil {
-			return err
-		}
-
 		if err := unm.Unmarshal(buf, resp); err != nil {
 			return err
 		}
@@ -1928,12 +1843,8 @@ func (c *messagingRESTClient) StreamBlurbs(ctx context.Context, req *genprotopb.
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
+		httpRsp, err := executeStreamingHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "StreamBlurbs")
 		if err != nil {
-			return err
-		}
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
 			return err
 		}
 
@@ -1980,7 +1891,7 @@ func (c *streamBlurbsRESTClient) Trailer() metadata.MD {
 
 func (c *streamBlurbsRESTClient) CloseSend() error {
 	// This is a no-op to fulfill the interface.
-	return fmt.Errorf("this method is not implemented for a server-stream")
+	return errors.New("this method is not implemented for a server-stream")
 }
 
 func (c *streamBlurbsRESTClient) Context() context.Context {
@@ -1989,12 +1900,12 @@ func (c *streamBlurbsRESTClient) Context() context.Context {
 
 func (c *streamBlurbsRESTClient) SendMsg(m interface{}) error {
 	// This is a no-op to fulfill the interface.
-	return fmt.Errorf("this method is not implemented for a server-stream")
+	return errors.New("this method is not implemented for a server-stream")
 }
 
 func (c *streamBlurbsRESTClient) RecvMsg(m interface{}) error {
 	// This is a no-op to fulfill the interface.
-	return fmt.Errorf("this method is not implemented, use Recv")
+	return errors.New("this method is not implemented, use Recv")
 }
 
 // SendBlurbs this is a stream to create multiple blurbs. If an invalid blurb is
@@ -2002,7 +1913,7 @@ func (c *streamBlurbsRESTClient) RecvMsg(m interface{}) error {
 //
 // This method is not supported for the REST transport.
 func (c *messagingRESTClient) SendBlurbs(ctx context.Context, opts ...gax.CallOption) (genprotopb.Messaging_SendBlurbsClient, error) {
-	return nil, fmt.Errorf("SendBlurbs not yet supported for REST clients")
+	return nil, errors.New("SendBlurbs not yet supported for REST clients")
 }
 
 // Connect this method starts a bidirectional stream that receives all blurbs that
@@ -2012,7 +1923,7 @@ func (c *messagingRESTClient) SendBlurbs(ctx context.Context, opts ...gax.CallOp
 //
 // This method is not supported for the REST transport.
 func (c *messagingRESTClient) Connect(ctx context.Context, opts ...gax.CallOption) (genprotopb.Messaging_ConnectClient, error) {
-	return nil, fmt.Errorf("Connect not yet supported for REST clients")
+	return nil, errors.New("Connect not yet supported for REST clients")
 }
 
 // ListLocations is a utility method from google.cloud.location.Locations.
@@ -2062,21 +1973,10 @@ func (c *messagingRESTClient) ListLocations(ctx context.Context, req *locationpb
 			}
 			httpReq.Header = headers
 
-			httpRsp, err := c.httpClient.Do(httpReq)
+			buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "ListLocations")
 			if err != nil {
 				return err
 			}
-			defer httpRsp.Body.Close()
-
-			if err = googleapi.CheckResponse(httpRsp); err != nil {
-				return err
-			}
-
-			buf, err := io.ReadAll(httpRsp.Body)
-			if err != nil {
-				return err
-			}
-
 			if err := unm.Unmarshal(buf, resp); err != nil {
 				return err
 			}
@@ -2134,17 +2034,7 @@ func (c *messagingRESTClient) GetLocation(ctx context.Context, req *locationpb.G
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "GetLocation")
 		if err != nil {
 			return err
 		}
@@ -2195,17 +2085,7 @@ func (c *messagingRESTClient) SetIamPolicy(ctx context.Context, req *iampb.SetIa
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "SetIamPolicy")
 		if err != nil {
 			return err
 		}
@@ -2257,17 +2137,7 @@ func (c *messagingRESTClient) GetIamPolicy(ctx context.Context, req *iampb.GetIa
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "GetIamPolicy")
 		if err != nil {
 			return err
 		}
@@ -2318,17 +2188,7 @@ func (c *messagingRESTClient) TestIamPermissions(ctx context.Context, req *iampb
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, jsonReq, "TestIamPermissions")
 		if err != nil {
 			return err
 		}
@@ -2395,21 +2255,10 @@ func (c *messagingRESTClient) ListOperations(ctx context.Context, req *longrunni
 			}
 			httpReq.Header = headers
 
-			httpRsp, err := c.httpClient.Do(httpReq)
+			buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "ListOperations")
 			if err != nil {
 				return err
 			}
-			defer httpRsp.Body.Close()
-
-			if err = googleapi.CheckResponse(httpRsp); err != nil {
-				return err
-			}
-
-			buf, err := io.ReadAll(httpRsp.Body)
-			if err != nil {
-				return err
-			}
-
 			if err := unm.Unmarshal(buf, resp); err != nil {
 				return err
 			}
@@ -2467,17 +2316,7 @@ func (c *messagingRESTClient) GetOperation(ctx context.Context, req *longrunning
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		if err = googleapi.CheckResponse(httpRsp); err != nil {
-			return err
-		}
-
-		buf, err := io.ReadAll(httpRsp.Body)
+		buf, err := executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "GetOperation")
 		if err != nil {
 			return err
 		}
@@ -2519,15 +2358,8 @@ func (c *messagingRESTClient) DeleteOperation(ctx context.Context, req *longrunn
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		// Returns nil if there is no error, otherwise wraps
-		// the response code and body into a non-nil error
-		return googleapi.CheckResponse(httpRsp)
+		_, err = executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "DeleteOperation")
+		return err
 	}, opts...)
 }
 
@@ -2556,22 +2388,9 @@ func (c *messagingRESTClient) CancelOperation(ctx context.Context, req *longrunn
 		httpReq = httpReq.WithContext(ctx)
 		httpReq.Header = headers
 
-		httpRsp, err := c.httpClient.Do(httpReq)
-		if err != nil {
-			return err
-		}
-		defer httpRsp.Body.Close()
-
-		// Returns nil if there is no error, otherwise wraps
-		// the response code and body into a non-nil error
-		return googleapi.CheckResponse(httpRsp)
+		_, err = executeHTTPRequest(ctx, c.httpClient, httpReq, c.logger, nil, "CancelOperation")
+		return err
 	}, opts...)
-}
-
-// SearchBlurbsOperation manages a long-running operation from SearchBlurbs.
-type SearchBlurbsOperation struct {
-	lro      *longrunning.Operation
-	pollPath string
 }
 
 // SearchBlurbsOperation returns a new SearchBlurbsOperation from a given name.
@@ -2590,156 +2409,4 @@ func (c *messagingRESTClient) SearchBlurbsOperation(name string) *SearchBlurbsOp
 		lro:      longrunning.InternalNewOperation(*c.LROClient, &longrunningpb.Operation{Name: name}),
 		pollPath: override,
 	}
-}
-
-// Wait blocks until the long-running operation is completed, returning the response and any errors encountered.
-//
-// See documentation of Poll for error-handling information.
-func (op *SearchBlurbsOperation) Wait(ctx context.Context, opts ...gax.CallOption) (*genprotopb.SearchBlurbsResponse, error) {
-	opts = append([]gax.CallOption{gax.WithPath(op.pollPath)}, opts...)
-	var resp genprotopb.SearchBlurbsResponse
-	if err := op.lro.WaitWithInterval(ctx, &resp, time.Minute, opts...); err != nil {
-		return nil, err
-	}
-	return &resp, nil
-}
-
-// Poll fetches the latest state of the long-running operation.
-//
-// Poll also fetches the latest metadata, which can be retrieved by Metadata.
-//
-// If Poll fails, the error is returned and op is unmodified. If Poll succeeds and
-// the operation has completed with failure, the error is returned and op.Done will return true.
-// If Poll succeeds and the operation has completed successfully,
-// op.Done will return true, and the response of the operation is returned.
-// If Poll succeeds and the operation has not completed, the returned response and error are both nil.
-func (op *SearchBlurbsOperation) Poll(ctx context.Context, opts ...gax.CallOption) (*genprotopb.SearchBlurbsResponse, error) {
-	opts = append([]gax.CallOption{gax.WithPath(op.pollPath)}, opts...)
-	var resp genprotopb.SearchBlurbsResponse
-	if err := op.lro.Poll(ctx, &resp, opts...); err != nil {
-		return nil, err
-	}
-	if !op.Done() {
-		return nil, nil
-	}
-	return &resp, nil
-}
-
-// Metadata returns metadata associated with the long-running operation.
-// Metadata itself does not contact the server, but Poll does.
-// To get the latest metadata, call this method after a successful call to Poll.
-// If the metadata is not available, the returned metadata and error are both nil.
-func (op *SearchBlurbsOperation) Metadata() (*genprotopb.SearchBlurbsMetadata, error) {
-	var meta genprotopb.SearchBlurbsMetadata
-	if err := op.lro.Metadata(&meta); err == longrunning.ErrNoMetadata {
-		return nil, nil
-	} else if err != nil {
-		return nil, err
-	}
-	return &meta, nil
-}
-
-// Done reports whether the long-running operation has completed.
-func (op *SearchBlurbsOperation) Done() bool {
-	return op.lro.Done()
-}
-
-// Name returns the name of the long-running operation.
-// The name is assigned by the server and is unique within the service from which the operation is created.
-func (op *SearchBlurbsOperation) Name() string {
-	return op.lro.Name()
-}
-
-// BlurbIterator manages a stream of *genprotopb.Blurb.
-type BlurbIterator struct {
-	items    []*genprotopb.Blurb
-	pageInfo *iterator.PageInfo
-	nextFunc func() error
-
-	// Response is the raw response for the current page.
-	// It must be cast to the RPC response type.
-	// Calling Next() or InternalFetch() updates this value.
-	Response interface{}
-
-	// InternalFetch is for use by the Google Cloud Libraries only.
-	// It is not part of the stable interface of this package.
-	//
-	// InternalFetch returns results from a single call to the underlying RPC.
-	// The number of results is no greater than pageSize.
-	// If there are no more results, nextPageToken is empty and err is nil.
-	InternalFetch func(pageSize int, pageToken string) (results []*genprotopb.Blurb, nextPageToken string, err error)
-}
-
-// PageInfo supports pagination. See the google.golang.org/api/iterator package for details.
-func (it *BlurbIterator) PageInfo() *iterator.PageInfo {
-	return it.pageInfo
-}
-
-// Next returns the next result. Its second return value is iterator.Done if there are no more
-// results. Once Next returns Done, all subsequent calls will return Done.
-func (it *BlurbIterator) Next() (*genprotopb.Blurb, error) {
-	var item *genprotopb.Blurb
-	if err := it.nextFunc(); err != nil {
-		return item, err
-	}
-	item = it.items[0]
-	it.items = it.items[1:]
-	return item, nil
-}
-
-func (it *BlurbIterator) bufLen() int {
-	return len(it.items)
-}
-
-func (it *BlurbIterator) takeBuf() interface{} {
-	b := it.items
-	it.items = nil
-	return b
-}
-
-// RoomIterator manages a stream of *genprotopb.Room.
-type RoomIterator struct {
-	items    []*genprotopb.Room
-	pageInfo *iterator.PageInfo
-	nextFunc func() error
-
-	// Response is the raw response for the current page.
-	// It must be cast to the RPC response type.
-	// Calling Next() or InternalFetch() updates this value.
-	Response interface{}
-
-	// InternalFetch is for use by the Google Cloud Libraries only.
-	// It is not part of the stable interface of this package.
-	//
-	// InternalFetch returns results from a single call to the underlying RPC.
-	// The number of results is no greater than pageSize.
-	// If there are no more results, nextPageToken is empty and err is nil.
-	InternalFetch func(pageSize int, pageToken string) (results []*genprotopb.Room, nextPageToken string, err error)
-}
-
-// PageInfo supports pagination. See the google.golang.org/api/iterator package for details.
-func (it *RoomIterator) PageInfo() *iterator.PageInfo {
-	return it.pageInfo
-}
-
-// Next returns the next result. Its second return value is iterator.Done if there are no more
-// results. Once Next returns Done, all subsequent calls will return Done.
-func (it *RoomIterator) Next() (*genprotopb.Room, error) {
-	var item *genprotopb.Room
-	if err := it.nextFunc(); err != nil {
-		return item, err
-	}
-	item = it.items[0]
-	it.items = it.items[1:]
-	return item, nil
-}
-
-func (it *RoomIterator) bufLen() int {
-	return len(it.items)
-}
-
-func (it *RoomIterator) takeBuf() interface{} {
-	b := it.items
-	it.items = nil
-	return b
 }

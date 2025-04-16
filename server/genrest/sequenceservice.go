@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,9 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/sequences': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -53,8 +56,8 @@ func (backend *RESTBackend) HandleCreateSequence(w http.ResponseWriter, r *http.
 	var bodyField genprotopb.Sequence
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -116,6 +119,9 @@ func (backend *RESTBackend) HandleCreateStreamingSequence(w http.ResponseWriter,
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/streamingSequences': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 0, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 0 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 0, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -133,8 +139,8 @@ func (backend *RESTBackend) HandleCreateStreamingSequence(w http.ResponseWriter,
 	var bodyField genprotopb.StreamingSequence
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -196,6 +202,9 @@ func (backend *RESTBackend) HandleGetSequenceReport(w http.ResponseWriter, r *ht
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=sequences/*/sequenceReport}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -259,6 +268,9 @@ func (backend *RESTBackend) HandleGetStreamingSequenceReport(w http.ResponseWrit
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=streamingSequences/*/streamingSequenceReport}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -322,6 +334,9 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=sequences/*}': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -338,8 +353,8 @@ func (backend *RESTBackend) HandleAttemptSequence(w http.ResponseWriter, r *http
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}
@@ -393,6 +408,9 @@ func (backend *RESTBackend) HandleAttemptStreamingSequence(w http.ResponseWriter
 
 	backend.StdLog.Printf("Received %s request matching '/v1beta1/{name=streamingSequences/*}:stream': %q", r.Method, r.URL)
 	backend.StdLog.Printf("  urlPathParams (expect 1, have %d): %q", numUrlPathParams, urlPathParams)
+	backend.StdLog.Printf("  urlRequestHeaders:\n%s", resttools.PrettyPrintHeaders(r, "    "))
+
+	resttools.IncludeRequestHeadersInResponse(w, r)
 
 	if numUrlPathParams != 1 {
 		backend.Error(w, http.StatusBadRequest, "found unexpected number of URL variables: expected 1, have %d: %#v", numUrlPathParams, urlPathParams)
@@ -409,8 +427,8 @@ func (backend *RESTBackend) HandleAttemptStreamingSequence(w http.ResponseWriter
 	// Intentional: Field values in the URL path override those set in the body.
 	var jsonReader bytes.Buffer
 	bodyReader := io.TeeReader(r.Body, &jsonReader)
-	rBytes := make([]byte, r.ContentLength)
-	if _, err := bodyReader.Read(rBytes); err != nil && err != io.EOF {
+	rBytes, err := io.ReadAll(bodyReader)
+	if err != nil {
 		backend.Error(w, http.StatusBadRequest, "error reading body content: %s", err)
 		return
 	}

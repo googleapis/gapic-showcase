@@ -244,9 +244,19 @@
                 "Echo"
               ]
             },
+            "EchoErrorDetails": {
+              "methods": [
+                "EchoErrorDetails"
+              ]
+            },
             "Expand": {
               "methods": [
                 "Expand"
+              ]
+            },
+            "FailEchoWithDetails": {
+              "methods": [
+                "FailEchoWithDetails"
               ]
             },
             "GetIamPolicy": {
@@ -339,9 +349,19 @@
                 "Echo"
               ]
             },
+            "EchoErrorDetails": {
+              "methods": [
+                "EchoErrorDetails"
+              ]
+            },
             "Expand": {
               "methods": [
                 "Expand"
+              ]
+            },
+            "FailEchoWithDetails": {
+              "methods": [
+                "FailEchoWithDetails"
               ]
             },
             "GetIamPolicy": {

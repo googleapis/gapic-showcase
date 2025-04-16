@@ -20,12 +20,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/protobuf/proto"
+	lropb "cloud.google.com/go/longrunning/autogen/longrunningpb"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
-	lropb "google.golang.org/genproto/googleapis/longrunning"
 	"google.golang.org/genproto/googleapis/rpc/status"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestGetWaiterInstance(t *testing.T) {

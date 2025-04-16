@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,6 +45,8 @@ func RegisterHandlers(router *gmux.Router, backend *services.Backend) {
 	router.HandleFunc("/v1beta1/compliance/enum", rest.HandleGetEnum).Methods("GET")
 	router.HandleFunc("/v1beta1/compliance/enum", rest.HandleVerifyEnum).Methods("POST")
 	router.HandleFunc("/v1beta1/echo:echo", rest.HandleEcho).Methods("POST")
+	router.HandleFunc("/v1beta1/echo:error-details", rest.HandleEchoErrorDetails).Methods("POST")
+	router.HandleFunc("/v1beta1/echo:failWithDetails", rest.HandleFailEchoWithDetails).Methods("POST")
 	router.HandleFunc("/v1beta1/echo:expand", rest.HandleExpand).Methods("POST")
 	router.HandleFunc("/v1beta1/echo:collect", rest.HandleCollect).Methods("POST")
 	router.HandleFunc("/v1beta1/echo:pagedExpand", rest.HandlePagedExpand).Methods("POST")
@@ -124,7 +126,7 @@ func (backend *RESTBackend) catchAllHandler(w http.ResponseWriter, r *http.Reque
 func (backend *RESTBackend) Error(w http.ResponseWriter, httpStatus int, format string, args ...interface{}) {
 	message := fmt.Sprintf(format, args...)
 	backend.ErrLog.Print(message)
-	resttools.ErrorResponse(w, httpStatus, message)
+	resttools.ErrorResponse(w, httpStatus, resttools.NoCodeGRPC, message)
 }
 func (backend *RESTBackend) ReportGRPCError(w http.ResponseWriter, err error) {
 	st, ok := status.FromError(err)
@@ -134,6 +136,5 @@ func (backend *RESTBackend) ReportGRPCError(w http.ResponseWriter, err error) {
 	}
 
 	backend.ErrLog.Print(st.Message())
-	code := resttools.GRPCToHTTP(st.Code())
-	resttools.ErrorResponse(w, code, st.Message(), st.Details()...)
+	resttools.ErrorResponse(w, resttools.NoCodeHTTP, st.Code(), st.Message(), st.Details()...)
 }
