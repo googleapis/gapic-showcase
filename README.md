@@ -18,7 +18,7 @@ page, or simply by installing from source using go.
 
 ### Docker
 
-**NOTE**: The "latest" Docker image is currently stale.
+**NOTE**: The "latest" Docker image is currently stale. We expect to update it in the near future. (We're upgrading our processes.)
 
 ```sh
 $ docker pull gcr.io/gapic-images/gapic-showcase:latest
