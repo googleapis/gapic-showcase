@@ -57,7 +57,7 @@ jobs:
       - name: Upload proto release assets
         uses: svenstaro/upload-release-action@v2
         with:
-          repo_token: ${{ github.token }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ./dist/*
           tag: ${{ env.TAG_NAME }}
           overwrite: true
@@ -68,7 +68,7 @@ jobs:
     env:
       AUTO_UPLOAD_URL: ${{ needs.get-upload-url.outputs.automated_upload_url }}
       MANUAL_UPLOAD_URL: ${{ needs.get-upload-url.outputs.manual_upload_url }}
-      GITHUB_TOKEN: ${{ github.token }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       matrix:
         osarch:
