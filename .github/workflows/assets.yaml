@@ -39,6 +39,8 @@ jobs:
             core.setOutput("MANUAL_UPLOAD_URL", release.data.upload_url);
   proto-assets:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/setup-go@v5
         with:
