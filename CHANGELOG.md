@@ -1,5 +1,12 @@
 # Release History
 
+## [0.36.2](https://github.com/googleapis/gapic-showcase/compare/v0.36.1...v0.36.2) (2025-04-16)
+
+
+### Bug Fixes
+
+* Name code_suggester step to fix CI action ([#1586](https://github.com/googleapis/gapic-showcase/issues/1586)) ([08c981d](https://github.com/googleapis/gapic-showcase/commit/08c981d696f1d5841119d97b131a39f182d8acb7))
+
 ## [0.36.1](https://github.com/googleapis/gapic-showcase/compare/v0.36.0...v0.36.1) (2025-04-16)
 
 
