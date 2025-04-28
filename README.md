@@ -17,6 +17,9 @@ downloading the compiled binary from our our [releases](https://github.com/googl
 page, or simply by installing from source using go.
 
 ### Docker
+
+**NOTE**: The "latest" Docker image is currently stale. We expect to update it in the near future. (We're upgrading our processes.)
+
 ```sh
 $ docker pull gcr.io/gapic-images/gapic-showcase:latest
 $ docker run \
@@ -50,7 +53,7 @@ $ docker run \
 
 ### Binary
 ```sh
-$ export GAPIC_SHOWCASE_VERSION=0.24.0
+$ export GAPIC_SHOWCASE_VERSION=0.36.1  # use the current version here
 $ export OS=linux
 $ export ARCH=amd64
 $ curl -L https://github.com/googleapis/gapic-showcase/releases/download/v${GAPIC_SHOWCASE_VERSION}/gapic-showcase-${GAPIC_SHOWCASE_VERSION}-${OS}-${ARCH}.tar.gz | sudo tar -zx --directory /usr/local/bin/
