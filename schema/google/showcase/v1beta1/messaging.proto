@@ -30,6 +30,10 @@ option go_package = "github.com/googleapis/gapic-showcase/server/genproto";
 option java_package = "com.google.showcase.v1beta1";
 option java_multiple_files = true;
 option ruby_package = "Google::Showcase::V1beta1";
+option (google.api.resource_definition) = {
+  type: "showcase.googleapis.com/User"
+  pattern: "users/{user}"
+};
 
 // A simple messaging service that implements chat rooms and profile posts.
 //
@@ -46,7 +50,7 @@ service Messaging {
       post: "/v1beta1/rooms"
       body: "*"
     };
-    option (google.api.method_signature) = "room.display_name,room.description";
+    option (google.api.method_signature) = "room";
   }
 
   // Retrieves the Room with the given resource name.
@@ -92,8 +96,7 @@ service Messaging {
         body: "*"
       }
     };
-    option (google.api.method_signature) = "parent,blurb.user,blurb.text";
-    option (google.api.method_signature) = "parent,blurb.user,blurb.image";
+    option (google.api.method_signature) = "parent,blurb";
   }
 
   // Retrieves the Blurb with the given resource name.
@@ -194,6 +197,7 @@ message Room {
   option (google.api.resource) = {
     type: "showcase.googleapis.com/Room"
     pattern: "rooms/{room}"
+    pattern: "rooms/{room}/legacy_room/{legacy_room}"
   };
 
   // The resource name of the chat room.
@@ -283,10 +287,10 @@ message ListRoomsResponse {
 message Blurb {
   option (google.api.resource) = {
     type: "showcase.googleapis.com/Blurb"
-    pattern: "users/{user}/profile/blurbs/legacy/{legacy_user}~{blurb}"
-    pattern: "users/{user}/profile/blurbs/{blurb}"
+    pattern: "users/{user}/blurbs/{blurb}"
     pattern: "rooms/{room}/blurbs/{blurb}"
-    pattern: "rooms/{room}/blurbs/legacy/{legacy_room}.{blurb}"
+    pattern: "rooms/{room}/legacy_room/{legacy_room}/blurbs/{blurb}"
+    pattern: "users/{user}/blurbs/{blurb}/legacy/{legacy_user}"
   };
 
   // The resource name of the chat room.
