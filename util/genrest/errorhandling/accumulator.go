@@ -43,5 +43,5 @@ func (ea *Accumulator) Error() error {
 	for idx, err := range ea.errors {
 		errorStrings[idx] = err.Error()
 	}
-	return fmt.Errorf(strings.Join(errorStrings, "\n"))
+	return fmt.Errorf("%s", strings.Join(errorStrings, "\n"))
 }

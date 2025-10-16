@@ -39,7 +39,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 
 	for idxService, service := range model.Service {
 		file := view.Append(goview.NewFile("", strings.ToLower(service.ShortName)+".go"))
-		file.P(license)
+		file.P("%s", license)
 		file.P("// DO NOT EDIT. This is an auto-generated file containing the REST handlers")
 		file.P("// for service #%d: %s.\n", idxService, service.FullName())
 		file.P("")
@@ -263,7 +263,7 @@ func NewView(model *gomodel.Model) (*goview.View, error) {
 	}
 
 	file := view.Append(goview.NewFile("", "genrest.go"))
-	file.P(license)
+	file.P("%s", license)
 	file.P("// DO NOT EDIT. This is an auto-generated file registering the REST handlers.")
 	file.P("// for the various Showcase services.")
 	file.P("")
