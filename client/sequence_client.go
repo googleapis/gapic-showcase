@@ -74,6 +74,7 @@ func defaultSequenceGRPCClientOptions() []option.ClientOption {
 		internaloption.WithDefaultAudience("https://localhost/"),
 		internaloption.WithDefaultScopes(DefaultAuthScopes()...),
 		internaloption.EnableJwtWithScope(),
+		internaloption.AllowHardBoundTokens("MTLS_S2A"),
 		internaloption.EnableNewAuthLibrary(),
 		option.WithGRPCDialOption(grpc.WithDefaultCallOptions(
 			grpc.MaxCallRecvMsgSize(math.MaxInt32))),
@@ -365,7 +366,7 @@ func (c *sequenceGRPCClient) Connection() *grpc.ClientConn {
 // use by Google-written clients.
 func (c *sequenceGRPCClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", gax.GoVersion}, keyval...)
-	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "grpc", grpc.Version)
+	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "grpc", grpc.Version, "pb", protoVersion)
 	c.xGoogHeaders = []string{
 		"x-goog-api-client", gax.XGoogHeader(kv...),
 	}
@@ -431,7 +432,7 @@ func defaultSequenceRESTClientOptions() []option.ClientOption {
 // use by Google-written clients.
 func (c *sequenceRESTClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", gax.GoVersion}, keyval...)
-	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "rest", "UNKNOWN")
+	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "rest", "UNKNOWN", "pb", protoVersion)
 	c.xGoogHeaders = []string{
 		"x-goog-api-client", gax.XGoogHeader(kv...),
 	}
@@ -1004,7 +1005,7 @@ func (c *sequenceRESTClient) AttemptStreamingSequence(ctx context.Context, req *
 	hds = append(c.xGoogHeaders, hds...)
 	hds = append(hds, "Content-Type", "application/json")
 	headers := gax.BuildHeaders(ctx, hds...)
-	var streamClient *attemptStreamingSequenceRESTClient
+	var streamClient *attemptStreamingSequenceRESTStreamClient
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		if settings.Path != "" {
 			baseUrl.Path = settings.Path
@@ -1021,7 +1022,7 @@ func (c *sequenceRESTClient) AttemptStreamingSequence(ctx context.Context, req *
 			return err
 		}
 
-		streamClient = &attemptStreamingSequenceRESTClient{
+		streamClient = &attemptStreamingSequenceRESTStreamClient{
 			ctx:    ctx,
 			md:     metadata.MD(httpRsp.Header),
 			stream: gax.NewProtoJSONStreamReader(httpRsp.Body, (&genprotopb.AttemptStreamingSequenceResponse{}).ProtoReflect().Type()),
@@ -1032,15 +1033,15 @@ func (c *sequenceRESTClient) AttemptStreamingSequence(ctx context.Context, req *
 	return streamClient, e
 }
 
-// attemptStreamingSequenceRESTClient is the stream client used to consume the server stream created by
+// attemptStreamingSequenceRESTStreamClient is the stream client used to consume the server stream created by
 // the REST implementation of AttemptStreamingSequence.
-type attemptStreamingSequenceRESTClient struct {
+type attemptStreamingSequenceRESTStreamClient struct {
 	ctx    context.Context
 	md     metadata.MD
 	stream *gax.ProtoJSONStream
 }
 
-func (c *attemptStreamingSequenceRESTClient) Recv() (*genprotopb.AttemptStreamingSequenceResponse, error) {
+func (c *attemptStreamingSequenceRESTStreamClient) Recv() (*genprotopb.AttemptStreamingSequenceResponse, error) {
 	if err := c.ctx.Err(); err != nil {
 		defer c.stream.Close()
 		return nil, err
@@ -1054,29 +1055,29 @@ func (c *attemptStreamingSequenceRESTClient) Recv() (*genprotopb.AttemptStreamin
 	return res, nil
 }
 
-func (c *attemptStreamingSequenceRESTClient) Header() (metadata.MD, error) {
+func (c *attemptStreamingSequenceRESTStreamClient) Header() (metadata.MD, error) {
 	return c.md, nil
 }
 
-func (c *attemptStreamingSequenceRESTClient) Trailer() metadata.MD {
+func (c *attemptStreamingSequenceRESTStreamClient) Trailer() metadata.MD {
 	return c.md
 }
 
-func (c *attemptStreamingSequenceRESTClient) CloseSend() error {
+func (c *attemptStreamingSequenceRESTStreamClient) CloseSend() error {
 	// This is a no-op to fulfill the interface.
 	return errors.New("this method is not implemented for a server-stream")
 }
 
-func (c *attemptStreamingSequenceRESTClient) Context() context.Context {
+func (c *attemptStreamingSequenceRESTStreamClient) Context() context.Context {
 	return c.ctx
 }
 
-func (c *attemptStreamingSequenceRESTClient) SendMsg(m interface{}) error {
+func (c *attemptStreamingSequenceRESTStreamClient) SendMsg(m interface{}) error {
 	// This is a no-op to fulfill the interface.
 	return errors.New("this method is not implemented for a server-stream")
 }
 
-func (c *attemptStreamingSequenceRESTClient) RecvMsg(m interface{}) error {
+func (c *attemptStreamingSequenceRESTStreamClient) RecvMsg(m interface{}) error {
 	// This is a no-op to fulfill the interface.
 	return errors.New("this method is not implemented, use Recv")
 }

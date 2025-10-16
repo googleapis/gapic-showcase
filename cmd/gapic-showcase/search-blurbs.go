@@ -109,6 +109,10 @@ var SearchBlurbsCmd = &cobra.Command{
 		}
 		printMessage(result)
 
+		if err == iterator.Done {
+			return nil
+		}
+
 		return err
 	},
 }

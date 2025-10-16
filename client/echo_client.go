@@ -85,6 +85,7 @@ func defaultEchoGRPCClientOptions() []option.ClientOption {
 		internaloption.WithDefaultAudience("https://localhost/"),
 		internaloption.WithDefaultScopes(DefaultAuthScopes()...),
 		internaloption.EnableJwtWithScope(),
+		internaloption.AllowHardBoundTokens("MTLS_S2A"),
 		internaloption.EnableNewAuthLibrary(),
 		option.WithGRPCDialOption(grpc.WithDefaultCallOptions(
 			grpc.MaxCallRecvMsgSize(math.MaxInt32))),
@@ -543,7 +544,7 @@ func (c *echoGRPCClient) Connection() *grpc.ClientConn {
 // use by Google-written clients.
 func (c *echoGRPCClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", gax.GoVersion}, keyval...)
-	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "grpc", grpc.Version)
+	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "grpc", grpc.Version, "pb", protoVersion)
 	c.xGoogHeaders = []string{
 		"x-goog-api-client", gax.XGoogHeader(kv...),
 		"x-goog-api-version", "v1_20240408",
@@ -633,7 +634,7 @@ func defaultEchoRESTClientOptions() []option.ClientOption {
 // use by Google-written clients.
 func (c *echoRESTClient) setGoogleClientInfo(keyval ...string) {
 	kv := append([]string{"gl-go", gax.GoVersion}, keyval...)
-	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "rest", "UNKNOWN")
+	kv = append(kv, "gapic", getVersionClient(), "gax", gax.Version, "rest", "UNKNOWN", "pb", protoVersion)
 	c.xGoogHeaders = []string{
 		"x-goog-api-client", gax.XGoogHeader(kv...),
 		"x-goog-api-version", "v1_20240408",
@@ -1376,7 +1377,7 @@ func (c *echoRESTClient) Expand(ctx context.Context, req *genprotopb.ExpandReque
 	// Build HTTP headers from client and context metadata.
 	hds := append(c.xGoogHeaders, "Content-Type", "application/json")
 	headers := gax.BuildHeaders(ctx, hds...)
-	var streamClient *expandRESTClient
+	var streamClient *expandRESTStreamClient
 	e := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
 		if settings.Path != "" {
 			baseUrl.Path = settings.Path
@@ -1393,7 +1394,7 @@ func (c *echoRESTClient) Expand(ctx context.Context, req *genprotopb.ExpandReque
 			return err
 		}
 
-		streamClient = &expandRESTClient{
+		streamClient = &expandRESTStreamClient{
 			ctx:    ctx,
 			md:     metadata.MD(httpRsp.Header),
 			stream: gax.NewProtoJSONStreamReader(httpRsp.Body, (&genprotopb.EchoResponse{}).ProtoReflect().Type()),
@@ -1404,15 +1405,15 @@ func (c *echoRESTClient) Expand(ctx context.Context, req *genprotopb.ExpandReque
 	return streamClient, e
 }
 
-// expandRESTClient is the stream client used to consume the server stream created by
+// expandRESTStreamClient is the stream client used to consume the server stream created by
 // the REST implementation of Expand.
-type expandRESTClient struct {
+type expandRESTStreamClient struct {
 	ctx    context.Context
 	md     metadata.MD
 	stream *gax.ProtoJSONStream
 }
 
-func (c *expandRESTClient) Recv() (*genprotopb.EchoResponse, error) {
+func (c *expandRESTStreamClient) Recv() (*genprotopb.EchoResponse, error) {
 	if err := c.ctx.Err(); err != nil {
 		defer c.stream.Close()
 		return nil, err
@@ -1426,29 +1427,29 @@ func (c *expandRESTClient) Recv() (*genprotopb.EchoResponse, error) {
 	return res, nil
 }
 
-func (c *expandRESTClient) Header() (metadata.MD, error) {
+func (c *expandRESTStreamClient) Header() (metadata.MD, error) {
 	return c.md, nil
 }
 
-func (c *expandRESTClient) Trailer() metadata.MD {
+func (c *expandRESTStreamClient) Trailer() metadata.MD {
 	return c.md
 }
 
-func (c *expandRESTClient) CloseSend() error {
+func (c *expandRESTStreamClient) CloseSend() error {
 	// This is a no-op to fulfill the interface.
 	return errors.New("this method is not implemented for a server-stream")
 }
 
-func (c *expandRESTClient) Context() context.Context {
+func (c *expandRESTStreamClient) Context() context.Context {
 	return c.ctx
 }
 
-func (c *expandRESTClient) SendMsg(m interface{}) error {
+func (c *expandRESTStreamClient) SendMsg(m interface{}) error {
 	// This is a no-op to fulfill the interface.
 	return errors.New("this method is not implemented for a server-stream")
 }
 
-func (c *expandRESTClient) RecvMsg(m interface{}) error {
+func (c *expandRESTStreamClient) RecvMsg(m interface{}) error {
 	// This is a no-op to fulfill the interface.
 	return errors.New("this method is not implemented, use Recv")
 }
