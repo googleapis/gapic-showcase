@@ -79,6 +79,10 @@ var PagedExpandCmd = &cobra.Command{
 		}
 		printMessage(iter.Response)
 
+		if err == iterator.Done {
+			return nil
+		}
+
 		return err
 	},
 }

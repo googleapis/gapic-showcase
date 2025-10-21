@@ -97,7 +97,7 @@ func (s *sequenceServerImpl) AttemptSequence(ctx context.Context, in *pb.Attempt
 	if err != nil {
 		return nil, status.Errorf(
 			codes.Internal,
-			err.Error(),
+			"%s", err.Error(),
 		)
 	}
 
@@ -134,7 +134,7 @@ func (s *sequenceServerImpl) AttemptSequence(ctx context.Context, in *pb.Attempt
 	if err != nil {
 		return nil, status.Errorf(
 			codes.Internal,
-			err.Error(),
+			"%s", err.Error(),
 		)
 	}
 
@@ -277,7 +277,7 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 	if err != nil {
 		return status.Errorf(
 			codes.Internal,
-			err.Error(),
+			"%s", err.Error(),
 		)
 	}
 

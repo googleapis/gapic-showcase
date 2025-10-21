@@ -97,6 +97,10 @@ func CompileProtos(version string) {
 			"cmd/gapic-showcase/wait.go",
 			"s/EndEnd_time/EndEndTime/g",
 		},
+		{
+			"cmd/gapic-showcase/search-blurbs.go",
+			"/if err == iterator.Done {/,/}/d",
+		},
 	}
 	command = []string{
 		"sed",

@@ -45,7 +45,7 @@ func (csi *complianceServerImpl) requestMatchesExpectation(received *pb.RepeatRe
 	}
 
 	if ComplianceSuiteStatus == ComplianceSuiteError {
-		return fmt.Errorf(ComplianceSuiteStatusMessage)
+		return fmt.Errorf("%s", ComplianceSuiteStatusMessage)
 	}
 
 	name := received.GetName()
@@ -231,7 +231,7 @@ func indexTestingRequests(suiteBytes []byte) (err error) {
 	if err := protojson.Unmarshal(suiteBytes, ComplianceSuite); err != nil {
 		ComplianceSuiteStatus = ComplianceSuiteError
 		ComplianceSuiteStatusMessage = fmt.Sprintf("(ComplianceServiceReadError) could not read compliance suite file: %s", err)
-		return fmt.Errorf(ComplianceSuiteStatusMessage)
+		return fmt.Errorf("%s", ComplianceSuiteStatusMessage)
 
 	}
 
@@ -239,7 +239,7 @@ func indexTestingRequests(suiteBytes []byte) (err error) {
 	if err != nil {
 		ComplianceSuiteStatus = ComplianceSuiteError
 		ComplianceSuiteStatusMessage = fmt.Sprintf("(ComplianceServiceSetupError) %s", err)
-		return fmt.Errorf(ComplianceSuiteStatusMessage)
+		return fmt.Errorf("%s", ComplianceSuiteStatusMessage)
 	}
 	ComplianceSuiteRequests = indexedSuite
 	ComplianceSuiteStatus = ComplianceSuiteLoaded
