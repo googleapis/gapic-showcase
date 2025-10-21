@@ -1,5 +1,12 @@
 # Release History
 
+## [0.37.0](https://github.com/googleapis/gapic-showcase/compare/v0.36.2...v0.37.0) (2025-10-21)
+
+
+### Features
+
+* Update dependencies and regenerate clients ([#1597](https://github.com/googleapis/gapic-showcase/issues/1597)) ([0ae044d](https://github.com/googleapis/gapic-showcase/commit/0ae044d8dda556672eaf6b2eb24a82ef0d2e4c4e))
+
 ## [0.36.2](https://github.com/googleapis/gapic-showcase/compare/v0.36.1...v0.36.2) (2025-04-16)
 
 
