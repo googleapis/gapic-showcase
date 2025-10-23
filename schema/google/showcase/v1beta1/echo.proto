@@ -361,9 +361,7 @@ message PagedExpandResponseList {
 
 message PagedExpandLegacyMappedResponse {
   // The words that were expanded, indexed by their initial character.
-  // (-- aip.dev/not-precedent: This is a legacy, non-standard pattern that violates
-  //     aip.dev/158. Ordinarily, this should be a `repeated` field, as in PagedExpandResponse. --)
-  map<string, PagedExpandResponseList> alphabetized = 1;
+  repeated PagedExpandResponseList alphabetized = 1;
 
   // The next page token.
   string next_page_token = 2;
