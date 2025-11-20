@@ -28,7 +28,7 @@ jobs:
       - name: Get upload URL for manually triggered releases
         id: manual-upload-url
         if: ${{ github.event.inputs.tag }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const release = await github.rest.repos.getReleaseByTag({
@@ -42,10 +42,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
-          go-version: '1.24'
-      - uses: actions/checkout@v4
+          go-version: '1.25'
+      - uses: actions/checkout@v6
       - name: Init submodule
         run: git submodule init && git submodule update
       - name: Set raw version
@@ -97,12 +97,12 @@ jobs:
           else
           echo "GITHUB_UPLOAD_URL=$MANUAL_UPLOAD_URL" >> "$GITHUB_OUTPUT"
           fi
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
-          go-version: '1.24'
+          go-version: '1.25'
       - name: Install gox
         run: go install github.com/mitchellh/gox@latest
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set raw version
         id: raw_tag
         # Strips the 'v' from the actual semver version.
