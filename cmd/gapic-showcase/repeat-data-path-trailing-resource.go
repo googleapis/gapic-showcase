@@ -62,8 +62,6 @@ var repeatDataPathTrailingResourceInputInfoPDouble float64
 
 var repeatDataPathTrailingResourceInputInfoPBool bool
 
-var repeatDataPathTrailingResourceInputInfoPBytes []byte
-
 var RepeatDataPathTrailingResourceInputInfoPKingdom string
 
 var RepeatDataPathTrailingResourceInputInfoPChildFContinent string
@@ -196,8 +194,6 @@ func init() {
 	RepeatDataPathTrailingResourceCmd.Flags().Float64Var(&repeatDataPathTrailingResourceInputInfoPDouble, "info.p_double", 0.0, "")
 
 	RepeatDataPathTrailingResourceCmd.Flags().BoolVar(&repeatDataPathTrailingResourceInputInfoPBool, "info.p_bool", false, "")
-
-	RepeatDataPathTrailingResourceCmd.Flags().BytesHexVar(&repeatDataPathTrailingResourceInputInfoPBytes, "info.p_bytes", []byte{}, "")
 
 	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&RepeatDataPathTrailingResourceInputInfoPKingdom, "info.p_kingdom", "", "")
 
@@ -366,10 +362,6 @@ var RepeatDataPathTrailingResourceCmd = &cobra.Command{
 
 			if cmd.Flags().Changed("info.p_bool") {
 				RepeatDataPathTrailingResourceInput.Info.PBool = &repeatDataPathTrailingResourceInputInfoPBool
-			}
-
-			if cmd.Flags().Changed("info.p_bytes") {
-				RepeatDataPathTrailingResourceInput.Info.PBytes = &repeatDataPathTrailingResourceInputInfoPBytes
 			}
 
 			if cmd.Flags().Changed("info.p_child.p_string") {

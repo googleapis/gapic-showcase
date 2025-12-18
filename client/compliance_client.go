@@ -1084,9 +1084,6 @@ func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprot
 	if req.GetInfo() != nil && req.GetInfo().PBool != nil {
 		params.Add("info.pBool", fmt.Sprintf("%v", req.GetInfo().GetPBool()))
 	}
-	if req.GetInfo() != nil && req.GetInfo().PBytes != nil {
-		params.Add("info.pBytes", fmt.Sprintf("%v", req.GetInfo().GetPBytes()))
-	}
 	if req.GetInfo().GetPChild().GetFBool() {
 		params.Add("info.pChild.fBool", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFBool()))
 	}
@@ -1335,9 +1332,6 @@ func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *ge
 	}
 	if req.GetInfo() != nil && req.GetInfo().PBool != nil {
 		params.Add("info.pBool", fmt.Sprintf("%v", req.GetInfo().GetPBool()))
-	}
-	if req.GetInfo() != nil && req.GetInfo().PBytes != nil {
-		params.Add("info.pBytes", fmt.Sprintf("%v", req.GetInfo().GetPBytes()))
 	}
 	if req.GetInfo().GetPChild().GetFBool() {
 		params.Add("info.pChild.fBool", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFBool()))
@@ -1594,9 +1588,6 @@ func (c *complianceRESTClient) RepeatDataPathResource(ctx context.Context, req *
 	}
 	if req.GetInfo() != nil && req.GetInfo().PBool != nil {
 		params.Add("info.pBool", fmt.Sprintf("%v", req.GetInfo().GetPBool()))
-	}
-	if req.GetInfo() != nil && req.GetInfo().PBytes != nil {
-		params.Add("info.pBytes", fmt.Sprintf("%v", req.GetInfo().GetPBytes()))
 	}
 	if req.GetInfo().GetPChild().GetFBool() {
 		params.Add("info.pChild.fBool", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFBool()))
@@ -1856,9 +1847,6 @@ func (c *complianceRESTClient) RepeatDataPathTrailingResource(ctx context.Contex
 	}
 	if req.GetInfo() != nil && req.GetInfo().PBool != nil {
 		params.Add("info.pBool", fmt.Sprintf("%v", req.GetInfo().GetPBool()))
-	}
-	if req.GetInfo() != nil && req.GetInfo().PBytes != nil {
-		params.Add("info.pBytes", fmt.Sprintf("%v", req.GetInfo().GetPBytes()))
 	}
 	if req.GetInfo().GetPChild().GetFBool() {
 		params.Add("info.pChild.fBool", fmt.Sprintf("%v", req.GetInfo().GetPChild().GetFBool()))

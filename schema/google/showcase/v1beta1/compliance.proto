@@ -236,7 +236,16 @@ message ComplianceData {
 
   optional bool p_bool = 20;
 
-  optional bytes p_bytes = 49;
+  // The proto compiler seems to misgenerate optional bytes fields.
+  // The generated code looks like:
+  // ```
+  // if cmd.Flags().Changed("info.p_bytes") {
+  // 	RepeatDataBodyInfoInput.Info.PBytes = &repeatDataBodyInfoInputInfoPBytes
+  // }
+  // ```
+  // The dereference of `&repeatDataBodyInfoInputInfoPBytes` is incorrect since
+  // `repeatDataBodyInfoInputInfoPBytes` is already a `byte[]`
+  // optional bytes p_bytes = 49;
 
   optional LifeKingdom p_kingdom = 23;
   optional ComplianceDataChild p_child = 21;

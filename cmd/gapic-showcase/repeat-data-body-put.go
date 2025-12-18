@@ -62,8 +62,6 @@ var repeatDataBodyPutInputInfoPDouble float64
 
 var repeatDataBodyPutInputInfoPBool bool
 
-var repeatDataBodyPutInputInfoPBytes []byte
-
 var RepeatDataBodyPutInputInfoPKingdom string
 
 var RepeatDataBodyPutInputInfoPChildFContinent string
@@ -196,8 +194,6 @@ func init() {
 	RepeatDataBodyPutCmd.Flags().Float64Var(&repeatDataBodyPutInputInfoPDouble, "info.p_double", 0.0, "")
 
 	RepeatDataBodyPutCmd.Flags().BoolVar(&repeatDataBodyPutInputInfoPBool, "info.p_bool", false, "")
-
-	RepeatDataBodyPutCmd.Flags().BytesHexVar(&repeatDataBodyPutInputInfoPBytes, "info.p_bytes", []byte{}, "")
 
 	RepeatDataBodyPutCmd.Flags().StringVar(&RepeatDataBodyPutInputInfoPKingdom, "info.p_kingdom", "", "")
 
@@ -366,10 +362,6 @@ var RepeatDataBodyPutCmd = &cobra.Command{
 
 			if cmd.Flags().Changed("info.p_bool") {
 				RepeatDataBodyPutInput.Info.PBool = &repeatDataBodyPutInputInfoPBool
-			}
-
-			if cmd.Flags().Changed("info.p_bytes") {
-				RepeatDataBodyPutInput.Info.PBytes = &repeatDataBodyPutInputInfoPBytes
 			}
 
 			if cmd.Flags().Changed("info.p_child.p_string") {

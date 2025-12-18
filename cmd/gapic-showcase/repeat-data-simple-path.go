@@ -62,8 +62,6 @@ var repeatDataSimplePathInputInfoPDouble float64
 
 var repeatDataSimplePathInputInfoPBool bool
 
-var repeatDataSimplePathInputInfoPBytes []byte
-
 var RepeatDataSimplePathInputInfoPKingdom string
 
 var RepeatDataSimplePathInputInfoPChildFContinent string
@@ -196,8 +194,6 @@ func init() {
 	RepeatDataSimplePathCmd.Flags().Float64Var(&repeatDataSimplePathInputInfoPDouble, "info.p_double", 0.0, "")
 
 	RepeatDataSimplePathCmd.Flags().BoolVar(&repeatDataSimplePathInputInfoPBool, "info.p_bool", false, "")
-
-	RepeatDataSimplePathCmd.Flags().BytesHexVar(&repeatDataSimplePathInputInfoPBytes, "info.p_bytes", []byte{}, "")
 
 	RepeatDataSimplePathCmd.Flags().StringVar(&RepeatDataSimplePathInputInfoPKingdom, "info.p_kingdom", "", "")
 
@@ -366,10 +362,6 @@ var RepeatDataSimplePathCmd = &cobra.Command{
 
 			if cmd.Flags().Changed("info.p_bool") {
 				RepeatDataSimplePathInput.Info.PBool = &repeatDataSimplePathInputInfoPBool
-			}
-
-			if cmd.Flags().Changed("info.p_bytes") {
-				RepeatDataSimplePathInput.Info.PBytes = &repeatDataSimplePathInputInfoPBytes
 			}
 
 			if cmd.Flags().Changed("info.p_child.p_string") {
