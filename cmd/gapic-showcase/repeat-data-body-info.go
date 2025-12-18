@@ -38,9 +38,31 @@ var repeatDataBodyInfoInputInfoPString string
 
 var repeatDataBodyInfoInputInfoPInt32 int32
 
+var repeatDataBodyInfoInputInfoPSint32 int32
+
+var repeatDataBodyInfoInputInfoPSfixed32 int32
+
+var repeatDataBodyInfoInputInfoPUint32 uint32
+
+var repeatDataBodyInfoInputInfoPFixed32 uint32
+
+var repeatDataBodyInfoInputInfoPInt64 int64
+
+var repeatDataBodyInfoInputInfoPSint64 int64
+
+var repeatDataBodyInfoInputInfoPSfixed64 int64
+
+var repeatDataBodyInfoInputInfoPUint64 uint64
+
+var repeatDataBodyInfoInputInfoPFixed64 uint64
+
+var repeatDataBodyInfoInputInfoPFloat float32
+
 var repeatDataBodyInfoInputInfoPDouble float64
 
 var repeatDataBodyInfoInputInfoPBool bool
+
+var repeatDataBodyInfoInputInfoPBytes []byte
 
 var RepeatDataBodyInfoInputInfoPKingdom string
 
@@ -151,9 +173,31 @@ func init() {
 
 	RepeatDataBodyInfoCmd.Flags().Int32Var(&repeatDataBodyInfoInputInfoPInt32, "info.p_int32", 0, "")
 
+	RepeatDataBodyInfoCmd.Flags().Int32Var(&repeatDataBodyInfoInputInfoPSint32, "info.p_sint32", 0, "")
+
+	RepeatDataBodyInfoCmd.Flags().Int32Var(&repeatDataBodyInfoInputInfoPSfixed32, "info.p_sfixed32", 0, "")
+
+	RepeatDataBodyInfoCmd.Flags().Uint32Var(&repeatDataBodyInfoInputInfoPUint32, "info.p_uint32", 0, "")
+
+	RepeatDataBodyInfoCmd.Flags().Uint32Var(&repeatDataBodyInfoInputInfoPFixed32, "info.p_fixed32", 0, "")
+
+	RepeatDataBodyInfoCmd.Flags().Int64Var(&repeatDataBodyInfoInputInfoPInt64, "info.p_int64", 0, "")
+
+	RepeatDataBodyInfoCmd.Flags().Int64Var(&repeatDataBodyInfoInputInfoPSint64, "info.p_sint64", 0, "")
+
+	RepeatDataBodyInfoCmd.Flags().Int64Var(&repeatDataBodyInfoInputInfoPSfixed64, "info.p_sfixed64", 0, "")
+
+	RepeatDataBodyInfoCmd.Flags().Uint64Var(&repeatDataBodyInfoInputInfoPUint64, "info.p_uint64", 0, "")
+
+	RepeatDataBodyInfoCmd.Flags().Uint64Var(&repeatDataBodyInfoInputInfoPFixed64, "info.p_fixed64", 0, "")
+
+	RepeatDataBodyInfoCmd.Flags().Float32Var(&repeatDataBodyInfoInputInfoPFloat, "info.p_float", 0.0, "")
+
 	RepeatDataBodyInfoCmd.Flags().Float64Var(&repeatDataBodyInfoInputInfoPDouble, "info.p_double", 0.0, "")
 
 	RepeatDataBodyInfoCmd.Flags().BoolVar(&repeatDataBodyInfoInputInfoPBool, "info.p_bool", false, "")
+
+	RepeatDataBodyInfoCmd.Flags().BytesHexVar(&repeatDataBodyInfoInputInfoPBytes, "info.p_bytes", []byte{}, "")
 
 	RepeatDataBodyInfoCmd.Flags().StringVar(&RepeatDataBodyInfoInputInfoPKingdom, "info.p_kingdom", "", "")
 
@@ -276,12 +320,56 @@ var RepeatDataBodyInfoCmd = &cobra.Command{
 				RepeatDataBodyInfoInput.Info.PInt32 = &repeatDataBodyInfoInputInfoPInt32
 			}
 
+			if cmd.Flags().Changed("info.p_sint32") {
+				RepeatDataBodyInfoInput.Info.PSint32 = &repeatDataBodyInfoInputInfoPSint32
+			}
+
+			if cmd.Flags().Changed("info.p_sfixed32") {
+				RepeatDataBodyInfoInput.Info.PSfixed32 = &repeatDataBodyInfoInputInfoPSfixed32
+			}
+
+			if cmd.Flags().Changed("info.p_uint32") {
+				RepeatDataBodyInfoInput.Info.PUint32 = &repeatDataBodyInfoInputInfoPUint32
+			}
+
+			if cmd.Flags().Changed("info.p_fixed32") {
+				RepeatDataBodyInfoInput.Info.PFixed32 = &repeatDataBodyInfoInputInfoPFixed32
+			}
+
+			if cmd.Flags().Changed("info.p_int64") {
+				RepeatDataBodyInfoInput.Info.PInt64 = &repeatDataBodyInfoInputInfoPInt64
+			}
+
+			if cmd.Flags().Changed("info.p_sint64") {
+				RepeatDataBodyInfoInput.Info.PSint64 = &repeatDataBodyInfoInputInfoPSint64
+			}
+
+			if cmd.Flags().Changed("info.p_sfixed64") {
+				RepeatDataBodyInfoInput.Info.PSfixed64 = &repeatDataBodyInfoInputInfoPSfixed64
+			}
+
+			if cmd.Flags().Changed("info.p_uint64") {
+				RepeatDataBodyInfoInput.Info.PUint64 = &repeatDataBodyInfoInputInfoPUint64
+			}
+
+			if cmd.Flags().Changed("info.p_fixed64") {
+				RepeatDataBodyInfoInput.Info.PFixed64 = &repeatDataBodyInfoInputInfoPFixed64
+			}
+
+			if cmd.Flags().Changed("info.p_float") {
+				RepeatDataBodyInfoInput.Info.PFloat = &repeatDataBodyInfoInputInfoPFloat
+			}
+
 			if cmd.Flags().Changed("info.p_double") {
 				RepeatDataBodyInfoInput.Info.PDouble = &repeatDataBodyInfoInputInfoPDouble
 			}
 
 			if cmd.Flags().Changed("info.p_bool") {
 				RepeatDataBodyInfoInput.Info.PBool = &repeatDataBodyInfoInputInfoPBool
+			}
+
+			if cmd.Flags().Changed("info.p_bytes") {
+				RepeatDataBodyInfoInput.Info.PBytes = &repeatDataBodyInfoInputInfoPBytes
 			}
 
 			if cmd.Flags().Changed("info.p_child.p_string") {

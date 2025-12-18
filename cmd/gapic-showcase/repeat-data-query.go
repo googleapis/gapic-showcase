@@ -38,9 +38,31 @@ var repeatDataQueryInputInfoPString string
 
 var repeatDataQueryInputInfoPInt32 int32
 
+var repeatDataQueryInputInfoPSint32 int32
+
+var repeatDataQueryInputInfoPSfixed32 int32
+
+var repeatDataQueryInputInfoPUint32 uint32
+
+var repeatDataQueryInputInfoPFixed32 uint32
+
+var repeatDataQueryInputInfoPInt64 int64
+
+var repeatDataQueryInputInfoPSint64 int64
+
+var repeatDataQueryInputInfoPSfixed64 int64
+
+var repeatDataQueryInputInfoPUint64 uint64
+
+var repeatDataQueryInputInfoPFixed64 uint64
+
+var repeatDataQueryInputInfoPFloat float32
+
 var repeatDataQueryInputInfoPDouble float64
 
 var repeatDataQueryInputInfoPBool bool
+
+var repeatDataQueryInputInfoPBytes []byte
 
 var RepeatDataQueryInputInfoPKingdom string
 
@@ -151,9 +173,31 @@ func init() {
 
 	RepeatDataQueryCmd.Flags().Int32Var(&repeatDataQueryInputInfoPInt32, "info.p_int32", 0, "")
 
+	RepeatDataQueryCmd.Flags().Int32Var(&repeatDataQueryInputInfoPSint32, "info.p_sint32", 0, "")
+
+	RepeatDataQueryCmd.Flags().Int32Var(&repeatDataQueryInputInfoPSfixed32, "info.p_sfixed32", 0, "")
+
+	RepeatDataQueryCmd.Flags().Uint32Var(&repeatDataQueryInputInfoPUint32, "info.p_uint32", 0, "")
+
+	RepeatDataQueryCmd.Flags().Uint32Var(&repeatDataQueryInputInfoPFixed32, "info.p_fixed32", 0, "")
+
+	RepeatDataQueryCmd.Flags().Int64Var(&repeatDataQueryInputInfoPInt64, "info.p_int64", 0, "")
+
+	RepeatDataQueryCmd.Flags().Int64Var(&repeatDataQueryInputInfoPSint64, "info.p_sint64", 0, "")
+
+	RepeatDataQueryCmd.Flags().Int64Var(&repeatDataQueryInputInfoPSfixed64, "info.p_sfixed64", 0, "")
+
+	RepeatDataQueryCmd.Flags().Uint64Var(&repeatDataQueryInputInfoPUint64, "info.p_uint64", 0, "")
+
+	RepeatDataQueryCmd.Flags().Uint64Var(&repeatDataQueryInputInfoPFixed64, "info.p_fixed64", 0, "")
+
+	RepeatDataQueryCmd.Flags().Float32Var(&repeatDataQueryInputInfoPFloat, "info.p_float", 0.0, "")
+
 	RepeatDataQueryCmd.Flags().Float64Var(&repeatDataQueryInputInfoPDouble, "info.p_double", 0.0, "")
 
 	RepeatDataQueryCmd.Flags().BoolVar(&repeatDataQueryInputInfoPBool, "info.p_bool", false, "")
+
+	RepeatDataQueryCmd.Flags().BytesHexVar(&repeatDataQueryInputInfoPBytes, "info.p_bytes", []byte{}, "")
 
 	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryInputInfoPKingdom, "info.p_kingdom", "", "")
 
@@ -276,12 +320,56 @@ var RepeatDataQueryCmd = &cobra.Command{
 				RepeatDataQueryInput.Info.PInt32 = &repeatDataQueryInputInfoPInt32
 			}
 
+			if cmd.Flags().Changed("info.p_sint32") {
+				RepeatDataQueryInput.Info.PSint32 = &repeatDataQueryInputInfoPSint32
+			}
+
+			if cmd.Flags().Changed("info.p_sfixed32") {
+				RepeatDataQueryInput.Info.PSfixed32 = &repeatDataQueryInputInfoPSfixed32
+			}
+
+			if cmd.Flags().Changed("info.p_uint32") {
+				RepeatDataQueryInput.Info.PUint32 = &repeatDataQueryInputInfoPUint32
+			}
+
+			if cmd.Flags().Changed("info.p_fixed32") {
+				RepeatDataQueryInput.Info.PFixed32 = &repeatDataQueryInputInfoPFixed32
+			}
+
+			if cmd.Flags().Changed("info.p_int64") {
+				RepeatDataQueryInput.Info.PInt64 = &repeatDataQueryInputInfoPInt64
+			}
+
+			if cmd.Flags().Changed("info.p_sint64") {
+				RepeatDataQueryInput.Info.PSint64 = &repeatDataQueryInputInfoPSint64
+			}
+
+			if cmd.Flags().Changed("info.p_sfixed64") {
+				RepeatDataQueryInput.Info.PSfixed64 = &repeatDataQueryInputInfoPSfixed64
+			}
+
+			if cmd.Flags().Changed("info.p_uint64") {
+				RepeatDataQueryInput.Info.PUint64 = &repeatDataQueryInputInfoPUint64
+			}
+
+			if cmd.Flags().Changed("info.p_fixed64") {
+				RepeatDataQueryInput.Info.PFixed64 = &repeatDataQueryInputInfoPFixed64
+			}
+
+			if cmd.Flags().Changed("info.p_float") {
+				RepeatDataQueryInput.Info.PFloat = &repeatDataQueryInputInfoPFloat
+			}
+
 			if cmd.Flags().Changed("info.p_double") {
 				RepeatDataQueryInput.Info.PDouble = &repeatDataQueryInputInfoPDouble
 			}
 
 			if cmd.Flags().Changed("info.p_bool") {
 				RepeatDataQueryInput.Info.PBool = &repeatDataQueryInputInfoPBool
+			}
+
+			if cmd.Flags().Changed("info.p_bytes") {
+				RepeatDataQueryInput.Info.PBytes = &repeatDataQueryInputInfoPBytes
 			}
 
 			if cmd.Flags().Changed("info.p_child.p_string") {

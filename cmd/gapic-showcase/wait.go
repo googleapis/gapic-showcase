@@ -55,7 +55,7 @@ func init() {
 
 	WaitInputResponseSuccess.Success = new(genprotopb.WaitResponse)
 
-	WaitCmd.Flags().Int64Var(&WaitInputEndEndTime.EndTime.Seconds, "end.end_time.seconds", 0, "Represents seconds of UTC time since Unix epoch ...")
+	WaitCmd.Flags().Int64Var(&WaitInputEndEndTime.EndTime.Seconds, "end.end_time.seconds", 0, "Represents seconds of UTC time since Unix epoch...")
 
 	WaitCmd.Flags().Int32Var(&WaitInputEndEndTime.EndTime.Nanos, "end.end_time.nanos", 0, "Non-negative fractions of a second at nanosecond...")
 

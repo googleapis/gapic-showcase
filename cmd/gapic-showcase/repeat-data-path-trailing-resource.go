@@ -38,9 +38,31 @@ var repeatDataPathTrailingResourceInputInfoPString string
 
 var repeatDataPathTrailingResourceInputInfoPInt32 int32
 
+var repeatDataPathTrailingResourceInputInfoPSint32 int32
+
+var repeatDataPathTrailingResourceInputInfoPSfixed32 int32
+
+var repeatDataPathTrailingResourceInputInfoPUint32 uint32
+
+var repeatDataPathTrailingResourceInputInfoPFixed32 uint32
+
+var repeatDataPathTrailingResourceInputInfoPInt64 int64
+
+var repeatDataPathTrailingResourceInputInfoPSint64 int64
+
+var repeatDataPathTrailingResourceInputInfoPSfixed64 int64
+
+var repeatDataPathTrailingResourceInputInfoPUint64 uint64
+
+var repeatDataPathTrailingResourceInputInfoPFixed64 uint64
+
+var repeatDataPathTrailingResourceInputInfoPFloat float32
+
 var repeatDataPathTrailingResourceInputInfoPDouble float64
 
 var repeatDataPathTrailingResourceInputInfoPBool bool
+
+var repeatDataPathTrailingResourceInputInfoPBytes []byte
 
 var RepeatDataPathTrailingResourceInputInfoPKingdom string
 
@@ -151,9 +173,31 @@ func init() {
 
 	RepeatDataPathTrailingResourceCmd.Flags().Int32Var(&repeatDataPathTrailingResourceInputInfoPInt32, "info.p_int32", 0, "")
 
+	RepeatDataPathTrailingResourceCmd.Flags().Int32Var(&repeatDataPathTrailingResourceInputInfoPSint32, "info.p_sint32", 0, "")
+
+	RepeatDataPathTrailingResourceCmd.Flags().Int32Var(&repeatDataPathTrailingResourceInputInfoPSfixed32, "info.p_sfixed32", 0, "")
+
+	RepeatDataPathTrailingResourceCmd.Flags().Uint32Var(&repeatDataPathTrailingResourceInputInfoPUint32, "info.p_uint32", 0, "")
+
+	RepeatDataPathTrailingResourceCmd.Flags().Uint32Var(&repeatDataPathTrailingResourceInputInfoPFixed32, "info.p_fixed32", 0, "")
+
+	RepeatDataPathTrailingResourceCmd.Flags().Int64Var(&repeatDataPathTrailingResourceInputInfoPInt64, "info.p_int64", 0, "")
+
+	RepeatDataPathTrailingResourceCmd.Flags().Int64Var(&repeatDataPathTrailingResourceInputInfoPSint64, "info.p_sint64", 0, "")
+
+	RepeatDataPathTrailingResourceCmd.Flags().Int64Var(&repeatDataPathTrailingResourceInputInfoPSfixed64, "info.p_sfixed64", 0, "")
+
+	RepeatDataPathTrailingResourceCmd.Flags().Uint64Var(&repeatDataPathTrailingResourceInputInfoPUint64, "info.p_uint64", 0, "")
+
+	RepeatDataPathTrailingResourceCmd.Flags().Uint64Var(&repeatDataPathTrailingResourceInputInfoPFixed64, "info.p_fixed64", 0, "")
+
+	RepeatDataPathTrailingResourceCmd.Flags().Float32Var(&repeatDataPathTrailingResourceInputInfoPFloat, "info.p_float", 0.0, "")
+
 	RepeatDataPathTrailingResourceCmd.Flags().Float64Var(&repeatDataPathTrailingResourceInputInfoPDouble, "info.p_double", 0.0, "")
 
 	RepeatDataPathTrailingResourceCmd.Flags().BoolVar(&repeatDataPathTrailingResourceInputInfoPBool, "info.p_bool", false, "")
+
+	RepeatDataPathTrailingResourceCmd.Flags().BytesHexVar(&repeatDataPathTrailingResourceInputInfoPBytes, "info.p_bytes", []byte{}, "")
 
 	RepeatDataPathTrailingResourceCmd.Flags().StringVar(&RepeatDataPathTrailingResourceInputInfoPKingdom, "info.p_kingdom", "", "")
 
@@ -276,12 +320,56 @@ var RepeatDataPathTrailingResourceCmd = &cobra.Command{
 				RepeatDataPathTrailingResourceInput.Info.PInt32 = &repeatDataPathTrailingResourceInputInfoPInt32
 			}
 
+			if cmd.Flags().Changed("info.p_sint32") {
+				RepeatDataPathTrailingResourceInput.Info.PSint32 = &repeatDataPathTrailingResourceInputInfoPSint32
+			}
+
+			if cmd.Flags().Changed("info.p_sfixed32") {
+				RepeatDataPathTrailingResourceInput.Info.PSfixed32 = &repeatDataPathTrailingResourceInputInfoPSfixed32
+			}
+
+			if cmd.Flags().Changed("info.p_uint32") {
+				RepeatDataPathTrailingResourceInput.Info.PUint32 = &repeatDataPathTrailingResourceInputInfoPUint32
+			}
+
+			if cmd.Flags().Changed("info.p_fixed32") {
+				RepeatDataPathTrailingResourceInput.Info.PFixed32 = &repeatDataPathTrailingResourceInputInfoPFixed32
+			}
+
+			if cmd.Flags().Changed("info.p_int64") {
+				RepeatDataPathTrailingResourceInput.Info.PInt64 = &repeatDataPathTrailingResourceInputInfoPInt64
+			}
+
+			if cmd.Flags().Changed("info.p_sint64") {
+				RepeatDataPathTrailingResourceInput.Info.PSint64 = &repeatDataPathTrailingResourceInputInfoPSint64
+			}
+
+			if cmd.Flags().Changed("info.p_sfixed64") {
+				RepeatDataPathTrailingResourceInput.Info.PSfixed64 = &repeatDataPathTrailingResourceInputInfoPSfixed64
+			}
+
+			if cmd.Flags().Changed("info.p_uint64") {
+				RepeatDataPathTrailingResourceInput.Info.PUint64 = &repeatDataPathTrailingResourceInputInfoPUint64
+			}
+
+			if cmd.Flags().Changed("info.p_fixed64") {
+				RepeatDataPathTrailingResourceInput.Info.PFixed64 = &repeatDataPathTrailingResourceInputInfoPFixed64
+			}
+
+			if cmd.Flags().Changed("info.p_float") {
+				RepeatDataPathTrailingResourceInput.Info.PFloat = &repeatDataPathTrailingResourceInputInfoPFloat
+			}
+
 			if cmd.Flags().Changed("info.p_double") {
 				RepeatDataPathTrailingResourceInput.Info.PDouble = &repeatDataPathTrailingResourceInputInfoPDouble
 			}
 
 			if cmd.Flags().Changed("info.p_bool") {
 				RepeatDataPathTrailingResourceInput.Info.PBool = &repeatDataPathTrailingResourceInputInfoPBool
+			}
+
+			if cmd.Flags().Changed("info.p_bytes") {
+				RepeatDataPathTrailingResourceInput.Info.PBytes = &repeatDataPathTrailingResourceInputInfoPBytes
 			}
 
 			if cmd.Flags().Changed("info.p_child.p_string") {

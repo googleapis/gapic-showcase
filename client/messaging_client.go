@@ -2240,6 +2240,9 @@ func (c *messagingRESTClient) ListOperations(ctx context.Context, req *longrunni
 		if req.GetPageToken() != "" {
 			params.Add("pageToken", fmt.Sprintf("%v", req.GetPageToken()))
 		}
+		if req.GetReturnPartialSuccess() {
+			params.Add("returnPartialSuccess", fmt.Sprintf("%v", req.GetReturnPartialSuccess()))
+		}
 
 		baseUrl.RawQuery = params.Encode()
 

@@ -38,9 +38,31 @@ var repeatDataPathResourceInputInfoPString string
 
 var repeatDataPathResourceInputInfoPInt32 int32
 
+var repeatDataPathResourceInputInfoPSint32 int32
+
+var repeatDataPathResourceInputInfoPSfixed32 int32
+
+var repeatDataPathResourceInputInfoPUint32 uint32
+
+var repeatDataPathResourceInputInfoPFixed32 uint32
+
+var repeatDataPathResourceInputInfoPInt64 int64
+
+var repeatDataPathResourceInputInfoPSint64 int64
+
+var repeatDataPathResourceInputInfoPSfixed64 int64
+
+var repeatDataPathResourceInputInfoPUint64 uint64
+
+var repeatDataPathResourceInputInfoPFixed64 uint64
+
+var repeatDataPathResourceInputInfoPFloat float32
+
 var repeatDataPathResourceInputInfoPDouble float64
 
 var repeatDataPathResourceInputInfoPBool bool
+
+var repeatDataPathResourceInputInfoPBytes []byte
 
 var RepeatDataPathResourceInputInfoPKingdom string
 
@@ -151,9 +173,31 @@ func init() {
 
 	RepeatDataPathResourceCmd.Flags().Int32Var(&repeatDataPathResourceInputInfoPInt32, "info.p_int32", 0, "")
 
+	RepeatDataPathResourceCmd.Flags().Int32Var(&repeatDataPathResourceInputInfoPSint32, "info.p_sint32", 0, "")
+
+	RepeatDataPathResourceCmd.Flags().Int32Var(&repeatDataPathResourceInputInfoPSfixed32, "info.p_sfixed32", 0, "")
+
+	RepeatDataPathResourceCmd.Flags().Uint32Var(&repeatDataPathResourceInputInfoPUint32, "info.p_uint32", 0, "")
+
+	RepeatDataPathResourceCmd.Flags().Uint32Var(&repeatDataPathResourceInputInfoPFixed32, "info.p_fixed32", 0, "")
+
+	RepeatDataPathResourceCmd.Flags().Int64Var(&repeatDataPathResourceInputInfoPInt64, "info.p_int64", 0, "")
+
+	RepeatDataPathResourceCmd.Flags().Int64Var(&repeatDataPathResourceInputInfoPSint64, "info.p_sint64", 0, "")
+
+	RepeatDataPathResourceCmd.Flags().Int64Var(&repeatDataPathResourceInputInfoPSfixed64, "info.p_sfixed64", 0, "")
+
+	RepeatDataPathResourceCmd.Flags().Uint64Var(&repeatDataPathResourceInputInfoPUint64, "info.p_uint64", 0, "")
+
+	RepeatDataPathResourceCmd.Flags().Uint64Var(&repeatDataPathResourceInputInfoPFixed64, "info.p_fixed64", 0, "")
+
+	RepeatDataPathResourceCmd.Flags().Float32Var(&repeatDataPathResourceInputInfoPFloat, "info.p_float", 0.0, "")
+
 	RepeatDataPathResourceCmd.Flags().Float64Var(&repeatDataPathResourceInputInfoPDouble, "info.p_double", 0.0, "")
 
 	RepeatDataPathResourceCmd.Flags().BoolVar(&repeatDataPathResourceInputInfoPBool, "info.p_bool", false, "")
+
+	RepeatDataPathResourceCmd.Flags().BytesHexVar(&repeatDataPathResourceInputInfoPBytes, "info.p_bytes", []byte{}, "")
 
 	RepeatDataPathResourceCmd.Flags().StringVar(&RepeatDataPathResourceInputInfoPKingdom, "info.p_kingdom", "", "")
 
@@ -276,12 +320,56 @@ var RepeatDataPathResourceCmd = &cobra.Command{
 				RepeatDataPathResourceInput.Info.PInt32 = &repeatDataPathResourceInputInfoPInt32
 			}
 
+			if cmd.Flags().Changed("info.p_sint32") {
+				RepeatDataPathResourceInput.Info.PSint32 = &repeatDataPathResourceInputInfoPSint32
+			}
+
+			if cmd.Flags().Changed("info.p_sfixed32") {
+				RepeatDataPathResourceInput.Info.PSfixed32 = &repeatDataPathResourceInputInfoPSfixed32
+			}
+
+			if cmd.Flags().Changed("info.p_uint32") {
+				RepeatDataPathResourceInput.Info.PUint32 = &repeatDataPathResourceInputInfoPUint32
+			}
+
+			if cmd.Flags().Changed("info.p_fixed32") {
+				RepeatDataPathResourceInput.Info.PFixed32 = &repeatDataPathResourceInputInfoPFixed32
+			}
+
+			if cmd.Flags().Changed("info.p_int64") {
+				RepeatDataPathResourceInput.Info.PInt64 = &repeatDataPathResourceInputInfoPInt64
+			}
+
+			if cmd.Flags().Changed("info.p_sint64") {
+				RepeatDataPathResourceInput.Info.PSint64 = &repeatDataPathResourceInputInfoPSint64
+			}
+
+			if cmd.Flags().Changed("info.p_sfixed64") {
+				RepeatDataPathResourceInput.Info.PSfixed64 = &repeatDataPathResourceInputInfoPSfixed64
+			}
+
+			if cmd.Flags().Changed("info.p_uint64") {
+				RepeatDataPathResourceInput.Info.PUint64 = &repeatDataPathResourceInputInfoPUint64
+			}
+
+			if cmd.Flags().Changed("info.p_fixed64") {
+				RepeatDataPathResourceInput.Info.PFixed64 = &repeatDataPathResourceInputInfoPFixed64
+			}
+
+			if cmd.Flags().Changed("info.p_float") {
+				RepeatDataPathResourceInput.Info.PFloat = &repeatDataPathResourceInputInfoPFloat
+			}
+
 			if cmd.Flags().Changed("info.p_double") {
 				RepeatDataPathResourceInput.Info.PDouble = &repeatDataPathResourceInputInfoPDouble
 			}
 
 			if cmd.Flags().Changed("info.p_bool") {
 				RepeatDataPathResourceInput.Info.PBool = &repeatDataPathResourceInputInfoPBool
+			}
+
+			if cmd.Flags().Changed("info.p_bytes") {
+				RepeatDataPathResourceInput.Info.PBytes = &repeatDataPathResourceInputInfoPBytes
 			}
 
 			if cmd.Flags().Changed("info.p_child.p_string") {
