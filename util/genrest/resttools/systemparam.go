@@ -26,6 +26,7 @@ import (
 // https://cloud.google.com/apis/docs/system-parameters.
 type SystemParameters struct {
 	EnumEncodingAsInt bool
+	APIVersion        string
 }
 
 // GetSystemParameters returns the SystemParameters encoded in request, and the query parameters in
@@ -85,6 +86,14 @@ func processQueryString(queryString string) (systemParams *SystemParameters, que
 			}
 			delete(queryParams, param)
 			sawAltParam = true
+		case "apiVersion", "$apiVersion":
+			if systemParams.APIVersion != "" {
+				return systemParams, queryParams, fmt.Errorf("multiple instances of $apiVersion system parameter")
+			}
+			for _, val := range values {
+				systemParams.APIVersion = val
+			}
+			delete(queryParams, param)
 		}
 	}
 	return systemParams, queryParams, nil

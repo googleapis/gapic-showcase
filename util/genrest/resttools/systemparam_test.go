@@ -24,7 +24,7 @@ import (
 func TestProcessQueryString(t *testing.T) {
 	for idx, testCase := range []struct {
 		queryString string
-		wantInt     bool
+		wantSystem  *SystemParameters
 		wantParams  map[string][]string
 		wantError   bool
 	}{
@@ -98,27 +98,27 @@ func TestProcessQueryString(t *testing.T) {
 		{queryString: "%24alt=json"},
 		{
 			queryString: "alt=json%3Benum-encoding=int",
-			wantInt:     true,
+			wantSystem:  &SystemParameters{EnumEncodingAsInt: true},
 		},
 		{
 			queryString: "$alt=json%3Benum-encoding=int",
-			wantInt:     true,
+			wantSystem:  &SystemParameters{EnumEncodingAsInt: true},
 		},
 		{
 			queryString: "%24alt=json%3Benum-encoding=int",
-			wantInt:     true,
+			wantSystem:  &SystemParameters{EnumEncodingAsInt: true},
 		},
 		{
 			queryString: "alt=json%3Benum-encoding%3Dint",
-			wantInt:     true,
+			wantSystem:  &SystemParameters{EnumEncodingAsInt: true},
 		},
 		{
 			queryString: "$alt=json%3Benum-encoding%3Dint",
-			wantInt:     true,
+			wantSystem:  &SystemParameters{EnumEncodingAsInt: true},
 		},
 		{
 			queryString: "%24alt=json%3Benum-encoding%3Dint",
-			wantInt:     true,
+			wantSystem:  &SystemParameters{EnumEncodingAsInt: true},
 		},
 
 		// system param+query params in front
@@ -142,21 +142,21 @@ func TestProcessQueryString(t *testing.T) {
 		},
 		{
 			queryString: "foo=bar&alt=json%3Benum-encoding=int",
-			wantInt:     true,
+			wantSystem:  &SystemParameters{EnumEncodingAsInt: true},
 			wantParams: map[string][]string{
 				"foo": {"bar"},
 			},
 		},
 		{
 			queryString: "foo=bar&$alt=json%3Benum-encoding=int",
-			wantInt:     true,
+			wantSystem:  &SystemParameters{EnumEncodingAsInt: true},
 			wantParams: map[string][]string{
 				"foo": {"bar"},
 			},
 		},
 		{
 			queryString: "foo=bar&%24alt=json%3Benum-encoding=int",
-			wantInt:     true,
+			wantSystem:  &SystemParameters{EnumEncodingAsInt: true},
 			wantParams: map[string][]string{
 				"foo": {"bar"},
 			},
@@ -183,23 +183,46 @@ func TestProcessQueryString(t *testing.T) {
 		},
 		{
 			queryString: "alt=json%3Benum-encoding=int&foo=bar",
-			wantInt:     true,
+			wantSystem:  &SystemParameters{EnumEncodingAsInt: true},
 			wantParams: map[string][]string{
 				"foo": {"bar"},
 			},
 		},
 		{
 			queryString: "$alt=json%3Benum-encoding=int&foo=bar",
-			wantInt:     true,
+			wantSystem:  &SystemParameters{EnumEncodingAsInt: true},
 			wantParams: map[string][]string{
 				"foo": {"bar"},
 			},
 		},
 		{
 			queryString: "%24alt=json%3Benum-encoding=int&foo=bar",
-			wantInt:     true,
+			wantSystem:  &SystemParameters{EnumEncodingAsInt: true},
 			wantParams: map[string][]string{
 				"foo": {"bar"},
+			},
+		},
+		{
+			queryString: "$apiVersion=v7_20260210",
+			wantSystem:  &SystemParameters{APIVersion: "v7_20260210"},
+			wantParams:  map[string][]string{},
+		},
+		{
+			queryString: "alt=json%3Benum-encoding=int&apiVersion=v7_20260210",
+			wantSystem: &SystemParameters{
+				APIVersion:        "v7_20260210",
+				EnumEncodingAsInt: true,
+			},
+			wantParams: map[string][]string{},
+		},
+		{
+			queryString: "alt=json%3Benum-encoding=int&apiVersion=v7_20260210&foo=bar",
+			wantSystem: &SystemParameters{
+				APIVersion:        "v7_20260210",
+				EnumEncodingAsInt: true,
+			},
+			wantParams: map[string][]string{
+				"foo": []string{"bar"},
 			},
 		},
 
@@ -232,29 +255,34 @@ func TestProcessQueryString(t *testing.T) {
 			queryString: "foo&$alt=json&bar&alt=json", // repeated
 			wantError:   true,
 		},
+		{
+			queryString: "$apiVersion=v8&apiVersion=v9", // repeated
+			wantError:   true,
+		},
 	} {
-		label := fmt.Sprintf("[%2d %q]", idx, testCase.queryString)
+		t.Run(fmt.Sprintf("[%2d %q]", idx, testCase.queryString), func(t *testing.T) {
+			systemParams, queryParams, err := processQueryString(testCase.queryString)
 
-		systemParams, queryParams, err := processQueryString(testCase.queryString)
-
-		if got, want := (err != nil), testCase.wantError; got != want {
-			t.Errorf("%s: error condition not met: want error: %v, got error:%v", label, testCase.wantError, err)
-			continue
-		}
-		if err != nil {
-			continue
-		}
-
-		wantParams := testCase.wantParams
-		if wantParams == nil {
-			wantParams = map[string][]string{}
-		}
-		if got, want := queryParams, wantParams; !cmp.Equal(got, want) {
-			t.Errorf("%s: query params: want %#v, got %#v", label, want, got)
-		}
-
-		if got, want := systemParams.EnumEncodingAsInt, testCase.wantInt; got != want {
-			t.Errorf("%s: numeric enums: want %v, got %v", label, want, got)
-		}
+			if got, want := (err != nil), testCase.wantError; got != want {
+				t.Errorf("error condition not met: want error: %v, got error:%v", testCase.wantError, err)
+			}
+			if err != nil {
+				return
+			}
+			wantParams := testCase.wantParams
+			if wantParams == nil {
+				wantParams = map[string][]string{}
+			}
+			if diff := cmp.Diff(queryParams, wantParams); diff != "" {
+				t.Errorf("query params mismatch (+want, -got):\n%s", diff)
+			}
+			wantSystem := testCase.wantSystem
+			if wantSystem == nil {
+				wantSystem = &SystemParameters{}
+			}
+			if diff := cmp.Diff(systemParams, wantSystem); diff != "" {
+				t.Errorf("system params mismatch (+want, -got):\n%s", diff)
+			}
+		})
 	}
 }
