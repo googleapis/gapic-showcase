@@ -87,10 +87,10 @@ func processQueryString(queryString string) (systemParams *SystemParameters, que
 			delete(queryParams, param)
 			sawAltParam = true
 		case "apiVersion", "$apiVersion":
-			if systemParams.APIVersion != "" {
-				return systemParams, queryParams, fmt.Errorf("multiple instances of $apiVersion system parameter")
-			}
 			for _, val := range values {
+				if systemParams.APIVersion != "" {
+					return systemParams, queryParams, fmt.Errorf("multiple instances of $apiVersion system parameter")
+				}
 				systemParams.APIVersion = val
 			}
 			delete(queryParams, param)
