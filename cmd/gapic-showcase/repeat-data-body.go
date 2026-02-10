@@ -38,6 +38,26 @@ var repeatDataBodyInputInfoPString string
 
 var repeatDataBodyInputInfoPInt32 int32
 
+var repeatDataBodyInputInfoPSint32 int32
+
+var repeatDataBodyInputInfoPSfixed32 int32
+
+var repeatDataBodyInputInfoPUint32 uint32
+
+var repeatDataBodyInputInfoPFixed32 uint32
+
+var repeatDataBodyInputInfoPInt64 int64
+
+var repeatDataBodyInputInfoPSint64 int64
+
+var repeatDataBodyInputInfoPSfixed64 int64
+
+var repeatDataBodyInputInfoPUint64 uint64
+
+var repeatDataBodyInputInfoPFixed64 uint64
+
+var repeatDataBodyInputInfoPFloat float32
+
 var repeatDataBodyInputInfoPDouble float64
 
 var repeatDataBodyInputInfoPBool bool
@@ -150,6 +170,26 @@ func init() {
 	RepeatDataBodyCmd.Flags().StringVar(&repeatDataBodyInputInfoPString, "info.p_string", "", "")
 
 	RepeatDataBodyCmd.Flags().Int32Var(&repeatDataBodyInputInfoPInt32, "info.p_int32", 0, "")
+
+	RepeatDataBodyCmd.Flags().Int32Var(&repeatDataBodyInputInfoPSint32, "info.p_sint32", 0, "")
+
+	RepeatDataBodyCmd.Flags().Int32Var(&repeatDataBodyInputInfoPSfixed32, "info.p_sfixed32", 0, "")
+
+	RepeatDataBodyCmd.Flags().Uint32Var(&repeatDataBodyInputInfoPUint32, "info.p_uint32", 0, "")
+
+	RepeatDataBodyCmd.Flags().Uint32Var(&repeatDataBodyInputInfoPFixed32, "info.p_fixed32", 0, "")
+
+	RepeatDataBodyCmd.Flags().Int64Var(&repeatDataBodyInputInfoPInt64, "info.p_int64", 0, "")
+
+	RepeatDataBodyCmd.Flags().Int64Var(&repeatDataBodyInputInfoPSint64, "info.p_sint64", 0, "")
+
+	RepeatDataBodyCmd.Flags().Int64Var(&repeatDataBodyInputInfoPSfixed64, "info.p_sfixed64", 0, "")
+
+	RepeatDataBodyCmd.Flags().Uint64Var(&repeatDataBodyInputInfoPUint64, "info.p_uint64", 0, "")
+
+	RepeatDataBodyCmd.Flags().Uint64Var(&repeatDataBodyInputInfoPFixed64, "info.p_fixed64", 0, "")
+
+	RepeatDataBodyCmd.Flags().Float32Var(&repeatDataBodyInputInfoPFloat, "info.p_float", 0.0, "")
 
 	RepeatDataBodyCmd.Flags().Float64Var(&repeatDataBodyInputInfoPDouble, "info.p_double", 0.0, "")
 
@@ -274,6 +314,46 @@ var RepeatDataBodyCmd = &cobra.Command{
 
 			if cmd.Flags().Changed("info.p_int32") {
 				RepeatDataBodyInput.Info.PInt32 = &repeatDataBodyInputInfoPInt32
+			}
+
+			if cmd.Flags().Changed("info.p_sint32") {
+				RepeatDataBodyInput.Info.PSint32 = &repeatDataBodyInputInfoPSint32
+			}
+
+			if cmd.Flags().Changed("info.p_sfixed32") {
+				RepeatDataBodyInput.Info.PSfixed32 = &repeatDataBodyInputInfoPSfixed32
+			}
+
+			if cmd.Flags().Changed("info.p_uint32") {
+				RepeatDataBodyInput.Info.PUint32 = &repeatDataBodyInputInfoPUint32
+			}
+
+			if cmd.Flags().Changed("info.p_fixed32") {
+				RepeatDataBodyInput.Info.PFixed32 = &repeatDataBodyInputInfoPFixed32
+			}
+
+			if cmd.Flags().Changed("info.p_int64") {
+				RepeatDataBodyInput.Info.PInt64 = &repeatDataBodyInputInfoPInt64
+			}
+
+			if cmd.Flags().Changed("info.p_sint64") {
+				RepeatDataBodyInput.Info.PSint64 = &repeatDataBodyInputInfoPSint64
+			}
+
+			if cmd.Flags().Changed("info.p_sfixed64") {
+				RepeatDataBodyInput.Info.PSfixed64 = &repeatDataBodyInputInfoPSfixed64
+			}
+
+			if cmd.Flags().Changed("info.p_uint64") {
+				RepeatDataBodyInput.Info.PUint64 = &repeatDataBodyInputInfoPUint64
+			}
+
+			if cmd.Flags().Changed("info.p_fixed64") {
+				RepeatDataBodyInput.Info.PFixed64 = &repeatDataBodyInputInfoPFixed64
+			}
+
+			if cmd.Flags().Changed("info.p_float") {
+				RepeatDataBodyInput.Info.PFloat = &repeatDataBodyInputInfoPFloat
 			}
 
 			if cmd.Flags().Changed("info.p_double") {

@@ -1135,14 +1135,44 @@ func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprot
 	if req.GetInfo() != nil && req.GetInfo().PDouble != nil {
 		params.Add("info.pDouble", fmt.Sprintf("%v", req.GetInfo().GetPDouble()))
 	}
+	if req.GetInfo() != nil && req.GetInfo().PFixed32 != nil {
+		params.Add("info.pFixed32", fmt.Sprintf("%v", req.GetInfo().GetPFixed32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PFixed64 != nil {
+		params.Add("info.pFixed64", fmt.Sprintf("%v", req.GetInfo().GetPFixed64()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PFloat != nil {
+		params.Add("info.pFloat", fmt.Sprintf("%v", req.GetInfo().GetPFloat()))
+	}
 	if req.GetInfo() != nil && req.GetInfo().PInt32 != nil {
 		params.Add("info.pInt32", fmt.Sprintf("%v", req.GetInfo().GetPInt32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PInt64 != nil {
+		params.Add("info.pInt64", fmt.Sprintf("%v", req.GetInfo().GetPInt64()))
 	}
 	if req.GetInfo() != nil && req.GetInfo().PKingdom != nil {
 		params.Add("info.pKingdom", fmt.Sprintf("%v", req.GetInfo().GetPKingdom()))
 	}
+	if req.GetInfo() != nil && req.GetInfo().PSfixed32 != nil {
+		params.Add("info.pSfixed32", fmt.Sprintf("%v", req.GetInfo().GetPSfixed32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PSfixed64 != nil {
+		params.Add("info.pSfixed64", fmt.Sprintf("%v", req.GetInfo().GetPSfixed64()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PSint32 != nil {
+		params.Add("info.pSint32", fmt.Sprintf("%v", req.GetInfo().GetPSint32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PSint64 != nil {
+		params.Add("info.pSint64", fmt.Sprintf("%v", req.GetInfo().GetPSint64()))
+	}
 	if req.GetInfo() != nil && req.GetInfo().PString != nil {
 		params.Add("info.pString", fmt.Sprintf("%v", req.GetInfo().GetPString()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PUint32 != nil {
+		params.Add("info.pUint32", fmt.Sprintf("%v", req.GetInfo().GetPUint32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PUint64 != nil {
+		params.Add("info.pUint64", fmt.Sprintf("%v", req.GetInfo().GetPUint64()))
 	}
 	if req != nil && req.IntendedBindingUri != nil {
 		params.Add("intendedBindingUri", fmt.Sprintf("%v", req.GetIntendedBindingUri()))
@@ -1354,14 +1384,44 @@ func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *ge
 	if req.GetInfo() != nil && req.GetInfo().PDouble != nil {
 		params.Add("info.pDouble", fmt.Sprintf("%v", req.GetInfo().GetPDouble()))
 	}
+	if req.GetInfo() != nil && req.GetInfo().PFixed32 != nil {
+		params.Add("info.pFixed32", fmt.Sprintf("%v", req.GetInfo().GetPFixed32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PFixed64 != nil {
+		params.Add("info.pFixed64", fmt.Sprintf("%v", req.GetInfo().GetPFixed64()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PFloat != nil {
+		params.Add("info.pFloat", fmt.Sprintf("%v", req.GetInfo().GetPFloat()))
+	}
 	if req.GetInfo() != nil && req.GetInfo().PInt32 != nil {
 		params.Add("info.pInt32", fmt.Sprintf("%v", req.GetInfo().GetPInt32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PInt64 != nil {
+		params.Add("info.pInt64", fmt.Sprintf("%v", req.GetInfo().GetPInt64()))
 	}
 	if req.GetInfo() != nil && req.GetInfo().PKingdom != nil {
 		params.Add("info.pKingdom", fmt.Sprintf("%v", req.GetInfo().GetPKingdom()))
 	}
+	if req.GetInfo() != nil && req.GetInfo().PSfixed32 != nil {
+		params.Add("info.pSfixed32", fmt.Sprintf("%v", req.GetInfo().GetPSfixed32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PSfixed64 != nil {
+		params.Add("info.pSfixed64", fmt.Sprintf("%v", req.GetInfo().GetPSfixed64()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PSint32 != nil {
+		params.Add("info.pSint32", fmt.Sprintf("%v", req.GetInfo().GetPSint32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PSint64 != nil {
+		params.Add("info.pSint64", fmt.Sprintf("%v", req.GetInfo().GetPSint64()))
+	}
 	if req.GetInfo() != nil && req.GetInfo().PString != nil {
 		params.Add("info.pString", fmt.Sprintf("%v", req.GetInfo().GetPString()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PUint32 != nil {
+		params.Add("info.pUint32", fmt.Sprintf("%v", req.GetInfo().GetPUint32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PUint64 != nil {
+		params.Add("info.pUint64", fmt.Sprintf("%v", req.GetInfo().GetPUint64()))
 	}
 	if req != nil && req.IntendedBindingUri != nil {
 		params.Add("intendedBindingUri", fmt.Sprintf("%v", req.GetIntendedBindingUri()))
@@ -1580,14 +1640,44 @@ func (c *complianceRESTClient) RepeatDataPathResource(ctx context.Context, req *
 	if req.GetInfo() != nil && req.GetInfo().PDouble != nil {
 		params.Add("info.pDouble", fmt.Sprintf("%v", req.GetInfo().GetPDouble()))
 	}
+	if req.GetInfo() != nil && req.GetInfo().PFixed32 != nil {
+		params.Add("info.pFixed32", fmt.Sprintf("%v", req.GetInfo().GetPFixed32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PFixed64 != nil {
+		params.Add("info.pFixed64", fmt.Sprintf("%v", req.GetInfo().GetPFixed64()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PFloat != nil {
+		params.Add("info.pFloat", fmt.Sprintf("%v", req.GetInfo().GetPFloat()))
+	}
 	if req.GetInfo() != nil && req.GetInfo().PInt32 != nil {
 		params.Add("info.pInt32", fmt.Sprintf("%v", req.GetInfo().GetPInt32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PInt64 != nil {
+		params.Add("info.pInt64", fmt.Sprintf("%v", req.GetInfo().GetPInt64()))
 	}
 	if req.GetInfo() != nil && req.GetInfo().PKingdom != nil {
 		params.Add("info.pKingdom", fmt.Sprintf("%v", req.GetInfo().GetPKingdom()))
 	}
+	if req.GetInfo() != nil && req.GetInfo().PSfixed32 != nil {
+		params.Add("info.pSfixed32", fmt.Sprintf("%v", req.GetInfo().GetPSfixed32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PSfixed64 != nil {
+		params.Add("info.pSfixed64", fmt.Sprintf("%v", req.GetInfo().GetPSfixed64()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PSint32 != nil {
+		params.Add("info.pSint32", fmt.Sprintf("%v", req.GetInfo().GetPSint32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PSint64 != nil {
+		params.Add("info.pSint64", fmt.Sprintf("%v", req.GetInfo().GetPSint64()))
+	}
 	if req.GetInfo() != nil && req.GetInfo().PString != nil {
 		params.Add("info.pString", fmt.Sprintf("%v", req.GetInfo().GetPString()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PUint32 != nil {
+		params.Add("info.pUint32", fmt.Sprintf("%v", req.GetInfo().GetPUint32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PUint64 != nil {
+		params.Add("info.pUint64", fmt.Sprintf("%v", req.GetInfo().GetPUint64()))
 	}
 	if req != nil && req.IntendedBindingUri != nil {
 		params.Add("intendedBindingUri", fmt.Sprintf("%v", req.GetIntendedBindingUri()))
@@ -1809,14 +1899,44 @@ func (c *complianceRESTClient) RepeatDataPathTrailingResource(ctx context.Contex
 	if req.GetInfo() != nil && req.GetInfo().PDouble != nil {
 		params.Add("info.pDouble", fmt.Sprintf("%v", req.GetInfo().GetPDouble()))
 	}
+	if req.GetInfo() != nil && req.GetInfo().PFixed32 != nil {
+		params.Add("info.pFixed32", fmt.Sprintf("%v", req.GetInfo().GetPFixed32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PFixed64 != nil {
+		params.Add("info.pFixed64", fmt.Sprintf("%v", req.GetInfo().GetPFixed64()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PFloat != nil {
+		params.Add("info.pFloat", fmt.Sprintf("%v", req.GetInfo().GetPFloat()))
+	}
 	if req.GetInfo() != nil && req.GetInfo().PInt32 != nil {
 		params.Add("info.pInt32", fmt.Sprintf("%v", req.GetInfo().GetPInt32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PInt64 != nil {
+		params.Add("info.pInt64", fmt.Sprintf("%v", req.GetInfo().GetPInt64()))
 	}
 	if req.GetInfo() != nil && req.GetInfo().PKingdom != nil {
 		params.Add("info.pKingdom", fmt.Sprintf("%v", req.GetInfo().GetPKingdom()))
 	}
+	if req.GetInfo() != nil && req.GetInfo().PSfixed32 != nil {
+		params.Add("info.pSfixed32", fmt.Sprintf("%v", req.GetInfo().GetPSfixed32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PSfixed64 != nil {
+		params.Add("info.pSfixed64", fmt.Sprintf("%v", req.GetInfo().GetPSfixed64()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PSint32 != nil {
+		params.Add("info.pSint32", fmt.Sprintf("%v", req.GetInfo().GetPSint32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PSint64 != nil {
+		params.Add("info.pSint64", fmt.Sprintf("%v", req.GetInfo().GetPSint64()))
+	}
 	if req.GetInfo() != nil && req.GetInfo().PString != nil {
 		params.Add("info.pString", fmt.Sprintf("%v", req.GetInfo().GetPString()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PUint32 != nil {
+		params.Add("info.pUint32", fmt.Sprintf("%v", req.GetInfo().GetPUint32()))
+	}
+	if req.GetInfo() != nil && req.GetInfo().PUint64 != nil {
+		params.Add("info.pUint64", fmt.Sprintf("%v", req.GetInfo().GetPUint64()))
 	}
 	if req != nil && req.IntendedBindingUri != nil {
 		params.Add("intendedBindingUri", fmt.Sprintf("%v", req.GetIntendedBindingUri()))
@@ -2395,6 +2515,9 @@ func (c *complianceRESTClient) ListOperations(ctx context.Context, req *longrunn
 		}
 		if req.GetPageToken() != "" {
 			params.Add("pageToken", fmt.Sprintf("%v", req.GetPageToken()))
+		}
+		if req.GetReturnPartialSuccess() {
+			params.Add("returnPartialSuccess", fmt.Sprintf("%v", req.GetReturnPartialSuccess()))
 		}
 
 		baseUrl.RawQuery = params.Encode()
