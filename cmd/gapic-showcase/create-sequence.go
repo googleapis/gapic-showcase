@@ -33,8 +33,8 @@ func init() {
 
 var CreateSequenceCmd = &cobra.Command{
 	Use:   "create-sequence",
-	Short: "Creates a sequence.",
-	Long:  "Creates a sequence.",
+	Short: "Create a sequence of responses to be returned as...",
+	Long:  "Create a sequence of responses to be returned as unary calls",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if CreateSequenceFromFile == "" {

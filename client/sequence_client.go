@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -74,7 +74,6 @@ func defaultSequenceGRPCClientOptions() []option.ClientOption {
 		internaloption.WithDefaultAudience("https://localhost/"),
 		internaloption.WithDefaultScopes(DefaultAuthScopes()...),
 		internaloption.EnableJwtWithScope(),
-		internaloption.AllowHardBoundTokens("MTLS_S2A"),
 		internaloption.EnableNewAuthLibrary(),
 		option.WithGRPCDialOption(grpc.WithDefaultCallOptions(
 			grpc.MaxCallRecvMsgSize(math.MaxInt32))),
@@ -186,6 +185,9 @@ type internalSequenceClient interface {
 
 // SequenceClient is a client for interacting with Client Libraries Showcase API.
 // Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
+//
+// A service that enables testing of unary and server streaming calls
+// by specifying a specific, predictable sequence of responses from the service
 type SequenceClient struct {
 	// The internal transport-dependent client.
 	internalClient internalSequenceClient
@@ -217,32 +219,35 @@ func (c *SequenceClient) Connection() *grpc.ClientConn {
 	return c.internalClient.Connection()
 }
 
-// CreateSequence creates a sequence.
+// CreateSequence create a sequence of responses to be returned as unary calls
 func (c *SequenceClient) CreateSequence(ctx context.Context, req *genprotopb.CreateSequenceRequest, opts ...gax.CallOption) (*genprotopb.Sequence, error) {
 	return c.internalClient.CreateSequence(ctx, req, opts...)
 }
 
-// CreateStreamingSequence creates a sequence.
+// CreateStreamingSequence creates a sequence of responses to be returned in a server streaming call
 func (c *SequenceClient) CreateStreamingSequence(ctx context.Context, req *genprotopb.CreateStreamingSequenceRequest, opts ...gax.CallOption) (*genprotopb.StreamingSequence, error) {
 	return c.internalClient.CreateStreamingSequence(ctx, req, opts...)
 }
 
-// GetSequenceReport retrieves a sequence.
+// GetSequenceReport retrieves a sequence report which can be used to retrieve information about a
+// sequence of unary calls.
 func (c *SequenceClient) GetSequenceReport(ctx context.Context, req *genprotopb.GetSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.SequenceReport, error) {
 	return c.internalClient.GetSequenceReport(ctx, req, opts...)
 }
 
-// GetStreamingSequenceReport retrieves a sequence.
+// GetStreamingSequenceReport retrieves a sequence report which can be used to retrieve information
+// about a sequences of responses in a server streaming call.
 func (c *SequenceClient) GetStreamingSequenceReport(ctx context.Context, req *genprotopb.GetStreamingSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.StreamingSequenceReport, error) {
 	return c.internalClient.GetStreamingSequenceReport(ctx, req, opts...)
 }
 
-// AttemptSequence attempts a sequence.
+// AttemptSequence attempts a sequence of unary responses.
 func (c *SequenceClient) AttemptSequence(ctx context.Context, req *genprotopb.AttemptSequenceRequest, opts ...gax.CallOption) error {
 	return c.internalClient.AttemptSequence(ctx, req, opts...)
 }
 
-// AttemptStreamingSequence attempts a streaming sequence.
+// AttemptStreamingSequence attempts a server streaming call with a sequence of responses
+// Can be used to test retries and stream resumption logic
 // May not function as expected in HTTP mode due to when http statuses are sent
 // See https://github.com/googleapis/gapic-showcase/issues/1377 (at https://github.com/googleapis/gapic-showcase/issues/1377) for more details
 func (c *SequenceClient) AttemptStreamingSequence(ctx context.Context, req *genprotopb.AttemptStreamingSequenceRequest, opts ...gax.CallOption) (genprotopb.SequenceService_AttemptStreamingSequenceClient, error) {
@@ -321,6 +326,9 @@ type sequenceGRPCClient struct {
 
 // NewSequenceClient creates a new sequence service client based on gRPC.
 // The returned client must be Closed when it is done being used to clean up its underlying connections.
+//
+// A service that enables testing of unary and server streaming calls
+// by specifying a specific, predictable sequence of responses from the service
 func NewSequenceClient(ctx context.Context, opts ...option.ClientOption) (*SequenceClient, error) {
 	clientOpts := defaultSequenceGRPCClientOptions()
 	if newSequenceClientHook != nil {
@@ -396,6 +404,9 @@ type sequenceRESTClient struct {
 }
 
 // NewSequenceRESTClient creates a new sequence service rest client.
+//
+// A service that enables testing of unary and server streaming calls
+// by specifying a specific, predictable sequence of responses from the service
 func NewSequenceRESTClient(ctx context.Context, opts ...option.ClientOption) (*SequenceClient, error) {
 	clientOpts := append(defaultSequenceRESTClientOptions(), opts...)
 	httpClient, endpoint, err := httptransport.NewClient(ctx, clientOpts...)
@@ -759,7 +770,7 @@ func (c *sequenceGRPCClient) CancelOperation(ctx context.Context, req *longrunni
 	return err
 }
 
-// CreateSequence creates a sequence.
+// CreateSequence create a sequence of responses to be returned as unary calls
 func (c *sequenceRESTClient) CreateSequence(ctx context.Context, req *genprotopb.CreateSequenceRequest, opts ...gax.CallOption) (*genprotopb.Sequence, error) {
 	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	body := req.GetSequence()
@@ -808,7 +819,7 @@ func (c *sequenceRESTClient) CreateSequence(ctx context.Context, req *genprotopb
 	return resp, nil
 }
 
-// CreateStreamingSequence creates a sequence.
+// CreateStreamingSequence creates a sequence of responses to be returned in a server streaming call
 func (c *sequenceRESTClient) CreateStreamingSequence(ctx context.Context, req *genprotopb.CreateStreamingSequenceRequest, opts ...gax.CallOption) (*genprotopb.StreamingSequence, error) {
 	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	body := req.GetStreamingSequence()
@@ -857,7 +868,8 @@ func (c *sequenceRESTClient) CreateStreamingSequence(ctx context.Context, req *g
 	return resp, nil
 }
 
-// GetSequenceReport retrieves a sequence.
+// GetSequenceReport retrieves a sequence report which can be used to retrieve information about a
+// sequence of unary calls.
 func (c *sequenceRESTClient) GetSequenceReport(ctx context.Context, req *genprotopb.GetSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.SequenceReport, error) {
 	baseUrl, err := url.Parse(c.endpoint)
 	if err != nil {
@@ -902,7 +914,8 @@ func (c *sequenceRESTClient) GetSequenceReport(ctx context.Context, req *genprot
 	return resp, nil
 }
 
-// GetStreamingSequenceReport retrieves a sequence.
+// GetStreamingSequenceReport retrieves a sequence report which can be used to retrieve information
+// about a sequences of responses in a server streaming call.
 func (c *sequenceRESTClient) GetStreamingSequenceReport(ctx context.Context, req *genprotopb.GetStreamingSequenceReportRequest, opts ...gax.CallOption) (*genprotopb.StreamingSequenceReport, error) {
 	baseUrl, err := url.Parse(c.endpoint)
 	if err != nil {
@@ -947,7 +960,7 @@ func (c *sequenceRESTClient) GetStreamingSequenceReport(ctx context.Context, req
 	return resp, nil
 }
 
-// AttemptSequence attempts a sequence.
+// AttemptSequence attempts a sequence of unary responses.
 func (c *sequenceRESTClient) AttemptSequence(ctx context.Context, req *genprotopb.AttemptSequenceRequest, opts ...gax.CallOption) error {
 	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	jsonReq, err := m.Marshal(req)
@@ -983,7 +996,8 @@ func (c *sequenceRESTClient) AttemptSequence(ctx context.Context, req *genprotop
 	}, opts...)
 }
 
-// AttemptStreamingSequence attempts a streaming sequence.
+// AttemptStreamingSequence attempts a server streaming call with a sequence of responses
+// Can be used to test retries and stream resumption logic
 // May not function as expected in HTTP mode due to when http statuses are sent
 // See https://github.com/googleapis/gapic-showcase/issues/1377 (at https://github.com/googleapis/gapic-showcase/issues/1377) for more details
 func (c *sequenceRESTClient) AttemptStreamingSequence(ctx context.Context, req *genprotopb.AttemptStreamingSequenceRequest, opts ...gax.CallOption) (genprotopb.SequenceService_AttemptStreamingSequenceClient, error) {

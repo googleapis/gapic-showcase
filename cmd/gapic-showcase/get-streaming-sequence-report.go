@@ -29,8 +29,8 @@ func init() {
 
 var GetStreamingSequenceReportCmd = &cobra.Command{
 	Use:   "get-streaming-sequence-report",
-	Short: "Retrieves a sequence.",
-	Long:  "Retrieves a sequence.",
+	Short: "Retrieves a sequence report which can be used to...",
+	Long:  "Retrieves a sequence report which can be used to retrieve information  about a sequences of responses in a server streaming call.",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if GetStreamingSequenceReportFromFile == "" {
