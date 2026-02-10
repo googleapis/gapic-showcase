@@ -13,9 +13,9 @@ jobs:
     outputs:
       modified_files: ${{ steps.mod.outputs.modified_files }}
     steps:
-    - uses: actions/setup-go@v5
+    - uses: actions/setup-go@v6
       with:
-        go-version: '1.24'
+        go-version: '1.25'
     - name: Install Protoc
       uses: arduino/setup-protoc@v1
     - name: Install external generators
@@ -23,7 +23,7 @@ jobs:
         go install github.com/golang/protobuf/protoc-gen-go@latest
         go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli@latest
         go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic@latest
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Checkout common protos
       run: git submodule init && git submodule update
     - name: Download go deps
@@ -40,7 +40,7 @@ jobs:
     - name: Prepare regenerated sources
       if: steps.mod.outputs.modified_files
       run: tar czf regen.tgz ${{ steps.mod.outputs.modified_files }}
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       if: steps.mod.outputs.modified_files
       with:
         name: regenerated-sources
@@ -49,13 +49,13 @@ jobs:
     needs: regenerate
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/setup-go@v5
+    - uses: actions/setup-go@v6
       with:
-        go-version: '1.24'
+        go-version: '1.25'
     - name: Install golint
       run: go install golang.org/x/lint/golint@latest
-    - uses: actions/checkout@v4
-    - uses: actions/download-artifact@v4
+    - uses: actions/checkout@v6
+    - uses: actions/download-artifact@v7
       if: needs.regenerate.outputs.modified_files
       with:
         name: regenerated-sources
@@ -75,7 +75,7 @@ jobs:
       # which would mess up the empty vetting results check.
       run: go mod download && go vet ./server/services 2> govet.txt && ! [ -s govet.txt ]
       if: ${{ always() }}
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       if: ${{ always() }}
       with:
         name: linting-results
@@ -87,11 +87,11 @@ jobs:
     needs: regenerate
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-go@v5
+    - uses: actions/checkout@v6
+    - uses: actions/setup-go@v6
       with:
-        go-version: '1.24'
-    - uses: actions/download-artifact@v4
+        go-version: '1.25'
+    - uses: actions/download-artifact@v7
       if: needs.regenerate.outputs.modified_files
       with:
         name: regenerated-sources
@@ -112,11 +112,11 @@ jobs:
     needs: regenerate
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-go@v5
+    - uses: actions/checkout@v6
+    - uses: actions/setup-go@v6
       with:
-        go-version: '1.24'
-    - uses: actions/download-artifact@v4
+        go-version: '1.25'
+    - uses: actions/download-artifact@v7
       if: needs.regenerate.outputs.modified_files
       with:
         name: regenerated-sources
@@ -162,10 +162,10 @@ jobs:
   protobufjs-load-test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - uses: actions/checkout@v6
+    - uses: actions/setup-node@v6
       with:
-        node-version: '22'
+        node-version: '24'
     - name: Install protobuf loader
       run: npm install google-proto-files
     - name: Verify protos can be loaded by protobufjs
@@ -182,10 +182,10 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && needs.regenerate.outputs.modified_files
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         ref: main
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v7
       with:
         name: regenerated-sources
     - name: Expand regen archive
@@ -208,7 +208,7 @@ jobs:
         git_dir: '.'
         force: true
     - name: Add automerge label to pull request
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       with:
         script: |
           github.rest.issues.addLabels({
@@ -220,8 +220,8 @@ jobs:
   bazel_build_protos:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: bazel-contrib/setup-bazel@0.14.0
+    - uses: actions/checkout@v6
+    - uses: bazel-contrib/setup-bazel@0.18.0
       with:
         # Avoid downloading Bazel every time.
         bazelisk-cache: true
