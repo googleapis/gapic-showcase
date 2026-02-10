@@ -51,9 +51,9 @@ func init() {
 }
 
 var SequenceServiceCmd = &cobra.Command{
-	Use:   "sequence",
-	Short: "Sub-command for Service: Sequence",
-
+	Use:       "sequence",
+	Short:     "A service that enables testing of unary and...",
+	Long:      "A service that enables testing of unary and server streaming calls  by specifying a specific, predictable sequence of responses from the service",
 	ValidArgs: SequenceSubCommands,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
 		var opts []option.ClientOption

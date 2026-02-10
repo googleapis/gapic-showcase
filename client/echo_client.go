@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -85,7 +85,6 @@ func defaultEchoGRPCClientOptions() []option.ClientOption {
 		internaloption.WithDefaultAudience("https://localhost/"),
 		internaloption.WithDefaultScopes(DefaultAuthScopes()...),
 		internaloption.EnableJwtWithScope(),
-		internaloption.AllowHardBoundTokens("MTLS_S2A"),
 		internaloption.EnableNewAuthLibrary(),
 		option.WithGRPCDialOption(grpc.WithDefaultCallOptions(
 			grpc.MaxCallRecvMsgSize(math.MaxInt32))),
@@ -276,6 +275,8 @@ type internalEchoClient interface {
 // to have the values echoed in the response trailers. Set the
 // ‘x-goog-request-params’ metadata key on any method to have the values
 // echoed in the response headers.
+//
+// This client uses Echo version v1_20240408.
 type EchoClient struct {
 	// The internal transport-dependent client.
 	internalClient internalEchoClient

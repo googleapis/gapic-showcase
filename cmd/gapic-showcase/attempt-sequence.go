@@ -27,8 +27,8 @@ func init() {
 
 var AttemptSequenceCmd = &cobra.Command{
 	Use:   "attempt-sequence",
-	Short: "Attempts a sequence.",
-	Long:  "Attempts a sequence.",
+	Short: "Attempts a sequence of unary responses.",
+	Long:  "Attempts a sequence of unary responses.",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if AttemptSequenceFromFile == "" {

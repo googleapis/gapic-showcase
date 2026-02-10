@@ -25,7 +25,7 @@ func init() {
 
 	CreateStreamingSequenceInput.StreamingSequence = new(genprotopb.StreamingSequence)
 
-	CreateStreamingSequenceCmd.Flags().StringVar(&CreateStreamingSequenceInput.StreamingSequence.Content, "streaming_sequence.content", "", "The Content that the stream will send")
+	CreateStreamingSequenceCmd.Flags().StringVar(&CreateStreamingSequenceInput.StreamingSequence.Content, "streaming_sequence.content", "", "The content that the stream will send  this was...")
 
 	CreateStreamingSequenceCmd.Flags().StringArrayVar(&CreateStreamingSequenceInputStreamingSequenceResponses, "streaming_sequence.responses", []string{}, "Sequence of responses to return in order for each...")
 
@@ -35,8 +35,8 @@ func init() {
 
 var CreateStreamingSequenceCmd = &cobra.Command{
 	Use:   "create-streaming-sequence",
-	Short: "Creates a sequence.",
-	Long:  "Creates a sequence.",
+	Short: "Creates a sequence of responses to be returned in...",
+	Long:  "Creates a sequence of responses to be returned in a server streaming call",
 	PreRun: func(cmd *cobra.Command, args []string) {
 
 		if CreateStreamingSequenceFromFile == "" {

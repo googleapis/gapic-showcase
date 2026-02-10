@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,14 @@
 //
 // Showcase represents both a model API and an integration testing surface
 // for client library generator consumption.
+//
+// # API Versions
+//
+// The versioned iterations of API service interfaces in this API client package.
+// Each client includes the API version identifier mentioned below in their API calls.
+// Navigate to the product documentation to learn more about the API versions used in this package.
+//
+// All clients in this package use version v1_20240408 of their service interface.
 //
 // # General documentation
 //
