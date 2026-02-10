@@ -1,5 +1,13 @@
 # Release History
 
+## [0.38.0](https://github.com/googleapis/gapic-showcase/compare/v0.37.0...v0.38.0) (2026-02-10)
+
+
+### Features
+
+* **compliance:** Add optional fields for all primitive types ([#1602](https://github.com/googleapis/gapic-showcase/issues/1602)) ([ec41cbd](https://github.com/googleapis/gapic-showcase/commit/ec41cbde514ec092ce0da86d791bdef3c525aff6))
+* Support apiVersion system parameter ([#1607](https://github.com/googleapis/gapic-showcase/issues/1607)) ([3fd9cb2](https://github.com/googleapis/gapic-showcase/commit/3fd9cb2f682d5f8263d913eaba8b78e045acc4d2))
+
 ## [0.37.0](https://github.com/googleapis/gapic-showcase/compare/v0.36.2...v0.37.0) (2025-10-21)
 
 
