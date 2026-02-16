@@ -16,7 +16,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	golang.org/x/oauth2 v0.35.0
 	golang.org/x/sync v0.19.0
-	google.golang.org/api v0.265.0
+	google.golang.org/api v0.266.0
 	google.golang.org/genproto v0.0.0-20260209200024-4cfbd4190f57
 	google.golang.org/genproto/googleapis/api v0.0.0-20260209200024-4cfbd4190f57
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260209200024-4cfbd4190f57
@@ -61,4 +61,4 @@ require (
 
 go 1.24.0
 
-toolchain go1.25.7
+toolchain go1.26.0
