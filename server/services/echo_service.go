@@ -389,11 +389,15 @@ func echoHeaders(ctx context.Context) {
 	if !ok {
 		return
 	}
+	fmt.Printf("Received headers: %v\n", md)
 
-	values := md.Get("x-goog-request-params")
-	for _, value := range values {
-		header := metadata.Pairs("x-goog-request-params", value)
-		grpc.SetHeader(ctx, header)
+	headersToEcho := []string{"x-goog-request-params", "traceparent", "tracestate"}
+	for _, headerName := range headersToEcho {
+		values := md.Get(headerName)
+		for _, value := range values {
+			header := metadata.Pairs(headerName, value)
+			grpc.SetHeader(ctx, header)
+		}
 	}
 }
 
@@ -402,11 +406,15 @@ func echoStreamingHeaders(stream grpc.ServerStream) {
 	if !ok {
 		return
 	}
-	values := md.Get("x-goog-request-params")
-	for _, value := range values {
-		header := metadata.Pairs("x-goog-request-params", value)
-		if stream.SetHeader(header) != nil {
-			return
+
+	headersToEcho := []string{"x-goog-request-params", "traceparent", "tracestate"}
+	for _, headerName := range headersToEcho {
+		values := md.Get(headerName)
+		for _, value := range values {
+			header := metadata.Pairs(headerName, value)
+			if stream.SetHeader(header) != nil {
+				return
+			}
 		}
 	}
 }
