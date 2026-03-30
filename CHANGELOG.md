@@ -1,5 +1,12 @@
 # Release History
 
+## [0.39.0](https://github.com/googleapis/gapic-showcase/compare/v0.38.0...v0.39.0) (2026-03-30)
+
+
+### Features
+
+* Echo W3C trace propagation headers in showcase ([#1621](https://github.com/googleapis/gapic-showcase/issues/1621)) ([e8cd646](https://github.com/googleapis/gapic-showcase/commit/e8cd646fb411a9ca4e266a5d97e072794757fa4b))
+
 ## [0.38.0](https://github.com/googleapis/gapic-showcase/compare/v0.37.0...v0.38.0) (2026-02-10)
 
 
