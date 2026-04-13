@@ -28,7 +28,7 @@ jobs:
       - name: Get upload URL for manually triggered releases
         id: manual-upload-url
         if: ${{ github.event.inputs.tag }}
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const release = await github.rest.repos.getReleaseByTag({

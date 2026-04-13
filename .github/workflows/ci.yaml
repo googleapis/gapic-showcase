@@ -208,7 +208,7 @@ jobs:
         git_dir: '.'
         force: true
     - name: Add automerge label to pull request
-      uses: actions/github-script@v8
+      uses: actions/github-script@v9
       with:
         script: |
           github.rest.issues.addLabels({
