@@ -1,13 +1,13 @@
 module github.com/googleapis/gapic-showcase
 
 require (
-	cloud.google.com/go/iam v1.8.0
-	cloud.google.com/go/longrunning v0.10.0
+	cloud.google.com/go/iam v1.9.0
+	cloud.google.com/go/longrunning v0.11.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/protobuf v1.5.4
 	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
-	github.com/googleapis/gax-go/v2 v2.21.0
+	github.com/googleapis/gax-go/v2 v2.22.0
 	github.com/googleapis/grpc-fallback-go v0.1.4
 	github.com/gorilla/mux v1.8.1
 	github.com/iancoleman/strcase v0.3.0
@@ -16,10 +16,10 @@ require (
 	github.com/spf13/viper v1.21.0
 	golang.org/x/oauth2 v0.36.0
 	golang.org/x/sync v0.20.0
-	google.golang.org/api v0.275.0
-	google.golang.org/genproto v0.0.0-20260406210006-6f92a3bedf2d
-	google.golang.org/genproto/googleapis/api v0.0.0-20260406210006-6f92a3bedf2d
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260406210006-6f92a3bedf2d
+	google.golang.org/api v0.276.0
+	google.golang.org/genproto v0.0.0-20260414002931-afd174a4e478
+	google.golang.org/genproto/googleapis/api v0.0.0-20260414002931-afd174a4e478
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260414002931-afd174a4e478
 	google.golang.org/grpc v1.80.0
 	google.golang.org/protobuf v1.36.11
 )
