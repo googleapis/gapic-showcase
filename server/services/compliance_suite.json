@@ -235,6 +235,25 @@
           }
         }
       ]
+    },
+    {
+      "name": "Custom json_name binding testing",
+      "rpcs": [
+        "Compliance.RepeatDataCustomPath",
+        "Compliance.RepeatDataBodyCustomMessage",
+        "Compliance.RepeatDataCustomQuery"
+      ],
+      "requests": [
+        {
+          "name": "JsonNameTesting",
+          "serverVerify": true,
+          "info": {
+            "fString": "test",
+            "custom_path_field": "kebab-path-value"
+          },
+          "custom_kebab_name": "kebab-query-value"
+        }
+      ]
     }
   ]
 }
