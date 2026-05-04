@@ -167,6 +167,8 @@ func init() {
 
 	RepeatDataBodyPutCmd.Flags().BoolVar(&RepeatDataBodyPutInput.Info.FChild.PChild.FBool, "info.f_child.p_child.f_bool", false, "")
 
+	RepeatDataBodyPutCmd.Flags().StringVar(&RepeatDataBodyPutInput.Info.CustomPathField, "info.custom_path_field", "", "")
+
 	RepeatDataBodyPutCmd.Flags().StringVar(&repeatDataBodyPutInputInfoPString, "info.p_string", "", "")
 
 	RepeatDataBodyPutCmd.Flags().Int32Var(&repeatDataBodyPutInputInfoPInt32, "info.p_int32", 0, "")
@@ -244,6 +246,8 @@ func init() {
 	RepeatDataBodyPutCmd.Flags().Int64Var(&repeatDataBodyPutInputPInt64, "p_int64", 0, "")
 
 	RepeatDataBodyPutCmd.Flags().Float64Var(&repeatDataBodyPutInputPDouble, "p_double", 0.0, "")
+
+	RepeatDataBodyPutCmd.Flags().StringVar(&RepeatDataBodyPutInput.CustomKebabName, "custom_kebab_name", "", "")
 
 	RepeatDataBodyPutCmd.Flags().StringVar(&RepeatDataBodyPutFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

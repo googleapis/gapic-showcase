@@ -167,6 +167,8 @@ func init() {
 
 	RepeatDataQueryCmd.Flags().BoolVar(&RepeatDataQueryInput.Info.FChild.PChild.FBool, "info.f_child.p_child.f_bool", false, "")
 
+	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryInput.Info.CustomPathField, "info.custom_path_field", "", "")
+
 	RepeatDataQueryCmd.Flags().StringVar(&repeatDataQueryInputInfoPString, "info.p_string", "", "")
 
 	RepeatDataQueryCmd.Flags().Int32Var(&repeatDataQueryInputInfoPInt32, "info.p_int32", 0, "")
@@ -244,6 +246,8 @@ func init() {
 	RepeatDataQueryCmd.Flags().Int64Var(&repeatDataQueryInputPInt64, "p_int64", 0, "")
 
 	RepeatDataQueryCmd.Flags().Float64Var(&repeatDataQueryInputPDouble, "p_double", 0.0, "")
+
+	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryInput.CustomKebabName, "custom_kebab_name", "", "")
 
 	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

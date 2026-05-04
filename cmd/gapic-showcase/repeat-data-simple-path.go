@@ -167,6 +167,8 @@ func init() {
 
 	RepeatDataSimplePathCmd.Flags().BoolVar(&RepeatDataSimplePathInput.Info.FChild.PChild.FBool, "info.f_child.p_child.f_bool", false, "")
 
+	RepeatDataSimplePathCmd.Flags().StringVar(&RepeatDataSimplePathInput.Info.CustomPathField, "info.custom_path_field", "", "")
+
 	RepeatDataSimplePathCmd.Flags().StringVar(&repeatDataSimplePathInputInfoPString, "info.p_string", "", "")
 
 	RepeatDataSimplePathCmd.Flags().Int32Var(&repeatDataSimplePathInputInfoPInt32, "info.p_int32", 0, "")
@@ -244,6 +246,8 @@ func init() {
 	RepeatDataSimplePathCmd.Flags().Int64Var(&repeatDataSimplePathInputPInt64, "p_int64", 0, "")
 
 	RepeatDataSimplePathCmd.Flags().Float64Var(&repeatDataSimplePathInputPDouble, "p_double", 0.0, "")
+
+	RepeatDataSimplePathCmd.Flags().StringVar(&RepeatDataSimplePathInput.CustomKebabName, "custom_kebab_name", "", "")
 
 	RepeatDataSimplePathCmd.Flags().StringVar(&RepeatDataSimplePathFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

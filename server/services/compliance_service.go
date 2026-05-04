@@ -122,40 +122,6 @@ func (csi *complianceServerImpl) RepeatDataBodyPatch(ctx context.Context, in *pb
 	return csi.Repeat(ctx, in)
 }
 
-func (csi *complianceServerImpl) RepeatCustom(ctx context.Context, in *pb.CustomBindingRequest) (*pb.RepeatResponse, error) {
-	echoTrailers(ctx)
-
-	bindingURI, ok := ctx.Value(resttools.BindingURIKey).(string)
-	if !ok {
-		bindingURI = ""
-	}
-
-	repeatReq := &pb.RepeatRequest{
-		Name:         in.GetName(),
-		Info:         in.GetInfo(),
-		ServerVerify: in.GetServerVerify(),
-	}
-
-	if err := csi.requestMatchesExpectation(repeatReq, bindingURI); err != nil {
-		return nil, err
-	}
-
-	return &pb.RepeatResponse{Request: repeatReq, BindingUri: bindingURI}, nil
-}
-
-func (csi *complianceServerImpl) RepeatDataCustomPath(ctx context.Context, in *pb.CustomBindingRequest) (*pb.RepeatResponse, error) {
-	return csi.RepeatCustom(ctx, in)
-}
-
-func (csi *complianceServerImpl) RepeatDataBodyCustomMessage(ctx context.Context, in *pb.CustomBindingRequest) (*pb.RepeatResponse, error) {
-	return csi.RepeatCustom(ctx, in)
-}
-
-func (csi *complianceServerImpl) RepeatDataCustomQuery(ctx context.Context, in *pb.CustomBindingRequest) (*pb.RepeatResponse, error) {
-	return csi.RepeatCustom(ctx, in)
-}
-
-
 // complianceSuiteBytes contains the contents of the compliance suite JSON file. This requires Go
 // 1.16. Note that embedding can only be applied to global variables at package scope.
 //

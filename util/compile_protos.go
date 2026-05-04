@@ -56,6 +56,7 @@ func CompileProtos(version string) {
 		"--experimental_allow_proto3_optional",
 		"--proto_path=schema/googleapis",
 		"--proto_path=schema",
+		"--proto_path=include",
 		"--go_cli_out=" + filepath.Join("cmd", "gapic-showcase"),
 		"--go_cli_opt=root=gapic-showcase",
 		"--go_cli_opt=gapic=github.com/googleapis/gapic-showcase/client",

@@ -238,20 +238,16 @@
     },
     {
       "name": "Custom json_name binding testing",
-      "rpcs": [
-        "Compliance.RepeatDataCustomPath",
-        "Compliance.RepeatDataBodyCustomMessage",
-        "Compliance.RepeatDataCustomQuery"
-      ],
+      "rpcs": ["Compliance.RepeatDataQuery", "Compliance.RepeatDataSimplePath"],
       "requests": [
         {
           "name": "JsonNameTesting",
           "serverVerify": true,
           "info": {
             "fString": "test",
-            "custom_path_field": "kebab-path-value"
+            "customPath": "kebab-path-value"
           },
-          "custom_kebab_name": "kebab-query-value"
+          "customKebab": "kebab-query-value"
         }
       ]
     }

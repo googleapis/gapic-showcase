@@ -901,6 +901,9 @@ func (c *complianceRESTClient) RepeatDataBodyInfo(ctx context.Context, req *genp
 	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat:bodyinfo")
 
 	params := url.Values{}
+	if req.GetCustomKebabName() != "" {
+		params.Add("customKebabName", fmt.Sprintf("%v", req.GetCustomKebabName()))
+	}
 	if req.GetFDouble() != 0 {
 		params.Add("fDouble", fmt.Sprintf("%v", req.GetFDouble()))
 	}
@@ -975,6 +978,9 @@ func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprot
 	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat:query")
 
 	params := url.Values{}
+	if req.GetCustomKebabName() != "" {
+		params.Add("customKebabName", fmt.Sprintf("%v", req.GetCustomKebabName()))
+	}
 	if req.GetFDouble() != 0 {
 		params.Add("fDouble", fmt.Sprintf("%v", req.GetFDouble()))
 	}
@@ -983,6 +989,9 @@ func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprot
 	}
 	if req.GetFInt64() != 0 {
 		params.Add("fInt64", fmt.Sprintf("%v", req.GetFInt64()))
+	}
+	if req.GetInfo().GetCustomPathField() != "" {
+		params.Add("info.customPathField", fmt.Sprintf("%v", req.GetInfo().GetCustomPathField()))
 	}
 	if req.GetInfo().GetFBool() {
 		params.Add("info.fBool", fmt.Sprintf("%v", req.GetInfo().GetFBool()))
@@ -1239,6 +1248,9 @@ func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *ge
 	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat/%v/%v/%v/%v/%v:simplepath", req.GetInfo().GetFString(), req.GetInfo().GetFInt32(), req.GetInfo().GetFDouble(), req.GetInfo().GetFBool(), req.GetInfo().GetFKingdom())
 
 	params := url.Values{}
+	if req.GetCustomKebabName() != "" {
+		params.Add("customKebabName", fmt.Sprintf("%v", req.GetCustomKebabName()))
+	}
 	if req.GetFDouble() != 0 {
 		params.Add("fDouble", fmt.Sprintf("%v", req.GetFDouble()))
 	}
@@ -1247,6 +1259,9 @@ func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *ge
 	}
 	if req.GetFInt64() != 0 {
 		params.Add("fInt64", fmt.Sprintf("%v", req.GetFInt64()))
+	}
+	if req.GetInfo().GetCustomPathField() != "" {
+		params.Add("info.customPathField", fmt.Sprintf("%v", req.GetInfo().GetCustomPathField()))
 	}
 	if req.GetInfo().GetFBytes() != nil {
 		params.Add("info.fBytes", fmt.Sprintf("%v", req.GetInfo().GetFBytes()))
@@ -1489,6 +1504,9 @@ func (c *complianceRESTClient) RepeatDataPathResource(ctx context.Context, req *
 	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat/%v/%v/bool/%v:pathresource", req.GetInfo().GetFString(), req.GetInfo().GetFChild().GetFString(), req.GetInfo().GetFBool())
 
 	params := url.Values{}
+	if req.GetCustomKebabName() != "" {
+		params.Add("customKebabName", fmt.Sprintf("%v", req.GetCustomKebabName()))
+	}
 	if req.GetFDouble() != 0 {
 		params.Add("fDouble", fmt.Sprintf("%v", req.GetFDouble()))
 	}
@@ -1497,6 +1515,9 @@ func (c *complianceRESTClient) RepeatDataPathResource(ctx context.Context, req *
 	}
 	if req.GetFInt64() != 0 {
 		params.Add("fInt64", fmt.Sprintf("%v", req.GetFInt64()))
+	}
+	if req.GetInfo().GetCustomPathField() != "" {
+		params.Add("info.customPathField", fmt.Sprintf("%v", req.GetInfo().GetCustomPathField()))
 	}
 	if req.GetInfo().GetFBytes() != nil {
 		params.Add("info.fBytes", fmt.Sprintf("%v", req.GetInfo().GetFBytes()))
@@ -1745,6 +1766,9 @@ func (c *complianceRESTClient) RepeatDataPathTrailingResource(ctx context.Contex
 	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat/%v/%v:pathtrailingresource", req.GetInfo().GetFString(), req.GetInfo().GetFChild().GetFString())
 
 	params := url.Values{}
+	if req.GetCustomKebabName() != "" {
+		params.Add("customKebabName", fmt.Sprintf("%v", req.GetCustomKebabName()))
+	}
 	if req.GetFDouble() != 0 {
 		params.Add("fDouble", fmt.Sprintf("%v", req.GetFDouble()))
 	}
@@ -1753,6 +1777,9 @@ func (c *complianceRESTClient) RepeatDataPathTrailingResource(ctx context.Contex
 	}
 	if req.GetFInt64() != 0 {
 		params.Add("fInt64", fmt.Sprintf("%v", req.GetFInt64()))
+	}
+	if req.GetInfo().GetCustomPathField() != "" {
+		params.Add("info.customPathField", fmt.Sprintf("%v", req.GetInfo().GetCustomPathField()))
 	}
 	if req.GetInfo().GetFBool() {
 		params.Add("info.fBool", fmt.Sprintf("%v", req.GetInfo().GetFBool()))
