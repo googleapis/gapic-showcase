@@ -901,8 +901,8 @@ func (c *complianceRESTClient) RepeatDataBodyInfo(ctx context.Context, req *genp
 	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat:bodyinfo")
 
 	params := url.Values{}
-	if req.GetCustomKebabName() != "" {
-		params.Add("customKebabName", fmt.Sprintf("%v", req.GetCustomKebabName()))
+	if req.GetCustomJsonName() != "" {
+		params.Add("customJsonName", fmt.Sprintf("%v", req.GetCustomJsonName()))
 	}
 	if req.GetFDouble() != 0 {
 		params.Add("fDouble", fmt.Sprintf("%v", req.GetFDouble()))
@@ -978,8 +978,8 @@ func (c *complianceRESTClient) RepeatDataQuery(ctx context.Context, req *genprot
 	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat:query")
 
 	params := url.Values{}
-	if req.GetCustomKebabName() != "" {
-		params.Add("customKebabName", fmt.Sprintf("%v", req.GetCustomKebabName()))
+	if req.GetCustomJsonName() != "" {
+		params.Add("customJsonName", fmt.Sprintf("%v", req.GetCustomJsonName()))
 	}
 	if req.GetFDouble() != 0 {
 		params.Add("fDouble", fmt.Sprintf("%v", req.GetFDouble()))
@@ -1248,8 +1248,8 @@ func (c *complianceRESTClient) RepeatDataSimplePath(ctx context.Context, req *ge
 	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat/%v/%v/%v/%v/%v:simplepath", req.GetInfo().GetFString(), req.GetInfo().GetFInt32(), req.GetInfo().GetFDouble(), req.GetInfo().GetFBool(), req.GetInfo().GetFKingdom())
 
 	params := url.Values{}
-	if req.GetCustomKebabName() != "" {
-		params.Add("customKebabName", fmt.Sprintf("%v", req.GetCustomKebabName()))
+	if req.GetCustomJsonName() != "" {
+		params.Add("customJsonName", fmt.Sprintf("%v", req.GetCustomJsonName()))
 	}
 	if req.GetFDouble() != 0 {
 		params.Add("fDouble", fmt.Sprintf("%v", req.GetFDouble()))
@@ -1504,8 +1504,8 @@ func (c *complianceRESTClient) RepeatDataPathResource(ctx context.Context, req *
 	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat/%v/%v/bool/%v:pathresource", req.GetInfo().GetFString(), req.GetInfo().GetFChild().GetFString(), req.GetInfo().GetFBool())
 
 	params := url.Values{}
-	if req.GetCustomKebabName() != "" {
-		params.Add("customKebabName", fmt.Sprintf("%v", req.GetCustomKebabName()))
+	if req.GetCustomJsonName() != "" {
+		params.Add("customJsonName", fmt.Sprintf("%v", req.GetCustomJsonName()))
 	}
 	if req.GetFDouble() != 0 {
 		params.Add("fDouble", fmt.Sprintf("%v", req.GetFDouble()))
@@ -1766,8 +1766,8 @@ func (c *complianceRESTClient) RepeatDataPathTrailingResource(ctx context.Contex
 	baseUrl.Path += fmt.Sprintf("/v1beta1/repeat/%v/%v:pathtrailingresource", req.GetInfo().GetFString(), req.GetInfo().GetFChild().GetFString())
 
 	params := url.Values{}
-	if req.GetCustomKebabName() != "" {
-		params.Add("customKebabName", fmt.Sprintf("%v", req.GetCustomKebabName()))
+	if req.GetCustomJsonName() != "" {
+		params.Add("customJsonName", fmt.Sprintf("%v", req.GetCustomJsonName()))
 	}
 	if req.GetFDouble() != 0 {
 		params.Add("fDouble", fmt.Sprintf("%v", req.GetFDouble()))

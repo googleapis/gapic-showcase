@@ -147,7 +147,7 @@ message RepeatRequest {
   optional int32 p_int32 = 7;
   optional int64 p_int64 = 8;
   optional double p_double = 9;
-  string custom_kebab_name = 11 [json_name = "customKebab"];
+  string custom_json_name = 11 [json_name = "customJsonName"];
 }
 
 message RepeatResponse {
