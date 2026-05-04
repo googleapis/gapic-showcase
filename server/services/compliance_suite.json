@@ -245,9 +245,9 @@
           "serverVerify": true,
           "info": {
             "fString": "test",
-            "customPath": "kebab-path-value"
+            "customPath": "json-name-path-value"
           },
-          "customKebab": "kebab-query-value"
+          "customJsonName": "json-name-query-value"
         }
       ]
     }

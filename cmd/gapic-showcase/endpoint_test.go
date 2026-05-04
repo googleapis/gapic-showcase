@@ -155,7 +155,7 @@ func TestRESTCalls(t *testing.T) {
                             "fInt32": 0,
                             "fInt64": "0",
                             "fDouble": 0,
-                            "customKebab": ""
+                            "customJsonName": ""
                           },
                           "bindingUri":"/v1beta1/repeat:body"
                         }

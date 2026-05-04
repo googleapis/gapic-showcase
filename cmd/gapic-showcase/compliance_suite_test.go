@@ -329,8 +329,8 @@ func prepRepeatDataTestsQueryParams(request *genproto.RepeatRequest, exclude map
 			return
 		}
 		casedKey := caser(key)
-		if key == "custom_kebab_name" {
-			casedKey = "customKebab"
+		if key == "custom_json_name" {
+			casedKey = "customJsonName"
 		} else if key == "info.custom_path_field" {
 			casedKey = "info.customPath"
 		}
@@ -349,7 +349,7 @@ func prepRepeatDataTestsQueryParams(request *genproto.RepeatRequest, exclude map
 	addParam("p_int32", request.PInt32 != nil, fmt.Sprintf("%d", request.GetPInt32()))
 	addParam("p_int64", request.PInt64 != nil, fmt.Sprintf("%d", request.GetPInt64()))
 	addParam("p_double", request.PDouble != nil, url.QueryEscape(fmt.Sprintf("%g", request.GetPDouble())))
-	addParam("custom_kebab_name", len(request.GetCustomKebabName()) > 0, url.QueryEscape(request.GetCustomKebabName()))
+	addParam("custom_json_name", len(request.GetCustomJsonName()) > 0, url.QueryEscape(request.GetCustomJsonName()))
 
 	// info.* fields
 	addParam("info.f_string", len(info.GetFString()) > 0, url.QueryEscape(info.GetFString()))

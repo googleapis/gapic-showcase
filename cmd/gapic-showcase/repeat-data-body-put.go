@@ -247,7 +247,7 @@ func init() {
 
 	RepeatDataBodyPutCmd.Flags().Float64Var(&repeatDataBodyPutInputPDouble, "p_double", 0.0, "")
 
-	RepeatDataBodyPutCmd.Flags().StringVar(&RepeatDataBodyPutInput.CustomKebabName, "custom_kebab_name", "", "")
+	RepeatDataBodyPutCmd.Flags().StringVar(&RepeatDataBodyPutInput.CustomJsonName, "custom_json_name", "", "")
 
 	RepeatDataBodyPutCmd.Flags().StringVar(&RepeatDataBodyPutFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

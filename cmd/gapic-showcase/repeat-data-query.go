@@ -247,7 +247,7 @@ func init() {
 
 	RepeatDataQueryCmd.Flags().Float64Var(&repeatDataQueryInputPDouble, "p_double", 0.0, "")
 
-	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryInput.CustomKebabName, "custom_kebab_name", "", "")
+	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryInput.CustomJsonName, "custom_json_name", "", "")
 
 	RepeatDataQueryCmd.Flags().StringVar(&RepeatDataQueryFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 

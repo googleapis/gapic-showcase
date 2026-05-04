@@ -247,7 +247,7 @@ func init() {
 
 	RepeatDataPathResourceCmd.Flags().Float64Var(&repeatDataPathResourceInputPDouble, "p_double", 0.0, "")
 
-	RepeatDataPathResourceCmd.Flags().StringVar(&RepeatDataPathResourceInput.CustomKebabName, "custom_kebab_name", "", "")
+	RepeatDataPathResourceCmd.Flags().StringVar(&RepeatDataPathResourceInput.CustomJsonName, "custom_json_name", "", "")
 
 	RepeatDataPathResourceCmd.Flags().StringVar(&RepeatDataPathResourceFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
