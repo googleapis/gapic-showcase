@@ -148,12 +148,14 @@ func TestRESTCalls(t *testing.T) {
                               "fBytes": "",
                               "fKingdom": "LIFE_KINGDOM_UNSPECIFIED",
                               "fChild": null,
+                              "customPath": "",
                               "pDouble": 0
                             },
                             "serverVerify": false,
                             "fInt32": 0,
                             "fInt64": "0",
-                            "fDouble": 0
+                            "fDouble": 0,
+                            "customJsonName": ""
                           },
                           "bindingUri":"/v1beta1/repeat:body"
                         }

@@ -147,6 +147,7 @@ message RepeatRequest {
   optional int32 p_int32 = 7;
   optional int64 p_int64 = 8;
   optional double p_double = 9;
+  string custom_json_name = 11 [json_name = "customJsonName"];
 }
 
 message RepeatResponse {
@@ -212,6 +213,7 @@ message ComplianceData {
   LifeKingdom f_kingdom = 22;
 
   ComplianceDataChild f_child = 16;
+  string custom_path_field = 24 [json_name = "customPath"];
 
   // optional fields
 

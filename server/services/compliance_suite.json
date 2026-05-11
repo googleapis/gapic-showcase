@@ -235,6 +235,21 @@
           }
         }
       ]
+    },
+    {
+      "name": "Custom json_name binding testing",
+      "rpcs": ["Compliance.RepeatDataQuery", "Compliance.RepeatDataSimplePath"],
+      "requests": [
+        {
+          "name": "JsonNameTesting",
+          "serverVerify": true,
+          "info": {
+            "fString": "test",
+            "customPath": "json-name-path-value"
+          },
+          "customJsonName": "json-name-query-value"
+        }
+      ]
     }
   ]
 }

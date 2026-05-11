@@ -167,6 +167,8 @@ func init() {
 
 	RepeatDataBodyInfoCmd.Flags().BoolVar(&RepeatDataBodyInfoInput.Info.FChild.PChild.FBool, "info.f_child.p_child.f_bool", false, "")
 
+	RepeatDataBodyInfoCmd.Flags().StringVar(&RepeatDataBodyInfoInput.Info.CustomPathField, "info.custom_path_field", "", "")
+
 	RepeatDataBodyInfoCmd.Flags().StringVar(&repeatDataBodyInfoInputInfoPString, "info.p_string", "", "")
 
 	RepeatDataBodyInfoCmd.Flags().Int32Var(&repeatDataBodyInfoInputInfoPInt32, "info.p_int32", 0, "")
@@ -244,6 +246,8 @@ func init() {
 	RepeatDataBodyInfoCmd.Flags().Int64Var(&repeatDataBodyInfoInputPInt64, "p_int64", 0, "")
 
 	RepeatDataBodyInfoCmd.Flags().Float64Var(&repeatDataBodyInfoInputPDouble, "p_double", 0.0, "")
+
+	RepeatDataBodyInfoCmd.Flags().StringVar(&RepeatDataBodyInfoInput.CustomJsonName, "custom_json_name", "", "")
 
 	RepeatDataBodyInfoCmd.Flags().StringVar(&RepeatDataBodyInfoFromFile, "from_file", "", "Absolute path to JSON file containing request payload")
 
