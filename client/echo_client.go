@@ -292,7 +292,7 @@ type EchoClient struct {
 
 // Wrapper methods routed to the internal client.
 
-// Close closes the connection to the API service. **Always** call Close() when
+// Close closes the connection to the API service. The user should invoke this when
 // the client is no longer required.
 func (c *EchoClient) Close() error {
 	return c.internalClient.Close()
@@ -552,7 +552,7 @@ func (c *echoGRPCClient) setGoogleClientInfo(keyval ...string) {
 	}
 }
 
-// Close closes the connection to the API service. **Always** call Close() when
+// Close closes the connection to the API service. The user should invoke this when
 // the client is no longer required.
 func (c *echoGRPCClient) Close() error {
 	return c.connPool.Close()
@@ -642,7 +642,7 @@ func (c *echoRESTClient) setGoogleClientInfo(keyval ...string) {
 	}
 }
 
-// Close closes the connection to the API service. **Always** call Close() when
+// Close closes the connection to the API service. The user should invoke this when
 // the client is no longer required.
 func (c *echoRESTClient) Close() error {
 	// Replace httpClient with nil to force cleanup.
@@ -795,7 +795,7 @@ func (c *echoGRPCClient) PagedExpand(ctx context.Context, req *genprotopb.PagedE
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).PagedExpand[0:len((*c.CallOptions).PagedExpand):len((*c.CallOptions).PagedExpand)], opts...)
 	it := &EchoResponseIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*genprotopb.PagedExpandRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.EchoResponse, string, error) {
 		resp := &genprotopb.PagedExpandResponse{}
 		if pageToken != "" {
@@ -838,7 +838,7 @@ func (c *echoGRPCClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).PagedExpandLegacy[0:len((*c.CallOptions).PagedExpandLegacy):len((*c.CallOptions).PagedExpandLegacy)], opts...)
 	it := &EchoResponseIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*genprotopb.PagedExpandLegacyRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.EchoResponse, string, error) {
 		resp := &genprotopb.PagedExpandResponse{}
 		if pageToken != "" {
@@ -881,7 +881,7 @@ func (c *echoGRPCClient) PagedExpandLegacyMapped(ctx context.Context, req *genpr
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).PagedExpandLegacyMapped[0:len((*c.CallOptions).PagedExpandLegacyMapped):len((*c.CallOptions).PagedExpandLegacyMapped)], opts...)
 	it := &PagedExpandResponseListPairIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*genprotopb.PagedExpandRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]PagedExpandResponseListPair, string, error) {
 		resp := &genprotopb.PagedExpandLegacyMappedResponse{}
 		if pageToken != "" {
@@ -966,7 +966,7 @@ func (c *echoGRPCClient) ListLocations(ctx context.Context, req *locationpb.List
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).ListLocations[0:len((*c.CallOptions).ListLocations):len((*c.CallOptions).ListLocations)], opts...)
 	it := &LocationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
 		resp := &locationpb.ListLocationsResponse{}
 		if pageToken != "" {
@@ -1081,7 +1081,7 @@ func (c *echoGRPCClient) ListOperations(ctx context.Context, req *longrunningpb.
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).ListOperations[0:len((*c.CallOptions).ListOperations):len((*c.CallOptions).ListOperations)], opts...)
 	it := &OperationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
 		resp := &longrunningpb.ListOperationsResponse{}
 		if pageToken != "" {
@@ -1477,7 +1477,7 @@ func (c *echoRESTClient) Chat(ctx context.Context, opts ...gax.CallOption) (genp
 // expanded words, this method returns a paged list of expanded words.
 func (c *echoRESTClient) PagedExpand(ctx context.Context, req *genprotopb.PagedExpandRequest, opts ...gax.CallOption) *EchoResponseIterator {
 	it := &EchoResponseIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*genprotopb.PagedExpandRequest)
 	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.EchoResponse, string, error) {
@@ -1552,7 +1552,7 @@ func (c *echoRESTClient) PagedExpand(ctx context.Context, req *genprotopb.PagedE
 // do. New APIs should NOT use this pattern.
 func (c *echoRESTClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.PagedExpandLegacyRequest, opts ...gax.CallOption) *EchoResponseIterator {
 	it := &EchoResponseIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*genprotopb.PagedExpandLegacyRequest)
 	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.EchoResponse, string, error) {
@@ -1629,7 +1629,7 @@ func (c *echoRESTClient) PagedExpandLegacy(ctx context.Context, req *genprotopb.
 // APIs. New APIs should NOT use this pattern.
 func (c *echoRESTClient) PagedExpandLegacyMapped(ctx context.Context, req *genprotopb.PagedExpandRequest, opts ...gax.CallOption) *PagedExpandResponseListPairIterator {
 	it := &PagedExpandResponseListPairIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*genprotopb.PagedExpandRequest)
 	m := protojson.MarshalOptions{AllowPartial: true, UseEnumNumbers: true}
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]PagedExpandResponseListPair, string, error) {
@@ -1811,7 +1811,7 @@ func (c *echoRESTClient) Block(ctx context.Context, req *genprotopb.BlockRequest
 // ListLocations is a utility method from google.cloud.location.Locations.
 func (c *echoRESTClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
 	it := &LocationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
 		resp := &locationpb.ListLocationsResponse{}
@@ -2090,7 +2090,7 @@ func (c *echoRESTClient) TestIamPermissions(ctx context.Context, req *iampb.Test
 // ListOperations is a utility method from google.longrunning.Operations.
 func (c *echoRESTClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
 	it := &OperationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
 		resp := &longrunningpb.ListOperationsResponse{}

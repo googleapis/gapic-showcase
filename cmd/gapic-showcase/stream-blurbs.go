@@ -29,7 +29,7 @@ func init() {
 
 	StreamBlurbsCmd.Flags().StringVar(&StreamBlurbsInput.Name, "name", "", "Required. The resource name of a chat room or user profile...")
 
-	StreamBlurbsCmd.Flags().Int64Var(&StreamBlurbsInput.ExpireTime.Seconds, "expire_time.seconds", 0, "Represents seconds of UTC time since Unix epoch...")
+	StreamBlurbsCmd.Flags().Int64Var(&StreamBlurbsInput.ExpireTime.Seconds, "expire_time.seconds", 0, "Represents seconds of UTC time since Unix epoch ...")
 
 	StreamBlurbsCmd.Flags().Int32Var(&StreamBlurbsInput.ExpireTime.Nanos, "expire_time.nanos", 0, "Non-negative fractions of a second at nanosecond...")
 
