@@ -198,7 +198,7 @@ type SequenceClient struct {
 
 // Wrapper methods routed to the internal client.
 
-// Close closes the connection to the API service. **Always** call Close() when
+// Close closes the connection to the API service. The user should invoke this when
 // the client is no longer required.
 func (c *SequenceClient) Close() error {
 	return c.internalClient.Close()
@@ -380,7 +380,7 @@ func (c *sequenceGRPCClient) setGoogleClientInfo(keyval ...string) {
 	}
 }
 
-// Close closes the connection to the API service. **Always** call Close() when
+// Close closes the connection to the API service. The user should invoke this when
 // the client is no longer required.
 func (c *sequenceGRPCClient) Close() error {
 	return c.connPool.Close()
@@ -449,7 +449,7 @@ func (c *sequenceRESTClient) setGoogleClientInfo(keyval ...string) {
 	}
 }
 
-// Close closes the connection to the API service. **Always** call Close() when
+// Close closes the connection to the API service. The user should invoke this when
 // the client is no longer required.
 func (c *sequenceRESTClient) Close() error {
 	// Replace httpClient with nil to force cleanup.
@@ -570,7 +570,7 @@ func (c *sequenceGRPCClient) ListLocations(ctx context.Context, req *locationpb.
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).ListLocations[0:len((*c.CallOptions).ListLocations):len((*c.CallOptions).ListLocations)], opts...)
 	it := &LocationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
 		resp := &locationpb.ListLocationsResponse{}
 		if pageToken != "" {
@@ -685,7 +685,7 @@ func (c *sequenceGRPCClient) ListOperations(ctx context.Context, req *longrunnin
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).ListOperations[0:len((*c.CallOptions).ListOperations):len((*c.CallOptions).ListOperations)], opts...)
 	it := &OperationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
 		resp := &longrunningpb.ListOperationsResponse{}
 		if pageToken != "" {
@@ -1099,7 +1099,7 @@ func (c *attemptStreamingSequenceRESTStreamClient) RecvMsg(m interface{}) error 
 // ListLocations is a utility method from google.cloud.location.Locations.
 func (c *sequenceRESTClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
 	it := &LocationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
 		resp := &locationpb.ListLocationsResponse{}
@@ -1378,7 +1378,7 @@ func (c *sequenceRESTClient) TestIamPermissions(ctx context.Context, req *iampb.
 // ListOperations is a utility method from google.longrunning.Operations.
 func (c *sequenceRESTClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
 	it := &OperationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
 		resp := &longrunningpb.ListOperationsResponse{}

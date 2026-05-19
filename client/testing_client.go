@@ -166,7 +166,7 @@ type TestingClient struct {
 
 // Wrapper methods routed to the internal client.
 
-// Close closes the connection to the API service. **Always** call Close() when
+// Close closes the connection to the API service. The user should invoke this when
 // the client is no longer required.
 func (c *TestingClient) Close() error {
 	return c.internalClient.Close()
@@ -373,7 +373,7 @@ func (c *testingGRPCClient) setGoogleClientInfo(keyval ...string) {
 	}
 }
 
-// Close closes the connection to the API service. **Always** call Close() when
+// Close closes the connection to the API service. The user should invoke this when
 // the client is no longer required.
 func (c *testingGRPCClient) Close() error {
 	return c.connPool.Close()
@@ -447,7 +447,7 @@ func (c *testingRESTClient) setGoogleClientInfo(keyval ...string) {
 	}
 }
 
-// Close closes the connection to the API service. **Always** call Close() when
+// Close closes the connection to the API service. The user should invoke this when
 // the client is no longer required.
 func (c *testingRESTClient) Close() error {
 	// Replace httpClient with nil to force cleanup.
@@ -498,7 +498,7 @@ func (c *testingGRPCClient) ListSessions(ctx context.Context, req *genprotopb.Li
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).ListSessions[0:len((*c.CallOptions).ListSessions):len((*c.CallOptions).ListSessions)], opts...)
 	it := &SessionIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*genprotopb.ListSessionsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.Session, string, error) {
 		resp := &genprotopb.ListSessionsResponse{}
 		if pageToken != "" {
@@ -576,7 +576,7 @@ func (c *testingGRPCClient) ListTests(ctx context.Context, req *genprotopb.ListT
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).ListTests[0:len((*c.CallOptions).ListTests):len((*c.CallOptions).ListTests)], opts...)
 	it := &TestIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*genprotopb.ListTestsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.Test, string, error) {
 		resp := &genprotopb.ListTestsResponse{}
 		if pageToken != "" {
@@ -654,7 +654,7 @@ func (c *testingGRPCClient) ListLocations(ctx context.Context, req *locationpb.L
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).ListLocations[0:len((*c.CallOptions).ListLocations):len((*c.CallOptions).ListLocations)], opts...)
 	it := &LocationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
 		resp := &locationpb.ListLocationsResponse{}
 		if pageToken != "" {
@@ -769,7 +769,7 @@ func (c *testingGRPCClient) ListOperations(ctx context.Context, req *longrunning
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).ListOperations[0:len((*c.CallOptions).ListOperations):len((*c.CallOptions).ListOperations)], opts...)
 	it := &OperationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
 		resp := &longrunningpb.ListOperationsResponse{}
 		if pageToken != "" {
@@ -956,7 +956,7 @@ func (c *testingRESTClient) GetSession(ctx context.Context, req *genprotopb.GetS
 // ListSessions lists the current test sessions.
 func (c *testingRESTClient) ListSessions(ctx context.Context, req *genprotopb.ListSessionsRequest, opts ...gax.CallOption) *SessionIterator {
 	it := &SessionIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*genprotopb.ListSessionsRequest)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.Session, string, error) {
 		resp := &genprotopb.ListSessionsResponse{}
@@ -1110,7 +1110,7 @@ func (c *testingRESTClient) ReportSession(ctx context.Context, req *genprotopb.R
 // ListTests list the tests of a sessesion.
 func (c *testingRESTClient) ListTests(ctx context.Context, req *genprotopb.ListTestsRequest, opts ...gax.CallOption) *TestIterator {
 	it := &TestIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*genprotopb.ListTestsRequest)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.Test, string, error) {
 		resp := &genprotopb.ListTestsResponse{}
@@ -1282,7 +1282,7 @@ func (c *testingRESTClient) VerifyTest(ctx context.Context, req *genprotopb.Veri
 // ListLocations is a utility method from google.cloud.location.Locations.
 func (c *testingRESTClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
 	it := &LocationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
 		resp := &locationpb.ListLocationsResponse{}
@@ -1561,7 +1561,7 @@ func (c *testingRESTClient) TestIamPermissions(ctx context.Context, req *iampb.T
 // ListOperations is a utility method from google.longrunning.Operations.
 func (c *testingRESTClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
 	it := &OperationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
 		resp := &longrunningpb.ListOperationsResponse{}
