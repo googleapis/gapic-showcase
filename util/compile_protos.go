@@ -68,7 +68,9 @@ func CompileProtos(version string) {
 		"--go_gapic_opt=metadata",
 		"--go_gapic_opt=transport=grpc+rest",
 		"--go_rest_server_out=" + filepath.Join("server", "genrest"),
-		"--go_out=plugins=grpc:" + outDir,
+		"--go_out=" + outDir,
+		"--go-grpc_out=" + outDir,
+		"--go-grpc_opt=require_unimplemented_servers=false",
 	}
 	Execute(append(command, files...)...)
 
