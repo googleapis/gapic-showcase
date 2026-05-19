@@ -196,7 +196,7 @@ type IdentityClient struct {
 
 // Wrapper methods routed to the internal client.
 
-// Close closes the connection to the API service. **Always** call Close() when
+// Close closes the connection to the API service. The user should invoke this when
 // the client is no longer required.
 func (c *IdentityClient) Close() error {
 	return c.internalClient.Close()
@@ -367,7 +367,7 @@ func (c *identityGRPCClient) setGoogleClientInfo(keyval ...string) {
 	}
 }
 
-// Close closes the connection to the API service. **Always** call Close() when
+// Close closes the connection to the API service. The user should invoke this when
 // the client is no longer required.
 func (c *identityGRPCClient) Close() error {
 	return c.connPool.Close()
@@ -435,7 +435,7 @@ func (c *identityRESTClient) setGoogleClientInfo(keyval ...string) {
 	}
 }
 
-// Close closes the connection to the API service. **Always** call Close() when
+// Close closes the connection to the API service. The user should invoke this when
 // the client is no longer required.
 func (c *identityRESTClient) Close() error {
 	// Replace httpClient with nil to force cleanup.
@@ -518,7 +518,7 @@ func (c *identityGRPCClient) ListUsers(ctx context.Context, req *genprotopb.List
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).ListUsers[0:len((*c.CallOptions).ListUsers):len((*c.CallOptions).ListUsers)], opts...)
 	it := &UserIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*genprotopb.ListUsersRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.User, string, error) {
 		resp := &genprotopb.ListUsersResponse{}
 		if pageToken != "" {
@@ -564,7 +564,7 @@ func (c *identityGRPCClient) ListLocations(ctx context.Context, req *locationpb.
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).ListLocations[0:len((*c.CallOptions).ListLocations):len((*c.CallOptions).ListLocations)], opts...)
 	it := &LocationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
 		resp := &locationpb.ListLocationsResponse{}
 		if pageToken != "" {
@@ -679,7 +679,7 @@ func (c *identityGRPCClient) ListOperations(ctx context.Context, req *longrunnin
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).ListOperations[0:len((*c.CallOptions).ListOperations):len((*c.CallOptions).ListOperations)], opts...)
 	it := &OperationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
 		resp := &longrunningpb.ListOperationsResponse{}
 		if pageToken != "" {
@@ -953,7 +953,7 @@ func (c *identityRESTClient) DeleteUser(ctx context.Context, req *genprotopb.Del
 // ListUsers lists all users.
 func (c *identityRESTClient) ListUsers(ctx context.Context, req *genprotopb.ListUsersRequest, opts ...gax.CallOption) *UserIterator {
 	it := &UserIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*genprotopb.ListUsersRequest)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.User, string, error) {
 		resp := &genprotopb.ListUsersResponse{}
@@ -1030,7 +1030,7 @@ func (c *identityRESTClient) ListUsers(ctx context.Context, req *genprotopb.List
 // ListLocations is a utility method from google.cloud.location.Locations.
 func (c *identityRESTClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
 	it := &LocationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
 		resp := &locationpb.ListLocationsResponse{}
@@ -1309,7 +1309,7 @@ func (c *identityRESTClient) TestIamPermissions(ctx context.Context, req *iampb.
 // ListOperations is a utility method from google.longrunning.Operations.
 func (c *identityRESTClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
 	it := &OperationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
 		resp := &longrunningpb.ListOperationsResponse{}
