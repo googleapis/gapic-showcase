@@ -1,5 +1,12 @@
 # Release History
 
+## [0.40.0](https://github.com/googleapis/gapic-showcase/compare/v0.39.0...v0.40.0) (2026-05-19)
+
+
+### Features
+
+* **showcase:** Pin tool versions in CI for reproducible builds ([#1637](https://github.com/googleapis/gapic-showcase/issues/1637)) ([c247dce](https://github.com/googleapis/gapic-showcase/commit/c247dce69f14c54d136cf29048c589271beaa8a0))
+
 ## [0.39.0](https://github.com/googleapis/gapic-showcase/compare/v0.38.0...v0.39.0) (2026-03-30)
 
 
