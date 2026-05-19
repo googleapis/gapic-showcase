@@ -364,7 +364,7 @@ type MessagingClient struct {
 
 // Wrapper methods routed to the internal client.
 
-// Close closes the connection to the API service. The user should invoke this when
+// Close closes the connection to the API service. **Always** call Close() when
 // the client is no longer required.
 func (c *MessagingClient) Close() error {
 	return c.internalClient.Close()
@@ -619,7 +619,7 @@ func (c *messagingGRPCClient) setGoogleClientInfo(keyval ...string) {
 	}
 }
 
-// Close closes the connection to the API service. The user should invoke this when
+// Close closes the connection to the API service. **Always** call Close() when
 // the client is no longer required.
 func (c *messagingGRPCClient) Close() error {
 	return c.connPool.Close()
@@ -705,7 +705,7 @@ func (c *messagingRESTClient) setGoogleClientInfo(keyval ...string) {
 	}
 }
 
-// Close closes the connection to the API service. The user should invoke this when
+// Close closes the connection to the API service. **Always** call Close() when
 // the client is no longer required.
 func (c *messagingRESTClient) Close() error {
 	// Replace httpClient with nil to force cleanup.
@@ -788,7 +788,7 @@ func (c *messagingGRPCClient) ListRooms(ctx context.Context, req *genprotopb.Lis
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).ListRooms[0:len((*c.CallOptions).ListRooms):len((*c.CallOptions).ListRooms)], opts...)
 	it := &RoomIterator{}
-	req = proto.Clone(req).(*genprotopb.ListRoomsRequest)
+	req = proto.CloneOf(req)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.Room, string, error) {
 		resp := &genprotopb.ListRoomsResponse{}
 		if pageToken != "" {
@@ -902,7 +902,7 @@ func (c *messagingGRPCClient) ListBlurbs(ctx context.Context, req *genprotopb.Li
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).ListBlurbs[0:len((*c.CallOptions).ListBlurbs):len((*c.CallOptions).ListBlurbs)], opts...)
 	it := &BlurbIterator{}
-	req = proto.Clone(req).(*genprotopb.ListBlurbsRequest)
+	req = proto.CloneOf(req)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.Blurb, string, error) {
 		resp := &genprotopb.ListBlurbsResponse{}
 		if pageToken != "" {
@@ -1022,7 +1022,7 @@ func (c *messagingGRPCClient) ListLocations(ctx context.Context, req *locationpb
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).ListLocations[0:len((*c.CallOptions).ListLocations):len((*c.CallOptions).ListLocations)], opts...)
 	it := &LocationIterator{}
-	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
+	req = proto.CloneOf(req)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
 		resp := &locationpb.ListLocationsResponse{}
 		if pageToken != "" {
@@ -1137,7 +1137,7 @@ func (c *messagingGRPCClient) ListOperations(ctx context.Context, req *longrunni
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).ListOperations[0:len((*c.CallOptions).ListOperations):len((*c.CallOptions).ListOperations)], opts...)
 	it := &OperationIterator{}
-	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
+	req = proto.CloneOf(req)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
 		resp := &longrunningpb.ListOperationsResponse{}
 		if pageToken != "" {
@@ -1411,7 +1411,7 @@ func (c *messagingRESTClient) DeleteRoom(ctx context.Context, req *genprotopb.De
 // ListRooms lists all chat rooms.
 func (c *messagingRESTClient) ListRooms(ctx context.Context, req *genprotopb.ListRoomsRequest, opts ...gax.CallOption) *RoomIterator {
 	it := &RoomIterator{}
-	req = proto.Clone(req).(*genprotopb.ListRoomsRequest)
+	req = proto.CloneOf(req)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.Room, string, error) {
 		resp := &genprotopb.ListRoomsResponse{}
@@ -1680,7 +1680,7 @@ func (c *messagingRESTClient) DeleteBlurb(ctx context.Context, req *genprotopb.D
 // parent resource name.
 func (c *messagingRESTClient) ListBlurbs(ctx context.Context, req *genprotopb.ListBlurbsRequest, opts ...gax.CallOption) *BlurbIterator {
 	it := &BlurbIterator{}
-	req = proto.Clone(req).(*genprotopb.ListBlurbsRequest)
+	req = proto.CloneOf(req)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*genprotopb.Blurb, string, error) {
 		resp := &genprotopb.ListBlurbsResponse{}
@@ -1929,7 +1929,7 @@ func (c *messagingRESTClient) Connect(ctx context.Context, opts ...gax.CallOptio
 // ListLocations is a utility method from google.cloud.location.Locations.
 func (c *messagingRESTClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
 	it := &LocationIterator{}
-	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
+	req = proto.CloneOf(req)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
 		resp := &locationpb.ListLocationsResponse{}
@@ -2208,7 +2208,7 @@ func (c *messagingRESTClient) TestIamPermissions(ctx context.Context, req *iampb
 // ListOperations is a utility method from google.longrunning.Operations.
 func (c *messagingRESTClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
 	it := &OperationIterator{}
-	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
+	req = proto.CloneOf(req)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
 		resp := &longrunningpb.ListOperationsResponse{}
