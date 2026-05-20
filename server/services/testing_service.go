@@ -30,7 +30,7 @@ import (
 
 // NewTestingServer returns a new TestingServer for the Showcase API.
 func NewTestingServer(observerRegistry server.GrpcObserverRegistry) pb.TestingServer {
-	name := fmt.Sprintf("sessions/-")
+	name := "sessions/-"
 	defaultSession := server.NewSession(name, pb.Session_V1_LATEST, observerRegistry)
 	defaultSession.RegisterTests(spec.ShowcaseTests(name, pb.Session_V1_LATEST))
 	sessions := []sessionEntry{{session: defaultSession}}
