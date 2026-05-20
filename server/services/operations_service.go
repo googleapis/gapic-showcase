@@ -120,7 +120,7 @@ func (s *operationsServerImpl) handleSearchBlurbs(in *lropb.GetOperationRequest)
 func searchFilterFunc(query string) func(b *pb.Blurb) bool {
 	return func(b *pb.Blurb) bool {
 		for _, s := range strings.Fields(query) {
-			if strings.Index(b.GetText(), s) >= 0 {
+			if strings.Contains(b.GetText(), s) {
 				return true
 			}
 		}
