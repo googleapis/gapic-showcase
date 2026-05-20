@@ -4,7 +4,6 @@ dist/
 coverage.txt
 .vscode
 *~
-bazel-*
 golint.txt
 gofmt.txt
 govet.txt
