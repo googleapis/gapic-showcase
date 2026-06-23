@@ -26,6 +26,7 @@ import "google/protobuf/duration.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
+import "google/protobuf/struct.proto";
 import "google/rpc/status.proto";
 
 package google.showcase.v1beta1;
@@ -97,6 +98,7 @@ service Echo {
   // run-time, the actual types for these fields must be one of the types in
   // google/rpc/error_details.proto.
   rpc EchoErrorDetails(EchoErrorDetailsRequest) returns (EchoErrorDetailsResponse) {
+    option deprecated = true;
     option (google.api.http) = {
       post: "/v1beta1/echo:error-details"
       body: "*"
@@ -254,6 +256,32 @@ service Echo {
       body: "*"
     };
   };
+
+  // A method with a foreign request with a repeated flattened field.
+  rpc EchoForeignRepeated(google.rpc.Status) returns (google.rpc.Status) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:foreignRepeated"
+      body: "*"
+    };
+    option (google.api.method_signature) = "details";
+  }
+
+  // A method with a foreign request with a map flattened field.
+  rpc EchoForeignMap(google.protobuf.Struct) returns (google.protobuf.Struct) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:foreignMap"
+      body: "*"
+    };
+    option (google.api.method_signature) = "fields";
+  }
+
+  // A method with a primitive paged result field.
+  rpc PagedExpandPrimitive(PagedExpandRequest) returns (PagedExpandPrimitiveResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:pagedExpandPrimitive"
+      body: "*"
+    };
+  }
 }
 
 // Polling service for extended LROs.
@@ -268,6 +296,7 @@ service CustomOperations {
 
 message GetCustomOperationRequest {
   string name = 1;
+  string custom_response_field = 2 [(google.cloud.operation_response_field) = "name"];
 }
 
 message Operation {
@@ -276,7 +305,7 @@ message Operation {
     DONE = 1;
     RUNNING = 2;
   }
-  string name = 1 [(google.cloud.operation_field) = NAME];
+  string custom_name = 1 [(google.cloud.operation_field) = NAME];
   Status status = 2 [(google.cloud.operation_field) = STATUS];
   int32 error_code = 3 [(google.cloud.operation_field) = ERROR_CODE];
   string error_message = 4 [(google.cloud.operation_field) = ERROR_MESSAGE];
@@ -493,6 +522,9 @@ message WaitRequest {
     // The response to be returned on operation completion.
     WaitResponse success = 3;
   }
+
+  // Custom request field for extended operations coverage.
+  string custom_request_field = 5 [(google.cloud.operation_request_field) = "name"];
 }
 
 // The result of the Wait operation.
@@ -561,4 +593,12 @@ message AutoPopulateRequest {
   string request_id = 1 [(google.api.field_info).format = UUID4];
   // Another field.
   string other_field = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+// The response for PagedExpandPrimitive.
+message PagedExpandPrimitiveResponse {
+  // A list of primitive responses.
+  repeated string responses = 1;
+  // A next page token.
+  string next_page_token = 2;
 }
