@@ -288,7 +288,7 @@ service Echo {
 service CustomOperations {
   rpc GetCustomOperation(GetCustomOperationRequest) returns (Operation) {
     option (google.api.http) = {
-      get: "/v1beta1/operations/{name=**}"
+      get: "/v1beta1/custom_operations/{name=**}"
     };
     option (google.cloud.operation_polling_method) = true;
   }
