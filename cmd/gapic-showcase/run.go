@@ -100,7 +100,7 @@ func init() {
 		"The server private key path for custom mutual TLS channel. (Deprecated: use tls-key)")
 
 	runCmd.Flags().BoolVar(
-		&config.autoTls,
+		&config.autoTLS,
 		"tls",
 		false,
 		"Automatically generate self-signed TLS certificates in-memory.")
