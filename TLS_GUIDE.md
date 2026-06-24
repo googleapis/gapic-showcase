@@ -1,8 +1,8 @@
-# GAPIC Showcase: TLS Guide
+# GAPIC Showcase: TLS & Post-Quantum Cryptography (PQC) Guide
 
 This guide explains how to configure, run, and connect to the GAPIC Showcase server using TLS.
 
-For most use cases, **Auto-TLS** is the recommended mode as it requires zero configuration. Generating certificates manually via OpenSSL is only necessary if you need to test **Mutual TLS (mTLS)**.
+For most use cases (including verifying PQC), **Auto-TLS** is the recommended mode as it requires zero configuration. Generating certificates manually via OpenSSL is only necessary if you need to test **Mutual TLS (mTLS)**.
 
 ## 1. Running the Server with Auto-TLS (Recommended)
 
@@ -67,3 +67,24 @@ Provide the server cert, key, **and the CA cert** (which the server will use to 
 ```
 *The server log will confirm:* `Configured server with Mutual TLS (mTLS)`
 
+## 3. Verifying Post-Quantum Cryptography (PQC)
+
+When running on **Go 1.24+**, the hybrid post-quantum key exchange **`X25519MLKEM768`** is enabled by default on the Showcase server.
+
+### Disabling PQC (Server-Side)
+
+If you need to verify classical fallback behavior, you can force the Showcase server to disable all Post-Quantum hybrid key exchanges and use only classical cryptography by starting the server with the `--enable-pqc=false` flag:
+
+```sh
+./gapic-showcase run \
+  --tls-cert certs/server.crt \
+  --tls-key certs/server.key \
+  --enable-pqc=false
+```
+
+## 4. Exposed TLS Response Metadata (Headers)
+
+When a client connects securely, the Showcase server automatically injects the following metadata into the gRPC response headers (and HTTP headers):
+
+*   **`x-showcase-tls-group`**: The negotiated key-exchange group (e.g., `X25519MLKEM768`).
+*   **`x-showcase-tls-client-supported-groups`**: A comma-separated list of all key-exchange groups the client offered in its `ClientHello` handshake, ordered by the client's preference.
