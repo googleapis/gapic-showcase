@@ -286,6 +286,8 @@ service Echo {
 
 // Polling service for extended LROs.
 service CustomOperations {
+  option (google.api.default_host) = "localhost:7469";
+
   rpc GetCustomOperation(GetCustomOperationRequest) returns (Operation) {
     option (google.api.http) = {
       get: "/v1beta1/custom_operations/{name=**}"
