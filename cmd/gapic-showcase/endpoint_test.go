@@ -17,6 +17,7 @@ package main
 import (
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -31,7 +32,7 @@ import (
 func TestRESTCalls(t *testing.T) {
 	server := httptest.NewUnstartedServer(nil)
 	backend := createBackends()
-	restServer := newEndpointREST(nil, backend)
+	restServer := newEndpointREST(net.Listener(nil), backend)
 
 	server.Config = restServer.server
 	server.Start()

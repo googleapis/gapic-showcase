@@ -69,17 +69,44 @@ func init() {
 		"The port that the fallback-proxy will be served on.")
 	runCmd.Flags().StringVar(
 		&config.tlsCaCert,
+		"tls-ca-cert",
+		"",
+		"The Root CA certificate path for custom TLS channel (enables mutual TLS if provided).")
+	runCmd.Flags().StringVar(
+		&config.tlsCert,
+		"tls-cert",
+		"",
+		"The server certificate path for TLS channel.")
+	runCmd.Flags().StringVar(
+		&config.tlsKey,
+		"tls-key",
+		"",
+		"The server private key path for TLS channel.")
+	// Backward compatibility flags
+	runCmd.Flags().StringVar(
+		&config.tlsCaCert,
 		"mtls-ca-cert",
 		"",
-		"The Root CA certificate path for custom mutual TLS channel.")
+		"The Root CA certificate path for custom mutual TLS channel. (Deprecated: use tls-ca-cert)")
 	runCmd.Flags().StringVar(
 		&config.tlsCert,
 		"mtls-cert",
 		"",
-		"The server certificate path for custom mutual TLS channel.")
+		"The server certificate path for custom mutual TLS channel. (Deprecated: use tls-cert)")
 	runCmd.Flags().StringVar(
 		&config.tlsKey,
 		"mtls-key",
 		"",
-		"The server private key path for custom mutual TLS channel.")
+		"The server private key path for custom mutual TLS channel. (Deprecated: use tls-key)")
+
+	runCmd.Flags().BoolVar(
+		&config.autoTLS,
+		"tls",
+		false,
+		"Automatically generate self-signed TLS certificates in-memory.")
+	runCmd.Flags().StringVar(
+		&config.caCertFile,
+		"ca-cert-output-file",
+		"",
+		"Path to write the automatically generated CA certificate (PEM) to.")
 }

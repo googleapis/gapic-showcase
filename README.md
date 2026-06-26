@@ -97,7 +97,6 @@ is the minimum supported version of `protoc`.
 1. Set up Go protobuf tools:
     ```sh
     go install github.com/golang/protobuf/protoc-gen-go@latest
-    go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli@latest
     go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic@latest
     ```
 
