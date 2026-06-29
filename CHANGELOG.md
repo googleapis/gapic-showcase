@@ -1,5 +1,13 @@
 # Release History
 
+## [0.41.0](https://github.com/googleapis/gapic-showcase/compare/v0.40.0...v0.41.0) (2026-06-29)
+
+
+### Features
+
+* Add Post-Quantum Cryptography (PQC) support to TLS ([#1650](https://github.com/googleapis/gapic-showcase/issues/1650)) ([83d1e8b](https://github.com/googleapis/gapic-showcase/commit/83d1e8ba4a5106a1e6395a9e1b12d8b7d25a2cd6))
+* Add TLS support ([#1646](https://github.com/googleapis/gapic-showcase/issues/1646)) ([9949939](https://github.com/googleapis/gapic-showcase/commit/9949939e04e14e46727cf034cdd775b5ebdfbcf4))
+
 ## [0.40.0](https://github.com/googleapis/gapic-showcase/compare/v0.39.0...v0.40.0) (2026-05-19)
 
 
