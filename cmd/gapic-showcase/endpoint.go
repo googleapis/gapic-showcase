@@ -50,7 +50,7 @@ type RuntimeConfig struct {
 	tlsCaCert    string
 	tlsCert      string
 	tlsKey       string
-	disablePQC   bool
+	enablePQC    *bool
 	autoTLS      bool
 	caCertFile   string
 }
@@ -112,7 +112,12 @@ func createTLSConfig(config RuntimeConfig) *tls.Config {
 		NextProtos:   []string{"h2", "http/1.1"},
 	}
 
-	if config.disablePQC {
+	pqcEnabled := true
+	if config.enablePQC != nil {
+		pqcEnabled = *config.enablePQC
+	}
+
+	if !pqcEnabled {
 		baseConfig.CurvePreferences = []tls.CurveID{
 			tls.X25519,
 			tls.CurveP256,

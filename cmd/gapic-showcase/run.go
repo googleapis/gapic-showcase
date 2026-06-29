@@ -36,7 +36,7 @@ func init() {
 		Use:   "run",
 		Short: "Runs the showcase server",
 		Run: func(cmd *cobra.Command, args []string) {
-			config.disablePQC = !enablePQCVal
+			config.enablePQC = &enablePQCVal
 			cmuxServer := CreateAllEndpoints(config)
 
 			done := make(chan os.Signal, 2)

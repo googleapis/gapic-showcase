@@ -122,6 +122,7 @@ func TestConnectWithTLS(t *testing.T) {
 		t.Errorf("expected client supported groups to contain X25519MLKEM768, got %q", clientGroups[0])
 	}
 }
+
 func assertHeader(t *testing.T, md metadata.MD, key, expected string) {
 	t.Helper()
 	val := md.Get(key)
@@ -143,7 +144,7 @@ func TestConnectWithTLS_PQCDisabled(t *testing.T) {
 		fallbackPort: ":0", // avoid conflicts
 		autoTLS:      true,
 		caCertFile:   caPath,
-		disablePQC:   true, // Disable PQC
+		enablePQC:    boolPtr(false), // Disable PQC
 	}
 
 	// CreateAllEndpoints synchronously generates certs and writes caCertFile when autoTLS is true
@@ -209,7 +210,10 @@ func TestConnectWithTLS_PQCDisabled(t *testing.T) {
 		t.Errorf("expected %q, got %q", content, resp.GetContent())
 	}
 
-	// Assertions: negotiated group should be X25519 (classical)
 	assertHeader(t, header, "x-showcase-tls-group", "X25519")
+}
+
+func boolPtr(b bool) *bool {
+	return &b
 }
 
