@@ -475,6 +475,7 @@ func (er *endpointREST) Shutdown() error {
 func (er *endpointREST) GetAddr() net.Addr {
 	return er.listener.Addr()
 }
+
 type cleanupConn struct {
 	net.Conn
 }
