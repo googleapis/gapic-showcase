@@ -50,6 +50,7 @@ type RuntimeConfig struct {
 	tlsCaCert    string
 	tlsCert      string
 	tlsKey       string
+	enablePQC    *bool
 	autoTLS      bool
 	caCertFile   string
 }
@@ -111,6 +112,21 @@ func createTLSConfig(config RuntimeConfig) *tls.Config {
 		NextProtos:   []string{"h2", "http/1.1"},
 	}
 
+	pqcEnabled := true
+	if config.enablePQC != nil {
+		pqcEnabled = *config.enablePQC
+	}
+
+	if !pqcEnabled {
+		baseConfig.CurvePreferences = []tls.CurveID{
+			tls.X25519,
+			tls.CurveP256,
+			tls.CurveP384,
+			tls.CurveP521,
+		}
+		stdLog.Printf("PQC key exchanges disabled on server. Using classical curves only.")
+	}
+
 	// Handle Client CA for mTLS / One-Way TLS
 	if config.tlsCaCert != "" {
 		cert, err := os.ReadFile(config.tlsCaCert)
@@ -132,9 +148,16 @@ func createTLSConfig(config RuntimeConfig) *tls.Config {
 		remoteAddr := info.Conn.RemoteAddr().String()
 		conf := baseConfig.Clone()
 		conf.VerifyConnection = func(state tls.ConnectionState) error {
+			server.RecordTLSHandshake(remoteAddr, state, info.SupportedCurves)
 			stdLog.Printf("TLS Handshake Complete on Server for %s:", remoteAddr)
 			stdLog.Printf("  Protocol: %s", tls.VersionName(state.Version))
 			stdLog.Printf("  Cipher Suite: %s", tls.CipherSuiteName(state.CipherSuite))
+			stdLog.Printf("  Negotiated Group: %s", server.TLSGroupName(state.CurveID))
+			var groups []string
+			for _, g := range info.SupportedCurves {
+				groups = append(groups, server.TLSGroupName(g))
+			}
+			stdLog.Printf("  Client Offered Groups: %s", strings.Join(groups, ", "))
 			return nil
 		}
 		return conf, nil
@@ -164,6 +187,9 @@ func CreateAllEndpoints(config RuntimeConfig) Endpoint {
 		tlsConfig := createTLSConfig(config)
 		lis = tls.NewListener(lis, tlsConfig)
 	}
+
+	// Wrap in cleanup listener for connection tracking and leak prevention
+	lis = &cleanupListener{Listener: lis}
 
 	// Get allocated port for logging
 	addr := lis.Addr().(*net.TCPAddr)
@@ -326,7 +352,10 @@ func createBackends() *services.Backend {
 func newEndpointGRPC(lis net.Listener, config RuntimeConfig, backend *services.Backend) Endpoint {
 	opts := []grpc.ServerOption{
 		grpc.StreamInterceptor(backend.ObserverRegistry.StreamInterceptor),
-		grpc.UnaryInterceptor(backend.ObserverRegistry.UnaryInterceptor),
+		grpc.ChainUnaryInterceptor(
+			backend.ObserverRegistry.UnaryInterceptor,
+			server.TLSMetadataUnaryInterceptor,
+		),
 	}
 
 	s := grpc.NewServer(opts...)
@@ -409,6 +438,8 @@ func newEndpointREST(lis net.Listener, backend *services.Backend) *endpointREST 
 	})
 	genrest.RegisterHandlers(router, backend)
 
+	// Register TLS HTTP Middleware
+	router.Use(server.TLSHTTPMiddleware)
 	return &endpointREST{
 		server:   &http.Server{Handler: router},
 		listener: lis,
@@ -443,4 +474,24 @@ func (er *endpointREST) Shutdown() error {
 
 func (er *endpointREST) GetAddr() net.Addr {
 	return er.listener.Addr()
+}
+type cleanupConn struct {
+	net.Conn
+}
+
+func (c *cleanupConn) Close() error {
+	server.RemoveTLSState(c.RemoteAddr().String())
+	return c.Conn.Close()
+}
+
+type cleanupListener struct {
+	net.Listener
+}
+
+func (l *cleanupListener) Accept() (net.Conn, error) {
+	c, err := l.Listener.Accept()
+	if err != nil {
+		return nil, err
+	}
+	return &cleanupConn{Conn: c}, nil
 }

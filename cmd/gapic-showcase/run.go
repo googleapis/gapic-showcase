@@ -31,10 +31,12 @@ func message(err error) string {
 
 func init() {
 	config := RuntimeConfig{}
+	var enablePQCVal bool
 	runCmd := &cobra.Command{
 		Use:   "run",
 		Short: "Runs the showcase server",
 		Run: func(cmd *cobra.Command, args []string) {
+			config.enablePQC = &enablePQCVal
 			cmuxServer := CreateAllEndpoints(config)
 
 			done := make(chan os.Signal, 2)
@@ -98,7 +100,11 @@ func init() {
 		"mtls-key",
 		"",
 		"The server private key path for custom mutual TLS channel. (Deprecated: use tls-key)")
-
+	runCmd.Flags().BoolVar(
+		&enablePQCVal,
+		"enable-pqc",
+		true,
+		"Enable Post-Quantum Cryptography (PQC) hybrid key exchanges.")
 	runCmd.Flags().BoolVar(
 		&config.autoTLS,
 		"tls",
