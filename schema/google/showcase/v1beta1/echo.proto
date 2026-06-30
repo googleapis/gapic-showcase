@@ -19,10 +19,14 @@ import "google/api/client.proto";
 import "google/api/field_behavior.proto";
 import "google/api/field_info.proto";
 import "google/api/routing.proto";
+import "google/cloud/extended_operations.proto";
 import "google/longrunning/operations.proto";
 import "google/protobuf/any.proto";
 import "google/protobuf/duration.proto";
+import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/struct.proto";
 import "google/rpc/status.proto";
 
 package google.showcase.v1beta1;
@@ -94,6 +98,7 @@ service Echo {
   // run-time, the actual types for these fields must be one of the types in
   // google/rpc/error_details.proto.
   rpc EchoErrorDetails(EchoErrorDetailsRequest) returns (EchoErrorDetailsResponse) {
+    option deprecated = true;
     option (google.api.http) = {
       post: "/v1beta1/echo:error-details"
       body: "*"
@@ -185,6 +190,63 @@ service Echo {
     };
   }
 
+  // A method that has a flattened duration and a wrapper to test template coverage.
+  rpc WaitDuration(WaitDurationRequest) returns (WaitResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:waitDuration"
+      body: "*"
+    };
+    option (google.api.method_signature) = "duration,timestamp,wrapper";
+  }
+
+  // A method with a foreign request.
+  rpc ForeignRequest(google.protobuf.Empty) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      get: "/v1beta1/echo:foreign"
+    };
+  }
+
+  // An extended LRO method.
+  rpc WaitCustomOperation(WaitRequest) returns (Operation) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:waitCustom"
+      body: "*"
+    };
+    option (google.cloud.operation_service) = "CustomOperations";
+  }
+
+  // A client-streaming method that has a duration field.
+  rpc ChatDuration(stream WaitDurationRequest) returns (WaitResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:chatDuration"
+      body: "*"
+    };
+  }
+
+  // A method that returns a response with a oneof field.
+  rpc GetOneof(WaitRequest) returns (OneofResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:getOneof"
+      body: "*"
+    };
+  }
+
+  // A method that has a UUID4 auto-populated field in its request.
+  rpc AutoPopulate(AutoPopulateRequest) returns (WaitResponse) {
+    option (google.api.http) = {
+      get: "/v1beta1/echo:autoPopulate"
+    };
+  }
+
+  // A server streaming LRO method.
+  rpc StreamWaitCustomOperation(WaitDurationRequest) returns (stream Operation) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:streamWaitCustomOperation"
+      body: "*"
+    };
+    option (google.cloud.operation_service) = "CustomOperations";
+  }
+
   // This method will block (wait) for the requested amount of time
   // and then return the response or error.
   // This method showcases how a client handles delays or retries.
@@ -194,6 +256,66 @@ service Echo {
       body: "*"
     };
   };
+
+  // A method with a foreign request with a repeated flattened field.
+  rpc EchoForeignRepeated(google.rpc.Status) returns (google.rpc.Status) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:foreignRepeated"
+      body: "*"
+    };
+    option (google.api.method_signature) = "details";
+  }
+
+  // A method with a foreign request with a map flattened field.
+  rpc EchoForeignMap(google.protobuf.Struct) returns (google.protobuf.Struct) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:foreignMap"
+      body: "*"
+    };
+    option (google.api.method_signature) = "fields";
+  }
+
+  // A method with a primitive paged result field.
+  rpc PagedExpandPrimitive(PagedExpandRequest) returns (PagedExpandPrimitiveResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/echo:pagedExpandPrimitive"
+      body: "*"
+    };
+  }
+}
+
+// Polling service for extended LROs.
+service CustomOperations {
+  option (google.api.default_host) = "localhost:7469";
+
+  rpc GetCustomOperation(GetCustomOperationRequest) returns (Operation) {
+    option (google.api.http) = {
+      get: "/v1beta1/custom_operations/{name=**}"
+    };
+    option (google.cloud.operation_polling_method) = true;
+  }
+}
+
+message GetCustomOperationRequest {
+  string name = 1;
+  string custom_response_field = 2 [(google.cloud.operation_response_field) = "name"];
+}
+
+message Operation {
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+    DONE = 1;
+    RUNNING = 2;
+  }
+  string custom_name = 1 [(google.cloud.operation_field) = NAME];
+  Status status = 2 [(google.cloud.operation_field) = STATUS];
+  int32 error_code = 3 [(google.cloud.operation_field) = ERROR_CODE];
+  string error_message = 4 [(google.cloud.operation_field) = ERROR_MESSAGE];
+  
+  oneof result {
+    string response = 5;
+    string error = 6;
+  }
 }
 
 // A severity enum used to test enum capabilities in GAPIC surfaces.
@@ -219,13 +341,16 @@ message EchoRequest {
   }
 
   // The severity to be echoed by the server.
-  Severity severity = 3;
+  Severity severity = 3 [(google.api.field_behavior) = REQUIRED];
 
   // Optional. This field can be set to test the routing annotation on the Echo method.
   string header = 4;
 
   // Optional. This field can be set to test the routing annotation on the Echo method.
   string other_header = 5;
+
+  // Optional field to test proto3_optional coverage.
+  optional string optional_field = 6;
 
   // To facilitate testing of https://google.aip.dev/client-libraries/4235
   string request_id = 7 [
@@ -246,11 +371,23 @@ message EchoResponse {
   // The severity specified in the request.
   Severity severity = 2;
 
+  // my_float_list for coverage.
+  repeated float my_float_list = 3;
+
+  // my_double_list for coverage.
+  repeated double my_double_list = 4;
+
+  // my_bool for coverage.
+  bool my_bool = 5;
+
+  // my_single_float for coverage.
+  float my_single_float = 6;
+
   // The request ID specified or autopopulated in the request.
-  string request_id = 3;
+  string request_id = 7;
 
   // The other request ID specified or autopopulated in the request.
-  string other_request_id = 4;
+  string other_request_id = 8;
 }
 
 // The request message used for the EchoErrorDetails method.
@@ -387,12 +524,20 @@ message WaitRequest {
     // The response to be returned on operation completion.
     WaitResponse success = 3;
   }
+
+  // Custom request field for extended operations coverage.
+  string custom_request_field = 5 [(google.cloud.operation_request_field) = "name"];
 }
 
 // The result of the Wait operation.
 message WaitResponse {
-  // This content of the result.
+  // This content of the original request.
   string content = 1;
+  
+  oneof result {
+    string success = 2;
+    string error_msg = 3;
+  }
 }
 
 // The metadata for Wait operation.
@@ -421,4 +566,41 @@ message BlockResponse {
   // This content can contain anything, the server will not depend on a value
   // here.
   string content = 1;
+}
+
+// The request for WaitDuration.
+message WaitDurationRequest {
+  // The duration to wait.
+  google.protobuf.Duration duration = 1 [(google.api.field_behavior) = REQUIRED];
+  // A string wrapper.
+  google.protobuf.StringValue wrapper = 2;
+  // A timestamp.
+  google.protobuf.Timestamp timestamp = 3;
+}
+
+// The response for GetOneof.
+message OneofResponse {
+  // A oneof containing a non-message field.
+  oneof result {
+    // A successful response.
+    string success = 1;
+    // An error response.
+    string error = 2;
+  }
+}
+
+// The request for AutoPopulate.
+message AutoPopulateRequest {
+  // A UUID4 string.
+  string request_id = 1 [(google.api.field_info).format = UUID4];
+  // Another field.
+  string other_field = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+// The response for PagedExpandPrimitive.
+message PagedExpandPrimitiveResponse {
+  // A list of primitive responses.
+  repeated string responses = 1;
+  // A next page token.
+  string next_page_token = 2;
 }
