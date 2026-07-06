@@ -20,6 +20,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -78,20 +79,6 @@ func TestConnectWithTLS(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Dial the server
-	conn, err := grpc.DialContext(ctx, addr, grpc.WithTransportCredentials(creds), grpc.WithBlock())
-	if err != nil {
-		t.Fatalf("failed to connect to server at %s: %v", addr, err)
-	}
-	defer conn.Close()
-
-	c, err := client.NewEchoClient(ctx, option.WithGRPCConn(conn))
-	if err != nil {
-		t.Fatalf("failed to create echo client: %v", err)
-	}
-	defer c.Close()
-
-	// Call Unary Echo
 	content := "TLS Test using Auto-TLS"
 	req := &pb.EchoRequest{
 		Response: &pb.EchoRequest_Content{
@@ -99,28 +86,79 @@ func TestConnectWithTLS(t *testing.T) {
 		},
 	}
 
-	var header metadata.MD
-	resp, err := c.Echo(ctx, req, gax.WithGRPCOptions(grpc.Header(&header)))
-	if err != nil {
-		t.Fatalf("Echo call failed: %v", err)
-	}
+	t.Run("gRPC", func(t *testing.T) {
+		// Dial the server
+		conn, err := grpc.DialContext(ctx, addr, grpc.WithTransportCredentials(creds), grpc.WithBlock())
+		if err != nil {
+			t.Fatalf("failed to connect to server at %s: %v", addr, err)
+		}
+		defer conn.Close()
 
-	if resp.GetContent() != content {
-		t.Errorf("expected %q, got %q", content, resp.GetContent())
-	}
+		c, err := client.NewEchoClient(ctx, option.WithGRPCConn(conn))
+		if err != nil {
+			t.Fatalf("failed to create echo client: %v", err)
+		}
+		defer c.Close()
 
-	// Assertions on Negotiated TLS Parameters
-	assertHeader(t, header, "x-showcase-tls-group", "X25519MLKEM768") // Default Go 1.25 PQC group
+		var header metadata.MD
+		resp, err := c.Echo(ctx, req, gax.WithGRPCOptions(grpc.Header(&header)))
+		if err != nil {
+			t.Fatalf("Echo call failed: %v", err)
+		}
 
-	clientGroups := header.Get("x-showcase-tls-client-supported-groups")
-	if len(clientGroups) == 0 {
-		t.Fatalf("missing header: x-showcase-tls-client-supported-groups")
-	}
-	t.Logf("Client supported groups received: %s", clientGroups[0])
+		if resp.GetContent() != content {
+			t.Errorf("expected %q, got %q", content, resp.GetContent())
+		}
 
-	if !strings.Contains(clientGroups[0], "X25519MLKEM768") {
-		t.Errorf("expected client supported groups to contain X25519MLKEM768, got %q", clientGroups[0])
-	}
+		// Assertions on Negotiated TLS Parameters
+		assertHeader(t, header, "x-showcase-tls-group", "X25519MLKEM768") // Default Go 1.25 PQC group
+
+		clientGroups := header.Get("x-showcase-tls-client-supported-groups")
+		if len(clientGroups) == 0 {
+			t.Fatalf("missing header: x-showcase-tls-client-supported-groups")
+		}
+		t.Logf("Client supported groups received: %s", clientGroups[0])
+
+		if !strings.Contains(clientGroups[0], "X25519MLKEM768") {
+			t.Errorf("expected client supported groups to contain X25519MLKEM768, got %q", clientGroups[0])
+		}
+	})
+
+	t.Run("REST", func(t *testing.T) {
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{
+				RootCAs: certPool,
+			},
+		}
+		capturer := &headerCapturer{transport: tr}
+		hc := &http.Client{Transport: capturer}
+
+		restClient, err := client.NewEchoRESTClient(ctx,
+			option.WithHTTPClient(hc),
+			option.WithEndpoint("https://"+addr),
+		)
+		if err != nil {
+			t.Fatalf("failed to create echo REST client: %v", err)
+		}
+		defer restClient.Close()
+
+		respREST, err := restClient.Echo(ctx, req)
+		if err != nil {
+			t.Fatalf("REST Echo call failed: %v", err)
+		}
+		if respREST.GetContent() != content {
+			t.Errorf("REST expected %q, got %q", content, respREST.GetContent())
+		}
+
+		assertRESTHeader(t, capturer.headers, "x-showcase-tls-group", "X25519MLKEM768")
+
+		restClientGroups := capturer.headers.Get("x-showcase-tls-client-supported-groups")
+		if restClientGroups == "" {
+			t.Errorf("REST: missing header: x-showcase-tls-client-supported-groups")
+		} else if !strings.Contains(restClientGroups, "X25519MLKEM768") {
+			t.Errorf("REST: expected client supported groups to contain X25519MLKEM768, got %q", restClientGroups)
+		}
+	})
 }
 
 func assertHeader(t *testing.T, md metadata.MD, key, expected string) {
@@ -215,4 +253,30 @@ func TestConnectWithTLS_PQCDisabled(t *testing.T) {
 
 func boolPtr(b bool) *bool {
 	return &b
+}
+
+type headerCapturer struct {
+	transport http.RoundTripper
+	headers   http.Header
+}
+
+func (h *headerCapturer) RoundTrip(req *http.Request) (*http.Response, error) {
+	resp, err := h.transport.RoundTrip(req)
+	if err == nil {
+		h.headers = resp.Header
+	}
+	return resp, err
+}
+
+func assertRESTHeader(t *testing.T, headers http.Header, key, expected string) {
+	t.Helper()
+	val := headers.Get(key)
+	if val == "" {
+		t.Errorf("REST: missing header: %s", key)
+		return
+	}
+	t.Logf("REST Header %s: %s", key, val)
+	if val != expected {
+		t.Errorf("REST header %s: expected %q, got %q", key, expected, val)
+	}
 }
