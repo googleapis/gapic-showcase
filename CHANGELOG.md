@@ -1,5 +1,12 @@
 # Release History
 
+## [0.41.1](https://github.com/googleapis/gapic-showcase/compare/v0.41.0...v0.41.1) (2026-07-10)
+
+
+### Bug Fixes
+
+* Correct go min version ([#1654](https://github.com/googleapis/gapic-showcase/issues/1654)) ([1c018a2](https://github.com/googleapis/gapic-showcase/commit/1c018a2aad09f95f270a31bdd5e1e1c9308d86c7))
+
 ## [0.41.0](https://github.com/googleapis/gapic-showcase/compare/v0.40.0...v0.41.0) (2026-06-29)
 
 
