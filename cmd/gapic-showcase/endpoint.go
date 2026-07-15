@@ -31,6 +31,7 @@ import (
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/server/genrest"
+	"github.com/googleapis/gapic-showcase/server/resumableupload"
 	"github.com/googleapis/gapic-showcase/server/services"
 	fallback "github.com/googleapis/grpc-fallback-go/server"
 	gmux "github.com/gorilla/mux"
@@ -437,6 +438,10 @@ func newEndpointREST(lis net.Listener, backend *services.Backend) *endpointREST 
 		w.Write([]byte("GAPIC Showcase: HTTP/REST endpoint using gorilla/mux\n"))
 	})
 	genrest.RegisterHandlers(router, backend)
+
+	// Register Resumable Upload protocol middleware
+	resumableMgr := resumableupload.NewManager()
+	router.Use(resumableMgr.Middleware)
 
 	// Register TLS HTTP Middleware
 	router.Use(server.TLSHTTPMiddleware)
