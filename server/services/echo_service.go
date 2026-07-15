@@ -42,6 +42,7 @@ func NewEchoServer() pb.EchoServer {
 }
 
 type echoServerImpl struct {
+	pb.UnimplementedEchoServer
 	waiter server.Waiter
 }
 
