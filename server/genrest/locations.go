@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // DO NOT EDIT. This is an auto-generated file containing the REST handlers
-// for service #6: "Locations" (.google.cloud.location.Locations).
+// for service #7: "Locations" (.google.cloud.location.Locations).
 
 package genrest
 

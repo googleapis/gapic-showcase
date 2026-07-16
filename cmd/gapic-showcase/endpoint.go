@@ -335,19 +335,19 @@ func createBackends() *services.Backend {
 	identityServer := services.NewIdentityServer()
 	messagingServer := services.NewMessagingServer(identityServer)
 	return &services.Backend{
-		EchoServer:            services.NewEchoServer(),
-		SequenceServiceServer: services.NewSequenceServer(),
-		IdentityServer:        identityServer,
-		MessagingServer:       messagingServer,
-		ComplianceServer:      services.NewComplianceServer(),
+		EchoServer:                   services.NewEchoServer(),
+		SequenceServiceServer:        services.NewSequenceServer(),
+		IdentityServer:               identityServer,
+		MessagingServer:              messagingServer,
+		ComplianceServer:             services.NewComplianceServer(),
 		TestingServer:                services.NewTestingServer(observerRegistry),
 		ResumableUploadServiceServer: services.NewResumableUploadServer(),
 		OperationsServer:             services.NewOperationsServer(messagingServer),
-		LocationsServer:       services.NewLocationsServer(),
-		IAMPolicyServer:       services.NewIAMPolicyServer(),
-		StdLog:                stdLog,
-		ErrLog:                errLog,
-		ObserverRegistry:      observerRegistry,
+		LocationsServer:              services.NewLocationsServer(),
+		IAMPolicyServer:              services.NewIAMPolicyServer(),
+		StdLog:                       stdLog,
+		ErrLog:                       errLog,
+		ObserverRegistry:             observerRegistry,
 	}
 }
 

@@ -24,6 +24,7 @@ import (
 	"math"
 	"net/http"
 	"net/url"
+	"time"
 
 	iampb "cloud.google.com/go/iam/apiv1/iampb"
 	longrunningpb "cloud.google.com/go/longrunning/autogen/longrunningpb"
@@ -73,7 +74,9 @@ func defaultResumableUploadGRPCClientOptions() []option.ClientOption {
 
 func defaultResumableUploadCallOptions() *ResumableUploadCallOptions {
 	return &ResumableUploadCallOptions{
-		UploadMedia:        []gax.CallOption{},
+		UploadMedia: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
 		ListLocations:      []gax.CallOption{},
 		GetLocation:        []gax.CallOption{},
 		SetIamPolicy:       []gax.CallOption{},
@@ -88,7 +91,9 @@ func defaultResumableUploadCallOptions() *ResumableUploadCallOptions {
 
 func defaultResumableUploadRESTCallOptions() *ResumableUploadCallOptions {
 	return &ResumableUploadCallOptions{
-		UploadMedia:        []gax.CallOption{},
+		UploadMedia: []gax.CallOption{
+			gax.WithTimeout(5000 * time.Millisecond),
+		},
 		ListLocations:      []gax.CallOption{},
 		GetLocation:        []gax.CallOption{},
 		SetIamPolicy:       []gax.CallOption{},
@@ -132,7 +137,7 @@ type ResumableUploadClient struct {
 
 // Wrapper methods routed to the internal client.
 
-// Close closes the connection to the API service. **Always** call Close() when
+// Close closes the connection to the API service. The user should invoke this when
 // the client is no longer required.
 func (c *ResumableUploadClient) Close() error {
 	return c.internalClient.Close()
@@ -283,7 +288,7 @@ func (c *resumableUploadGRPCClient) setGoogleClientInfo(keyval ...string) {
 	}
 }
 
-// Close closes the connection to the API service. **Always** call Close() when
+// Close closes the connection to the API service. The user should invoke this when
 // the client is no longer required.
 func (c *resumableUploadGRPCClient) Close() error {
 	return c.connPool.Close()
@@ -351,7 +356,7 @@ func (c *resumableUploadRESTClient) setGoogleClientInfo(keyval ...string) {
 	}
 }
 
-// Close closes the connection to the API service. **Always** call Close() when
+// Close closes the connection to the API service. The user should invoke this when
 // the client is no longer required.
 func (c *resumableUploadRESTClient) Close() error {
 	// Replace httpClient with nil to force cleanup.
@@ -387,7 +392,7 @@ func (c *resumableUploadGRPCClient) ListLocations(ctx context.Context, req *loca
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).ListLocations[0:len((*c.CallOptions).ListLocations):len((*c.CallOptions).ListLocations)], opts...)
 	it := &LocationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
 		resp := &locationpb.ListLocationsResponse{}
 		if pageToken != "" {
@@ -502,7 +507,7 @@ func (c *resumableUploadGRPCClient) ListOperations(ctx context.Context, req *lon
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).ListOperations[0:len((*c.CallOptions).ListOperations):len((*c.CallOptions).ListOperations)], opts...)
 	it := &OperationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
 		resp := &longrunningpb.ListOperationsResponse{}
 		if pageToken != "" {
@@ -638,7 +643,7 @@ func (c *resumableUploadRESTClient) UploadMedia(ctx context.Context, req *genpro
 // ListLocations is a utility method from google.cloud.location.Locations.
 func (c *resumableUploadRESTClient) ListLocations(ctx context.Context, req *locationpb.ListLocationsRequest, opts ...gax.CallOption) *LocationIterator {
 	it := &LocationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*locationpb.ListLocationsRequest)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*locationpb.Location, string, error) {
 		resp := &locationpb.ListLocationsResponse{}
@@ -917,7 +922,7 @@ func (c *resumableUploadRESTClient) TestIamPermissions(ctx context.Context, req 
 // ListOperations is a utility method from google.longrunning.Operations.
 func (c *resumableUploadRESTClient) ListOperations(ctx context.Context, req *longrunningpb.ListOperationsRequest, opts ...gax.CallOption) *OperationIterator {
 	it := &OperationIterator{}
-	req = proto.CloneOf(req)
+	req = proto.Clone(req).(*longrunningpb.ListOperationsRequest)
 	unm := protojson.UnmarshalOptions{AllowPartial: true, DiscardUnknown: true}
 	it.InternalFetch = func(pageSize int, pageToken string) ([]*longrunningpb.Operation, string, error) {
 		resp := &longrunningpb.ListOperationsResponse{}

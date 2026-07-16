@@ -117,10 +117,16 @@ func (m *Manager) handleRequest(w http.ResponseWriter, r *http.Request) {
 
 	if containsCommand(commands, "upload") {
 		if sess.Scenario == "non_fatal_error_on_chunk_upload" {
-			if offset >= sess.ScenarioConfig.AfterOffset && sess.UploadFailures < sess.ScenarioConfig.FailureCount {
-				sess.UploadFailures++
-				sendError(w, sess.ScenarioConfig.ErrorCode, "Injected non-fatal chunk upload error", "active")
-				return
+			if offset >= sess.ScenarioConfig.AfterOffset {
+				if sess.UploadFailures < sess.ScenarioConfig.FailureCount {
+					sess.UploadFailures++
+					sendError(w, sess.ScenarioConfig.ErrorCode, "Injected non-fatal chunk upload error", "active")
+					return
+				}
+				if sess.ScenarioConfig.ActionAfterFailures == "terminate" {
+					sendError(w, http.StatusInternalServerError, "Scenario requested termination", "")
+					return
+				}
 			}
 		}
 
@@ -141,8 +147,10 @@ func (m *Manager) handleRequest(w http.ResponseWriter, r *http.Request) {
 	if containsCommand(commands, "finalize") {
 		sess.Status = "final"
 		w.Header().Set("X-Goog-Upload-Status", "final")
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("\"2026-01-01T00:00:00Z\""))
+		resp := fmt.Sprintf(`{"name":"%s","size":%d}`, sess.ID, sess.CurrentOffset)
+		w.Write([]byte(resp))
 		return
 	}
 
@@ -178,6 +186,14 @@ func (m *Manager) handleStart(w http.ResponseWriter, r *http.Request) {
 	failures := m.incrementStartFailure(key, scenario, config.FailureCount)
 	if scenario == "non_fatal_error_on_start" && failures <= config.FailureCount {
 		sendError(w, config.ErrorCode, "Injected non-fatal start error", "")
+		return
+	}
+	if scenario == "fatal_error_on_start" {
+		code := config.ErrorCode
+		if code == 0 {
+			code = http.StatusForbidden
+		}
+		sendError(w, code, "Injected fatal start error", "")
 		return
 	}
 

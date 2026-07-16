@@ -24,6 +24,7 @@ type resumableUploadServerImpl struct {
 	pb.UnimplementedResumableUploadServiceServer
 }
 
+// NewResumableUploadServer returns a new ResumableUploadServiceServer for the Showcase API.
 func NewResumableUploadServer() pb.ResumableUploadServiceServer {
 	return &resumableUploadServerImpl{}
 }

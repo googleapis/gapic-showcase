@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // DO NOT EDIT. This is an auto-generated file containing the REST handlers
-// for service #8: "Operations" (.google.longrunning.Operations).
+// for service #9: "Operations" (.google.longrunning.Operations).
 
 package genrest
 
