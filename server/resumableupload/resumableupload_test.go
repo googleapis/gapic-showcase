@@ -114,3 +114,61 @@ func TestNonFatalErrorOnStart(t *testing.T) {
 		t.Fatalf("expected 200 on retry start, got %d", rec2.Code)
 	}
 }
+
+func TestNonFatalErrorOnQuery(t *testing.T) {
+	mgr := resumableupload.NewManager()
+	handler := mgr.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+
+	req := httptest.NewRequest("POST", "http://localhost:7469/upload", nil)
+	req.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	req.Header.Set("X-Goog-Upload-Command", "start")
+	req.Header.Set("X-Goog-Test-Scenario", "non_fatal_error_on_query")
+	req.Header.Set("X-Goog-Test-Scenario-Config", `{"error_code": 503, "failure_count": 1}`)
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200 on start, got %d", rec.Code)
+	}
+	uploadURL := rec.Header().Get("X-Goog-Upload-URL")
+
+	reqQuery1 := httptest.NewRequest("POST", uploadURL, nil)
+	reqQuery1.Header.Set("X-Goog-Upload-Command", "query")
+	recQuery1 := httptest.NewRecorder()
+	handler.ServeHTTP(recQuery1, reqQuery1)
+	if recQuery1.Code != http.StatusServiceUnavailable {
+		t.Fatalf("expected 503 on first query, got %d", recQuery1.Code)
+	}
+
+	reqQuery2 := httptest.NewRequest("POST", uploadURL, nil)
+	reqQuery2.Header.Set("X-Goog-Upload-Command", "query")
+	recQuery2 := httptest.NewRecorder()
+	handler.ServeHTTP(recQuery2, reqQuery2)
+	if recQuery2.Code != http.StatusOK {
+		t.Fatalf("expected 200 on retry query, got %d", recQuery2.Code)
+	}
+}
+
+func TestChunkGranularityScenario(t *testing.T) {
+	mgr := resumableupload.NewManager()
+	handler := mgr.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+
+	req := httptest.NewRequest("POST", "http://localhost:7469/upload", nil)
+	req.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	req.Header.Set("X-Goog-Upload-Command", "start")
+	req.Header.Set("X-Goog-Test-Scenario", "chunk_granularity")
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200 on start, got %d", rec.Code)
+	}
+	if rec.Header().Get("X-Goog-Upload-Chunk-Granularity") != "256" {
+		t.Fatalf("expected granularity 256, got %s", rec.Header().Get("X-Goog-Upload-Chunk-Granularity"))
+	}
+}
+

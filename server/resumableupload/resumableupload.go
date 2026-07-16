@@ -91,6 +91,13 @@ func (m *Manager) handleRequest(w http.ResponseWriter, r *http.Request) {
 	defer sess.mu.Unlock()
 
 	if containsCommand(commands, "query") {
+		if sess.Scenario == "non_fatal_error_on_query" {
+			if sess.UploadFailures < sess.ScenarioConfig.FailureCount {
+				sess.UploadFailures++
+				sendError(w, sess.ScenarioConfig.ErrorCode, "Injected non-fatal query error", "active")
+				return
+			}
+		}
 		w.Header().Set("X-Goog-Upload-Status", sess.Status)
 		w.Header().Set("X-Goog-Upload-Size-Received", strconv.FormatInt(sess.CurrentOffset, 10))
 		w.WriteHeader(http.StatusOK)
@@ -127,6 +134,14 @@ func (m *Manager) handleRequest(w http.ResponseWriter, r *http.Request) {
 					sendError(w, http.StatusInternalServerError, "Scenario requested termination", "")
 					return
 				}
+			}
+		}
+
+		if sess.Scenario == "chunk_granularity" && !containsCommand(commands, "finalize") {
+			bodyLen := r.ContentLength
+			if bodyLen > 0 && bodyLen%256 != 0 {
+				sendError(w, http.StatusBadRequest, fmt.Sprintf("Chunk size %d is not a multiple of granularity 256", bodyLen), "active")
+				return
 			}
 		}
 
@@ -222,10 +237,14 @@ func (m *Manager) handleStart(w http.ResponseWriter, r *http.Request) {
 	}
 
 	uploadURL := fmt.Sprintf("%s://%s%s?sid=%s", scheme, host, path, sid)
+	granularity := "1"
+	if scenario == "chunk_granularity" {
+		granularity = "256"
+	}
 	w.Header().Set("X-Goog-Upload-Status", "active")
 	w.Header().Set("X-Goog-Upload-URL", uploadURL)
 	w.Header().Set("X-Goog-Upload-Control-URL", uploadURL)
-	w.Header().Set("X-Goog-Upload-Chunk-Granularity", "1")
+	w.Header().Set("X-Goog-Upload-Chunk-Granularity", granularity)
 	w.WriteHeader(http.StatusOK)
 }
 
