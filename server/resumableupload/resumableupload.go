@@ -16,7 +16,6 @@ package resumableupload
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -26,23 +25,12 @@ import (
 	"sync/atomic"
 )
 
-type ScenarioConfig struct {
-	ErrorCode           int    `json:"error_code"`
-	FailureCount        int    `json:"failure_count"`
-	ActionAfterFailures string `json:"action_after_failures"`
-	AfterOffset         int64  `json:"after_offset"`
-}
-
 type uploadSession struct {
-	ID             string
-	CurrentOffset  int64
-	Buffer         bytes.Buffer
-	Status         string
-	Scenario       string
-	ScenarioConfig ScenarioConfig
-	StartFailures  int
-	UploadFailures int
-	mu             sync.Mutex
+	ID            string
+	CurrentOffset int64
+	Buffer        bytes.Buffer
+	Status        string
+	mu            sync.Mutex
 }
 
 type Manager struct {
@@ -91,13 +79,6 @@ func (m *Manager) handleRequest(w http.ResponseWriter, r *http.Request) {
 	defer sess.mu.Unlock()
 
 	if containsCommand(commands, "query") {
-		if sess.Scenario == "non_fatal_error_on_query" {
-			if sess.UploadFailures < sess.ScenarioConfig.FailureCount {
-				sess.UploadFailures++
-				sendError(w, sess.ScenarioConfig.ErrorCode, "Injected non-fatal query error", "active")
-				return
-			}
-		}
 		w.Header().Set("X-Goog-Upload-Status", sess.Status)
 		w.Header().Set("X-Goog-Upload-Size-Received", strconv.FormatInt(sess.CurrentOffset, 10))
 		w.WriteHeader(http.StatusOK)
@@ -123,28 +104,6 @@ func (m *Manager) handleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if containsCommand(commands, "upload") {
-		if sess.Scenario == "non_fatal_error_on_chunk_upload" {
-			if offset >= sess.ScenarioConfig.AfterOffset {
-				if sess.UploadFailures < sess.ScenarioConfig.FailureCount {
-					sess.UploadFailures++
-					sendError(w, sess.ScenarioConfig.ErrorCode, "Injected non-fatal chunk upload error", "active")
-					return
-				}
-				if sess.ScenarioConfig.ActionAfterFailures == "terminate" {
-					sendError(w, http.StatusInternalServerError, "Scenario requested termination", "")
-					return
-				}
-			}
-		}
-
-		if sess.Scenario == "chunk_granularity" && !containsCommand(commands, "finalize") {
-			bodyLen := r.ContentLength
-			if bodyLen > 0 && bodyLen%256 != 0 {
-				sendError(w, http.StatusBadRequest, fmt.Sprintf("Chunk size %d is not a multiple of granularity 256", bodyLen), "active")
-				return
-			}
-		}
-
 		if offset != sess.CurrentOffset {
 			sendError(w, http.StatusConflict, fmt.Sprintf("Invalid offset: expected %d, got %d", sess.CurrentOffset, offset), "active")
 			return
@@ -179,47 +138,12 @@ func (m *Manager) handleRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *Manager) handleStart(w http.ResponseWriter, r *http.Request) {
-	scenario := r.Header.Get("X-Goog-Test-Scenario")
-	if scenario == "" {
-		scenario = "happy_path"
-	}
-
-	config := ScenarioConfig{
-		ErrorCode:           http.StatusServiceUnavailable,
-		FailureCount:        1,
-		ActionAfterFailures: "succeed",
-		AfterOffset:         0,
-	}
-	if cfgStr := r.Header.Get("X-Goog-Test-Scenario-Config"); cfgStr != "" {
-		_ = json.Unmarshal([]byte(cfgStr), &config)
-	}
-
-	// Use scenario+client specific failure counter key or session state
-	// For start requests before session creation, track start failures on manager if needed,
-	// or use scenario header failure tracking per client IP/scenario.
-	key := scenario + "-" + r.RemoteAddr
-	failures := m.incrementStartFailure(key, scenario, config.FailureCount)
-	if scenario == "non_fatal_error_on_start" && failures <= config.FailureCount {
-		sendError(w, config.ErrorCode, "Injected non-fatal start error", "")
-		return
-	}
-	if scenario == "fatal_error_on_start" {
-		code := config.ErrorCode
-		if code == 0 {
-			code = http.StatusForbidden
-		}
-		sendError(w, code, "Injected fatal start error", "")
-		return
-	}
-
 	id := atomic.AddInt64(&m.idGen, 1)
 	sid := fmt.Sprintf("scotty-sid-%d", id)
 
 	sess := &uploadSession{
-		ID:             sid,
-		Status:         "active",
-		Scenario:       scenario,
-		ScenarioConfig: config,
+		ID:     sid,
+		Status: "active",
 	}
 	m.sessions.Store(sid, sess)
 
@@ -237,31 +161,11 @@ func (m *Manager) handleStart(w http.ResponseWriter, r *http.Request) {
 	}
 
 	uploadURL := fmt.Sprintf("%s://%s%s?sid=%s", scheme, host, path, sid)
-	granularity := "1"
-	if scenario == "chunk_granularity" {
-		granularity = "256"
-	}
 	w.Header().Set("X-Goog-Upload-Status", "active")
 	w.Header().Set("X-Goog-Upload-URL", uploadURL)
 	w.Header().Set("X-Goog-Upload-Control-URL", uploadURL)
-	w.Header().Set("X-Goog-Upload-Chunk-Granularity", granularity)
+	w.Header().Set("X-Goog-Upload-Chunk-Granularity", "1")
 	w.WriteHeader(http.StatusOK)
-}
-
-var startFailureMap sync.Map
-
-func (m *Manager) incrementStartFailure(key, scenario string, limit int) int {
-	if scenario != "non_fatal_error_on_start" {
-		return limit + 1
-	}
-	val, _ := startFailureMap.LoadOrStore(key, new(int32))
-	ptr := val.(*int32)
-	current := int(atomic.AddInt32(ptr, 1))
-	if current > limit {
-		// Reset after success so subsequent tests can run independently
-		atomic.StoreInt32(ptr, 0)
-	}
-	return current
 }
 
 func parseCommands(header string) []string {
@@ -285,10 +189,11 @@ func containsCommand(commands []string, cmd string) bool {
 	return false
 }
 
-func sendError(w http.ResponseWriter, code int, msg string, status string) {
+func sendError(w http.ResponseWriter, code int, message, status string) {
 	if status != "" {
 		w.Header().Set("X-Goog-Upload-Status", status)
 	}
+	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(code)
-	w.Write([]byte(msg))
+	w.Write([]byte(message))
 }

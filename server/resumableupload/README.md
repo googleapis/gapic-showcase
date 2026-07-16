@@ -1,6 +1,6 @@
-# `ResumableUploadService` in `gapic-showcase`: Methods & Test Scenarios
+# `ResumableUploadService` in `gapic-showcase`
 
-`gapic-showcase` provides a canonical protobuf service (`google.showcase.v1beta1.ResumableUploadService`) and HTTP middleware (`server/resumableupload`) implementing the **Scotty Universal Resumable Upload Protocol**.
+`gapic-showcase` provides a canonical protobuf service (`google.showcase.v1beta1.ResumableUploadService`) and HTTP middleware (`server/resumableupload`) implementing the core **Scotty Universal Resumable Upload Protocol**.
 
 ---
 
@@ -13,15 +13,12 @@
 
 ---
 
-## 2. Test Scenarios (`X-Goog-Test-Scenario`)
+## 2. Core Resumable Upload Protocol Commands Handled
 
-All test scenarios are controlled by passing custom HTTP headers (`X-Goog-Test-Scenario` and optional `X-Goog-Test-Scenario-Config`) when initiating the session (`X-Goog-Upload-Command: start`).
+The middleware inspects `X-Goog-Upload-Command` and implements the core session exchange:
 
-| Scenario Name | Description | Header Configuration | Expected Client Behavior |
-| :--- | :--- | :--- | :--- |
-| **Happy Path** | Default upload flow. Returns `X-Goog-Upload-Chunk-Granularity: 1` and completes upload. | None | Completes upload successfully on first attempt. |
-| **`non_fatal_error_on_start`** | Returns a retriable HTTP error (`503 Service Unavailable` by default) on initial `start` command. | `X-Goog-Test-Scenario: non_fatal_error_on_start`<br/>`X-Goog-Test-Scenario-Config: {"error_code": 503, "failure_count": 1}` | Automatically retries initial `start` request and succeeds. |
-| **`fatal_error_on_start`** | Returns a fatal HTTP error (`403 Forbidden` by default) on initial `start` command. | `X-Goog-Test-Scenario: fatal_error_on_start`<br/>`X-Goog-Test-Scenario-Config: {"error_code": 403}` | Aborts session and raises an error with status code `403`. |
-| **`non_fatal_error_on_chunk_upload`** | Returns a retriable error (`503`) during chunk upload, triggering recovery query exchange. | `X-Goog-Test-Scenario: non_fatal_error_on_chunk_upload`<br/>`X-Goog-Test-Scenario-Config: {"error_code": 503, "failure_count": 1, "after_offset": 1024}` | Enters `RECOVERY` phase, queries committed offset (`X-Goog-Upload-Command: query`), and resumes uploading remaining bytes. |
-| **`non_fatal_error_on_query`** | Returns a retriable error (`503`) on the recovery `query` command. | `X-Goog-Test-Scenario: non_fatal_error_on_query`<br/>`X-Goog-Test-Scenario-Config: {"error_code": 503, "failure_count": 1}` | Retries the `query` request until server returns `X-Goog-Upload-Size-Received`, then resumes transmission. |
-| **`chunk_granularity`** | Returns `X-Goog-Upload-Chunk-Granularity: 256` on `start` and rejects non-final chunks whose length is not a multiple of `256`. | `X-Goog-Test-Scenario: chunk_granularity` | Parses granularity from `start` response and rounds chunk boundaries to multiples of `256` bytes. |
+- **`start`**: Initiates a session. Returns `200 OK` with `X-Goog-Upload-Status: active`, `X-Goog-Upload-URL`, `X-Goog-Upload-Control-URL`, and `X-Goog-Upload-Chunk-Granularity: 1`.
+- **`upload`**: Appends chunk data to the session buffer after validating `X-Goog-Upload-Offset`.
+- **`upload, finalize`**: Commits the final chunk, sets session status to `final`, and returns the JSON response `{"name":"<id>","size":<total_bytes>}`.
+- **`query`**: Queries current session status and returns `X-Goog-Upload-Status` and `X-Goog-Upload-Size-Received`.
+- **`cancel`**: Cancels the session (`X-Goog-Upload-Status: cancelled`).
