@@ -34,7 +34,8 @@ type Backend struct {
 	MessagingServer       pb.MessagingServer
 	SequenceServiceServer pb.SequenceServiceServer
 	ComplianceServer      pb.ComplianceServer
-	TestingServer         pb.TestingServer
+	TestingServer              pb.TestingServer
+	ResumableUploadServiceServer pb.ResumableUploadServiceServer
 
 	// Supporting protos
 	OperationsServer lropb.OperationsServer

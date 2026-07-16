@@ -340,8 +340,9 @@ func createBackends() *services.Backend {
 		IdentityServer:        identityServer,
 		MessagingServer:       messagingServer,
 		ComplianceServer:      services.NewComplianceServer(),
-		TestingServer:         services.NewTestingServer(observerRegistry),
-		OperationsServer:      services.NewOperationsServer(messagingServer),
+		TestingServer:                services.NewTestingServer(observerRegistry),
+		ResumableUploadServiceServer: services.NewResumableUploadServer(),
+		OperationsServer:             services.NewOperationsServer(messagingServer),
 		LocationsServer:       services.NewLocationsServer(),
 		IAMPolicyServer:       services.NewIAMPolicyServer(),
 		StdLog:                stdLog,
@@ -368,6 +369,7 @@ func newEndpointGRPC(lis net.Listener, config RuntimeConfig, backend *services.B
 	pb.RegisterMessagingServer(s, backend.MessagingServer)
 	pb.RegisterComplianceServer(s, backend.ComplianceServer)
 	pb.RegisterTestingServer(s, backend.TestingServer)
+	pb.RegisterResumableUploadServiceServer(s, backend.ResumableUploadServiceServer)
 	lropb.RegisterOperationsServer(s, backend.OperationsServer)
 	locpb.RegisterLocationsServer(s, backend.LocationsServer)
 	iampb.RegisterIAMPolicyServer(s, backend.IAMPolicyServer)
