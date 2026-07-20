@@ -17,7 +17,7 @@
 
 The middleware inspects `X-Goog-Upload-Command` and implements the core session exchange:
 
-- **`start`**: Initiates a session. Returns `200 OK` with `X-Goog-Upload-Status: active`, `X-Goog-Upload-URL`, `X-Goog-Upload-Control-URL`, and `X-Goog-Upload-Chunk-Granularity: 1`.
+- **`start`**: Initiates a session. Returns `200 OK` with `X-Goog-Upload-Status: active`, `X-Goog-Upload-URL`, `X-Goog-Upload-Control-URL`, and `X-Goog-Upload-Chunk-Granularity: 262144`.
 - **`upload`**: Appends chunk data to the session buffer after validating `X-Goog-Upload-Offset`.
 - **`upload, finalize`**: Commits the final chunk, sets session status to `final`, and returns the JSON response `{"name":"<id>","size":<total_bytes>}`.
 - **`query`**: Queries current session status and returns `X-Goog-Upload-Status` and `X-Goog-Upload-Size-Received`.

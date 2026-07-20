@@ -19,6 +19,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/googleapis/gapic-showcase/server/resumableupload"
@@ -43,6 +45,9 @@ func TestHappyPathUpload(t *testing.T) {
 	}
 	if rec.Header().Get("X-Goog-Upload-Status") != "active" {
 		t.Fatalf("expected active status, got %s", rec.Header().Get("X-Goog-Upload-Status"))
+	}
+	if got, want := rec.Header().Get("X-Goog-Upload-Chunk-Granularity"), strconv.Itoa(256*1024); got != want {
+		t.Fatalf("expected chunk granularity %s, got %s", want, got)
 	}
 	uploadURL := rec.Header().Get("X-Goog-Upload-URL")
 	if uploadURL == "" {
@@ -77,5 +82,99 @@ func TestHappyPathUpload(t *testing.T) {
 	}
 	if rec3.Header().Get("X-Goog-Upload-Status") != "final" {
 		t.Fatalf("expected final status, got %s", rec3.Header().Get("X-Goog-Upload-Status"))
+	}
+}
+
+func TestQueryAndUploadAfterFinalize(t *testing.T) {
+	mgr := resumableupload.NewManager()
+	handler := mgr.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+
+	req := httptest.NewRequest("POST", "http://localhost:7469/upload", nil)
+	req.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	req.Header.Set("X-Goog-Upload-Command", "start")
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	uploadURL := rec.Header().Get("X-Goog-Upload-URL")
+	u, _ := url.Parse(uploadURL)
+
+	reqFinal := httptest.NewRequest("POST", u.String(), bytes.NewReader([]byte("done")))
+	reqFinal.Header.Set("X-Goog-Upload-Command", "upload, finalize")
+	reqFinal.Header.Set("X-Goog-Upload-Offset", "0")
+	recFinal := httptest.NewRecorder()
+	handler.ServeHTTP(recFinal, reqFinal)
+
+	// Query finalized session
+	reqQuery := httptest.NewRequest("POST", u.String(), nil)
+	reqQuery.Header.Set("X-Goog-Upload-Command", "query")
+	recQuery := httptest.NewRecorder()
+	handler.ServeHTTP(recQuery, reqQuery)
+
+	if recQuery.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK on query finalized session, got %d", recQuery.Code)
+	}
+	if recQuery.Header().Get("X-Goog-Upload-Status") != "final" {
+		t.Fatalf("expected final status on query, got %s", recQuery.Header().Get("X-Goog-Upload-Status"))
+	}
+	if !strings.Contains(recQuery.Body.String(), `"size":4`) {
+		t.Fatalf("expected finalized JSON body on query, got %s", recQuery.Body.String())
+	}
+
+	// Attempt upload after finalize
+	reqUpload := httptest.NewRequest("POST", u.String(), bytes.NewReader([]byte("more")))
+	reqUpload.Header.Set("X-Goog-Upload-Command", "upload")
+	reqUpload.Header.Set("X-Goog-Upload-Offset", "4")
+	recUpload := httptest.NewRecorder()
+	handler.ServeHTTP(recUpload, reqUpload)
+
+	if recUpload.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 Bad Request on upload after finalize, got %d", recUpload.Code)
+	}
+}
+
+func TestQueryAndUploadAfterCancel(t *testing.T) {
+	mgr := resumableupload.NewManager()
+	handler := mgr.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+
+	req := httptest.NewRequest("POST", "http://localhost:7469/upload", nil)
+	req.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	req.Header.Set("X-Goog-Upload-Command", "start")
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	uploadURL := rec.Header().Get("X-Goog-Upload-URL")
+	u, _ := url.Parse(uploadURL)
+
+	reqCancel := httptest.NewRequest("POST", u.String(), nil)
+	reqCancel.Header.Set("X-Goog-Upload-Command", "cancel")
+	recCancel := httptest.NewRecorder()
+	handler.ServeHTTP(recCancel, reqCancel)
+
+	// Query cancelled session
+	reqQuery := httptest.NewRequest("POST", u.String(), nil)
+	reqQuery.Header.Set("X-Goog-Upload-Command", "query")
+	recQuery := httptest.NewRecorder()
+	handler.ServeHTTP(recQuery, reqQuery)
+
+	if recQuery.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK on query cancelled session, got %d", recQuery.Code)
+	}
+	if recQuery.Header().Get("X-Goog-Upload-Status") != "cancelled" {
+		t.Fatalf("expected cancelled status on query, got %s", recQuery.Header().Get("X-Goog-Upload-Status"))
+	}
+
+	// Attempt upload after cancel
+	reqUpload := httptest.NewRequest("POST", u.String(), bytes.NewReader([]byte("more")))
+	reqUpload.Header.Set("X-Goog-Upload-Command", "upload")
+	reqUpload.Header.Set("X-Goog-Upload-Offset", "0")
+	recUpload := httptest.NewRecorder()
+	handler.ServeHTTP(recUpload, reqUpload)
+
+	if recUpload.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 Bad Request on upload after cancel, got %d", recUpload.Code)
 	}
 }

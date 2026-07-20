@@ -19,17 +19,29 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
 )
 
+const defaultHost = "localhost:7469"
+
+type status string
+
+const (
+	statusActive    status = "active"
+	statusFinal     status = "final"
+	statusCancelled status = "cancelled"
+)
+
 type uploadSession struct {
 	ID            string
 	CurrentOffset int64
 	Buffer        bytes.Buffer
-	Status        string
+	Status        status
 	mu            sync.Mutex
 }
 
@@ -59,10 +71,71 @@ func (m *Manager) Middleware(next http.Handler) http.Handler {
 	})
 }
 
+func (sess *uploadSession) query(w http.ResponseWriter) {
+	w.Header().Set("X-Goog-Upload-Status", string(sess.Status))
+	if sess.Status == statusCancelled {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	if sess.Status == statusFinal {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		resp := fmt.Sprintf(`{"name":"%s","size":%d}`, sess.ID, sess.CurrentOffset)
+		w.Write([]byte(resp))
+		return
+	}
+	w.Header().Set("X-Goog-Upload-Size-Received", strconv.FormatInt(sess.CurrentOffset, 10))
+	w.WriteHeader(http.StatusOK)
+}
+
+func (sess *uploadSession) cancel(w http.ResponseWriter) {
+	if sess.Status == statusFinal {
+		sendError(w, http.StatusBadRequest, "Cannot cancel a finalized session", sess.Status)
+		return
+	}
+	sess.Status = statusCancelled
+	w.Header().Set("X-Goog-Upload-Status", string(statusCancelled))
+	w.WriteHeader(http.StatusOK)
+}
+
+func (sess *uploadSession) upload(w http.ResponseWriter, r *http.Request, offset int64) bool {
+	if sess.Status != statusActive {
+		sendError(w, http.StatusBadRequest, fmt.Sprintf("Cannot upload to session with status %s", sess.Status), sess.Status)
+		return false
+	}
+
+	if offset != sess.CurrentOffset {
+		sendError(w, http.StatusConflict, fmt.Sprintf("Invalid offset: expected %d, got %d", sess.CurrentOffset, offset), sess.Status)
+		return false
+	}
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		sendError(w, http.StatusBadRequest, "Error reading request body", sess.Status)
+		return false
+	}
+	sess.Buffer.Write(body)
+	sess.CurrentOffset += int64(len(body))
+	return true
+}
+
+func (sess *uploadSession) finalize(w http.ResponseWriter) {
+	if sess.Status == statusCancelled {
+		sendError(w, http.StatusBadRequest, "Cannot finalize a cancelled session", sess.Status)
+		return
+	}
+	sess.Status = statusFinal
+	w.Header().Set("X-Goog-Upload-Status", string(statusFinal))
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	resp := fmt.Sprintf(`{"name":"%s","size":%d}`, sess.ID, sess.CurrentOffset)
+	w.Write([]byte(resp))
+}
+
 func (m *Manager) handleRequest(w http.ResponseWriter, r *http.Request) {
 	commands := parseCommands(r.Header.Get("X-Goog-Upload-Command"))
 
-	if containsCommand(commands, "start") {
+	if slices.Contains(commands, "start") {
 		m.handleStart(w, r)
 		return
 	}
@@ -78,17 +151,13 @@ func (m *Manager) handleRequest(w http.ResponseWriter, r *http.Request) {
 	sess.mu.Lock()
 	defer sess.mu.Unlock()
 
-	if containsCommand(commands, "query") {
-		w.Header().Set("X-Goog-Upload-Status", sess.Status)
-		w.Header().Set("X-Goog-Upload-Size-Received", strconv.FormatInt(sess.CurrentOffset, 10))
-		w.WriteHeader(http.StatusOK)
+	if slices.Contains(commands, "query") {
+		sess.query(w)
 		return
 	}
 
-	if containsCommand(commands, "cancel") {
-		sess.Status = "cancelled"
-		w.Header().Set("X-Goog-Upload-Status", "cancelled")
-		w.WriteHeader(http.StatusOK)
+	if slices.Contains(commands, "cancel") {
+		sess.cancel(w)
 		return
 	}
 
@@ -98,38 +167,24 @@ func (m *Manager) handleRequest(w http.ResponseWriter, r *http.Request) {
 		var err error
 		offset, err = strconv.ParseInt(offsetStr, 10, 64)
 		if err != nil {
-			sendError(w, http.StatusBadRequest, "Invalid X-Goog-Upload-Offset header", "active")
+			sendError(w, http.StatusBadRequest, "Invalid X-Goog-Upload-Offset header", sess.Status)
 			return
 		}
 	}
 
-	if containsCommand(commands, "upload") {
-		if offset != sess.CurrentOffset {
-			sendError(w, http.StatusConflict, fmt.Sprintf("Invalid offset: expected %d, got %d", sess.CurrentOffset, offset), "active")
+	if slices.Contains(commands, "upload") {
+		if !sess.upload(w, r, offset) {
 			return
 		}
-
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			sendError(w, http.StatusBadRequest, "Error reading request body", "active")
-			return
-		}
-		sess.Buffer.Write(body)
-		sess.CurrentOffset += int64(len(body))
 	}
 
-	if containsCommand(commands, "finalize") {
-		sess.Status = "final"
-		w.Header().Set("X-Goog-Upload-Status", "final")
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		resp := fmt.Sprintf(`{"name":"%s","size":%d}`, sess.ID, sess.CurrentOffset)
-		w.Write([]byte(resp))
+	if slices.Contains(commands, "finalize") {
+		sess.finalize(w)
 		return
 	}
 
-	if containsCommand(commands, "upload") {
-		w.Header().Set("X-Goog-Upload-Status", "active")
+	if slices.Contains(commands, "upload") {
+		w.Header().Set("X-Goog-Upload-Status", string(statusActive))
 		w.WriteHeader(http.StatusOK)
 		return
 	}
@@ -143,7 +198,7 @@ func (m *Manager) handleStart(w http.ResponseWriter, r *http.Request) {
 
 	sess := &uploadSession{
 		ID:     sid,
-		Status: "active",
+		Status: statusActive,
 	}
 	m.sessions.Store(sid, sess)
 
@@ -153,18 +208,26 @@ func (m *Manager) handleStart(w http.ResponseWriter, r *http.Request) {
 	}
 	host := r.Host
 	if host == "" {
-		host = "localhost:7469"
+		host = defaultHost
 	}
 	path := r.URL.Path
 	if path == "" {
 		path = "/upload"
 	}
+	query := url.Values{}
+	query.Add("sid", sid)
+	newUrl := url.URL{
+		Scheme:   scheme,
+		Host:     host,
+		Path:     path,
+		RawQuery: query.Encode(),
+	}
+	uploadURL := newUrl.String()
 
-	uploadURL := fmt.Sprintf("%s://%s%s?sid=%s", scheme, host, path, sid)
-	w.Header().Set("X-Goog-Upload-Status", "active")
+	w.Header().Set("X-Goog-Upload-Status", string(statusActive))
 	w.Header().Set("X-Goog-Upload-URL", uploadURL)
 	w.Header().Set("X-Goog-Upload-Control-URL", uploadURL)
-	w.Header().Set("X-Goog-Upload-Chunk-Granularity", "1")
+	w.Header().Set("X-Goog-Upload-Chunk-Granularity", strconv.Itoa(256*1024))
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -180,18 +243,9 @@ func parseCommands(header string) []string {
 	return res
 }
 
-func containsCommand(commands []string, cmd string) bool {
-	for _, c := range commands {
-		if c == cmd {
-			return true
-		}
-	}
-	return false
-}
-
-func sendError(w http.ResponseWriter, code int, message, status string) {
-	if status != "" {
-		w.Header().Set("X-Goog-Upload-Status", status)
+func sendError(w http.ResponseWriter, code int, message string, st status) {
+	if st != "" {
+		w.Header().Set("X-Goog-Upload-Status", string(st))
 	}
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(code)
