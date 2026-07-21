@@ -1,5 +1,13 @@
 # Release History
 
+## [0.42.0](https://github.com/googleapis/gapic-showcase/compare/v0.41.1...v0.42.0) (2026-07-21)
+
+
+### Features
+
+* Add resumable upload endpoint ([#1657](https://github.com/googleapis/gapic-showcase/issues/1657)) ([de6a225](https://github.com/googleapis/gapic-showcase/commit/de6a2254032b4599c8331aff8c76d38434c4211d))
+* Add resumable upload error scenarios ([#1660](https://github.com/googleapis/gapic-showcase/issues/1660)) ([0fd2aef](https://github.com/googleapis/gapic-showcase/commit/0fd2aef0b6b71c44fe0ee50764a29c819c6d2bcc))
+
 ## [0.41.1](https://github.com/googleapis/gapic-showcase/compare/v0.41.0...v0.41.1) (2026-07-10)
 
 
