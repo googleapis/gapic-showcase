@@ -16,6 +16,7 @@ package resumableupload
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -37,22 +38,98 @@ const (
 	statusCancelled status = "cancelled"
 )
 
+type ScenarioConfig struct {
+	ClientUUID          string `json:"client_uuid"`
+	ErrorCode           int    `json:"error_code"`
+	FailureCount        int    `json:"failure_count"`
+	ActionAfterFailures string `json:"action_after_failures"`
+	AfterOffset         int64  `json:"after_offset"`
+}
+
 type uploadSession struct {
-	ID            string
-	CurrentOffset int64
-	Buffer        bytes.Buffer
-	Status        status
-	mu            sync.Mutex
+	ID             string
+	CurrentOffset  int64
+	Buffer         bytes.Buffer
+	Status         status
+	Scenario       string
+	ScenarioConfig ScenarioConfig
+	UploadFailures int
+	mu             sync.Mutex
+}
+
+func (sess *uploadSession) handleScenario(cmd string, w http.ResponseWriter, r *http.Request, offset int64) bool {
+	switch sess.Scenario {
+	case "non_fatal_error_on_query":
+		return sess.nonFatalErrorOnQuery(cmd, w)
+	case "non_fatal_error_on_chunk_upload":
+		return sess.nonFatalErrorOnChunkUpload(cmd, w, offset)
+	case "chunk_granularity":
+		return sess.chunkGranularity(cmd, w, r)
+	default:
+		return false
+	}
+}
+
+func (sess *uploadSession) nonFatalErrorOnQuery(cmd string, w http.ResponseWriter) bool {
+	if cmd == "query" && sess.UploadFailures < sess.ScenarioConfig.FailureCount {
+		sess.UploadFailures++
+		sendError(w, sess.ScenarioConfig.ErrorCode, "Injected non-fatal query error", statusActive)
+		return true
+	}
+	return false
+}
+
+func (sess *uploadSession) nonFatalErrorOnChunkUpload(cmd string, w http.ResponseWriter, offset int64) bool {
+	if cmd == "upload" && offset >= sess.ScenarioConfig.AfterOffset {
+		if sess.UploadFailures < sess.ScenarioConfig.FailureCount {
+			sess.UploadFailures++
+			sendError(w, sess.ScenarioConfig.ErrorCode, "Injected non-fatal chunk upload error", statusActive)
+			return true
+		}
+		if sess.ScenarioConfig.ActionAfterFailures == "terminate" {
+			sendError(w, http.StatusInternalServerError, "Scenario requested termination", "")
+			return true
+		}
+	}
+	return false
+}
+
+func (sess *uploadSession) chunkGranularity(cmd string, w http.ResponseWriter, r *http.Request) bool {
+	if cmd == "upload" {
+		commands := parseCommands(r.Header.Get("X-Goog-Upload-Command"))
+		if !slices.Contains(commands, "finalize") {
+			bodyLen := r.ContentLength
+			if bodyLen > 0 && bodyLen%256 != 0 {
+				sendError(w, http.StatusBadRequest, fmt.Sprintf("Chunk size %d is not a multiple of granularity 256", bodyLen), statusActive)
+				return true
+			}
+		}
+	}
+	return false
 }
 
 type Manager struct {
-	sessions sync.Map
-	idGen    int64
+	sessions        sync.Map
+	startFailureMap sync.Map
+	idGen           int64
 }
 
 // NewManager creates a new Resumable Upload session manager.
 func NewManager() *Manager {
 	return &Manager{}
+}
+
+func (m *Manager) incrementStartFailure(key, scenario string, limit int) int {
+	if scenario != "non_fatal_error_on_start" {
+		return limit + 1
+	}
+	val, _ := m.startFailureMap.LoadOrStore(key, new(int32))
+	ptr := val.(*int32)
+	current := int(atomic.AddInt32(ptr, 1))
+	if current > limit {
+		atomic.StoreInt32(ptr, 0)
+	}
+	return current
 }
 
 // Middleware returns an HTTP middleware that handles Resumable Upload protocol requests.
@@ -72,6 +149,9 @@ func (m *Manager) Middleware(next http.Handler) http.Handler {
 }
 
 func (sess *uploadSession) query(w http.ResponseWriter) {
+	if sess.handleScenario("query", w, nil, 0) {
+		return
+	}
 	w.Header().Set("X-Goog-Upload-Status", string(sess.Status))
 	if sess.Status == statusCancelled {
 		w.WriteHeader(http.StatusGone)
@@ -101,6 +181,10 @@ func (sess *uploadSession) cancel(w http.ResponseWriter) {
 func (sess *uploadSession) upload(w http.ResponseWriter, r *http.Request, offset int64) bool {
 	if sess.Status != statusActive {
 		sendError(w, http.StatusBadRequest, fmt.Sprintf("Cannot upload to session with status %s", sess.Status), sess.Status)
+		return false
+	}
+
+	if sess.handleScenario("upload", w, r, offset) {
 		return false
 	}
 
@@ -193,12 +277,51 @@ func (m *Manager) handleRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *Manager) handleStart(w http.ResponseWriter, r *http.Request) {
+	scenario := r.Header.Get("X-Goog-Test-Scenario")
+	if scenario == "" {
+		scenario = "happy_path"
+	}
+
+	config := ScenarioConfig{
+		ErrorCode:           http.StatusServiceUnavailable,
+		FailureCount:        1,
+		ActionAfterFailures: "succeed",
+		AfterOffset:         0,
+	}
+	if cfgStr := r.Header.Get("X-Goog-Test-Scenario-Config"); cfgStr != "" {
+		if err := json.Unmarshal([]byte(cfgStr), &config); err != nil {
+			sendError(w, http.StatusBadRequest, "Invalid JSON in X-Goog-Test-Scenario-Config header", "")
+			return
+		}
+	}
+
+	lookupKey := scenario + "-" + r.RemoteAddr
+	if config.ClientUUID != "" {
+		lookupKey = scenario + "-" + config.ClientUUID
+	}
+
+	failures := m.incrementStartFailure(lookupKey, scenario, config.FailureCount)
+	if scenario == "non_fatal_error_on_start" && failures <= config.FailureCount {
+		sendError(w, config.ErrorCode, "Injected non-fatal start error", "")
+		return
+	}
+	if scenario == "fatal_error_on_start" {
+		code := config.ErrorCode
+		if code == 0 {
+			code = http.StatusForbidden
+		}
+		sendError(w, code, "Injected fatal start error", "")
+		return
+	}
+
 	id := atomic.AddInt64(&m.idGen, 1)
 	sid := fmt.Sprintf("scotty-sid-%d", id)
 
 	sess := &uploadSession{
-		ID:     sid,
-		Status: statusActive,
+		ID:             sid,
+		Status:         statusActive,
+		Scenario:       scenario,
+		ScenarioConfig: config,
 	}
 	m.sessions.Store(sid, sess)
 
@@ -224,10 +347,14 @@ func (m *Manager) handleStart(w http.ResponseWriter, r *http.Request) {
 	}
 	uploadURL := newUrl.String()
 
+	granularity := strconv.Itoa(256 * 1024)
+	if scenario == "chunk_granularity" {
+		granularity = "256"
+	}
 	w.Header().Set("X-Goog-Upload-Status", string(statusActive))
 	w.Header().Set("X-Goog-Upload-URL", uploadURL)
 	w.Header().Set("X-Goog-Upload-Control-URL", uploadURL)
-	w.Header().Set("X-Goog-Upload-Chunk-Granularity", strconv.Itoa(256*1024))
+	w.Header().Set("X-Goog-Upload-Chunk-Granularity", granularity)
 	w.WriteHeader(http.StatusOK)
 }
 
