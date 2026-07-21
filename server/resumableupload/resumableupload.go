@@ -289,7 +289,10 @@ func (m *Manager) handleStart(w http.ResponseWriter, r *http.Request) {
 		AfterOffset:         0,
 	}
 	if cfgStr := r.Header.Get("X-Goog-Test-Scenario-Config"); cfgStr != "" {
-		_ = json.Unmarshal([]byte(cfgStr), &config)
+		if err := json.Unmarshal([]byte(cfgStr), &config); err != nil {
+			sendError(w, http.StatusBadRequest, "Invalid JSON in X-Goog-Test-Scenario-Config header", "")
+			return
+		}
 	}
 
 	lookupKey := scenario + "-" + r.RemoteAddr
