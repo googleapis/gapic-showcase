@@ -178,3 +178,52 @@ func TestQueryAndUploadAfterCancel(t *testing.T) {
 		t.Fatalf("expected 400 Bad Request on upload after cancel, got %d", recUpload.Code)
 	}
 }
+
+func TestNonFatalStartErrorWithClientUUID(t *testing.T) {
+	mgr := resumableupload.NewManager()
+	handler := mgr.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+
+	cfgA := `{"client_uuid":"client-a","error_code":503,"failure_count":1}`
+
+	// 1st request for client-a fails with 503
+	reqA1 := httptest.NewRequest("POST", "http://localhost:7469/upload", nil)
+	reqA1.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	reqA1.Header.Set("X-Goog-Upload-Command", "start")
+	reqA1.Header.Set("X-Goog-Test-Scenario", "non_fatal_error_on_start")
+	reqA1.Header.Set("X-Goog-Test-Scenario-Config", cfgA)
+	recA1 := httptest.NewRecorder()
+	handler.ServeHTTP(recA1, reqA1)
+
+	if recA1.Code != http.StatusServiceUnavailable {
+		t.Fatalf("expected 503 Service Unavailable on first start for client-a, got %d", recA1.Code)
+	}
+
+	// 2nd request for client-a succeeds (failure_count=1 exhausted)
+	reqA2 := httptest.NewRequest("POST", "http://localhost:7469/upload", nil)
+	reqA2.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	reqA2.Header.Set("X-Goog-Upload-Command", "start")
+	reqA2.Header.Set("X-Goog-Test-Scenario", "non_fatal_error_on_start")
+	reqA2.Header.Set("X-Goog-Test-Scenario-Config", cfgA)
+	recA2 := httptest.NewRecorder()
+	handler.ServeHTTP(recA2, reqA2)
+
+	if recA2.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK on retry start for client-a, got %d", recA2.Code)
+	}
+
+	// Request for client-b fails independently with 503 despite same RemoteAddr
+	cfgB := `{"client_uuid":"client-b","error_code":503,"failure_count":1}`
+	reqB1 := httptest.NewRequest("POST", "http://localhost:7469/upload", nil)
+	reqB1.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	reqB1.Header.Set("X-Goog-Upload-Command", "start")
+	reqB1.Header.Set("X-Goog-Test-Scenario", "non_fatal_error_on_start")
+	reqB1.Header.Set("X-Goog-Test-Scenario-Config", cfgB)
+	recB1 := httptest.NewRecorder()
+	handler.ServeHTTP(recB1, reqB1)
+
+	if recB1.Code != http.StatusServiceUnavailable {
+		t.Fatalf("expected 503 Service Unavailable on first start for client-b, got %d", recB1.Code)
+	}
+}
