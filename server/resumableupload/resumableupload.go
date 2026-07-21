@@ -74,7 +74,7 @@ func (m *Manager) Middleware(next http.Handler) http.Handler {
 func (sess *uploadSession) query(w http.ResponseWriter) {
 	w.Header().Set("X-Goog-Upload-Status", string(sess.Status))
 	if sess.Status == statusCancelled {
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusGone)
 		return
 	}
 	if sess.Status == statusFinal {

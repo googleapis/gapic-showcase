@@ -160,8 +160,8 @@ func TestQueryAndUploadAfterCancel(t *testing.T) {
 	recQuery := httptest.NewRecorder()
 	handler.ServeHTTP(recQuery, reqQuery)
 
-	if recQuery.Code != http.StatusOK {
-		t.Fatalf("expected 200 OK on query cancelled session, got %d", recQuery.Code)
+	if recQuery.Code != http.StatusGone {
+		t.Fatalf("expected 410 Gone on query cancelled session, got %d", recQuery.Code)
 	}
 	if recQuery.Header().Get("X-Goog-Upload-Status") != "cancelled" {
 		t.Fatalf("expected cancelled status on query, got %s", recQuery.Header().Get("X-Goog-Upload-Status"))
