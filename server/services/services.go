@@ -29,12 +29,13 @@ import (
 // accessible via one or more transport endpoints.
 type Backend struct {
 	// Showcase schema
-	EchoServer            pb.EchoServer
-	IdentityServer        pb.IdentityServer
-	MessagingServer       pb.MessagingServer
-	SequenceServiceServer pb.SequenceServiceServer
-	ComplianceServer      pb.ComplianceServer
-	TestingServer         pb.TestingServer
+	EchoServer                   pb.EchoServer
+	IdentityServer               pb.IdentityServer
+	MessagingServer              pb.MessagingServer
+	SequenceServiceServer        pb.SequenceServiceServer
+	ComplianceServer             pb.ComplianceServer
+	TestingServer                pb.TestingServer
+	ResumableUploadServiceServer pb.ResumableUploadServiceServer
 
 	// Supporting protos
 	OperationsServer lropb.OperationsServer

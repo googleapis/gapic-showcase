@@ -5,6 +5,7 @@ google/showcase/v1beta1/echo.proto
 google/showcase/v1beta1/identity.proto
 google/showcase/v1beta1/messaging.proto
 google/showcase/v1beta1/rest_error.proto
+google/showcase/v1beta1/resumable_upload.proto
 google/showcase/v1beta1/sequence.proto
 google/showcase/v1beta1/testing.proto
 
@@ -63,6 +64,9 @@ Messaging (.google.showcase.v1beta1.Messaging):
   .google.showcase.v1beta1.Messaging.StreamBlurbs[1] : POST: "/v1beta1/{name=users/*/profile}/blurbs:stream"
   .google.showcase.v1beta1.Messaging.SendBlurbs[0] : POST: "/v1beta1/{parent=rooms/*}/blurbs:send"
   .google.showcase.v1beta1.Messaging.SendBlurbs[1] : POST: "/v1beta1/{parent=users/*/profile}/blurbs:send"
+
+ResumableUploadService (.google.showcase.v1beta1.ResumableUploadService):
+  .google.showcase.v1beta1.ResumableUploadService.UploadMedia[0] : POST: "/v1beta1/files:upload"
 
 SequenceService (.google.showcase.v1beta1.SequenceService):
   .google.showcase.v1beta1.SequenceService.CreateSequence[0] : POST: "/v1beta1/sequences"
@@ -273,6 +277,14 @@ Shim "Messaging" (.google.showcase.v1beta1.Messaging)
 
       DELETE           /v1beta1/{name=users/*/profile/blurbs/*} func DeleteBlurb(request genprotopb.DeleteBlurbRequest) (response emptypbpb.Empty) {}
 ["/" "v1beta1" "/" {name = ["users" "/" * "/" "profile" "/" "blurbs" "/" *]}]
+
+----------------------------------------
+Shim "ResumableUploadService" (.google.showcase.v1beta1.ResumableUploadService)
+  Imports:
+    genprotopb: "github.com/googleapis/gapic-showcase/server/genproto" "github.com/googleapis/gapic-showcase/server/genproto"
+  Handlers (1):
+        POST                              /v1beta1/files:upload func UploadMedia(request genprotopb.UploadMediaRequest) (response genprotopb.UploadMediaResponse) {}
+["/" "v1beta1" "/" "files" ":" "upload"]
 
 ----------------------------------------
 Shim "SequenceService" (.google.showcase.v1beta1.SequenceService)

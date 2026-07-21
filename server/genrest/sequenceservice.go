@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // DO NOT EDIT. This is an auto-generated file containing the REST handlers
-// for service #4: "SequenceService" (.google.showcase.v1beta1.SequenceService).
+// for service #5: "SequenceService" (.google.showcase.v1beta1.SequenceService).
 
 package genrest
 

@@ -31,6 +31,7 @@ import (
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gapic-showcase/server/genrest"
+	"github.com/googleapis/gapic-showcase/server/resumableupload"
 	"github.com/googleapis/gapic-showcase/server/services"
 	fallback "github.com/googleapis/grpc-fallback-go/server"
 	gmux "github.com/gorilla/mux"
@@ -334,18 +335,19 @@ func createBackends() *services.Backend {
 	identityServer := services.NewIdentityServer()
 	messagingServer := services.NewMessagingServer(identityServer)
 	return &services.Backend{
-		EchoServer:            services.NewEchoServer(),
-		SequenceServiceServer: services.NewSequenceServer(),
-		IdentityServer:        identityServer,
-		MessagingServer:       messagingServer,
-		ComplianceServer:      services.NewComplianceServer(),
-		TestingServer:         services.NewTestingServer(observerRegistry),
-		OperationsServer:      services.NewOperationsServer(messagingServer),
-		LocationsServer:       services.NewLocationsServer(),
-		IAMPolicyServer:       services.NewIAMPolicyServer(),
-		StdLog:                stdLog,
-		ErrLog:                errLog,
-		ObserverRegistry:      observerRegistry,
+		EchoServer:                   services.NewEchoServer(),
+		SequenceServiceServer:        services.NewSequenceServer(),
+		IdentityServer:               identityServer,
+		MessagingServer:              messagingServer,
+		ComplianceServer:             services.NewComplianceServer(),
+		TestingServer:                services.NewTestingServer(observerRegistry),
+		ResumableUploadServiceServer: services.NewResumableUploadServer(),
+		OperationsServer:             services.NewOperationsServer(messagingServer),
+		LocationsServer:              services.NewLocationsServer(),
+		IAMPolicyServer:              services.NewIAMPolicyServer(),
+		StdLog:                       stdLog,
+		ErrLog:                       errLog,
+		ObserverRegistry:             observerRegistry,
 	}
 }
 
@@ -367,6 +369,7 @@ func newEndpointGRPC(lis net.Listener, config RuntimeConfig, backend *services.B
 	pb.RegisterMessagingServer(s, backend.MessagingServer)
 	pb.RegisterComplianceServer(s, backend.ComplianceServer)
 	pb.RegisterTestingServer(s, backend.TestingServer)
+	pb.RegisterResumableUploadServiceServer(s, backend.ResumableUploadServiceServer)
 	lropb.RegisterOperationsServer(s, backend.OperationsServer)
 	locpb.RegisterLocationsServer(s, backend.LocationsServer)
 	iampb.RegisterIAMPolicyServer(s, backend.IAMPolicyServer)
@@ -437,6 +440,10 @@ func newEndpointREST(lis net.Listener, backend *services.Backend) *endpointREST 
 		w.Write([]byte("GAPIC Showcase: HTTP/REST endpoint using gorilla/mux\n"))
 	})
 	genrest.RegisterHandlers(router, backend)
+
+	// Register Resumable Upload protocol middleware
+	resumableMgr := resumableupload.NewManager()
+	router.Use(resumableMgr.Middleware)
 
 	// Register TLS HTTP Middleware
 	router.Use(server.TLSHTTPMiddleware)
