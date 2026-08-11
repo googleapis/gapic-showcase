@@ -19,6 +19,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -89,6 +90,38 @@ func TLSGroupName(id tls.CurveID) string {
 	default:
 		return fmt.Sprintf("Unknown-Curve-%d", id)
 	}
+}
+
+// ParseTLSGroup parses a single TLS key exchange group ID represented as a hex (e.g. "0x11ec")
+// or decimal (e.g. "4588") integer into a tls.CurveID.
+func ParseTLSGroup(raw string) (tls.CurveID, error) {
+	raw = strings.TrimSpace(raw)
+	val, err := strconv.ParseUint(raw, 0, 16)
+	if err != nil || val == 0 {
+		return 0, fmt.Errorf("invalid TLS group ID %q: expected non-zero hex (e.g. 0x11ec) or decimal (e.g. 4588) IANA group ID", raw)
+	}
+	return tls.CurveID(val), nil
+}
+
+// ParseTLSGroups parses a comma-separated list of TLS key exchange group IDs.
+func ParseTLSGroups(csv string) ([]tls.CurveID, error) {
+	if strings.TrimSpace(csv) == "" {
+		return nil, nil
+	}
+	parts := strings.Split(csv, ",")
+	groups := make([]tls.CurveID, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+		g, err := ParseTLSGroup(p)
+		if err != nil {
+			return nil, err
+		}
+		groups = append(groups, g)
+	}
+	return groups, nil
 }
 
 // TLSMetadataUnaryInterceptor injects TLS handshake details into unary gRPC response headers.

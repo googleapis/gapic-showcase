@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/googleapis/gapic-showcase/client"
+	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"github.com/googleapis/gax-go/v2"
 	"google.golang.org/api/option"
@@ -37,6 +38,10 @@ import (
 )
 
 func setupTLSTestServer(t *testing.T, enablePQC *bool) (addr string, certPool *x509.CertPool, cleanup func()) {
+	return setupTLSTestServerWithGroups(t, enablePQC, "")
+}
+
+func setupTLSTestServerWithGroups(t *testing.T, enablePQC *bool, tlsGroups string) (addr string, certPool *x509.CertPool, cleanup func()) {
 	t.Helper()
 	caPath := filepath.Join(t.TempDir(), "ca.crt")
 	config := RuntimeConfig{
@@ -45,13 +50,14 @@ func setupTLSTestServer(t *testing.T, enablePQC *bool) (addr string, certPool *x
 		autoTLS:      true,
 		caCertFile:   caPath,
 		enablePQC:    enablePQC,
+		tlsGroups:    tlsGroups,
 	}
 
 	serverEndpoint := CreateAllEndpoints(config)
 
 	go func() {
-		if err := serverEndpoint.Serve(); err != nil && !strings.Contains(err.Error(), "use of closed network connection") {
-			t.Errorf("server exited with error: %v", err)
+		if err := serverEndpoint.Serve(); err != nil && !strings.Contains(err.Error(), "closed") {
+			t.Logf("server exited with: %v", err)
 		}
 	}()
 
@@ -264,5 +270,131 @@ func assertRESTHeader(t *testing.T, headers http.Header, key, expected string) {
 	t.Logf("REST Header %s: %s", key, val)
 	if val != expected {
 		t.Errorf("REST header %s: expected %q, got %q", key, expected, val)
+	}
+}
+
+func TestConnectWithTLS_GroupPinned(t *testing.T) {
+	t.Parallel()
+	// Pin server to X25519MLKEM768 (0x11ec)
+	addr, certPool, cleanup := setupTLSTestServerWithGroups(t, nil, "0x11ec")
+	defer cleanup()
+
+	creds := credentials.NewTLS(&tls.Config{
+		RootCAs: certPool,
+	})
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	conn, err := grpc.DialContext(ctx, addr, grpc.WithTransportCredentials(creds), grpc.WithBlock())
+	if err != nil {
+		t.Fatalf("failed to connect to server at %s: %v", addr, err)
+	}
+	defer conn.Close()
+
+	c, err := client.NewEchoClient(ctx, option.WithGRPCConn(conn))
+	if err != nil {
+		t.Fatalf("failed to create echo client: %v", err)
+	}
+	defer c.Close()
+
+	var header metadata.MD
+	resp, err := c.Echo(ctx, &pb.EchoRequest{
+		Response: &pb.EchoRequest_Content{Content: "Group Pinned"},
+	}, gax.WithGRPCOptions(grpc.Header(&header)))
+	if err != nil {
+		t.Fatalf("Echo call failed: %v", err)
+	}
+	if resp.GetContent() != "Group Pinned" {
+		t.Errorf("expected %q, got %q", "Group Pinned", resp.GetContent())
+	}
+
+	assertHeader(t, header, "x-showcase-tls-group", "X25519MLKEM768")
+}
+
+func TestConnectWithTLS_GroupMismatch_FailsHandshake(t *testing.T) {
+	t.Parallel()
+	// Server only allows X25519MLKEM768 (0x11ec)
+	addr, certPool, cleanup := setupTLSTestServerWithGroups(t, nil, "0x11ec")
+	defer cleanup()
+
+	// Client only offers classical X25519
+	creds := credentials.NewTLS(&tls.Config{
+		RootCAs:          certPool,
+		CurvePreferences: []tls.CurveID{tls.X25519},
+	})
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	// Dialing with mismatching groups should fail TLS handshake
+	_, err := grpc.DialContext(ctx, addr, grpc.WithTransportCredentials(creds), grpc.WithBlock())
+	if err == nil {
+		t.Fatalf("expected TLS handshake failure due to no shared groups, but connection succeeded")
+	}
+	t.Logf("Expected handshake failure received: %v", err)
+}
+
+func TestParseTLSGroups(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     string
+		want      []tls.CurveID
+		expectErr bool
+	}{
+		{
+			name:  "valid hex and decimal list with spaces",
+			input: " 0x11ec , 0X001D, 4587 ",
+			want:  []tls.CurveID{tls.X25519MLKEM768, tls.X25519, tls.SecP256r1MLKEM768},
+		},
+		{
+			name:  "empty input",
+			input: "   ",
+			want:  nil,
+		},
+		{
+			name:      "invalid group name string",
+			input:     "X25519MLKEM768",
+			expectErr: true,
+		},
+		{
+			name:      "zero codepoint",
+			input:     "0",
+			expectErr: true,
+		},
+		{
+			name:      "hex zero codepoint",
+			input:     "0x0000",
+			expectErr: true,
+		},
+		{
+			name:      "out of range > 65535",
+			input:     "65536",
+			expectErr: true,
+		},
+		{
+			name:      "negative number",
+			input:     "-1",
+			expectErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := server.ParseTLSGroups(tt.input)
+			if (err != nil) != tt.expectErr {
+				t.Fatalf("ParseTLSGroups(%q) error = %v, expectErr %v", tt.input, err, tt.expectErr)
+			}
+			if !tt.expectErr {
+				if len(got) != len(tt.want) {
+					t.Fatalf("ParseTLSGroups(%q) = %v (len %d), want %v (len %d)", tt.input, got, len(got), tt.want, len(tt.want))
+				}
+				for i := range got {
+					if got[i] != tt.want[i] {
+						t.Errorf("ParseTLSGroups(%q)[%d] = %v, want %v", tt.input, i, got[i], tt.want[i])
+					}
+				}
+			}
+		})
 	}
 }

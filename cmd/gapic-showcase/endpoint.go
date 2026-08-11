@@ -51,6 +51,7 @@ type RuntimeConfig struct {
 	tlsCaCert    string
 	tlsCert      string
 	tlsKey       string
+	tlsGroups    string
 	enablePQC    *bool
 	autoTLS      bool
 	caCertFile   string
@@ -118,7 +119,18 @@ func createTLSConfig(config RuntimeConfig) *tls.Config {
 		pqcEnabled = *config.enablePQC
 	}
 
-	if !pqcEnabled {
+	if config.tlsGroups != "" {
+		groups, err := server.ParseTLSGroups(config.tlsGroups)
+		if err != nil {
+			log.Fatalf("Failed to parse --tls-groups: %v", err)
+		}
+		baseConfig.CurvePreferences = groups
+		var groupNames []string
+		for _, g := range groups {
+			groupNames = append(groupNames, server.TLSGroupName(g))
+		}
+		stdLog.Printf("Restricted server TLS key exchange groups: %s", strings.Join(groupNames, ","))
+	} else if !pqcEnabled {
 		baseConfig.CurvePreferences = []tls.CurveID{
 			tls.X25519,
 			tls.CurveP256,

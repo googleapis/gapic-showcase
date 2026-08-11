@@ -105,6 +105,11 @@ func init() {
 		"enable-pqc",
 		true,
 		"Enable Post-Quantum Cryptography (PQC) hybrid key exchanges.")
+	runCmd.Flags().StringVar(
+		&config.tlsGroups,
+		"tls-groups",
+		"",
+		"Comma-separated list of allowed TLS key exchange group IANA IDs (hex e.g. 0x11ec or decimal) in preference order.")
 	runCmd.Flags().BoolVar(
 		&config.autoTLS,
 		"tls",
