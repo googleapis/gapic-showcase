@@ -82,6 +82,37 @@ If you need to verify classical fallback behavior, you can force the Showcase se
   --enable-pqc=false
 ```
 
+### Restricting / Pinning Allowed TLS Groups (`--tls-groups`)
+
+To strictly test whether a client supports a specific key exchange algorithm (or to test custom server preference ordering), use the `--tls-groups` flag.
+
+The flag accepts a comma-separated list of standard [IANA Key Exchange Group IDs](https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-8) in hexadecimal (e.g. `0x11ec`) or decimal (e.g. `4588`) format.
+
+```sh
+# Only allow X25519MLKEM768 (handshake fails if client does not support it):
+./gapic-showcase run \
+  --tls-cert certs/server.crt \
+  --tls-key certs/server.key \
+  --tls-groups 0x11ec
+
+# Allow classical X25519 and SecP256r1 in server preference order:
+./gapic-showcase run \
+  --tls-cert certs/server.crt \
+  --tls-key certs/server.key \
+  --tls-groups 0x001d,0x0017
+```
+
+#### Common IANA Group IDs Reference
+
+| Key Exchange Group | Hex Codepoint | Decimal Codepoint | Description |
+| :--- | :--- | :--- | :--- |
+| **`X25519MLKEM768`** | `0x11ec` | `4588` | Post-Quantum Hybrid (Default) |
+| **`SecP256r1MLKEM768`** | `0x11eb` | `4587` | Post-Quantum Hybrid |
+| **`X25519`** | `0x001d` | `29` | Classical |
+| **`secp256r1 (P-256)`** | `0x0017` | `23` | Classical |
+| **`secp384r1 (P-384)`** | `0x0018` | `24` | Classical |
+| **`secp521r1 (P-521)`** | `0x0019` | `25` | Classical |
+
 ## 4. Exposed TLS Response Metadata (Headers)
 
 When a client connects securely, the Showcase server automatically injects the following metadata into the gRPC response headers (and HTTP headers):
