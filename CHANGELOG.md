@@ -1,5 +1,12 @@
 # Release History
 
+## [0.43.0](https://github.com/googleapis/gapic-showcase/compare/v0.42.0...v0.43.0) (2026-08-12)
+
+
+### Features
+
+* Support --tls-groups flag to restrict allowed TLS key-exchange groups ([#1662](https://github.com/googleapis/gapic-showcase/issues/1662)) ([6147736](https://github.com/googleapis/gapic-showcase/commit/6147736e79d5763cf79d2fefef354d7f813ca1a2))
+
 ## [0.42.0](https://github.com/googleapis/gapic-showcase/compare/v0.41.1...v0.42.0) (2026-07-21)
 
 
