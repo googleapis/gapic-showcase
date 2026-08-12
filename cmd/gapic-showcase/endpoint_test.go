@@ -15,6 +15,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"io"
 	"log"
 	"net"
@@ -23,6 +24,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/googleapis/gapic-showcase/server"
 	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -236,4 +238,31 @@ func allowFullJSON() *resttools.JSONMarshalOptions {
 func noSpace(src string) string {
 	str := strings.ReplaceAll(src, "\n", "")
 	return strings.ReplaceAll(str, " ", "")
+}
+
+// TestResumableUploadMiddlewareOrder verifies that outer middleware (such as TLS HTTP middleware)
+// executes on Resumable Upload protocol requests.
+func TestResumableUploadMiddlewareOrder(t *testing.T) {
+	backend := createBackends()
+	restServer := newEndpointREST(net.Listener(nil), backend)
+
+	// Record TLS handshake state for the client address
+	server.RecordTLSHandshake("192.0.2.1:1234", tls.ConnectionState{CurveID: tls.X25519}, []tls.CurveID{tls.X25519})
+	defer server.RemoveTLSState("192.0.2.1:1234")
+
+	req := httptest.NewRequest("POST", "/resumable/upload/v1beta1/files:upload", strings.NewReader(`{"name":"sample.txt"}`))
+	req.RemoteAddr = "192.0.2.1:1234"
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	req.Header.Set("X-Goog-Upload-Command", "start")
+	rec := httptest.NewRecorder()
+
+	restServer.server.Handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK, got %d: %s", rec.Code, rec.Body.String())
+	}
+	if got, want := rec.Header().Get("x-showcase-tls-group"), "X25519"; got != want {
+		t.Fatalf("expected TLS group %s, got %s", want, got)
+	}
 }

@@ -449,5 +449,3 @@ func TestChunkGranularityScenario(t *testing.T) {
 		t.Fatalf("expected 200 OK on unaligned final chunk upload, got %d", recFinal.Code)
 	}
 }
-
-
