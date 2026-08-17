@@ -16,6 +16,7 @@ package resumableupload_test
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -450,4 +451,75 @@ func TestChunkGranularityScenario(t *testing.T) {
 	}
 }
 
+// TestFinalizeWithInitialMetadata verifies that finalize returns the metadata name
+// from start and the size of the uploaded data payload.
+func TestFinalizeWithInitialMetadata(t *testing.T) {
+	mgr := resumableupload.NewManager()
+	handler := mgr.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+	}))
 
+	// 1. Start upload session with initial JSON metadata
+	reqStart := httptest.NewRequest("POST", "http://localhost:7469/upload", strings.NewReader(`{"name":"test_file.txt"}`))
+	reqStart.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	reqStart.Header.Set("X-Goog-Upload-Command", "start")
+	reqStart.Header.Set("Content-Type", "application/json")
+	recStart := httptest.NewRecorder()
+	handler.ServeHTTP(recStart, reqStart)
+
+	// 2. Finalize upload with 4 bytes of payload data
+	reqFinal := httptest.NewRequest("POST", recStart.Header().Get("X-Goog-Upload-URL"), strings.NewReader("data"))
+	reqFinal.Header.Set("X-Goog-Upload-Command", "upload, finalize")
+	recFinal := httptest.NewRecorder()
+	handler.ServeHTTP(recFinal, reqFinal)
+
+	if got, want := recFinal.Body.String(), `{"name":"test_file.txt","size":4}`; got != want {
+		t.Fatalf("expected backend response %s, got %s", want, got)
+	}
+}
+
+// TestBinaryPayloadUpload verifies that arbitrary binary payloads (e.g. PNG, octet-stream)
+// can be uploaded in the data phase without requiring the binary data to be JSON-formatted.
+func TestBinaryPayloadUpload(t *testing.T) {
+	mgr := resumableupload.NewManager()
+	handler := mgr.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	// 1. Start upload session with initial JSON metadata
+	reqStart := httptest.NewRequest("POST", "http://localhost:7469/upload", strings.NewReader(`{"name":"uploaded_image.png"}`))
+	reqStart.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	reqStart.Header.Set("X-Goog-Upload-Command", "start")
+	reqStart.Header.Set("Content-Type", "application/json")
+	recStart := httptest.NewRecorder()
+	handler.ServeHTTP(recStart, reqStart)
+
+	if recStart.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK on start, got %d", recStart.Code)
+	}
+
+	uploadURL := recStart.Header().Get("X-Goog-Upload-URL")
+	if uploadURL == "" {
+		t.Fatalf("expected X-Goog-Upload-URL in response, got empty")
+	}
+
+	// 2. Upload raw binary PNG bytes (not JSON!)
+	binaryPayload := []byte("\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00")
+	reqFinal := httptest.NewRequest("POST", uploadURL, bytes.NewReader(binaryPayload))
+	reqFinal.Header.Set("X-Goog-Upload-Command", "upload, finalize")
+	reqFinal.Header.Set("X-Goog-Upload-Offset", "0")
+	reqFinal.Header.Set("Content-Type", "image/png")
+	recFinal := httptest.NewRecorder()
+	handler.ServeHTTP(recFinal, reqFinal)
+
+	if recFinal.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK on binary upload finalize, got %d with body %s", recFinal.Code, recFinal.Body.String())
+	}
+
+	expectedResponse := fmt.Sprintf(`{"name":"uploaded_image.png","size":%d}`, len(binaryPayload))
+	if got := strings.TrimSpace(recFinal.Body.String()); got != expectedResponse {
+		t.Fatalf("expected final response %s, got %s", expectedResponse, got)
+	}
+}
