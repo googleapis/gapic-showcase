@@ -29,6 +29,10 @@ func NewResumableUploadServer() pb.ResumableUploadServiceServer {
 	return &resumableUploadServerImpl{}
 }
 
+// UploadMedia handles the media upload request and returns an UploadMediaResponse
+// containing the name of the uploaded resource.
 func (s *resumableUploadServerImpl) UploadMedia(ctx context.Context, req *pb.UploadMediaRequest) (*pb.UploadMediaResponse, error) {
-	return &pb.UploadMediaResponse{}, nil
+	return &pb.UploadMediaResponse{
+		Name: req.GetName(),
+	}, nil
 }

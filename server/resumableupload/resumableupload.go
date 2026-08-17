@@ -48,6 +48,7 @@ type ScenarioConfig struct {
 
 type uploadSession struct {
 	ID             string
+	Name           string
 	CurrentOffset  int64
 	Buffer         bytes.Buffer
 	Status         status
@@ -212,7 +213,7 @@ func (sess *uploadSession) finalize(w http.ResponseWriter) {
 	w.Header().Set("X-Goog-Upload-Status", string(statusFinal))
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	resp := fmt.Sprintf(`{"name":"%s","size":%d}`, sess.ID, sess.CurrentOffset)
+	resp := fmt.Sprintf(`{"name":"%s","size":%d}`, sess.Name, sess.CurrentOffset)
 	w.Write([]byte(resp))
 }
 
@@ -317,8 +318,21 @@ func (m *Manager) handleStart(w http.ResponseWriter, r *http.Request) {
 	id := atomic.AddInt64(&m.idGen, 1)
 	sid := fmt.Sprintf("scotty-sid-%d", id)
 
+	name := sid
+	if r.Body != nil {
+		body, _ := io.ReadAll(r.Body)
+		var meta struct {
+			Name string `json:"name"`
+		}
+		if err := json.Unmarshal(body, &meta); err == nil && meta.Name != "" {
+			name = meta.Name
+		}
+	}
+
+	// Record the upload session, preserving the target metadata name.
 	sess := &uploadSession{
 		ID:             sid,
+		Name:           name,
 		Status:         statusActive,
 		Scenario:       scenario,
 		ScenarioConfig: config,
