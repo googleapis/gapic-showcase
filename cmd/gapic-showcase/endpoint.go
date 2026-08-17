@@ -127,7 +127,7 @@ func createTLSConfig(config RuntimeConfig) *tls.Config {
 		baseConfig.CurvePreferences = groups
 		var groupNames []string
 		for _, g := range groups {
-			groupNames = append(groupNames, server.TLSGroupName(g))
+			groupNames = append(groupNames, g.String())
 		}
 		stdLog.Printf("Restricted server TLS key exchange groups: %s", strings.Join(groupNames, ","))
 	} else if !pqcEnabled {
@@ -165,10 +165,10 @@ func createTLSConfig(config RuntimeConfig) *tls.Config {
 			stdLog.Printf("TLS Handshake Complete on Server for %s:", remoteAddr)
 			stdLog.Printf("  Protocol: %s", tls.VersionName(state.Version))
 			stdLog.Printf("  Cipher Suite: %s", tls.CipherSuiteName(state.CipherSuite))
-			stdLog.Printf("  Negotiated Group: %s", server.TLSGroupName(state.CurveID))
+			stdLog.Printf("  Negotiated Group: %s", state.CurveID.String())
 			var groups []string
 			for _, g := range info.SupportedCurves {
-				groups = append(groups, server.TLSGroupName(g))
+				groups = append(groups, g.String())
 			}
 			stdLog.Printf("  Client Offered Groups: %s", strings.Join(groups, ", "))
 			return nil
