@@ -67,29 +67,9 @@ func RemoveTLSState(remoteAddr string) {
 func formatGroups(groups []tls.CurveID) string {
 	var names []string
 	for _, g := range groups {
-		names = append(names, TLSGroupName(g))
+		names = append(names, g.String())
 	}
 	return strings.Join(names, ",")
-}
-
-// TLSGroupName maps a CurveID to a human-readable name, highlighting PQC hybrid groups.
-func TLSGroupName(id tls.CurveID) string {
-	switch id {
-	case tls.X25519MLKEM768:
-		return "X25519MLKEM768"
-	case tls.SecP256r1MLKEM768:
-		return "SecP256r1MLKEM768"
-	case tls.X25519:
-		return "X25519"
-	case tls.CurveP256:
-		return "CurveP256"
-	case tls.CurveP384:
-		return "CurveP384"
-	case tls.CurveP521:
-		return "CurveP521"
-	default:
-		return fmt.Sprintf("Unknown-Curve-%d", id)
-	}
 }
 
 // ParseTLSGroup parses a single TLS key exchange group ID represented as a hex (e.g. "0x11ec")
@@ -129,7 +109,7 @@ func TLSMetadataUnaryInterceptor(ctx context.Context, req interface{}, info *grp
 	if p, ok := peer.FromContext(ctx); ok {
 		if state := GetTLSState(p.Addr.String()); state != nil {
 			md := metadata.Pairs(
-				"x-showcase-tls-group", TLSGroupName(state.CurveID),
+				"x-showcase-tls-group", state.CurveID.String(),
 				"x-showcase-tls-client-supported-groups", formatGroups(state.ClientCurves),
 			)
 			_ = grpc.SetHeader(ctx, md)
@@ -142,7 +122,7 @@ func TLSMetadataUnaryInterceptor(ctx context.Context, req interface{}, info *grp
 func TLSHTTPMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if state := GetTLSState(r.RemoteAddr); state != nil {
-			w.Header().Set("x-showcase-tls-group", TLSGroupName(state.CurveID))
+			w.Header().Set("x-showcase-tls-group", state.CurveID.String())
 			w.Header().Set("x-showcase-tls-client-supported-groups", formatGroups(state.ClientCurves))
 		}
 		next.ServeHTTP(w, r)
