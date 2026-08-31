@@ -52,7 +52,6 @@ type RuntimeConfig struct {
 	tlsCert      string
 	tlsKey       string
 	tlsGroups    string
-	enablePQC    *bool
 	autoTLS      bool
 	caCertFile   string
 }
@@ -114,11 +113,6 @@ func createTLSConfig(config RuntimeConfig) *tls.Config {
 		NextProtos:   []string{"h2", "http/1.1"},
 	}
 
-	pqcEnabled := true
-	if config.enablePQC != nil {
-		pqcEnabled = *config.enablePQC
-	}
-
 	if config.tlsGroups != "" {
 		groups, err := server.ParseTLSGroups(config.tlsGroups)
 		if err != nil {
@@ -127,17 +121,9 @@ func createTLSConfig(config RuntimeConfig) *tls.Config {
 		baseConfig.CurvePreferences = groups
 		var groupNames []string
 		for _, g := range groups {
-			groupNames = append(groupNames, server.TLSGroupName(g))
+			groupNames = append(groupNames, g.String())
 		}
 		stdLog.Printf("Restricted server TLS key exchange groups: %s", strings.Join(groupNames, ","))
-	} else if !pqcEnabled {
-		baseConfig.CurvePreferences = []tls.CurveID{
-			tls.X25519,
-			tls.CurveP256,
-			tls.CurveP384,
-			tls.CurveP521,
-		}
-		stdLog.Printf("PQC key exchanges disabled on server. Using classical curves only.")
 	}
 
 	// Handle Client CA for mTLS / One-Way TLS
@@ -165,10 +151,10 @@ func createTLSConfig(config RuntimeConfig) *tls.Config {
 			stdLog.Printf("TLS Handshake Complete on Server for %s:", remoteAddr)
 			stdLog.Printf("  Protocol: %s", tls.VersionName(state.Version))
 			stdLog.Printf("  Cipher Suite: %s", tls.CipherSuiteName(state.CipherSuite))
-			stdLog.Printf("  Negotiated Group: %s", server.TLSGroupName(state.CurveID))
+			stdLog.Printf("  Negotiated Group: %s", state.CurveID.String())
 			var groups []string
 			for _, g := range info.SupportedCurves {
-				groups = append(groups, server.TLSGroupName(g))
+				groups = append(groups, g.String())
 			}
 			stdLog.Printf("  Client Offered Groups: %s", strings.Join(groups, ", "))
 			return nil
