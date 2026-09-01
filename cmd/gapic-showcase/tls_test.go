@@ -37,11 +37,11 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-func setupTLSTestServer(t *testing.T, enablePQC *bool) (addr string, certPool *x509.CertPool, cleanup func()) {
-	return setupTLSTestServerWithGroups(t, enablePQC, "")
+func setupTLSTestServer(t *testing.T) (addr string, certPool *x509.CertPool, cleanup func()) {
+	return setupTLSTestServerWithGroups(t, "")
 }
 
-func setupTLSTestServerWithGroups(t *testing.T, enablePQC *bool, tlsGroups string) (addr string, certPool *x509.CertPool, cleanup func()) {
+func setupTLSTestServerWithGroups(t *testing.T, tlsGroups string) (addr string, certPool *x509.CertPool, cleanup func()) {
 	t.Helper()
 	caPath := filepath.Join(t.TempDir(), "ca.crt")
 	config := RuntimeConfig{
@@ -49,7 +49,6 @@ func setupTLSTestServerWithGroups(t *testing.T, enablePQC *bool, tlsGroups strin
 		fallbackPort: ":0", // avoid conflicts
 		autoTLS:      true,
 		caCertFile:   caPath,
-		enablePQC:    enablePQC,
 		tlsGroups:    tlsGroups,
 	}
 
@@ -80,7 +79,7 @@ func setupTLSTestServerWithGroups(t *testing.T, enablePQC *bool, tlsGroups strin
 
 func TestConnectWithTLS(t *testing.T) {
 	t.Parallel()
-	addr, certPool, cleanup := setupTLSTestServer(t, nil)
+	addr, certPool, cleanup := setupTLSTestServer(t)
 	defer cleanup()
 
 	creds := credentials.NewTLS(&tls.Config{
@@ -136,7 +135,7 @@ func TestConnectWithTLS(t *testing.T) {
 
 func TestConnectWithTLS_REST(t *testing.T) {
 	t.Parallel()
-	addr, certPool, cleanup := setupTLSTestServer(t, nil)
+	addr, certPool, cleanup := setupTLSTestServer(t)
 	defer cleanup()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -199,7 +198,7 @@ func assertHeader(t *testing.T, md metadata.MD, key, expected string) {
 
 func TestConnectWithTLS_PQCDisabled(t *testing.T) {
 	t.Parallel()
-	addr, certPool, cleanup := setupTLSTestServer(t, boolPtr(false))
+	addr, certPool, cleanup := setupTLSTestServerWithGroups(t, "0x001d,0x0017,0x0018,0x0019")
 	defer cleanup()
 
 	creds := credentials.NewTLS(&tls.Config{
@@ -243,10 +242,6 @@ func TestConnectWithTLS_PQCDisabled(t *testing.T) {
 	assertHeader(t, header, "x-showcase-tls-group", "X25519")
 }
 
-func boolPtr(b bool) *bool {
-	return &b
-}
-
 type headerCapturer struct {
 	transport http.RoundTripper
 	headers   http.Header
@@ -276,7 +271,7 @@ func assertRESTHeader(t *testing.T, headers http.Header, key, expected string) {
 func TestConnectWithTLS_GroupPinned(t *testing.T) {
 	t.Parallel()
 	// Pin server to X25519MLKEM768 (0x11ec)
-	addr, certPool, cleanup := setupTLSTestServerWithGroups(t, nil, "0x11ec")
+	addr, certPool, cleanup := setupTLSTestServerWithGroups(t, "0x11ec")
 	defer cleanup()
 
 	creds := credentials.NewTLS(&tls.Config{
@@ -315,7 +310,7 @@ func TestConnectWithTLS_GroupPinned(t *testing.T) {
 func TestConnectWithTLS_GroupMismatch_FailsHandshake(t *testing.T) {
 	t.Parallel()
 	// Server only allows X25519MLKEM768 (0x11ec)
-	addr, certPool, cleanup := setupTLSTestServerWithGroups(t, nil, "0x11ec")
+	addr, certPool, cleanup := setupTLSTestServerWithGroups(t, "0x11ec")
 	defer cleanup()
 
 	// Client only offers classical X25519

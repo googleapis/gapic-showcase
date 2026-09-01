@@ -71,17 +71,6 @@ Provide the server cert, key, **and the CA cert** (which the server will use to 
 
 When running on **Go 1.24+**, the hybrid post-quantum key exchange **`X25519MLKEM768`** is enabled by default on the Showcase server.
 
-### Disabling PQC (Server-Side)
-
-If you need to verify classical fallback behavior, you can force the Showcase server to disable all Post-Quantum hybrid key exchanges and use only classical cryptography by starting the server with the `--enable-pqc=false` flag:
-
-```sh
-./gapic-showcase run \
-  --tls-cert certs/server.crt \
-  --tls-key certs/server.key \
-  --enable-pqc=false
-```
-
 ### Restricting / Pinning Allowed TLS Groups (`--tls-groups`)
 
 To strictly test whether a client supports a specific key exchange algorithm (or to test custom server preference ordering), use the `--tls-groups` flag.
@@ -100,6 +89,18 @@ The flag accepts a comma-separated list of standard [IANA Key Exchange Group IDs
   --tls-cert certs/server.crt \
   --tls-key certs/server.key \
   --tls-groups 0x001d,0x0017
+```
+
+### Disabling PQC (Classical Only)
+
+To disable Post-Quantum hybrid key exchanges and restrict the Showcase server to classical cryptography only, specify the classical curves using `--tls-groups`:
+
+```sh
+# Restrict server to classical curves (X25519, P-256, P-384, P-521):
+./gapic-showcase run \
+  --tls-cert certs/server.crt \
+  --tls-key certs/server.key \
+  --tls-groups 0x001d,0x0017,0x0018,0x0019
 ```
 
 #### Common IANA Group IDs Reference

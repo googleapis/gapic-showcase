@@ -52,7 +52,6 @@ type RuntimeConfig struct {
 	tlsCert      string
 	tlsKey       string
 	tlsGroups    string
-	enablePQC    *bool
 	autoTLS      bool
 	caCertFile   string
 }
@@ -114,11 +113,6 @@ func createTLSConfig(config RuntimeConfig) *tls.Config {
 		NextProtos:   []string{"h2", "http/1.1"},
 	}
 
-	pqcEnabled := true
-	if config.enablePQC != nil {
-		pqcEnabled = *config.enablePQC
-	}
-
 	if config.tlsGroups != "" {
 		groups, err := server.ParseTLSGroups(config.tlsGroups)
 		if err != nil {
@@ -130,14 +124,6 @@ func createTLSConfig(config RuntimeConfig) *tls.Config {
 			groupNames = append(groupNames, g.String())
 		}
 		stdLog.Printf("Restricted server TLS key exchange groups: %s", strings.Join(groupNames, ","))
-	} else if !pqcEnabled {
-		baseConfig.CurvePreferences = []tls.CurveID{
-			tls.X25519,
-			tls.CurveP256,
-			tls.CurveP384,
-			tls.CurveP521,
-		}
-		stdLog.Printf("PQC key exchanges disabled on server. Using classical curves only.")
 	}
 
 	// Handle Client CA for mTLS / One-Way TLS
