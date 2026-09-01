@@ -1,5 +1,13 @@
 # Release History
 
+## [0.43.1](https://github.com/googleapis/gapic-showcase/compare/v0.43.0...v0.43.1) (2026-09-01)
+
+
+### Bug Fixes
+
+* Fix HTTP 400 on resumable upload requests due to middleware execution order ([#1665](https://github.com/googleapis/gapic-showcase/issues/1665)) ([48cfc9b](https://github.com/googleapis/gapic-showcase/commit/48cfc9b4417217dff3d6cb124313e82929d3fd21))
+* Return backend response on resumable upload finalize ([#1667](https://github.com/googleapis/gapic-showcase/issues/1667)) ([71a6df3](https://github.com/googleapis/gapic-showcase/commit/71a6df3b599ae3ce09842830707a8a22a627c1d0))
+
 ## [0.43.0](https://github.com/googleapis/gapic-showcase/compare/v0.42.0...v0.43.0) (2026-08-12)
 
 
