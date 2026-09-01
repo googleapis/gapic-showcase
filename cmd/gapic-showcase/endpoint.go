@@ -439,14 +439,14 @@ func newEndpointREST(lis net.Listener, backend *services.Backend) *endpointREST 
 	})
 	genrest.RegisterHandlers(router, backend)
 
-	// Register Resumable Upload protocol middleware
+	// Register Resumable Upload protocol and TLS HTTP middleware as outer HTTP handlers
 	resumableMgr := resumableupload.NewManager()
-	router.Use(resumableMgr.Middleware)
+	var handler http.Handler = router
+	handler = resumableMgr.Middleware(handler)
+	handler = server.TLSHTTPMiddleware(handler)
 
-	// Register TLS HTTP Middleware
-	router.Use(server.TLSHTTPMiddleware)
 	return &endpointREST{
-		server:   &http.Server{Handler: router},
+		server:   &http.Server{Handler: handler},
 		listener: lis,
 	}
 }
