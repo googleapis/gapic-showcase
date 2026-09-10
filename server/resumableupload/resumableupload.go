@@ -26,6 +26,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 )
 
 const defaultHost = "localhost:7469"
@@ -44,6 +45,7 @@ type ScenarioConfig struct {
 	FailureCount        int    `json:"failure_count"`
 	ActionAfterFailures string `json:"action_after_failures"`
 	AfterOffset         int64  `json:"after_offset"`
+	DelayMs             int    `json:"delay_ms"`
 }
 
 type uploadSession struct {
@@ -194,6 +196,10 @@ func (sess *uploadSession) upload(w http.ResponseWriter, r *http.Request, offset
 		return false
 	}
 
+	if sess.ScenarioConfig.DelayMs > 0 {
+		time.Sleep(time.Duration(sess.ScenarioConfig.DelayMs) * time.Millisecond)
+	}
+
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		sendError(w, http.StatusBadRequest, "Error reading request body", sess.Status)
@@ -235,6 +241,15 @@ func (m *Manager) handleRequest(w http.ResponseWriter, r *http.Request) {
 
 	sess.mu.Lock()
 	defer sess.mu.Unlock()
+
+	if cfgStr := r.Header.Get("X-Goog-Test-Scenario-Config"); cfgStr != "" {
+		var reqConfig struct {
+			DelayMs *int `json:"delay_ms"`
+		}
+		if err := json.Unmarshal([]byte(cfgStr), &reqConfig); err == nil && reqConfig.DelayMs != nil {
+			sess.ScenarioConfig.DelayMs = *reqConfig.DelayMs
+		}
+	}
 
 	if slices.Contains(commands, "query") {
 		sess.query(w)
