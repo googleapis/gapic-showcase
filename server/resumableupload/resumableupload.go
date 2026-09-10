@@ -46,6 +46,7 @@ type ScenarioConfig struct {
 	ActionAfterFailures string `json:"action_after_failures"`
 	AfterOffset         int64  `json:"after_offset"`
 	DelayMs             int    `json:"delay_ms"`
+	PartialBytes        int64  `json:"partial_bytes"`
 }
 
 type uploadSession struct {
@@ -66,11 +67,65 @@ func (sess *uploadSession) handleScenario(cmd string, w http.ResponseWriter, r *
 		return sess.nonFatalErrorOnQuery(cmd, w)
 	case "non_fatal_error_on_chunk_upload":
 		return sess.nonFatalErrorOnChunkUpload(cmd, w, offset)
+	case "partial_commit_on_chunk_upload":
+		return sess.partialCommitOnChunkUpload(cmd, w, r, offset)
 	case "chunk_granularity":
 		return sess.chunkGranularity(cmd, w, r)
 	default:
 		return false
 	}
+}
+
+// partialCommitOnChunkUpload simulates a partial commit error during chunk upload.
+// It commits up to PartialBytes from the chunk payload into the session buffer, advances
+// CurrentOffset, and returns an error (default 409 Conflict) with the
+// X-Goog-Upload-Size-Received header indicating the committed byte offset.
+func (sess *uploadSession) partialCommitOnChunkUpload(cmd string, w http.ResponseWriter, r *http.Request, offset int64) bool {
+	if cmd == "upload" && offset >= sess.ScenarioConfig.AfterOffset {
+		if sess.UploadFailures < sess.ScenarioConfig.FailureCount {
+			sess.UploadFailures++
+			// Verify that the chunk offset matches the server's current committed offset before committing.
+			if offset != sess.CurrentOffset {
+				w.Header().Set("X-Goog-Upload-Size-Received", strconv.FormatInt(sess.CurrentOffset, 10))
+				sendError(w, http.StatusConflict, fmt.Sprintf("Invalid offset: expected %d, got %d", sess.CurrentOffset, offset), sess.Status)
+				return true
+			}
+			var body []byte
+			if r.Body != nil {
+				var err error
+				body, err = io.ReadAll(r.Body)
+				if err != nil {
+					sendError(w, http.StatusBadRequest, "Error reading request body", sess.Status)
+					return true
+				}
+			}
+			// Ingest only up to PartialBytes into the buffer and advance offset accordingly.
+			commitBytes := sess.ScenarioConfig.PartialBytes
+			if commitBytes > int64(len(body)) {
+				commitBytes = int64(len(body))
+			}
+			if commitBytes > 0 {
+				sess.Buffer.Write(body[:commitBytes])
+				sess.CurrentOffset += commitBytes
+			}
+			if sess.ScenarioConfig.DelayMs > 0 {
+				time.Sleep(time.Duration(sess.ScenarioConfig.DelayMs) * time.Millisecond)
+			}
+			errorCode := sess.ScenarioConfig.ErrorCode
+			if errorCode == 0 {
+				errorCode = http.StatusConflict
+			}
+			// Return committed byte offset via X-Goog-Upload-Size-Received with active status.
+			w.Header().Set("X-Goog-Upload-Size-Received", strconv.FormatInt(sess.CurrentOffset, 10))
+			sendError(w, errorCode, "Injected partial commit chunk upload error", statusActive)
+			return true
+		}
+		if sess.ScenarioConfig.ActionAfterFailures == "terminate" {
+			sendError(w, http.StatusInternalServerError, "Scenario requested termination", "")
+			return true
+		}
+	}
+	return false
 }
 
 func (sess *uploadSession) nonFatalErrorOnQuery(cmd string, w http.ResponseWriter) bool {
@@ -192,6 +247,7 @@ func (sess *uploadSession) upload(w http.ResponseWriter, r *http.Request, offset
 	}
 
 	if offset != sess.CurrentOffset {
+		w.Header().Set("X-Goog-Upload-Size-Received", strconv.FormatInt(sess.CurrentOffset, 10))
 		sendError(w, http.StatusConflict, fmt.Sprintf("Invalid offset: expected %d, got %d", sess.CurrentOffset, offset), sess.Status)
 		return false
 	}
@@ -298,8 +354,12 @@ func (m *Manager) handleStart(w http.ResponseWriter, r *http.Request) {
 		scenario = "happy_path"
 	}
 
+	defaultErrorCode := http.StatusServiceUnavailable
+	if scenario == "partial_commit_on_chunk_upload" {
+		defaultErrorCode = http.StatusConflict
+	}
 	config := ScenarioConfig{
-		ErrorCode:           http.StatusServiceUnavailable,
+		ErrorCode:           defaultErrorCode,
 		FailureCount:        1,
 		ActionAfterFailures: "succeed",
 		AfterOffset:         0,
