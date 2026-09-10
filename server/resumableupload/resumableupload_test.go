@@ -564,3 +564,69 @@ func TestDelayMsChunkUploadScenario(t *testing.T) {
 		t.Fatalf("expected upload to take at least 100ms, elapsed: %v", elapsed)
 	}
 }
+
+// TestPartialCommitChunkUploadScenario verifies that partial_commit_on_chunk_upload
+// commits partial_bytes, returns HTTP 409 with X-Goog-Upload-Size-Received, and allows resuming.
+func TestPartialCommitChunkUploadScenario(t *testing.T) {
+	mgr := resumableupload.NewManager()
+	handler := mgr.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	// 1. Start session with partial_commit_on_chunk_upload (commit 4 bytes, fail with 409)
+	reqStart := httptest.NewRequest("POST", "http://localhost:7469/upload", strings.NewReader(`{"name":"test.txt"}`))
+	reqStart.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	reqStart.Header.Set("X-Goog-Upload-Command", "start")
+	reqStart.Header.Set("Content-Type", "application/json")
+	reqStart.Header.Set("X-Goog-Test-Scenario", "partial_commit_on_chunk_upload")
+	reqStart.Header.Set("X-Goog-Test-Scenario-Config", `{"partial_bytes": 4, "error_code": 409, "failure_count": 1}`)
+	recStart := httptest.NewRecorder()
+	handler.ServeHTTP(recStart, reqStart)
+
+	uploadURL := recStart.Header().Get("X-Goog-Upload-URL")
+	if uploadURL == "" {
+		t.Fatalf("expected X-Goog-Upload-URL in response, got empty")
+	}
+
+	// 2. Upload an 8-byte chunk at offset 0
+	chunk1 := []byte("12345678")
+	reqChunk1 := httptest.NewRequest("POST", uploadURL, bytes.NewReader(chunk1))
+	reqChunk1.Header.Set("X-Goog-Upload-Command", "upload")
+	reqChunk1.Header.Set("X-Goog-Upload-Offset", "0")
+	recChunk1 := httptest.NewRecorder()
+	handler.ServeHTTP(recChunk1, reqChunk1)
+
+	// Expect HTTP 409 Conflict with X-Goog-Upload-Size-Received: 4
+	if recChunk1.Code != http.StatusConflict {
+		t.Fatalf("expected 409 Conflict on partial chunk upload, got %d: %s", recChunk1.Code, recChunk1.Body.String())
+	}
+	if got := recChunk1.Header().Get("X-Goog-Upload-Size-Received"); got != "4" {
+		t.Fatalf("expected X-Goog-Upload-Size-Received 4, got %q", got)
+	}
+
+	// 3. Query current offset to verify server committed 4 bytes
+	reqQuery := httptest.NewRequest("POST", uploadURL, nil)
+	reqQuery.Header.Set("X-Goog-Upload-Command", "query")
+	recQuery := httptest.NewRecorder()
+	handler.ServeHTTP(recQuery, reqQuery)
+
+	if got := recQuery.Header().Get("X-Goog-Upload-Size-Received"); got != "4" {
+		t.Fatalf("expected query to report offset 4, got %q", got)
+	}
+
+	// 4. Resume upload with remaining 4 bytes at offset 4 and finalize
+	chunk2 := []byte("5678")
+	reqChunk2 := httptest.NewRequest("POST", uploadURL, bytes.NewReader(chunk2))
+	reqChunk2.Header.Set("X-Goog-Upload-Command", "upload, finalize")
+	reqChunk2.Header.Set("X-Goog-Upload-Offset", "4")
+	recChunk2 := httptest.NewRecorder()
+	handler.ServeHTTP(recChunk2, reqChunk2)
+
+	if recChunk2.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK on resume finalize, got %d: %s", recChunk2.Code, recChunk2.Body.String())
+	}
+	expectedBody := `{"name":"test.txt","size":8}`
+	if got := strings.TrimSpace(recChunk2.Body.String()); got != expectedBody {
+		t.Fatalf("expected body %s, got %s", expectedBody, got)
+	}
+}
