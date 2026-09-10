@@ -78,15 +78,13 @@ func (sess *uploadSession) handleScenario(cmd string, w http.ResponseWriter, r *
 
 // partialCommitOnChunkUpload simulates a partial commit error during chunk upload.
 // It commits up to PartialBytes from the chunk payload into the session buffer, advances
-// CurrentOffset, and returns an error (default 409 Conflict) with the
-// X-Goog-Upload-Size-Received header indicating the committed byte offset.
+// CurrentOffset, and returns a transient error (default 503 Service Unavailable).
 func (sess *uploadSession) partialCommitOnChunkUpload(cmd string, w http.ResponseWriter, r *http.Request, offset int64) bool {
 	if cmd == "upload" && offset >= sess.ScenarioConfig.AfterOffset {
 		if sess.UploadFailures < sess.ScenarioConfig.FailureCount {
 			sess.UploadFailures++
 			// Verify that the chunk offset matches the server's current committed offset before committing.
 			if offset != sess.CurrentOffset {
-				w.Header().Set("X-Goog-Upload-Size-Received", strconv.FormatInt(sess.CurrentOffset, 10))
 				sendError(w, http.StatusConflict, fmt.Sprintf("Invalid offset: expected %d, got %d", sess.CurrentOffset, offset), sess.Status)
 				return true
 			}
@@ -113,10 +111,8 @@ func (sess *uploadSession) partialCommitOnChunkUpload(cmd string, w http.Respons
 			}
 			errorCode := sess.ScenarioConfig.ErrorCode
 			if errorCode == 0 {
-				errorCode = http.StatusConflict
+				errorCode = http.StatusServiceUnavailable
 			}
-			// Return committed byte offset via X-Goog-Upload-Size-Received with active status.
-			w.Header().Set("X-Goog-Upload-Size-Received", strconv.FormatInt(sess.CurrentOffset, 10))
 			sendError(w, errorCode, "Injected partial commit chunk upload error", statusActive)
 			return true
 		}
@@ -247,7 +243,6 @@ func (sess *uploadSession) upload(w http.ResponseWriter, r *http.Request, offset
 	}
 
 	if offset != sess.CurrentOffset {
-		w.Header().Set("X-Goog-Upload-Size-Received", strconv.FormatInt(sess.CurrentOffset, 10))
 		sendError(w, http.StatusConflict, fmt.Sprintf("Invalid offset: expected %d, got %d", sess.CurrentOffset, offset), sess.Status)
 		return false
 	}
@@ -354,12 +349,8 @@ func (m *Manager) handleStart(w http.ResponseWriter, r *http.Request) {
 		scenario = "happy_path"
 	}
 
-	defaultErrorCode := http.StatusServiceUnavailable
-	if scenario == "partial_commit_on_chunk_upload" {
-		defaultErrorCode = http.StatusConflict
-	}
 	config := ScenarioConfig{
-		ErrorCode:           defaultErrorCode,
+		ErrorCode:           http.StatusServiceUnavailable,
 		FailureCount:        1,
 		ActionAfterFailures: "succeed",
 		AfterOffset:         0,
