@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/googleapis/gapic-showcase/server/resumableupload"
 )
@@ -521,5 +522,45 @@ func TestBinaryPayloadUpload(t *testing.T) {
 	expectedResponse := fmt.Sprintf(`{"name":"uploaded_image.png","size":%d}`, len(binaryPayload))
 	if got := strings.TrimSpace(recFinal.Body.String()); got != expectedResponse {
 		t.Fatalf("expected final response %s, got %s", expectedResponse, got)
+	}
+}
+
+// TestDelayMsChunkUploadScenario verifies that delay_ms pauses chunk upload responses.
+func TestDelayMsChunkUploadScenario(t *testing.T) {
+	mgr := resumableupload.NewManager()
+	handler := mgr.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	// 1. Start upload session
+	reqStart := httptest.NewRequest("POST", "http://localhost:7469/upload", strings.NewReader(`{"name":"test.txt"}`))
+	reqStart.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	reqStart.Header.Set("X-Goog-Upload-Command", "start")
+	reqStart.Header.Set("Content-Type", "application/json")
+	recStart := httptest.NewRecorder()
+	handler.ServeHTTP(recStart, reqStart)
+
+	uploadURL := recStart.Header().Get("X-Goog-Upload-URL")
+	if uploadURL == "" {
+		t.Fatalf("expected X-Goog-Upload-URL in response, got empty")
+	}
+
+	// 2. Upload chunk with delay_ms: 100
+	payload := []byte("delayed data chunk")
+	reqUpload := httptest.NewRequest("POST", uploadURL, bytes.NewReader(payload))
+	reqUpload.Header.Set("X-Goog-Upload-Command", "upload")
+	reqUpload.Header.Set("X-Goog-Upload-Offset", "0")
+	reqUpload.Header.Set("X-Goog-Test-Scenario-Config", `{"delay_ms": 100}`)
+	recUpload := httptest.NewRecorder()
+
+	start := time.Now()
+	handler.ServeHTTP(recUpload, reqUpload)
+	elapsed := time.Since(start)
+
+	if recUpload.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK, got %d", recUpload.Code)
+	}
+	if elapsed < 100*time.Millisecond {
+		t.Fatalf("expected upload to take at least 100ms, elapsed: %v", elapsed)
 	}
 }
