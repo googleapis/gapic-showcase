@@ -29,7 +29,7 @@ The middleware inspects `X-Goog-Upload-Command` and implements the core session 
 
 The middleware supports injecting failure scenarios via HTTP headers for testing client retry and error-recovery behavior:
 
-- **`X-Goog-Test-Scenario`**: Specifies the scenario (`non_fatal_error_on_start`, `fatal_error_on_start`, `non_fatal_error_on_chunk_upload`, `partial_commit_on_chunk_upload`, `non_fatal_error_on_query`, `chunk_granularity`).
+- **`X-Goog-Test-Scenario`**: Specifies the scenario (`non_fatal_error_on_start`, `fatal_error_on_start`, `non_fatal_error_on_chunk_upload`, `fatal_error_on_chunk_upload`, `partial_commit_on_chunk_upload`, `non_fatal_error_on_query`, `chunk_granularity`).
 - **`X-Goog-Test-Scenario-Config`**: JSON configuration string controlling the injected error (`client_uuid`, `error_code`, `failure_count`, `after_offset`, `action_after_failures`, `partial_bytes`, `delay_ms`).
 
 ### Start-Call Scenario Isolation (`client_uuid`)
