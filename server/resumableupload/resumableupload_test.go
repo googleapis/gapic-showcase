@@ -613,3 +613,91 @@ func TestPartialCommitChunkUploadScenario(t *testing.T) {
 		t.Fatalf("expected body %s, got %s", expectedBody, got)
 	}
 }
+
+// TestFatalErrorOnChunkUploadScenario verifies that fatal_error_on_chunk_upload
+// returns a terminal error with X-Goog-Upload-Status: final and prevents further uploads.
+func TestFatalErrorOnChunkUploadScenario(t *testing.T) {
+	mgr := resumableupload.NewManager()
+	handler := mgr.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	// 1. Default fatal error on chunk upload (403 Forbidden, X-Goog-Upload-Status: final)
+	reqStartDefault := httptest.NewRequest("POST", "http://localhost:7469/upload", nil)
+	reqStartDefault.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	reqStartDefault.Header.Set("X-Goog-Upload-Command", "start")
+	reqStartDefault.Header.Set("X-Goog-Test-Scenario", "fatal_error_on_chunk_upload")
+	recStartDefault := httptest.NewRecorder()
+	handler.ServeHTTP(recStartDefault, reqStartDefault)
+
+	defaultUploadURL := recStartDefault.Header().Get("X-Goog-Upload-URL")
+	if defaultUploadURL == "" {
+		t.Fatalf("expected X-Goog-Upload-URL in response, got empty")
+	}
+
+	reqChunkFatal := httptest.NewRequest("POST", defaultUploadURL, bytes.NewReader([]byte("chunk1")))
+	reqChunkFatal.Header.Set("X-Goog-Upload-Command", "upload")
+	reqChunkFatal.Header.Set("X-Goog-Upload-Offset", "0")
+	recChunkFatal := httptest.NewRecorder()
+	handler.ServeHTTP(recChunkFatal, reqChunkFatal)
+
+	if recChunkFatal.Code != http.StatusForbidden {
+		t.Fatalf("expected 403 Forbidden on fatal_error_on_chunk_upload default, got %d", recChunkFatal.Code)
+	}
+	if got := recChunkFatal.Header().Get("X-Goog-Upload-Status"); got != "final" {
+		t.Fatalf("expected X-Goog-Upload-Status final, got %q", got)
+	}
+
+	// Subsequent upload attempt should fail because the session is terminated (status is final)
+	reqChunkRetry := httptest.NewRequest("POST", defaultUploadURL, bytes.NewReader([]byte("chunk1")))
+	reqChunkRetry.Header.Set("X-Goog-Upload-Command", "upload")
+	reqChunkRetry.Header.Set("X-Goog-Upload-Offset", "0")
+	recChunkRetry := httptest.NewRecorder()
+	handler.ServeHTTP(recChunkRetry, reqChunkRetry)
+
+	if recChunkRetry.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 Bad Request on retry after fatal error, got %d", recChunkRetry.Code)
+	}
+	if got := recChunkRetry.Header().Get("X-Goog-Upload-Status"); got != "final" {
+		t.Fatalf("expected X-Goog-Upload-Status final on retry, got %q", got)
+	}
+
+	// 2. Custom fatal error on chunk upload with error_code: 400 and after_offset: 5
+	reqStartCustom := httptest.NewRequest("POST", "http://localhost:7469/upload", nil)
+	reqStartCustom.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	reqStartCustom.Header.Set("X-Goog-Upload-Command", "start")
+	reqStartCustom.Header.Set("X-Goog-Test-Scenario", "fatal_error_on_chunk_upload")
+	reqStartCustom.Header.Set("X-Goog-Test-Scenario-Config", `{"error_code": 400, "after_offset": 5}`)
+	recStartCustom := httptest.NewRecorder()
+	handler.ServeHTTP(recStartCustom, reqStartCustom)
+
+	customUploadURL := recStartCustom.Header().Get("X-Goog-Upload-URL")
+	if customUploadURL == "" {
+		t.Fatalf("expected X-Goog-Upload-URL in response, got empty")
+	}
+
+	// First chunk at offset 0 (5 bytes) succeeds because after_offset is 5
+	reqChunkBeforeOffset := httptest.NewRequest("POST", customUploadURL, bytes.NewReader([]byte("12345")))
+	reqChunkBeforeOffset.Header.Set("X-Goog-Upload-Command", "upload")
+	reqChunkBeforeOffset.Header.Set("X-Goog-Upload-Offset", "0")
+	recChunkBeforeOffset := httptest.NewRecorder()
+	handler.ServeHTTP(recChunkBeforeOffset, reqChunkBeforeOffset)
+
+	if recChunkBeforeOffset.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK for chunk before after_offset, got %d", recChunkBeforeOffset.Code)
+	}
+
+	// Second chunk at offset 5 triggers the fatal error (400 Bad Request, status final)
+	reqChunkAtOffset := httptest.NewRequest("POST", customUploadURL, bytes.NewReader([]byte("67890")))
+	reqChunkAtOffset.Header.Set("X-Goog-Upload-Command", "upload")
+	reqChunkAtOffset.Header.Set("X-Goog-Upload-Offset", "5")
+	recChunkAtOffset := httptest.NewRecorder()
+	handler.ServeHTTP(recChunkAtOffset, reqChunkAtOffset)
+
+	if recChunkAtOffset.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 Bad Request for chunk at after_offset, got %d", recChunkAtOffset.Code)
+	}
+	if got := recChunkAtOffset.Header().Get("X-Goog-Upload-Status"); got != "final" {
+		t.Fatalf("expected X-Goog-Upload-Status final, got %q", got)
+	}
+}
