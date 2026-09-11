@@ -257,7 +257,7 @@ func (sess *uploadSession) upload(w http.ResponseWriter, r *http.Request, offset
 		return false
 	}
 
-	if sess.ScenarioConfig.DelayMs > 0 {
+	if sess.ScenarioConfig.DelayMs > 0 && offset >= sess.ScenarioConfig.AfterOffset {
 		time.Sleep(time.Duration(sess.ScenarioConfig.DelayMs) * time.Millisecond)
 	}
 
@@ -305,10 +305,16 @@ func (m *Manager) handleRequest(w http.ResponseWriter, r *http.Request) {
 
 	if cfgStr := r.Header.Get("X-Goog-Test-Scenario-Config"); cfgStr != "" {
 		var reqConfig struct {
-			DelayMs *int `json:"delay_ms"`
+			DelayMs     *int   `json:"delay_ms"`
+			AfterOffset *int64 `json:"after_offset"`
 		}
-		if err := json.Unmarshal([]byte(cfgStr), &reqConfig); err == nil && reqConfig.DelayMs != nil {
-			sess.ScenarioConfig.DelayMs = *reqConfig.DelayMs
+		if err := json.Unmarshal([]byte(cfgStr), &reqConfig); err == nil {
+			if reqConfig.DelayMs != nil {
+				sess.ScenarioConfig.DelayMs = *reqConfig.DelayMs
+			}
+			if reqConfig.AfterOffset != nil {
+				sess.ScenarioConfig.AfterOffset = *reqConfig.AfterOffset
+			}
 		}
 	}
 

@@ -613,3 +613,60 @@ func TestPartialCommitChunkUploadScenario(t *testing.T) {
 		t.Fatalf("expected body %s, got %s", expectedBody, got)
 	}
 }
+
+// TestDelayMsAfterOffsetChunkUploadScenario verifies that delay_ms with after_offset
+// delays chunks at or after after_offset without requiring a dedicated scenario.
+func TestDelayMsAfterOffsetChunkUploadScenario(t *testing.T) {
+	mgr := resumableupload.NewManager()
+	handler := mgr.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	// 1. Start upload session with delay_ms and after_offset configured
+	reqStart := httptest.NewRequest("POST", "http://localhost:7469/upload", strings.NewReader(`{"name":"delay_offset_test.txt"}`))
+	reqStart.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	reqStart.Header.Set("X-Goog-Upload-Command", "start")
+	reqStart.Header.Set("Content-Type", "application/json")
+	reqStart.Header.Set("X-Goog-Test-Scenario-Config", `{"delay_ms": 100, "after_offset": 5}`)
+	recStart := httptest.NewRecorder()
+	handler.ServeHTTP(recStart, reqStart)
+
+	uploadURL := recStart.Header().Get("X-Goog-Upload-URL")
+	if uploadURL == "" {
+		t.Fatalf("expected X-Goog-Upload-URL in response, got empty")
+	}
+
+	// 2. Upload first chunk at offset 0 (length 5) -> should NOT delay since offset < 5
+	reqUpload1 := httptest.NewRequest("POST", uploadURL, bytes.NewReader([]byte("hello")))
+	reqUpload1.Header.Set("X-Goog-Upload-Command", "upload")
+	reqUpload1.Header.Set("X-Goog-Upload-Offset", "0")
+	recUpload1 := httptest.NewRecorder()
+
+	start1 := time.Now()
+	handler.ServeHTTP(recUpload1, reqUpload1)
+	elapsed1 := time.Since(start1)
+
+	if recUpload1.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK, got %d", recUpload1.Code)
+	}
+	if elapsed1 >= 100*time.Millisecond {
+		t.Fatalf("expected first chunk to not delay, but took %v", elapsed1)
+	}
+
+	// 3. Upload second chunk at offset 5 (length 5) -> should delay at least 100ms
+	reqUpload2 := httptest.NewRequest("POST", uploadURL, bytes.NewReader([]byte("world")))
+	reqUpload2.Header.Set("X-Goog-Upload-Command", "upload, finalize")
+	reqUpload2.Header.Set("X-Goog-Upload-Offset", "5")
+	recUpload2 := httptest.NewRecorder()
+
+	start2 := time.Now()
+	handler.ServeHTTP(recUpload2, reqUpload2)
+	elapsed2 := time.Since(start2)
+
+	if recUpload2.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK, got %d", recUpload2.Code)
+	}
+	if elapsed2 < 100*time.Millisecond {
+		t.Fatalf("expected second chunk to delay at least 100ms, elapsed: %v", elapsed2)
+	}
+}
