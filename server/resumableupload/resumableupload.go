@@ -127,12 +127,15 @@ func (sess *uploadSession) partialCommitOnChunkUpload(cmd string, w http.Respons
 // if ActionAfterFailures is "terminate", it terminates the session with a 500 Internal Server Error;
 // otherwise it allows the request to proceed normally.
 func (sess *uploadSession) nonFatalError(targetCmd, cmd string, w http.ResponseWriter, offset int64) bool {
+	// Only apply this handler if the current command matches the scenario's target command.
 	if cmd != targetCmd {
 		return false
 	}
+	// For chunk upload errors, only inject the failure once the upload offset reaches AfterOffset.
 	if targetCmd == "upload" && offset < sess.ScenarioConfig.AfterOffset {
 		return false
 	}
+	// Inject transient errors while the failure count is below the configured threshold.
 	if sess.UploadFailures < sess.ScenarioConfig.FailureCount {
 		sess.UploadFailures++
 		errorCode := sess.ScenarioConfig.ErrorCode
@@ -146,10 +149,12 @@ func (sess *uploadSession) nonFatalError(targetCmd, cmd string, w http.ResponseW
 		sendError(w, errorCode, fmt.Sprintf("Injected non-fatal %s error", msgCmd), statusActive)
 		return true
 	}
+	// Once the failure count is exhausted, terminate the session if configured to do so.
 	if sess.ScenarioConfig.ActionAfterFailures == "terminate" {
 		sendError(w, http.StatusInternalServerError, "Scenario requested termination", "")
 		return true
 	}
+	// Allow the request to proceed normally once failures are exhausted.
 	return false
 }
 
