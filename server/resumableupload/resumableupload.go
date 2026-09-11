@@ -63,6 +63,8 @@ type uploadSession struct {
 
 func (sess *uploadSession) handleScenario(cmd string, w http.ResponseWriter, r *http.Request, offset int64) bool {
 	switch sess.Scenario {
+	case "fatal_error_on_chunk_upload":
+		return sess.fatalErrorOnChunkUpload(cmd, w, offset)
 	case "non_fatal_error_on_query":
 		return sess.nonFatalErrorOnQuery(cmd, w)
 	case "non_fatal_error_on_chunk_upload":
@@ -74,6 +76,25 @@ func (sess *uploadSession) handleScenario(cmd string, w http.ResponseWriter, r *
 	default:
 		return false
 	}
+}
+
+// fatalErrorOnChunkUpload simulates a terminal (non-retryable) failure during chunk upload.
+// When offset is at or above AfterOffset, it marks the session status as final (terminating
+// the session permanently) and returns an HTTP error (default 403 Forbidden) with header
+// X-Goog-Upload-Status: final. Subsequent upload attempts to this session will be rejected.
+func (sess *uploadSession) fatalErrorOnChunkUpload(cmd string, w http.ResponseWriter, offset int64) bool {
+	// Only trigger on "upload" commands once the client reaches or exceeds AfterOffset.
+	if cmd == "upload" && offset >= sess.ScenarioConfig.AfterOffset {
+		code := sess.ScenarioConfig.ErrorCode
+		if code == 0 {
+			code = http.StatusForbidden
+		}
+		// Permanently terminate the session per protocol specification.
+		sess.Status = statusFinal
+		sendError(w, code, "Injected fatal chunk upload error", statusFinal)
+		return true
+	}
+	return false
 }
 
 // partialCommitOnChunkUpload simulates a partial commit error during chunk upload.
@@ -346,8 +367,13 @@ func (m *Manager) handleStart(w http.ResponseWriter, r *http.Request) {
 		scenario = "happy_path"
 	}
 
+	defaultErrorCode := http.StatusServiceUnavailable
+	if scenario == "fatal_error_on_chunk_upload" {
+		defaultErrorCode = http.StatusForbidden
+	}
+
 	config := ScenarioConfig{
-		ErrorCode:           http.StatusServiceUnavailable,
+		ErrorCode:           defaultErrorCode,
 		FailureCount:        1,
 		ActionAfterFailures: "succeed",
 		AfterOffset:         0,
