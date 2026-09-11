@@ -106,9 +106,6 @@ func (sess *uploadSession) partialCommitOnChunkUpload(cmd string, w http.Respons
 				sess.Buffer.Write(body[:commitBytes])
 				sess.CurrentOffset += commitBytes
 			}
-			if sess.ScenarioConfig.DelayMs > 0 {
-				time.Sleep(time.Duration(sess.ScenarioConfig.DelayMs) * time.Millisecond)
-			}
 			errorCode := sess.ScenarioConfig.ErrorCode
 			if errorCode == 0 {
 				errorCode = http.StatusServiceUnavailable
