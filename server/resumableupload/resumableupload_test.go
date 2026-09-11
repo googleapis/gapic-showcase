@@ -17,6 +17,7 @@ package resumableupload_test
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -280,41 +281,56 @@ func TestFatalErrorOnStartScenario(t *testing.T) {
 	}
 }
 
+func startUploadSession(t *testing.T, handler http.Handler, scenario, config string) string {
+	t.Helper()
+	req := httptest.NewRequest("POST", "http://localhost:7469/upload", nil)
+	req.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	req.Header.Set("X-Goog-Upload-Command", "start")
+	if scenario != "" {
+		req.Header.Set("X-Goog-Test-Scenario", scenario)
+	}
+	if config != "" {
+		req.Header.Set("X-Goog-Test-Scenario-Config", config)
+	}
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK on start, got %d", rec.Code)
+	}
+	uploadURL := rec.Header().Get("X-Goog-Upload-URL")
+	if uploadURL == "" {
+		t.Fatalf("expected X-Goog-Upload-URL in response, got empty")
+	}
+	return uploadURL
+}
+
+func sendUploadCommand(handler http.Handler, uploadURL, command string, offset int64, body io.Reader) *httptest.ResponseRecorder {
+	req := httptest.NewRequest("POST", uploadURL, body)
+	req.Header.Set("X-Goog-Upload-Command", command)
+	if offset >= 0 {
+		req.Header.Set("X-Goog-Upload-Offset", strconv.FormatInt(offset, 10))
+	}
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	return rec
+}
+
 func TestNonFatalErrorOnChunkUploadScenario(t *testing.T) {
 	mgr := resumableupload.NewManager()
 	handler := mgr.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	}))
 
-	reqStart := httptest.NewRequest("POST", "http://localhost:7469/upload", nil)
-	reqStart.Header.Set("X-Goog-Upload-Protocol", "resumable")
-	reqStart.Header.Set("X-Goog-Upload-Command", "start")
-	reqStart.Header.Set("X-Goog-Test-Scenario", "non_fatal_error_on_chunk_upload")
-	reqStart.Header.Set("X-Goog-Test-Scenario-Config", `{"error_code":503,"failure_count":1,"after_offset":0}`)
-	recStart := httptest.NewRecorder()
-	handler.ServeHTTP(recStart, reqStart)
-
-	uploadURL := recStart.Header().Get("X-Goog-Upload-URL")
-	u, _ := url.Parse(uploadURL)
+	uploadURL := startUploadSession(t, handler, "non_fatal_error_on_chunk_upload", `{"error_code":503,"failure_count":1,"after_offset":0}`)
 
 	// First upload attempt fails with injected 503
-	reqUpload1 := httptest.NewRequest("POST", u.String(), bytes.NewReader([]byte("chunk1")))
-	reqUpload1.Header.Set("X-Goog-Upload-Command", "upload")
-	reqUpload1.Header.Set("X-Goog-Upload-Offset", "0")
-	recUpload1 := httptest.NewRecorder()
-	handler.ServeHTTP(recUpload1, reqUpload1)
-
+	recUpload1 := sendUploadCommand(handler, uploadURL, "upload", 0, bytes.NewReader([]byte("chunk1")))
 	if recUpload1.Code != http.StatusServiceUnavailable {
 		t.Fatalf("expected 503 Service Unavailable on first chunk upload, got %d", recUpload1.Code)
 	}
 
 	// Second upload attempt succeeds after exhausting failure_count=1
-	reqUpload2 := httptest.NewRequest("POST", u.String(), bytes.NewReader([]byte("chunk1")))
-	reqUpload2.Header.Set("X-Goog-Upload-Command", "upload")
-	reqUpload2.Header.Set("X-Goog-Upload-Offset", "0")
-	recUpload2 := httptest.NewRecorder()
-	handler.ServeHTTP(recUpload2, reqUpload2)
-
+	recUpload2 := sendUploadCommand(handler, uploadURL, "upload", 0, bytes.NewReader([]byte("chunk1")))
 	if recUpload2.Code != http.StatusOK {
 		t.Fatalf("expected 200 OK on retry chunk upload, got %d", recUpload2.Code)
 	}
@@ -326,35 +342,16 @@ func TestNonFatalErrorOnChunkUploadTerminateScenario(t *testing.T) {
 		w.WriteHeader(http.StatusNotFound)
 	}))
 
-	reqStart := httptest.NewRequest("POST", "http://localhost:7469/upload", nil)
-	reqStart.Header.Set("X-Goog-Upload-Protocol", "resumable")
-	reqStart.Header.Set("X-Goog-Upload-Command", "start")
-	reqStart.Header.Set("X-Goog-Test-Scenario", "non_fatal_error_on_chunk_upload")
-	reqStart.Header.Set("X-Goog-Test-Scenario-Config", `{"error_code":503,"failure_count":1,"action_after_failures":"terminate"}`)
-	recStart := httptest.NewRecorder()
-	handler.ServeHTTP(recStart, reqStart)
-
-	uploadURL := recStart.Header().Get("X-Goog-Upload-URL")
-	u, _ := url.Parse(uploadURL)
+	uploadURL := startUploadSession(t, handler, "non_fatal_error_on_chunk_upload", `{"error_code":503,"failure_count":1,"action_after_failures":"terminate"}`)
 
 	// First upload attempt fails with injected 503
-	reqUpload1 := httptest.NewRequest("POST", u.String(), bytes.NewReader([]byte("chunk1")))
-	reqUpload1.Header.Set("X-Goog-Upload-Command", "upload")
-	reqUpload1.Header.Set("X-Goog-Upload-Offset", "0")
-	recUpload1 := httptest.NewRecorder()
-	handler.ServeHTTP(recUpload1, reqUpload1)
-
+	recUpload1 := sendUploadCommand(handler, uploadURL, "upload", 0, bytes.NewReader([]byte("chunk1")))
 	if recUpload1.Code != http.StatusServiceUnavailable {
 		t.Fatalf("expected 503 Service Unavailable on first chunk upload, got %d", recUpload1.Code)
 	}
 
 	// Subsequent upload attempt terminates with 500 Internal Server Error
-	reqUpload2 := httptest.NewRequest("POST", u.String(), bytes.NewReader([]byte("chunk1")))
-	reqUpload2.Header.Set("X-Goog-Upload-Command", "upload")
-	reqUpload2.Header.Set("X-Goog-Upload-Offset", "0")
-	recUpload2 := httptest.NewRecorder()
-	handler.ServeHTTP(recUpload2, reqUpload2)
-
+	recUpload2 := sendUploadCommand(handler, uploadURL, "upload", 0, bytes.NewReader([]byte("chunk1")))
 	if recUpload2.Code != http.StatusInternalServerError {
 		t.Fatalf("expected 500 Internal Server Error when action_after_failures=terminate, got %d", recUpload2.Code)
 	}
@@ -366,33 +363,16 @@ func TestNonFatalErrorOnQueryScenario(t *testing.T) {
 		w.WriteHeader(http.StatusNotFound)
 	}))
 
-	reqStart := httptest.NewRequest("POST", "http://localhost:7469/upload", nil)
-	reqStart.Header.Set("X-Goog-Upload-Protocol", "resumable")
-	reqStart.Header.Set("X-Goog-Upload-Command", "start")
-	reqStart.Header.Set("X-Goog-Test-Scenario", "non_fatal_error_on_query")
-	reqStart.Header.Set("X-Goog-Test-Scenario-Config", `{"error_code":502,"failure_count":1}`)
-	recStart := httptest.NewRecorder()
-	handler.ServeHTTP(recStart, reqStart)
-
-	uploadURL := recStart.Header().Get("X-Goog-Upload-URL")
-	u, _ := url.Parse(uploadURL)
+	uploadURL := startUploadSession(t, handler, "non_fatal_error_on_query", `{"error_code":502,"failure_count":1}`)
 
 	// First query attempt fails with injected 502
-	reqQuery1 := httptest.NewRequest("POST", u.String(), nil)
-	reqQuery1.Header.Set("X-Goog-Upload-Command", "query")
-	recQuery1 := httptest.NewRecorder()
-	handler.ServeHTTP(recQuery1, reqQuery1)
-
+	recQuery1 := sendUploadCommand(handler, uploadURL, "query", -1, nil)
 	if recQuery1.Code != http.StatusBadGateway {
 		t.Fatalf("expected 502 Bad Gateway on first query, got %d", recQuery1.Code)
 	}
 
 	// Second query attempt succeeds after exhausting failure_count=1
-	reqQuery2 := httptest.NewRequest("POST", u.String(), nil)
-	reqQuery2.Header.Set("X-Goog-Upload-Command", "query")
-	recQuery2 := httptest.NewRecorder()
-	handler.ServeHTTP(recQuery2, reqQuery2)
-
+	recQuery2 := sendUploadCommand(handler, uploadURL, "query", -1, nil)
 	if recQuery2.Code != http.StatusOK {
 		t.Fatalf("expected 200 OK on retry query, got %d", recQuery2.Code)
 	}
