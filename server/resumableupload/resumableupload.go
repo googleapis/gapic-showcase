@@ -46,6 +46,7 @@ type ScenarioConfig struct {
 	ActionAfterFailures string `json:"action_after_failures"`
 	AfterOffset         int64  `json:"after_offset"`
 	DelayMs             int    `json:"delay_ms"`
+	PartialBytes        int64  `json:"partial_bytes"`
 }
 
 type uploadSession struct {
@@ -66,11 +67,58 @@ func (sess *uploadSession) handleScenario(cmd string, w http.ResponseWriter, r *
 		return sess.nonFatalErrorOnQuery(cmd, w)
 	case "non_fatal_error_on_chunk_upload":
 		return sess.nonFatalErrorOnChunkUpload(cmd, w, offset)
+	case "partial_commit_on_chunk_upload":
+		return sess.partialCommitOnChunkUpload(cmd, w, r, offset)
 	case "chunk_granularity":
 		return sess.chunkGranularity(cmd, w, r)
 	default:
 		return false
 	}
+}
+
+// partialCommitOnChunkUpload simulates a partial commit error during chunk upload.
+// It commits up to PartialBytes from the chunk payload into the session buffer, advances
+// CurrentOffset, and returns a transient error (default 503 Service Unavailable).
+func (sess *uploadSession) partialCommitOnChunkUpload(cmd string, w http.ResponseWriter, r *http.Request, offset int64) bool {
+	if cmd == "upload" && offset >= sess.ScenarioConfig.AfterOffset {
+		if sess.UploadFailures < sess.ScenarioConfig.FailureCount {
+			sess.UploadFailures++
+			// Verify that the chunk offset matches the server's current committed offset before committing.
+			if offset != sess.CurrentOffset {
+				sendError(w, http.StatusConflict, fmt.Sprintf("Invalid offset: expected %d, got %d", sess.CurrentOffset, offset), sess.Status)
+				return true
+			}
+			var body []byte
+			if r.Body != nil {
+				var err error
+				body, err = io.ReadAll(r.Body)
+				if err != nil {
+					sendError(w, http.StatusBadRequest, "Error reading request body", sess.Status)
+					return true
+				}
+			}
+			// Ingest only up to PartialBytes into the buffer and advance offset accordingly.
+			commitBytes := sess.ScenarioConfig.PartialBytes
+			if commitBytes > int64(len(body)) {
+				commitBytes = int64(len(body))
+			}
+			if commitBytes > 0 {
+				sess.Buffer.Write(body[:commitBytes])
+				sess.CurrentOffset += commitBytes
+			}
+			errorCode := sess.ScenarioConfig.ErrorCode
+			if errorCode == 0 {
+				errorCode = http.StatusServiceUnavailable
+			}
+			sendError(w, errorCode, "Injected partial commit chunk upload error", statusActive)
+			return true
+		}
+		if sess.ScenarioConfig.ActionAfterFailures == "terminate" {
+			sendError(w, http.StatusInternalServerError, "Scenario requested termination", "")
+			return true
+		}
+	}
+	return false
 }
 
 func (sess *uploadSession) nonFatalErrorOnQuery(cmd string, w http.ResponseWriter) bool {
