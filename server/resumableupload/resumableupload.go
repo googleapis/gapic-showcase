@@ -64,9 +64,9 @@ type uploadSession struct {
 func (sess *uploadSession) handleScenario(cmd string, w http.ResponseWriter, r *http.Request, offset int64) bool {
 	switch sess.Scenario {
 	case "non_fatal_error_on_query":
-		return sess.nonFatalErrorOnQuery(cmd, w)
+		return sess.nonFatalError("query", cmd, w, offset)
 	case "non_fatal_error_on_chunk_upload":
-		return sess.nonFatalErrorOnChunkUpload(cmd, w, offset)
+		return sess.nonFatalError("upload", cmd, w, offset)
 	case "partial_commit_on_chunk_upload":
 		return sess.partialCommitOnChunkUpload(cmd, w, r, offset)
 	case "chunk_granularity":
@@ -121,26 +121,34 @@ func (sess *uploadSession) partialCommitOnChunkUpload(cmd string, w http.Respons
 	return false
 }
 
-func (sess *uploadSession) nonFatalErrorOnQuery(cmd string, w http.ResponseWriter) bool {
-	if cmd == "query" && sess.UploadFailures < sess.ScenarioConfig.FailureCount {
+// nonFatalError handles injecting transient errors for a given upload command.
+// If the session has failed fewer than FailureCount times, it increments the failure count
+// and returns a non-fatal error response (status active). Once FailureCount is reached,
+// if ActionAfterFailures is "terminate", it terminates the session with a 500 Internal Server Error;
+// otherwise it allows the request to proceed normally.
+func (sess *uploadSession) nonFatalError(targetCmd, cmd string, w http.ResponseWriter, offset int64) bool {
+	if cmd != targetCmd {
+		return false
+	}
+	if targetCmd == "upload" && offset < sess.ScenarioConfig.AfterOffset {
+		return false
+	}
+	if sess.UploadFailures < sess.ScenarioConfig.FailureCount {
 		sess.UploadFailures++
-		sendError(w, sess.ScenarioConfig.ErrorCode, "Injected non-fatal query error", statusActive)
+		errorCode := sess.ScenarioConfig.ErrorCode
+		if errorCode == 0 {
+			errorCode = http.StatusServiceUnavailable
+		}
+		msgCmd := targetCmd
+		if targetCmd == "upload" {
+			msgCmd = "chunk upload"
+		}
+		sendError(w, errorCode, fmt.Sprintf("Injected non-fatal %s error", msgCmd), statusActive)
 		return true
 	}
-	return false
-}
-
-func (sess *uploadSession) nonFatalErrorOnChunkUpload(cmd string, w http.ResponseWriter, offset int64) bool {
-	if cmd == "upload" && offset >= sess.ScenarioConfig.AfterOffset {
-		if sess.UploadFailures < sess.ScenarioConfig.FailureCount {
-			sess.UploadFailures++
-			sendError(w, sess.ScenarioConfig.ErrorCode, "Injected non-fatal chunk upload error", statusActive)
-			return true
-		}
-		if sess.ScenarioConfig.ActionAfterFailures == "terminate" {
-			sendError(w, http.StatusInternalServerError, "Scenario requested termination", "")
-			return true
-		}
+	if sess.ScenarioConfig.ActionAfterFailures == "terminate" {
+		sendError(w, http.StatusInternalServerError, "Scenario requested termination", "")
+		return true
 	}
 	return false
 }
