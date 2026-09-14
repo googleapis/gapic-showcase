@@ -1,5 +1,18 @@
 # Release History
 
+## [0.44.0](https://github.com/googleapis/gapic-showcase/compare/v0.43.1...v0.44.0) (2026-09-14)
+
+
+### Features
+
+* Add AfterOffset for testing stall control ([#1684](https://github.com/googleapis/gapic-showcase/issues/1684)) ([9ae8dbd](https://github.com/googleapis/gapic-showcase/commit/9ae8dbd4473203d133987d60e188967b57cd48f4))
+* Add resumable uploads partial commit support ([#1679](https://github.com/googleapis/gapic-showcase/issues/1679)) ([dece585](https://github.com/googleapis/gapic-showcase/commit/dece585e7cb61ec0f28ffcc708b2843524be52b1))
+
+
+### Bug Fixes
+
+* Add ability to introduce delays in resumable upload test scenarios ([#1676](https://github.com/googleapis/gapic-showcase/issues/1676)) ([03780dc](https://github.com/googleapis/gapic-showcase/commit/03780dc20c3f96b124407fbf0f94a94f55ed231e))
+
 ## [0.43.1](https://github.com/googleapis/gapic-showcase/compare/v0.43.0...v0.43.1) (2026-09-01)
 
 
