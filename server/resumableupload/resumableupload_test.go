@@ -460,6 +460,38 @@ func TestFinalizeWithInitialMetadata(t *testing.T) {
 	}
 }
 
+func TestUploadURLScheme(t *testing.T) {
+	mgr := resumableupload.NewManager()
+	handler := mgr.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+
+	// Plain HTTP request
+	httpReq := httptest.NewRequest("POST", "http://localhost:7469/upload", nil)
+	httpReq.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	httpReq.Header.Set("X-Goog-Upload-Command", "start")
+	httpRec := httptest.NewRecorder()
+	handler.ServeHTTP(httpRec, httpReq)
+
+	// Verify returned upload URL uses http
+	if got := httpRec.Header().Get("X-Goog-Upload-URL"); !strings.HasPrefix(got, "http://") {
+		t.Errorf("expected http:// upload URL, got %q", got)
+	}
+
+	// HTTPS request with TLS
+	tlsReq := httptest.NewRequest("POST", "https://localhost:7469/upload", nil)
+	tlsReq.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	tlsReq.Header.Set("X-Goog-Upload-Command", "start")
+	tlsRec := httptest.NewRecorder()
+	handler.ServeHTTP(tlsRec, tlsReq)
+
+	// Verify returned upload URL uses https
+	if got := tlsRec.Header().Get("X-Goog-Upload-URL"); !strings.HasPrefix(got, "https://") {
+		t.Errorf("expected https:// upload URL, got %q", got)
+	}
+}
+
+
 // TestBinaryPayloadUpload verifies that arbitrary binary payloads (e.g. PNG, octet-stream)
 // can be uploaded in the data phase without requiring the binary data to be JSON-formatted.
 func TestBinaryPayloadUpload(t *testing.T) {

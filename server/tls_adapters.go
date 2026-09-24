@@ -30,6 +30,7 @@ import (
 
 // ConnectionState stores the TLS handshake details for a connection.
 type ConnectionState struct {
+	TLSState     tls.ConnectionState
 	CurveID      tls.CurveID
 	ClientCurves []tls.CurveID
 }
@@ -44,6 +45,7 @@ func RecordTLSHandshake(remoteAddr string, state tls.ConnectionState, clientCurv
 	tlsRegistryMu.Lock()
 	defer tlsRegistryMu.Unlock()
 	tlsRegistry[remoteAddr] = &ConnectionState{
+		TLSState:     state,
 		CurveID:      state.CurveID,
 		ClientCurves: clientCurves,
 	}
@@ -119,9 +121,11 @@ func TLSMetadataUnaryInterceptor(ctx context.Context, req interface{}, info *grp
 }
 
 // TLSHTTPMiddleware injects TLS handshake details into HTTP response headers.
+// Additionally restores r.TLS that was stripped by cmux, so handlers can determine request scheme.
 func TLSHTTPMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if state := GetTLSState(r.RemoteAddr); state != nil {
+			r.TLS = &state.TLSState
 			w.Header().Set("x-showcase-tls-group", state.CurveID.String())
 			w.Header().Set("x-showcase-tls-client-supported-groups", formatGroups(state.ClientCurves))
 		}
