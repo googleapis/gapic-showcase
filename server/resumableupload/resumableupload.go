@@ -64,9 +64,9 @@ type uploadSession struct {
 func (sess *uploadSession) handleScenario(cmd string, w http.ResponseWriter, r *http.Request, offset int64) bool {
 	switch sess.Scenario {
 	case "non_fatal_error_on_query":
-		return sess.nonFatalError("query", cmd, w, offset)
+		return sess.nonFatalError("query", cmd, w, r, offset)
 	case "non_fatal_error_on_chunk_upload":
-		return sess.nonFatalError("upload", cmd, w, offset)
+		return sess.nonFatalError("upload", cmd, w, r, offset)
 	case "partial_commit_on_chunk_upload":
 		return sess.partialCommitOnChunkUpload(cmd, w, r, offset)
 	case "chunk_granularity":
@@ -126,7 +126,7 @@ func (sess *uploadSession) partialCommitOnChunkUpload(cmd string, w http.Respons
 // and returns a non-fatal error response (status active). Once FailureCount is reached,
 // if ActionAfterFailures is "terminate", it terminates the session with a 500 Internal Server Error;
 // otherwise it allows the request to proceed normally.
-func (sess *uploadSession) nonFatalError(targetCmd, cmd string, w http.ResponseWriter, offset int64) bool {
+func (sess *uploadSession) nonFatalError(targetCmd, cmd string, w http.ResponseWriter, r *http.Request, offset int64) bool {
 	// Only apply this handler if the current command matches the scenario's target command.
 	if cmd != targetCmd {
 		return false
@@ -138,6 +138,11 @@ func (sess *uploadSession) nonFatalError(targetCmd, cmd string, w http.ResponseW
 	// Inject transient errors while the failure count is below the configured threshold.
 	if sess.UploadFailures < sess.ScenarioConfig.FailureCount {
 		sess.UploadFailures++
+		// Drain it before returning error, otherwise unread data left on the socket causes Winsock on Windows
+		// to issue a hard TCP RST (WSAECONNRESET / 10054) which aborts the client before it can read the response headers.
+		if targetCmd == "upload" && r != nil && r.Body != nil {
+			_, _ = io.Copy(io.Discard, r.Body)
+		}
 		errorCode := sess.ScenarioConfig.ErrorCode
 		if errorCode == 0 {
 			errorCode = http.StatusServiceUnavailable
