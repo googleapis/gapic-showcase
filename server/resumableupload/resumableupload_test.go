@@ -357,6 +357,29 @@ func TestNonFatalErrorOnChunkUploadTerminateScenario(t *testing.T) {
 	}
 }
 
+// TestUploadErrorDrainsRequestBody verifies that when an upload fails early (e.g. 503),
+// the server drains the unread chunk payload to prevent client connection resets (e.g. Windows WSAECONNRESET).
+func TestUploadErrorDrainsRequestBody(t *testing.T) {
+	mgr := resumableupload.NewManager()
+	handler := mgr.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+
+	uploadURL := startUploadSession(t, handler, "non_fatal_error_on_chunk_upload", `{"error_code":503,"failure_count":1,"after_offset":0}`)
+
+	// Send a 512 KiB chunk payload that triggers an injected 503 error on upload.
+	body := bytes.NewReader(bytes.Repeat([]byte("a"), 512*1024))
+	rec := sendUploadCommand(handler, uploadURL, "upload", 0, body)
+	if rec.Code != http.StatusServiceUnavailable {
+		t.Fatalf("expected 503 Service Unavailable, got %d", rec.Code)
+	}
+
+	// Verify the server drained the request body to EOF so no unread bytes remain on the wire.
+	if body.Len() != 0 {
+		t.Fatalf("expected request body to be fully drained, but %d bytes remain", body.Len())
+	}
+}
+
 func TestNonFatalErrorOnQueryScenario(t *testing.T) {
 	mgr := resumableupload.NewManager()
 	handler := mgr.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
