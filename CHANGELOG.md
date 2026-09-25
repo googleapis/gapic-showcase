@@ -1,5 +1,12 @@
 # Release History
 
+## [0.44.1](https://github.com/googleapis/gapic-showcase/compare/v0.44.0...v0.44.1) (2026-09-25)
+
+
+### Bug Fixes
+
+* Restore r.TLS when TLS is enabled ([#1686](https://github.com/googleapis/gapic-showcase/issues/1686)) ([b872317](https://github.com/googleapis/gapic-showcase/commit/b8723178cb6f8070ea68d221b407de9d552ec254))
+
 ## [0.44.0](https://github.com/googleapis/gapic-showcase/compare/v0.43.1...v0.44.0) (2026-09-14)
 
 
