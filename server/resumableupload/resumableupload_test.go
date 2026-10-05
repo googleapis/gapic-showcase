@@ -544,7 +544,6 @@ func TestUploadURLScheme(t *testing.T) {
 	}
 }
 
-
 // TestBinaryPayloadUpload verifies that arbitrary binary payloads (e.g. PNG, octet-stream)
 // can be uploaded in the data phase without requiring the binary data to be JSON-formatted.
 func TestBinaryPayloadUpload(t *testing.T) {
