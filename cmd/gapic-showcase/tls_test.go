@@ -19,8 +19,10 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -180,6 +182,71 @@ func TestConnectWithTLS_REST(t *testing.T) {
 		t.Errorf("REST: missing header: x-showcase-tls-client-supported-groups")
 	} else if !strings.Contains(restClientGroups, "X25519MLKEM768") {
 		t.Errorf("REST: expected client supported groups to contain X25519MLKEM768, got %q", restClientGroups)
+	}
+}
+
+// TestResumableUploadURLSchemeOverTLS checks the upload URL a resumable upload
+// start hands out, through the real TLS -> cmux -> REST stack. cmux hides the
+// *tls.Conn from net/http, so r.TLS is nil unless TLSHTTPMiddleware restores
+// it, and an http:// URL sends every later upload request in plain text to the
+// TLS port. TestUploadURLScheme cannot catch that: it sets r.TLS directly on an
+// httptest request.
+func TestResumableUploadURLSchemeOverTLS(t *testing.T) {
+	t.Parallel()
+	addr, certPool, cleanup := setupTLSTestServer(t)
+	defer cleanup()
+
+	// A custom TLSClientConfig disables the transport's automatic HTTP/2, so the
+	// requests negotiate HTTP/1.1 and cmux routes them to the REST server.
+	hc := &http.Client{
+		Transport: &http.Transport{TLSClientConfig: &tls.Config{RootCAs: certPool}},
+		Timeout:   5 * time.Second,
+	}
+
+	start, err := http.NewRequest("POST", "https://"+addr+"/resumable/upload/v1beta1/files:upload", strings.NewReader(`{"name":"sample.txt"}`))
+	if err != nil {
+		t.Fatalf("failed to build start request: %v", err)
+	}
+	start.Header.Set("Content-Type", "application/json")
+	start.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	start.Header.Set("X-Goog-Upload-Command", "start")
+	startResp, err := hc.Do(start)
+	if err != nil {
+		t.Fatalf("start request failed: %v", err)
+	}
+	startBody, _ := io.ReadAll(startResp.Body)
+	startResp.Body.Close()
+	if startResp.StatusCode != http.StatusOK {
+		t.Fatalf("start: expected 200 OK, got %d: %s", startResp.StatusCode, startBody)
+	}
+
+	uploadURL := startResp.Header.Get("X-Goog-Upload-URL")
+	parsed, err := url.Parse(uploadURL)
+	if err != nil {
+		t.Fatalf("start: unparseable upload URL %q: %v", uploadURL, err)
+	}
+	if parsed.Scheme != "https" || parsed.Host != addr {
+		t.Fatalf("start: expected an https://%s upload URL, got %q", addr, uploadURL)
+	}
+
+	// The URL must also be usable over TLS: finish the upload through it.
+	final, err := http.NewRequest("POST", uploadURL, strings.NewReader("data"))
+	if err != nil {
+		t.Fatalf("failed to build finalize request: %v", err)
+	}
+	final.Header.Set("X-Goog-Upload-Command", "upload, finalize")
+	final.Header.Set("X-Goog-Upload-Offset", "0")
+	finalResp, err := hc.Do(final)
+	if err != nil {
+		t.Fatalf("upload, finalize request failed: %v", err)
+	}
+	finalBody, _ := io.ReadAll(finalResp.Body)
+	finalResp.Body.Close()
+	if finalResp.StatusCode != http.StatusOK {
+		t.Fatalf("upload, finalize: expected 200 OK, got %d: %s", finalResp.StatusCode, finalBody)
+	}
+	if got, want := finalResp.Header.Get("X-Goog-Upload-Status"), "final"; got != want {
+		t.Fatalf("upload, finalize: expected X-Goog-Upload-Status %q, got %q", want, got)
 	}
 }
 
