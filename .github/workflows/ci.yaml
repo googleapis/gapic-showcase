@@ -7,17 +7,21 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   regenerate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       modified_files: ${{ steps.mod.outputs.modified_files }}
     steps:
-    - uses: actions/setup-go@v6
+    - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
       with:
         go-version: '1.26'
     - name: Install Protoc
-      uses: arduino/setup-protoc@v3.0.0
+      uses: arduino/setup-protoc@c65c819552d16ad3c9b72d9dfd5ba5237b9c906b # v3.0.0
       with:
         version: "34.1"
     # Pinned tool versions ensure reproducible builds and prevent unexpected diffs in automated PRs.
@@ -27,7 +31,7 @@ jobs:
         go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.6.2
         go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_cli@v0.60.0
         go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic@v0.60.0
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
     - name: Checkout common protos
       run: git submodule init && git submodule update
     - name: Download go deps
@@ -39,12 +43,15 @@ jobs:
     - name: Capture modified files
       id: mod
       run: |
-        files=$(git ls-files --deleted --modified --other --directory --exclude-standard cmd client server/genproto server/genrest)
-        echo ::set-output name=modified_files::$files
+        readarray -t files < <(git ls-files --deleted --modified --other --directory --exclude-standard cmd client server/genproto server/genrest)
+        echo "modified_files=${files[@]}" >> "$GITHUB_OUTPUT"
     - name: Prepare regenerated sources
+
       if: steps.mod.outputs.modified_files
-      run: tar czf regen.tgz ${{ steps.mod.outputs.modified_files }}
-    - uses: actions/upload-artifact@v7
+      env:
+        MODIFIED_FILES: ${{ steps.mod.outputs.modified_files }}
+      run: tar czf regen.tgz $MODIFIED_FILES
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
       if: steps.mod.outputs.modified_files
       with:
         name: regenerated-sources
@@ -52,14 +59,16 @@ jobs:
   lint:
     needs: regenerate
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-    - uses: actions/setup-go@v6
+    - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
       with:
         go-version: '1.26'
     - name: Install golint
       run: go install golang.org/x/lint/golint@latest
-    - uses: actions/checkout@v7
-    - uses: actions/download-artifact@v8
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+    - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
       if: needs.regenerate.outputs.modified_files
       with:
         name: regenerated-sources
@@ -79,7 +88,7 @@ jobs:
       # which would mess up the empty vetting results check.
       run: go mod download && go vet ./server/services 2> govet.txt && ! [ -s govet.txt ]
       if: ${{ always() }}
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
       if: ${{ always() }}
       with:
         name: linting-results
@@ -90,12 +99,14 @@ jobs:
   tests:
     needs: regenerate
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-    - uses: actions/checkout@v7
-    - uses: actions/setup-go@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+    - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
       with:
         go-version: '1.26'
-    - uses: actions/download-artifact@v8
+    - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
       if: needs.regenerate.outputs.modified_files
       with:
         name: regenerated-sources
@@ -115,12 +126,14 @@ jobs:
   probes:
     needs: regenerate
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-    - uses: actions/checkout@v7
-    - uses: actions/setup-go@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+    - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
       with:
         go-version: '1.26'
-    - uses: actions/download-artifact@v8
+    - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
       if: needs.regenerate.outputs.modified_files
       with:
         name: regenerated-sources
@@ -165,9 +178,11 @@ jobs:
   #       npm run system-test
   protobufjs-load-test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-    - uses: actions/checkout@v7
-    - uses: actions/setup-node@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
       with:
         node-version: '24'
     - name: Install protobuf loader
@@ -184,19 +199,22 @@ jobs:
   push-generated-sources:
     needs: [regenerate, lint, tests, probes]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     if: github.ref == 'refs/heads/main' && needs.regenerate.outputs.modified_files
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       with:
         ref: main
-    - uses: actions/download-artifact@v8
+    - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
       with:
         name: regenerated-sources
     - name: Expand regen archive
       run: |
         tar xvzf regen.tgz
         rm regen.tgz
-    - uses: googleapis/code-suggester@v5
+    - uses: googleapis/code-suggester@f9fef85aa02459e30e62526abe950341cbbd768b # v5
       id: code_suggester
       env:
         ACCESS_TOKEN: ${{ secrets.YOSHI_CODE_BOT_TOKEN }}
@@ -212,11 +230,13 @@ jobs:
         git_dir: '.'
         force: true
     - name: Add automerge label to pull request
-      uses: actions/github-script@v9
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+      env:
+        PULL_NUMBER: ${{ steps.code_suggester.outputs.pull }}
       with:
         script: |
           github.rest.issues.addLabels({
-            issue_number: ${{ steps.code_suggester.outputs.pull }},
+            issue_number: Number(process.env.PULL_NUMBER),
             owner: context.repo.owner,
             repo: context.repo.repo,
             labels: ['automerge']
