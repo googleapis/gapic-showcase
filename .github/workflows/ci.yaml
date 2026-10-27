@@ -65,8 +65,8 @@ jobs:
     - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
       with:
         go-version: '1.27'
-    - name: Install golint
-      run: go install golang.org/x/lint/golint@latest
+    - name: Install staticcheck
+      run: go install honnef.co/go/tools/cmd/staticcheck@2026.2.2
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
     - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
       if: needs.regenerate.outputs.modified_files
@@ -80,8 +80,8 @@ jobs:
     - name: Check formatting
       run: gofmt -l ./server/services > gofmt.txt && ! [ -s gofmt.txt ]
       if: ${{ always() }}
-    - name: Lint service implementations
-      run: golint ./server/services >> golint.txt && ! [ -s golint.txt ]
+    - name: Run staticcheck on service implementations
+      run: staticcheck ./server/services > staticcheck.txt 2>&1 && ! [ -s staticcheck.txt ]
       if: ${{ always() }}
     - name: Vet service implementations
       # The mod download is there to prevent go vet from logging mod downloads
@@ -94,7 +94,7 @@ jobs:
         name: linting-results
         path: |
           gofmt.txt
-          golint.txt
+          staticcheck.txt
           govet.txt
   tests:
     needs: regenerate
@@ -155,27 +155,6 @@ jobs:
         echo "gRPC exit code: $GRPC_EXIT_CODE"
         echo "REST status code: $STATUSCODE"
         [ $STATUSCODE = "200" ]  && [ GRPC_EXIT_CODE != 0 ]
-  # Disabled until https://github.com/googleapis/gapic-generator-typescript/pull/955 is merged/released.
-  # typescript-smoke-test:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - uses: actions/setup-node@v2
-  #     with:
-  #       node-version: '12'
-  #   - name: Run gapic-generator-typescript
-  #     run: |
-  #       mkdir tsout
-  #       docker run --rm --user $UID \
-  #         --mount type=bind,source="$(pwd)"/schema,destination=/in/protos/google/showcase/v1beta1,readonly \
-  #         --mount type=bind,source="$(pwd)"/tsout,destination=/out/ \
-  #         gcr.io/gapic-images/gapic-generator-typescript:latest
-  #   - name: Run auto-generated tests
-  #     run: |
-  #       cd tsout
-  #       npm install
-  #       npm test
-  #       npm run system-test
   protobufjs-load-test:
     runs-on: ubuntu-latest
     permissions:
@@ -214,30 +193,20 @@ jobs:
       run: |
         tar xvzf regen.tgz
         rm regen.tgz
-    - uses: googleapis/code-suggester@f9fef85aa02459e30e62526abe950341cbbd768b # v5
-      id: code_suggester
+    - name: Push regenerated sources and open PR
       env:
-        ACCESS_TOKEN: ${{ secrets.YOSHI_CODE_BOT_TOKEN }}
-      with:
-        command: pr
-        upstream_owner: googleapis
-        upstream_repo: gapic-showcase
-        description: 'Regenerated sources resulting from most recent commit to main'
-        title: 'chore: regenerate sources'
-        message: 'chore: regenerate sources'
-        primary: 'main'
-        branch: regen
-        git_dir: '.'
-        force: true
-    - name: Add automerge label to pull request
-      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
-      env:
-        PULL_NUMBER: ${{ steps.code_suggester.outputs.pull }}
-      with:
-        script: |
-          github.rest.issues.addLabels({
-            issue_number: Number(process.env.PULL_NUMBER),
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            labels: ['automerge']
-          })
+        GH_TOKEN: ${{ secrets.YOSHI_CODE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+      run: |
+        gh auth setup-git
+        git config user.name "actions-bot"
+        git config user.email "actions-bot@users.noreply.github.com"
+        git checkout -B regen
+        git add -A
+        git commit -m "chore: regenerate sources"
+        git push -f origin regen
+        gh pr create \
+          --title "chore: regenerate sources" \
+          --body "Regenerated sources resulting from most recent commit to main" \
+          --base main \
+          --head regen \
+          --label automerge || gh pr edit regen --add-label automerge || true
