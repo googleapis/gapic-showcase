@@ -21,13 +21,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // NewSequenceServer returns a new SequenceServer for the Showcase API.
@@ -93,13 +94,7 @@ func (s *sequenceServerImpl) AttemptSequence(ctx context.Context, in *pb.Attempt
 
 	// Retrieve the attempt deadline.
 	deadline, _ := ctx.Deadline()
-	dpb, err := ptypes.TimestampProto(deadline)
-	if err != nil {
-		return nil, status.Errorf(
-			codes.Internal,
-			"%s", err.Error(),
-		)
-	}
+	dpb := timestamppb.New(deadline)
 
 	// Get the number of attempts, which coincides with this attempt's number.
 	n := len(rep.Attempts)
@@ -125,18 +120,12 @@ func (s *sequenceServerImpl) AttemptSequence(ctx context.Context, in *pb.Attempt
 		prev := rep.GetAttempts()[n-1]
 		respTime := prev.GetResponseTime()
 		d := received.Sub(respTime.AsTime())
-		attDelay = ptypes.DurationProto(d)
+		attDelay = durationpb.New(d)
 	}
 
 	// Clock the time that the server is sending the response
 	responseTime := time.Now()
-	rpb, err := ptypes.TimestampProto(responseTime)
-	if err != nil {
-		return nil, status.Errorf(
-			codes.Internal,
-			"%s", err.Error(),
-		)
-	}
+	rpb := timestamppb.New(responseTime)
 
 	rep.Attempts = append(rep.Attempts, &pb.SequenceReport_Attempt{
 		AttemptNumber:   int32(n),
@@ -268,18 +257,12 @@ func (s *sequenceServerImpl) AttemptStreamingSequence(in *pb.AttemptStreamingSeq
 		prev := rep.GetAttempts()[n-1]
 		respTime := prev.GetResponseTime()
 		d := received.Sub(respTime.AsTime())
-		attDelay = ptypes.DurationProto(d)
+		attDelay = durationpb.New(d)
 	}
 
 	// Clock the time that the server is sending the response
 	responseTime := time.Now()
-	rpb, err := ptypes.TimestampProto(responseTime)
-	if err != nil {
-		return status.Errorf(
-			codes.Internal,
-			"%s", err.Error(),
-		)
-	}
+	rpb := timestamppb.New(responseTime)
 
 	rep.Attempts = append(rep.Attempts, &pb.StreamingSequenceReport_Attempt{
 		AttemptNumber: int32(n),

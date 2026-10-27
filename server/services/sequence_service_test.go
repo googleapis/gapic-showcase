@@ -16,16 +16,15 @@ package services
 
 import (
 	"context"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 func TestSequenceEmpty(t *testing.T) {
@@ -74,11 +73,11 @@ func TestSequenceRetry(t *testing.T) {
 	responses := []*pb.Sequence_Response{
 		{
 			Status: status.New(codes.Unavailable, "Unavailable").Proto(),
-			Delay:  ptypes.DurationProto(1 * time.Second),
+			Delay:  durationpb.New(1 * time.Second),
 		},
 		{
 			Status: status.New(codes.Unavailable, "Unavailable").Proto(),
-			Delay:  ptypes.DurationProto(2 * time.Second),
+			Delay:  durationpb.New(2 * time.Second),
 		},
 		{
 			Status: status.New(codes.OK, "OK").Proto(),
@@ -248,15 +247,6 @@ func (m *mockStreamSequence) SetHeader(md metadata.MD) error {
 	return nil
 }
 
-func (m *mockStreamSequence) verify(expectHeadersAndTrailers bool) {
-	if len(m.exp) > 0 {
-		m.t.Errorf("Expand did not stream all expected values. %d expected values remaining.", len(m.exp))
-	}
-	if expectHeadersAndTrailers && (!reflect.DeepEqual([]string{"show", "case"}, m.trail) || !reflect.DeepEqual([]string{"showcaseHeader", "anotherHeader"}, m.head)) {
-		m.t.Errorf("Expand did not get all expected headers and trailers.\nGot these headers: %+v\nGot these trailers: %+v", m.head, m.trail)
-	}
-}
-
 func TestStreamingSequenceEmpty(t *testing.T) {
 	s := NewSequenceServer()
 
@@ -294,11 +284,11 @@ func TestStreamingSequenceRetry(t *testing.T) {
 	responses := []*pb.StreamingSequence_Response{
 		{
 			Status: status.New(codes.Unavailable, "Unavailable").Proto(),
-			Delay:  ptypes.DurationProto(1 * time.Second),
+			Delay:  durationpb.New(1 * time.Second),
 		},
 		{
 			Status: status.New(codes.Unavailable, "Unavailable").Proto(),
-			Delay:  ptypes.DurationProto(2 * time.Second),
+			Delay:  durationpb.New(2 * time.Second),
 		},
 		{
 			Status: status.New(codes.OK, "OK").Proto(),
@@ -359,11 +349,11 @@ func TestStreamingSequenceWithLastFailIndex(t *testing.T) {
 	responses := []*pb.StreamingSequence_Response{
 		{
 			Status: status.New(codes.Unavailable, "Unavailable").Proto(),
-			Delay:  ptypes.DurationProto(1 * time.Second),
+			Delay:  durationpb.New(1 * time.Second),
 		},
 		{
 			Status: status.New(codes.Unavailable, "Unavailable").Proto(),
-			Delay:  ptypes.DurationProto(2 * time.Second),
+			Delay:  durationpb.New(2 * time.Second),
 		},
 		{
 			Status: status.New(codes.OK, "OK").Proto(),

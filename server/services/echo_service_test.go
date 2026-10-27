@@ -24,7 +24,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	durpb "github.com/golang/protobuf/ptypes/duration"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -35,6 +34,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	durationpb "google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func TestEcho_success(t *testing.T) {
@@ -899,7 +899,7 @@ func TestPagedExpandLegacyMapped(t *testing.T) {
 }
 
 func TestWait(t *testing.T) {
-	endTime, _ := ptypes.TimestampProto(time.Now())
+	endTime := timestamppb.Now()
 	req := &pb.WaitRequest{End: &pb.WaitRequest_EndTime{EndTime: endTime}}
 	waiter := &mockWaiter{}
 	server := &echoServerImpl{waiter: waiter}
