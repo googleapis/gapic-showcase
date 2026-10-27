@@ -513,9 +513,8 @@ type Blurb struct {
 	// The latest timestamp at which the blurb was updated.
 	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
 	// (-- aip.dev/not-precedent: This is designed for testing non-slash
-	//
-	//	resource patterns. Ordinarily, non-slash separators are discouraged.
-	//	--)
+	//     resource patterns. Ordinarily, non-slash separators are discouraged.
+	//     --)
 	//
 	// Types that are valid to be assigned to LegacyId:
 	//
