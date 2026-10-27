@@ -19,19 +19,19 @@ import (
 	"encoding/base64"
 	"fmt"
 	"testing"
-	"time"
 
 	lropb "cloud.google.com/go/longrunning/autogen/longrunningpb"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func TestGetOperation_wait(t *testing.T) {
-	endTime, _ := ptypes.TimestampProto(time.Now())
+	endTime := timestamppb.Now()
 	waitReq := &pb.WaitRequest{End: &pb.WaitRequest_EndTime{EndTime: endTime}}
 	nameBytes, _ := proto.Marshal(waitReq)
 	req := &lropb.GetOperationRequest{
@@ -162,8 +162,10 @@ func TestGetOperation_searchBlurbs(t *testing.T) {
 	if op.GetResponse() == nil {
 		t.Error("SearchBlurbs() expected op.Response!=nil")
 	}
-	resp := &pb.SearchBlurbsResponse{}
-	ptypes.UnmarshalAny(op.GetResponse(), resp)
+	var resp pb.SearchBlurbsResponse
+	if err := anypb.UnmarshalTo(op.GetResponse(), &resp, proto.UnmarshalOptions{}); err != nil {
+		t.Fatal(err)
+	}
 	if len(resp.GetBlurbs()) != len(expected) {
 		t.Errorf(
 			"SearchBlurbs() expected blurbs size %d, got %d",
