@@ -637,7 +637,7 @@ type ExpandRequest struct {
 	Content string `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
 	// The error that is thrown after all words are sent on the stream.
 	Error *status.Status `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
-	// The wait time between each server streaming messages
+	//The wait time between each server streaming messages
 	StreamWaitTime *durationpb.Duration `protobuf:"bytes,3,opt,name=stream_wait_time,json=streamWaitTime,proto3" json:"stream_wait_time,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
@@ -767,8 +767,7 @@ type PagedExpandLegacyRequest struct {
 	Content string `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
 	// The number of words to returned in each page.
 	// (-- aip.dev/not-precedent: This is a legacy, non-standard pattern that
-	//
-	//	violates aip.dev/158. Ordinarily, this should be page_size. --)
+	//     violates aip.dev/158. Ordinarily, this should be page_size. --)
 	MaxResults int32 `protobuf:"varint,2,opt,name=max_results,json=maxResults,proto3" json:"max_results,omitempty"`
 	// The position of the page to be returned.
 	PageToken     string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
@@ -931,8 +930,7 @@ type PagedExpandLegacyMappedResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The words that were expanded, indexed by their initial character.
 	// (-- aip.dev/not-precedent: This is a legacy, non-standard pattern that violates
-	//
-	//	aip.dev/158. Ordinarily, this should be a `repeated` field, as in PagedExpandResponse. --)
+	//     aip.dev/158. Ordinarily, this should be a `repeated` field, as in PagedExpandResponse. --)
 	Alphabetized map[string]*PagedExpandResponseList `protobuf:"bytes,1,rep,name=alphabetized,proto3" json:"alphabetized,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// The next page token.
 	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`

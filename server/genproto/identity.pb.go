@@ -59,14 +59,12 @@ type User struct {
 	// The nickname of the user.
 	//
 	// (-- aip.dev/not-precedent: An empty string is a valid nickname.
-	//
-	//	Ordinarily, proto3_optional should not be used on a `string` field. --)
+	//     Ordinarily, proto3_optional should not be used on a `string` field. --)
 	Nickname *string `protobuf:"bytes,8,opt,name=nickname,proto3,oneof" json:"nickname,omitempty"`
 	// Enables the receiving of notifications. The default is true if unset.
 	//
 	// (-- aip.dev/not-precedent: The default for the feature is true.
-	//
-	//	Ordinarily, the default for a `bool` field should be false. --)
+	//     Ordinarily, the default for a `bool` field should be false. --)
 	EnableNotifications *bool `protobuf:"varint,9,opt,name=enable_notifications,json=enableNotifications,proto3,oneof" json:"enable_notifications,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
