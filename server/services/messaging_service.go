@@ -25,7 +25,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/longrunning/autogen/longrunningpb"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
@@ -33,6 +32,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
+	"google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // NewMessagingServer returns an instance of a messaging server.
@@ -125,7 +127,7 @@ func (s *messagingServerImpl) CreateRoom(ctx context.Context, in *pb.CreateRoomR
 	// Assign info.
 	id := s.roomUID.Next()
 	name := fmt.Sprintf("rooms/%d", id)
-	now := ptypes.TimestampNow()
+	now := timestamppb.Now()
 
 	r.Name = name
 	r.CreateTime = now
@@ -193,7 +195,7 @@ func (s *messagingServerImpl) UpdateRoom(ctx context.Context, in *pb.UpdateRoomR
 	updated := proto.Clone(existing).(*pb.Room)
 	applyFieldMask(r.ProtoReflect(), updated.ProtoReflect(), mask.GetPaths())
 	updated.CreateTime = existing.GetCreateTime()
-	updated.UpdateTime = ptypes.TimestampNow()
+	updated.UpdateTime = timestamppb.Now()
 
 	s.rooms[i] = roomEntry{room: updated}
 	return updated, nil
@@ -295,7 +297,7 @@ func (s *messagingServerImpl) CreateBlurb(ctx context.Context, in *pb.CreateBlur
 
 	id := puid.Next()
 	name := fmt.Sprintf("%s/blurbs/%d", parent, id)
-	now := ptypes.TimestampNow()
+	now := timestamppb.Now()
 	switch legacyID := b.LegacyId.(type) {
 	case *pb.Blurb_LegacyRoomId:
 		name = fmt.Sprintf("%s/blurbs/legacy/%s.%d", parent, legacyID.LegacyRoomId, id)
@@ -363,7 +365,7 @@ func (s *messagingServerImpl) UpdateBlurb(ctx context.Context, in *pb.UpdateBlur
 	updated := proto.Clone(existing).(*pb.Blurb)
 	applyFieldMask(b.ProtoReflect(), updated.ProtoReflect(), mask.GetPaths())
 	updated.CreateTime = existing.GetCreateTime()
-	updated.UpdateTime = ptypes.TimestampNow()
+	updated.UpdateTime = timestamppb.Now()
 	s.blurbs[i.row][i.col] = blurbEntry{blurb: updated}
 
 	// Call observers.
@@ -464,10 +466,10 @@ func (s *messagingServerImpl) SearchBlurbs(ctx context.Context, in *pb.SearchBlu
 		"operations/google.showcase.v1beta1.Messaging/SearchBlurbs/%s",
 		base64.StdEncoding.EncodeToString(reqBytes))
 	// TODO(landrito) Add randomization to the retry delay.
-	meta, _ := ptypes.MarshalAny(
+	meta, _ := anypb.New(
 		&pb.SearchBlurbsMetadata{
 			RetryInfo: &errdetails.RetryInfo{
-				RetryDelay: ptypes.DurationProto(time.Duration(1) * time.Second),
+				RetryDelay: durationpb.New(time.Duration(1) * time.Second),
 			},
 		},
 	)
@@ -482,10 +484,12 @@ func (s *messagingServerImpl) StreamBlurbs(in *pb.StreamBlurbsRequest, stream pb
 		return err
 	}
 
-	expireTime, err := ptypes.Timestamp(in.GetExpireTime())
-	if err != nil {
-		return status.Error(codes.InvalidArgument, err.Error())
+	if in.GetExpireTime() != nil {
+		if err := in.GetExpireTime().CheckValid(); err != nil {
+			return status.Error(codes.InvalidArgument, err.Error())
+		}
 	}
+	expireTime := in.GetExpireTime().AsTime()
 	observer := &streamBlurbsObserver{
 		stream: stream.(BlurbsOutStream),
 		mu:     sync.Mutex{},
@@ -538,11 +542,9 @@ func withCreatedNames(err error, names []string) error {
 	s, _ := status.FromError(err)
 	spb := s.Proto()
 
-	details, err := ptypes.MarshalAny(&pb.SendBlurbsResponse{Names: names})
-	if err == nil {
+	if details, anyErr := anypb.New(&pb.SendBlurbsResponse{Names: names}); anyErr == nil {
 		spb.Details = append(spb.Details, details)
 	}
-
 	return status.ErrorProto(spb)
 }
 
@@ -638,9 +640,6 @@ func (s *messagingServerImpl) validateParent(p string) error {
 type streamBlurbsObserver struct {
 	// The stream to send the blurbs.
 	stream BlurbsOutStream
-
-	// Blurb parent to observe.
-	parent string
 
 	// Holds an error that occurred when sending a blurb.
 	mu  sync.Mutex

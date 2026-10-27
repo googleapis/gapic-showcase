@@ -122,6 +122,9 @@ func Test_User_lifecycle(t *testing.T) {
 	r, err := s.ListUsers(
 		context.Background(),
 		&pb.ListUsersRequest{PageSize: 1, PageToken: ""})
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(r.GetUsers()) != 1 {
 		t.Errorf("List want: page size %d, got %d", 1, len(r.GetUsers()))
 	}
@@ -135,6 +138,9 @@ func Test_User_lifecycle(t *testing.T) {
 	r, err = s.ListUsers(
 		context.Background(),
 		&pb.ListUsersRequest{PageSize: 10, PageToken: r.GetNextPageToken()})
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(r.GetUsers()) != 1 {
 		t.Errorf("List want: page size %d, got %d", 1, len(r.GetUsers()))
 	}
@@ -200,15 +206,15 @@ func Test_Create_alreadyPresent(t *testing.T) {
 func Test_Create_deleted(t *testing.T) {
 	s := NewIdentityServer()
 	u := &pb.User{DisplayName: "Rumble", Email: "rumble@example.com"}
-	u, err := s.CreateUser(context.Background(), &pb.CreateUserRequest{User: u})
+	created, err := s.CreateUser(context.Background(), &pb.CreateUserRequest{User: u})
 	if err != nil {
 		t.Errorf("Create: unexpected error: %v", err)
 	}
-	_, err = s.DeleteUser(context.Background(), &pb.DeleteUserRequest{Name: u.GetName()})
+	_, err = s.DeleteUser(context.Background(), &pb.DeleteUserRequest{Name: created.GetName()})
 	if err != nil {
 		t.Errorf("Delete: unexpected error: %v", err)
 	}
-	u, err = s.CreateUser(context.Background(), &pb.CreateUserRequest{User: u})
+	_, err = s.CreateUser(context.Background(), &pb.CreateUserRequest{User: u})
 	if err != nil {
 		t.Errorf("Create: a using a deleted email should be allowed, got: %v", err)
 	}

@@ -77,6 +77,9 @@ func Test_Session_lifecycle(t *testing.T) {
 	r, err := s.ListSessions(
 		context.Background(),
 		&pb.ListSessionsRequest{PageSize: 1, PageToken: ""})
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(r.GetSessions()) != 1 {
 		t.Errorf("List want: page size %d, got %d", 1, len(r.GetSessions()))
 	}
@@ -90,6 +93,9 @@ func Test_Session_lifecycle(t *testing.T) {
 	r, err = s.ListSessions(
 		context.Background(),
 		&pb.ListSessionsRequest{PageSize: 10, PageToken: r.GetNextPageToken()})
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(r.GetSessions()) != 2 {
 		t.Errorf("List want: page size %d, got %d", 2, len(r.GetSessions()))
 	}

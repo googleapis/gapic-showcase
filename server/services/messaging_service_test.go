@@ -24,7 +24,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/gapic-showcase/server"
@@ -33,7 +32,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func Test_Room_lifecycle(t *testing.T) {
@@ -108,6 +109,9 @@ func Test_Room_lifecycle(t *testing.T) {
 	r, err := s.ListRooms(
 		context.Background(),
 		&pb.ListRoomsRequest{PageSize: 1, PageToken: ""})
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(r.GetRooms()) != 1 {
 		t.Errorf("List want: page size %d, got %d", 1, len(r.GetRooms()))
 	}
@@ -121,6 +125,9 @@ func Test_Room_lifecycle(t *testing.T) {
 	r, err = s.ListRooms(
 		context.Background(),
 		&pb.ListRoomsRequest{PageSize: 10, PageToken: r.GetNextPageToken()})
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(r.GetRooms()) != 1 {
 		t.Errorf("List want: page size %d, got %d", 1, len(r.GetRooms()))
 	}
@@ -846,10 +853,7 @@ func TestStreamBlurbs_lifecycle(t *testing.T) {
 	m := &mockStreamBlurbsStream{resps: []*pb.StreamBlurbsResponse{}}
 
 	// Make the end time some time after the time the now function will return.
-	endTime, err := ptypes.TimestampProto(time.Unix(int64(1), int64(0)))
-	if err != nil {
-		t.Errorf("TimestampProto: unexpected err %+v", err)
-	}
+	endTime := timestamppb.New(time.Unix(int64(1), int64(0)))
 
 	// The parent to stream
 	p := "users/rumble/profile"
@@ -1035,10 +1039,7 @@ func Test_StreamBlurbs_sendError(t *testing.T) {
 	}
 
 	// Make the end time some time after the time the now function will return.
-	endTime, err := ptypes.TimestampProto(time.Unix(int64(1), int64(0)))
-	if err != nil {
-		t.Errorf("TimestampProto: unexpected err %+v", err)
-	}
+	endTime := timestamppb.New(time.Unix(int64(1), int64(0)))
 
 	// The parent to stream.
 	p := "users/rumble/profile"
@@ -1047,7 +1048,7 @@ func Test_StreamBlurbs_sendError(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go (func() {
-		err = s.StreamBlurbs(
+		err := s.StreamBlurbs(
 			&pb.StreamBlurbsRequest{Name: p, ExpireTime: endTime},
 			&errorStreamBlurbsStream{})
 		status, _ := status.FromError(err)
@@ -1068,7 +1069,7 @@ func Test_StreamBlurbs_sendError(t *testing.T) {
 	}
 
 	// Create a blurb to trigger observer.
-	_, err = s.CreateBlurb(
+	_, err := s.CreateBlurb(
 		context.Background(),
 		&pb.CreateBlurbRequest{
 			Parent: p,
@@ -1120,10 +1121,7 @@ func Test_StreamBlurbs_parentNotFoundLater(t *testing.T) {
 	}
 
 	// Make the end time some time after the time the now function will return.
-	endTime, err := ptypes.TimestampProto(time.Unix(int64(1), int64(0)))
-	if err != nil {
-		t.Errorf("TimestampProto: unexpected err %+v", err)
-	}
+	endTime := timestamppb.New(time.Unix(int64(1), int64(0)))
 
 	parent := fmt.Sprintf("%s/profile", first.GetName())
 
@@ -1309,7 +1307,9 @@ func TestSendBlurbs_error(t *testing.T) {
 		t.Errorf("SendBlurbs: expected err details to be of length 1")
 	}
 	resp := &pb.SendBlurbsResponse{}
-	ptypes.UnmarshalAny(details[0], resp)
+	if err := anypb.UnmarshalTo(details[0], resp, proto.UnmarshalOptions{}); err != nil {
+		t.Fatal(err)
+	}
 
 	for i, name := range resp.GetNames() {
 		got, err := s.GetBlurb(
@@ -1382,7 +1382,9 @@ func TestSendBlurbs_invalidParent(t *testing.T) {
 		t.Errorf("SendBlurbs: expected err details to be of length 1")
 	}
 	resp := &pb.SendBlurbsResponse{}
-	ptypes.UnmarshalAny(details[0], resp)
+	if err := anypb.UnmarshalTo(details[0], resp, proto.UnmarshalOptions{}); err != nil {
+		t.Fatal(err)
+	}
 
 	for i, name := range resp.GetNames() {
 		got, err := s.GetBlurb(
@@ -1442,7 +1444,9 @@ func TestSendBlurbs_invalidBlurb(t *testing.T) {
 		t.Errorf("SendBlurbs: expected err details to be of length 1")
 	}
 	resp := &pb.SendBlurbsResponse{}
-	ptypes.UnmarshalAny(details[0], resp)
+	if err := anypb.UnmarshalTo(details[0], resp, proto.UnmarshalOptions{}); err != nil {
+		t.Fatal(err)
+	}
 
 	for i, name := range resp.GetNames() {
 		got, err := s.GetBlurb(
@@ -1474,6 +1478,8 @@ type mockConnectStream struct {
 }
 
 func (m *mockConnectStream) Recv() (*pb.ConnectRequest, error) {
+	m.nextMu.Lock()
+	defer m.nextMu.Unlock()
 	if m.next < len(m.reqs) {
 		req := m.reqs[m.next]
 		m.next++
@@ -1483,6 +1489,18 @@ func (m *mockConnectStream) Recv() (*pb.ConnectRequest, error) {
 		return nil, io.EOF
 	}
 	return nil, nil
+}
+
+func (m *mockConnectStream) setStop() {
+	m.nextMu.Lock()
+	defer m.nextMu.Unlock()
+	m.stop = true
+}
+
+func (m *mockConnectStream) getRespCount() int {
+	m.respMu.Lock()
+	defer m.respMu.Unlock()
+	return len(m.resps)
 }
 
 func (m *mockConnectStream) Send(r *pb.StreamBlurbsResponse) error {
@@ -1527,7 +1545,7 @@ func TestConnect(t *testing.T) {
 	})
 
 	for {
-		if len(m.resps) > 0 {
+		if m.getRespCount() > 0 {
 			break
 		}
 	}
@@ -1633,7 +1651,7 @@ func TestConnect(t *testing.T) {
 			streamResp.GetBlurb())
 	}
 
-	m.stop = true
+	m.setStop()
 	if err := g.Wait(); err != nil {
 		t.Error(err)
 	}
@@ -1727,11 +1745,7 @@ type sendErrorConnectStream struct {
 	t    *testing.T
 	stop bool
 
-	respMu sync.Mutex
-	resps  []*pb.StreamBlurbsResponse
-
-	nextMu sync.Mutex
-	next   int
+	next int
 
 	pb.Messaging_ConnectServer
 }
@@ -1771,9 +1785,8 @@ func TestConnect_sendError(t *testing.T) {
 		},
 	}
 	m := &sendErrorConnectStream{
-		reqs:  reqs,
-		t:     t,
-		resps: []*pb.StreamBlurbsResponse{},
+		reqs: reqs,
+		t:    t,
 	}
 	s := NewMessagingServer(&mockIdentityServer{})
 
