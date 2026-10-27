@@ -94,7 +94,8 @@ jobs:
           TARGET_ARCH: ${{ matrix.osarch.arch }}
         run: |
           ASSET_NAME="gapic-showcase-${RAW_VERSION}-${TARGET_OS}-${TARGET_ARCH}.tar.gz"
-          gh release upload "$TAG_NAME" "./gapic-showcase.tar.gz#${ASSET_NAME}" --clobber
+          mv gapic-showcase.tar.gz "${ASSET_NAME}"
+          gh release upload "$TAG_NAME" "${ASSET_NAME}" --clobber
   # Note: Disabled until better solution for storing the GCR key is found.
   # push_to_registry:
   #   needs:

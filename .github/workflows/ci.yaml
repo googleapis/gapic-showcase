@@ -46,6 +46,7 @@ jobs:
         readarray -t files < <(git ls-files --deleted --modified --other --directory --exclude-standard cmd client server/genproto server/genrest)
         echo "modified_files=${files[@]}" >> "$GITHUB_OUTPUT"
     - name: Prepare regenerated sources
+
       if: steps.mod.outputs.modified_files
       env:
         MODIFIED_FILES: ${{ steps.mod.outputs.modified_files }}
