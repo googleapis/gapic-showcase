@@ -483,6 +483,36 @@ func TestFinalizeWithInitialMetadata(t *testing.T) {
 	}
 }
 
+func TestStartWithMetadataRequiresJSONContentType(t *testing.T) {
+	mgr := resumableupload.NewManager()
+	handler := mgr.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	// 1. Start with non-empty JSON body and missing Content-Type should fail with 400 Bad Request
+	reqMissing := httptest.NewRequest("POST", "http://localhost:7469/upload", strings.NewReader(`{"name":"test_file.txt"}`))
+	reqMissing.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	reqMissing.Header.Set("X-Goog-Upload-Command", "start")
+	recMissing := httptest.NewRecorder()
+	handler.ServeHTTP(recMissing, reqMissing)
+
+	if recMissing.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 Bad Request when Content-Type is missing on start with body, got %d", recMissing.Code)
+	}
+
+	// 2. Start with non-empty JSON body and non-JSON Content-Type should fail with 400 Bad Request
+	reqWrong := httptest.NewRequest("POST", "http://localhost:7469/upload", strings.NewReader(`{"name":"test_file.txt"}`))
+	reqWrong.Header.Set("X-Goog-Upload-Protocol", "resumable")
+	reqWrong.Header.Set("X-Goog-Upload-Command", "start")
+	reqWrong.Header.Set("Content-Type", "text/plain")
+	recWrong := httptest.NewRecorder()
+	handler.ServeHTTP(recWrong, reqWrong)
+
+	if recWrong.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 Bad Request when Content-Type is text/plain on start with body, got %d", recWrong.Code)
+	}
+}
+
 func TestUploadURLScheme(t *testing.T) {
 	mgr := resumableupload.NewManager()
 	handler := mgr.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -513,7 +543,6 @@ func TestUploadURLScheme(t *testing.T) {
 		t.Errorf("expected https:// upload URL, got %q", got)
 	}
 }
-
 
 // TestBinaryPayloadUpload verifies that arbitrary binary payloads (e.g. PNG, octet-stream)
 // can be uploaded in the data phase without requiring the binary data to be JSON-formatted.
