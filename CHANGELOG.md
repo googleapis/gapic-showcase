@@ -1,5 +1,12 @@
 # Release History
 
+## [0.44.3](https://github.com/googleapis/gapic-showcase/compare/v0.44.2...v0.44.3) (2026-10-27)
+
+
+### Bug Fixes
+
+* **ci:** Pin actions and harden workflows ([#1695](https://github.com/googleapis/gapic-showcase/issues/1695)) ([6e80564](https://github.com/googleapis/gapic-showcase/commit/6e805647c45401dedef448b39312d92adf1f20ec))
+
 ## [0.44.2](https://github.com/googleapis/gapic-showcase/compare/v0.44.1...v0.44.2) (2026-09-25)
 
 
