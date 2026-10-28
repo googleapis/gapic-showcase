@@ -60,7 +60,7 @@ func (s *operationsServerImpl) handleWait(in *lropb.GetOperationRequest) (*lropb
 
 	waitReq := &pb.WaitRequest{}
 	encodedBytes := strings.TrimPrefix(in.Name, prefix)
-	waitReqBytes, err := base64.StdEncoding.DecodeString(encodedBytes)
+	waitReqBytes, err := base64.URLEncoding.DecodeString(encodedBytes)
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "Operation %q not found.", in.Name)
 	}
@@ -81,7 +81,7 @@ func (s *operationsServerImpl) handleSearchBlurbs(in *lropb.GetOperationRequest)
 
 	req := &pb.SearchBlurbsRequest{}
 	encodedBytes := strings.TrimPrefix(in.GetName(), prefix)
-	waitReqBytes, err := base64.StdEncoding.DecodeString(encodedBytes)
+	waitReqBytes, err := base64.URLEncoding.DecodeString(encodedBytes)
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "Operation %q not found.", in.Name)
 	}

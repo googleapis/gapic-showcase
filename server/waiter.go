@@ -61,7 +61,7 @@ func (w *waiterImpl) Wait(req *pb.WaitRequest) *lropb.Operation {
 	reqBytes, _ := proto.Marshal(req)
 	name := fmt.Sprintf(
 		"operations/google.showcase.v1beta1.Echo/Wait/%s",
-		base64.StdEncoding.EncodeToString(reqBytes))
+		base64.URLEncoding.EncodeToString(reqBytes))
 	answer := &lropb.Operation{
 		Name: name,
 		Done: done,
