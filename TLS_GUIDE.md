@@ -71,11 +71,14 @@ Provide the server cert, key, **and the CA cert** (which the server will use to 
 
 When running on **Go 1.24+**, the hybrid post-quantum key exchange **`X25519MLKEM768`** is enabled by default on the Showcase server.
 
+> **Note on validating `MLKEM1024` (`0x0202`):**
+> Pure `MLKEM1024` (`0x0202` / `514`, available in **Go 1.27+**) is not enabled by default in Go's `crypto/tls`, and client libraries offering multiple groups prefer `X25519MLKEM768` first. To enable and strictly validate `MLKEM1024` negotiation, start the Showcase server with `--tls-groups 0x0202`.
+
 ### Restricting / Pinning Allowed TLS Groups (`--tls-groups`)
 
 To strictly test whether a client supports a specific key exchange algorithm (or to test custom server preference ordering), use the `--tls-groups` flag.
 
-The flag accepts a comma-separated list of standard [IANA Key Exchange Group IDs](https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-8) in hexadecimal (e.g. `0x11ec`) or decimal (e.g. `4588`) format.
+The flag accepts a comma-separated list of standard [IANA Key Exchange Group IDs](https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-8) in hexadecimal (e.g. `0x11ec`, `0x0202`) or decimal (e.g. `4588`, `514`) format.
 
 ```sh
 # Only allow X25519MLKEM768 (handshake fails if client does not support it):
@@ -83,6 +86,12 @@ The flag accepts a comma-separated list of standard [IANA Key Exchange Group IDs
   --tls-cert certs/server.crt \
   --tls-key certs/server.key \
   --tls-groups 0x11ec
+
+# Only allow pure MLKEM1024 (handshake fails if client does not support it):
+./gapic-showcase run \
+  --tls-cert certs/server.crt \
+  --tls-key certs/server.key \
+  --tls-groups 0x0202
 
 # Allow classical X25519 and SecP256r1 in server preference order:
 ./gapic-showcase run \
@@ -109,6 +118,8 @@ To disable Post-Quantum hybrid key exchanges and restrict the Showcase server to
 | :--- | :--- | :--- | :--- |
 | **`X25519MLKEM768`** | `0x11ec` | `4588` | Post-Quantum Hybrid (Default) |
 | **`SecP256r1MLKEM768`** | `0x11eb` | `4587` | Post-Quantum Hybrid |
+| **`SecP384r1MLKEM1024`** | `0x11ed` | `4589` | Post-Quantum Hybrid |
+| **`MLKEM1024`** | `0x0202` | `514` | Post-Quantum Pure (ML-KEM-1024) |
 | **`X25519`** | `0x001d` | `29` | Classical |
 | **`secp256r1 (P-256)`** | `0x0017` | `23` | Classical |
 | **`secp384r1 (P-384)`** | `0x0018` | `24` | Classical |
