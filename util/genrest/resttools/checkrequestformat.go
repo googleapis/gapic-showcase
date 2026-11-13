@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"unicode"
 	"unicode/utf8"
 
@@ -159,12 +160,24 @@ func CheckEnum(payload jsonPayload, fieldPath []protoreflect.Name) (fieldName st
 // simple protoreflect.Name.
 func GetEnumFields(message protoreflect.Message) [][]protoreflect.Name {
 	messageName := message.Descriptor().FullName()
-	if fields, ok := protoEnumFields[messageName]; ok {
+
+	protoEnumFieldsMu.RLock()
+	fields, ok := protoEnumFields[messageName]
+	protoEnumFieldsMu.RUnlock()
+	if ok {
 		return fields
 	}
 
-	fields := ComputeEnumFields(message)
+	fields = ComputeEnumFields(message)
+
+	protoEnumFieldsMu.Lock()
+	// Double-check under the write lock in case another goroutine populated this entry concurrently.
+	if existing, ok := protoEnumFields[messageName]; ok {
+		protoEnumFieldsMu.Unlock()
+		return existing
+	}
 	protoEnumFields[messageName] = fields
+	protoEnumFieldsMu.Unlock()
 	return fields
 }
 
@@ -183,11 +196,14 @@ func computeEnumFields(message protoreflect.MessageDescriptor, currentPath []pro
 	allFields := message.Fields()
 	for idx := 0; idx < allFields.Len(); idx++ {
 		field := allFields.Get(idx)
+		fieldPath := make([]protoreflect.Name, len(currentPath)+1)
+		copy(fieldPath, currentPath)
+		fieldPath[len(currentPath)] = field.Name()
 		switch field.Kind() {
 		case protoreflect.EnumKind:
-			results = append(results, append(currentPath, field.Name()))
+			results = append(results, fieldPath)
 		case protoreflect.MessageKind:
-			results = append(results, computeEnumFields(field.Message(), append(currentPath, field.Name()))...)
+			results = append(results, computeEnumFields(field.Message(), fieldPath)...)
 		default:
 			continue
 
@@ -201,7 +217,11 @@ type jsonPayload map[string]interface{}
 
 // protoEnumFields is a list of fields paths (themselves represented as a list of nested field
 // names) which represent enum fields. This is used to memoize calls to GetEnumFields.
-var protoEnumFields map[protoreflect.FullName][][]protoreflect.Name
+// Protected by protoEnumFieldsMu for concurrent access across REST handlers.
+var (
+	protoEnumFieldsMu sync.RWMutex
+	protoEnumFields   map[protoreflect.FullName][][]protoreflect.Name
+)
 
 func init() {
 	protoEnumFields = map[protoreflect.FullName][][]protoreflect.Name{}

@@ -18,11 +18,43 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
 
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
+
+func TestGetEnumFieldsConcurrent(t *testing.T) {
+	// Reset memoized cache for this message type so concurrent callers race on initial population.
+	complianceData := &genprotopb.ComplianceData{}
+	echoRequest := &genprotopb.EchoRequest{}
+
+	protoEnumFieldsMu.Lock()
+	delete(protoEnumFields, complianceData.ProtoReflect().Descriptor().FullName())
+	delete(protoEnumFields, echoRequest.ProtoReflect().Descriptor().FullName())
+	protoEnumFieldsMu.Unlock()
+
+	const workers = 16
+	var wg sync.WaitGroup
+	wg.Add(workers)
+	for i := 0; i < workers; i++ {
+		go func(id int) {
+			defer wg.Done()
+			for j := 0; j < 20; j++ {
+				if (id+j)%2 == 0 {
+					got := GetEnumFields(complianceData.ProtoReflect())
+					if len(got) == 0 {
+						t.Errorf("GetEnumFields(ComplianceData) returned empty slice")
+					}
+				} else {
+					_ = GetEnumFields(echoRequest.ProtoReflect())
+				}
+			}
+		}(i)
+	}
+	wg.Wait()
+}
 
 func TestComputeEnumFields(t *testing.T) {
 	complianceData := &genprotopb.ComplianceData{}
