@@ -1,0 +1,14 @@
+name = "aip4222"
+version = "0.1.0"
+defaultTargets = ["Aip4222", "Aip4222Audit", "aip4222-oracle"]
+
+[[lean_lib]]
+name = "Aip4222"
+
+[[lean_lib]]
+name = "Aip4222Audit"
+roots = ["Aip4222.AxiomAudit"]
+
+[[lean_exe]]
+name = "aip4222-oracle"
+root = "Main"
