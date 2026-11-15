@@ -17,4 +17,6 @@ limitations under the License.
 import Aip4222.Syntax
 import Aip4222.Encoding
 import Aip4222.Semantics
+import Aip4222.Compiler
+import Aip4222.Theorems
 import Aip4222.Examples

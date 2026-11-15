@@ -43,7 +43,7 @@ def matchAtomSegs : List AtomSeg → List String → Bool
   | .singleWildcard :: patRest, seg :: segRest =>
     (seg != "") && matchAtomSegs patRest segRest
 
-private def matchPrefixAndCapture (t : CaptureTemplate) (rem : List String) : Option String :=
+def matchPrefixAndCapture (t : CaptureTemplate) (rem : List String) : Option String :=
   if t.suffixSegs.isEmpty then
     if matchAtomSegs t.matchSegs rem then
       let captured := joinStringsWith "/" rem
