@@ -16,6 +16,7 @@ limitations under the License.
 
 import Aip4222.Examples
 import Aip4222.Theorems
+import Aip4222.Vectors
 
 #print axioms Aip4222.Examples.examples_1_to_9_canonical
 #print axioms Aip4222.Examples.example_6a_vs_6b_without_instance
@@ -49,3 +50,6 @@ import Aip4222.Theorems
 #print axioms Aip4222.formatHeaderPairs_empty_iff
 #print axioms Aip4222.formatHeaderPairs_no_leading_amp
 #print axioms Aip4222.h4_buggy_rust_http_fold_falsified
+#print axioms Aip4222.extractVectors_all_valid
+#print axioms Aip4222.extractVector_sound
+#print axioms Aip4222.invalidTemplateVectors_all_rejected

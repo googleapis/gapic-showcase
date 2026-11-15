@@ -20,3 +20,4 @@ import Aip4222.Semantics
 import Aip4222.Compiler
 import Aip4222.Theorems
 import Aip4222.Examples
+import Aip4222.Vectors

@@ -112,6 +112,29 @@ private def parseRequestJson (j : Lean.Json) : Except String Request := do
     return Request.ofFlat pairs
   | _ => .error "expected request to be a JSON object"
 
+private def pairsToJson (pairs : List (String × String)) : Lean.Json :=
+  Lean.Json.arr (pairs.map fun (k, v) => Lean.Json.arr #[Lean.Json.str k, Lean.Json.str v]).toArray
+
+private def routingRuleToJson : Option RoutingRule → Lean.Json
+  | none => Lean.Json.null
+  | some rule =>
+    let paramsJson := rule.parameters.map fun p =>
+      Lean.Json.mkObj
+        [ ("field", Lean.Json.str p.field)
+        , ("path_template", Lean.Json.str p.pathTemplate)
+        ]
+    Lean.Json.mkObj [("parameters", Lean.Json.arr paramsJson.toArray)]
+
+private def httpRuleToJson : Option HttpRule → Lean.Json
+  | none => Lean.Json.null
+  | some http =>
+    let bindingsJson := http.bindings.map fun b =>
+      Lean.Json.arr (b.map fun vb => Lean.Json.str vb.fieldPath.toDotted).toArray
+    Lean.Json.mkObj [("bindings", Lean.Json.arr bindingsJson.toArray)]
+
+private def requestToJson (reqPairs : List (String × String)) : Lean.Json :=
+  Lean.Json.mkObj (reqPairs.map fun (k, v) => (k, Lean.Json.str v))
+
 private def evalCaseJson (item : Lean.Json) : Except String Lean.Json := do
   let id ← item.getObjValAs? String "id"
   let routingVal ← item.getObjVal? "routing"
@@ -120,8 +143,6 @@ private def evalCaseJson (item : Lean.Json) : Except String Lean.Json := do
   let http ← parseHttpJson httpVal
   let reqVal ← item.getObjVal? "request"
   let req ← parseRequestJson reqVal
-  let pairsToJson (pairs : List (String × String)) : Lean.Json :=
-    Lean.Json.arr (pairs.map fun (k, v) => Lean.Json.arr #[Lean.Json.str k, Lean.Json.str v]).toArray
   match routing with
   | none =>
     let declPairs :=
@@ -143,7 +164,7 @@ private def evalCaseJson (item : Lean.Json) : Except String Lean.Json := do
         compileTemplatesForJson rule.parameters with
     | .ok declPairs, .ok groups, .ok tmplsJson =>
       let declHeader := formatHeaderPairs declPairs
-      let sortedGroups := (groups.toArray.qsort (fun a b => a.headerKey < b.headerKey)).toList
+      let sortedGroups := sortKeyGroupsAlpha groups
       let alphaHeader := formatHeaderPairs (evalCompiledKeyGroupsPairs sortedGroups req)
       return Lean.Json.mkObj [
         ("id", Lean.Json.str id),
@@ -175,6 +196,66 @@ private def evalCaseJson (item : Lean.Json) : Except String Lean.Json := do
         ("compiled_templates", Lean.Json.arr #[])
       ]
 
+private def extractVectorToJson (v : ExtractVector) : Except String Lean.Json := do
+  let req := Request.ofFlat v.request
+  let declPairs ← evalMethodRoutingPairs v.spec req
+  let declHeader := formatHeaderPairs declPairs
+  let (staticDeclHeader, alphaHeader, tmplsJson) ←
+    match v.spec.routing with
+    | none => .ok (declHeader, declHeader, [])
+    | some rule => do
+      let groups ← compileRoutingRuleDeclOrder rule
+      let tmpls ← compileTemplatesForJson rule.parameters
+      let staticDecl := formatHeaderPairs (evalCompiledKeyGroupsPairs groups req)
+      let alpha := formatHeaderPairs (evalCompiledKeyGroupsPairs (sortKeyGroupsAlpha groups) req)
+      .ok (staticDecl, alpha, tmpls)
+  return Lean.Json.mkObj [
+    ("id", Lean.Json.str v.id),
+    ("category", Lean.Json.str v.category.toSlug),
+    ("description", Lean.Json.str v.description),
+    ("theorem_ref", Lean.Json.str v.theoremRef),
+    ("routing", routingRuleToJson v.spec.routing),
+    ("http", httpRuleToJson v.spec.http),
+    ("request", requestToJson v.request),
+    ("expected_pairs", pairsToJson (sortPairsAlpha declPairs)),
+    ("expected_decl_header", Lean.Json.str declHeader),
+    ("expected_static_decl_header", Lean.Json.str staticDeclHeader),
+    ("expected_alpha_header", Lean.Json.str alphaHeader),
+    ("expect_header_sent", Lean.Json.bool (alphaHeader != "")),
+    ("compiled_templates", Lean.Json.arr tmplsJson.toArray)
+  ]
+
+private def invalidVectorToJson (v : InvalidTemplateVector) : Except String Lean.Json :=
+  match parseRoutingParameter v.field v.pathTemplate with
+  | .ok _ => .error s!"negative vector {v.id} unexpectedly parsed successfully"
+  | .error err =>
+    .ok <| Lean.Json.mkObj [
+      ("id", Lean.Json.str v.id),
+      ("bug_ref", Lean.Json.str v.bugRef),
+      ("description", Lean.Json.str v.description),
+      ("field", Lean.Json.str v.field),
+      ("path_template", Lean.Json.str v.pathTemplate),
+      ("expected_error", Lean.Json.str err)
+    ]
+
+private def buildConformanceSuiteJson : Except String Lean.Json := do
+  let extArr ← extractVectors.mapM extractVectorToJson
+  let invArr ← invalidTemplateVectors.mapM invalidVectorToJson
+  return Lean.Json.mkObj [
+    ("schema_version", Lean.Json.str "1.0"),
+    ("spec", Lean.Json.str "AIP-4222"),
+    ("generator", Lean.Json.str "formal/aip4222/Aip4222/Vectors.lean"),
+    ("extract_vectors", Lean.Json.arr extArr.toArray),
+    ("invalid_template_vectors", Lean.Json.arr invArr.toArray)
+  ]
+
+private def runEmitConformance (outPath : Option String) : IO Unit := do
+  let suite ← IO.ofExcept buildConformanceSuiteJson
+  let rendered := Lean.Json.pretty suite 2 ++ "\n"
+  match outPath with
+  | none => IO.print rendered
+  | some path => IO.FS.writeFile path rendered
+
 private def runBatchJson : IO Unit := do
   let input ← (← IO.getStdin).readToEnd
   let parsed ← IO.ofExcept (Lean.Json.parse input)
@@ -186,6 +267,8 @@ def main (args : List String) : IO Unit := do
   match args with
   | [] | ["smoke"] => runSmoke
   | ["--batch-json"] => runBatchJson
+  | ["--emit-conformance"] => runEmitConformance none
+  | ["--emit-conformance", outPath] => runEmitConformance (some outPath)
   | _ =>
-    IO.eprintln s!"unknown arguments: {args}; expected [smoke|--batch-json]"
+    IO.eprintln s!"unknown arguments: {args}; expected [smoke|--batch-json|--emit-conformance [path]]"
     IO.Process.exit 2
