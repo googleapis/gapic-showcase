@@ -462,7 +462,7 @@ func (s *messagingServerImpl) SearchBlurbs(ctx context.Context, in *pb.SearchBlu
 
 	name := fmt.Sprintf(
 		"operations/google.showcase.v1beta1.Messaging/SearchBlurbs/%s",
-		base64.StdEncoding.EncodeToString(reqBytes))
+		base64.URLEncoding.EncodeToString(reqBytes))
 	// TODO(landrito) Add randomization to the retry delay.
 	meta, _ := ptypes.MarshalAny(
 		&pb.SearchBlurbsMetadata{

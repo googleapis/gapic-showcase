@@ -31,13 +31,13 @@ import (
 )
 
 func TestGetOperation_wait(t *testing.T) {
-	endTime, _ := ptypes.TimestampProto(time.Now())
+	endTime, _ := ptypes.TimestampProto(time.Unix(1777777789, 0))
 	waitReq := &pb.WaitRequest{End: &pb.WaitRequest_EndTime{EndTime: endTime}}
 	nameBytes, _ := proto.Marshal(waitReq)
 	req := &lropb.GetOperationRequest{
 		Name: fmt.Sprintf(
 			"operations/google.showcase.v1beta1.Echo/Wait/%s",
-			base64.StdEncoding.EncodeToString(nameBytes)),
+			base64.URLEncoding.EncodeToString(nameBytes)),
 	}
 
 	waiter := &mockWaiter{}
@@ -123,7 +123,7 @@ func TestGetOperation_searchBlurbs(t *testing.T) {
 	req := &lropb.GetOperationRequest{
 		Name: fmt.Sprintf(
 			"operations/google.showcase.v1beta1.Messaging/SearchBlurbs/%s",
-			base64.StdEncoding.EncodeToString(reqBytes)),
+			base64.URLEncoding.EncodeToString(reqBytes)),
 	}
 	op, err := server.GetOperation(context.Background(), req)
 	if err != nil {
@@ -221,7 +221,7 @@ func TestGetOperation_invalidMarshalledProto(t *testing.T) {
 		name := fmt.Sprintf(
 			"%s/%s",
 			p,
-			base64.StdEncoding.EncodeToString([]byte("BOGUS")))
+			base64.URLEncoding.EncodeToString([]byte("BOGUS")))
 		req := &lropb.GetOperationRequest{
 			Name: name,
 		}

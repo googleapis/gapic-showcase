@@ -161,7 +161,10 @@ func checkName(t *testing.T, req *pb.WaitRequest, op *lropb.Operation) {
 	encodedBytes := strings.TrimPrefix(
 		op.Name,
 		"operations/google.showcase.v1beta1.Echo/Wait/")
-	bytes, _ := base64.StdEncoding.DecodeString(encodedBytes)
+	if strings.Contains(encodedBytes, "/") {
+		t.Errorf("Wait() op.Name suffix %q contains '/', which breaks REST URL path routing", encodedBytes)
+	}
+	bytes, _ := base64.URLEncoding.DecodeString(encodedBytes)
 	proto.Unmarshal(bytes, nameProto)
 	if !proto.Equal(nameProto, req) {
 		t.Errorf(
@@ -170,4 +173,20 @@ func checkName(t *testing.T, req *pb.WaitRequest, op *lropb.Operation) {
 			req,
 			nameProto)
 	}
+}
+
+func TestWait_noSlashInOperationName(t *testing.T) {
+	// Timestamp seconds=1777777789 produces "CgYI/fjazwY=" in standard base64,
+	// which contains '/' and breaks REST URL routing when unescaped.
+	endTime := &timestamp.Timestamp{Seconds: 1777777789}
+	req := &pb.WaitRequest{
+		End: &pb.WaitRequest_EndTime{
+			EndTime: endTime,
+		},
+	}
+
+	waiter := &waiterImpl{nowF: func() time.Time { return time.Unix(1, 0) }}
+	op := waiter.Wait(req)
+
+	checkName(t, req, op)
 }

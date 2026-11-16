@@ -783,7 +783,10 @@ func Test_SearchBlurbs(t *testing.T) {
 	encodedBytes := strings.TrimPrefix(
 		op.Name,
 		expName)
-	bytes, _ := base64.StdEncoding.DecodeString(encodedBytes)
+	if strings.Contains(encodedBytes, "/") {
+		t.Errorf("SearchBlurbs op.Name suffix %q contains '/', which breaks REST URL path routing", encodedBytes)
+	}
+	bytes, _ := base64.URLEncoding.DecodeString(encodedBytes)
 	proto.Unmarshal(bytes, reqProto)
 	if !proto.Equal(reqProto, req) {
 		t.Errorf(
