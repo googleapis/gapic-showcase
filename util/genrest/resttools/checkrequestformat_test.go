@@ -25,33 +25,25 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-func TestGetEnumFieldsConcurrent(t *testing.T) {
-	// Reset memoized cache for this message type so concurrent callers race on initial population.
-	complianceData := &genprotopb.ComplianceData{}
-	echoRequest := &genprotopb.EchoRequest{}
-
-	protoEnumFieldsMu.Lock()
-	delete(protoEnumFields, complianceData.ProtoReflect().Descriptor().FullName())
-	delete(protoEnumFields, echoRequest.ProtoReflect().Descriptor().FullName())
-	protoEnumFieldsMu.Unlock()
-
-	const workers = 16
+func TestCheckRequestFormatConcurrent(t *testing.T) {
+	// REST handlers call CheckRequestFormat from concurrent goroutines, so it must not
+	// share unsynchronized state across calls. Run with -race to catch regressions.
+	message := (&genprotopb.ComplianceData{}).ProtoReflect()
 	var wg sync.WaitGroup
-	wg.Add(workers)
-	for i := 0; i < workers; i++ {
-		go func(id int) {
-			defer wg.Done()
-			for j := 0; j < 20; j++ {
-				if (id+j)%2 == 0 {
-					got := GetEnumFields(complianceData.ProtoReflect())
-					if len(got) == 0 {
-						t.Errorf("GetEnumFields(ComplianceData) returned empty slice")
-					}
-				} else {
-					_ = GetEnumFields(echoRequest.ProtoReflect())
+	for range 16 {
+		wg.Go(func() {
+			for range 20 {
+				request, err := http.NewRequest(http.MethodPost, "showcase.foo.com", strings.NewReader(`{"fString": "hi", "fKingdom": "FUNGI"}`))
+				if err != nil {
+					t.Errorf("could not create request: %s", err)
+					return
+				}
+				PopulateRequestHeaders(request)
+				if err := CheckRequestFormat(request.Body, request, message); err != nil {
+					t.Errorf("CheckRequestFormat() = %v, want nil", err)
 				}
 			}
-		}(i)
+		})
 	}
 	wg.Wait()
 }
