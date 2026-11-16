@@ -51,7 +51,7 @@ type RuntimeConfig struct {
 	tlsCaCert    string
 	tlsCert      string
 	tlsKey       string
-	tlsGroups    string
+	tlsGroups    []tls.CurveID
 	autoTLS      bool
 	caCertFile   string
 }
@@ -113,14 +113,10 @@ func createTLSConfig(config RuntimeConfig) *tls.Config {
 		NextProtos:   []string{"h2", "http/1.1"},
 	}
 
-	if config.tlsGroups != "" {
-		groups, err := server.ParseTLSGroups(config.tlsGroups)
-		if err != nil {
-			log.Fatalf("Failed to parse --tls-groups: %v", err)
-		}
-		baseConfig.CurvePreferences = groups
+	if len(config.tlsGroups) > 0 {
+		baseConfig.CurvePreferences = config.tlsGroups
 		var groupNames []string
-		for _, g := range groups {
+		for _, g := range config.tlsGroups {
 			groupNames = append(groupNames, g.String())
 		}
 		stdLog.Printf("Restricted server TLS key exchange groups: %s", strings.Join(groupNames, ","))
