@@ -1,5 +1,17 @@
 # Release History
 
+## [0.45.0](https://github.com/googleapis/gapic-showcase/compare/v0.44.2...v0.45.0) (2026-11-16)
+
+
+### Features
+
+* Enable ML-KEM-1024 TLS key exchange support and tests ([#1701](https://github.com/googleapis/gapic-showcase/issues/1701)) ([157e82d](https://github.com/googleapis/gapic-showcase/commit/157e82d54d37a23991b76028ff8899b8b66f1ed3))
+
+
+### Bug Fixes
+
+* **ci:** Pin actions and harden workflows ([#1695](https://github.com/googleapis/gapic-showcase/issues/1695)) ([6e80564](https://github.com/googleapis/gapic-showcase/commit/6e805647c45401dedef448b39312d92adf1f20ec))
+
 ## [0.44.2](https://github.com/googleapis/gapic-showcase/compare/v0.44.1...v0.44.2) (2026-09-25)
 
 
