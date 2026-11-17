@@ -38,10 +38,11 @@ import (
 )
 
 func setupTLSTestServer(t *testing.T) (addr string, certPool *x509.CertPool, cleanup func()) {
-	return setupTLSTestServerWithGroups(t, "")
+	t.Helper()
+	return setupTLSTestServerWithGroups(t)
 }
 
-func setupTLSTestServerWithGroups(t *testing.T, tlsGroups string) (addr string, certPool *x509.CertPool, cleanup func()) {
+func setupTLSTestServerWithGroups(t *testing.T, tlsGroups ...tls.CurveID) (addr string, certPool *x509.CertPool, cleanup func()) {
 	t.Helper()
 	caPath := filepath.Join(t.TempDir(), "ca.crt")
 	config := RuntimeConfig{
@@ -198,7 +199,7 @@ func assertHeader(t *testing.T, md metadata.MD, key, expected string) {
 
 func TestConnectWithTLS_PQCDisabled(t *testing.T) {
 	t.Parallel()
-	addr, certPool, cleanup := setupTLSTestServerWithGroups(t, "0x001d,0x0017,0x0018,0x0019")
+	addr, certPool, cleanup := setupTLSTestServerWithGroups(t, tls.X25519, tls.CurveP256, tls.CurveP384, tls.CurveP521)
 	defer cleanup()
 
 	creds := credentials.NewTLS(&tls.Config{
@@ -271,7 +272,7 @@ func assertRESTHeader(t *testing.T, headers http.Header, key, expected string) {
 func TestConnectWithTLS_GroupPinned(t *testing.T) {
 	t.Parallel()
 	// Pin server to X25519MLKEM768 (0x11ec)
-	addr, certPool, cleanup := setupTLSTestServerWithGroups(t, "0x11ec")
+	addr, certPool, cleanup := setupTLSTestServerWithGroups(t, tls.X25519MLKEM768)
 	defer cleanup()
 
 	creds := credentials.NewTLS(&tls.Config{
@@ -310,7 +311,7 @@ func TestConnectWithTLS_GroupPinned(t *testing.T) {
 func TestConnectWithTLS_GroupMismatch_FailsHandshake(t *testing.T) {
 	t.Parallel()
 	// Server only allows X25519MLKEM768 (0x11ec)
-	addr, certPool, cleanup := setupTLSTestServerWithGroups(t, "0x11ec")
+	addr, certPool, cleanup := setupTLSTestServerWithGroups(t, tls.X25519MLKEM768)
 	defer cleanup()
 
 	// Client only offers classical X25519
@@ -330,6 +331,112 @@ func TestConnectWithTLS_GroupMismatch_FailsHandshake(t *testing.T) {
 	t.Logf("Expected handshake failure received: %v", err)
 }
 
+func TestConnectWithTLS_MLKEM1024_GroupPinned(t *testing.T) {
+	t.Parallel()
+	// Pin server to MLKEM1024 (0x0202 / 514)
+	addr, certPool, cleanup := setupTLSTestServerWithGroups(t, tls.MLKEM1024)
+	defer cleanup()
+
+	// Client offers X25519MLKEM768, MLKEM1024, and X25519
+	creds := credentials.NewTLS(&tls.Config{
+		RootCAs:          certPool,
+		CurvePreferences: []tls.CurveID{tls.X25519MLKEM768, tls.MLKEM1024, tls.X25519},
+	})
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	conn, err := grpc.DialContext(ctx, addr, grpc.WithTransportCredentials(creds), grpc.WithBlock())
+	if err != nil {
+		t.Fatalf("failed to connect to server at %s: %v", addr, err)
+	}
+	defer conn.Close()
+
+	c, err := client.NewEchoClient(ctx, option.WithGRPCConn(conn))
+	if err != nil {
+		t.Fatalf("failed to create echo client: %v", err)
+	}
+	defer c.Close()
+
+	var header metadata.MD
+	resp, err := c.Echo(ctx, &pb.EchoRequest{
+		Response: &pb.EchoRequest_Content{Content: "MLKEM1024 Group Pinned"},
+	}, gax.WithGRPCOptions(grpc.Header(&header)))
+	if err != nil {
+		t.Fatalf("Echo call failed: %v", err)
+	}
+	if resp.GetContent() != "MLKEM1024 Group Pinned" {
+		t.Errorf("expected %q, got %q", "MLKEM1024 Group Pinned", resp.GetContent())
+	}
+
+	assertHeader(t, header, "x-showcase-tls-group", "MLKEM1024")
+	assertHeader(t, header, "x-showcase-tls-client-supported-groups", "X25519MLKEM768,MLKEM1024,X25519")
+}
+
+func TestConnectWithTLS_MLKEM1024_REST(t *testing.T) {
+	t.Parallel()
+	// Pin server to MLKEM1024 (0x0202 / 514)
+	addr, certPool, cleanup := setupTLSTestServerWithGroups(t, tls.MLKEM1024)
+	defer cleanup()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			RootCAs:          certPool,
+			CurvePreferences: []tls.CurveID{tls.X25519MLKEM768, tls.MLKEM1024, tls.X25519},
+		},
+	}
+	capturer := &headerCapturer{transport: tr}
+	hc := &http.Client{Transport: capturer}
+
+	restClient, err := client.NewEchoRESTClient(ctx,
+		option.WithHTTPClient(hc),
+		option.WithEndpoint("https://"+addr),
+	)
+	if err != nil {
+		t.Fatalf("failed to create echo REST client: %v", err)
+	}
+	defer restClient.Close()
+
+	content := "TLS REST Test using MLKEM1024"
+	respREST, err := restClient.Echo(ctx, &pb.EchoRequest{
+		Response: &pb.EchoRequest_Content{Content: content},
+	})
+	if err != nil {
+		t.Fatalf("REST Echo call failed: %v", err)
+	}
+	if respREST.GetContent() != content {
+		t.Errorf("REST expected %q, got %q", content, respREST.GetContent())
+	}
+
+	assertRESTHeader(t, capturer.headers, "x-showcase-tls-group", "MLKEM1024")
+	assertRESTHeader(t, capturer.headers, "x-showcase-tls-client-supported-groups", "X25519MLKEM768,MLKEM1024,X25519")
+}
+
+func TestConnectWithTLS_MLKEM1024_GroupMismatch_FailsHandshake(t *testing.T) {
+	t.Parallel()
+	// Server only allows MLKEM1024 (0x0202)
+	addr, certPool, cleanup := setupTLSTestServerWithGroups(t, tls.MLKEM1024)
+	defer cleanup()
+
+	// Client only offers X25519MLKEM768 and X25519 (no MLKEM1024)
+	creds := credentials.NewTLS(&tls.Config{
+		RootCAs:          certPool,
+		CurvePreferences: []tls.CurveID{tls.X25519MLKEM768, tls.X25519},
+	})
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	_, err := grpc.DialContext(ctx, addr, grpc.WithTransportCredentials(creds), grpc.WithBlock())
+	if err == nil {
+		t.Fatalf("expected TLS handshake failure due to missing MLKEM1024 support, but connection succeeded")
+	}
+	t.Logf("Expected handshake failure received: %v", err)
+}
+
 func TestParseTLSGroups(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -339,8 +446,8 @@ func TestParseTLSGroups(t *testing.T) {
 	}{
 		{
 			name:  "valid hex and decimal list with spaces",
-			input: " 0x11ec , 0X001D, 4587 ",
-			want:  []tls.CurveID{tls.X25519MLKEM768, tls.X25519, tls.SecP256r1MLKEM768},
+			input: " 0x11ec , 0X001D, 4587, 0x0202 ",
+			want:  []tls.CurveID{tls.X25519MLKEM768, tls.X25519, tls.SecP256r1MLKEM768, tls.MLKEM1024},
 		},
 		{
 			name:  "empty input",

@@ -15,10 +15,12 @@
 package main
 
 import (
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/googleapis/gapic-showcase/server"
 	"github.com/spf13/cobra"
 )
 
@@ -31,10 +33,18 @@ func message(err error) string {
 
 func init() {
 	config := RuntimeConfig{}
+	var tlsGroupsRaw string
 	runCmd := &cobra.Command{
 		Use:   "run",
 		Short: "Runs the showcase server",
 		Run: func(cmd *cobra.Command, args []string) {
+			if tlsGroupsRaw != "" {
+				groups, err := server.ParseTLSGroups(tlsGroupsRaw)
+				if err != nil {
+					log.Fatalf("Failed to parse --tls-groups: %v", err)
+				}
+				config.tlsGroups = groups
+			}
 			cmuxServer := CreateAllEndpoints(config)
 
 			done := make(chan os.Signal, 2)
@@ -99,7 +109,7 @@ func init() {
 		"",
 		"The server private key path for custom mutual TLS channel. (Deprecated: use tls-key)")
 	runCmd.Flags().StringVar(
-		&config.tlsGroups,
+		&tlsGroupsRaw,
 		"tls-groups",
 		"",
 		"Comma-separated list of allowed TLS key exchange group IANA IDs (hex e.g. 0x11ec or decimal) in preference order.")
