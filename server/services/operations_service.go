@@ -23,13 +23,13 @@ import (
 	"time"
 
 	lropb "cloud.google.com/go/longrunning/autogen/longrunningpb"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 // NewOperationsServer returns a new OperationsServer for the Showcase API.
@@ -101,19 +101,23 @@ func (s *operationsServerImpl) handleSearchBlurbs(in *lropb.GetOperationRequest)
 			PageToken: req.GetPageToken(),
 		},
 		searchFilterFunc(req.GetQuery()))
-
 	answer := &lropb.Operation{
 		Name: in.GetName(),
 		Done: true,
 	}
+	if err != nil {
+		answer.Result = &lropb.Operation_Error{Error: status.Convert(err).Proto()}
+		return answer, nil
+	}
 
-	resp, _ := ptypes.MarshalAny(
-		&pb.SearchBlurbsResponse{
-			Blurbs:        listResp.GetBlurbs(),
-			NextPageToken: listResp.GetNextPageToken(),
-		})
+	resp, err := anypb.New(&pb.SearchBlurbsResponse{
+		Blurbs:        listResp.GetBlurbs(),
+		NextPageToken: listResp.GetNextPageToken(),
+	})
+	if err != nil {
+		return nil, err
+	}
 	answer.Result = &lropb.Operation_Response{Response: resp}
-
 	return answer, nil
 }
 

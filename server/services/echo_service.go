@@ -24,7 +24,6 @@ import (
 	"unicode/utf8"
 
 	lropb "cloud.google.com/go/longrunning/autogen/longrunningpb"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	errdetails "google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -373,7 +372,7 @@ func (s *echoServerImpl) Wait(ctx context.Context, in *pb.WaitRequest) (*lropb.O
 }
 
 func (s *echoServerImpl) Block(ctx context.Context, in *pb.BlockRequest) (*pb.BlockResponse, error) {
-	d, _ := ptypes.Duration(in.GetResponseDelay())
+	d := in.GetResponseDelay().AsDuration()
 	time.Sleep(d)
 	if in.GetError() != nil {
 		return nil, status.ErrorProto(in.GetError())
