@@ -1,5 +1,12 @@
 # Release History
 
+## [0.45.1](https://github.com/googleapis/gapic-showcase/compare/v0.45.0...v0.45.1) (2026-11-17)
+
+
+### Bug Fixes
+
+* **genrest:** Prevent concurrent map panic in CheckRequestFormat ([#1702](https://github.com/googleapis/gapic-showcase/issues/1702)) ([9078278](https://github.com/googleapis/gapic-showcase/commit/907827807f07cfaf64a38a76fc6b53cd455a567e))
+
 ## [0.45.0](https://github.com/googleapis/gapic-showcase/compare/v0.44.2...v0.45.0) (2026-11-16)
 
 
