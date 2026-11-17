@@ -27,6 +27,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/googleapis/gapic-showcase/util/genrest/resttools"
 )
 
 const defaultHost = "localhost:7469"
@@ -408,11 +410,17 @@ func (m *Manager) handleStart(w http.ResponseWriter, r *http.Request) {
 	name := sid
 	if r.Body != nil {
 		body, _ := io.ReadAll(r.Body)
-		var meta struct {
-			Name string `json:"name"`
-		}
-		if err := json.Unmarshal(body, &meta); err == nil && meta.Name != "" {
-			name = meta.Name
+		if len(body) > 0 {
+			if err := resttools.CheckContentType(r.Header); err != nil {
+				sendError(w, http.StatusBadRequest, err.Error(), "")
+				return
+			}
+			var meta struct {
+				Name string `json:"name"`
+			}
+			if err := json.Unmarshal(body, &meta); err == nil && meta.Name != "" {
+				name = meta.Name
+			}
 		}
 	}
 
