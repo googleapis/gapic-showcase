@@ -60,7 +60,7 @@ func CheckRequestFormat(jsonReader io.Reader, request *http.Request, message pro
 		return err
 	}
 
-	enumFields := GetEnumFields(message)
+	enumFields := ComputeEnumFields(message)
 	return CheckJSONEnumFields(payload, enumFields)
 }
 
@@ -154,20 +154,6 @@ func CheckEnum(payload jsonPayload, fieldPath []protoreflect.Name) (fieldName st
 	return fieldName, true
 }
 
-// GetEnumFields returns a list of any arbitrarily nested fields in message that are enums. Each
-// member of the returned list is a qualified field name, itself represented as a list of
-// simple protoreflect.Name.
-func GetEnumFields(message protoreflect.Message) [][]protoreflect.Name {
-	messageName := message.Descriptor().FullName()
-	if fields, ok := protoEnumFields[messageName]; ok {
-		return fields
-	}
-
-	fields := ComputeEnumFields(message)
-	protoEnumFields[messageName] = fields
-	return fields
-}
-
 // ComputeEnumFields determines which fields in message or its submessages are enums, and returns a
 // list of those qualified field names (each one of those being a list of simple
 // protoreflect.Name).
@@ -183,11 +169,14 @@ func computeEnumFields(message protoreflect.MessageDescriptor, currentPath []pro
 	allFields := message.Fields()
 	for idx := 0; idx < allFields.Len(); idx++ {
 		field := allFields.Get(idx)
+		fieldPath := make([]protoreflect.Name, len(currentPath)+1)
+		copy(fieldPath, currentPath)
+		fieldPath[len(currentPath)] = field.Name()
 		switch field.Kind() {
 		case protoreflect.EnumKind:
-			results = append(results, append(currentPath, field.Name()))
+			results = append(results, fieldPath)
 		case protoreflect.MessageKind:
-			results = append(results, computeEnumFields(field.Message(), append(currentPath, field.Name()))...)
+			results = append(results, computeEnumFields(field.Message(), fieldPath)...)
 		default:
 			continue
 
@@ -198,11 +187,3 @@ func computeEnumFields(message protoreflect.MessageDescriptor, currentPath []pro
 
 // jsonPayload is used for unmarshaling arbitrary JSON.
 type jsonPayload map[string]interface{}
-
-// protoEnumFields is a list of fields paths (themselves represented as a list of nested field
-// names) which represent enum fields. This is used to memoize calls to GetEnumFields.
-var protoEnumFields map[protoreflect.FullName][][]protoreflect.Name
-
-func init() {
-	protoEnumFields = map[protoreflect.FullName][][]protoreflect.Name{}
-}

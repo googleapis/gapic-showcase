@@ -18,11 +18,35 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
 
 	genprotopb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
+
+func TestCheckRequestFormatConcurrent(t *testing.T) {
+	// REST handlers call CheckRequestFormat from concurrent goroutines, so it must not
+	// share unsynchronized state across calls. Run with -race to catch regressions.
+	message := (&genprotopb.ComplianceData{}).ProtoReflect()
+	var wg sync.WaitGroup
+	for range 16 {
+		wg.Go(func() {
+			for range 20 {
+				request, err := http.NewRequest(http.MethodPost, "showcase.foo.com", strings.NewReader(`{"fString": "hi", "fKingdom": "FUNGI"}`))
+				if err != nil {
+					t.Errorf("could not create request: %s", err)
+					return
+				}
+				PopulateRequestHeaders(request)
+				if err := CheckRequestFormat(request.Body, request, message); err != nil {
+					t.Errorf("CheckRequestFormat() = %v, want nil", err)
+				}
+			}
+		})
+	}
+	wg.Wait()
+}
 
 func TestComputeEnumFields(t *testing.T) {
 	complianceData := &genprotopb.ComplianceData{}
