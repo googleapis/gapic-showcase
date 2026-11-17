@@ -19,13 +19,13 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/googleapis/gapic-showcase/server"
 	pb "github.com/googleapis/gapic-showcase/server/genproto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // NewIdentityServer returns a new instance of showcase identity server.
@@ -74,7 +74,7 @@ func (s *identityServerImpl) CreateUser(_ context.Context, in *pb.CreateUserRequ
 	// Assign info.
 	id := s.uid.Next()
 	name := fmt.Sprintf("users/%d", id)
-	now := ptypes.TimestampNow()
+	now := timestamppb.Now()
 
 	u.Name = name
 	u.CreateTime = now
@@ -130,7 +130,7 @@ func (s *identityServerImpl) UpdateUser(_ context.Context, in *pb.UpdateUserRequ
 	updated := proto.Clone(existing).(*pb.User)
 	applyFieldMask(u.ProtoReflect(), updated.ProtoReflect(), mask.GetPaths())
 	updated.CreateTime = existing.GetCreateTime()
-	updated.UpdateTime = ptypes.TimestampNow()
+	updated.UpdateTime = timestamppb.Now()
 
 	s.users[i] = userEntry{user: updated}
 	return updated, nil
